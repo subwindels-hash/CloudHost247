@@ -346,6 +346,14 @@ final class GoogleWorkspaceProvider extends AbstractProvider
 
         $body = (array) ($result['data']['body'] ?? []);
 
+        // Optional WHMCS server connection test for the reseller tenant. This
+        // is independent of the Directory account and never performs purchases.
+        $settings = $this->accessHashJson();
+        if (($settings['reseller_readonly_check'] ?? false) === true) {
+            $reseller = (new GoogleResellerConnection($this->config, $this->http))->testConnection();
+            if (!Result::isOk($reseller)) return $reseller;
+        }
+
         return Result::ok(
             [
                 'admin'      => $admin,
@@ -395,14 +403,10 @@ final class GoogleWorkspaceProvider extends AbstractProvider
 
         if (!Result::isOk($created)) {
             if (($created['code'] ?? '') === Result::CODE_CONFLICT) {
-                $existing = $this->findByEmail($email);
-
-                if (Result::isOk($existing)) {
-                    return Result::ok(
-                        $existing['data'] + ['adopted' => true],
-                        'An existing Google Workspace user with this address was adopted instead of creating a duplicate.'
-                    );
-                }
+                // A matching address does not prove this service owns the user or
+                // that its requested licence is assigned. Never adopt it blindly.
+                return Result::fail(Result::CODE_CONFLICT,
+                    'A Google user already exists at this address. An administrator must verify ownership and licensing before proceeding.');
             }
 
             return $created;
@@ -505,7 +509,11 @@ final class GoogleWorkspaceProvider extends AbstractProvider
         $sku = (string) ($account['plan_sku'] ?? '');
 
         if ($sku !== '') {
-            $this->removeLicense($account, $sku);
+            $removed = $this->removeLicense($account, $sku);
+            if (!Result::isOk($removed)) {
+                // Do not delete the user when licence release is unconfirmed.
+                return $removed;
+            }
         }
 
         $deleted = $this->api('DELETE', self::DIRECTORY . '/users/' . rawurlencode($reference), null, true, 'google.delete_user');
@@ -538,8 +546,13 @@ final class GoogleWorkspaceProvider extends AbstractProvider
         $result = $this->api('POST', $url, ['userId' => $email], true, 'google.assign_license');
 
         if (!Result::isOk($result) && ($result['code'] ?? '') === Result::CODE_CONFLICT) {
-            // Already licensed: idempotent success.
-            return Result::ok([], 'The user already holds this licence.');
+            // A conflict alone does not prove this particular assignment exists.
+            $lookup = $this->api('GET', $url . '/' . rawurlencode($email), null, false, 'google.get_license');
+            if (Result::isOk($lookup)) {
+                return Result::ok([], 'The requested licence assignment was verified.');
+            }
+            return Result::fail(Result::CODE_CONFLICT,
+                'Google reported a licence conflict but the requested assignment could not be verified.');
         }
 
         return $result;

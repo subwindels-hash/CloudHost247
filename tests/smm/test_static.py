@@ -227,6 +227,17 @@ class TestSecurity(unittest.TestCase):
             for m in re.finditer(r"Capsule::raw\s*\(([^;]*)\)", read(path)):
                 self.assertNotIn("$", m.group(1), "%s: Capsule::raw with variable" % path)
 
+    def test_service_deletion_is_confirmed_and_guarded(self):
+        controller = read(os.path.join(ADDON, "lib", "Services", "AdminController.php"))
+        block = controller.split("case 'service_delete':", 1)[1].split("break;", 1)[0]
+        self.assertIn("requireCapability('cloudhost247_smm', 'providers.manage')", block)
+        self.assertIn("$_POST['confirm']", block)
+        self.assertIn("service.delete", block)
+        view = read(os.path.join(ADDON, "lib", "Services", "AdminView.php"))
+        self.assertIn('value="service_delete"', view)
+        self.assertIn('name="confirm" value="1" required', view)
+        self.assertIn('name="token"', view)
+
     def test_admin_controller_has_guards(self):
         src = read(os.path.join(ADDON, "lib", "Services", "AdminController.php"))
         self.assertIn("requireAdmin()", src)

@@ -50,6 +50,9 @@ const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const ServicePlansIndex = lazy(() => import('./pages/ServicePlansPage').then((m) => ({ default: m.ServicePlansIndex })));
+const CatalogServicePlansPage = lazy(() => import('./pages/ServicePlansPage').then((m) => ({ default: m.CatalogServicePlansPage })));
+const PlatformServicePlansPage = lazy(() => import('./pages/ServicePlansPage').then((m) => ({ default: m.PlatformServicePlansPage })));
 const DomainsPage = lazy(() => import('./pages/DomainsPage'));
 const DomainBrokeragePage = lazy(() => import('./pages/DomainBrokeragePage'));
 const BillingPage = lazy(() => import('./pages/BillingPage'));
@@ -204,6 +207,9 @@ export default function App() {
             not declare — so this list and the navigation can never disagree. */}
         <Route path="/" element={<HomePage />} />
         <Route path="/sitemap" element={<SitemapPage />} />
+        <Route path="/service-plans" element={<ServicePlansIndex />} />
+        <Route path="/service-plans/catalog/:slug" element={<CatalogServicePlansPage />} />
+        <Route path="/service-plans/platform/:kind" element={<PlatformServicePlansPage />} />
         {MARKETING_ROUTES.map((route) => (
           <Route key={route} path={route} element={<SiteMarketingPage />} />
         ))}

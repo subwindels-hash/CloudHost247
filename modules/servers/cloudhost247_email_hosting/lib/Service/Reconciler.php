@@ -95,6 +95,14 @@ final class Reconciler
         $account = $context['data']['account'];
         $provider = ProviderFactory::make($config, $this->http);
 
+        // A package swap can leave two assignments. A single user status read
+        // cannot establish the outcome of both mutations.
+        if ((int) $account->needs_reconcile === 1
+            && strpos((string) $account->reconcile_reason, 'Package change:') === 0) {
+            return Result::fail(Result::CODE_CONFLICT,
+                'The package change requires manual verification of both licence assignments.');
+        }
+
         $capabilities = $provider->capabilities();
 
         if (empty($capabilities['status'])) {
@@ -103,6 +111,12 @@ final class Reconciler
 
         $email = (string) $account->email;
         $remoteId = (string) $account->remote_id;
+
+        // An address lookup cannot establish ownership after an uncertain create.
+        if ($remoteId === '' && in_array($provider->key(), [Config::PROVIDER_GOOGLE, Config::PROVIDER_MICROSOFT], true)) {
+            return Result::fail(Result::CODE_CONFLICT,
+                'User creation needs manual ownership and licence verification before reconciliation.');
+        }
 
         // With no remote id the uncertain operation was a create: look the
         // mailbox up by address instead of creating a second one.
@@ -169,12 +183,27 @@ final class Reconciler
         $account = $context['data']['account'];
         $provider = ProviderFactory::make($config, $this->http);
 
+        // A package swap can leave two assignments. A single user status read
+        // cannot establish the outcome of both mutations.
+        if ((int) $account->needs_reconcile === 1
+            && strpos((string) $account->reconcile_reason, 'Package change:') === 0) {
+            return Result::fail(Result::CODE_CONFLICT,
+                'The package change requires manual verification of both licence assignments.');
+        }
+
         if (empty($provider->capabilities()['status'])) {
             return Result::fail(Result::CODE_NOT_SUPPORTED, 'Status lookup is not supported by this provider.');
         }
 
         if (empty($account->remote_id)) {
             return Result::fail(Result::CODE_NOT_FOUND, 'No remote account is recorded.');
+        }
+
+        // Directory status does not prove assignment of the requested SKU.
+        if (in_array($provider->key(), [Config::PROVIDER_GOOGLE, Config::PROVIDER_MICROSOFT], true)
+            && (string) $account->license_state === 'unassigned') {
+            return Result::fail(Result::CODE_CONFLICT,
+                'Licence assignment requires manual verification before this service can be reconciled.');
         }
 
         $status = $provider->getStatus([

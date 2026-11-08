@@ -14,6 +14,7 @@ import { useAuthState } from './useAuthState';
 const ACCOUNT_LINKS = [
   { to: '/dashboard', label: 'Overview' },
   { to: '/services', label: 'Services' },
+  { to: '/service-plans', label: 'Browse Plans' },
   { to: '/dashboard/domains', label: 'Domains & DNS' },
   { to: '/dashboard/servers', label: 'Servers' },
   { to: '/dashboard/apps', label: 'Applications' },
@@ -58,6 +59,7 @@ export default function Header() {
               <CurrencySwitcher />
             </div>
             <NavLink to="/pricing">{copy.pricing}</NavLink>
+            <NavLink to="/service-plans">Service plans</NavLink>
             <NavLink to="/help">{copy.help}</NavLink>
           </nav>
 

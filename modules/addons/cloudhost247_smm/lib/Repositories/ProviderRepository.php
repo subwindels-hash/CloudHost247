@@ -233,9 +233,16 @@ final class ProviderRepository implements ProviderFinder
 
     public function deleteService($id)
     {
+        $service = $this->findService($id);
+        if ($service === null) {
+            return false;
+        }
         $used = Capsule::table(self::MAPPINGS)->where('service_id', (int) $id)->exists();
-        if ($used) {
-            return false; // deleting a mapped service would orphan the mapping; refuse
+        $hasOrders = Capsule::table('mod_cloudhost247_smm_orders')
+            ->where('provider_id', (int) $service->provider_id)
+            ->where('provider_service_id', (string) $service->provider_service_id)->exists();
+        if ($used || $hasOrders) {
+            return false; // preserve product mappings and order history
         }
         return Capsule::table(self::SERVICES)->where('id', (int) $id)->delete() > 0;
     }

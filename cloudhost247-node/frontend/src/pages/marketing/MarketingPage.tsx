@@ -401,6 +401,7 @@ function Catalog({ section }: { section: MarketingSection }) {
                 )}
               </span>
 
+              <p><Link to={`/service-plans/catalog/${encodeURIComponent(product.slug)}`}>Open plan page →</Link></p>
               {openSlug === product.slug ? (
                 <div style={{ marginTop: '14px' }}>
                   {plans.status === 'loading' ? <CatalogLoadingBanner label="Loading plans…" /> : null}
@@ -566,6 +567,7 @@ function renderSection(section: MarketingSection, index: number) {
               </div>
             ) : null}
             <ProductPlansSection slug={(section as { productSlug: string }).productSlug} />
+            <p><Link to={`/service-plans/catalog/${encodeURIComponent((section as { productSlug: string }).productSlug)}`}>View dedicated plan page →</Link></p>
           </div>
         </section>
       );

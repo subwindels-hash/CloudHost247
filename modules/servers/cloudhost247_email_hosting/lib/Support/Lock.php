@@ -18,7 +18,7 @@ final class Lock
 {
     const TABLE = 'mod_cloudhost247_email_hosting_locks';
 
-    /** @var array<int,string> keys held by this process */
+    /** @var array<string,string> lock key => unique acquisition owner */
     private static $held = [];
 
     /**
@@ -29,9 +29,10 @@ final class Lock
         $key = substr($key, 0, 191);
         $now = date('Y-m-d H:i:s');
         $expires = date('Y-m-d H:i:s', time() + max(5, $ttlSeconds));
-        $owner = substr(Logger::correlationId(), 0, 64);
-
         try {
+            // Unique per acquisition, not per request: an expired owner must
+            // never release the lock acquired by a later worker.
+            $owner = bin2hex(random_bytes(16));
             // Reap expired locks first; harmless if another process beats us.
             Capsule::table(self::TABLE)->where('expires_at', '<', $now)->delete();
 
@@ -42,7 +43,7 @@ final class Lock
                 'expires_at'  => $expires,
             ]);
 
-            self::$held[] = $key;
+            self::$held[$key] = $owner;
 
             return true;
         } catch (\Throwable $e) {
@@ -55,15 +56,17 @@ final class Lock
     {
         $key = substr($key, 0, 191);
 
+        if (!isset(self::$held[$key])) {
+            return;
+        }
+        $owner = self::$held[$key];
         try {
-            Capsule::table(self::TABLE)->where('lock_key', $key)->delete();
+            Capsule::table(self::TABLE)->where('lock_key', $key)->where('owner', $owner)->delete();
         } catch (\Throwable $e) {
             Logger::debug('lock.release_failed', ['lock' => $key, 'error' => $e->getMessage()]);
         }
 
-        self::$held = array_values(array_filter(self::$held, static function ($held) use ($key) {
-            return $held !== $key;
-        }));
+        unset(self::$held[$key]);
     }
 
     /**
@@ -95,7 +98,7 @@ final class Lock
 
     public static function releaseAllHeld(): void
     {
-        foreach (self::$held as $key) {
+        foreach (array_keys(self::$held) as $key) {
             self::release($key);
         }
     }

@@ -534,6 +534,96 @@ $tests['MOCK: Microsoft refuses an unmapped SKU'] = static function () {
         ?: 'an unmapped SKU must be a configuration error';
 };
 
+$tests['MOCK: WHMCS Google connection test checks reseller access when configured'] = static function () {
+    $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
+    openssl_pkey_export($key, $privateKey);
+    $params = ch247_email_params([
+        'configoption1' => Config::PROVIDER_GOOGLE,
+        'serverusername' => 'admin@example-business.com',
+        'serveraccesshash' => json_encode([
+            'service_account' => ['client_email' => 'service@example-business.com', 'private_key' => $privateKey],
+            'reseller_admin' => 'partner@example-business.com', 'reseller_readonly_check' => true,
+        ]),
+    ]);
+    $http = new MockHttpClient();
+    $http->on('POST https://oauth2.googleapis.com/token', 200, ['access_token' => 'directory-token', 'expires_in' => 3600]);
+    $http->on('GET https://admin.googleapis.com/admin/directory/v1/users/admin%40example-business.com', 200, ['isAdmin' => true]);
+    $http->on('POST https://oauth2.googleapis.com/token', 200, ['access_token' => 'reseller-token', 'expires_in' => 3600]);
+    $http->on('GET https://reseller.googleapis.com/apps/reseller/v1/subscriptions?maxResults=1', 200, ['kind' => 'reseller#subscriptions']);
+    $provider = new GoogleWorkspaceProvider(new Config($params), $http);
+    $result = $provider->testConnection();
+    $requests = array_values(array_filter($http->requests, static function ($r) { return strpos($r['url'], 'oauth2.googleapis.com/token') !== false; }));
+    if (!Result::isOk($result) || count($requests) !== 2) return 'Directory and reseller checks must both succeed';
+    parse_str($requests[1]['body'], $form);
+    $parts = explode('.', $form['assertion'] ?? '');
+    $claims = json_decode(base64_decode(strtr($parts[1] ?? '', '-_', '+/')), true);
+    return ($claims['sub'] ?? '') === 'partner@example-business.com'
+        && ($claims['scope'] ?? '') === \CloudHost247\Email\Providers\GoogleResellerConnection::SCOPE
+        ?: 'reseller assertion must use reseller subject and read-only scope';
+};
+
+$tests['MOCK: reseller connection fails closed without authorization'] = static function () {
+    $http = new MockHttpClient();
+    $client = new \CloudHost247\Email\Providers\GoogleResellerConnection(new Config(ch247_email_params()), $http);
+    $result = $client->testConnection();
+    return !Result::isOk($result) && $result['code'] === Result::CODE_CONFIG && count($http->requests) === 0
+        ?: 'missing reseller configuration must not make a provider request';
+};
+
+$tests['MOCK: reseller connection refreshes after unauthorized response'] = static function () {
+    $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
+    openssl_pkey_export($key, $privateKey);
+    $config = new Config(ch247_email_params(['serveraccesshash' => json_encode([
+        'service_account' => ['client_email' => 'service@example-business.com', 'private_key' => $privateKey],
+        'reseller_admin' => 'partner@example-business.com',
+    ])]));
+    $http = new MockHttpClient();
+    $http->on('POST https://oauth2.googleapis.com/token', 200, ['access_token' => 'first-token', 'expires_in' => 3600]);
+    $http->on('GET https://reseller.googleapis.com/', 401, []);
+    $http->on('POST https://oauth2.googleapis.com/token', 200, ['access_token' => 'second-token', 'expires_in' => 3600]);
+    $http->on('GET https://reseller.googleapis.com/', 200, ['kind' => 'reseller#subscriptions']);
+    $result = (new \CloudHost247\Email\Providers\GoogleResellerConnection($config, $http))->testConnection();
+    return Result::isOk($result) && count($http->requests) === 4
+        && ($http->requests[3]['headers']['Authorization'] ?? '') === 'Bearer second-token'
+        && strpos(json_encode($result), 'token') === false
+        ?: 'read-only auth retry or secret isolation failed';
+};
+
+$tests['MOCK: Google reseller retrieves a subscription and rejects malformed identifiers'] = static function () {
+    $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
+    openssl_pkey_export($key, $privateKey);
+    $config = new Config(ch247_email_params(['serveraccesshash' => json_encode([
+        'service_account' => ['client_email' => 'service@example-business.com', 'private_key' => $privateKey],
+        'reseller_admin' => 'partner@example-business.com',
+    ])]));
+    $http = new MockHttpClient();
+    $client = new \CloudHost247\Email\Providers\GoogleResellerConnection($config, $http);
+    $invalid = $client->getSubscription('customer/other', 'sub');
+    if (Result::isOk($invalid) || count($http->requests) !== 0) return 'invalid ids must fail before network access';
+    $http->on('POST https://oauth2.googleapis.com/token', 200, ['access_token' => 'test-token', 'expires_in' => 3600]);
+    $http->on('GET https://reseller.googleapis.com/apps/reseller/v1/customers/C0123/subscriptions/S456', 200,
+        ['kind' => 'reseller#subscription', 'subscriptionId' => 'S456', 'customerId' => 'C0123', 'status' => 'ACTIVE']);
+    $result = $client->getSubscription('C0123', 'S456');
+    return Result::isOk($result) && ($result['data']['body']['status'] ?? '') === 'ACTIVE'
+        && count($http->requests) === 2 && $http->requests[1]['method'] === 'GET'
+        ?: 'subscription lookup failed';
+};
+
+$tests['MOCK: Google reseller refuses invalid subscription responses'] = static function () {
+    $key = openssl_pkey_new(['private_key_bits' => 2048, 'private_key_type' => OPENSSL_KEYTYPE_RSA]);
+    openssl_pkey_export($key, $privateKey);
+    $config = new Config(ch247_email_params(['serveraccesshash' => json_encode([
+        'service_account' => ['client_email' => 'service@example-business.com', 'private_key' => $privateKey],
+        'reseller_admin' => 'partner@example-business.com',
+    ])]));
+    $http = new MockHttpClient();
+    $http->on('POST https://oauth2.googleapis.com/token', 200, ['access_token' => 'test-token']);
+    $http->on('GET https://reseller.googleapis.com/', 200, []);
+    $result = (new \CloudHost247\Email\Providers\GoogleResellerConnection($config, $http))->getSubscription('C0123', 'S456');
+    return !Result::isOk($result) && $result['code'] === Result::CODE_REMOTE
+        ?: 'invalid provider response must not be accepted';
+};
+
 $tests['MOCK: Google creates a user and assigns the licence'] = static function () {
     $http = new MockHttpClient();
     $provider = ch247_email_google($http);
@@ -565,33 +655,115 @@ $tests['MOCK: Google creates a user and assigns the licence'] = static function 
         ?: 'google create payload wrong: ' . json_encode($body);
 };
 
-$tests['MOCK: an existing remote user is adopted, never duplicated'] = static function () {
+$tests['MOCK: Google refuses to adopt a conflicting user'] = static function () {
+    $http = new MockHttpClient();
+    $provider = ch247_email_google($http);
+    $http->on('POST https://admin.googleapis.com/admin/directory/v1/users', 409, ['error' => ['message' => 'Already exists']]);
+    $result = $provider->createAccount([
+        'email' => 'info@example-business.com', 'password' => 'Str0ng-Passw0rd!x', 'sku' => '1010020027',
+    ]);
+    foreach ($http->requests as $request) {
+        if ($request['method'] === 'GET' || strpos($request['url'], 'licensing.googleapis.com') !== false) {
+            return 'conflicting users must not be adopted or licensed automatically';
+        }
+    }
+    return !Result::isOk($result) && $result['code'] === Result::CODE_CONFLICT
+        ?: 'Google conflict must require manual review';
+};
+
+$tests['MOCK: Google preserves created user when licence assignment times out'] = static function () {
+    $http = new MockHttpClient();
+    $provider = ch247_email_google($http);
+    $http->on('POST https://admin.googleapis.com/admin/directory/v1/users', 200, [
+        'id' => '1234567890', 'primaryEmail' => 'info@example-business.com',
+    ]);
+    $http->on('POST https://licensing.googleapis.com/', 0, '', [], true, 'timeout');
+    $result = $provider->createAccount([
+        'email' => 'info@example-business.com', 'password' => 'Str0ng-Passw0rd!x', 'sku' => '1010020027',
+    ]);
+    return !Result::isOk($result) && Result::isUncertain($result)
+        && ($result['data']['remote_id'] ?? '') === '1234567890'
+        && ($result['data']['license_state'] ?? '') === 'unassigned'
+        ?: 'partial create must retain the user id and require reconciliation';
+};
+
+$tests['MOCK: Google licence conflict requires verification'] = static function () {
+    $http = new MockHttpClient();
+    $provider = ch247_email_google($http);
+    $url = 'https://licensing.googleapis.com/apps/licensing/v1/product/Google-Apps/sku/1010020027/user';
+    $http->on('POST ' . $url, 409, ['error' => ['message' => 'conflict']]);
+    $http->on('GET ' . $url . '/info%40example-business.com', 404, []);
+    $result = $provider->assignLicense(['email' => 'info@example-business.com'], '1010020027');
+    return !Result::isOk($result) && $result['code'] === Result::CODE_CONFLICT
+        ?: 'an unverified conflict must not be accepted as a licence assignment';
+};
+
+$tests['MOCK: Google verified licence conflict is idempotent'] = static function () {
+    $http = new MockHttpClient();
+    $provider = ch247_email_google($http);
+    $url = 'https://licensing.googleapis.com/apps/licensing/v1/product/Google-Apps/sku/1010020027/user';
+    $http->on('POST ' . $url, 409, []);
+    $http->on('GET ' . $url . '/info%40example-business.com', 200, ['userId' => 'info@example-business.com']);
+    return Result::isOk($provider->assignLicense(['email' => 'info@example-business.com'], '1010020027'))
+        ?: 'a verified assignment should be accepted';
+};
+
+$tests['MOCK: Google termination stops when licence release fails'] = static function () {
+    $http = new MockHttpClient();
+    $provider = ch247_email_google($http);
+    $http->on('DELETE https://licensing.googleapis.com/', 403, ['error' => ['message' => 'denied']]);
+    $result = $provider->terminateAccount([
+        'remote_id' => '1234567890', 'email' => 'info@example-business.com', 'plan_sku' => '1010020027',
+    ]);
+    foreach ($http->requests as $request) {
+        if ($request['method'] === 'DELETE' && strpos($request['url'], 'admin.googleapis.com') !== false) {
+            return 'user must not be deleted after an unconfirmed licence release';
+        }
+    }
+    return !Result::isOk($result) && $result['code'] === Result::CODE_PERMISSION
+        ?: 'licence release error must be returned';
+};
+
+$tests['MOCK: Microsoft refuses to adopt a conflicting user'] = static function () {
     $http = new MockHttpClient();
     $provider = ch247_email_microsoft($http);
-
-    $http->on('GET https://graph.microsoft.com/v1.0/subscribedSkus', 200, ['value' => [[
-        'skuId' => 'sku-guid', 'skuPartNumber' => 'O365_BUSINESS_PREMIUM',
-        'consumedUnits' => 1, 'prepaidUnits' => ['enabled' => 5],
-    ]]]);
-    $http->on('POST https://graph.microsoft.com/v1.0/users', 409, [
-        'error' => ['message' => 'Another object with the same value for property userPrincipalName already exists.'],
-    ]);
-    $http->on('GET https://graph.microsoft.com/v1.0/users/info%40example-business.com', 200, [
-        'id' => 'existing-guid', 'userPrincipalName' => 'info@example-business.com',
-        'accountEnabled' => true, 'assignedLicenses' => [['skuId' => 'sku-guid']],
-    ]);
-
+    $http->on('POST https://graph.microsoft.com/v1.0/users', 409, ['error' => ['message' => 'already exists']]);
     $result = $provider->createAccount([
-        'email'          => 'info@example-business.com',
-        'password'       => 'Str0ng-Passw0rd!x',
-        'sku'            => 'O365_BUSINESS_PREMIUM',
-        'usage_location' => 'NG',
+        'email' => 'info@example-business.com', 'password' => 'Str0ng-Passw0rd!x', 'usage_location' => 'NG',
     ]);
+    foreach ($http->requests as $request) {
+        if ($request['method'] === 'GET' && strpos($request['url'], '/users/') !== false) {
+            return 'a conflicting Microsoft user must not be looked up for automatic adoption';
+        }
+    }
+    return !Result::isOk($result) && $result['code'] === Result::CODE_CONFLICT
+        ?: 'Microsoft conflict must require manual review';
+};
 
-    return Result::isOk($result)
-        && !empty($result['data']['adopted'])
-        && $result['data']['remote_id'] === 'existing-guid'
-        ?: 'a conflicting create must adopt the existing user';
+$tests['MOCK: Microsoft termination stops when licence release fails'] = static function () {
+    $http = new MockHttpClient();
+    $provider = ch247_email_microsoft($http);
+    $http->on('POST https://graph.microsoft.com/v1.0/users/user-guid/assignLicense', 403, ['error' => ['message' => 'denied']]);
+    $result = $provider->terminateAccount([
+        'remote_id' => 'user-guid', 'plan_sku' => 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+    ]);
+    foreach ($http->requests as $request) {
+        if ($request['method'] === 'DELETE') return 'user must not be deleted after a failed licence release';
+    }
+    return !Result::isOk($result) && $result['code'] === Result::CODE_PERMISSION
+        ?: 'licence release error must be returned';
+};
+
+$tests['MOCK: Microsoft rejects an unresolved licence SKU before removal'] = static function () {
+    $http = new MockHttpClient();
+    $provider = ch247_email_microsoft($http);
+    $http->on('GET https://graph.microsoft.com/v1.0/subscribedSkus', 200, ['value' => []]);
+    $result = $provider->removeLicense(['remote_id' => 'user-guid'], 'UNKNOWN_SKU');
+    foreach ($http->requests as $request) {
+        if (strpos($request['url'], '/assignLicense') !== false) return 'unresolved SKU must not be sent to Graph';
+    }
+    return !Result::isOk($result) && $result['code'] === Result::CODE_CONFIG
+        ?: 'unresolved SKU must fail closed';
 };
 
 /* =========================================== idempotency and reconciliation */

@@ -9,6 +9,7 @@
  * conversations attached to their own account and only `visibility = 'public'` messages — internal
  * notes are excluded in SQL, not hidden in the UI.
  */
+import { randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { Env } from '../config/env';
@@ -76,6 +77,7 @@ export async function registerInboxRoutes(app: FastifyInstance, env: Env, overri
 
     await withTransaction(pool, (tx) => recordMessage(tx, {
       channelKind: 'web_form',
+      externalReference: `contact-form:${randomUUID()}`,
       contactName: input.name,
       contactEmail: input.email,
       authorName: input.name,

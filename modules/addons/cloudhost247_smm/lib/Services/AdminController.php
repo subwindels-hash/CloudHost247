@@ -97,6 +97,23 @@ final class AdminController
                 $result = (new ProviderService($this->providers, $this->logs, $this->factory))
                     ->delete($id, !empty($_POST['confirm']), $adminId);
                 break;
+            case 'service_delete':
+                AdminGuard::requireCapability('cloudhost247_smm', 'providers.manage');
+                if (empty($_POST['confirm'])) {
+                    throw new InvalidArgumentException('Service deletion requires confirmation.');
+                }
+                $service = $this->providers->findService($id);
+                if ($service === null) {
+                    throw new InvalidArgumentException('Service not found.');
+                }
+                if (!$this->providers->deleteService($id)) {
+                    throw new InvalidArgumentException('Deletion blocked: the service is mapped to a product or has order history. Disable it instead.');
+                }
+                AuditLogger::record('cloudhost247_smm', 'service.delete', 'service', $id,
+                    array('provider_id' => (int) $service->provider_id, 'provider_service_id' => (string) $service->provider_service_id, 'name' => (string) $service->name),
+                    array(), 'success', null, $adminId);
+                $result = array('ok' => true, 'message' => 'Service deleted. A future provider sync may import it again.');
+                break;
             case 'service_toggle':
                 AdminGuard::requireCapability('cloudhost247_smm', 'providers.manage');
                 $service = $this->providers->findService($id);
