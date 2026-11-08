@@ -16,6 +16,8 @@ export interface CartLineDTO {
   productSlug: string;
   planName: string;
   planSlug: string;
+  /** Stable public marketing content ID (never an internal cart/order UUID). */
+  contentId: string;
   billingPeriod: string;
   quantity: number;
   unitPriceAmount: string | null;
@@ -42,6 +44,8 @@ export interface CartServiceLineDTO {
   serviceKind: 'domain_registration' | 'platform_plan';
   serviceRef: string;
   serviceName: string;
+  /** Stable public marketing content ID, resolved from authoritative service metadata. */
+  contentId: string | null;
   billingPeriod: string;
   quantity: number;
   unitPriceAmount: string | null;
@@ -74,6 +78,7 @@ export function toCartLineDTO(row: CartItemDetailRow): CartLineDTO {
     productSlug: row.product_slug,
     planName: row.plan_name,
     planSlug: row.plan_slug,
+    contentId: `catalog:${row.product_slug}:${row.plan_slug}`,
     billingPeriod: row.billing_period,
     quantity: row.quantity,
     unitPriceAmount: row.unit_price_amount,
@@ -171,6 +176,7 @@ export function toCartServiceLineDTO(
     serviceKind: line.serviceKind as CartServiceLineDTO['serviceKind'],
     serviceRef: line.serviceRef,
     serviceName: line.serviceName,
+    contentId: null,
     billingPeriod: line.billingPeriod,
     quantity: line.quantity,
     unitPriceAmount: line.unitAmount,

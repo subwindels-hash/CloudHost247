@@ -82,10 +82,14 @@ describe('Hostinger-style public homepage', () => {
   beforeEach(() => {
     localStorage.clear();
     stubFetch();
+    // JSDOM has no media decoder. Keep these composition tests independent of that missing
+    // browser capability; promo-video-hero.test.tsx exercises playback success/failure explicitly.
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined);
   });
 
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
     localStorage.clear();
   });

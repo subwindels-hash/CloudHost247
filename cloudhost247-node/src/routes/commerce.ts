@@ -1,3 +1,4 @@
+import { checkoutConsentContext } from '../marketing/consent-service';
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
@@ -166,7 +167,8 @@ export async function registerCommerceRoutes(app: FastifyInstance, env: Env, ove
 
   app.post('/api/v1/orders', async (request, reply) => {
     const auth = await authenticate(request, env, pool);
-    const order = await checkoutCart(pool, auth.userId, randomUUID);
+    const marketingContext = await checkoutConsentContext(pool, request, env);
+    const order = await checkoutCart(pool, auth.userId, randomUUID, marketingContext);
     reply.code(201);
     return { order };
   });

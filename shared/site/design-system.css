@@ -1250,3 +1250,19 @@ html, body { max-width: 100%; overflow-x: clip; }
     overflow: auto;
   }
 }
+
+/* Marketing Integrations: existing card/forms/tokens, responsive without fixed-width overflow. */
+.ch247-marketing-admin__heading { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.ch247-marketing-admin__fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.25rem; }
+.ch247-marketing-admin__fields label,.ch247-marketing-admin__fieldset>label:not(.ch247-marketing-admin__check) { display:flex; flex-direction:column; gap:.45rem; font-weight:600; min-width:0; }
+.ch247-marketing-admin input:not([type=checkbox]),.ch247-marketing-admin select { width:100%; min-height:44px; padding:.65rem .8rem; border:1px solid var(--ch-line,#dedfdd); border-radius:8px; background:var(--ch-surface,#fff); color:var(--ch-ink,#10171d); font:inherit; }
+.ch247-marketing-admin small { font-weight:400; }
+.ch247-marketing-admin__check { display:flex; align-items:center; gap:.65rem; min-height:44px; }
+.ch247-marketing-admin__check input { width:20px; height:20px; flex-shrink:0; accent-color:var(--ch247-primary,#5f450a); }
+.ch247-marketing-admin__fieldset { border:1px solid var(--ch-line,#dedfdd); border-radius:10px; padding:1.25rem; display:grid; gap:1rem; min-width:0; }
+.ch247-marketing-admin__fieldset legend { font-weight:700; padding-inline:.4rem; }
+.ch247-marketing-admin__status { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.ch247-marketing-admin__status dt { font-size:.8rem; opacity:.75; }
+.ch247-marketing-admin__status dd { margin:.25rem 0 0; overflow-wrap:anywhere; }
+.ch247-marketing-admin__event-id { display:block; max-width:24rem; overflow-wrap:anywhere; font-family:monospace; }
+@media(max-width:640px) { .ch247-marketing-admin__fields,.ch247-marketing-admin__status { grid-template-columns:1fr; } }

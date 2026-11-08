@@ -58,6 +58,9 @@ export default function Header() {
               <LanguageSwitcher />
               <CurrencySwitcher />
             </div>
+            {/* Keep the documented six-control utility line: Pricing, Help, language, currency,
+                Sign In and Create Account. Browse Plans remains in the account navigation and
+                on My Services; it must not push the signed-out controls onto another line. */}
             <NavLink to="/pricing">{copy.pricing}</NavLink>
             {/*
               No third quick link here. The utility line is a documented six-control row

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { apiFetch } from '../lib/api';
+import { trackMarketing } from '../lib/marketing';
 import { usePageMeta } from '../lib/usePageMeta';
 import './contact-page.css';
 
@@ -18,11 +19,15 @@ export default function ContactPage() {
     setSending(true);
     setStatus('idle');
     try {
-      await apiFetch('/api/v1/contact', {
+      const response = await apiFetch<{ marketingEvent?: { eventName: string; eventId: string; customData: Record<string, unknown> } | null }>('/api/v1/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(Object.fromEntries(data.entries())),
       });
+      if (response.marketingEvent) {
+        trackMarketing(response.marketingEvent.eventName, response.marketingEvent.customData, response.marketingEvent.eventId);
+        trackMarketing('Lead', { content_name: 'Contact form' }, response.marketingEvent.eventId.replace(/^contact:/,'lead:'));
+      }
       form.reset();
       setStatus('success');
     } catch {

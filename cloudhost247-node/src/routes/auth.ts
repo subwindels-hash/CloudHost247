@@ -1,3 +1,4 @@
+import { recordServerConversion } from '../marketing/conversion-service';
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
@@ -259,6 +260,8 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
         requestAuditContext(request)
       );
 
+      const marketing = await recordServerConversion(pool, request, env.APP_URL, { name: 'CompleteRegistration', id: `registration:${user.id}`, data: { content_name: 'CloudHost247 account', content_category: 'registration' } }).catch(() => null);
+
       const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: user.auth_session_version });
       reply.code(201);
       // The plaintext Security Number is returned exactly once, here, to the person who just
@@ -274,6 +277,7 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
         // email verification, so this response says when the first rotation is due and nothing else.
         securityPin: { set: Boolean(user.security_pin_hash), nextRotationAt: user.security_pin_expires_at },
         emailVerification: { queued: verification.issued },
+        marketingEvent: marketing?.recorded ? { eventName: 'CompleteRegistration', eventId: marketing.eventId, customData: { content_name: 'CloudHost247 account', content_category: 'registration' } } : null,
       };
     }
   );

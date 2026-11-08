@@ -15,6 +15,7 @@ import {
 import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { deliverNotificationOutbox } from '../services/notification-outbox-service';
+import { drainCapiOutbox, pruneMarketingRetention } from '../marketing/capi-worker';
 import { deliverAuthEmailOutbox } from '../services/auth-recovery-service';
 import { deliverPinVerificationEmails } from '../services/security-pin-email-service';
 import { pinKeyOrNull } from '../lib/pin-key';
@@ -74,6 +75,8 @@ interface WorkerSchedule {
   lastOsLifecycleSweep: number;
   lastTerminationSweep: number;
   lastNotificationDrain: number;
+  lastMarketingDrain: number;
+  lastMarketingRetention: number;
   lastReconciliation: number;
   lastImageRevalidation: number;
   lastSecurityNumberSweep: number;
@@ -94,6 +97,8 @@ function createWorkerSchedule(): WorkerSchedule {
     lastOsLifecycleSweep: 0,
     lastTerminationSweep: 0,
     lastNotificationDrain: 0,
+    lastMarketingDrain: 0,
+    lastMarketingRetention: 0,
     lastReconciliation: 0,
     lastImageRevalidation: 0,
     lastSecurityNumberSweep: 0,
@@ -194,6 +199,24 @@ async function runWorkerCycle(
         `[worker:${ctx.workerId}] security pin email queue: ${pinDelivery.delivered} delivered, ${pinDelivery.retrying} retrying, ${pinDelivery.failed} failed, ${pinDelivery.cancelled} cancelled, ${pinDelivery.configurationRequired} awaiting configuration`
       );
     }
+  }
+  // Consent-aware Meta CAPI outbox. Disabled/unconfigured integrations are a cheap no-op.
+  // The same drain runs in persistent and one-shot Cron modes; row leases prevent duplicates.
+  if (now - schedule.lastMarketingDrain >= NOTIFICATION_OUTBOX_INTERVAL_MS) {
+    schedule.lastMarketingDrain = now;
+    const marketing = await drainCapiOutbox(ctx.db, { workerId: ctx.workerId });
+    const marketingWork = marketing.claimed > 0 || marketing.failed > 0;
+    didWork ||= marketingWork;
+    if (marketingWork) logger.log(`[worker:${ctx.workerId}] Meta outbox: ${marketing.delivered} API-accepted, ${marketing.retried} retrying, ${marketing.failed} dead-letter, ${marketing.cancelled} cancelled`);
+  }
+  if (now - schedule.lastMarketingRetention >= 86_400_000) {
+    schedule.lastMarketingRetention = now;
+    try {
+      const pruned = await pruneMarketingRetention(ctx.db);
+      if (pruned.consentHistory || pruned.consentSessions || pruned.events || pruned.deliveries || pruned.contexts) {
+        logger.log(`[worker:${ctx.workerId}] marketing retention: ${pruned.consentHistory} consent history, ${pruned.consentSessions} expired consent sessions, ${pruned.events} events, ${pruned.deliveries} deliveries, ${pruned.contexts} contexts pruned`);
+      }
+    } catch (error) { logger.error(`[worker:${ctx.workerId}] marketing retention failed: ${error instanceof Error ? error.message : String(error)}`); }
   }
   if (now - schedule.lastReconciliation >= RECONCILIATION_INTERVAL_MS) {
     schedule.lastReconciliation = now;

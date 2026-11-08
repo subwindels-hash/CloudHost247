@@ -49,7 +49,7 @@ final class AdminController
 
     /** Every view the module currently serves. */
     const VIEWS = array('dashboard', 'settings', 'subscribers', 'subscriber', 'lists', 'import', 'suppressions',
-        'segments', 'segment', 'templates', 'template', 'campaigns', 'campaign', 'analytics', 'automations');
+        'segments', 'segment', 'templates', 'template', 'campaigns', 'campaign', 'analytics', 'automations', 'meta-pixel');
 
     /**
      * Sections the admin menu already advertises but whose build session has not
@@ -211,6 +211,7 @@ final class AdminController
             'stats' => $this->dashboardStats(),
             'settings' => $this->settings->all(),
             'integration' => $this->integrationStatus(),
+            'metaPixel' => $view === 'meta-pixel' ? $this->metaPixelBridge() : null,
             'tables' => $this->tableHealth(),
             'plannedSession' => isset($plannedSessions[$view]) ? $plannedSessions[$view] : 0,
             'capabilities' => array(
@@ -1249,6 +1250,28 @@ final class AdminController
             // Status readout must never break the dashboard.
         }
         return $status;
+    }
+
+    /** Read-only bridge: the Node console is the only runtime configuration authority. */
+    private function metaPixelBridge()
+    {
+        $legacyId = '';
+        $platform = '';
+        try {
+            if (class_exists(\WHMCS\Database\Capsule::class) && \WHMCS\Database\Capsule::schema()->hasTable('mod_cloudhost247_theme_settings')) {
+                $row = \WHMCS\Database\Capsule::table('mod_cloudhost247_theme_settings')->where('setting_key', 'facebook_pixel_code')->first();
+                if ($row) { $legacyId = trim((string) $row->setting_value); }
+                $mount = \WHMCS\Database\Capsule::table('mod_cloudhost247_theme_settings')->where('setting_key', 'platform_base_path')->first();
+                if ($mount) { $platform = trim((string) $mount->setting_value); }
+            }
+        } catch (\Throwable $error) { /* bridge is advisory; never break the admin page */ }
+        if ($platform !== '' && !preg_match('~^/(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-]+/?$~D', $platform)) { $platform = ''; }
+        return array(
+            'legacyId' => $legacyId,
+            'platform' => rtrim($platform, '/'),
+            'consoleUrl' => rtrim($platform, '/') . '/admin/marketing-integrations/meta-pixel',
+            'canonical' => 'CloudHost247 platform → Admin → Marketing Integrations → Meta Pixel',
+        );
     }
 
     private function tableHealth()

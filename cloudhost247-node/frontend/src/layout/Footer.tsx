@@ -3,6 +3,7 @@ import { faInstagram, faWhatsapp, faTiktok, faTelegram, faCcVisa, faCcMastercard
 import { publicFetch } from '../lib/api';
 import FooterLogoIcon from '../components/FooterLogoIcon';
 import { Link } from 'react-router-dom';
+import CookieSettingsButton from '../components/CookieSettingsButton';
 import { useLocale } from '../i18n/LocaleProvider';
 import { useCurrency } from '../currency/CurrencyProvider';
 import { FOOTER_COLUMNS, BRAND } from '../navigation/registry.generated';
@@ -165,6 +166,7 @@ export default function Footer() {
           <div className="hg-footer__brand-lines">
             <p className="hg-footer__copyright">{t('footer.copyright', { year, legalName: BRAND.legalName })}</p>
             <p className="hg-footer__powered">Proudly Powered by WINDELS GROUP &amp; COMPANY®</p>
+          <CookieSettingsButton />
           </div>
           <div className="hg-footer__locale">
             <span className="hg-footer__locale-values" aria-label="Current language, currency and region">

@@ -106,6 +106,10 @@ const METALS_CSS = join(ROOT, 'shared', 'site', 'metals.css');
 const METALS_CSS_COPY = join(ROOT, 'templates', 'cloudhost247', 'css', 'metals.css');
 const MOTION_JS = join(ROOT, 'shared', 'site', 'motion.js');
 const MOTION_JS_COPY = join(ROOT, 'templates', 'cloudhost247', 'js', 'motion.js');
+const MARKETING_JS_COPY = join(ROOT, 'templates', 'cloudhost247', 'js', 'marketing.js');
+const LEGACY_MARKETING_JS_COPY = join(ROOT, 'templates', 'cloudhost247_legacy', 'js', 'marketing.js');
+const MARKETING_CSS_COPY = join(ROOT, 'templates', 'cloudhost247', 'css', 'marketing.css');
+const LEGACY_MARKETING_CSS_COPY = join(ROOT, 'templates', 'cloudhost247_legacy', 'css', 'marketing.css');
 // Photography is a single authored registry: the SPA gets a typed resolver, the WHMCS theme gets
 // a Smarty lookup. Neither surface may invent its own image mapping.
 const PHOTOGRAPHY = join(ROOT, 'shared', 'site', 'photography.json');
@@ -1687,6 +1691,9 @@ function main() {
     generatedHeader('shared/site/metals.css', '/*', '*/') + readFileSync(METALS_CSS, 'utf8'));
   writeFileSync(MOTION_JS_COPY,
     generatedHeader('shared/site/motion.js', '/*', '*/') + readFileSync(MOTION_JS, 'utf8'));
+  // Consent/Pixel has one owner across all three shells. Generated copies avoid a second snippet.
+  for (const target of [MARKETING_JS_COPY, LEGACY_MARKETING_JS_COPY]) writeFileSync(target, generatedHeader('shared/site/marketing.js','/*','*/') + readFileSync(join(ROOT,'shared/site/marketing.js'),'utf8'));
+  for (const target of [MARKETING_CSS_COPY, LEGACY_MARKETING_CSS_COPY]) writeFileSync(target, generatedHeader('shared/site/marketing.css','/*','*/') + readFileSync(join(ROOT,'shared/site/marketing.css'),'utf8'));
 
   // ---- Photography registry -------------------------------------------------
   // Validation runs BEFORE either projection is written. A scene whose photo ladder is missing

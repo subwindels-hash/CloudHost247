@@ -105,4 +105,15 @@
   </p>
   <p>Powered by <a href="https://www.whmcs.com/" target="_blank">WHMCompleteSolution</a>
   </p>
+
+  <h2>Marketing Measurement Addendum</h2>
+  <p>Effective for the platform implementation published on 8 November 2026, CloudHost247 uses a consent-aware Meta Pixel and, where configured, Meta Conversions API to measure website journeys and confirmed purchases.</p>
+  <ul>
+    <li>Optional marketing measurement is off until you allow it in Cookie Settings. You may reject optional categories or withdraw consent later; withdrawal stops future browser and server marketing events for that choice.</li>
+    <li>Events may include the page path, product or plan identifiers, cart/checkout step, search result count, registration or contact completion, and a stable event identifier used to avoid double counting.</li>
+    <li>Purchase events are created only after a payment is confirmed and the related invoice/order is paid. Value and currency are taken from the payment record.</li>
+    <li>The default server payload contains a SHA-256 hash of an opaque consent-session identifier and, where available, Meta <code>_fbp</code>/<code>_fbc</code> values. It does not include your name, email address, phone number, password or payment-card data. Any future advanced-matching change requires separate review and consent.</li>
+    <li>Meta processes the data under its own terms and privacy policy. Marketing consent history is retained for up to 180 days, event activity for up to 90 days, and terminal delivery diagnostics for up to 30 days.</li>
+  </ul>
+  <p>Questions or rights requests can be sent to <a href="mailto:privacy@cloudhost247.com">privacy@cloudhost247.com</a>.</p>
 </section>

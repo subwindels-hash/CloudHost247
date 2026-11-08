@@ -7,11 +7,24 @@ const MEDIA = '/media/homepage/promo/';
 const TRANSITION_MS = 700;
 const matches = (query: string) => typeof window !== 'undefined' && !!window.matchMedia?.(query).matches;
 
+/** Modern browsers return a Promise from play(); older media stacks return undefined, and some
+ * implementations throw synchronously. Normalize all three without letting a blocked/unsupported
+ * video take down the surrounding page. The video's play/pause events remain the playing authority. */
+async function playMedia(element: HTMLVideoElement): Promise<boolean> {
+  try {
+    await element.play();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Two original motion-graphics videos, with real HTML copy overlaid on the footage. */
 export default function PromoVideoHero() {
   const section = useRef<HTMLElement>(null);
   const videos = useRef<Record<number, HTMLVideoElement | null>>({});
   const cleanupTimer = useRef<number | undefined>(undefined);
+  const playbackRequest = useRef(0);
   const [index, setIndex] = useState(0);
   const [previous, setPrevious] = useState<number | null>(null);
   const [mobile, setMobile] = useState(() => matches('(max-width: 600px)'));
@@ -31,13 +44,14 @@ export default function PromoVideoHero() {
     const target = (next + PROMO_SLIDES.length) % PROMO_SLIDES.length;
     if (target === index) return;
     window.clearTimeout(cleanupTimer.current);
+    playbackRequest.current += 1;
     setPrevious(index);
     setIndex(target);
     setPlaying(false);
     setFailed(false);
     cleanupTimer.current = window.setTimeout(() => setPrevious(null), reducedMotion ? 0 : TRANSITION_MS);
   }, [index, reducedMotion]);
-  useEffect(() => () => window.clearTimeout(cleanupTimer.current), []);
+  useEffect(() => () => { window.clearTimeout(cleanupTimer.current); playbackRequest.current += 1; }, []);
 
   useEffect(() => {
     const responsive = window.matchMedia?.('(max-width: 600px)');
@@ -76,19 +90,18 @@ export default function PromoVideoHero() {
   useEffect(() => {
     const element = videos.current[index];
     if (!element || !activated) return;
+    let currentRequest = true;
     if (previous !== null) videos.current[previous]?.pause();
     if (requestedPlay && visible && !pageHidden) {
-      // `play()` returns a promise in browsers that implement autoplay control, but `undefined`
-      // in environments that do not implement it at all (jsdom, and older embedded webviews). The
-      // old `element.play().catch(...)` threw a TypeError there, which took the whole hero down
-      // instead of merely failing to start the video.
-      const started = element.play() as Promise<void> | undefined;
-      if (started && typeof started.catch === 'function') {
-        void started.catch(() => setPlaying(false));
-      }
+      // Normalize play() across Promise-returning browsers, legacy undefined returns and
+      // synchronous throws; a blocked/unsupported video must not take down the hero.
+      void playMedia(element).then((started) => {
+        if (currentRequest && !started) setPlaying(false);
+      });
     } else {
       element.pause();
     }
+    return () => { currentRequest = false; };
   }, [activated, requestedPlay, visible, pageHidden, variant, index, previous]);
 
   useEffect(() => {
@@ -100,13 +113,18 @@ export default function PromoVideoHero() {
   function togglePlayback() {
     const element = videos.current[index];
     if (!element) return;
+    const request = ++playbackRequest.current;
     if (playing) {
       setRequestedPlay(false);
       element.pause();
     } else {
       setFailed(false);
       setRequestedPlay(true);
-      void element.play().catch(() => { setPlaying(false); setFailed(true); });
+      void playMedia(element).then((started) => {
+        if (request !== playbackRequest.current || started) return;
+        setPlaying(false);
+        setFailed(true);
+      });
     }
   }
 

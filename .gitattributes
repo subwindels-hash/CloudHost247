@@ -25,3 +25,8 @@ modules/servers/RDP/templates/overview.tpl text eol=crlf
 # the pinned archive hash - while the check stays on for every first-party path.
 modules/servers/RDP/RDP.php whitespace=-trailing-space
 modules/servers/RDP/assets/js/admin-script.js whitespace=-trailing-space
+
+# The parity register is an existing CRLF document. Allow only carriage returns at line ends in
+# whitespace checks so a scoped row edit does not require rewriting every line's ending; spaces,
+# tabs and other trailing whitespace remain errors.
+docs/feature-parity-register.csv whitespace=cr-at-eol
