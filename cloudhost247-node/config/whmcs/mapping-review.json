@@ -1339,5 +1339,6 @@
     "59 service(s) cannot be classified and must not be enabled."
   ],
   "discovered": false,
-  "proposalHint": "Next action: `npm run whmcs:discover` against staging — this review has no evidence to classify with."
+  "proposalHint": "Next action: `npm run whmcs:discover` against staging — this review has no evidence to classify with.",
+  "validation": null
 }

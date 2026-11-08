@@ -19,6 +19,7 @@
  *   orderability — the single public verdict "may this be bought online, in these cycles"
  *   discovery — the read-only C1 snapshot of a real installation, and its review report
  *   mapping-review — the service-by-service classification between discovery and any binding
+ *   discovery-validation — the gate that decides whether a captured artifact is evidence at all
  *   idempotency — one durable record per order/payment operation, so a retry cannot double-charge
  */
 
@@ -36,4 +37,5 @@ export * from './orderability';
 export * from './discovery';
 export * from './service-register';
 export * from './mapping-review';
+export * from './discovery-validation';
 export * from './idempotency';

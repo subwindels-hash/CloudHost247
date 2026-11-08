@@ -40,10 +40,11 @@ Everything below is a consequence of that sentence.
 | `src/whmcs/discovery.ts` | C1 read-only discovery: reads groups/products/currencies into a reviewable artifact and renders the Markdown report. Issues no write action, by construction. |
 | `src/whmcs/mapping-review.ts` | The mapping review engine: classifies every advertised service against the discovery artifact and renders `docs/WHMCS-MAPPING-REVIEW.md`. It writes no binding. |
 | `src/whmcs/service-register.ts` | Typed RFC-4180 reader for the cross-stack service register, shared by the review and the coverage tooling. |
-| `scripts/whmcs/catalogue-map.ts` | Operator CLI: `verify`, `snapshot`, `bind`, `dispose`, `dispositions`, `init`, `doctor`, `discover`, `review`. |
+| `src/whmcs/discovery-validation.ts` | The gate between a captured snapshot and any review: schema, provenance, currency, group, pid, cycle and price consistency. Critical failures make the artifact unusable. |
+| `scripts/whmcs/catalogue-map.ts` | Operator CLI: `verify`, `snapshot`, `bind`, `dispose`, `dispositions`, `init`, `doctor`, `discover`, `validate`, `review`. Type-checked via `tsconfig.scripts.json` (`npm run typecheck:scripts`, part of `npm run build`). |
 | `config/whmcs/product-map.json` | The generated map. Currently **0 bindings, 59 dispositions**. |
 | `config/whmcs/service-register.csv` (repository root) | Cross-stack inventory of advertised services, shared with the PHP/WHMCS side. |
-| `tests/unit/whmcs-*.test.ts`, `tests/integration/whmcs-*.test.ts` | 180 tests across 13 files: the layer, the completeness gate, the orderability verdict, the identity bridge, the discovery pipeline and the mapping review. |
+| `tests/unit/whmcs-*.test.ts`, `tests/integration/whmcs-*.test.ts` | 198 tests across 14 files: the layer, the completeness gate, the orderability verdict, the identity bridge, the discovery pipeline, the mapping review and the snapshot validation gate. |
 
 ---
 
@@ -70,7 +71,15 @@ Everything below is a consequence of that sentence.
    npm run whmcs:discover    # C1: config/whmcs/catalogue-snapshot.json + docs/WHMCS-DISCOVERY-REPORT.md
    ```
 
-   `discover` binds nothing. Review `docs/WHMCS-DISCOVERY-REPORT.md` before going further.
+   `discover` binds nothing. Review `docs/WHMCS-DISCOVERY-REPORT.md`, then validate the captured artifact — a
+   critical failure means it is not evidence and must not be reviewed or bound from:
+
+   ```bash
+   npm run whmcs:validate    # exit 1 ⇒ re-run discover and investigate; do not continue
+   ```
+
+   The full procedure, including what each preflight failure means and which conditions abort the run, is
+   [`WHMCS-DISCOVERY-RUNBOOK.md`](WHMCS-DISCOVERY-RUNBOOK.md).
 
 4. **Produce the mapping review** — one row per advertised service, with evidence:
 
@@ -79,8 +88,9 @@ Everything below is a consequence of that sentence.
    ```
 
    It writes no binding. Until a proposal exists it reports every service as `BLOCKED` (no discovery) or
-   `NOT INTEGRATED` (no proposal) — which is the honest answer. Submit it for approval before any `bind`;
-   it is the gate C2 waits on.
+   `NOT INTEGRATED` (no proposal) — which is the honest answer. A proposal must record the artifact's
+   `baseUrlFingerprint`: one written against a different install blocks every row it touches. Submit the review for
+   approval before any `bind`; it is the gate C2 waits on.
 
 5. **Restart the application**, then check the reason it reports:
 

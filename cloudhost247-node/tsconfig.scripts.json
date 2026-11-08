@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.ts", "database/**/*.ts", "scripts/whmcs/**/*.ts"],
+  "exclude": ["node_modules", "dist", "frontend", "public", "tests"]
+}

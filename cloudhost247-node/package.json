@@ -16,7 +16,7 @@
     "dev:api": "tsx watch scripts/dev-server.ts",
     "dev:server": "tsx watch src/server.ts",
     "dev:frontend": "vite --config frontend/vite.config.ts",
-    "build": "npm run tools:catalog:check && npm run build:server && npm run build:frontend && npm run build:tools",
+    "build": "npm run typecheck:scripts && npm run tools:catalog:check && npm run build:server && npm run build:frontend && npm run build:tools",
     "build:server": "tsc -p tsconfig.json",
     "build:frontend": "vite build --config frontend/vite.config.ts",
     "start": "node server.js",
@@ -50,7 +50,9 @@
     "check:3d": "node scripts/check-3d-experience.mjs",
     "whmcs:discover": "tsx scripts/whmcs/catalogue-map.ts discover",
     "whmcs:doctor": "tsx scripts/whmcs/catalogue-map.ts doctor",
-    "whmcs:review": "tsx scripts/whmcs/catalogue-map.ts review"
+    "whmcs:review": "tsx scripts/whmcs/catalogue-map.ts review",
+    "whmcs:validate": "tsx scripts/whmcs/catalogue-map.ts validate",
+    "typecheck:scripts": "tsc -p tsconfig.scripts.json --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",

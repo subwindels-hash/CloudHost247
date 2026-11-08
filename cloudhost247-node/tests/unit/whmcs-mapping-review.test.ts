@@ -400,6 +400,49 @@ describe('buildMappingReview', () => {
     expect(review.blockers.join(' ')).toContain('2 service(s) cannot be classified');
   });
 
+  it('refuses to classify from an artifact that fails validation', () => {
+    const broken = discovery([product(11)], { currencies: [], defaultCurrency: null });
+    const review = buildMappingReview({
+      services: [entry('hosting-vps')],
+      discovery: broken,
+      proposal: { entries: [{ serviceKey: 'hosting-vps', productId: 11 }] },
+      map: EMPTY_MAP,
+    });
+    expect(review.validation).not.toBeNull();
+    expect(review.validation?.usable).toBe(false);
+    expect(review.rows[0].state).toBe('BLOCKED');
+    expect(review.rows[0].evidence).toContain('failed validation');
+    expect(review.rows[0].missing.join(' ')).toContain('failed validation');
+    expect(review.blockers.join(' ')).toContain('failed validation');
+  });
+
+  it('blocks a proposal written against a different install fingerprint', () => {
+    const stale: MappingProposal = {
+      baseUrlFingerprint: 'b'.repeat(64),
+      entries: [{ serviceKey: 'hosting-vps', productId: 11 }],
+    };
+    const review = buildMappingReview({
+      services: [entry('hosting-vps')],
+      discovery: discovery([product(11)]),
+      proposal: stale,
+      map: EMPTY_MAP,
+    });
+    expect(review.rows[0].state).toBe('BLOCKED');
+    expect(review.rows[0].missing.join(' ')).toContain('different install fingerprint');
+    expect(review.blockers.join(' ')).toContain('different install fingerprint');
+  });
+
+  it('accepts a proposal whose fingerprint matches the artifact it was written from', () => {
+    const review = buildMappingReview({
+      services: [entry('hosting-vps')],
+      discovery: discovery([product(11)]),
+      proposal: { baseUrlFingerprint: 'a'.repeat(64), entries: [{ serviceKey: 'hosting-vps', productId: 11 }] },
+      map: EMPTY_MAP,
+    });
+    expect(review.rows[0].state).toBe('VERIFIED — READY FOR APPROVAL');
+    expect(review.validation?.usable).toBe(true);
+  });
+
   it('reports discovery warnings and a missing version as reviewer blockers', () => {
     const review = buildMappingReview({
       services: [entry('hosting-vps')],
@@ -476,6 +519,16 @@ describe('renderMappingReview', () => {
     expect(markdown).toContain('discovery pid 11');
     expect(markdown).toContain('not read — WHMCS configurable options need a separate read (slice B2.3)');
     expect(markdown).toContain('no registrar configured in WHMCS');
+  });
+
+  it('shows the snapshot validation table when an artifact was supplied', () => {
+    expect(markdown).toContain('## Snapshot validation');
+    expect(markdown).toContain('| `currencies.default-declared` |');
+
+    const noArtifact = renderMappingReview(
+      buildMappingReview({ services: [entry('hosting-vps')], discovery: null, proposal: null, map: EMPTY_MAP }),
+    );
+    expect(noArtifact).not.toContain('## Snapshot validation');
   });
 
   it('documents the proposal format and points at the next human action', () => {

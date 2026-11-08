@@ -53,6 +53,7 @@ import { BILLING_CYCLES, type BillingCycle } from '../../src/whmcs/types';
 import { collectDiscovery, renderDiscoveryReport, type DiscoveryArtifact } from '../../src/whmcs/discovery';
 import { readServiceRegister } from '../../src/whmcs/service-register';
 import { buildMappingReview, renderMappingReview, type MappingProposal } from '../../src/whmcs/mapping-review';
+import { validateDiscoveryArtifact } from '../../src/whmcs/discovery-validation';
 
 const DEFAULT_MAP_PATH = path.join(process.cwd(), 'config', 'whmcs', 'product-map.json');
 const DEFAULT_REGISTER_PATH = path.resolve(process.cwd(), '..', 'config', 'whmcs', 'service-register.csv');
@@ -114,16 +115,20 @@ function parseArgs(argv: string[]): Args {
         i += 1;
         break;
       case '--out':
-        args.discoveryPath = value();
+        out.discoveryPath = path.resolve(value ?? out.discoveryPath);
+        i += 1;
         break;
       case '--json':
-        args.reviewJsonPath = value();
+        out.reviewJsonPath = path.resolve(value ?? out.reviewJsonPath);
+        i += 1;
         break;
       case '--proposal':
-        args.proposalPath = value();
+        out.proposalPath = path.resolve(value ?? out.proposalPath);
+        i += 1;
         break;
       case '--report':
-        args.reportPath = value();
+        out.reportPath = path.resolve(value ?? out.reportPath);
+        i += 1;
         break;
       case '--register':
         out.registerPath = path.resolve(value ?? DEFAULT_REGISTER_PATH);
@@ -530,6 +535,35 @@ function silence() {
  * Markdown review and a JSON copy for diffing. It binds nothing — a VERIFIED row is a recommendation
  * that still needs a reviewed `bind`.
  */
+function validate(args: Args): void {
+  if (!existsSync(args.discoveryPath)) {
+    fail(
+      `no discovery artifact at ${path.relative(process.cwd(), args.discoveryPath)} — run \`npm run whmcs:discover\` first`,
+      2,
+    );
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(args.discoveryPath, 'utf8'));
+  } catch {
+    fail(`${path.relative(process.cwd(), args.discoveryPath)} is not valid JSON`, 2);
+  }
+
+  const result = validateDiscoveryArtifact(parsed);
+  for (const check of result.checks) {
+    const mark = check.ok ? '✓' : check.critical ? '✗' : '!';
+    const type = check.critical ? 'critical' : 'warning ';
+    console.log(`  ${mark} ${type} ${check.id.padEnd(28)} ${check.detail}`);
+  }
+  console.log('');
+  if (!result.usable) {
+    console.log(`✗ the artifact is not usable: ${result.critical.length} critical check(s) failed.`);
+    console.log('  Do not review or bind from it. Re-run `npm run whmcs:discover` and investigate the failures.');
+    process.exit(1);
+  }
+  console.log(`✓ the artifact is usable — ${result.warnings.length} warning(s) for the reviewer, nothing was bound.`);
+}
+
 function review(args: Args): void {
   if (!existsSync(args.registerPath)) fail(`no service register at ${args.registerPath}`, 2);
   const services = readServiceRegister(args.registerPath);
@@ -591,8 +625,24 @@ function review(args: Args): void {
   console.log('  nothing was bound. Approve rows first, then bind one service at a time.');
 }
 
+const USAGE = `WHMCS catalogue map — discovery and binding.
+
+  npm run whmcs:map -- doctor        read-only preflight against the installation (writes nothing)
+  npm run whmcs:map -- discover      C1: catalogue JSON + discovery report (writes nothing else)
+  npm run whmcs:map -- validate      validate a captured catalogue snapshot (exit 1 if unusable)
+  npm run whmcs:map -- review        classify every advertised service (binds nothing)
+  npm run whmcs:map -- snapshot      checksummed product-map snapshot from GetProducts
+  npm run whmcs:map -- verify        re-check map checksums, provenance and integrity
+  npm run whmcs:map -- bind --service <key> --product <pid> [--cycles monthly,annually]
+  npm run whmcs:map -- dispose --service <key> --reason "<why it is not orderable>"
+  npm run whmcs:map -- dispositions  seed a reason for every unbound advertised service
+  npm run whmcs:map -- init --map <path>  create an empty checksummed map
+
+Flags: --map, --register, --out, --report, --json, --proposal.
+Exit codes: 0 success, 1 verification failure, 2 configuration/usage problem.`;
+
 function help(): void {
-  console.log(readFileSync(new URL(import.meta.url)).toString().split('\n').slice(1, 36).join('\n').replace(/^ \* ?/gm, ''));
+  console.log(USAGE);
 }
 
 async function main(): Promise<void> {
@@ -618,6 +668,9 @@ async function main(): Promise<void> {
       break;
     case 'doctor':
       await doctor();
+      break;
+    case 'validate':
+      validate(args);
       break;
     case 'review':
       review(args);

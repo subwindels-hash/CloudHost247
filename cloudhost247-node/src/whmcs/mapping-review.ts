@@ -26,6 +26,7 @@
 import type { DiscoveryArtifact, DiscoveryProduct } from './discovery';
 import { BILLING_CYCLES, type BillingCycle } from './types';
 import type { ProductMapDocument } from './product-map';
+import { validateDiscoveryArtifact, type DiscoveryValidation } from './discovery-validation';
 import type { ServiceRegisterEntry } from './service-register';
 
 export const REVIEW_STATES = [
@@ -87,6 +88,8 @@ export interface MappingReview {
   discovered: boolean;
   /** One-line pointer to the next human action, so the document is never a dead end. */
   proposalHint: string | null;
+  /** Result of validating the discovery artifact; null when there is no artifact to validate. */
+  validation: DiscoveryValidation | null;
 }
 
 export interface ReviewInput {
@@ -153,8 +156,21 @@ export function classifyService(input: {
   proposal: ProposalEntry | null;
   duplicateProduct: boolean;
   boundProductId: number | null;
+  /** Set when the artifact on disk fails validation: no row may be classified from it. */
+  artifactProblem?: string | null;
+  /** Set when the proposal cannot be trusted (e.g. written against a different install). */
+  proposalProblem?: string | null;
 }): ReviewRow {
-  const { entry, discovery, product, proposal, duplicateProduct, boundProductId } = input;
+  const {
+    entry,
+    discovery,
+    product,
+    proposal,
+    duplicateProduct,
+    boundProductId,
+    artifactProblem = null,
+    proposalProblem = null,
+  } = input;
   const defaultCurrency = discovery?.defaultCurrency ?? null;
 
   const base: ReviewRow = {
@@ -186,6 +202,17 @@ export function classifyService(input: {
       orderability: stateOrderability('BLOCKED'),
       missing: [...base.missing, 'no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`'],
       evidence: 'config/whmcs/catalogue-snapshot.json does not exist',
+    };
+  }
+
+  // 1b. An artifact that fails validation is not evidence. Say so instead of classifying from it.
+  if (artifactProblem) {
+    return {
+      ...base,
+      state: 'BLOCKED',
+      orderability: stateOrderability('BLOCKED'),
+      missing: [...base.missing, artifactProblem],
+      evidence: 'the discovery artifact failed validation — see the Snapshot validation section',
     };
   }
 
@@ -235,6 +262,16 @@ export function classifyService(input: {
   }
 
   // 4. A proposal that cannot be resolved is blocked, not guessed at.
+  if (proposalProblem) {
+    return {
+      ...base,
+      productId: proposal.productId,
+      state: 'BLOCKED',
+      orderability: stateOrderability('BLOCKED'),
+      missing: [...base.missing, proposalProblem],
+      evidence: `mapping-proposal.json entry for ${entry.serviceKey} — not usable until the proposal is regenerated`,
+    };
+  }
   if (duplicateProduct) {
     return {
       ...base,
@@ -322,6 +359,15 @@ export function buildMappingReview(input: ReviewInput): MappingReview {
     productUseCount.set(entry.productId, (productUseCount.get(entry.productId) ?? 0) + 1);
   }
 
+  const validation = discovery ? validateDiscoveryArtifact(discovery) : null;
+  const artifactProblem = validation && validation.critical.length > 0
+    ? `the discovery artifact on disk failed validation (${validation.critical.length} critical check(s)) — re-run \`npm run whmcs:discover\``
+    : null;
+  const proposalProblem = proposal?.baseUrlFingerprint && discovery
+      && proposal.baseUrlFingerprint !== discovery.baseUrlFingerprint
+    ? 'the proposal records a different install fingerprint than the discovery artifact — it was written against another run and cannot be applied here'
+    : null;
+
   const rows = services.map((entry) => {
     const binding = map.services[entry.serviceKey];
     const proposalEntry = proposals.get(entry.serviceKey) ?? null;
@@ -335,6 +381,10 @@ export function buildMappingReview(input: ReviewInput): MappingReview {
       proposal: proposalEntry,
       duplicateProduct: proposalEntry ? (productUseCount.get(proposalEntry.productId) ?? 0) > 1 : false,
       boundProductId: binding?.productId ?? null,
+      artifactProblem,
+      // A stale proposal must not classify a *proposed* row; an existing binding is unaffected, because
+      // bindings are already validated against the checksummed snapshot.
+      proposalProblem: binding ? null : proposalProblem,
     });
   });
 
@@ -361,6 +411,10 @@ export function buildMappingReview(input: ReviewInput): MappingReview {
   if (!proposal) {
     blockers.push('No mapping proposal exists yet — every service is intentionally left NOT INTEGRATED.');
   }
+  if (validation) {
+    for (const failure of validation.critical) blockers.push(`Discovery artifact failed validation — ${failure}`);
+    if (proposalProblem) blockers.push(proposalProblem);
+  }
   if (summary['BLOCKED'] > 0) {
     blockers.push(`${summary['BLOCKED']} service(s) cannot be classified and must not be enabled.`);
   }
@@ -371,7 +425,7 @@ export function buildMappingReview(input: ReviewInput): MappingReview {
       ? 'Next action: write `config/whmcs/mapping-proposal.json` from the discovery artifact, then re-run `npm run whmcs:review`.'
       : null;
 
-  return { rows, summary, blockers, discovered: Boolean(discovery), proposalHint };
+  return { rows, summary, blockers, discovered: Boolean(discovery), proposalHint, validation };
 }
 
 function escapeCell(value: string): string {
@@ -416,6 +470,24 @@ export function renderMappingReview(review: MappingReview, options: RenderOption
   lines.push('');
   for (const blocker of review.blockers) lines.push(`- ${blocker}`);
   lines.push('');
+
+  if (review.validation) {
+    lines.push('## Snapshot validation');
+    lines.push('');
+    lines.push(
+      'The artifact was checked before any row was classified. A critical failure would have made every row ' +
+        'BLOCKED; warnings are facts for the reviewer, not defects.',
+    );
+    lines.push('');
+    lines.push('| Check | Type | Result | Detail |');
+    lines.push('| --- | --- | --- | --- |');
+    for (const check of review.validation.checks) {
+      const type = check.critical ? 'critical' : 'warning';
+      const result = check.ok ? 'pass' : check.critical ? '**FAIL**' : 'see detail';
+      lines.push(`| \`${check.id}\` | ${type} | ${result} | ${escapeCell(check.detail)} |`);
+    }
+    lines.push('');
+  }
 
   lines.push('## Classification rules');
   lines.push('');
