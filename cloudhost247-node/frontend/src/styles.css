@@ -827,7 +827,7 @@ form.ch247-form--auth button[type="submit"] {
   border: 0;
   background: none;
   font: inherit;
-  color: #16704b;
+  color: var(--ch247-primary, #5f450a);
   text-decoration: underline;
   cursor: pointer;
 }

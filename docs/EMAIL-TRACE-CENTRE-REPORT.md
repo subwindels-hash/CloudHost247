@@ -19,7 +19,7 @@ Behind those two pages:
 
 | Layer | Where | State |
 | --- | --- | --- |
-| Schema | `database/migrations/0089_create_email_trace_centre.sql` | 3 tables, dedupe unique index, 8 indexes, CHECK guard rails |
+| Schema | `database/migrations/0090_create_email_trace_centre.sql` (renumbered from 0089 when `main` took 0089 for marketing integrations) | 3 tables, dedupe unique index, 8 indexes, CHECK guard rails |
 | Repository | `src/db/email-trace.ts` | every SQL statement for the feature |
 | Parsing | `src/email-trace/exim/{mainlog-parser,normalizer,queue-parser}.ts` | Exim message log + `exim -bp` |
 | Status rules | `src/email-trace/status-resolver.ts` | flag → status, contradictions → UNKNOWN |

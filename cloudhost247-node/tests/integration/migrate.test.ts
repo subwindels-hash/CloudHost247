@@ -132,6 +132,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0087_create_whmcs_identity.sql',
     // Cross-instance SSO hand-off budget (0088): one atomic counter row per account per window.
     '0088_create_whmcs_sso_rate_limits.sql',
+    // Consent-aware Meta Pixel/CAPI configuration, consent, conversion activity and delivery outbox.
+    '0089_create_marketing_integrations.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -1577,6 +1577,8 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/admin/invoices/:id",
   "/admin/ledger",
   "/admin/licenses",
+  "/admin/marketing-integrations",
+  "/admin/marketing-integrations/:provider",
   "/admin/marketing-services",
   "/admin/monitoring",
   "/admin/online-store",

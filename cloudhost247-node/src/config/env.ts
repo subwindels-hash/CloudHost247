@@ -248,6 +248,9 @@ const envSchema = z.object({
    * Digital-marketing integration credentials (all optional). A channel is reported as connected
    * only when its own variable is present; see src/marketing-services/campaign-service.ts.
    */
+    // Optional domain-separated key for anonymous cookie-consent CSRF. Falls back to JWT_SECRET
+  // through a one-way HMAC derivation; never reused directly as an authentication token.
+  MARKETING_CONSENT_SECRET: z.string().min(32).optional(),
   MARKETING_PROVIDER_GOOGLE_SEARCH_CONSOLE_TOKEN: z.string().min(8).optional(),
   MARKETING_PROVIDER_AHREFS_TOKEN: z.string().min(8).optional(),
   MARKETING_PROVIDER_SEMRUSH_TOKEN: z.string().min(8).optional(),

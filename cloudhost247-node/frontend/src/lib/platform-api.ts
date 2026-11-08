@@ -438,6 +438,9 @@ export interface InboxMessage {
 export interface CartLine {
   id: string;
   planId: string;
+  productSlug: string;
+  planSlug: string;
+  contentId: string;
   productName: string;
   planName: string;
   billingPeriod: string;
@@ -454,6 +457,7 @@ export interface CartServiceLine {
   serviceKind: string;
   serviceRef: string;
   serviceName: string;
+  contentId: string | null;
   billingPeriod: string | null;
   quantity: number;
   unitPriceAmount: string | null;

@@ -1,0 +1,11 @@
+7. CloudHost247 Preference Centre
+
+Effective upon publication of the CloudHost247 platform implementation, the Cookie Settings control in the website footer opens a preference centre backed by the CloudHost247 platform.
+
+- A strictly necessary, HttpOnly consent cookie (ch247_marketing_consent) stores an opaque choice identifier for up to 180 days. It does not contain your name, email address or browsing history.
+- Optional analytics and marketing categories are off until you allow them. You can accept all, reject optional categories, save a custom choice, or withdraw consent at any time.
+- When you allow marketing, the site may load the Meta Pixel and send standard events such as page views, product views, searches, cart actions, checkout steps, registration, contact and verified purchases. Meta may set _fbp and _fbc cookies. Withdrawing consent revokes the Pixel, clears known Meta cookies, reloads the current page and refreshes other open tabs.
+- Server-side Conversions API events are sent only for consented journeys. Purchase value and currency come from a confirmed payment, not from the browser. The platform sends a hashed opaque session identifier and, where present, Meta click/browser cookies; it does not send your name, email address, password or payment-card details by default.
+- Consent history is retained for up to 180 days, marketing event activity for up to 90 days, and terminal delivery diagnostics for up to 30 days. Financial records and security audit logs are governed by their own retention rules.
+
+You can change your choice at any time through Cookie Settings. Browser-level blocking may still be used, but the preference centre is the site-level control for optional tracking.

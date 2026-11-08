@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import { ApproxAmount } from '../components/ApproxAmount';
 import { useApiResource } from '../lib/useApiResource';
 import { usePageMeta } from '../lib/usePageMeta';
+import { trackMarketing } from '../lib/marketing';
 import { formatPrice, type CatalogListResponse, type ProductPlansResponse } from '../lib/catalog-types';
 import { money, titleCase, type PlatformPlan } from '../lib/platform-api';
 
@@ -62,6 +64,8 @@ export function CatalogServicePlansPage() {
   usePageMeta('Service plans', 'Explore published service plans.');
   const valid = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
   const result = useApiResource<ProductPlansResponse>(`/api/v1/catalog/products/${encodeURIComponent(valid ? slug : 'invalid')}/plans`);
+  const catalogData = result.status === 'success' ? result.data : null;
+  useEffect(() => { if (!catalogData?.product.available) return; const product = catalogData.product; trackMarketing('ViewContent', { content_ids: [slug], content_name: product.name, content_category: product.productType, content_type: 'product_group' }, `view:${slug}`); }, [catalogData, slug]);
   return (
     <main className="ch247-page ch247-page--wide ch247-stack">
       <Link to="/service-plans">← All service plans</Link>
@@ -96,6 +100,8 @@ export function PlatformServicePlansPage() {
   usePageMeta(name ? `${name} plans` : 'Service plans', 'Explore published platform service plans.');
   const result = useApiResource<{ plans: PlatformPlan[] }>('/api/v1/platform-services/plans');
   const plans = result.status === 'success' ? result.data.plans.filter((plan) => plan.service_kind === kind) : [];
+  const platformData = result.status === 'success' ? result.data : null;
+  useEffect(() => { if (!name || !platformData) return; const published = platformData.plans.filter(plan => plan.service_kind === kind); if (published.length > 0) trackMarketing('ViewContent', { content_ids: [`platform:${kind}`], content_name: name, content_category: kind, content_type: 'product_group' }, `view:platform:${kind}`); }, [name, kind, platformData]);
   return (
     <main className="ch247-page ch247-page--wide ch247-stack">
       <Link to="/service-plans">← All service plans</Link>

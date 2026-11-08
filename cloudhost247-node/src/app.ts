@@ -67,6 +67,8 @@ import { registerStoreRoutes } from './routes/store';
 import { registerLogoMakerRoutes } from './routes/logo-maker';
 import { registerExpertRoutes } from './routes/experts';
 import { registerMarketingServiceRoutes } from './routes/marketing-services';
+import { registerAdminMarketingRoutes } from './routes/admin-marketing';
+import { registerMarketingRoutes } from './routes/marketing';
 import { registerInboxRoutes } from './routes/inbox';
 import { registerAdminPlatformServiceRoutes } from './routes/admin-platform-services';
 import { HttpError, ValidationError } from './lib/errors';
@@ -281,6 +283,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerLogoMakerRoutes(instance, env, pool);
     await registerExpertRoutes(instance, env, pool);
     await registerMarketingServiceRoutes(instance, env, pool);
+    await registerAdminMarketingRoutes(instance, env, pool);
+    await registerMarketingRoutes(instance, env, pool);
     await registerInboxRoutes(instance, env, pool);
     await registerAdminPlatformServiceRoutes(instance, env, pool);
 

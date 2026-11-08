@@ -273,7 +273,7 @@ redacted on the agent (no headers beyond what §4.1 lists, no body, no credentia
 
 ## 4. Data model
 
-Three tables, one migration (`database/migrations/0089_create_email_trace_centre.sql`), following the
+Three tables, one migration (`database/migrations/0090_create_email_trace_centre.sql`), following the
 repository's header-comment convention (why, what it deliberately does not store, and what it
 assumes). UUID primary keys, `timestamptz`, `jsonb` only where the shape is genuinely open.
 
@@ -530,7 +530,7 @@ suite.
 
 | File | Slice |
 | --- | --- |
-| `database/migrations/0089_create_email_trace_centre.sql` | 1 — **done** |
+| `database/migrations/0090_create_email_trace_centre.sql` | 1 — **done** |
 | `src/db/email-trace.ts` (`EmailTraceRepository` + row types — this is the repository; there is no separate `src/email-trace/trace-repository.ts`) | 1 — **done** |
 | `src/email-trace/types.ts`, `status-resolver.ts`, `dedupe.ts`, `exim/mainlog-parser.ts`, `exim/queue-parser.ts`, `exim/normalizer.ts` | 1 — **done** |
 | `src/email-trace/trace-service.ts`, `access-control.ts`, `audit.ts`, `capability.ts`, `collector.ts`, `adapters/exim-agent.ts` | 2 — **done** (retention SQL lives in `src/db/email-trace.ts`) |
@@ -642,7 +642,7 @@ reachable by a user.
 
 | File | What it contains |
 | --- | --- |
-| `cloudhost247-node/database/migrations/0089_create_email_trace_centre.sql` | `email_trace_events`, `email_trace_sources`, `email_trace_collection_runs`; dedupe unique index; tenant/status indexes; CHECK constraints for statuses, event types, SMTP code range, address shape, hash length, retention overrides |
+| `cloudhost247-node/database/migrations/0090_create_email_trace_centre.sql` | `email_trace_events`, `email_trace_sources`, `email_trace_collection_runs`; dedupe unique index; tenant/status indexes; CHECK constraints for statuses, event types, SMTP code range, address shape, hash length, retention overrides |
 | `cloudhost247-node/src/db/email-trace.ts` | Repository: insert with `ON CONFLICT DO NOTHING`, scoped list/detail/summary, sources, collection runs, latest queue snapshots, retention trims |
 | `cloudhost247-node/src/email-trace/types.ts` | Status/event vocabulary, parsed and normalised shapes, queue snapshot shape |
 | `cloudhost247-node/src/email-trace/status-resolver.ts` | Flag → status mapping with an explanation per decision |

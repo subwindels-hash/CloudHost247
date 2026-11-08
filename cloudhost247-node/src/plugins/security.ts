@@ -16,10 +16,11 @@ export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:'],
+        imgSrc: ["'self'", 'data:', 'https://www.facebook.com'],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        connectSrc: ["'self'"],
+        // Only Meta's official SDK origin; no inline scripts or wildcard hosts.
+        scriptSrc: ["'self'", 'https://connect.facebook.net'],
+        connectSrc: ["'self'", 'https://connect.facebook.net', 'https://www.facebook.com'],
       },
     },
   });

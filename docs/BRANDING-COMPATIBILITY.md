@@ -8,6 +8,21 @@ Every retained identifier below is listed in the machine-readable register
 `scripts/branding-audit.py`, which fails the release-candidate check if any
 *unlisted* The-Retired-Brand string appears anywhere in the repository.
 
+## Vendor integrity baseline re-cut — 2026-11-08
+
+The consent-aware Meta Pixel integration deliberately changed three vendor-derived
+legacy-theme files:
+
+- `templates/cloudhost247_legacy/footer.tpl`
+- `templates/cloudhost247_legacy/cloudhost247_legacy_includes/cookie-offers.tpl`
+- `templates/cloudhost247_legacy/cloudhost247_legacy_includes/seo-trackers.tpl`
+
+They now load the canonical shared marketing runtime, expose the Cookie Settings
+control, and retire unconditional third-party tracker snippets instead of firing
+before consent. The SHA-256 inventory in
+`docs/independent-rebuild/original-file-manifest.sha256` was re-cut for exactly
+these three paths; no side-car override was introduced.
+
 ## Approved naming rules
 
 - **Legal/company name:** `CloudHost247 Isc.` (including the final period).

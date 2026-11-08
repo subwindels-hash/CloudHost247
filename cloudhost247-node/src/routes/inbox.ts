@@ -1,3 +1,4 @@
+import { recordServerConversion } from '../marketing/conversion-service';
 /**
  * Unified Inbox API.
  *
@@ -75,7 +76,7 @@ export async function registerInboxRoutes(app: FastifyInstance, env: Env, overri
       message: z.string().trim().min(1).max(10000),
     }).strict(), request.body);
 
-    await withTransaction(pool, (tx) => recordMessage(tx, {
+    const message = await withTransaction(pool, (tx) => recordMessage(tx, {
       channelKind: 'web_form',
       externalReference: `contact-form:${randomUUID()}`,
       contactName: input.name,
@@ -85,7 +86,8 @@ export async function registerInboxRoutes(app: FastifyInstance, env: Env, overri
       subject: `[${input.department}] ${input.subject}`,
       body: input.message,
     }));
-    return reply.code(201).send({ received: true });
+    const marketing = message.created ? await recordServerConversion(pool, request, env.APP_URL, { name: 'Contact', id: `contact:${message.messageId}`, data: { content_name: 'Contact form', content_category: input.department } }).catch(() => null) : null;
+    return reply.code(201).send({ received: true, marketingEvent: marketing?.recorded ? { eventName: 'Contact', eventId: marketing.eventId, customData: { content_name: 'Contact form', content_category: input.department } } : null });
   });
 
   /* ------------------------------------------------------------------------------------------

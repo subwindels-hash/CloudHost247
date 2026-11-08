@@ -8,6 +8,7 @@ import SupportModeBanner from '../components/SupportModeBanner';
 import AiSupportWidget from '../components/AiSupportWidget';
 import { CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import AnnouncementBar from '../components/AnnouncementBar';
+import { startMarketing, useMarketing } from '../lib/marketing';
 
 /**
  * Shared application shell — a single Header/Footer wrapping every route (public marketing pages
@@ -49,6 +50,9 @@ export function isMarketingSurface(pathname: string): boolean {
 export default function Layout() {
   const { pathname, hash } = useLocation();
   const marketing = isMarketingSurface(pathname);
+  useMarketing();
+  useEffect(() => { startMarketing(); }, []);
+  useEffect(() => { void window.CloudHost247Marketing.ready().then(() => window.CloudHost247Marketing.pageView(pathname)); }, [pathname]);
 
   // A 320 ms opacity-only transition between routes. Opacity (not transform) is deliberate: it
   // cannot shift layout or hurt CLS, and `metals.css` disables it under reduced motion. The

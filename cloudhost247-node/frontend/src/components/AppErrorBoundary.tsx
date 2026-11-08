@@ -25,7 +25,7 @@ export default class AppErrorBoundary extends Component<{ children: ReactNode },
           <button
             type="button"
             onClick={() => window.location.reload()}
-            style={{ color: '#315941', fontWeight: 700, background: 'none', border: 0, padding: 0, font: 'inherit', cursor: 'pointer' }}
+            style={{ color: 'var(--ch247-primary, #5f450a)', fontWeight: 700, background: 'none', border: 0, padding: 0, font: 'inherit', cursor: 'pointer' }}
           >
             Refresh page
           </button>

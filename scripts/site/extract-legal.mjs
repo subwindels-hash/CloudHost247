@@ -7,6 +7,8 @@
  *   - `docs/policies/*.pdf`  — the signed, customer-facing policy PDFs. Text extracted once by
  *                              `scripts/site/extract-legal-pdf.mjs` into
  *                              `shared/site/content/legal/<slug>.txt` (committed, reviewable).
+ *                              Reviewed platform addenda live separately in `legal/addenda/<registry-slug>.txt`
+ *                              and are appended at extraction time, so PDF re-extraction cannot erase them.
  *   - `templates/…/legal/*.tpl` — policies that exist only in the WHMCS theme, e.g. the
  *                              Acceptable Use Policy, which has no PDF.
  *
@@ -212,7 +214,10 @@ function main() {
         );
         continue;
       }
-      html = textToHtml(readFileSync(textFile, 'utf8'), entry.title);
+      let text = readFileSync(textFile, 'utf8');
+      const addendumFile = join(TEXT_DIR, 'addenda', `${entry.slug}.txt`);
+      if (existsSync(addendumFile)) text += '\n\n' + readFileSync(addendumFile, 'utf8');
+      html = textToHtml(text, entry.title);
       origin = 'pdf';
     } else if (entry.source.toLowerCase().endsWith('.php')) {
       html = phpTermsToHtml(readFileSync(source, 'utf8'));
