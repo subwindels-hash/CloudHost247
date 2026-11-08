@@ -6,7 +6,7 @@ import type { Queryable } from '../db/types';
 import { withTransaction } from '../db/transaction';
 import { safeEqual } from '../lib/crypto';
 import { ForbiddenError, ValidationError } from '../lib/errors';
-import { resolveVisitorIp } from '../routes/visitor-ip';
+import { resolveVisitorIpFromRequest } from '../routes/visitor-ip';
 import { CONSENT_POLICY_VERSION, defaultPreferences, preferencesSchema, type Preferences } from './types';
 
 export const CONSENT_COOKIE = 'ch247_marketing_consent';
@@ -35,7 +35,7 @@ export function cookieValue(request: FastifyRequest, name: string): string | nul
   return null;
 }
 export function resolveJurisdiction(request: FastifyRequest, env: Env): string | null {
-  const ip = resolveVisitorIp(request.raw.socket.remoteAddress, typeof request.headers['x-forwarded-for'] === 'string' ? request.headers['x-forwarded-for'] : undefined, env.VISITOR_IP_MODE, env.VISITOR_IP_TRUSTED_PROXIES);
+  const ip = resolveVisitorIpFromRequest(request, env).ip;
   if (!ip) return null;
   try { const country = geoip.lookup(ip)?.country; return country && /^[A-Z]{2}$/.test(country) ? country : null; }
   catch { return null; }
