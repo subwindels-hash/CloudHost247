@@ -210,3 +210,17 @@ and duplicate-event warnings (derived from the dedup ledger).
 
 Until (1)–(3) are done, the Events API status must be read as
 **pending external account configuration**, exactly as the admin UI states.
+
+## 11. Verification record (continuation pass, 2026-11-08)
+
+- Full backend unit suite: **1,915/1,915 passed** (133 files).
+- Full backend integration suite (all 83 files, run in chunks):
+  189 + 213 + 132 + 180 passed in the chunked runs, plus the previously run
+  marketing/TikTok/consent/conversions/migrate/commerce/payments/contact/auth
+  files (33 + 17 + 51) — **no failures**.
+- Full frontend suite: **809/809 passed** (69 files), including the TikTok
+  admin page regression tests added after a wiring bug (missing TikTok admin
+  imports / route fallback) was found by the frontend typecheck and fixed.
+- Server + frontend typechecks and `npm run build`: pass.
+- `Subscribe` now fires for genuinely new newsletter subscriptions and
+  `SubmitForm` for successful contact submissions (see §4 table).
