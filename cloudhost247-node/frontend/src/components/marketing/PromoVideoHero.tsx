@@ -78,7 +78,14 @@ export default function PromoVideoHero() {
     if (!element || !activated) return;
     if (previous !== null) videos.current[previous]?.pause();
     if (requestedPlay && visible && !pageHidden) {
-      void element.play().catch(() => setPlaying(false));
+      // `play()` returns a promise in browsers that implement autoplay control, but `undefined`
+      // in environments that do not implement it at all (jsdom, and older embedded webviews). The
+      // old `element.play().catch(...)` threw a TypeError there, which took the whole hero down
+      // instead of merely failing to start the video.
+      const started = element.play() as Promise<void> | undefined;
+      if (started && typeof started.catch === 'function') {
+        void started.catch(() => setPlaying(false));
+      }
     } else {
       element.pause();
     }

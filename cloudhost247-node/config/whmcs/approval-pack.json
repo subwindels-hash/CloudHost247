@@ -1,0 +1,847 @@
+{
+  "generatedAt": "2026-11-08T16:26:22.845Z",
+  "stagingOnly": true,
+  "environment": {
+    "baseUrlHost": null,
+    "baseUrlFingerprint": null,
+    "mode": null,
+    "mfaRequired": null,
+    "credentialsPresent": false
+  },
+  "discovery": null,
+  "validation": null,
+  "review": {
+    "summary": {
+      "VERIFIED — READY FOR APPROVAL": 0,
+      "NOT INTEGRATED": 0,
+      "NO PROVISIONING MODULE": 0,
+      "NO VALID PRICE": 0,
+      "HIDDEN PRODUCT": 0,
+      "BLOCKED": 59
+    },
+    "blockers": [
+      "No discovery run has been performed. Nothing can be approved from this document until `npm run whmcs:discover` has run against the staging installation.",
+      "The install System URL must equal WHMCS_BASE_URL exactly, or SSO hand-offs are refused (B5.1 §9).",
+      "No mapping proposal exists yet — every service is intentionally left NOT INTEGRATED.",
+      "59 service(s) cannot be classified and must not be enabled."
+    ],
+    "discovered": false
+  },
+  "map": {
+    "bindings": 0,
+    "dispositions": 59,
+    "baseUrlFingerprint": "80c00e100ce65521a6f3b4df0e0de367d660ec7c45dd44698e1149d01fe50729",
+    "retrievedAt": "2026-11-08T13:27:05.120Z"
+  },
+  "proposal": null,
+  "products": [],
+  "services": [
+    {
+      "serviceKey": "cloud",
+      "service": "Cloud & Servers",
+      "page": "/cloud",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-public",
+      "service": "Public Cloud",
+      "page": "/cloud/public",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-private",
+      "service": "Private Cloud",
+      "page": "/cloud/private",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-enterprise-servers",
+      "service": "Enterprise Servers",
+      "page": "/cloud/enterprise-servers",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-game-servers",
+      "service": "Game Servers",
+      "page": "/cloud/game-servers",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-infrastructure",
+      "service": "Infrastructure",
+      "page": "/cloud/infrastructure",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-data-centers",
+      "service": "Data Centers",
+      "page": "/cloud/data-centers",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-network",
+      "service": "Network",
+      "page": "/cloud/network",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-operating-systems",
+      "service": "Operating Systems",
+      "page": "/cloud/operating-systems",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-server-management",
+      "service": "Server Management",
+      "page": "/cloud/server-management",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-monitoring",
+      "service": "Monitoring",
+      "page": "/cloud/monitoring",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-backups",
+      "service": "Server & Cloud Backups",
+      "page": "/cloud/backups",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-firewall",
+      "service": "Firewalls",
+      "page": "/cloud/firewall",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-security",
+      "service": "Cloud Security",
+      "page": "/cloud/security",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-ip-management",
+      "service": "IP Management",
+      "page": "/cloud/ip-management",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "cloud-managed-services",
+      "service": "Managed Services",
+      "page": "/cloud/managed-services",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "developers",
+      "service": "Developer Platform",
+      "page": "/developers",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "developers-deployment",
+      "service": "Application Deployment",
+      "page": "/developers/deployment",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "developers-environments",
+      "service": "Application Environments",
+      "page": "/developers/environments",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "developers-nodejs",
+      "service": "Node.js Hosting",
+      "page": "/developers/nodejs",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "developers-php",
+      "service": "PHP Hosting",
+      "page": "/developers/php",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "developers-python",
+      "service": "Python Hosting",
+      "page": "/developers/python",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "developers-laravel",
+      "service": "Laravel Hosting",
+      "page": "/developers/laravel",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "developers-docker",
+      "service": "Docker Hosting",
+      "page": "/developers/docker",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting",
+      "service": "Hosting",
+      "page": "/hosting",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-web-hosting",
+      "service": "Web Hosting",
+      "page": "/hosting/web-hosting",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-business",
+      "service": "Business Hosting",
+      "page": "/hosting/business",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-wordpress",
+      "service": "WordPress Hosting",
+      "page": "/hosting/wordpress",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-reseller",
+      "service": "Reseller Hosting",
+      "page": "/hosting/reseller",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-windows",
+      "service": "Windows Hosting",
+      "page": "/hosting/windows",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-email",
+      "service": "Email Hosting",
+      "page": "/hosting/email",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-developer",
+      "service": "Developer Hosting",
+      "page": "/hosting/developer",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-api",
+      "service": "API Hosting",
+      "page": "/hosting/api",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-ssl",
+      "service": "SSL Certificates",
+      "page": "/hosting/ssl",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no SSL issuance provider verified — issuance cannot be claimed",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-backups",
+      "service": "Backups",
+      "page": "/hosting/backups",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-migration",
+      "service": "Website Migration",
+      "page": "/hosting/migration",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-security",
+      "service": "Hosting Security",
+      "page": "/hosting/security",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "platforms",
+      "service": "Platforms",
+      "page": "/platforms",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "platforms-applications",
+      "service": "Application Hosting",
+      "page": "/platforms/applications",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "platforms-databases",
+      "service": "Managed Databases",
+      "page": "/platforms/databases",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "platforms-containers",
+      "service": "Containers & Docker",
+      "page": "/platforms/containers",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "platforms-paas",
+      "service": "PaaS & Deployment Workflows",
+      "page": "/platforms/paas",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "platform/developer surface — WHMCS may not sell this at all; confirm before proposing a product",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-vps",
+      "service": "VPS Hosting",
+      "page": "/hosting/vps",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-dedicated",
+      "service": "Dedicated Servers",
+      "page": "/hosting/dedicated",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-cpanel",
+      "service": "cPanel Hosting",
+      "page": "/hosting/cpanel",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains",
+      "service": "Domains",
+      "page": "/domains",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-search",
+      "service": "Domain Search",
+      "page": "/domains/search",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-bulk-search",
+      "service": "Bulk Domain Search",
+      "page": "/domains/bulk-search",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-transfer",
+      "service": "Domain Transfer",
+      "page": "/domains/transfer",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-whois",
+      "service": "WHOIS Lookup",
+      "page": "/domains/whois",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-extensions",
+      "service": "Domain Extensions",
+      "page": "/domains/extensions",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-appraisal",
+      "service": "Domain Appraisal",
+      "page": "/domains/appraisal",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-auctions",
+      "service": "Domain Auctions",
+      "page": "/domains/auctions",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-club",
+      "service": "Domain Club",
+      "page": "/domains/club",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-broker",
+      "service": "Domain Broker",
+      "page": "/domains/broker",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domains-domain-health",
+      "service": "Domain Health",
+      "page": "/domains/:domain/health",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no registrar configured in WHMCS — domain ordering stays disabled until one is and availability is verified",
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "hosting-catalogue",
+      "service": "Hosting catalogue (all plans / pricing)",
+      "page": "(target of every PHP \"View Plans\" CTA)",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "plesk-hosting",
+      "service": "Plesk Hosting",
+      "page": "(none — no SPA route)",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    },
+    {
+      "serviceKey": "domain-dns",
+      "service": "Domain DNS (PHP page)",
+      "page": "(none — no SPA route)",
+      "state": "BLOCKED",
+      "productId": null,
+      "productGroup": null,
+      "productName": null,
+      "cycles": [],
+      "missing": [
+        "no WHMCS discovery run — supply staging credentials, then run `npm run whmcs:discover`"
+      ]
+    }
+  ],
+  "artifactIntegrity": {
+    "reviewedSha256": null,
+    "currentSha256": null,
+    "consistent": false
+  },
+  "ownerApproved": false,
+  "verificationStatus": "Verified locally — not WHMCS-integrated in a live staging environment.",
+  "notVerified": [
+    "configurable options were not read (slice B2.3)",
+    "provisioning module capability was not exercised — a configured module is not a working server",
+    "no order, invoice, payment or provisioning action was issued",
+    "the installation was treated as staging on the owner's attestation, which this tool cannot check",
+    "an owner approval was recorded — this tool has no code path that records one, so the pack is a request",
+    "nothing was bound, priced or made orderable by this pack"
+  ]
+}
