@@ -16,7 +16,7 @@ function renderExperience() {
 }
 
 describe('Homepage 3D Experience', () => {
-  it('renders a titled section with four 3D layers and four accessible controls', () => {
+  it('renders the four 3D layers as the only accessible controls', () => {
     const { container } = renderExperience();
 
     const section = container.querySelector('section.hg-exp3d');
@@ -24,12 +24,18 @@ describe('Homepage 3D Experience', () => {
     expect(section?.getAttribute('id')).toBe('experience-3d');
     expect(screen.getByRole('heading', { level: 2, name: /Explore the platform in three dimensions/ })).toBeTruthy();
     expect(container.querySelectorAll('.hg-exp3d__plane')).toHaveLength(4);
-    expect(container.querySelectorAll('.hg-exp3d__control')).toHaveLength(4);
+    expect(container.querySelectorAll('.hg-exp3d__control')).toHaveLength(0);
 
     const group = screen.getByRole('group', { name: /Choose a platform layer/ });
     const buttons = within(group).getAllByRole('button');
     expect(buttons.map((button) => button.getAttribute('aria-pressed'))).toEqual(['true', 'false', 'false', 'false']);
-    buttons.forEach((button) => expect(button.getAttribute('aria-controls')).toBe('hg-exp3d-detail'));
+    buttons.forEach((button) => {
+      expect(button.classList.contains('hg-exp3d__plane')).toBe(true);
+      expect(button.getAttribute('aria-controls')).toBe('hg-exp3d-detail');
+    });
+    ['Edge & DNS', 'Compute & Hosting', 'Cloud & Storage', 'Operations'].forEach((name) => {
+      expect(screen.getAllByText(name)).toHaveLength(1);
+    });
   });
 
   it('switches the live detail and destination when a layer is chosen', () => {
@@ -37,12 +43,12 @@ describe('Homepage 3D Experience', () => {
 
     const detail = container.querySelector('#hg-exp3d-detail')!;
     expect(detail.getAttribute('aria-live')).toBe('polite');
-    expect(within(detail as HTMLElement).getByRole('heading', { name: 'Edge & DNS' })).toBeTruthy();
+    expect(within(detail as HTMLElement).getByText('Layer 01 · Details')).toBeTruthy();
     expect(within(detail as HTMLElement).getByRole('link').getAttribute('href')).toBe('/domains');
 
     fireEvent.click(screen.getByRole('button', { name: /Cloud & Storage/ }));
 
-    expect(within(detail as HTMLElement).getByRole('heading', { name: 'Cloud & Storage' })).toBeTruthy();
+    expect(within(detail as HTMLElement).getByText('Layer 03 · Details')).toBeTruthy();
     expect(within(detail as HTMLElement).getByRole('link').getAttribute('href')).toBe('/cloud');
     expect(screen.getByRole('button', { name: /Cloud & Storage/ }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('button', { name: /Edge & DNS/ }).getAttribute('aria-pressed')).toBe('false');

@@ -12,6 +12,9 @@ import { ApproxAmount } from '../components/ApproxAmount';
 import { BASE_CURRENCY } from '../currency/display-currency';
 import { BRAND, UTILITY, NAV_SECTIONS } from '../navigation/registry.generated';
 import Experience3D from '../components/marketing/Experience3D';
+import CreationShowcase from '../components/marketing/CreationShowcase';
+import AssistantShowcase from '../components/marketing/AssistantShowcase';
+import PromoVideoHero from '../components/marketing/PromoVideoHero';
 
 /**
  * CloudHost247 public homepage — Hostinger-style page grammar.
@@ -424,6 +427,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Promotional video sits after the existing search hero and before the capability strip. */}
+      <PromoVideoHero />
+
       {/* 2. Capability strip — real capabilities instead of press logos we do not have */}
       <section className="hg-proof ch-assurance" aria-label="Platform capabilities">
         <div className="hg-wrap hg-proof__grid">
@@ -439,6 +445,9 @@ export default function HomePage() {
 
       {/* 3. Tabbed pricing cards */}
       <PricingSection />
+
+      {/* Illustrative website concepts follow the plans, without inventing customer stories. */}
+      <CreationShowcase />
 
       {/* 3b. Interactive 3D Experience — layered CSS 3D stack with keyboard controls */}
       <Experience3D />
@@ -534,6 +543,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <AssistantShowcase />
 
       {/* 7. Use cases — Hostinger has a customer gallery; we show real starting points instead
              of inventing testimonials. */}

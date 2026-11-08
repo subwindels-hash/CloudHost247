@@ -958,7 +958,8 @@
 .hg-footer__copyright { margin: 0; font-size: 0.75rem; color: #8793a0; }
 .hg-footer__powered { margin: 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; color: #8793a0; }
 .hg-footer__locale { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 0.75rem; color: #8793a0; }
-.hg-footer__geo-credit { font-size: 0.75rem; color: #8793a0; }
+.hg-footer__locale-values { display: inline-flex; align-items: center; gap: 8px; }
+.hg-footer__geo-credit { margin: 0; font-size: 0.75rem; color: #8793a0; }
 .hg-footer__legal-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-left: auto; }
 .hg-footer__legal-links a { color: #aeb8c2; font-size: 0.75rem; text-decoration: none; }
 .hg-footer__legal-links a:hover { color: #e6c875; text-decoration: underline; }
@@ -1743,11 +1744,6 @@
   .hg-theme .hg-bar__top > .ch247-visitor-privacy { flex-wrap: wrap; justify-content: flex-start; gap: 3px 10px; padding-block: 4px; }
   .ch247-visitor-privacy__location { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; }
   .ch247-privacy-ticker { min-width: 120px; }
-}
-
-.hg-theme .hg-header .ch247-visitor-privacy .ch247-country__select { max-width: 115px; }
-@media (max-width: 500px) {
-  .hg-theme .hg-header .ch247-visitor-privacy .ch247-country__select { max-width: 90px; }
 }
 
 /* Brand, sharing and policy strip above the copyright row. */

@@ -62,15 +62,23 @@ describe('Footer: Amazon-style back-to-top strip', () => {
     expect(copyright?.compareDocumentPosition(powered) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it('places the GeoLite2 credit beside the country in the footer locale area', () => {
+    const { container } = renderFooter();
+    const values = container.querySelector('.hg-footer__locale-values');
+    const credit = container.querySelector('.hg-footer__geo-credit');
+    expect(values?.nextElementSibling).toBe(credit);
+    expect(credit?.textContent).toBe('This product includes GeoLite2 data created by WIL®.');
+    expect(container.querySelector('.hg-footer__brand-lines')?.contains(credit ?? null)).toBe(false);
+  });
+
   it('does not render the removed legal-links row in the footer bottom', () => {
     const { container } = renderFooter();
     const footer = container.querySelector('footer.ch247-footer');
     expect(footer?.querySelector('.hg-footer__legal-links')).toBeNull();
-    // The only bottom-row link is the GeoLite2 attribution, not a legal-links row.
     const bottom = container.querySelector('.hg-footer__bottom');
-    const links = bottom?.querySelectorAll('a');
-    expect(links).toHaveLength(1);
-    expect(links?.[0]?.getAttribute('href')).toBe('https://www.maxmind.com');
+    expect(bottom?.querySelectorAll('a')).toHaveLength(0);
+    expect(footer?.textContent).not.toContain('This product includes GeoLite2 data created by MaxMind');
+    expect(footer?.querySelector('a[href="https://www.maxmind.com"]')).toBeNull();
   });
 
   it('smooth-scrolls to the very top and moves focus to the header on click', () => {

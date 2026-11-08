@@ -26,18 +26,17 @@ describe('visitor privacy indicator', () => {
   });
 });
 
-it('shows the visitor’s selected country next to their IP', async () => {
+it('shows the detected country next to the IP without a country selector', async () => {
   const { LocaleProvider } = await import('../../src/i18n/LocaleProvider');
   const { CurrencyProvider } = await import('../../src/currency/CurrencyProvider');
   const { UNAVAILABLE_STATUS } = await import('../../src/currency/display-currency');
-  localStorage.setItem('ch247.country', 'NG');
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ ip: '8.8.8.8' }), { status: 200 }));
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => new Response(JSON.stringify(
+    String(input).includes('geo-country') ? { country: 'NG' } : { ip: '8.8.8.8' },
+  ), { status: 200 }));
   const { container } = render(<LocaleProvider initialLocale="en"><CurrencyProvider initialStatus={UNAVAILABLE_STATUS}><VisitorPrivacy /></CurrencyProvider></LocaleProvider>);
   await screen.findByText('IP: 8.8.8.8');
+  await screen.findByRole('status', { name: /Country or region: Nigeria/ });
   const location = container.querySelector('.ch247-visitor-privacy__location');
-  const country = location?.querySelector('select') as HTMLSelectElement;
-  expect(country?.value).toBe('NG');
   expect(location?.textContent).toContain('IP: 8.8.8.8');
-  expect(location?.querySelector('.ch247-country')).toBeTruthy();
-  localStorage.removeItem('ch247.country');
+  expect(location?.querySelector('.ch247-country select')).toBeNull();
 });

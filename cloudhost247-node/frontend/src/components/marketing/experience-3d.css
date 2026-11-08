@@ -10,13 +10,18 @@
 .hg-exp3d {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(165deg, #0d1116 0%, #141c25 58%, #101820 100%);
-  color: #eef1f4;
+  /* Layer soft reflected light over a fine, static brushed-silver grain. */
+  background-color: #c6c9c8;
+  background-image:
+    radial-gradient(ellipse at 24% 5%, rgba(255, 255, 255, .70), transparent 42%),
+    radial-gradient(ellipse at 88% 92%, rgba(255, 255, 255, .42), transparent 43%),
+    repeating-linear-gradient(100deg, rgba(255, 255, 255, .055) 0, rgba(255, 255, 255, .055) 1px, rgba(77, 85, 87, .025) 1px, rgba(77, 85, 87, .025) 3px),
+    linear-gradient(135deg, #d4d7d5 0%, #eef0ed 25%, #babfbe 53%, #e4e7e4 76%, #bfc4c3 100%);
+  color: #18211f;
 }
-.hg-exp3d .hg-eyebrow { color: #e6c875; }
-.hg-exp3d .hg-h2 { color: #fff; }
-.hg-exp3d .hg-lede { color: #aab4bf; }
-.hg-exp3d .hg-h3 { color: #fff; }
+.hg-exp3d .hg-eyebrow { color: #5c4a19; }
+.hg-exp3d .hg-h2 { color: #16201e; }
+.hg-exp3d .hg-lede { color: #36423f; }
 
 .hg-exp3d__layout {
   display: grid;
@@ -39,7 +44,7 @@
   inset: 8% 4% 12%;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(212, 175, 55, 0.22), rgba(212, 175, 55, 0.04) 62%, transparent 78%);
+  background: radial-gradient(closest-side, rgba(76, 91, 86, 0.25), rgba(76, 91, 86, 0.06) 62%, transparent 78%);
   filter: blur(18px);
   pointer-events: none;
 }
@@ -47,7 +52,6 @@
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
-  pointer-events: none;
 }
 .hg-exp3d__plane {
   position: absolute;
@@ -59,6 +63,10 @@
   align-items: center;
   gap: 16px;
   padding: 12px 22px;
+  color: #eef1f4;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   border: 1px solid rgba(212, 175, 55, 0.26);
   border-radius: 14px;
   background: linear-gradient(120deg, rgba(34, 45, 57, 0.97), rgba(17, 24, 32, 0.97));
@@ -66,6 +74,8 @@
   transform: translate3d(0, var(--plane-y), var(--plane-z));
   transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1), border-color 0.3s ease, box-shadow 0.3s ease;
 }
+.hg-exp3d__plane:hover { border-color: rgba(212, 175, 55, 0.7); }
+.hg-exp3d__plane:focus-visible { outline: 3px solid #e6c875; outline-offset: 3px; }
 .hg-exp3d__plane.is-active {
   border-color: #d4af37;
   box-shadow: 0 26px 62px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(212, 175, 55, 0.42);
@@ -105,45 +115,17 @@
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8492a0;
+  color: #35433f;
 }
 
-/* --- Controls + live detail ---------------------------------------------- */
+/* --- Live detail --------------------------------------------------------- */
 .hg-exp3d__panel { display: grid; gap: 20px; }
-.hg-exp3d__controls { display: grid; gap: 8px; }
-.hg-exp3d__control {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 48px;
-  padding: 10px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.035);
-  color: #d8dee5;
-  font: inherit;
-  font-size: 0.88rem;
-  font-weight: 650;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
-}
-.hg-exp3d__control:hover { border-color: rgba(212, 175, 55, 0.55); color: #fff; }
-.hg-exp3d__control.is-active {
-  border-color: #d4af37;
-  background: rgba(212, 175, 55, 0.13);
-  color: #fff;
-}
-.hg-exp3d__control:focus-visible { outline: 3px solid #d4af37; outline-offset: 2px; }
-.hg-exp3d__control-step { margin-left: auto; font-size: 0.7rem; color: #8492a0; }
-.hg-exp3d__control.is-active .hg-exp3d__control-step { color: #e6c875; }
-
 .hg-exp3d__detail {
   padding: 22px 24px;
-  border: 1px solid rgba(212, 175, 55, 0.26);
+  border: 1px solid #a0aaa5;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.045);
+  background: rgba(249, 250, 247, 0.92);
+  box-shadow: inset 0 1px 0 #fff, 0 14px 34px rgba(43, 54, 50, .12);
 }
 .hg-exp3d__detail-step {
   margin: 0 0 8px;
@@ -151,17 +133,16 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #e6c875;
+  color: #65521d;
 }
-.hg-exp3d__detail h3 { margin: 0 0 10px; font-size: 1.16rem; }
 .hg-exp3d__detail > p:not(.hg-exp3d__detail-step) {
   margin: 0 0 14px;
   font-size: 0.86rem;
   line-height: 1.65;
-  color: #b6c0ca;
+  color: #35423d;
 }
-.hg-exp3d__detail .hg-link { color: #e6c875; font-size: 0.86rem; font-weight: 700; }
-.hg-exp3d__detail .hg-link:hover { color: #fff; }
+.hg-exp3d__detail .hg-link { color: #1e563d; font-size: 0.86rem; font-weight: 700; }
+.hg-exp3d__detail .hg-link:hover { color: #102e22; }
 
 /* --- Responsive ---------------------------------------------------------- */
 @media (max-width: 1023px) {
@@ -174,7 +155,7 @@
 /* Hard off switches: below 1024px motion.js disables tilt, and reduced motion disables it at
    every width. In both cases the planes must become a normal stacked list rather than four
    absolutely-positioned cards sitting on top of each other. */
-@media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+@media (max-width: 1023px), (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
   .hg-exp3d__stage { min-height: 0; }
   .hg-exp3d__glow { display: none; }
   .hg-exp3d__stack { position: static; transform-style: flat; }

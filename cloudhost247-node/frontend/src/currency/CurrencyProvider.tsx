@@ -16,13 +16,9 @@ import { useLocale } from '../i18n/LocaleProvider';
 export { CURRENCY_STORAGE_KEY } from './display-currency';
 
 export type RatesState = 'loading' | 'ready' | 'unavailable';
-export const COUNTRY_STORAGE_KEY = 'ch247.country';
-export const COUNTRY_CODES: readonly string[] = all().map((country) => country.alpha2);
+const COUNTRY_CODES: readonly string[] = all().map((country) => country.alpha2);
 function validCountry(value: unknown): value is string {
   return typeof value === 'string' && COUNTRY_CODES.includes(value.toUpperCase());
-}
-function storedCountry(): string | null {
-  try { const country = localStorage.getItem(COUNTRY_STORAGE_KEY); return validCountry(country) ? country.toUpperCase() : null; } catch { return null; }
 }
 export function browserCountry(languages: readonly string[]): string | null {
   for (const language of languages) {
@@ -38,8 +34,7 @@ export interface CurrencyContextValue {
   readonly options: readonly string[];
   readonly ratesState: RatesState;
   readonly country: string | null;
-  readonly countrySource: 'selected' | 'detected' | 'unknown';
-  readonly setCountry: (country: string) => boolean;
+  readonly countrySource: 'detected' | 'browser' | 'unknown';
   readonly status: DisplayCurrencyStatus;
   /** Chooses a display currency. Returns false, and changes nothing, for a code the site does not offer. */
   readonly setCurrency: (code: string) => boolean;
@@ -275,10 +270,15 @@ export function CurrencyProvider({
     return isCurrencyCode(stored) ? stored : null;
   });
 
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(storedCountry);
+  // A browser region is an immediate, approximate fallback when IP detection is unavailable.
+  // It is not persisted: a verified IP hint takes precedence when available.
+  const [browserRegion] = useState<string | null>(() => {
+    if (typeof navigator === 'undefined') return null;
+    return browserCountry([...(navigator.languages ?? []), navigator.language].filter(Boolean));
+  });
   const [ipCountry, setIpCountry] = useState<string | null>(null);
+  const country = ipCountry ?? browserRegion;
   useEffect(() => {
-    if (selectedCountry) return undefined;
     let cancelled = false;
     let inFlight = false;
     const refresh = () => {
@@ -297,12 +297,11 @@ export function CurrencyProvider({
     window.addEventListener('online', refresh);
     document.addEventListener('visibilitychange', onVisible);
     return () => { cancelled = true; window.clearInterval(timer); window.removeEventListener('online', refresh); document.removeEventListener('visibilitychange', onVisible); };
-  }, [selectedCountry]);
+  }, []);
 
   useEffect(() => {
-    const country = selectedCountry ?? ipCountry;
     if (country) suggestCountryLocale(country);
-  }, [selectedCountry, ipCountry, suggestCountryLocale]);
+  }, [country, suggestCountryLocale]);
 
   useEffect(() => {
     if (initialStatus) return undefined;
@@ -347,7 +346,7 @@ export function CurrencyProvider({
     status,
     savedPreference,
     authenticatedPreference,
-    selectedCountry ?? ipCountry,
+    country,
     enabledCurrencies,
     BASE_CURRENCY
   );
@@ -363,19 +362,6 @@ export function CurrencyProvider({
     [status]
   );
 
-  const setCountry = useCallback((code: string) => {
-    if (!validCountry(code)) return false;
-    const next = code.toUpperCase();
-    try { localStorage.setItem(COUNTRY_STORAGE_KEY, next); } catch { /* applies for this page view */ }
-    setSelectedCountry(next);
-    // Choosing a country resets prior display defaults; later explicit language/currency choices
-    // remain independent and are respected until the visitor chooses another country.
-    try { localStorage.removeItem(CURRENCY_STORAGE_KEY); } catch { /* storage unavailable */ }
-    setRequested(null);
-    suggestCountryLocale(next, true);
-    return true;
-  }, [suggestCountryLocale]);
-
   const formatAmount = useCallback(
     (amount: number, sourceCurrency: string = BASE_CURRENCY) =>
       formatAmountInDisplayCurrency(amount, sourceCurrency, currency, status, locale.code),
@@ -383,8 +369,8 @@ export function CurrencyProvider({
   );
 
   const value = useMemo<CurrencyContextValue>(
-    () => ({ currency, options, ratesState, status, setCurrency, formatAmount, country: selectedCountry ?? ipCountry, countrySource: selectedCountry ? 'selected' : ipCountry ? 'detected' : 'unknown', setCountry }),
-    [currency, options, ratesState, status, setCurrency, formatAmount, selectedCountry, ipCountry, setCountry]
+    () => ({ currency, options, ratesState, status, setCurrency, formatAmount, country, countrySource: ipCountry ? 'detected' : browserRegion ? 'browser' : 'unknown' }),
+    [currency, options, ratesState, status, setCurrency, formatAmount, country, ipCountry, browserRegion]
   );
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
 }
@@ -393,7 +379,6 @@ const FALLBACK: CurrencyContextValue = {
   currency: BASE_CURRENCY,
   country: null,
   countrySource: 'unknown',
-  setCountry: () => false,
   options: [BASE_CURRENCY],
   ratesState: 'unavailable',
   status: UNAVAILABLE_STATUS,

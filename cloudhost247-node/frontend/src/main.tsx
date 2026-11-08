@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import AppErrorBoundary from './components/AppErrorBoundary';
 import { LocaleProvider } from './i18n/LocaleProvider';
 import { CurrencyProvider } from './currency/CurrencyProvider';
 // Load order matters and is deliberate: the application stylesheets come first, then the shared
@@ -38,12 +39,14 @@ if (!rootEl) {
 
 ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
-    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/,'') || '/'}>
-      <LocaleProvider>
-        <CurrencyProvider>
-          <App />
-        </CurrencyProvider>
-      </LocaleProvider>
-    </BrowserRouter>
+    <AppErrorBoundary>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/,'') || '/'}>
+        <LocaleProvider>
+          <CurrencyProvider>
+            <App />
+          </CurrencyProvider>
+        </LocaleProvider>
+      </BrowserRouter>
+    </AppErrorBoundary>
   </React.StrictMode>
 );

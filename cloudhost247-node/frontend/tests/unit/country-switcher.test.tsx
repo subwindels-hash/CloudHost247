@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CountrySwitcher from '../../src/components/CountrySwitcher';
 import { CurrencyProvider, useCurrency } from '../../src/currency/CurrencyProvider';
@@ -15,7 +15,7 @@ const rates = { base: 'USD', available: true, reason: null, asOf: '2026-10-12T06
   { code: 'EUR', rate: 0.9, observedAt: '2026-10-12T06:00:00Z' },
 ] };
 let detected: string | null = 'GB';
-function renderPicker() {
+function renderIndicator() {
   return render(<LocaleProvider><CurrencyProvider><CountrySwitcher /><Status /></CurrencyProvider></LocaleProvider>);
 }
 beforeEach(() => {
@@ -28,30 +28,43 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
-describe('country indicator', () => {
-  it('displays the real detected flag and UK abbreviation with its suggested currency', async () => {
-    renderPicker();
-    await waitFor(() => expect(document.querySelector('.ch247-country__flag')?.classList.contains('fi-gb')).toBe(true));
+describe('read-only country indicator', () => {
+  it('displays the detected flag and UK abbreviation with its suggested currency, without a dropdown', async () => {
+    const { container } = renderIndicator();
+    await waitFor(() => expect(container.querySelector('.ch247-country__flag')?.classList.contains('fi-gb')).toBe(true));
     await waitFor(() => expect(screen.getByText('en GBP')).toBeTruthy());
-    expect((screen.getByLabelText('Country or region') as HTMLSelectElement).value).toBe('GB');
+    expect(screen.getByRole('status', { name: /Country or region: United Kingdom.*IP address/ })).toBeTruthy();
+    expect(container.querySelector('.ch247-country select, .ch247-country button')).toBeNull();
   });
-  it('persists a manually chosen country and synchronizes language and available currency', async () => {
-    const view = renderPicker();
-    await waitFor(() => expect(document.querySelector('.ch247-country__flag')?.classList.contains('fi-gb')).toBe(true));
-    fireEvent.change(screen.getByLabelText('Country or region'), { target: { value: 'FR' } });
-    await waitFor(() => expect(document.querySelector('.ch247-country__flag')?.classList.contains('fi-fr')).toBe(true));
-    await waitFor(() => expect(screen.getByText('fr EUR')).toBeTruthy());
-    expect(localStorage.getItem('ch247.country')).toBe('FR');
-    view.unmount();
-    detected = 'US';
-    renderPicker();
-    await waitFor(() => expect(document.querySelector('.ch247-country__flag')?.classList.contains('fi-fr')).toBe(true));
-    await waitFor(() => expect(screen.getByText('fr EUR')).toBeTruthy());
+  it('ignores an old manually saved country and uses detection', async () => {
+    localStorage.setItem('ch247.country', 'FR');
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB']);
+    vi.spyOn(navigator, 'language', 'get').mockReturnValue('en-GB');
+    renderIndicator();
+    await waitFor(() => expect(screen.getByRole('status', { name: /United Kingdom.*IP address/ })).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('en GBP')).toBeTruthy());
   });
-  it('shows an honest selectable fallback if detection fails', async () => {
+  it('uses the browser region immediately when IP detection is unavailable', async () => {
     detected = null;
-    renderPicker();
-    await screen.findByText(/Country unavailable/);
-    expect((screen.getByLabelText('Country or region') as HTMLSelectElement).value).toBe('');
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['fr-FR']);
+    vi.spyOn(navigator, 'language', 'get').mockReturnValue('fr-FR');
+    renderIndicator();
+    expect(screen.getByRole('status', { name: /France.*browser settings/ })).toBeTruthy();
+    await waitFor(() => expect(screen.getByText('fr EUR')).toBeTruthy());
+    expect(localStorage.getItem('ch247.country')).toBeNull();
+  });
+  it('prefers a verified IP country over the browser region', async () => {
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['fr-FR']);
+    vi.spyOn(navigator, 'language', 'get').mockReturnValue('fr-FR');
+    renderIndicator();
+    await waitFor(() => expect(screen.getByRole('status', { name: /United Kingdom.*IP address/ })).toBeTruthy());
+    await waitFor(() => expect(screen.getByText('en GBP')).toBeTruthy());
+  });
+  it('shows an honest fallback when neither signal has a country', async () => {
+    detected = null;
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en']);
+    vi.spyOn(navigator, 'language', 'get').mockReturnValue('en');
+    renderIndicator();
+    expect(screen.getByRole('status', { name: /Country or region: unavailable/ })).toBeTruthy();
   });
 });

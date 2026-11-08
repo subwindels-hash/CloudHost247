@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -88,6 +88,36 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
       await app.close();
     }
   );
+
+  it('does not cache the SPA shell or serve it in place of missing build chunks', async () => {
+    const app = buildApp(env, { serveFrontend: true, publicDir });
+    const shell = await app.inject({ method: 'GET', url: '/' });
+    expect(shell.headers['cache-control']).toContain('no-store');
+    const missing = await app.inject({ method: 'GET', url: '/assets/old-build.js' });
+    expect(missing.statusCode).toBe(404);
+    expect(missing.headers['cache-control']).toContain('no-store');
+    expect(missing.body).not.toContain('SPA shell');
+    await app.close();
+  });
+
+  it('serves new hashed build assets added after startup without serving a shell or escaping the assets directory', async () => {
+    mkdirSync(path.join(publicDir, 'assets'));
+    const app = buildApp(env, { serveFrontend: true, publicDir });
+    await app.ready();
+    writeFileSync(path.join(publicDir, 'assets', 'index-new-build.js'), 'console.log("new build");');
+
+    const asset = await app.inject({ method: 'GET', url: '/assets/index-new-build.js' });
+    expect(asset.statusCode).toBe(200);
+    expect(asset.headers['content-type']).toMatch(/javascript/);
+    expect(asset.body).toContain('new build');
+    const missing = await app.inject({ method: 'GET', url: '/assets/not-present.js' });
+    expect(missing.statusCode).toBe(404);
+    expect(missing.body).not.toContain('SPA shell');
+    const traversal = await app.inject({ method: 'GET', url: '/assets/%2e%2e%2fapp.js' });
+    expect(traversal.statusCode).toBe(404);
+    expect(traversal.body).not.toContain('built asset');
+    await app.close();
+  });
 
   it('serves real static assets from public/', async () => {
     const app = buildApp(env, { serveFrontend: true, publicDir });
