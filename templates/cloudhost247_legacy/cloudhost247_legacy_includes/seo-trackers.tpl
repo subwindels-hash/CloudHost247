@@ -1,51 +1,36 @@
-{if !empty($cloudhost247.settings.google_verification_code)}
-	<meta name="google-site-verification" content="{$cloudhost247.settings.google_verification_code}" />
+{* LEGACY RETIREMENT: facebook_pixel_code remains stored for explicit admin import only.
+   The shared consent-gated Meta owner lives in marketing.tpl. Never restore this direct
+   Pixel/noscript initializer: it bypassed consent and duplicated the canonical tracker.
+   Other legacy analytics below retain their existing behaviour; this change does not claim
+   to make Google/Baidu/GTM consent-compliant. Review those providers separately before rollout. *}
+{if isset($cloudhost247.settings.google_analytics_code) && $cloudhost247.settings.google_analytics_code}
+<script async src="https://www.googletagmanager.com/gtag/js?id={$cloudhost247.settings.google_analytics_code|escape:'html'}"></script>
+{literal}
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{/literal}{$cloudhost247.settings.google_analytics_code|escape:"javascript"}{literal}');
+</script>
+{/literal}
 {/if}
-{if !empty($cloudhost247.settings.yandex_verification_code)}
-	<meta name="yandex-verification" content="{$cloudhost247.settings.yandex_verification_code}" />
+{if isset($cloudhost247.settings.baidu_analytics_code) && $cloudhost247.settings.baidu_analytics_code}
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?{$cloudhost247.settings.baidu_analytics_code|escape:'javascript'}";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
 {/if}
-{if !empty($cloudhost247.settings.baidu_pixel_code)}
-	<meta name="baidu-site-verification" content="{$cloudhost247.settings.baidu_pixel_code}" />
-{/if}
-{if !empty($cloudhost247.settings.bing_verification_code)}
-	<meta name="msvalidate.01" content="{$cloudhost247.settings.bing_verification_code}" />
-{/if}
-{if !empty($cloudhost247.settings.google_analytics_code)}
-	{literal}
-		<!-- Global site tag (gtag.js) - Google Analytics -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id={/literal}{$cloudhost247.settings.google_analytics_code}{literal}"></script>
-		<script>
-		  window.dataLayer = window.dataLayer || [];
-		  function gtag(){dataLayer.push(arguments);}
-		  gtag('js', new Date());
-		  gtag('config', '{/literal}{$cloudhost247.settings.google_analytics_code}{literal}');
-		</script>				
-	{/literal}
-{/if}
-{if !empty($cloudhost247.settings.facebook_pixel_code)}
-	{literal}
-	<!-- Facebook Pixel Code -->
-	<script>
-	 !function(f,b,e,v,n,t,s)
-	 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-	 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-	 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-	 n.queue=[];t=b.createElement(e);t.async=!0;
-	 t.src=v;s=b.getElementsByTagName(e)[0];
-	 s.parentNode.insertBefore(t,s)}(window, document,'script',
-	 'https://connect.facebook.net/en_US/fbevents.js');
-	 fbq('init', '{/literal}{$cloudhost247.settings.facebook_pixel_code}{literal}');
-	 fbq('track', 'PageView');
-	</script>
-	<noscript><img height="1" width="1" style="display:none"
-	 src="https://www.facebook.com/tr?id={/literal}{$cloudhost247.settings.facebook_pixel_code}{literal}&ev=PageView&noscript=1"
-	/></noscript>
-	<!-- End Facebook Pixel Code -->
-	{/literal}
-{/if}
-{if !empty($cloudhost247.settings.google_tag_manager_code)}
-	<!-- Google Tag Manager (noscript) -->
-	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={$cloudhost247.settings.google_tag_manager_code}"
-	height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-	<!-- End Google Tag Manager (noscript) -->
+{if isset($cloudhost247.settings.google_tag_manager_code) && $cloudhost247.settings.google_tag_manager_code}
+{literal}
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','{/literal}{$cloudhost247.settings.google_tag_manager_code|escape:"javascript"}{literal}');</script>
+{/literal}
 {/if}

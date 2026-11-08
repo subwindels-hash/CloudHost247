@@ -170,6 +170,7 @@ const RGModuleHealthPage = lazy(() => import('./pages/revenue-guardian/SettingsP
 const CloudflareServicesPage = lazy(() => import('./pages/cloudflare/CloudflareServicesPage'));
 const CloudflareServicePage = lazy(() => import('./pages/cloudflare/CloudflareServicePage'));
 const AdminCloudflarePage = lazy(() => import('./pages/AdminCloudflarePage'));
+const AdminMarketingIntegrationsPage = lazy(() => import('./pages/AdminMarketingIntegrationsPage'));
 const AdminDomainServicesPage = lazy(() => import('./pages/AdminDomainServicesPage'));
 const DomainSearchPage = lazy(() => import('./pages/domains/SearchPage'));
 const DomainTransferPage = lazy(() => import('./pages/domains/TransferPage'));
@@ -443,6 +444,8 @@ export default function App() {
             <Route path="/admin/cloudflare" element={<AdminCloudflarePage />} />
             <Route path="/admin/cloudflare/:tab" element={<AdminCloudflarePage />} />
             <Route path="/admin/integrations/cloudflare" element={<AdminCloudflarePage />} />
+            <Route path="/admin/marketing-integrations" element={<AdminMarketingIntegrationsPage />} />
+            <Route path="/admin/marketing-integrations/:provider" element={<AdminMarketingIntegrationsPage />} />
             {/* Domain Services control room: providers + credentials + real Test Connection,
                 extension catalogue + trending, auctions, transfers, Domain Club plans. */}
             <Route path="/admin/domain-services" element={<AdminDomainServicesPage />} />

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { trackMarketing } from '../lib/marketing';
 import { initiatePayment, type PaymentAttempt } from '../lib/billing-api';
 
 interface PaymentModalProps {
@@ -35,6 +36,7 @@ export default function PaymentModal({
     try {
       const payment = await initiatePayment(invoiceId, gateway);
       setActivePayment(payment);
+      trackMarketing('AddPaymentInfo', { value: Number(totalAmount), currency, content_name: invoiceNumber }, `payment-info:${payment.id}`);
       if (gateway === 'sandbox' && onPaymentSuccess) {
         // In sandbox mode, notify parent component
         onPaymentSuccess();

@@ -1,3 +1,4 @@
+import { attachOrderConsent, type CheckoutConsentContext } from '../marketing/consent-service';
 import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../db/types';
 import {
@@ -80,7 +81,15 @@ async function priceServiceItems(
     const priced: PricedServiceLine = { ...resolved, id: row.id };
     lines.push(priced);
   }
-  return { lines, dtos: lines.map(toCartServiceLineDTO) };
+  const dtos = lines.map(line => {
+    const metadata = line.orderMetadata ?? {};
+    const contentId = metadata.kind === 'platform_plan' && typeof metadata.serviceKind === 'string' && typeof metadata.planCode === 'string'
+      ? `platform:${metadata.serviceKind}:${metadata.planCode}`
+      : metadata.kind === 'domain_registration' && typeof metadata.registrationId === 'string'
+        ? `domain:${metadata.registrationId}` : null;
+    return { ...toCartServiceLineDTO(line), contentId };
+  });
+  return { lines, dtos };
 }
 
 async function computeCartSummary(
@@ -342,7 +351,7 @@ export async function findServiceLine(
  * of checkout, and a change between "view cart" and "place order" changes the order (never silently
  * charges the stale number the customer saw).
  */
-export async function checkoutCart(pool: Queryable, userId: string, genId: () => string): Promise<OrderDetailDTO> {
+export async function checkoutCart(pool: Queryable, userId: string, genId: () => string, marketingContext?: CheckoutConsentContext | null): Promise<OrderDetailDTO> {
   const orderId = genId();
 
   const { order, items, invoice } = await withTransaction(pool, async (tx) => {
@@ -439,6 +448,7 @@ export async function checkoutCart(pool: Queryable, userId: string, genId: () =>
     });
 
     const issuedInvoice = await issueInvoiceForOrder(tx, result.order, genId);
+    await attachOrderConsent(tx, result.order.id, marketingContext);
 
     // Point each checked-out domain draft at the order that now pays for it. The guarded update
     // refuses a draft another order already claimed, which makes a concurrent double-checkout of

@@ -1,3 +1,4 @@
+import { trackMarketing } from '../../lib/marketing';
 import ReturnToLogin from '../../components/ReturnToLogin';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -77,6 +78,7 @@ export default function BulkSearchPage() {
     try {
       const response = await bulkSearchDomains(content, 'text');
       setResult(response);
+      if (response.status === 'completed') trackMarketing('Search', { content_category: 'domain_bulk_search', num_items: Math.max(1,response.results.length) }, `search:${response.searchId}`);
       setSelected(
         new Set(response.results.filter((row) => row.availabilityStatus === 'available').map((row) => row.domainName))
       );

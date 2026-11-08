@@ -2,11 +2,13 @@ import { FormEvent, useId, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AuthFrame from '../components/AuthFrame';
 import { apiFetch } from '../lib/api';
+import { trackMarketing } from '../lib/marketing';
 import { setSession, type StoredUser } from '../lib/auth';
 import { usePageMeta } from '../lib/usePageMeta';
 import { authLink, safeReturnTo } from '../lib/return-to';
 
 interface AuthResponse {
+  marketingEvent?: { eventName: string; eventId: string; customData: Record<string, unknown> } | null;
   user: StoredUser;
   token: string;
   emailVerification: { queued: boolean };
@@ -140,6 +142,7 @@ export default function RegisterPage() {
         }),
       });
       setSession(res.token, res.user);
+      if (res.marketingEvent) trackMarketing(res.marketingEvent.eventName, res.marketingEvent.customData, res.marketingEvent.eventId);
       setMessage({
         kind: 'ok',
         text: res.emailVerification.queued

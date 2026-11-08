@@ -11,6 +11,7 @@
     </section>
 
     {include file="cloudhost247/includes/site-footer.tpl"}
+{include file="$template/includes/marketing.tpl"}
 
     <div id="fullpage-overlay" class="w-hidden">
         <div class="outer-wrapper">

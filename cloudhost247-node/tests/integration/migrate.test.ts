@@ -124,6 +124,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     // Customer username, permanent nine-digit Customer ID, the rotating Security PIN, the
     // six-digit email-verification gate in front of it, and account recovery (0085).
     '0085_customer_username_pin_and_verification.sql',
+  '0086_create_marketing_integrations.sql',
   ];
 
   it('finds the committed migration files in order', () => {

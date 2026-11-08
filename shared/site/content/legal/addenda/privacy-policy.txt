@@ -1,0 +1,11 @@
+Marketing Measurement Addendum
+
+Effective upon publication of the CloudHost247 platform implementation, CloudHost247 uses a consent-aware Meta Pixel and, where configured, Meta Conversions API to measure website journeys and confirmed purchases.
+
+- Optional marketing measurement is off until you allow it in Cookie Settings. You may reject optional categories or withdraw consent later; withdrawal stops future browser and server marketing events for that choice.
+- Events may include the page path, product or plan identifiers, cart/checkout step, search result count, registration or contact completion, and a stable event identifier used to avoid double counting.
+- Purchase events are created only after a payment is confirmed and the related invoice/order is paid. Value and currency are taken from the payment record.
+- The default server payload contains a SHA-256 hash of an opaque consent-session identifier and, where available, Meta _fbp/_fbc values. It does not include your name, email address, phone number, password or payment-card data. Any future advanced-matching change requires separate review and consent.
+- Meta processes the data under its own terms and privacy policy. Marketing consent history is retained for up to 180 days, event activity for up to 90 days, and terminal delivery diagnostics for up to 30 days.
+
+Questions or rights requests can be sent to privacy@cloudhost247.com.

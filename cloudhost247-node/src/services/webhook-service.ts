@@ -1,3 +1,4 @@
+import { recordVerifiedPaymentBestEffort } from '../marketing/conversion-service';
 import { createHash, randomUUID } from 'node:crypto';
 import type { Env } from '../config/env';
 import type { Queryable } from '../db/types';
@@ -216,6 +217,9 @@ export async function processIncomingWebhook(
       await import('./provisioning-service').then(({ provisionPaidOrder }) =>
         provisionPaidOrder(tx, order, idGenerator)
       );
+
+      // Consent-gated marketing outbox; no effect on payment verification or billing semantics.
+      await recordVerifiedPaymentBestEffort(tx, payment.id);
 
       // 5. Audit log
       const auditSql = `

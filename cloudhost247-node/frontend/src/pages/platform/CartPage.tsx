@@ -5,6 +5,7 @@ import { getToken } from '../../lib/auth';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../../components/CatalogStateBanner';
 import { Feedback, useAction } from '../../components/platform/ui';
+import { trackMarketing } from '../../lib/marketing';
 import { ApproxAmount } from '../../components/ApproxAmount';
 import { fetchPublishedPlans, money, type CartSummary, type OrderSummary } from '../../lib/platform-api';
 
@@ -78,6 +79,11 @@ export default function CartPage() {
           method: 'POST', body: JSON.stringify({ serviceKind: 'platform_plan', serviceRef: selected.id }),
         });
         setCart(result.cart);
+        const line = result.cart.serviceItems.find(item => item.serviceRef === selected.id);
+        if (line) {
+          const contentId = line.contentId ?? `platform:${serviceKind}:${selected.code}`;
+          trackMarketing('AddToCart', { content_ids: [contentId], contents: [{ id: contentId, quantity: line.quantity }], content_name: selected.name, content_type: 'product', ...(line.lineTotalAmount && line.currency ? { value: Number(line.lineTotalAmount), currency: line.currency } : {}) }, `cart:${line.id}:${line.quantity}`);
+        }
         return `${selected.name} was added to your cart.`;
       }
       if (!product || !plan || !period) throw new Error('The plan link is incomplete. Please choose a plan again from the product catalogue.');
@@ -85,6 +91,8 @@ export default function CartPage() {
         method: 'POST', body: JSON.stringify({ productSlug: product, planSlug: plan, billingPeriod: period }),
       });
       setCart(result.cart);
+      const line = result.cart.items.find(item => item.productSlug === product && item.planSlug === plan);
+      if (line) trackMarketing('AddToCart', { content_ids: [line.contentId], contents: [{ id: line.contentId, quantity: line.quantity }], content_name: line.planName, content_type: 'product', ...(line.lineTotalAmount && line.currency ? { value: Number(line.lineTotalAmount), currency: line.currency } : {}) }, `cart:${line.id}:${line.quantity}`);
       return 'The selected plan was added to your cart.';
     });
   }, [cart, loadError, loading, location.hash, location.pathname, location.search, navigate, runAction, token]);
@@ -106,10 +114,18 @@ export default function CartPage() {
   }
 
   async function checkout() {
+    if (!cart) return;
+    // Capture the server-resolved cart content IDs before checkout clears the cart. The order
+    // total/currency below still come from the authoritative checkout response.
+    const contents = [
+      ...cart.items.map(item => ({ id: item.contentId, quantity: item.quantity })),
+      ...cart.serviceItems.flatMap(item => item.contentId ? [{ id: item.contentId, quantity: item.quantity }] : []),
+    ];
     await action.run(async () => {
       try {
         const response = await apiFetch<{ order: OrderSummary }>('/api/v1/orders', { method: 'POST', body: JSON.stringify({}) });
         setOrder(response.order);
+        trackMarketing('InitiateCheckout', { value: Number(response.order.totalAmount), currency: response.order.currency, content_ids: contents.map(item => item.id), contents, num_items: contents.reduce((n,item) => n + item.quantity, 0) }, `checkout:${response.order.id}`);
         load();
       } catch (err) {
         if (err instanceof ApiRequestError && err.status === 401) {

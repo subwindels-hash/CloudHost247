@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { fetchInvoiceDetail, type InvoiceDetail } from '../lib/billing-api';
 import StatusBadge from '../components/StatusBadge';
 import PaymentModal from '../components/PaymentModal';
+import { trackVerifiedPurchase } from '../lib/marketing';
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,10 @@ export default function InvoiceDetailPage() {
   useEffect(() => {
     loadInvoice();
   }, [id]);
+
+  useEffect(() => {
+    if (invoice?.status === 'paid' && invoice.payments.some(p => p.status === 'successful')) void trackVerifiedPurchase(invoice.id);
+  }, [invoice?.id, invoice?.status, invoice?.payments]);
 
   if (loading) {
     return (

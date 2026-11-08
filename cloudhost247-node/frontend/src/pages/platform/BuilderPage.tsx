@@ -1,3 +1,4 @@
+import { trackMarketing } from '../../lib/marketing';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiFetch } from '../../lib/api';
@@ -9,6 +10,7 @@ import {
   money,
   type PageRow,
   type PlatformPlan,
+  type CartSummary,
   type SectionDefinition,
   type SiteRow,
   type SiteTemplate,
@@ -197,10 +199,15 @@ function SiteList({ token, navigate }: { token: string | null; navigate: ReturnT
                   className="ch247-button"
                   onClick={() =>
                     void action.run(async () => {
-                      await apiFetch('/api/v1/cart/service-items', {
+                      const result = await apiFetch<{ cart: CartSummary }>('/api/v1/cart/service-items', {
                         method: 'POST',
                         body: JSON.stringify({ serviceKind: 'platform_plan', serviceRef: plan.id, quantity: 1 }),
                       });
+                      const line = result.cart.serviceItems.find(item => item.serviceRef === plan.id);
+                      if (line) {
+                        const contentId = line.contentId ?? `platform:website_builder:${plan.code}`;
+                        trackMarketing('AddToCart', { content_ids: [contentId], contents: [{ id: contentId, quantity: line.quantity }], content_name: plan.name, content_type: 'product', value: Number(plan.price_amount) * line.quantity, currency: plan.currency }, `cart:${line.id}:${line.quantity}`);
+                      }
                       return `${plan.name} was added to your cart.`;
                     })
                   }

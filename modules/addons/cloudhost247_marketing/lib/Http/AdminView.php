@@ -67,6 +67,7 @@ final class AdminView
             'import' => array('Import', 'import'),
             'suppressions' => array('Suppression List', 'suppressions'),
             'settings' => array('Delivery Settings', 'settings'),
+            'meta-pixel' => array('Marketing Integrations', 'meta-pixel'),
         );
         $aliases = array(
             'campaign' => 'campaigns',
@@ -81,7 +82,8 @@ final class AdminView
         }
         echo '</ul><div style="margin-top:14px;">';
 
-        if ($data['view'] === 'settings') { $this->renderSettings($data); }
+        if ($data['view'] === 'meta-pixel') { $this->renderMetaPixelBridge($data); }
+        elseif ($data['view'] === 'settings') { $this->renderSettings($data); }
         elseif ($data['view'] === 'subscribers') { $this->renderSubscribers($data); }
         elseif ($data['view'] === 'subscriber') { $this->renderSubscriberDetail($data); }
         elseif ($data['view'] === 'lists') { $this->renderLists($data); }
@@ -121,6 +123,26 @@ final class AdminView
             . 'Nothing on this page reads or writes data.</div>';
         echo '<p class="text-muted">The session order is tracked in <code>docs/independent-rebuild/EMAIL-MARKETING.md</code>; '
             . 'the menu entry exists so the planned sections stay visible while they are built.</p>';
+    }
+
+    /** Legacy WHMCS bridge. No secret fields, no second initializer, no cross-database write. */
+    private function renderMetaPixelBridge(array $data)
+    {
+        $bridge = isset($data['metaPixel']) ? $data['metaPixel'] : array('legacyId' => '', 'platform' => '', 'consoleUrl' => '');
+        echo '<h3>Marketing Integrations → Meta Pixel</h3>';
+        echo '<div class="alert alert-info">Meta Pixel and Conversions API are managed centrally in the CloudHost247 platform. This WHMCS page is a read-only bridge; it does not install a second Pixel or share access tokens.</div>';
+        echo '<table class="table table-condensed" style="max-width:820px;">';
+        echo '<tr><th style="width:220px;">Canonical console</th><td>' . $this->e($bridge['canonical']) . '</td></tr>';
+        echo '<tr><th>Legacy WHMCS Pixel ID</th><td><code>' . ($bridge['legacyId'] !== '' ? $this->e($bridge['legacyId']) : 'Not configured') . '</code></td></tr>';
+        echo '<tr><th>Legacy setting</th><td><code>facebook_pixel_code</code> in the theme settings store. Retained for explicit import; the shared theme engine no longer executes it.</td></tr>';
+        echo '</table>';
+        if ($bridge['platform'] !== '') {
+            echo '<p><a class="btn btn-primary" href="' . $this->e($bridge['consoleUrl']) . '">Open Meta Pixel console</a></p>';
+            echo '<p class="text-muted">In the console, use “Import legacy WHMCS Pixel”, paste the identifier above, review the domain, then save. Import leaves tracking disabled until an administrator explicitly enables it.</p>';
+        } else {
+            echo '<div class="alert alert-warning">Configure the theme’s <code>platform_base_path</code> to the verified same-origin Node mount (for example <code>/platform</code>) before using the bridge. Tracking fails closed until then.</div>';
+        }
+        echo '<p class="text-muted">Browser events require visitor marketing consent. Server-side Purchase events are emitted only after authoritative payment confirmation. Test mode and delivery activity are visible in the canonical console.</p>';
     }
 
     private function renderDashboard(array $data)

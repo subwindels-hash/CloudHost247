@@ -31,3 +31,6 @@
  </div></div>
 </footer>
 {/if}
+
+{* Cookie choice access is available on every page, including after dismissal. *}
+<div class="ch-wrap"><button type="button" class="ch247-cookie-settings" data-cookie-settings>Cookie settings</button></div>

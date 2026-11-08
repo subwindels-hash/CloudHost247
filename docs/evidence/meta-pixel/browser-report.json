@@ -1,0 +1,332 @@
+{
+  "capturedAt": "2026-11-08T19:14:37.720Z",
+  "baseUrl": "http://localhost:3000",
+  "pixelId": "123456789012345",
+  "metaRequests": [
+    {
+      "url": "https://connect.facebook.net/en_US/fbevents.js",
+      "method": "GET",
+      "at": "2026-11-08T19:14:40.282Z"
+    },
+    {
+      "url": "https://connect.facebook.net/en_US/fbevents.js",
+      "method": "GET",
+      "at": "2026-11-08T19:14:41.644Z"
+    },
+    {
+      "url": "https://connect.facebook.net/en_US/fbevents.js",
+      "method": "GET",
+      "at": "2026-11-08T19:14:49.006Z"
+    },
+    {
+      "url": "https://connect.facebook.net/en_US/fbevents.js",
+      "method": "GET",
+      "at": "2026-11-08T19:14:49.437Z"
+    }
+  ],
+  "checks": [
+    {
+      "name": "no Meta request before consent",
+      "ok": true,
+      "detail": {
+        "count": 0
+      }
+    },
+    {
+      "name": "no Pixel SDK element before consent",
+      "ok": true
+    },
+    {
+      "name": "reject optional keeps Meta off",
+      "ok": true,
+      "detail": {
+        "count": 0
+      }
+    },
+    {
+      "name": "accept all initializes the configured Pixel",
+      "ok": true,
+      "detail": [
+        [
+          "set",
+          "autoConfig",
+          false,
+          "123456789012345"
+        ],
+        [
+          "consent",
+          "grant"
+        ],
+        [
+          "init",
+          "123456789012345"
+        ],
+        [
+          "consent",
+          "grant"
+        ],
+        [
+          "trackSingle",
+          "123456789012345",
+          "PageView",
+          {},
+          {
+            "eventID": "page:2:_"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "accept all dispatches PageView via trackSingle",
+      "ok": true,
+      "detail": [
+        [
+          "set",
+          "autoConfig",
+          false,
+          "123456789012345"
+        ],
+        [
+          "consent",
+          "grant"
+        ],
+        [
+          "init",
+          "123456789012345"
+        ],
+        [
+          "consent",
+          "grant"
+        ],
+        [
+          "trackSingle",
+          "123456789012345",
+          "PageView",
+          {},
+          {
+            "eventID": "page:2:_"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "Meta SDK request was attempted only after consent",
+      "ok": true,
+      "detail": [
+        {
+          "url": "https://connect.facebook.net/en_US/fbevents.js",
+          "method": "GET",
+          "at": "2026-11-08T19:14:40.282Z"
+        },
+        {
+          "url": "https://connect.facebook.net/en_US/fbevents.js",
+          "method": "GET",
+          "at": "2026-11-08T19:14:41.644Z"
+        },
+        {
+          "url": "https://connect.facebook.net/en_US/fbevents.js",
+          "method": "GET",
+          "at": "2026-11-08T19:14:49.006Z"
+        },
+        {
+          "url": "https://connect.facebook.net/en_US/fbevents.js",
+          "method": "GET",
+          "at": "2026-11-08T19:14:49.437Z"
+        }
+      ]
+    },
+    {
+      "name": "product page dispatches ViewContent after consent",
+      "ok": true,
+      "detail": [
+        [
+          "set",
+          "autoConfig",
+          false,
+          "123456789012345"
+        ],
+        [
+          "consent",
+          "grant"
+        ],
+        [
+          "init",
+          "123456789012345"
+        ],
+        [
+          "consent",
+          "grant"
+        ],
+        [
+          "trackSingle",
+          "123456789012345",
+          "PageView",
+          {},
+          {
+            "eventID": "page:2:_service-plans_catalog_web-hosting"
+          }
+        ],
+        [
+          "consent",
+          "grant"
+        ],
+        [
+          "trackSingle",
+          "123456789012345",
+          "ViewContent",
+          {
+            "content_ids": [
+              "web-hosting"
+            ],
+            "content_type": "product_group",
+            "content_name": "Web Hosting",
+            "content_category": "hosting"
+          },
+          {
+            "eventID": "view:web-hosting"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "withdrawal reloads without a new Meta SDK request",
+      "ok": true
+    },
+    {
+      "name": "withdrawal clears Meta browser cookies",
+      "ok": true,
+      "detail": [
+        "ch247_marketing_consent"
+      ]
+    },
+    {
+      "name": "admin console renders",
+      "ok": true
+    },
+    {
+      "name": "admin console explains API-accepted is not Events Manager receipt",
+      "ok": true
+    },
+    {
+      "name": "verified purchase fires exactly one browser Purchase",
+      "ok": true,
+      "detail": [
+        [
+          "trackSingle",
+          "123456789012345",
+          "Purchase",
+          {
+            "content_ids": [
+              "catalog:web-hosting:starter"
+            ],
+            "contents": [
+              {
+                "id": "catalog:web-hosting:starter",
+                "quantity": 1
+              }
+            ],
+            "content_type": "product",
+            "currency": "USD",
+            "value": 2.99,
+            "num_items": 1
+          },
+          {
+            "eventID": "purchase:5583d46a-dae8-4e72-9dc4-0576a947ad47"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "browser Purchase uses the verified payment event ID",
+      "ok": true,
+      "detail": {
+        "eventID": "purchase:5583d46a-dae8-4e72-9dc4-0576a947ad47"
+      }
+    },
+    {
+      "name": "browser Purchase carries canonical catalog content IDs",
+      "ok": true,
+      "detail": {
+        "content_ids": [
+          "catalog:web-hosting:starter"
+        ],
+        "contents": [
+          {
+            "id": "catalog:web-hosting:starter",
+            "quantity": 1
+          }
+        ],
+        "content_type": "product",
+        "currency": "USD",
+        "value": 2.99,
+        "num_items": 1
+      }
+    },
+    {
+      "name": "browser Purchase value/currency come from the paid order",
+      "ok": true,
+      "detail": {
+        "receipt": {
+          "content_ids": [
+            "catalog:web-hosting:starter"
+          ],
+          "contents": [
+            {
+              "id": "catalog:web-hosting:starter",
+              "quantity": 1
+            }
+          ],
+          "content_type": "product",
+          "currency": "USD",
+          "value": 2.99,
+          "num_items": 1
+        },
+        "order": {
+          "orderId": "12ed38d4-55db-4c7f-abe4-75cd56aebb59",
+          "invoiceId": "5eb6966d-24ba-4084-8dc2-0080952dbc2e",
+          "paymentId": "5583d46a-dae8-4e72-9dc4-0576a947ad47",
+          "totalAmount": "2.99",
+          "currency": "USD"
+        }
+      }
+    },
+    {
+      "name": "server recorded the same verified Purchase event ID",
+      "ok": true,
+      "detail": {
+        "id": "9117e9ae-6b4d-4870-9c90-a7fc7aeeaccc",
+        "event_name": "Purchase",
+        "event_id": "purchase:5583d46a-dae8-4e72-9dc4-0576a947ad47",
+        "pixel_id": "123456789012345",
+        "custom_data": {
+          "value": 2.99,
+          "contents": [
+            {
+              "id": "catalog:web-hosting:starter",
+              "quantity": 1
+            }
+          ],
+          "currency": "USD",
+          "num_items": 1,
+          "content_ids": [
+            "catalog:web-hosting:starter"
+          ],
+          "content_type": "product"
+        },
+        "occurred_at": "2026-11-08T19:14:49.167Z",
+        "browser_dispatched_at": null,
+        "server_recorded_at": "2026-11-08T19:14:49.167Z",
+        "channel": "server",
+        "delivery_status": null,
+        "attempts": null,
+        "http_status": null,
+        "events_received": null,
+        "last_error": null,
+        "delivered_at": null,
+        "next_attempt_at": null,
+        "marketing_consent_current": true
+      }
+    }
+  ],
+  "passed": true
+}

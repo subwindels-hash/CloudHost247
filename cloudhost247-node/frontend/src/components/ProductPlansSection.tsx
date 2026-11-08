@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { trackMarketing } from '../lib/marketing';
 import { useApiResource } from '../lib/useApiResource';
 import { formatPrice, type ProductPlansResponse } from '../lib/catalog-types';
 import { CatalogErrorBanner, CatalogLoadingBanner } from './CatalogStateBanner';
@@ -19,6 +21,12 @@ import { ApproxAmount } from './ApproxAmount';
  */
 export function ProductPlansSection({ slug }: { slug: string }) {
   const result = useApiResource<ProductPlansResponse>(`/api/v1/catalog/products/${slug}/plans`);
+  const data = result.status === 'success' ? result.data : null;
+  useEffect(() => {
+    if (!data?.product.available) return;
+    const product = data.product;
+    trackMarketing('ViewContent', { content_ids: [slug], content_name: product.name, content_category: product.productType, content_type: 'product_group' }, `view:${slug}`);
+  }, [data, slug]);
 
   if (result.status === 'loading') {
     return <CatalogLoadingBanner label="Loading plans and pricing…" />;

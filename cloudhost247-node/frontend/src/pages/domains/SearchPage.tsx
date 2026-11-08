@@ -1,3 +1,4 @@
+import { trackMarketing } from '../../lib/marketing';
 import ReturnToLogin from '../../components/ReturnToLogin';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -110,6 +111,7 @@ export default function SearchPage() {
     setCreatedInvoice(null);
     try {
       const response = await searchDomains(trimmed);
+      if (response.status === 'completed') trackMarketing('Search', { content_category: 'domain_search', num_items: Math.max(1,response.results.length) }, `search:${response.searchId}`);
       setSearch(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'The search could not be completed right now.');
