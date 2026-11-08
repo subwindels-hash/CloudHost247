@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import CreationScene from './CreationScene';
 import './creation-showcase.css';
 
-const images = '/media/cloudhost247/showcase';
+const images = '/media/homepage/showcase';
 
 /** Illustrative concepts, not customer sites or claims about available templates. */
 export default function CreationShowcase() {

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { PROMO_SLIDES } from './promo-slides';
 import './promo-video-hero.css';
 
-const MEDIA = '/media/cloudhost247/promo/';
+const MEDIA = '/media/homepage/promo/';
 const TRANSITION_MS = 700;
 const matches = (query: string) => typeof window !== 'undefined' && !!window.matchMedia?.(query).matches;
 

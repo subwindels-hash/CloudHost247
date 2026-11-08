@@ -98,6 +98,20 @@ test('reduced motion prevents autoplay but allows intentional playback', async (
   await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.currentTime), { timeout: 10000 }).toBeGreaterThan(0.2);
 });
 
+test('homepage promotional and showcase assets are served from their independent directory', async ({ request }) => {
+  const assets = [
+    ...['domains', 'people'].flatMap((video) => ['desktop', 'mobile'].flatMap((variant) =>
+      ['.mp4', '.webm', '-poster.webp'].map((suffix) => `promo/${video}-${variant}${suffix}`))),
+    ...['architecture', 'cafe', 'creative', 'wellness'].map((name) => `showcase/${name}.jpg`),
+  ];
+  for (const asset of assets) {
+    const response = await request.get(`/media/homepage/${asset}`);
+    expect(response.ok(), asset).toBe(true);
+    expect(response.headers()['content-type'], asset).toMatch(/^(video|image)\//);
+    expect((await response.body()).length, asset).toBeGreaterThan(0);
+  }
+});
+
 test('domain search remains functional', async ({ page }) => {
   await page.goto('/');
   const search = page.locator('.hg-domain');
@@ -117,10 +131,53 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }
     await hero.getByRole('button', { name: 'Previous slide' }).click();
     await expect(hero.getByRole('heading', { name: 'Find a name for your next big idea.' })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
-    await hero.locator('.promo-video__base').getByRole('link', { name: 'Support' }).click();
-    await expect(page).toHaveURL(/\/support$/);
+    const support = hero.locator('.promo-video__base').getByRole('link', { name: 'Support' });
+    await expect(support).toHaveAttribute('href', '/support');
+    await support.click();
+    // Support is an authenticated route. Do not accept the transient /support URL before the
+    // route guard redirects a signed-out visitor, and check that the destination survives login.
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole('heading', { name: 'Log in', exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Create an account' })).toHaveAttribute('href', '/register?next=%2Fsupport');
   });
 }
+
+test('support link retains its destination through login', async ({ page }) => {
+  // Browser-side fixtures exercise the UI and navigation only; they do not verify a live auth
+  // server, real credentials, or ticket access. Both rejected and successful login are covered.
+  let loginAttempts = 0;
+  let ticketAuthorization = '';
+  await page.route('**/api/auth/login', async (route) => {
+    loginAttempts += 1;
+    if (loginAttempts === 1) {
+      await route.fulfill({ status: 401, json: { error: 'INVALID_CREDENTIALS', message: 'Invalid credentials' } });
+      return;
+    }
+    await route.fulfill({ json: { token: 'test-session', user: { id: 'test-user', email: 'customer@example.test', fullName: 'Test Customer', role: 'customer' } } });
+  });
+  await page.route(/\/api\/v1\/account\/tickets(?:\?.*)?$/, async (route) => {
+    ticketAuthorization = route.request().headers().authorization ?? '';
+    await route.fulfill({ json: { tickets: [] } });
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const support = page.locator('.promo-video__base').getByRole('link', { name: 'Support' });
+  await expect(support).toHaveAttribute('href', '/support');
+  await support.click();
+  await expect(page).toHaveURL(/\/login$/);
+  await page.getByLabel('Email address').fill('customer@example.test');
+  await page.getByLabel('Password', { exact: true }).fill('not-a-real-password');
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await expect(page.getByText('Invalid credentials')).toBeVisible();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByRole('link', { name: 'Create an account' })).toHaveAttribute('href', '/register?next=%2Fsupport');
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await expect(page).toHaveURL(/\/support$/);
+  await expect(page.getByRole('heading', { name: 'Support', exact: true })).toBeVisible();
+  await expect(page.getByText("You haven't opened any support tickets yet.")).toBeVisible();
+  expect(loginAttempts).toBe(2);
+  expect(ticketAuthorization).toBe('Bearer test-session');
+});
 
 test('black and silver frame moves unless reduced motion is preferred', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });

@@ -70,6 +70,25 @@ class MediaLibraryParityTests(unittest.TestCase):
         files = [path for path in SCRIPT_MODULE.LIBRARY.rglob('*') if path.is_file()]
         self.assertGreater(len(files), 400)
 
+    def test_homepage_media_is_outside_the_shared_mirror_and_present(self) -> None:
+        # These assets belong to the Node homepage, not the shared illustration library.
+        # Keeping them outside the mirror prevents --emit-served from deleting live assets.
+        public = ROOT / 'cloudhost247-node/frontend/public/media/homepage'
+        for video in ('domains', 'people'):
+            for variant in ('desktop', 'mobile'):
+                for suffix in ('.mp4', '.webm', '-poster.webp'):
+                    asset = public / 'promo' / f'{video}-{variant}{suffix}'
+                    with self.subTest(asset=asset):
+                        self.assertTrue(asset.is_file() and asset.stat().st_size > 0)
+        for name in ('architecture.jpg', 'cafe.jpg', 'creative.jpg', 'wellness.jpg'):
+            asset = public / 'showcase' / name
+            with self.subTest(asset=asset):
+                self.assertTrue(asset.is_file() and asset.stat().st_size > 0)
+        components = ROOT / 'cloudhost247-node/frontend/src/components/marketing'
+        self.assertIn('/media/homepage/promo/', (components / 'PromoVideoHero.tsx').read_text())
+        self.assertIn('/media/homepage/showcase', (components / 'CreationShowcase.tsx').read_text())
+        self.assertIn('/media/homepage/showcase/', (components / 'creation-showcase.css').read_text())
+
 
 class MediaLibraryParityNegativeTests(unittest.TestCase):
     """The rule must fail on each way the mirror can drift."""

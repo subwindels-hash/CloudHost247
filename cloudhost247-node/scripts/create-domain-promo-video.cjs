@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 const { spawn, execFileSync } = require('node:child_process');
 const { unlinkSync } = require('node:fs');
 const path = require('node:path');
-const dest = path.resolve(__dirname, '../frontend/public/media/cloudhost247/promo');
+const dest = path.resolve(__dirname, '../frontend/public/media/homepage/promo');
 const ffmpeg = process.env.FFMPEG || 'ffmpeg';
 const html = `<!doctype html><html><head><style>*{margin:0}canvas{display:block;width:100vw;height:100vh}</style></head><body><canvas id="c"></canvas><script>
 const c=document.querySelector('canvas'),ctx=c.getContext('2d'); c.width=innerWidth;c.height=innerHeight;

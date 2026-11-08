@@ -23,7 +23,7 @@
 .creation-mini__nav b { font-size: 7px; }
 .creation-mini--estate { left: 12%; right: 0; top: 62px; height: 150px; border: 3px solid #e9ece8; border-right: 0; border-radius: 5px 0 0 5px; background: #181c1a; color: white; }
 .creation-mini--estate .creation-mini__nav { padding: 9px 10px; }
-.creation-mini__estate-image { position: absolute; inset: 26px 0 0 51%; background: url('/media/cloudhost247/showcase/architecture.jpg') center 55% / cover; }
+.creation-mini__estate-image { position: absolute; inset: 26px 0 0 51%; background: url('/media/homepage/showcase/architecture.jpg') center 55% / cover; }
 .creation-mini__copy { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 9px; padding: 12px; }
 .creation-mini__copy small, .creation-mini__wellness-copy small, .creation-mini__cafe-copy small { font-size: 5px; letter-spacing: .13em; }
 .creation-mini__copy strong { font: 600 20px/1 Georgia, serif; letter-spacing: -.05em; }
@@ -49,7 +49,7 @@
 .creation-card--wellness { height: 300px; background: #b5b3a1; }
 .creation-mini--wellness { top: 55px; left: 12%; right: 0; bottom: 20px; border-radius: 6px 0 0 6px; background: #f4f0e6; color: #23302a; }
 .creation-mini--wellness .creation-mini__nav { padding: 12px; }
-.creation-mini__wellness-image { position: absolute; inset: 34px 0 0; background: linear-gradient(0deg, #222b23aa, transparent 70%), url('/media/cloudhost247/showcase/wellness.jpg') center / cover; }
+.creation-mini__wellness-image { position: absolute; inset: 34px 0 0; background: linear-gradient(0deg, #222b23aa, transparent 70%), url('/media/homepage/showcase/wellness.jpg') center / cover; }
 .creation-mini__wellness-copy { position: absolute; left: 13px; bottom: 16px; display: grid; gap: 8px; color: white; }
 .creation-mini__wellness-copy strong { font: 500 23px/1 Georgia, serif; }
 .creation-mini__wellness-copy span { font-size: 6px; font-weight: 700; }
@@ -58,7 +58,7 @@
 .creation-card--small-note p { color: #242821; margin: 16px 0; font: 500 24px/1.08 Georgia, serif; }
 .creation-card--cafe { height: 280px; background: #806b53; }
 .creation-mini--cafe { top: 60px; left: 12%; right: 0; height: 175px; border-radius: 6px 0 0 6px; color: #2d3022; background: #f3efe1; }
-.creation-mini--cafe::after { content: ''; position: absolute; inset: 33px 0 0 54%; background: url('/media/cloudhost247/showcase/cafe.jpg') center / cover; }
+.creation-mini--cafe::after { content: ''; position: absolute; inset: 33px 0 0 54%; background: url('/media/homepage/showcase/cafe.jpg') center / cover; }
 .creation-mini--cafe .creation-mini__nav { padding: 10px; }
 .creation-mini__cafe-copy { position: relative; z-index: 1; display: grid; gap: 9px; padding: 20px 11px; }
 .creation-mini__cafe-copy strong { font: 600 20px/1.05 Georgia, serif; letter-spacing: -.05em; }
@@ -74,7 +74,7 @@
 .creation-card--note-alt { min-height: 196px; background: #f2eee5; }
 .creation-card--shop { height: 224px; background: #9da394; }
 .creation-mini--shop { top: 51px; left: 12%; right: 0; bottom: 18px; border-radius: 6px 0 0 6px; padding: 11px; background: #e8e4d8; color: #303a31; }
-.creation-mini--shop::after { content: ''; position: absolute; inset: 33px 0 0 55%; background: url('/media/cloudhost247/showcase/wellness.jpg') center / cover; }
+.creation-mini--shop::after { content: ''; position: absolute; inset: 33px 0 0 55%; background: url('/media/homepage/showcase/wellness.jpg') center / cover; }
 .creation-mini--shop p { position: relative; z-index: 1; margin: 23px 0 10px; font: 500 17px/1.1 Georgia, serif; }
 .creation-mini--shop > span { position: relative; z-index: 1; font-size: 5px; font-weight: 800; }
 .creation-showcase__disclaimer { margin: 18px 0 0; text-align: center; color: #686c65; font-size: 11px; line-height: 1.5; }
@@ -116,7 +116,7 @@
 .creation-scene__site-copy em, .creation-scene__phone-screen em { color: #96752e; font-weight: 400; }
 .creation-scene__site-copy > span { color: #626a60; font: 400 8px/1.5 sans-serif; }
 .creation-scene__site-copy i { margin-top: 14px; padding: 7px 8px; border-radius: 2px; background: #293b32; color: #fff; font: 700 6px/1 sans-serif; font-style: normal; letter-spacing: .04em; }
-.creation-scene__site-image { border-radius: 3px; background: url('/media/cloudhost247/showcase/architecture.jpg') center 55% / cover; }
+.creation-scene__site-image { border-radius: 3px; background: url('/media/homepage/showcase/architecture.jpg') center 55% / cover; }
 .creation-scene__site-bottom { display: flex; justify-content: space-between; padding: 10px 19px 0; color: #757b6e; font: 700 6px/1 sans-serif; letter-spacing: .12em; }
 .creation-scene__phone-float { position: absolute; right: 16%; top: 143px; width: 100px; height: 207px; }
 .creation-scene__phone-parallax { width: 100%; height: 100%; }
@@ -124,7 +124,7 @@
 .creation-scene__phone-screen { height: 100%; overflow: hidden; border-radius: 11px; background: #f4f2e9; color: #25382e; }
 .creation-scene__phone-notch { position: absolute; z-index: 1; left: 34%; top: 7px; width: 32%; height: 7px; border-radius: 0 0 5px 5px; background: #1a211d; }
 .creation-scene__phone-screen > span { display: block; padding: 13px 8px 8px; font: 800 8px/1 sans-serif; }
-.creation-scene__phone-image { height: 85px; background: url('/media/cloudhost247/showcase/architecture.jpg') center / cover; }
+.creation-scene__phone-image { height: 85px; background: url('/media/homepage/showcase/architecture.jpg') center / cover; }
 .creation-scene__phone-screen > b { display: block; margin: 9px 8px 5px; font: 500 16px/1 Georgia, serif; }
 .creation-scene__phone-screen > i { margin: 0 8px; color: #7f6a37; font: 700 5px/1 sans-serif; font-style: normal; }
 .creation-scene__palette-float { position: absolute; left: 12%; top: 163px; width: 170px; animation: creation-palette-float 9s ease-in-out infinite; animation-play-state: paused; }
