@@ -9,11 +9,17 @@
  *
  * Usage (from the application root):
  *
+ *   npm run whmcs:map -- doctor                    # read-only preflight: can this deployment read WHMCS?
+ *   npm run whmcs:map -- discover                  # C1: catalogue JSON + review report, binds nothing
  *   npm run whmcs:map -- verify
  *   npm run whmcs:map -- snapshot                  # read-only; needs WHMCS_BASE_URL + API credentials
  *   npm run whmcs:map -- bind --service hosting-vps --product 12
  *   npm run whmcs:map -- bind --service hosting-vps --product 12 --cycles monthly,annually
  *   npm run whmcs:map -- dispose --service hosting-plesk --reason "no Plesk product in WHMCS"
+ *
+ * `discover` writes config/whmcs/catalogue-snapshot.json and docs/WHMCS-DISCOVERY-REPORT.md
+ * (override with --out and --report). It never binds: mapping a page to a product is a reviewed
+ * `bind`, one service at a time.
  *
  * Exit codes: 0 success, 1 verification failure, 2 configuration/usage problem.
  *
@@ -43,9 +49,12 @@ import {
   toArray,
 } from '../../src/whmcs/schemas';
 import { BILLING_CYCLES, type BillingCycle } from '../../src/whmcs/types';
+import { collectDiscovery, renderDiscoveryReport } from '../../src/whmcs/discovery';
 
 const DEFAULT_MAP_PATH = path.join(process.cwd(), 'config', 'whmcs', 'product-map.json');
 const DEFAULT_REGISTER_PATH = path.resolve(process.cwd(), '..', 'config', 'whmcs', 'service-register.csv');
+const DEFAULT_DISCOVERY_PATH = path.join(process.cwd(), 'config', 'whmcs', 'catalogue-snapshot.json');
+const DEFAULT_REPORT_PATH = path.resolve(process.cwd(), '..', 'docs', 'WHMCS-DISCOVERY-REPORT.md');
 
 interface Args {
   command: string;
@@ -55,11 +64,19 @@ interface Args {
   reason?: string;
   mapPath: string;
   registerPath: string;
+  discoveryPath: string;
+  reportPath: string;
 }
 
 function parseArgs(argv: string[]): Args {
   const [command = 'help', ...rest] = argv;
-  const out: Args = { command, mapPath: DEFAULT_MAP_PATH, registerPath: DEFAULT_REGISTER_PATH };
+  const out: Args = {
+    command,
+    mapPath: DEFAULT_MAP_PATH,
+    registerPath: DEFAULT_REGISTER_PATH,
+    discoveryPath: DEFAULT_DISCOVERY_PATH,
+    reportPath: DEFAULT_REPORT_PATH,
+  };
   for (let i = 0; i < rest.length; i += 1) {
     const token = rest[i];
     const value = rest[i + 1];
@@ -83,6 +100,12 @@ function parseArgs(argv: string[]): Args {
       case '--map':
         out.mapPath = path.resolve(value ?? DEFAULT_MAP_PATH);
         i += 1;
+        break;
+      case '--out':
+        args.discoveryPath = value();
+        break;
+      case '--report':
+        args.reportPath = value();
         break;
       case '--register':
         out.registerPath = path.resolve(value ?? DEFAULT_REGISTER_PATH);
@@ -408,8 +431,125 @@ function verify(args: Args): void {
   }
 }
 
+/**
+ * C1 — read the installation and write the two review artifacts.
+ *
+ * Read-only: `collectDiscovery` issues `GetProductGroups`, `GetProducts` and `GetCurrencies` only.
+ * It writes a JSON snapshot and a Markdown report and binds nothing — mapping a service to a product
+ * stays a separate, reviewed `bind` command.
+ */
+async function discover(args: Args): Promise<void> {
+  const loaded = loadWhmcsConfig();
+  if (!loaded.enabled) fail(`${loaded.reason}. Set WHMCS_BASE_URL, WHMCS_API_IDENTIFIER and WHMCS_API_SECRET.`, 2);
+
+  const client = new WhmcsClient({ config: loaded.config, logger: consoleLogger });
+  console.log(`Discovering the catalogue at ${loaded.config.baseUrl} (read-only, no writes to WHMCS) …`);
+
+  const artifact = await collectDiscovery(client, {
+    baseUrl: loaded.config.baseUrl,
+    includeVersion: process.env.WHMCS_DISCOVERY_VERSION === '1',
+  });
+
+  mkdirSync(path.dirname(args.discoveryPath), { recursive: true });
+  writeFileSync(args.discoveryPath, `${JSON.stringify(artifact, null, 2)}\n`, 'utf8');
+
+  mkdirSync(path.dirname(args.reportPath), { recursive: true });
+  writeFileSync(args.reportPath, renderDiscoveryReport(artifact), 'utf8');
+
+  const priced = artifact.products.filter((product) => product.available).length;
+  console.log(`✓ ${artifact.groups.length} group(s), ${artifact.products.length} product(s), ${priced} priced`);
+  console.log(`✓ ${args.discoveryPath}`);
+  console.log(`✓ ${args.reportPath}`);
+  if (artifact.warnings.length > 0) {
+    console.log(`! ${artifact.warnings.length} warning(s) — read them before approving any mapping:`);
+    for (const warning of artifact.warnings) console.log(`    ${warning}`);
+  }
+  console.log('  nothing was bound. Review the report, then bind service by service with "bind".');
+}
+
+/**
+ * Preflight for C1: what the deployment can and cannot verify from here.
+ *
+ * Every line is either measured or marked as NOT VERIFIABLE. Nothing is asserted that was not read,
+ * because a false "connected" is worse than an honest "cannot tell".
+ */
+async function doctor(): Promise<void> {
+  const loaded = loadWhmcsConfig();
+  if (!loaded.enabled) {
+    console.log(`✗ configuration: ${loaded.reason}`);
+    console.log('  Set WHMCS_BASE_URL, WHMCS_API_IDENTIFIER and WHMCS_API_SECRET, then run this again.');
+    process.exit(2);
+  }
+
+  const { baseUrl, mode, apiUrl } = loaded.config;
+  console.log('WHMCS preflight (read-only)');
+  console.log(`  base URL      ${baseUrl}`);
+  console.log(`  API endpoint  ${apiUrl}`);
+  console.log(`  mode          ${mode}${mode === 'read-only' ? ' (writes refused)' : ' (WRITES ENABLED)'}`);
+  console.log(`  MFA for SSO   ${loaded.config.ssoRequireMfa ? 'required (default)' : 'NOT REQUIRED — explicit downgrade'}`);
+
+  const client = new WhmcsClient({ config: loaded.config, logger: silence() });
+  const checks: Array<{ label: string; run: () => Promise<string> }> = [
+    {
+      label: 'currencies',
+      run: async () => {
+        const payload = await client.call('GetCurrencies', {}, getCurrenciesSchema);
+        const rows = toArray(payload.currencies as unknown[] | Record<string, unknown> | undefined);
+        const codes = rows.map((row) => String((row as { code?: unknown }).code ?? '')).filter(Boolean);
+        return codes.length === 0 ? 'FAILED — no currencies configured' : `${codes.length}: ${codes.join(', ')}`;
+      },
+    },
+    {
+      label: 'product groups',
+      run: async () => {
+        const payload = await client.call('GetProductGroups', {}, getProductGroupsSchema);
+        const rows = toArray(payload.productgroups as unknown[] | Record<string, unknown> | undefined);
+        return `${rows.length}`;
+      },
+    },
+    {
+      label: 'products',
+      run: async () => {
+        const payload = await client.call('GetProducts', {}, getProductsSchema);
+        const rows = toArray(payload.products as unknown[] | Record<string, unknown> | undefined);
+        return rows.length === 0 ? 'FAILED — no products visible to this API role' : `${rows.length}`;
+      },
+    },
+  ];
+
+  let failed = false;
+  for (const check of checks) {
+    try {
+      console.log(`  ${check.label.padEnd(13)} ${await check.run()}`);
+    } catch (error) {
+      failed = true;
+      console.log(`  ${check.label.padEnd(13)} FAILED — ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // Honest limits of a read-only preflight.
+  console.log('  SSO origin    NOT VERIFIABLE read-only. The SSO redirect must be on the origin above; if the');
+  console.log('                install\'s System URL differs (e.g. www vs apex), the hand-off is refused. Confirm');
+  console.log('                Setup > General Settings > System URL matches exactly before enabling SSO.');
+  console.log('  client 2FA    NOT VERIFIABLE over the API. SSO redemption bypasses WHMCS 2FA by design, which is');
+  console.log('                why CloudHost247 requires MFA on its own account before minting a hand-off.');
+  console.log('  registrar     NOT CHECKED here — domain providers are verified in their own phase.');
+
+  if (failed) {
+    console.log('✗ preflight failed: the deployment cannot read the catalogue with these credentials.');
+    process.exit(1);
+  }
+  console.log('✓ preflight passed: read-only catalogue access works.');
+  console.log('  next: npm run whmcs:discover');
+}
+
+/** A logger that writes nothing — preflight output is the report, not HTTP noise. */
+function silence() {
+  return { info: () => undefined, warn: () => undefined, error: () => undefined };
+}
+
 function help(): void {
-  console.log(readFileSync(new URL(import.meta.url)).toString().split('\n').slice(1, 26).join('\n').replace(/^ \* ?/gm, ''));
+  console.log(readFileSync(new URL(import.meta.url)).toString().split('\n').slice(1, 36).join('\n').replace(/^ \* ?/gm, ''));
 }
 
 async function main(): Promise<void> {
@@ -429,6 +569,12 @@ async function main(): Promise<void> {
       break;
     case 'verify':
       verify(args);
+      break;
+    case 'discover':
+      await discover(args);
+      break;
+    case 'doctor':
+      await doctor();
       break;
     case 'init': {
       const loaded = loadWhmcsConfig();

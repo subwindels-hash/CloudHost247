@@ -59,7 +59,14 @@ export default function Header() {
               <CurrencySwitcher />
             </div>
             <NavLink to="/pricing">{copy.pricing}</NavLink>
-            <NavLink to="/service-plans">Service plans</NavLink>
+            {/*
+              No third quick link here. The utility line is a documented six-control row
+              (Pricing, Help, language, currency, Sign In, Create Account) and both
+              frontend/tests/unit/hostinger-chrome.test.tsx and scripts/check-chrome-benchmark.mjs
+              fail when a seventh is added — a wrapped or crowded bar is how Create Account went
+              missing before. `/service-plans` stays reachable from /services ("Browse plans"), the
+              catalog pages and the account menu.
+            */}
             <NavLink to="/help">{copy.help}</NavLink>
           </nav>
 

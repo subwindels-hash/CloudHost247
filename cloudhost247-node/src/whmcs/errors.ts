@@ -31,7 +31,9 @@ export type WhmcsErrorCode =
   | 'WHMCS_SSO_BLOCKED'
   | 'WHMCS_SSO_RATE_LIMITED'
   | 'WHMCS_SSO_UNSAFE_REDIRECT'
-  | 'WHMCS_SSO_LINK_CONFLICT';
+  | 'WHMCS_SSO_LINK_CONFLICT'
+  | 'WHMCS_SSO_LINK_STALE'
+  | 'WHMCS_SSO_EMAIL_NOT_CANONICAL';
 
 export class WhmcsError extends Error {
   constructor(
@@ -241,6 +243,10 @@ export function safeCustomerMessage(error: unknown): string {
       case 'WHMCS_SSO_ALREADY_LINKED':
       case 'WHMCS_SSO_LINK_CONFLICT':
         return 'This billing account is already connected to an account. Please contact support.';
+      case 'WHMCS_SSO_LINK_STALE':
+        return 'Your linked billing account is no longer available. Please contact support.';
+      case 'WHMCS_SSO_EMAIL_NOT_CANONICAL':
+        return 'Your account email address cannot be matched to a billing account automatically. Please contact support.';
       default:
         return 'We could not complete that request. No order or payment was created.';
     }

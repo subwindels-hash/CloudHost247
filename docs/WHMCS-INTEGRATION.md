@@ -1,9 +1,10 @@
 # WHMCS integration — operator and developer guide
 
-**Status:** the integration layer, the mapping gate and the one-identity SSO bridge (B5.1) are implemented;
-**no storefront page is wired to them yet**, and the SPA's own checkout is untouched.
-See [`WHMCS-INTEGRATION-AUDIT.md`](WHMCS-INTEGRATION-AUDIT.md) §9 for the full slice plan and §9.1 for what has
-actually been delivered.
+**Status:** the integration layer, the mapping gate, the public orderability endpoint (B2.4), the one-identity SSO
+bridge (B5.1, security-reviewed) and the C1 discovery tooling are implemented; **no storefront page is wired to them
+yet**, and the SPA's own catalogue and checkout are untouched. Nothing has been run against a live WHMCS installation.
+See [`WHMCS-INTEGRATION-REPORT.md`](WHMCS-INTEGRATION-REPORT.md) for the phase-by-phase evidence and exactly what is
+blocking C1, and [`WHMCS-INTEGRATION-AUDIT.md`](WHMCS-INTEGRATION-AUDIT.md) §9 for the slice plan and delivery log.
 
 This document is the practical companion: what the pieces are, how to turn the integration on, and the rules a
 change has to follow.
@@ -36,10 +37,11 @@ Everything below is a consequence of that sentence.
 | `src/routes/account-whmcs.ts` | The four customer endpoints (`GET/POST/DELETE /api/v1/account/whmcs`, `POST …/sso`). Registered in `app.ts`; answers `configured: false` until credentials exist. |
 | `src/whmcs/orderability.ts` | B2.4 — the single verdict "may this service be bought online, and in which cycles": binding ∩ live product ∩ priced cycles, plus a 60-second single-flight catalogue cache. |
 | `src/routes/whmcs-public.ts` | `GET /api/v1/whmcs/orderability[/:serviceKey]`. Anonymous, never a 500 for a WHMCS problem, fails closed on a broken map. |
+| `src/whmcs/discovery.ts` | C1 read-only discovery: reads groups/products/currencies into a reviewable artifact and renders the Markdown report. Issues no write action, by construction. |
 | `scripts/whmcs/catalogue-map.ts` | Operator CLI: `snapshot`, `bind`, `dispose`, `dispositions`, `verify`. |
 | `config/whmcs/product-map.json` | The generated map. Currently **0 bindings, 59 dispositions**. |
 | `config/whmcs/service-register.csv` (repository root) | Cross-stack inventory of advertised services, shared with the PHP/WHMCS side. |
-| `tests/unit/whmcs-*.test.ts`, `tests/integration/whmcs-*.test.ts` | 131 tests across 11 files: the layer, the completeness gate, the orderability verdict, and both HTTP surfaces. |
+| `tests/unit/whmcs-*.test.ts`, `tests/integration/whmcs-*.test.ts` | 153 tests across 12 files: the layer, the completeness gate, the orderability verdict, the identity bridge and the discovery pipeline. |
 
 ---
 
@@ -59,20 +61,29 @@ Everything below is a consequence of that sentence.
 
    Leave `WHMCS_MODE=read-only` until the read path is verified in staging. `full` is what permits orders,
    payments and provisioning actions to be sent at all.
-3. **Restart the application**, then check the reason it reports:
+3. **Run the preflight before anything else** (read-only, writes nothing):
+
+   ```bash
+   npm run whmcs:doctor      # config, mode, MFA policy, then live catalogue counts with pass/fail
+   npm run whmcs:discover    # C1: config/whmcs/catalogue-snapshot.json + docs/WHMCS-DISCOVERY-REPORT.md
+   ```
+
+   `discover` binds nothing. Review the report, then `snapshot` and `bind` service by service — see §4.
+
+4. **Restart the application**, then check the reason it reports:
 
    ```bash
    node -e "const {loadWhmcsConfig}=require('./dist/src/whmcs/config');console.log(loadWhmcsConfig())"
    ```
 
-4. **Take a snapshot** (read-only — calls `GetProductGroups`, `GetProducts`, `GetCurrencies`):
+5. **Take a snapshot** (read-only — calls `GetProductGroups`, `GetProducts`, `GetCurrencies`):
 
    ```bash
    npm run whmcs:map -- snapshot
    npm run whmcs:map -- verify
    ```
 
-5. **Bind each advertised service** to the product it actually sells:
+6. **Bind each advertised service** to the product it actually sells:
 
    ```bash
    npm run whmcs:map -- bind --service hosting-vps --product 12
@@ -82,13 +93,13 @@ Everything below is a consequence of that sentence.
    `bind` refuses a product id that is not in the snapshot, a cycle WHMCS does not offer, and a product with no
    configured price.
 
-6. **Dispose of what is not orderable** — with a reason, not silently:
+7. **Dispose of what is not orderable** — with a reason, not silently:
 
    ```bash
    npm run whmcs:map -- dispose --service hosting-plesk --reason "no Plesk product configured in WHMCS"
    ```
 
-7. **Commit the map.** It is a generated artifact: regenerating it is normal, hand-editing it is not possible
+8. **Commit the map.** It is a generated artifact: regenerating it is normal, hand-editing it is not possible
    without the checksum failing.
 
 ---
@@ -164,7 +175,7 @@ on the server. The request never carries a scope, a URL or a client id.
 | The redirect must be an absolute URL on the configured WHMCS origin, or the hand-off is refused | `sso.ts#assertSafeSsoRedirect` |
 | An admin support session cannot mint a hand-off | `routes/account-whmcs.ts#assertNotSupportSession` |
 | The response is `Cache-Control: no-store` | `routes/account-whmcs.ts` |
-| Replay is bounded by WHMCS single-use/60 s **and** by a per-account budget of 10 hand-offs per 5 minutes | `sso.ts#countRecentHandoffs` + route rate limit |
+| Replay is bounded by WHMCS single-use/60 s **and** by a per-account budget of 10 hand-offs per 5 minutes, enforced across instances | `sso.ts#consumeHandoffBudget` (atomic upsert in `0088`) + route rate limit |
 
 ### The MFA question (read this before setting `WHMCS_SSO_REQUIRE_MFA=false`)
 
@@ -179,17 +190,11 @@ Setting `WHMCS_SSO_REQUIRE_MFA=false` removes that requirement. Only do that if 
 billing area either has MFA in WHMCS or has accepted the downgrade in writing. The setting is parsed strictly: a
 typo throws `WHMCS_INVALID_CONFIG` at boot rather than quietly defaulting to `false`.
 
-### Session lifetime and logout — the honest version
+### Session lifetime and logout
 
-- **Hand-off lifetime:** 60 seconds, single use, enforced by WHMCS. After that the URL is inert; `expires_at` is
-  recorded so the audit trail says so.
-- **Our session:** unchanged — the SPA's own token and `/api/auth/logout` revocation rules apply exactly as before.
-  Logging out of the SPA stops *new* hand-offs.
-- **WHMCS session:** there is no API to end one. A customer who signs out of CloudHost247 but not of WHMCS keeps that
-  WHMCS session until WHMCS expires it or they sign out there. Do not claim otherwise in copy, and do not invent a
-  "sign out everywhere" control that only clears our side.
-- **Unlink** removes the mapping (password required). It does not delete the WHMCS client, its services or its
-  invoices — reconnecting needs either the same verified email or support.
+See **§9** for the complete lifecycle table (logout, expiry, unlink, deletion, revocation) and for the one thing this
+integration deliberately cannot do — end a WHMCS session. The short version: the hand-off URL is inert after 60
+seconds, signing out of CloudHost247 stops *new* hand-offs, and an already-open WHMCS session must be ended in WHMCS.
 
 ### What is still not proven
 
@@ -284,3 +289,39 @@ never stores a failure, and the circuit breaker in `client.ts` keeps the outage 
 The endpoint has been tested against a sealed fixture map and a scripted WHMCS. What staging must confirm: the real
 `GetProducts`/`GetProductGroups`/`GetCurrencies` payloads of the target version, and — the moment the first real
 binding exists — that the cart URL it produces actually lands on the right product with the right cycle.
+
+---
+
+## 9. SSO lifecycle, revocation, and what we cannot control
+
+Every row states what CloudHost247 can do, what WHMCS does, and — where they differ — which one wins. Copy, support
+scripts and dashboards must not blur these lines.
+
+| Event | CloudHost247 effect | WHMCS effect | Can we force it? |
+| --- | --- | --- | --- |
+| Hand-off minted | audit row + one unit of the rate budget | one 60-second single-use token exists | n/a |
+| Hand-off URL used | nothing (we keep no token) | session created in the client area | no — and nothing to replay |
+| 60 seconds pass | `expires_at` in the past, evidence only | token rejected | — |
+| Customer logs out of the SPA | `jti` revoked; `authenticate()` rejects future calls; no further hand-offs | **session keeps running** | **no** — WHMCS has no session-termination API |
+| Customer signs out of WHMCS | nothing | session ends | n/a |
+| Hand-off refused for MFA | `403` before any token exists | nothing happens | yes, by policy (`WHMCS_SSO_REQUIRE_MFA`) |
+| `DELETE /api/v1/account/whmcs/link` | link row deleted (password required) | **nothing** — client, services and invoices untouched | yes, on our side only |
+| WHMCS client deleted or merged | next hand-off returns `WHMCS_SSO_LINK_STALE` (`409`) | `CreateSsoToken` answers `Invalid client_id` | no auto-repair: staff must relink or unlink |
+| Customer disables SSO in their WHMCS security settings | next hand-off returns `WHMCS_SSO_BLOCKED` (`409`) | refuses the token | **no** — the customer's choice is final by design |
+| Account suspended/disabled | `authenticate()` rejects (`401`) before any WHMCS call | nothing happens | yes |
+| Account deleted | link row and hand-off audit rows cascade away | client remains | yes, on our side only |
+
+### The two limits worth repeating in the UI
+
+1. **"Sign out" does not sign the customer out of WHMCS.** There is no API for it. A "sign out everywhere" control would
+   be a lie unless it says *exactly* what it clears, i.e. our session only.
+2. **Unlinking is not cancellation.** It removes the way in; it does not stop billing, delete a service or close an
+   invoice. Anything the customer reads about unlinking must say so, and point at support for the billing side.
+
+### Revocation paths that are already tested
+
+- A logged-out (revoked) token cannot mint a hand-off or read the link status — `authenticate()` checks
+  `revoked_tokens` on every request.
+- A support-session token cannot mint one (`403`), so an administrator's impersonation never escalates into the
+  customer's billing account.
+- A suspended account cannot mint one — the status check precedes the WHMCS call.

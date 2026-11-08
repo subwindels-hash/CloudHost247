@@ -47,7 +47,9 @@
     "evidence:layout": "node scripts/check-header-layout.mjs",
     "evidence:chrome": "node scripts/capture-chrome-benchmark.mjs",
     "check:chrome": "node scripts/check-chrome-benchmark.mjs",
-    "check:3d": "node scripts/check-3d-experience.mjs"
+    "check:3d": "node scripts/check-3d-experience.mjs",
+    "whmcs:discover": "tsx scripts/whmcs/catalogue-map.ts discover",
+    "whmcs:doctor": "tsx scripts/whmcs/catalogue-map.ts doctor"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",

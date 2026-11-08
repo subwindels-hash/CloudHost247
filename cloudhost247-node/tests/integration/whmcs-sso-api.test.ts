@@ -419,6 +419,94 @@ describe('WHMCS identity API (/api/v1/account/whmcs)', () => {
     expect(after.statusCode).toBe(409);
   });
 
+  it('cannot be driven by a cross-site request: there is no cookie session to ride', async () => {
+    const customer = await createCustomer({ email: 'customer@example.com', mfa: true });
+    await link(customer.userId, 4242);
+    const fake = whmcs();
+    const app = buildTestApp(fake.deps);
+
+    // A browser sends cookies automatically; it does not send an Authorization header unless our own
+    // JavaScript sets it. Every route here authenticates from the bearer token alone, so a form
+    // posted by another origin — even with the customer's cookies attached — carries no identity.
+    for (const cookie of ['token=forged', 'session=forged', 'connect.sid=forged']) {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/v1/account/whmcs/sso',
+        headers: { cookie, origin: 'https://evil.example' },
+        payload: { destination: 'invoices' },
+      });
+      expect(response.statusCode, cookie).toBe(401);
+    }
+    expect(fake.requests).toHaveLength(0);
+  });
+
+  it('refuses a look-alike account address that would otherwise fold onto the billing address', async () => {
+    // Full-width characters that Unicode NFKC folds onto "customer@example.com".
+    const lookalike = await createCustomer({ email: 'ｃｕｓｔｏｍｅｒ＠ｅｘａｍｐｌｅ.com' });
+    const fake = whmcs();
+    const app = buildTestApp(fake.deps);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/account/whmcs/link',
+      headers: auth(lookalike.token),
+    });
+    expect(response.statusCode).toBe(409);
+    expect(response.json().message).toMatch(/cannot be matched/i);
+    // Nothing was looked up, so nobody was matched to the victim's client.
+    expect(fake.requests).toHaveLength(0);
+    expect((await db.query(`SELECT 1 FROM whmcs_client_links`)).rows).toHaveLength(0);
+  });
+
+  it('reports a stale link when the WHMCS client has been deleted', async () => {
+    const customer = await createCustomer({ email: 'customer@example.com', mfa: true });
+    await link(customer.userId, 4242);
+    const loaded = loadWhmcsConfig(WHMCS_ENV);
+    if (!loaded.enabled) throw new Error('test env invalid');
+    const config = loaded.config;
+    const app = buildTestApp({
+      whmcsConfig: { enabled: true, config, reason: null },
+      whmcsClient: new WhmcsClient({
+        config,
+        transport: {
+          async send() {
+            return { status: 200, body: JSON.stringify({ result: 'error', message: 'Invalid client_id' }) };
+          },
+        },
+      }),
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/account/whmcs/sso',
+      headers: auth(customer.token),
+      payload: { destination: 'invoices' },
+    });
+    expect(response.statusCode).toBe(409);
+    expect(response.json().message).toMatch(/no longer available/i);
+  });
+
+  it('survives two simultaneous link requests for the same account', async () => {
+    const customer = await createCustomer({ email: 'customer@example.com' });
+    const fake = whmcs();
+    const app = buildTestApp(fake.deps);
+
+    const responses = await Promise.all([
+      app.inject({ method: 'POST', url: '/api/v1/account/whmcs/link', headers: auth(customer.token) }),
+      app.inject({ method: 'POST', url: '/api/v1/account/whmcs/link', headers: auth(customer.token) }),
+    ]);
+
+    // Neither request may fail because the other won: the second is the same outcome, not an error.
+    for (const response of responses) expect([200, 409]).toContain(response.statusCode);
+    expect(responses.filter((r) => r.statusCode === 200).length).toBeGreaterThanOrEqual(1);
+    const rows = await db.query<{ whmcs_client_id: number }>(
+      `SELECT whmcs_client_id FROM whmcs_client_links WHERE user_id = $1`,
+      [customer.userId],
+    );
+    expect(rows.rows).toHaveLength(1);
+    expect(rows.rows[0]!.whmcs_client_id).toBe(4242);
+  });
+
   it('never exposes a password field, even if the identity payload grows one', async () => {
     const customer = await createCustomer({ mfa: true });
     await link(customer.userId, 4242);

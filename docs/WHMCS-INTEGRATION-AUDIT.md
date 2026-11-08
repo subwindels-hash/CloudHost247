@@ -456,11 +456,17 @@ VERIFIED** only after a real run.
 | C1.2 completeness gate | **DONE** | `tests/unit/whmcs-service-coverage.test.ts`; 5 tests — map valid/checksummed, no advertised service without a disposition, register and site in step, no binding for an unadvertised service |
 | B2.4 public orderability | **DONE (no bound services yet)** | `src/whmcs/orderability.ts`, `src/routes/whmcs-public.ts`; 15 unit + 15 integration tests — only a binding ∩ live product ∩ priced cycle is orderable, `NOT_INTEGRATED` for the 59 unbound services, `MAP_INVALID` for an edited map, `UPSTREAM_UNAVAILABLE` on outage, request parameters cannot change the verdict |
 | B5.1 one identity + SSO hand-off | **DONE (never run against a live WHMCS)** | `src/whmcs/sso.ts`, `src/routes/account-whmcs.ts`, migration `0087_create_whmcs_identity.sql`; 24 unit + 14 integration tests — client id only from the stored link, one-to-one link, verified+exact email match, token never stored, redirect pinned to the WHMCS origin, MFA required by default, support sessions refused, per-account hand-off budget |
+| B5.1 security review | **DONE** | Anti-look-alike email canonicalisation (`WHMCS_SSO_EMAIL_NOT_CANONICAL`), atomic cross-instance hand-off budget (migration `0088`, upsert with `RETURNING`), lost-race link idempotency, stale-client mapping (`WHMCS_SSO_LINK_STALE`), bearer-only/CSRF test, lifecycle table (`WHMCS-INTEGRATION.md` §9); 8 new tests |
+| C1.3 discovery commands | **DONE (never run against WHMCS)** | `npm run whmcs:doctor` (read-only preflight, per-check pass/fail, states what it cannot verify) and `npm run whmcs:discover` (catalogue JSON + review report, binds nothing); `src/whmcs/discovery.ts`; 11 tests asserting the exact read-only action list |
+| Frontend regression baseline | **DONE** | 19 pre-existing failures → 0 (782/782 frontend tests). Causes: stale generated `SPA_ROUTE_PATTERNS` (regenerated), empty `href` in `AppErrorBoundary`, a seventh utility-line control that broke the documented six-control contract, and `play()` returning `undefined` under jsdom. Classified in `WHMCS-INTEGRATION-REPORT.md` §6 |
 | B2.3 configurable options | NOT STARTED | Requires staging to confirm the cart parameter format |
 | B3.2/B3.3 orders, invoices, clients | NOT STARTED | Needs discovery + staging |
 | B4 lifecycle | NOT STARTED | Needs staging |
 | B5.2+ (SSO into cart, WHMCS → SPA direction) | NOT STARTED | Deliberately out of scope; see `WHMCS-INTEGRATION.md` §6 |
 | C2 + all later sessions | NOT STARTED | Gated on discovery |
+
+Phase-by-phase evidence (implemented / tested / blocked / evidence) is kept in
+[`WHMCS-INTEGRATION-REPORT.md`](WHMCS-INTEGRATION-REPORT.md); this audit keeps the plan and the record.
 
 **What is wired into the website today: two routes, no pages.** `GET /api/v1/whmcs/orderability` and the four
 `/api/v1/account/whmcs*` identity routes are registered and tested, but no SPA component calls them and the SPA still

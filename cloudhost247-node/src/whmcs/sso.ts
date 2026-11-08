@@ -83,8 +83,37 @@ export interface WhmcsClientLink {
   verifiedAt: string;
 }
 
+/**
+ * Characters an email address may not legitimately contain, and which an attacker can use to make
+ * two different strings look identical: zero-width spaces and other Unicode format characters (Cf).
+ */
+const FORMAT_CHARACTERS = /[\u00AD\u061C\u180E\u200B-\u200F\u202A-\u202E\u2060-\u2064\uFEFF]/g;
+
+/**
+ * Canonical form used for every comparison: format characters removed, NFKC normalised, trimmed,
+ * lower-cased. NFKC folds full-width and other compatibility look-alikes onto their ASCII form, so
+ * `ｃｕｓｔｏｍｅｒ＠ｅｘａｍｐｌｅ.com` compares equal to `customer@example.com` instead of silently
+ * missing.
+ */
 export function normalizeEmail(value: string): string {
-  return value.trim().toLowerCase();
+  return value.replace(FORMAT_CHARACTERS, '').normalize('NFKC').trim().toLowerCase();
+}
+
+/**
+ * Whether the stored address is already in canonical form, ignoring case.
+ *
+ * This is the anti-look-alike check. Matching on *normalised* forms alone would be exploitable: if
+ * an attacker could register `cust\u200Bomer@example.com` and pass the mailbox verification for it,
+ * normalisation would then match the victim's WHMCS client. Refusing any address that normalisation
+ * would change — while still allowing ordinary capitalisation — closes that, because a canonical
+ * address cannot be made to collide with a different address by normalising it.
+ */
+export function isCanonicalAddress(value: string): boolean {
+  const trimmed = value.trim();
+  if (trimmed === '') return false;
+  const canonical = trimmed.normalize('NFKC');
+  if (canonical !== trimmed) return false;
+  return !FORMAT_CHARACTERS.test(trimmed);
 }
 
 /** Reads the caller's link. Returns null when the account has never been connected. */
@@ -208,6 +237,15 @@ export async function linkWhmcsClient(
     );
   }
 
+  // The stored address must already be in canonical form. An address that only *becomes* the
+  // billing address after stripping look-alike characters is exactly the collision this refuses.
+  if (!isCanonicalAddress(input.email)) {
+    throw new WhmcsSsoError(
+      'WHMCS_SSO_EMAIL_NOT_CANONICAL',
+      'The account email contains invisible or look-alike characters and cannot be matched automatically',
+    );
+  }
+
   const existing = await findClientLink(pool, input.userId);
   if (existing) return existing;
 
@@ -220,12 +258,16 @@ export async function linkWhmcsClient(
       [input.userId, resolved.clientId, resolved.email],
     );
   } catch (error) {
-    // Either this user was linked concurrently (same user_id) or the client already belongs to
-    // another account. Both mean "ask a human"; neither may overwrite the existing row.
+    // Two callers can pass the "already linked?" check at the same time, or two accounts can race
+    // for the same client. Re-read instead of guessing which happened: a row now owned by *this*
+    // account means the concurrent call was this same user and the outcome is simply the link —
+    // idempotent, not an error. Anything else is a genuine conflict a human must resolve.
     if (isUniqueViolation(error)) {
+      const current = await findClientLink(pool, input.userId);
+      if (current) return current;
       throw new WhmcsSsoError(
         'WHMCS_SSO_LINK_CONFLICT',
-        'That billing account is already connected, or this account was connected concurrently',
+        'That billing account is already connected to a different account',
       );
     }
     throw error;
@@ -276,16 +318,58 @@ export function assertSafeSsoRedirect(config: WhmcsConfig, raw: string): string 
   return url.toString();
 }
 
-/** Hand-offs this customer has already been given inside the current window. */
-export async function countRecentHandoffs(pool: Queryable, userId: string, nowMs: number): Promise<number> {
-  const result = await pool.query<{ count: number | string }>(
-    `SELECT count(*)::int AS count
-       FROM whmcs_sso_handoffs
+export interface HandoffBudget {
+  allowed: boolean;
+  /** Hand-offs now counted in this window, including the one just consumed. */
+  used: number;
+  limit: number;
+  windowStart: string;
+}
+
+/**
+ * Consumes one hand-off from the account's budget — atomically, across every application instance.
+ *
+ * `INSERT … ON CONFLICT DO UPDATE … RETURNING` increments and reads in one statement, so two
+ * instances answering the same account at the same moment get 1 and 2, never 1 and 1. A refused
+ * attempt still increments: the budget is a ceiling per window, not a counter that resets when it
+ * is hit.
+ *
+ * The audit table (0087) stays as evidence of what was minted; this table only decides whether the
+ * next one is allowed.
+ */
+export async function consumeHandoffBudget(
+  pool: Queryable,
+  userId: string,
+  nowMs: number,
+  limit: number = SSO_MAX_HANDOFFS_PER_WINDOW,
+): Promise<HandoffBudget> {
+  const windowStartMs = Math.floor(nowMs / SSO_HANDOFF_WINDOW_MS) * SSO_HANDOFF_WINDOW_MS;
+
+  // Opportunistic housekeeping for this account only: an indexed delete of buckets older than a
+  // day, so the table cannot grow without a global cleanup job nobody runs.
+  await pool.query(
+    `DELETE FROM whmcs_sso_rate_limits
       WHERE user_id = $1
-        AND created_at > to_timestamp($2::double precision / 1000.0) - ($3::int * interval '1 millisecond')`,
-    [userId, nowMs, SSO_HANDOFF_WINDOW_MS],
+        AND window_start < to_timestamp($2::double precision / 1000.0) - interval '1 day'`,
+    [userId, windowStartMs],
   );
-  return Number(result.rows[0]?.count ?? 0);
+
+  const result = await pool.query<{ issued: number | string }>(
+    `INSERT INTO whmcs_sso_rate_limits (user_id, window_start, issued, updated_at)
+     VALUES ($1, to_timestamp($2::double precision / 1000.0), 1, now())
+     ON CONFLICT (user_id, window_start)
+     DO UPDATE SET issued = whmcs_sso_rate_limits.issued + 1, updated_at = now()
+     RETURNING issued`,
+    [userId, windowStartMs],
+  );
+
+  const used = Number(result.rows[0]?.issued ?? 0);
+  return {
+    allowed: used <= limit,
+    used,
+    limit,
+    windowStart: new Date(windowStartMs).toISOString(),
+  };
 }
 
 export interface HandoffInput {
@@ -315,6 +399,15 @@ function mapSsoApiError(error: unknown): never {
   if (error instanceof WhmcsApiError && /sso authentication blocked/i.test(error.message)) {
     throw new WhmcsSsoError('WHMCS_SSO_BLOCKED', 'WHMCS refused to mint a token: SSO is disabled for this client');
   }
+  // The linked client no longer exists in WHMCS (deleted, merged, or the account was recreated).
+  // That is a stale link, not an outage: the customer needs support, not a retry, and the stored
+  // row is now known to be wrong.
+  if (error instanceof WhmcsApiError && /invalid (client|user)_id/i.test(error.message)) {
+    throw new WhmcsSsoError(
+      'WHMCS_SSO_LINK_STALE',
+      'The linked WHMCS client no longer exists; the stored link is stale',
+    );
+  }
   throw error;
 }
 
@@ -333,11 +426,12 @@ export async function mintSsoHandoff(
   const now = deps.now ?? Date.now;
   const newId = deps.newId ?? (() => randomUUID());
 
-  const recent = await countRecentHandoffs(pool, input.userId, now());
-  if (recent >= SSO_MAX_HANDOFFS_PER_WINDOW) {
+  const budget = await consumeHandoffBudget(pool, input.userId, now());
+  if (!budget.allowed) {
     throw new WhmcsSsoError(
       'WHMCS_SSO_RATE_LIMITED',
-      `${recent} hand-offs already issued in the last ${SSO_HANDOFF_WINDOW_MS / 60_000} minutes`,
+      `${budget.limit} hand-offs already issued in the ${SSO_HANDOFF_WINDOW_MS / 60_000}-minute window ` +
+        `starting ${budget.windowStart}`,
     );
   }
 

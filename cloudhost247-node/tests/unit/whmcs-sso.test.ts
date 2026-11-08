@@ -7,7 +7,9 @@ import {
   SSO_MAX_HANDOFFS_PER_WINDOW,
   SSO_TOKEN_TTL_SECONDS,
   assertSafeSsoRedirect,
-  countRecentHandoffs,
+  consumeHandoffBudget,
+  isCanonicalAddress,
+  normalizeEmail,
   findClientLink,
   isSsoDestination,
   linkWhmcsClient,
@@ -74,6 +76,22 @@ function fakePool(handler: (sql: string, params: unknown[]) => { rows: unknown[]
       return handler(sql, params) as { rows: T[] };
     },
   } as unknown as Queryable & { calls: Array<{ sql: string; params: unknown[] }> };
+}
+
+/**
+ * A pool that answers the three statements `mintSsoHandoff` can issue: the rate-limit prune, the
+ * atomic budget increment (whose `issued` value decides the verdict) and the audit insert.
+ */
+function handoffPool(issued = 1, onAuditInsert?: (params: unknown[]) => void) {
+  return fakePool((sql, params) => {
+    if (sql.includes('DELETE FROM whmcs_sso_rate_limits')) return { rows: [] };
+    if (sql.includes('INSERT INTO whmcs_sso_rate_limits')) return { rows: [{ issued }] };
+    if (sql.startsWith('INSERT INTO whmcs_sso_handoffs')) {
+      onAuditInsert?.(params);
+      return { rows: [] };
+    }
+    return { rows: [] };
+  });
 }
 
 const LINK: WhmcsClientLink = {
@@ -240,6 +258,63 @@ describe('linkWhmcsClient', () => {
     expect(transport.requests).toHaveLength(0);
   });
 
+  it('refuses a look-alike address before it calls WHMCS at all', async () => {
+    const transport = transportOf(() =>
+      ok({ result: 'success', clients: { client: [{ id: 4242, email: 'customer@example.com' }] } }),
+    );
+    const client = new WhmcsClient({ config: config(), transport });
+    const pool = fakePool(() => ({ rows: [] }));
+
+    await expect(
+      linkWhmcsClient(pool, client, {
+        userId: LINK.userId,
+        // Full-width characters that NFKC would fold onto the victim's address.
+        email: 'ｃｕｓｔｏｍｅｒ＠ｅｘａｍｐｌｅ.com',
+        emailVerified: true,
+      }),
+    ).rejects.toMatchObject({ code: 'WHMCS_SSO_EMAIL_NOT_CANONICAL' });
+    expect(transport.requests).toHaveLength(0);
+    expect(pool.calls).toHaveLength(0);
+  });
+
+  it('treats a lost race with itself as the same link, not as a conflict', async () => {
+    const transport = transportOf(() =>
+      ok({ result: 'success', clients: { client: [{ id: 4242, email: 'customer@example.com' }] } }),
+    );
+    const client = new WhmcsClient({ config: config(), transport });
+    let inserted = false;
+    const pool = fakePool((sql) => {
+      if (sql.startsWith('INSERT INTO whmcs_client_links')) {
+        inserted = true;
+        const error = new Error('duplicate key value violates unique constraint') as Error & { code: string };
+        error.code = '23505';
+        throw error;
+      }
+      // The concurrent call for the *same* account already wrote the row.
+      if (sql.includes('FROM whmcs_client_links') && inserted) {
+        return {
+          rows: [
+            {
+              user_id: LINK.userId,
+              whmcs_client_id: 4242,
+              whmcs_email: 'customer@example.com',
+              link_method: 'verified-email-match',
+              verified_at: new Date('2026-01-01T00:00:00Z'),
+            },
+          ],
+        };
+      }
+      return { rows: [] };
+    });
+
+    const link = await linkWhmcsClient(pool, client, {
+      userId: LINK.userId,
+      email: 'customer@example.com',
+      emailVerified: true,
+    });
+    expect(link.whmcsClientId).toBe(4242);
+  });
+
   it('turns a unique violation into a conflict instead of overwriting the other link', async () => {
     const transport = transportOf(() =>
       ok({ result: 'success', clients: { client: [{ id: 4242, email: 'customer@example.com' }] } }),
@@ -294,14 +369,7 @@ describe('mintSsoHandoff', () => {
     });
     const client = new WhmcsClient({ config: config({ mode: 'read-only' }), transport });
     const inserted: unknown[] = [];
-    const pool = fakePool((sql, params) => {
-      if (sql.includes('count(*)')) return { rows: [{ count: 0 }] };
-      if (sql.startsWith('INSERT INTO whmcs_sso_handoffs')) {
-        inserted.push(params);
-        return { rows: [] };
-      }
-      return { rows: [] };
-    });
+    const pool = handoffPool(1, (params) => inserted.push(params));
 
     const result = await mintSsoHandoff(
       pool,
@@ -337,7 +405,7 @@ describe('mintSsoHandoff', () => {
       ok({ result: 'success', redirect_url: 'https://billing.example.com/clientarea.php' }),
     );
     const client = new WhmcsClient({ config: config(), transport });
-    const pool = fakePool((sql) => (sql.includes('count(*)') ? { rows: [{ count: 0 }] } : { rows: [] }));
+    const pool = handoffPool();
 
     await mintSsoHandoff(pool, client, { userId: LINK.userId, link: LINK, destination: 'clientarea' });
     expect(bodyOf(transport.requests[0]!).has('destination')).toBe(false);
@@ -346,7 +414,7 @@ describe('mintSsoHandoff', () => {
   it('refuses before touching WHMCS when the customer is over the hand-off budget', async () => {
     const transport = transportOf(() => ok({ result: 'success', redirect_url: 'https://billing.example.com/x' }));
     const client = new WhmcsClient({ config: config(), transport });
-    const pool = fakePool(() => ({ rows: [{ count: SSO_MAX_HANDOFFS_PER_WINDOW }] }));
+    const pool = handoffPool(SSO_MAX_HANDOFFS_PER_WINDOW + 1);
 
     await expect(
       mintSsoHandoff(pool, client, { userId: LINK.userId, link: LINK, destination: 'clientarea' }),
@@ -360,11 +428,24 @@ describe('mintSsoHandoff', () => {
       body: JSON.stringify({ result: 'error', message: 'SSO authentication blocked for client 4242' }),
     }));
     const client = new WhmcsClient({ config: config(), transport });
-    const pool = fakePool((sql) => (sql.includes('count(*)') ? { rows: [{ count: 0 }] } : { rows: [] }));
+    const pool = handoffPool();
 
     await expect(
       mintSsoHandoff(pool, client, { userId: LINK.userId, link: LINK, destination: 'clientarea' }),
     ).rejects.toMatchObject({ code: 'WHMCS_SSO_BLOCKED' });
+  });
+
+  it('reports a deleted WHMCS client as a stale link, not as an outage', async () => {
+    const transport = transportOf(() => ({
+      status: 200,
+      body: JSON.stringify({ result: 'error', message: 'Invalid client_id' }),
+    }));
+    const client = new WhmcsClient({ config: config(), transport });
+    const pool = handoffPool();
+
+    await expect(
+      mintSsoHandoff(pool, client, { userId: LINK.userId, link: LINK, destination: 'clientarea' }),
+    ).rejects.toMatchObject({ code: 'WHMCS_SSO_LINK_STALE' });
   });
 
   it('never retries a token mint, even when the transport times out', async () => {
@@ -380,7 +461,7 @@ describe('mintSsoHandoff', () => {
       transport,
       sleep: async () => undefined,
     });
-    const pool = fakePool((sql) => (sql.includes('count(*)') ? { rows: [{ count: 0 }] } : { rows: [] }));
+    const pool = handoffPool();
 
     await expect(
       mintSsoHandoff(pool, client, { userId: LINK.userId, link: LINK, destination: 'clientarea' }),
@@ -393,22 +474,22 @@ describe('mintSsoHandoff', () => {
       ok({ result: 'success', redirect_url: 'https://attacker.example/sso.php?token=abc' }),
     );
     const client = new WhmcsClient({ config: config(), transport });
-    const pool = fakePool((sql) => (sql.includes('count(*)') ? { rows: [{ count: 0 }] } : { rows: [] }));
+    const pool = handoffPool();
 
     await expect(
       mintSsoHandoff(pool, client, { userId: LINK.userId, link: LINK, destination: 'clientarea' }),
     ).rejects.toMatchObject({ code: 'WHMCS_SSO_UNSAFE_REDIRECT' });
-    // Nothing was recorded: the hand-off never happened.
-    expect(pool.calls.filter((c) => c.sql.startsWith('INSERT'))).toHaveLength(0);
+    // No audit row was written: the hand-off never happened, even though the budget was consumed.
+    expect(pool.calls.filter((c) => c.sql.includes('INSERT INTO whmcs_sso_handoffs'))).toHaveLength(0);
   });
 
   it('keeps an upstream error message out of the customer-facing failure', async () => {
     const transport = transportOf(() => ({
       status: 200,
-      body: JSON.stringify({ result: 'error', message: 'Invalid client_id (secret was abcd1234)' }),
+      body: JSON.stringify({ result: 'error', message: 'Gateway exploded near secret abcd1234' }),
     }));
     const client = new WhmcsClient({ config: config(), transport });
-    const pool = fakePool((sql) => (sql.includes('count(*)') ? { rows: [{ count: 0 }] } : { rows: [] }));
+    const pool = handoffPool();
 
     try {
       await mintSsoHandoff(pool, client, { userId: LINK.userId, link: LINK, destination: 'clientarea' });
@@ -422,14 +503,60 @@ describe('mintSsoHandoff', () => {
   });
 });
 
-describe('countRecentHandoffs', () => {
-  it('counts inside the configured window, in SQL, from the stored audit rows', async () => {
-    const pool = fakePool(() => ({ rows: [{ count: '3' }] }));
-    const count = await countRecentHandoffs(pool, LINK.userId, Date.parse('2026-05-01T12:00:00Z'));
-    expect(count).toBe(3);
-    expect(pool.calls[0]!.sql).toContain('whmcs_sso_handoffs');
-    expect(pool.calls[0]!.params[0]).toBe(LINK.userId);
-    expect(pool.calls[0]!.params[1]).toBe(Date.parse('2026-05-01T12:00:00Z'));
+describe('consumeHandoffBudget', () => {
+  function budgetPool(issued: number | string) {
+    return fakePool((sql) =>
+      sql.includes('INSERT INTO whmcs_sso_rate_limits') ? { rows: [{ issued }] } : { rows: [] },
+    );
+  }
+
+  it('increments and reads in one statement, so concurrent instances cannot both read "9"', async () => {
+    const pool = budgetPool(4);
+    const budget = await consumeHandoffBudget(pool, LINK.userId, Date.parse('2026-05-01T12:00:00Z'));
+
+    expect(budget).toMatchObject({ allowed: true, used: 4, limit: SSO_MAX_HANDOFFS_PER_WINDOW });
+    const increment = pool.calls.find((call) => call.sql.includes('INSERT INTO whmcs_sso_rate_limits'))!;
+    // The whole point: an UPSERT that returns the post-increment value. No SELECT-then-INSERT.
+    expect(increment.sql).toContain('ON CONFLICT');
+    expect(increment.sql).toContain('RETURNING issued');
+    expect(pool.calls.some((call) => /SELECT count\(\*\)/i.test(call.sql))).toBe(false);
+  });
+
+  it('puts every request in a whole-number window bucket', async () => {
+    const windowStart = Date.parse('2026-05-01T12:05:00Z');
+    const pool = budgetPool(1);
+    const budget = await consumeHandoffBudget(pool, LINK.userId, windowStart + 61_000);
+    expect(budget.windowStart).toBe(new Date(windowStart).toISOString());
+    const increment = pool.calls.find((call) => call.sql.includes('INSERT INTO whmcs_sso_rate_limits'))!;
+    expect(increment.params[1]).toBe(windowStart);
+  });
+
+  it('refuses the request that goes over the limit, and keeps counting', async () => {
+    const allowed = await consumeHandoffBudget(budgetPool(SSO_MAX_HANDOFFS_PER_WINDOW), LINK.userId, 0);
+    expect(allowed.allowed).toBe(true);
+
+    const refused = await consumeHandoffBudget(budgetPool(SSO_MAX_HANDOFFS_PER_WINDOW + 1), LINK.userId, 0);
+    expect(refused.allowed).toBe(false);
+    expect(refused.used).toBe(SSO_MAX_HANDOFFS_PER_WINDOW + 1);
+  });
+});
+
+describe('email canonicalisation', () => {
+  it('normalises case and folds look-alike forms to one comparable value', () => {
+    expect(normalizeEmail(' Customer@Example.COM ')).toBe('customer@example.com');
+    expect(normalizeEmail('ｃｕｓｔｏｍｅｒ＠ｅｘａｍｐｌｅ.com')).toBe('customer@example.com');
+    expect(normalizeEmail('cust\u200Bomer@example.com'.replace('\\u200B', '\u200B'))).toBe('customer@example.com');
+  });
+
+  it('treats a plain address as canonical, whatever its capitalisation', () => {
+    expect(isCanonicalAddress('customer@example.com')).toBe(true);
+    expect(isCanonicalAddress(' Customer@Example.COM ')).toBe(true);
+  });
+
+  it('refuses an address that only matches after normalising look-alike characters', () => {
+    expect(isCanonicalAddress('ｃｕｓｔｏｍｅｒ＠ｅｘａｍｐｌｅ.com')).toBe(false);
+    expect(isCanonicalAddress('cust\u200Bomer@example.com'.replace('\\u200B', '\u200B'))).toBe(false);
+    expect(isCanonicalAddress('   ')).toBe(false);
   });
 });
 

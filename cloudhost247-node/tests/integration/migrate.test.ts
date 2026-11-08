@@ -130,6 +130,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     // B5.1 — one customer identity: the account↔WHMCS-client link and the audit rows for SSO
     // hand-offs (0087). The token itself is never stored.
     '0087_create_whmcs_identity.sql',
+    // Cross-instance SSO hand-off budget (0088): one atomic counter row per account per window.
+    '0088_create_whmcs_sso_rate_limits.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -225,6 +227,7 @@ describe('migration runner against the real database/migrations SQL files', () =
         'whmcs_operations',
         'whmcs_client_links',
         'whmcs_sso_handoffs',
+        'whmcs_sso_rate_limits',
       ])
     );
   });

@@ -17,6 +17,7 @@
  *   cart      — the WHMCS cart hand-off, built only from a verified binding
  *   sso       — the one-identity link and the single-use session hand-off into the client area
  *   orderability — the single public verdict "may this be bought online, in these cycles"
+ *   discovery — the read-only C1 snapshot of a real installation, and its review report
  *   idempotency — one durable record per order/payment operation, so a retry cannot double-charge
  */
 
@@ -31,4 +32,5 @@ export * from './product-map';
 export * from './cart';
 export * from './sso';
 export * from './orderability';
+export * from './discovery';
 export * from './idempotency';

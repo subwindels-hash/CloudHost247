@@ -90,6 +90,8 @@ function toHttpError(error: unknown): HttpError {
       case 'WHMCS_SSO_NOT_VERIFIED':
       case 'WHMCS_SSO_ALREADY_LINKED':
       case 'WHMCS_SSO_LINK_CONFLICT':
+      case 'WHMCS_SSO_LINK_STALE':
+      case 'WHMCS_SSO_EMAIL_NOT_CANONICAL':
       case 'WHMCS_SSO_CLIENT_AMBIGUOUS':
       case 'WHMCS_SSO_EMAIL_MISMATCH':
       case 'WHMCS_SSO_BLOCKED':
