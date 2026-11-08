@@ -152,9 +152,14 @@ npx vitest run tests/unit/email-trace-*.test.ts tests/integration/email-trace-*.
 #   11 diagnostics composition
 #   15 repository + 10 collector + 19 API (integration, real migrations on PGlite)
 
-npx vitest run frontend/tests               # full frontend suite green (includes 12 page tests)
+npx vitest run frontend/tests               # 66 files / 798 tests green (includes 12 page tests)
+
+npx vitest run tests/unit                   # 136 files / 1969 tests green (whole backend unit surface)
 cd ../server-agent && npm test              # 83 tests green (12 new mail-trace tests)
 ```
+
+The last two figures are the whole surrounding suite, not just this feature: they were re-run after
+the diagnostics and retention changes to confirm nothing else in the platform regressed.
 
 What these numbers do **not** mean: no test in this repository has read a real Exim log, contacted a
 real agent, or verified a real queue listing. Every fixture used by the unit tests is synthetic and
