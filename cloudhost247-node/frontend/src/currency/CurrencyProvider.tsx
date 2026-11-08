@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { publicFetch } from '../lib/api';
+import { all } from 'iso-3166-1';
 import {
   BASE_CURRENCY,
   CURRENCY_STORAGE_KEY,
@@ -16,9 +17,9 @@ export { CURRENCY_STORAGE_KEY } from './display-currency';
 
 export type RatesState = 'loading' | 'ready' | 'unavailable';
 export const COUNTRY_STORAGE_KEY = 'ch247.country';
-export const COUNTRY_CODES = ['NG','GH','KE','ZA','EG','MA','TZ','UG','RW','US','CA','MX','GB','IE','FR','DE','ES','IT','NL','PT','BE','AT','FI','GR','PL','SE','CH','DK','NO','BR','AR','IN','PK','BD','CN','HK','JP','KR','SG','MY','ID','PH','AE','SA','TR','AU','NZ'] as const;
+export const COUNTRY_CODES: readonly string[] = all().map((country) => country.alpha2);
 function validCountry(value: unknown): value is string {
-  return typeof value === 'string' && COUNTRY_CODES.includes(value.toUpperCase() as typeof COUNTRY_CODES[number]);
+  return typeof value === 'string' && COUNTRY_CODES.includes(value.toUpperCase());
 }
 function storedCountry(): string | null {
   try { const country = localStorage.getItem(COUNTRY_STORAGE_KEY); return validCountry(country) ? country.toUpperCase() : null; } catch { return null; }
@@ -28,10 +29,6 @@ export function browserCountry(languages: readonly string[]): string | null {
     try { const region = new Intl.Locale(language).region; if (validCountry(region)) return region.toUpperCase(); } catch { /* invalid browser locale */ }
   }
   return null;
-}
-function browserCountryHint(): string | null {
-  if (typeof navigator === 'undefined') return null;
-  return browserCountry([...Array.from(navigator.languages || []), navigator.language]);
 }
 
 
@@ -279,22 +276,33 @@ export function CurrencyProvider({
   });
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(storedCountry);
-  const [ipCountry, setIpCountry] = useState<string | null>(() => browserCountryHint());
+  const [ipCountry, setIpCountry] = useState<string | null>(null);
   useEffect(() => {
-    if (initialStatus || selectedCountry || requested || savedPreference || authenticatedPreference) return undefined;
+    if (selectedCountry) return undefined;
     let cancelled = false;
-    publicFetch<{ country: string | null }>('/api/v1/currency/geo-country')
-      .then((payload) => {
-        if (cancelled) return;
-        if (validCountry(payload.country)) setIpCountry(payload.country.toUpperCase());
-      })
-      .catch(() => {
-        /* Geolocation failed gracefully — keep ipCountry as null */
-      });
-    return () => {
-      cancelled = true;
+    let inFlight = false;
+    const refresh = () => {
+      if (cancelled || inFlight || document.visibilityState === 'hidden') return;
+      inFlight = true;
+      publicFetch<{ country: string | null }>('/api/v1/currency/geo-country', { cache: 'no-store' })
+        .then((payload) => {
+          if (!cancelled) setIpCountry(validCountry(payload.country) ? payload.country.toUpperCase() : null);
+        })
+        .catch(() => { if (!cancelled) setIpCountry(null); })
+        .finally(() => { inFlight = false; });
     };
-  }, [initialStatus, selectedCountry, requested, savedPreference, authenticatedPreference]);
+    const onVisible = () => { if (document.visibilityState === 'visible') refresh(); };
+    refresh();
+    const timer = window.setInterval(refresh, 5 * 60 * 1000);
+    window.addEventListener('online', refresh);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { cancelled = true; window.clearInterval(timer); window.removeEventListener('online', refresh); document.removeEventListener('visibilitychange', onVisible); };
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    const country = selectedCountry ?? ipCountry;
+    if (country) suggestCountryLocale(country);
+  }, [selectedCountry, ipCountry, suggestCountryLocale]);
 
   useEffect(() => {
     if (initialStatus) return undefined;
@@ -360,7 +368,11 @@ export function CurrencyProvider({
     const next = code.toUpperCase();
     try { localStorage.setItem(COUNTRY_STORAGE_KEY, next); } catch { /* applies for this page view */ }
     setSelectedCountry(next);
-    suggestCountryLocale(next);
+    // Choosing a country resets prior display defaults; later explicit language/currency choices
+    // remain independent and are respected until the visitor chooses another country.
+    try { localStorage.removeItem(CURRENCY_STORAGE_KEY); } catch { /* storage unavailable */ }
+    setRequested(null);
+    suggestCountryLocale(next, true);
     return true;
   }, [suggestCountryLocale]);
 

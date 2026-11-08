@@ -101,6 +101,33 @@ test('homepage plan button preserves product, plan and billing period', async ({
   await expect(planCard.getByRole('link', { name: 'Choose plan' })).toHaveAttribute('href', '/cart?product=web-hosting&plan=starter&period=monthly');
 });
 
+test('homepage plan buttons stay stable and clickable on hover', async ({ page }) => {
+  const plans = [plan, { ...plan, slug: 'plus', name: 'Audit Plus' }, { ...plan, slug: 'pro', name: 'Audit Pro' }];
+  await page.route('**/api/**', async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    const body = path === '/api/v1/catalog/products/web-hosting/plans' ? { product, plans } : {};
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+  });
+  await page.goto('/');
+  const cards = page.locator('.hg-plan');
+  await expect(cards).toHaveCount(3);
+  for (const card of await cards.all()) {
+    const button = card.getByRole('link', { name: 'Choose plan' });
+    await button.scrollIntoViewIfNeeded();
+    await page.mouse.move(0, 0);
+    const before = await button.boundingBox();
+    await button.hover();
+    const after = await button.boundingBox();
+    expect(before).not.toBeNull();
+    expect(after).not.toBeNull();
+    expect(Math.abs(after!.x - before!.x)).toBeLessThan(1);
+    expect(Math.abs(after!.y - before!.y)).toBeLessThan(1);
+    await expect(button).toHaveCSS('transform', 'none');
+  }
+  await cards.last().getByRole('link', { name: 'Choose plan' }).click();
+  await expect(page).toHaveURL(/plan=pro/);
+});
+
 test('expert request keeps the selected offering and submits it to the API', async ({ page }) => {
   const offerings = [
     { id: 'a', code: 'design', name: 'Design', summary: '', description: '', deliverables: [] },

@@ -1,4 +1,7 @@
 import type { FastifyInstance } from 'fastify';
+import geoip from 'geoip-lite';
+import { whereAlpha2 } from 'iso-3166-1';
+import { resolveVisitorIp } from './visitor-ip';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
@@ -19,34 +22,20 @@ export async function registerCurrencyRoutes(app: FastifyInstance, env: Env, ove
     return buildDisplayCurrencyStatus(snapshot, new Date(), maxAgeMs);
   });
 
-  /**
-   * IP geolocation hint. Returns the ISO 3166-1 alpha-2 country code for the visitor's IP
-   * address, respecting trusted proxy headers when configured. This is used by the frontend to
-   * suggest a suitable display currency — the third of four signals, after an explicit choice and
-   * the authenticated account's preference. The result is advisory only: the customer can always
-   * override it, and it never affects billing.
-   *
-   * Two properties are deliberate and must survive any real geolocation being wired in:
-   *
-   *   1. The response is per-visitor, so it is marked `private` and never `public`. A public cache
-   *      directive on a response that varies by caller is how one visitor's country ends up served
-   *      to everyone else for a minute — which would turn an advisory hint into an authoritative
-   *      (and wrong) inference. `Vary` names the headers a trusted proxy would vary on.
-   *   2. The visitor's address is not echoed back. The caller is not the only reader of this
-   *      response — it passes through caches and logs — and nothing consumes the value; the
-   *      frontend reads `country` only.
-   *
-   * NOTE: geolocation is not configured in this deployment, so `country` is always null and the
-   * frontend keeps its default currency. When a trusted reverse proxy (Cloudflare, NGINX) is
-   * configured, the proxy sets the real client IP and this handler must validate it against the
-   * trusted proxy list before resolving a country.
-   */
-  app.get('/api/v1/currency/geo-country', async (_request, reply) => {
-    reply.header('Cache-Control', 'private, max-age=60');
+  // Resolve only a verified client IP. Never trust arbitrary proxy headers or return the IP.
+  // The bundled GeoLite database is local: visitor IPs are not sent to a third party.
+  app.get('/api/v1/currency/geo-country', async (request, reply) => {
+    reply.header('Cache-Control', 'private, no-store, max-age=0');
     reply.header('Vary', 'CF-Connecting-IP, X-Forwarded-For');
-    return {
-      country: null,
-      note: 'IP geolocation is advisory; configure a trusted proxy or geolocation service for currency detection.',
-    };
+    const forwarded = request.headers['x-forwarded-for'];
+    const ip = resolveVisitorIp(request.raw.socket.remoteAddress, typeof forwarded === 'string' ? forwarded : undefined, env.VISITOR_IP_MODE, env.VISITOR_IP_TRUSTED_PROXIES);
+    let country: string | null = null;
+    if (ip) {
+      try {
+        const code = geoip.lookup(ip)?.country?.toUpperCase();
+        if (code && whereAlpha2(code)) country = code;
+      } catch { /* A missing or unreadable database must not break the site. */ }
+    }
+    return country ? { country } : { country: null, note: 'IP geolocation is advisory and currently unavailable.' };
   });
 }

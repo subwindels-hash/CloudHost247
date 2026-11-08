@@ -58,7 +58,7 @@ describe('LanguageSwitcher', () => {
     expect(screen.queryByRole('list', { name: 'Choose a language' })).toBeNull();
   });
 
-  it('opens the list, marks the current language, and reports how many are available', async () => {
+  it('opens the list and shows only language names', async () => {
     renderSwitcher();
     await userEvent.click(screen.getByRole('button', { name: 'Language: English' }));
 
@@ -66,7 +66,8 @@ describe('LanguageSwitcher', () => {
     const list = screen.getByRole('list', { name: 'Choose a language' });
     const current = within(list).getByRole('button', { name: /English/ });
     expect(current.getAttribute('aria-current')).toBe('true');
-    expect(screen.getByText('13 languages available')).toBeTruthy();
+    expect(screen.queryByText('13 languages available')).toBeNull();
+    expect(within(list).getByRole('button', { name: 'Français' }).textContent).toBe('Français');
   });
 
   it('opens from the keyboard with Enter, and closes with Escape returning focus to the trigger', async () => {

@@ -8,6 +8,21 @@ export interface Translator {
   plural(key: string, count: number, params?: Params): string;
 }
 
+/** Missing catalog entries observed in this page session. Only locale and message keys are stored;
+ * translated text, interpolation values and customer data are never recorded or transmitted. */
+const missingKeys = new Map<string, Set<string>>();
+function recordMissing(locale: string, key: string): void {
+  // Only application-defined keys are accepted: never retain arbitrary dynamic/user content.
+  if (!(key in en)) return;
+  const keys = missingKeys.get(locale) ?? new Set<string>();
+  keys.add(key);
+  missingKeys.set(locale, keys);
+}
+export function getMissingTranslationKeys(): Record<string, string[]> {
+  return Object.fromEntries([...missingKeys].map(([locale, keys]) => [locale, [...keys].sort()]));
+}
+export function clearMissingTranslationKeys(): void { missingKeys.clear(); }
+
 /**
  * Replaces `{name}` placeholders. A placeholder with no value is left visible, so a missing
  * parameter shows up in review instead of silently disappearing.
@@ -25,7 +40,10 @@ export function interpolate(template: string, params: Params = {}): string {
  * catalogue tests.
  */
 export function createTranslator(locale: string, catalogue: Catalogue, fallback: Catalogue = en): Translator {
-  const lookup = (key: string): string | undefined => catalogue[key] ?? fallback[key];
+  const lookup = (key: string): string | undefined => {
+    if (catalogue[key] === undefined) recordMissing(locale, key);
+    return catalogue[key] ?? fallback[key];
+  };
   let rules: Intl.PluralRules;
   try {
     rules = new Intl.PluralRules(locale);
@@ -40,7 +58,14 @@ export function createTranslator(locale: string, catalogue: Catalogue, fallback:
 
   translate.plural = (key: string, count: number, params?: Params) => {
     const category = rules.select(count);
-    const template = lookup(`${key}.${category}`) ?? lookup(`${key}.other`);
+    const categoryKey = `${key}.${category}`;
+    const otherKey = `${key}.other`;
+    // A locale's "other" form is a valid plural fallback, not a missing translation.
+    const local = catalogue[categoryKey] ?? catalogue[otherKey];
+    if (local === undefined) {
+      recordMissing(locale, otherKey in en ? otherKey : categoryKey);
+    }
+    const template = local ?? fallback[categoryKey] ?? fallback[otherKey];
     return template === undefined ? key : interpolate(template, { count, ...params });
   };
   return translate;

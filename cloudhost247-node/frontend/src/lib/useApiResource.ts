@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { apiFetch, ApiRequestError } from './api';
+import { useLocale } from '../i18n/LocaleProvider';
 
 export type ApiResourceState<T> =
   | { status: 'loading' }
@@ -16,13 +17,18 @@ export type ApiResourceState<T> =
  * content-specific (e.g. "no plans configured yet" vs. "no service categories yet").
  */
 export function useApiResource<T>(path: string): ApiResourceState<T> {
+  const { locale } = useLocale();
+  // Only catalogue endpoints currently support localized product content. Query strings are
+  // explicit so HTTP caches cannot accidentally serve one language to another visitor.
+  const requestPath = /^\/api\/v1\/catalog(?:\/|\?|$)/.test(path)
+    ? `${path}${path.includes('?') ? '&' : '?'}lang=${encodeURIComponent(locale.code)}` : path;
   const [state, setState] = useState<ApiResourceState<T>>({ status: 'loading' });
 
   useEffect(() => {
     let cancelled = false;
     setState({ status: 'loading' });
 
-    apiFetch<T>(path)
+    apiFetch<T>(requestPath)
       .then((data) => {
         if (!cancelled) setState({ status: 'success', data });
       })
@@ -39,7 +45,7 @@ export function useApiResource<T>(path: string): ApiResourceState<T> {
     return () => {
       cancelled = true;
     };
-  }, [path]);
+  }, [requestPath]);
 
   return state;
 }

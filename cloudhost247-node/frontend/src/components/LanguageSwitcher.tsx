@@ -68,7 +68,7 @@ export default function LanguageSwitcher() {
   return (
     <div
       ref={rootRef}
-      className="ch247-locale"
+      className="ch247-locale ch247-language"
       onBlur={(event) => {
         if (open && !event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false);
       }}
@@ -105,16 +105,11 @@ export default function LanguageSwitcher() {
                     onClick={() => choose(option.code)}
                   >
                     <span>{option.nativeName}</span>
-                    {option.englishName !== option.nativeName ? (
-                      <span className="ch247-locale__english">{option.englishName}</span>
-                    ) : null}
                   </button>
                 </li>
               );
             })}
           </ul>
-          <p className="ch247-locale__count">{t.plural('language.switcher.count', LOCALES.length)}</p>
-          <p className="ch247-locale__note">{t('language.switcher.note')}</p>
         </div>
       ) : null}
     </div>

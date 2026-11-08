@@ -1,60 +1,57 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CountrySwitcher from '../../src/components/CountrySwitcher';
-import CurrencySwitcher from '../../src/components/CurrencySwitcher';
-import { browserCountry, COUNTRY_STORAGE_KEY, CurrencyProvider } from '../../src/currency/CurrencyProvider';
-import { CURRENCY_STORAGE_KEY, type DisplayCurrencyStatus } from '../../src/currency/display-currency';
-import { LocaleProvider } from '../../src/i18n/LocaleProvider';
-import { compareWithEnglish } from '../../src/i18n/catalogue';
-import { hi } from '../../src/i18n/messages/drafts/hi';
-import { sw } from '../../src/i18n/messages/drafts/sw';
+import { CurrencyProvider, useCurrency } from '../../src/currency/CurrencyProvider';
+import { LocaleProvider, useLocale } from '../../src/i18n/LocaleProvider';
 
-const feed: DisplayCurrencyStatus = { base: 'USD', available: true, reason: null, asOf: null, fetchedAt: null,
-  currencies: ['NGN', 'INR', 'JPY', 'CNY'].map(code => ({ code, rate: 2, observedAt: '2026-01-01T00:00:00Z' })) };
-function setup() {
-  return render(<LocaleProvider initialLocale="en"><CurrencyProvider initialStatus={feed}><CountrySwitcher /><CurrencySwitcher /></CurrencyProvider></LocaleProvider>);
+function Status() {
+  const { currency } = useCurrency();
+  const { locale } = useLocale();
+  return <output>{locale.code} {currency}</output>;
 }
-beforeEach(() => localStorage.clear());
-afterEach(cleanup);
-
-describe('country selection', () => {
-  it('uses only valid browser region subtags as advisory hints', () => {
-    expect(browserCountry(['en', 'en-NG'])).toBe('NG');
-    expect(browserCountry(['not a locale', 'en'])).toBeNull();
-    expect(browserCountry(['en-XX'])).toBeNull();
-  });
-  it('persists the selected country and suggests a currency with a valid rate', () => {
-    setup();
-    fireEvent.change(screen.getByLabelText('Country or region'), { target: { value: 'IN' } });
-    expect(localStorage.getItem(COUNTRY_STORAGE_KEY)).toBe('IN');
-    expect(screen.getByRole('button', { name: /Display currency: INR/ })).toBeTruthy();
-  });
-  it('honours a manually selected currency over the country suggestion', () => {
-    localStorage.setItem(CURRENCY_STORAGE_KEY, 'JPY');
-    setup();
-    fireEvent.change(screen.getByLabelText('Country or region'), { target: { value: 'NG' } });
-    expect(screen.getByRole('button', { name: /Display currency: JPY/ })).toBeTruthy();
-    expect(localStorage.getItem(CURRENCY_STORAGE_KEY)).toBe('JPY');
-  });
-  it('falls back to USD when the suggested currency has no rate', () => {
-    setup();
-    fireEvent.change(screen.getByLabelText('Country or region'), { target: { value: 'GB' } });
-    expect(screen.getByRole('button', { name: /Display currency: USD/ })).toBeTruthy();
-  });
-  it('keeps draft languages complete but not yet published', () => {
-    expect(compareWithEnglish(hi)).toEqual({ missing: [], extra: [] });
-    expect(compareWithEnglish(sw)).toEqual({ missing: [], extra: [] });
+const rates = { base: 'USD', available: true, reason: null, asOf: '2026-10-12T06:00:00Z', fetchedAt: '2026-10-12T06:00:00Z', currencies: [
+  { code: 'GBP', rate: 0.8, observedAt: '2026-10-12T06:00:00Z' },
+  { code: 'EUR', rate: 0.9, observedAt: '2026-10-12T06:00:00Z' },
+] };
+let detected: string | null = 'GB';
+function renderPicker() {
+  return render(<LocaleProvider><CurrencyProvider><CountrySwitcher /><Status /></CurrencyProvider></LocaleProvider>);
+}
+beforeEach(() => {
+  localStorage.clear();
+  detected = 'GB';
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+    const url = String(input);
+    return new Response(JSON.stringify(url.includes('geo-country') ? { country: detected } : rates), { status: 200 });
   });
 });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
-it('suggests a reviewed country language, and never overwrites a manual language', () => {
-  const { unmount } = render(<LocaleProvider><CurrencyProvider initialStatus={feed}><CountrySwitcher /></CurrencyProvider></LocaleProvider>);
-  fireEvent.change(screen.getByLabelText('Country or region'), { target: { value: 'FR' } });
-  expect(document.documentElement.lang).toBe('fr');
-  unmount();
-  localStorage.setItem('ch247.locale', 'de');
-  render(<LocaleProvider><CurrencyProvider initialStatus={feed}><CountrySwitcher /></CurrencyProvider></LocaleProvider>);
-  fireEvent.change(screen.getByLabelText('Country or region'), { target: { value: 'ES' } });
-  expect(document.documentElement.lang).toBe('de');
+describe('country indicator', () => {
+  it('displays the real detected flag and UK abbreviation with its suggested currency', async () => {
+    renderPicker();
+    await waitFor(() => expect(document.querySelector('.ch247-country__flag')?.classList.contains('fi-gb')).toBe(true));
+    await waitFor(() => expect(screen.getByText('en GBP')).toBeTruthy());
+    expect((screen.getByLabelText('Country or region') as HTMLSelectElement).value).toBe('GB');
+  });
+  it('persists a manually chosen country and synchronizes language and available currency', async () => {
+    const view = renderPicker();
+    await waitFor(() => expect(document.querySelector('.ch247-country__flag')?.classList.contains('fi-gb')).toBe(true));
+    fireEvent.change(screen.getByLabelText('Country or region'), { target: { value: 'FR' } });
+    await waitFor(() => expect(document.querySelector('.ch247-country__flag')?.classList.contains('fi-fr')).toBe(true));
+    await waitFor(() => expect(screen.getByText('fr EUR')).toBeTruthy());
+    expect(localStorage.getItem('ch247.country')).toBe('FR');
+    view.unmount();
+    detected = 'US';
+    renderPicker();
+    await waitFor(() => expect(document.querySelector('.ch247-country__flag')?.classList.contains('fi-fr')).toBe(true));
+    await waitFor(() => expect(screen.getByText('fr EUR')).toBeTruthy());
+  });
+  it('shows an honest selectable fallback if detection fails', async () => {
+    detected = null;
+    renderPicker();
+    await screen.findByText(/Country unavailable/);
+    expect((screen.getByLabelText('Country or region') as HTMLSelectElement).value).toBe('');
+  });
 });

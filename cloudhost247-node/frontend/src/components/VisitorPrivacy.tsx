@@ -34,7 +34,6 @@ export default function VisitorPrivacy() {
     <div className="ch247-visitor-privacy">
       <div className="ch247-visitor-privacy__location">
         <CountrySwitcher />
-        <span aria-hidden="true"> – </span>
         <span className="ch247-visitor-privacy__ip" aria-live="polite">IP: {ip ?? 'unavailable'}</span>
       </div>
       <div className="ch247-privacy-ticker" role="region" aria-label="Privacy status">

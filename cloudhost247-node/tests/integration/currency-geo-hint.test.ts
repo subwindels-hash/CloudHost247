@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import geoip from 'geoip-lite';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadEnv } from '../../src/config/env';
 import type { Queryable } from '../../src/db/types';
@@ -43,6 +44,32 @@ function buildInstance() {
 describe('GET /api/v1/currency/geo-country', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('resolves a verified direct visitor IP using the local GeoIP database', async () => {
+    const directEnv = loadEnv({ NODE_ENV: 'test', DATABASE_URL: 'postgresql://user:pass@localhost:5432/db', JWT_SECRET: 'e'.repeat(32), VISITOR_IP_MODE: 'direct' } as NodeJS.ProcessEnv);
+    const lookup = vi.spyOn(geoip, 'lookup').mockReturnValue({ country: 'NG' } as ReturnType<typeof geoip.lookup>);
+    const app = Fastify();
+    await registerCurrencyRoutes(app, directEnv, forbiddenPool);
+    const res = await app.inject({ method: 'GET', url: '/api/v1/currency/geo-country', remoteAddress: '8.8.8.8', headers: { 'x-forwarded-for': '1.1.1.1' } });
+    expect(lookup).toHaveBeenCalledWith('8.8.8.8');
+    expect(res.json()).toEqual({ country: 'NG' });
+    expect(res.body).not.toContain('8.8.8.8');
+    await app.close();
+  });
+
+  it('ignores untrusted forwarding headers and rejects invalid GeoIP country codes', async () => {
+    const proxyEnv = loadEnv({ NODE_ENV: 'test', DATABASE_URL: 'postgresql://user:pass@localhost:5432/db', JWT_SECRET: 'e'.repeat(32), VISITOR_IP_MODE: 'trusted-proxy', VISITOR_IP_TRUSTED_PROXIES: '10.0.0.0/8' } as NodeJS.ProcessEnv);
+    const lookup = vi.spyOn(geoip, 'lookup').mockReturnValue({ country: 'XX' } as ReturnType<typeof geoip.lookup>);
+    const app = Fastify();
+    await registerCurrencyRoutes(app, proxyEnv, forbiddenPool);
+    const untrusted = await app.inject({ method: 'GET', url: '/api/v1/currency/geo-country', remoteAddress: '8.8.8.8', headers: { 'x-forwarded-for': '1.1.1.1' } });
+    expect(untrusted.json().country).toBeNull();
+    expect(lookup).not.toHaveBeenCalled();
+    const invalid = await app.inject({ method: 'GET', url: '/api/v1/currency/geo-country', remoteAddress: '10.0.0.1', headers: { 'x-forwarded-for': '1.1.1.1' } });
+    expect(lookup).toHaveBeenCalledWith('1.1.1.1');
+    expect(invalid.json().country).toBeNull();
+    await app.close();
   });
 
   it('answers a country hint without a public cache directive', async () => {
