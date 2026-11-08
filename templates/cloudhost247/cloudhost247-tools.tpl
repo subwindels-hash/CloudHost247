@@ -1,5 +1,5 @@
 {if $chToolsHtml}
-<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/tools.css?v=20261107">
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/tools.css?v=2026110801">
 {$chToolsHtml nofilter}
 <script type="module" src="{$WEB_ROOT}/templates/cloudhost247/js/tools.js?v=20261016"></script>
 {else}
