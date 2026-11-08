@@ -123,6 +123,57 @@ switch ($command) {
 
         exit(Result::isOk($result) ? 0 : 1);
 
+    case 'reseller-subscription':
+        // Privileged, read-only diagnostic. This command does not associate a
+        // customer with a WHMCS service or update billing/provisioning status.
+        $args = [];
+        foreach (array_slice($argv, 2) as $argument) {
+            if (preg_match('/^--(server_id|customer_id|subscription_id)=(.+)$/', $argument, $match)) {
+                $args[$match[1]] = $match[2];
+            }
+        }
+        $serverId = (int) ($args['server_id'] ?? 0);
+        $customerId = (string) ($args['customer_id'] ?? '');
+        $subscriptionId = (string) ($args['subscription_id'] ?? '');
+        if ($serverId <= 0 || $customerId === '' || $subscriptionId === '') {
+            fwrite(STDERR, "Usage: reseller-subscription --server_id=N --customer_id=ID --subscription_id=ID\n");
+            exit(1);
+        }
+        try {
+            $server = Capsule::table('tblservers')->where('id', $serverId)
+                ->where('type', 'cloudhost247_email_hosting')->first();
+        } catch (\Throwable $e) {
+            fwrite(STDERR, "Could not load WHMCS server configuration.\n");
+            exit(1);
+        }
+        if (!$server) {
+            fwrite(STDERR, "Email Hosting server not found.\n");
+            exit(1);
+        }
+        $config = new \CloudHost247\Email\Support\Config([
+            'serveraccesshash' => Reconciler::decryptServerField((string) $server->accesshash),
+        ]);
+        $client = new \CloudHost247\Email\Providers\GoogleResellerConnection($config);
+        $result = $client->getSubscription($customerId, $subscriptionId);
+        if (!Result::isOk($result)) {
+            fwrite(STDERR, (string) $result['message'] . "\n");
+            exit(1);
+        }
+        $subscription = $result['data']['body'];
+        // Print only the fields needed to inspect subscription status, not the
+        // token or the complete provider response.
+        $summary = [
+            'customerId' => $subscription['customerId'] ?? null,
+            'subscriptionId' => $subscription['subscriptionId'] ?? null,
+            'skuId' => $subscription['skuId'] ?? null,
+            'status' => $subscription['status'] ?? null,
+            'plan' => $subscription['plan'] ?? null,
+            'seats' => $subscription['seats'] ?? null,
+            'renewalSettings' => $subscription['renewalSettings'] ?? null,
+        ];
+        echo json_encode($summary, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n";
+        exit(0);
+
     case 'status':
         Migrator::ensureSchema();
 
@@ -166,6 +217,8 @@ CloudHost247 Email Hosting CLI
   reconcile  [--batch=10]                  Resolve uncertain operations
   service    --service_id=N                Synchronise one service
   status                                   Health summary
+  reseller-subscription --server_id=N --customer_id=ID --subscription_id=ID
+                                           Read-only Google subscription lookup
   prune      [--days=90]                   Log and webhook housekeeping
 
 TEXT;

@@ -90,8 +90,10 @@ final class Provisioner
                 'plan_sku'  => $sku,
             ]);
 
-            // Already provisioned: this is the cheapest idempotency check.
-            if ($account && !empty($account->remote_id) && $account->status !== AccountRepository::STATUS_TERMINATED) {
+            // A remote id alone does not prove that a partial create succeeded.
+            if ($account && !empty($account->remote_id)
+                && in_array($account->status, [AccountRepository::STATUS_ACTIVE, AccountRepository::STATUS_SUSPENDED], true)
+                && (int) $account->needs_reconcile !== 1) {
                 Logger::info('create.already_provisioned', [
                     'service_id' => $serviceId,
                     'provider'   => $this->provider->key(),
@@ -106,6 +108,11 @@ final class Provisioner
                     'This service is awaiting reconciliation after an uncertain provider response and will not be '
                     . 'provisioned again automatically. Run the reconciler or inspect the provider first.'
                 );
+            }
+
+            if ($account && !empty($account->remote_id) && $account->status !== AccountRepository::STATUS_TERMINATED) {
+                return Result::fail(Result::CODE_CONFLICT,
+                    'A remote account exists but provisioning is incomplete. Verify its ownership and licence before retrying.');
             }
 
             $claim = OperationRepository::begin($serviceId, $this->provider->key(), 'create', [
@@ -148,6 +155,13 @@ final class Provisioner
 
             if (Result::isUncertain($created)) {
                 OperationRepository::finish($claim['key'], $created);
+                // A user may have been created before a later licence call timed out.
+                if (!empty($created['data']['remote_id'])) {
+                    AccountRepository::update($serviceId, [
+                        'remote_id' => (string) $created['data']['remote_id'],
+                        'license_state' => (string) ($created['data']['license_state'] ?? 'unknown'),
+                    ]);
+                }
                 AccountRepository::markForReconciliation($serviceId, (string) $created['message']);
 
                 return $created;

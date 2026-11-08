@@ -3515,7 +3515,7 @@
         },
         {
           "q": "Does email hosting include Office or Google Workspace?",
-          "a": "No. Those are separate Microsoft and Google subscriptions. CloudHost247 can provision Microsoft 365 and Google Workspace plans through the platform, and this page describes the mailboxes hosted directly on your account."
+          "a": "No. Microsoft 365 and Google Workspace are separate subscriptions. This page describes mailboxes hosted directly on your account; contact support about availability of third-party subscriptions."
         },
         {
           "q": "Can I send marketing email from these mailboxes?",

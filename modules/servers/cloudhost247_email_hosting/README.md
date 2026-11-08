@@ -38,6 +38,20 @@ across three independent provider adapters behind one contract, plus the public
 
 ## 1. What it does
 
+> **Google scope:** This module manages individual Directory users and licences in an
+> existing, authorized tenant. It does not create Google reseller customers or subscriptions,
+> purchase seats, or synchronize subscription renewals. Do not sell it as a complete Google
+> Workspace reseller integration. A conflicting Google user is not automatically adopted;
+> verify ownership and licence assignment manually. Partial/uncertain creates remain blocked
+> for administrator review. Do not clear those flags or attach a remote user without verifying
+> the WHMCS service, tenant ownership and provider state.
+
+> **Microsoft 365 scope:** The Graph adapter manages users and assigns licences from an
+> existing tenant's subscriptions. It does not purchase or renew Microsoft subscriptions.
+> Existing users are not adopted on a create conflict. Uncertain creates and partial licence
+> assignments require manual ownership and licence review. User deletion is blocked when
+> licence removal fails; removing an assignment does not cancel the subscription or its billing.
+
 ```
  order paid + approved
         │
@@ -162,6 +176,27 @@ The customer's Workspace **super administrator** must:
 Without step 2 or 3 Google returns `unauthorized_client`; the module surfaces that with the
 exact remediation instead of failing silently. A service account **never** gains tenant
 access on its own.
+
+#### Optional reseller connection check (read-only)
+
+In the existing encrypted server access-hash JSON, add `reseller_admin` (an authorized
+reseller administrator email) and `reseller_readonly_check: true`, alongside the existing
+`service_account` object. Delegate `https://www.googleapis.com/auth/apps.order.readonly`
+in the reseller tenant and enable the Reseller API in the Google Cloud project. The WHMCS
+server **Test Connection** then requires both the existing Directory check and a read-only
+Reseller API subscriptions-list check to pass. An empty subscription list is valid. No
+subscription details are displayed or logged by this check. Disable the flag to preserve the
+existing Directory-only test. A signed reseller agreement, a Google-authorized reseller tenant,
+and delegated API access are required; a successful read does not authorize purchases or
+verify the subscription lifecycle. **Customer creation and reseller ordering are not yet
+implemented.** Do not share service-account keys in tickets or chat.
+
+An administrator with shell access to the WHMCS host can inspect a known Google subscription
+using `php modules/servers/cloudhost247_email_hosting/cron.php reseller-subscription
+--server_id=N --customer_id=ID --subscription_id=ID` (all arguments on one line). This is a
+read-only provider lookup using the configured server credentials. Its output contains customer
+and subscription identifiers and must be handled as sensitive. It does **not** associate the
+subscription with a WHMCS service or synchronize local state, renewal or billing.
 
 ### Professional Email
 

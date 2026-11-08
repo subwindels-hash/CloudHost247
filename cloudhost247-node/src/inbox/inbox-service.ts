@@ -717,7 +717,7 @@ export interface OutboundReplyOptions {
  * Records a staff reply or internal note and reports delivery exactly as it happened.
  *
  *  - An internal note is never delivered anywhere (`not_applicable`).
- *  - An email-channel reply is actually sent through the platform's existing email transport
+ *  - An email-channel or Contact Us reply is actually sent through the platform's existing email transport
  *    (`NOTIFICATION_EMAIL_WEBHOOK_URL`/`_TOKEN`, the same contract the notification outbox uses) and
  *    is stored `sent` or `failed` with the provider's real answer. No second mailer is introduced.
  *  - A reply on a channel that has no outbound transport today is stored `manual`: the text is
@@ -764,11 +764,19 @@ export async function replyToConversation(
     };
   }
 
-  if (!conversation.contact_email && conversation.channel_kind === 'email') {
+  // Contact Us shares the web-form channel with builder forms and integrations. New submissions
+  // carry a server-generated source marker. Older Contact Us submissions had no reference and
+  // used these department prefixes; keep those replyable without changing builder-form behavior.
+  const isContactForm = conversation.channel_kind === 'web_form' && (
+    conversation.external_reference?.startsWith('contact-form:') ||
+    (!conversation.external_reference && !conversation.user_id && !conversation.ticket_id &&
+      /^\[(General support|Billing|Abuse & security|Privacy & data protection|Legal)\] /.test(conversation.subject))
+  );
+  const isEmail = conversation.channel_kind === 'email' || isContactForm;
+  if (!conversation.contact_email && isEmail) {
     throw new ValidationError('This conversation has no email address to reply to');
   }
 
-  const isEmail = conversation.channel_kind === 'email';
 
   if (!isEmail) {
     const note = `${conversation.channel_name} is an inbound-only channel: copy this reply into the channel's own app, then mark the conversation as replied. The text is stored here so nothing is lost.`;

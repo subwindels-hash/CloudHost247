@@ -88,6 +88,11 @@ function cloudhost247_email_hosting_change_package(Provisioner $provisioner, Con
         return Result::fail(Result::CODE_NOT_FOUND, 'No provisioned mailbox is recorded for this service.');
     }
 
+    if ((int) $account->needs_reconcile === 1) {
+        return Result::fail(Result::CODE_CONFLICT,
+            'This service requires reconciliation before another package change.');
+    }
+
     $newSku = $config->planSku();
     $oldSku = (string) $account->plan_sku;
 
@@ -115,11 +120,22 @@ function cloudhost247_email_hosting_change_package(Provisioner $provisioner, Con
     $assigned = $provider->assignLicense($payload, $newSku);
 
     if (!Result::isOk($assigned)) {
+        if (Result::isUncertain($assigned)) {
+            AccountRepository::markForReconciliation($config->serviceId(),
+                'Package change: new licence assignment has an uncertain outcome; verify both licences.');
+        }
         return $assigned;
     }
 
     if ($oldSku !== '' && !empty($capabilities['remove_license'])) {
-        $provider->removeLicense($payload, $oldSku);
+        $removed = $provider->removeLicense($payload, $oldSku);
+        if (!Result::isOk($removed)) {
+            AccountRepository::markForReconciliation($config->serviceId(),
+                'Package change: new licence was assigned but old licence removal failed or is uncertain; verify both licences.');
+            return Result::fail(Result::CODE_CONFLICT,
+                'The new licence was assigned but removal of the old licence was not confirmed. Manual reconciliation is required.',
+                [], Result::isUncertain($removed));
+        }
     }
 
     AccountRepository::update($config->serviceId(), [

@@ -372,18 +372,12 @@ final class Microsoft365Provider extends AbstractProvider
         $created = $this->graph('POST', '/users', $payload, true);
 
         if (!Result::isOk($created)) {
-            // A conflict means the UPN already exists - treat it as a lookup
-            // rather than a failure, which makes create idempotent.
+            // An existing UPN is not proof that this service owns the user or
+            // that the requested licence is assigned. Require manual review.
             if (($created['code'] ?? '') === Result::CODE_CONFLICT
                 || strpos(strtolower((string) ($created['message'] ?? '')), 'already exist') !== false) {
-                $existing = $this->findByEmail($email);
-
-                if (Result::isOk($existing)) {
-                    return Result::ok(
-                        $existing['data'] + ['adopted' => true],
-                        'An existing Microsoft 365 user with this address was adopted instead of creating a duplicate.'
-                    );
-                }
+                return Result::fail(Result::CODE_CONFLICT,
+                    'A Microsoft 365 user already exists at this address. An administrator must verify ownership and licensing before proceeding.');
             }
 
             return $created;
@@ -487,8 +481,11 @@ final class Microsoft365Provider extends AbstractProvider
         $sku = (string) ($account['plan_sku'] ?? '');
 
         if ($sku !== '') {
-            // Free the seat first so the subscription is not billed on.
-            $this->removeLicense($account, $sku);
+            // Release the assignment first; this does not cancel the subscription.
+            $removed = $this->removeLicense($account, $sku);
+            if (!Result::isOk($removed)) {
+                return $removed;
+            }
         }
 
         $deleted = $this->graph('DELETE', '/users/' . rawurlencode($id), null, true);
@@ -577,14 +574,19 @@ final class Microsoft365Provider extends AbstractProvider
         if (!preg_match('/^[0-9a-f]{8}-/i', $sku)) {
             $plans = $this->listPlans();
 
-            if (Result::isOk($plans)) {
-                foreach ($plans['data']['plans'] as $plan) {
-                    if (strcasecmp($plan['name'], $sku) === 0) {
-                        $skuId = $plan['id'];
-                        break;
-                    }
+            if (!Result::isOk($plans)) {
+                return $plans;
+            }
+            $skuId = '';
+            foreach ($plans['data']['plans'] as $plan) {
+                if (strcasecmp($plan['name'], $sku) === 0) {
+                    $skuId = (string) $plan['id'];
+                    break;
                 }
             }
+        }
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $skuId)) {
+            return Result::fail(Result::CODE_CONFIG, 'The Microsoft 365 licence SKU could not be resolved to a valid GUID.');
         }
 
         return $this->graph('POST', '/users/' . rawurlencode($id) . '/assignLicense', [

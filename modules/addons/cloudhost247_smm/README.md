@@ -44,6 +44,18 @@ the tree untouched; disable them when this module goes live).
   require session + CSRF token + capability; client queries are
   ownership-scoped; page rendering performs zero provider API calls.
 
+## Deleting services and providers
+
+Admins with the `providers.manage` capability can delete an unused service from the
+Services tab using the confirmation checkbox. Deletion removes only the local catalog
+entry, not the provider's remote service. Services with a product mapping or order history
+are blocked; disable them instead. A future provider catalog sync can re-import a deleted
+service if the provider still offers it. Provider deletion is already available from the
+Providers tab, requires confirmation and is blocked if any orders reference the provider.
+It removes that provider's local services and mappings when no order history exists; it does
+not remove WHMCS products or cancel provider-side orders. All actions use the existing WHMCS
+admin/CSRF/capability checks and audit logging.
+
 ## Tables (all `mod_cloudhost247_smm_*`)
 
 `providers`, `services`, `mappings`, `orders`, `order_events`, `api_log`,

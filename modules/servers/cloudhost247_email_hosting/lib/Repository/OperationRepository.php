@@ -63,13 +63,30 @@ final class OperationRepository
         if ($existing) {
             // Already recorded. Only a previously failed attempt may be retried.
             if ($existing->state === self::STATE_FAILED) {
-                self::update($key, [
-                    'state'          => self::STATE_IN_PROGRESS,
-                    'attempts'       => (int) $existing->attempts + 1,
-                    'correlation_id' => Logger::correlationId(),
-                ]);
-
-                return ['claimed' => true, 'state' => self::STATE_IN_PROGRESS, 'row' => self::findByKey($key), 'key' => $key];
+                // Compare-and-set: two workers may both have read FAILED.
+                // Only the worker which changes that exact state owns the retry.
+                try {
+                    $changed = Capsule::table(self::TABLE)
+                        ->where('idempotency_key', $key)
+                        ->where('state', self::STATE_FAILED)
+                        ->where('attempts', (int) $existing->attempts)
+                        ->update([
+                            'state'          => self::STATE_IN_PROGRESS,
+                            'attempts'       => (int) $existing->attempts + 1,
+                            'correlation_id' => Logger::correlationId(),
+                            'updated_at'     => date('Y-m-d H:i:s'),
+                        ]);
+                } catch (\Throwable $e) {
+                    Logger::error('operation.retry_claim_failed', ['error' => $e->getMessage()]);
+                    $changed = 0;
+                }
+                $row = self::findByKey($key);
+                return [
+                    'claimed' => $changed === 1,
+                    'state' => $row ? (string) $row->state : self::STATE_IN_PROGRESS,
+                    'row' => $row,
+                    'key' => $key,
+                ];
             }
 
             return ['claimed' => false, 'state' => (string) $existing->state, 'row' => $existing, 'key' => $key];
@@ -185,20 +202,30 @@ final class OperationRepository
                 ->where('updated_at', '<', $threshold)
                 ->get();
 
+            $marked = 0;
             foreach ($stale as $operation) {
-                self::update((string) $operation->idempotency_key, [
-                    'state'          => self::STATE_RECONCILE,
-                    'result_code'    => 'uncertain',
-                    'result_message' => 'Operation did not complete; queued for reconciliation.',
-                ]);
-
+                // Do not overwrite a completion that raced with the sweep.
+                $changed = Capsule::table(self::TABLE)
+                    ->where('idempotency_key', (string) $operation->idempotency_key)
+                    ->where('state', self::STATE_IN_PROGRESS)
+                    ->where('updated_at', '<', $threshold)
+                    ->update([
+                        'state'          => self::STATE_RECONCILE,
+                        'result_code'    => 'uncertain',
+                        'result_message' => 'Operation did not complete; queued for reconciliation.',
+                        'updated_at'     => date('Y-m-d H:i:s'),
+                    ]);
+                if ($changed !== 1) {
+                    continue;
+                }
+                $marked++;
                 AccountRepository::markForReconciliation(
                     (int) $operation->service_id,
                     'Stalled ' . $operation->operation . ' operation'
                 );
             }
 
-            return count($stale);
+            return $marked;
         } catch (\Throwable $e) {
             return 0;
         }

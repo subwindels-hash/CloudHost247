@@ -171,14 +171,20 @@ final class AdminView
                 . '<td><form method="post" style="display:inline"><input type="hidden" name="token" value="' . $this->e($data['token']) . '">'
                 . '<input type="hidden" name="operation" value="service_toggle"><input type="hidden" name="view" value="services">'
                 . '<input type="hidden" name="id" value="' . $this->e($s->id) . '"><input type="hidden" name="available" value="' . ((int) $s->available === 1 ? 0 : 1) . '">'
-                . '<button class="btn btn-xs btn-default">' . ((int) $s->available === 1 ? 'Mark unavailable' : 'Mark available') . '</button></form></td></tr>';
+                . '<button class="btn btn-xs btn-default">' . ((int) $s->available === 1 ? 'Mark unavailable' : 'Mark available') . '</button></form> '
+                . '<form method="post" style="display:inline" onsubmit="return confirm(\'Delete this local service? Provider sync may import it again.\')">'
+                . '<input type="hidden" name="token" value="' . $this->e($data['token']) . '">'
+                . '<input type="hidden" name="operation" value="service_delete"><input type="hidden" name="view" value="services">'
+                . '<input type="hidden" name="id" value="' . $this->e($s->id) . '">'
+                . '<label class="small"><input type="checkbox" name="confirm" value="1" required> confirm</label> '
+                . '<button class="btn btn-xs btn-danger">Delete</button></form></td></tr>';
         }
         if (array() === $data['services']) {
             echo '<tr><td colspan="10" class="text-muted">No services. Run "Sync services" on the Providers tab.</td></tr>';
         }
         echo '</table>';
         $this->pagination($data, 'services', $f);
-        echo '<p class="text-muted small">Deleting catalog rows is unnecessary: services missing from the provider are marked unavailable automatically, and history always keeps its reference.</p>';
+        echo '<p class="text-muted small">Deletion removes only the local catalog row. Mapped services or services with order history cannot be deleted. A provider sync may import a deleted service again.</p>';
     }
 
     // ------------------------------------------------------------- mappings

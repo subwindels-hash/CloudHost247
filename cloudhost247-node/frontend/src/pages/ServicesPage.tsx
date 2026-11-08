@@ -20,6 +20,7 @@ export default function ServicesPage() {
             </p>
           </div>
           <div className="ch247-card__actions">
+            <Link to="/service-plans" className="ch247-button ch247-button--secondary">Browse plans</Link>
             <Link to="/servers/new" className="ch247-button">
               + Deploy New Server
             </Link>

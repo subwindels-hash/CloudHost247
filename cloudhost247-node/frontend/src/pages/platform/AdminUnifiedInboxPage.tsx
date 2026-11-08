@@ -119,7 +119,7 @@ export default function AdminUnifiedInboxPage() {
     <div className="ch247-page ch247-page--wide">
       <h1>Unified inbox</h1>
       <p className="ch247-page__hint">
-        Website form submissions arrive here automatically. Other channels appear once an operator connects them — a
+        Contact Us and website form submissions arrive here automatically. Other channels appear once an operator connects them — a
         channel that is not configured says so, so an empty list is never mistaken for silence.
       </p>
       <Feedback error={action.error} message={action.message} />
@@ -129,7 +129,7 @@ export default function AdminUnifiedInboxPage() {
         <h2>Channels</h2>
         <p className="ch247-page__hint">
           Outbound email transport:{' '}
-          {emailTransportConfigured ? 'configured — replies are sent by email.' : 'not configured — replies are stored as manual.'}
+          {emailTransportConfigured ? 'configured — Contact Us and email-channel replies use this transport.' : 'not configured — Contact Us and email-channel replies are not sent.'}
         </p>
         <div className="ch247-table-scroll">
           <table className="ch247-table">
@@ -523,7 +523,7 @@ export default function AdminUnifiedInboxPage() {
                   setReply({ ...reply, body: '' });
                   reloadDetail();
                   return response.deliveryStatus === 'sent'
-                    ? 'Reply sent.'
+                    ? 'Reply accepted by the email transport.'
                     : `Recorded as ${response.deliveryStatus}${response.deliveryNote ? ` — ${response.deliveryNote}` : ''}.`;
                 })
               }
