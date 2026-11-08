@@ -15,6 +15,8 @@ import { registerAccountRoutes } from './routes/account';
 import { registerAdminCustomerRoutes } from './routes/admin-customers';
 import { registerAccountIdentityRoutes } from './routes/account-identity';
 import { registerAccountSecurityRoutes } from './routes/account-security';
+import { registerWhmcsAccountRoutes, type WhmcsAccountRouteDeps } from './routes/account-whmcs';
+import { registerWhmcsPublicRoutes, type WhmcsPublicRouteDeps } from './routes/whmcs-public';
 import { registerAdminAccountSecurityRoutes } from './routes/admin-account-security';
 import { registerAdminUserRoutes } from './routes/admin-users';
 import { registerCommerceRoutes } from './routes/commerce';
@@ -81,6 +83,13 @@ export interface BuildAppOptions {
    * so the genuine route handlers run against a scripted provider.
    */
   dnsPropagation?: DnsPropagationOptions;
+  /**
+   * Test-only: substitute the WHMCS client/config used by the account identity routes (B5.1), so
+   * the real route handlers run against a scripted WHMCS instead of a live installation.
+   */
+  whmcs?: WhmcsAccountRouteDeps;
+  /** Test-only: the same seam for the anonymous orderability endpoint (B2.4). */
+  whmcsPublic?: WhmcsPublicRouteDeps;
 }
 
 /**
@@ -88,7 +97,14 @@ export interface BuildAppOptions {
  * use `app.inject()` without binding a real TCP port.
  */
 export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstance {
-  const { serveFrontend = true, publicDir = path.join(__dirname, '..', '..', 'public'), pool, dnsPropagation } = options;
+  const {
+    serveFrontend = true,
+    publicDir = path.join(__dirname, '..', '..', 'public'),
+    pool,
+    dnsPropagation,
+    whmcs,
+    whmcsPublic,
+  } = options;
 
   const app = Fastify({
     // Cast: pino's Logger type is a structural superset of Fastify's FastifyBaseLogger but TS's
@@ -165,6 +181,10 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerHealthRoutes(instance, env, pool);
     await registerAuthRoutes(instance, env, pool);
     await registerPublicCatalogRoutes(instance, env, pool);
+    // B2.4 — the public orderability verdict. Anonymous, and the only place a hosting page may learn
+    // that a service is buyable. Reports "not integrated" for every service without a verified WHMCS
+    // product binding (all 59 today) instead of inventing a price or a cart link.
+    await registerWhmcsPublicRoutes(instance, env, pool, whmcsPublic);
     await registerCurrencyRoutes(instance, env, pool);
     await registerVisitorIpRoute(instance, env);
     await registerCatalogAdminRoutes(instance, env, pool);
@@ -173,6 +193,10 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // Username, the rotating Security PIN and its six-digit email-verification gate, plus account
     // recovery (customer side) and staff oversight of recovery + PIN policy (admin side).
     await registerAccountSecurityRoutes(instance, env, pool);
+    // B5.1 — one customer identity. Links the signed-in account to its WHMCS client (verified email
+    // match) and mints single-use session hand-offs into the billing client area. Answers
+    // `configured: false` until WHMCS credentials are supplied, and never touches the SPA cart.
+    await registerWhmcsAccountRoutes(instance, env, pool, whmcs);
     await registerAdminAccountSecurityRoutes(instance, env, pool);
     await registerAdminCustomerRoutes(instance, env, pool);
     await registerAdminUserRoutes(instance, env, pool);

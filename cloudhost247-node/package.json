@@ -36,6 +36,7 @@
     "catalog:import": "tsx scripts/import-catalog.ts",
     "verify:financial": "tsx tools/verify-financial-invariants.ts",
     "verify:authorization": "tsx tools/verify-payment-authorization.ts",
+    "whmcs:map": "tsx scripts/whmcs/catalogue-map.ts",
     "tools:catalog": "tsx scripts/export-tools-site.ts",
     "tools:catalog:check": "tsx scripts/export-tools-site.ts --check",
     "tools:preview": "tsx scripts/tools-demo-preview.ts",
