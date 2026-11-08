@@ -84,7 +84,16 @@ export interface EmailTraceCollectionRunRow {
   lease_holder: string | null;
 }
 
-export interface EmailTraceFilters {
+/**
+ * Tenant scope passed to every read. An empty (or absent) `customerIds`/`hostingAccountIds` array is
+ * a *closed* scope, never "unrestricted" — see src/email-trace/access-control.ts.
+ */
+export interface EmailTraceScope {
+  customerIds?: string[];
+  hostingAccountIds?: string[];
+}
+
+export interface EmailTraceFilters extends EmailTraceScope {
   /** Free-text-ish exact filters; all bound as parameters. */
   sender?: string;
   recipient?: string;
@@ -94,9 +103,6 @@ export interface EmailTraceFilters {
   statuses?: DeliveryStatus[];
   smtpCode?: number;
   serverIds?: string[];
-  /** Tenant scope. Empty array is a valid, closed scope (matches nothing). */
-  customerIds?: string[];
-  hostingAccountIds?: string[];
   from?: Date;
   to?: Date;
   limit?: number;
@@ -507,9 +513,10 @@ export async function startEmailTraceCollectionRun(
 
 export interface CompleteRunInput {
   status: 'ok' | 'partial' | 'failed' | 'skipped';
-  recordsSeen: number;
-  recordsCollected: number;
-  recordsRejected: number;
+  /** Counts default to 0 so a failed run does not have to invent them. */
+  recordsSeen?: number;
+  recordsCollected?: number;
+  recordsRejected?: number;
   queueCount?: number | null;
   queueOldestSeconds?: number | null;
   queueDeferred?: number | null;
@@ -541,9 +548,9 @@ export async function completeEmailTraceCollectionRun(
     [
       id,
       input.status,
-      input.recordsSeen,
-      input.recordsCollected,
-      input.recordsRejected,
+      input.recordsSeen ?? 0,
+      input.recordsCollected ?? 0,
+      input.recordsRejected ?? 0,
       input.queueCount ?? null,
       input.queueOldestSeconds ?? null,
       input.queueDeferred ?? null,

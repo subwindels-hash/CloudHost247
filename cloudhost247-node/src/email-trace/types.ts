@@ -62,6 +62,12 @@ export const EXIM_FLAGS = ['<=', '=>', '->', '**', '==', '*>', '<*', '!!'] as co
 export type EximFlag = (typeof EXIM_FLAGS)[number];
 
 /** One parsed mainlog line, before normalisation. No raw line text is kept — see §1 of the ADR. */
+/**
+ * How much a mail server can tell us about one collection channel. `unknown` means "not probed",
+ * never "probably fine" — the UI renders it as a warning, not as success.
+ */
+export type EmailTraceCapabilityState = 'available' | 'unavailable' | 'unsupported' | 'unknown';
+
 export interface RawEximEvent {
   /** UTC instant parsed from the line's leading timestamp. */
   timestamp: Date;

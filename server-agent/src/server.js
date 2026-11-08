@@ -13,6 +13,8 @@
  *   POST /v1/apps/:project/healthcheck  manifest-declared probe
  *   POST /v1/apps/:project/backup       tar.gz volumes + db dump → backup dir
  *   POST /v1/apps/:project/restore      restore an archive from the backup dir
+ *   POST /v1/mail/trace                 read-only Exim message-log slice + queue listing (allowlisted
+ *                                       paths only; parses nothing, changes nothing)
  *
  * Outbound (signed with the same secret):
  *   POST {control}/api/v1/agent/report  periodic metrics
@@ -37,6 +39,7 @@ import {
   assertProjectName,
 } from './docker.js';
 import { runBackup, restoreBackup, systemReport } from './backups.js';
+import { mailTrace } from './mail-trace.js';
 
 const config = loadConfig();
 const nonceCache = new NonceCache(config.maxSkewSeconds);
@@ -80,6 +83,15 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/v1/system/report') {
       const report = await systemReport();
       send(res, 200, { ...report, agentVersion: AGENT_VERSION, ...provisioningAttestation(report) });
+      return;
+    }
+
+    // ---- read-only mail trace ----------------------------------------------------------------
+    if (req.method === 'POST' && url.pathname === '/v1/mail/trace') {
+      const body = rawBody.length > 0 ? JSON.parse(rawBody.toString('utf8')) : {};
+      // Returns lines verbatim: parsing and every privacy decision stay in the control plane. The
+      // handler cannot delete, freeze, retry or force a message, and reads only allowlisted logs.
+      send(res, 200, await mailTrace(body, { config }));
       return;
     }
 
