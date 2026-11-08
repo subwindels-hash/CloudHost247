@@ -10,6 +10,14 @@ interface AuthResponse {
   user: StoredUser;
   token: string;
   emailVerification: { queued: boolean };
+  securityPin?: { set: boolean; nextRotationAt: string | null };
+}
+
+interface UsernameAvailability {
+  available: boolean;
+  username: string;
+  reason: string | null;
+  suggestions: string[];
 }
 
 const MIN_PASSWORD_LENGTH = 10;
@@ -26,6 +34,14 @@ const REGISTER_NOTES = [
     body: 'You are signed in immediately and asked to verify the email address before ordering.',
   },
   {
+    title: 'Your username and Customer ID',
+    body: 'Your username is how you sign in and how support finds you. Every account also gets a permanent nine-digit Customer ID.',
+  },
+  {
+    title: 'Your Security PIN',
+    body: 'A four-digit Security PIN rotates every 24 hours. It is never shown in the app until you confirm a code sent to your verified email address.',
+  },
+  {
     title: 'Account security',
     body: 'Choose a unique password. Multi-factor authentication and passkeys can be added from the account page.',
   },
@@ -38,6 +54,9 @@ const REGISTER_NOTES = [
 export default function RegisterPage() {
   usePageMeta('Create your account', 'Create a CloudHost247 account.');
   const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameCheck, setUsernameCheck] = useState<UsernameAvailability | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -52,10 +71,39 @@ export default function RegisterPage() {
   const returnTo = safeReturnTo(params.get('next')) ?? (idea ? `/websites/ai-builder?idea=${encodeURIComponent(idea)}` : null);
   const idPrefix = useId();
 
+  /**
+   * Asks the server whether the name is free. The server is the only authority (format, reserved
+   * words and uniqueness all live in one place there); this is purely an early, friendly warning,
+   * and registration re-checks everything.
+   */
+  async function checkUsername(next: string) {
+    const value = next.trim();
+    if (value.length < 3) {
+      setUsernameCheck(null);
+      return;
+    }
+    setCheckingUsername(true);
+    try {
+      const res = await apiFetch<UsernameAvailability>(
+        `/api/v1/account/username/availability?username=${encodeURIComponent(value)}`
+      );
+      setUsernameCheck(res);
+    } catch {
+      // A failed availability probe must never block registration — the server validates again.
+      setUsernameCheck(null);
+    } finally {
+      setCheckingUsername(false);
+    }
+  }
+
   function validate() {
     const errors: Record<string, string> = {};
     if (fullName.trim().length < 2) {
       errors.fullName = 'Enter the name that should appear on the account.';
+    }
+    // Optional: leaving it blank lets the server derive one from the email address.
+    if (username.trim() && usernameCheck && !usernameCheck.available) {
+      errors.username = usernameCheck.reason ?? 'That username is not available.';
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       errors.email = 'Enter a valid email address, for example name@example.com.';
@@ -84,7 +132,12 @@ export default function RegisterPage() {
     try {
       const res = await apiFetch<AuthResponse>('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ fullName: fullName.trim(), email: email.trim(), password }),
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          password,
+          ...(username.trim() ? { username: username.trim() } : {}),
+        }),
       });
       setSession(res.token, res.user);
       setMessage({
@@ -142,6 +195,68 @@ export default function RegisterPage() {
           />
           {fieldErrors.fullName && (
             <span className="ch247-field-error" id={`${idPrefix}-name-error`}>{fieldErrors.fullName}</span>
+          )}
+        </div>
+
+        <div className="ch247-field">
+          <label className="ch247-field-label" htmlFor={`${idPrefix}-username`}>
+            Username <span className="ch247-field-optional">(optional)</span>
+          </label>
+          <input
+            id={`${idPrefix}-username`}
+            name="username"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              setUsernameCheck(null);
+            }}
+            onBlur={(e) => void checkUsername(e.target.value)}
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            minLength={3}
+            maxLength={32}
+            aria-invalid={Boolean(fieldErrors.username) || usernameCheck?.available === false}
+            aria-describedby={`${idPrefix}-username-hint${fieldErrors.username ? ` ${idPrefix}-username-error` : ''}`}
+          />
+          <span
+            className={usernameCheck && !usernameCheck.available ? 'ch247-field-error' : 'ch247-field-hint'}
+            id={`${idPrefix}-username-hint`}
+            role="status"
+          >
+            {checkingUsername
+              ? 'Checking availability…'
+              : usernameCheck?.available
+                ? `"${usernameCheck.username}" is available.`
+                : usernameCheck && !usernameCheck.available
+                  ? (usernameCheck.reason ?? 'That username is not available.')
+                  : username.trim()
+                    ? '3–32 characters, starting with a letter. Letters, numbers, dots, underscores and hyphens.'
+                    : 'Leave blank and we will create one from your email address. You can change it later.'}
+          </span>
+          {usernameCheck && !usernameCheck.available && usernameCheck.suggestions.length > 0 && (
+            <span className="ch247-field-hint">
+              Try{' '}
+              {usernameCheck.suggestions.map((suggestion, index) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  className="ch247-link-button"
+                  onClick={() => {
+                    setUsername(suggestion);
+                    setUsernameCheck(null);
+                  }}
+                >
+                  {index > 0 ? ', ' : ''}
+                  {suggestion}
+                </button>
+              ))}
+              .
+            </span>
+          )}
+          {fieldErrors.username && (
+            <span className="ch247-field-error" id={`${idPrefix}-username-error`}>{fieldErrors.username}</span>
           )}
         </div>
 

@@ -1,28 +1,63 @@
-# Customer identity, Security Number, user management and support mode
+# Customer identity, username, Security PIN, recovery and support mode
 
-This document is the contract for the identity layer introduced by migrations
-`0053_customer_identity_and_support_sessions.sql`, `0059_create_auth_recovery.sql`, and
-`0060_create_totp_mfa.sql`. It covers:
+This document is the contract for the customer identity layer: migrations
+`0053_customer_identity_and_support_sessions.sql`, `0059_create_auth_recovery.sql`,
+`0060_create_totp_mfa.sql`, and `0085_customer_username_pin_and_verification.sql`. It covers:
 
-1. the permanent six-digit **Customer ID**,
-2. the rotating four-digit **Security Number**,
-3. **admin user management** (including soft deletion),
-4. **support mode** — an administrator temporarily working inside a customer's account,
-5. email verification and password recovery, and
-6. TOTP multi-factor authentication and recovery codes.
+1. the unique **username** (sign-in handle, changeable from account settings),
+2. the permanent nine-digit **Customer ID**,
+3. the rotating four-digit **Security PIN**, viewable only behind an emailed code,
+4. **account recovery** for a customer who has lost access to their mailbox,
+5. the legacy rotating four-digit **Security Number**,
+6. **admin user management** (including soft deletion),
+7. **support mode** — an administrator temporarily working inside a customer's account,
+8. email verification and password recovery, and
+9. TOTP multi-factor authentication and recovery codes.
 
 Everything here is additive: `users.id` (uuid) is still the primary key, every existing foreign
 key still points at it, and existing authentication, billing and RBAC behaviour is unchanged.
+Accounts created by an import or a fixture without a username or PIN are repaired in place — see
+"Degradation" at the end.
 
-## 1. Customer ID
+## 1. Username
 
 | Property | Value |
 | --- | --- |
-| Column | `users.customer_id varchar(6)` |
-| Format | exactly six digits, zero-padded (`000042` is valid) |
+| Column | `users.username varchar(32)` (nullable at the storage layer, always populated in practice) |
+| Format | 3–32 chars, starts with a letter, then letters/digits/`.`/`_`/`-`; no leading, trailing or doubled separator |
+| Uniqueness | `users_username_lower_unique_idx` — case-insensitive |
+| Mutability | changeable from account settings; the previous handle stops working for sign-in immediately |
+| Reserved | static list in `src/services/username-service.ts` ∪ the `reserved_usernames` table |
+
+One module (`src/services/username-service.ts`) owns every rule — format, reservation,
+case-insensitive uniqueness and suggestions — because the same rules have to apply at registration,
+in account settings, and in the admin create-user path. A rule that lives in a zod schema at one
+call site is a rule the other call sites do not have.
+
+The format rule and the `users_username_format_check` constraint are kept identical on purpose.
+When they drifted, a name like `dots..` passed validation and was then rejected by PostgreSQL, so
+the customer got a 500 instead of "choose a different name". `USERNAME_SEPARATOR_PATTERN` exists to
+make that drift impossible to reintroduce silently.
+
+**Registration does not require a username.** If the customer supplies one it is validated (a
+conflict is a friendly 409 with suggestions); if they leave it blank the server derives one from
+the email local-part with punctuation removed and a numeric suffix on collision. This keeps
+imports, scripts and pre-0085 API clients working unchanged.
+
+Sign-in accepts a username *or* an email address in the same field
+(`identifier`; `email`/`username` are still accepted for older clients) and returns an identical
+401 message either way, so the endpoint cannot be used to discover which accounts exist.
+
+## 2. Customer ID
+
+| Property | Value |
+| --- | --- |
+| Column | `users.customer_id varchar(9)` (widened in place from `varchar(6)`) |
+| Format | exactly nine digits, first digit 1–9 (`100000000`–`999999999`) |
+| Legacy | six-digit values issued before 0085 are **kept verbatim**, never re-issued |
 | Source | `randomInt` (CSPRNG) in `src/services/customer-identity-service.ts` |
 | Uniqueness | `users_customer_id_unique_idx` + insert-and-retry on unique violation |
-| Mutability | immutable; never reassigned, never released (even after soft deletion) |
+| Mutability | immutable; also enforced by a `BEFORE UPDATE` trigger, not just by convention |
 
 Why insert-and-retry rather than "pick a number, check it's free, insert it": the check-then-act
 version races — two concurrent registrations can both see the same candidate as free. The unique
@@ -36,7 +71,138 @@ anything on its own.
 Pre-existing accounts were backfilled inside the migration itself, so `customer_id` is never NULL
 in practice; `ensureCustomerId()` exists as defence-in-depth for out-of-band imports.
 
-## 2. Security Number
+The format check accepts six **or** nine digits for exactly that reason: it is strict about
+"digits only" either way, so the column can never hold a UUID, an email address or an arbitrary
+string, while a customer who was told "000042" still has a valid, unchanged number.
+
+Immutability is enforced in the database. Assignment happens once (the column starts NULL) and any
+later `UPDATE` that changes it aborts with `23514`. Ordinary administrators and customers
+therefore cannot rewrite an identifier even if a future route forgets to strip the field from its
+input.
+
+`admin_support_sessions.customer_id` (the audit copy taken when staff switch into an account) is
+widened in the same migration. It was still `varchar(6)`, which made every "switch to customer"
+fail with `22001` the moment the first nine-digit customer was delegated to.
+
+## 3. Security PIN
+
+A four-digit code, `0000`–`9999`, that rotates every 24 hours by default and that **the customer
+can actually be shown** after proving control of their verified email address.
+
+| Property | Value |
+| --- | --- |
+| Verification | `users.security_pin_hash` = HMAC-SHA-256 under `SECURITY_PIN_HMAC_KEY`, per-value random salt |
+| Recoverable copy | `users.security_pin_encrypted` = AES-256-GCM envelope `pin1:<iv>:<tag>:<ct>` |
+| Lifecycle | `security_pin_created_at`, `security_pin_expires_at`, `security_pin_version`, `security_pin_previous_hash` |
+| Service | `src/services/security-pin-service.ts` (hash, seal, rotate), `security-pin-challenge-service.ts` (the gate), `security-pin-email-service.ts` (delivery) |
+
+### Why two copies of the same value
+
+The requirement is "the customer can see their current PIN after email verification". A one-way
+hash cannot be shown again, so the PIN is stored twice for two different jobs:
+
+* the **keyed hash** answers "is this the current PIN?" during any future verification, without
+  the server ever needing the plaintext;
+* the **sealed envelope** lets the application recover the digits for exactly one purpose: showing
+  them to the account owner who has just passed email verification.
+
+Domain separation (`...:security-pin:key:v1` vs `...:security-pin:seal:v1`) means one key material
+value safely serves both, and the two column values can never be confused for one another. A
+database dump alone still reveals nothing: the envelope is useless without the key, and the hash is
+useless without the PIN. There is deliberately **no in-memory escrow** — the envelope is the only
+recoverable copy, so a process restart can never lose a PIN.
+
+The plaintext PIN is never logged, never placed in a JWT, never written to an audit row, never
+returned in a summary payload, and never shown to staff. The only endpoint in the entire
+application that returns it is `POST /account/security-pin/reveal`.
+
+### The verification gate
+
+Obtaining the PIN is a three-step sequence, and each step is only reachable from the previous one:
+
+| Step | Endpoint | What it does |
+| --- | --- | --- |
+| 1 | `POST /api/v1/account/security-pin/view` | Issues a six-digit code **to the account's registered address** and returns a challenge token plus the masked address. The request body has no field for an address, so this cannot be used to send a code elsewhere or to discover which address belongs to an account. |
+| 1b | `POST /api/v1/account/security-pin/resend` | Rotates the code on the same challenge. Cooldown + cap, both enforced inside the row lock. |
+| 2 | `POST /api/v1/account/security-pin/verify` | Checks the code. Five wrong attempts finish the challenge. |
+| 3 | `POST /api/v1/account/security-pin/reveal` | Consumes the verified challenge — once — and returns the current PIN. |
+
+Properties the tests pin down:
+
+* **Verified email required.** An account whose `email_verified_at` is null gets a 403 before a
+  code is even generated.
+* **One live challenge.** Issuing a new challenge consumes the previous one; a resend reuses the
+  token but replaces the code, so an older code is never left alive.
+* **Session-bound.** The challenge is keyed to `session_jti`, so a token stolen from another
+  session cannot be used to redeem it (404, not 403 — no signal about why).
+* **Single use.** `reveal` consumes the challenge in the same transaction; a replay is a 404.
+* **Attempts actually count.** See "Correctness notes" below — the counter is committed before the
+  failure is reported.
+* **Support mode cannot use it.** `security_pin.view` and `security_pin.change` are in
+  `SUPPORT_MODE_RESTRICTED_ACTIONS`, so a delegated admin session is refused outright.
+* **Codes are sealed in the queue.** `pin_verification_email_queue` stores
+  `pinv1:<iv>:<tag>:<ct>` and nothing else; the worker decrypts in memory immediately before
+  handing the text to the mail transport. A stale row (expired, consumed, or superseded) is
+  cancelled rather than delivered late.
+
+### Rotation
+
+| Path | Where | Purpose |
+| --- | --- | --- |
+| Proactive | `sweepSecurityPins()` in `src/worker/sweeps.ts` | keeps PINs fresh platform-wide, audited as `scheduled_rotation` |
+| Reactive | `GET /api/v1/account/security` calls `ensureCurrentPin()` | guarantees nobody reads a stale PIN if the worker is down |
+
+Rotation never reveals anything: the new value is sealed for the customer, and the plaintext is
+discarded by the rotating process. A rotation notice goes out through `user_notifications` (so it
+appears in the notification centre) and is idempotent per version; it never contains the PIN.
+
+### Policy (`platform_settings`, super_admin configurable)
+
+| Key | Default |
+| --- | --- |
+| `security_pin.rotation_hours` | 24 |
+| `security_pin.reveal_ttl_seconds` | 30 |
+| `security_pin.verification_code_ttl_minutes` | 10 |
+| `security_pin.verification_max_attempts` | 5 |
+| `security_pin.verification_resend_cooldown_seconds` | 3 |
+| `security_pin.verification_max_resends` | 3 |
+| `security_pin.notify_on_rotation` | true |
+
+The resend cooldown is three seconds, not thirty. It exists to stop a double-click from sending two
+mails and to blunt scripted mail flooding; it is not the defence against guessing, because guessing
+is capped separately by `verification_max_attempts` and `verification_max_resends` per challenge
+plus a per-route request limit. Thirty seconds turned a mail-client filter into a half-minute dead
+end for the customer.
+
+### Admin oversight
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| GET | `/api/v1/admin/users/:id/security-pin` | lifecycle metadata only — never the value, hash, salt or envelope |
+| POST | `/api/v1/admin/users/:id/security-pin/rotate` | force a rotation; the new value is **not** returned to the administrator |
+| GET/PUT | `/api/v1/admin/security-pin/policy` | read / super_admin change |
+| GET | `/api/v1/admin/security-pin/due` | accounts whose PIN is due for rotation |
+
+## 4. Account recovery
+
+A customer who cannot complete email verification (lost mailbox, compromised inbox) needs a human,
+identity-checked route back in.
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| POST | `/api/v1/account/recovery` | opens (or returns) the single open request; returns a short reference |
+| GET | `/api/v1/account/recovery` | the caller's own recent requests |
+| POST | `/api/v1/account/recovery/:id/cancel` | the owner cancels; cross-customer access is a 404 |
+
+A recovery request **never reveals and never resets the PIN**. It records the claim, lets support
+verify ownership out of band, and on approval *revokes* compromised verification methods: the
+account's `email_verified_at` is cleared and every open PIN challenge is consumed, so the customer
+must re-verify before anything security-related works again. Requests are idempotent (a second
+click returns the same reference instead of stacking competing claims — the partial unique index
+makes that true under a race), and approval is refused until an `IDENTITY_VERIFIED` step has been
+recorded (409).
+
+## 5. Security Number
 
 A four-digit code that rotates every 24 hours by default.
 
@@ -87,7 +253,7 @@ verifications are recorded in `security_number_attempts` and throttled by policy
 | `security_number.reveal_ttl_seconds` | 120 |
 | `support_mode.session_minutes` | 30 |
 
-## 3. Admin user management
+## 6. Admin user management
 
 `GET/POST /api/v1/admin/users` and `GET/PATCH/DELETE /api/v1/admin/users/:id`.
 
@@ -101,7 +267,7 @@ verifications are recorded in `security_number_attempts` and throttled by policy
   and its Customer ID retained. Invoices, payments, tickets and audit entries keep resolving.
   Hard deletion is not offered because it would orphan financial history.
 
-## 4. Support mode (account switching)
+## 7. Support mode (account switching)
 
 `POST /api/v1/admin/customers/:id/switch` creates a row in `admin_support_sessions` and mints a
 short-lived JWT with two extra claims: `sup` (the session id) and `act` (the acting admin).
@@ -122,7 +288,7 @@ short-lived JWT with two extra claims: `sup` (the session id) and `act` (the act
   `GET /api/v1/admin/support-sessions` lists them and
   `POST /api/v1/admin/support-sessions/:id/end` ends one.
 
-## 5. Profile editing and profile images
+## 8. Profile editing and profile images
 
 `GET/PATCH /api/v1/account` exposes only the safe fields (name, phone, address, city, state,
 postal code, country). The zod schema is `.strict()`, so an attempt to send `role`, `status`,
@@ -136,7 +302,7 @@ rejects SVG/HTML/scripts outright, extension agreement, a 2 MiB cap on decoded b
 server-generated uuid as the storage key. Bytes are served from an authenticated route with
 `X-Content-Type-Options: nosniff`.
 
-## 6. Audit events
+## 9. Audit events
 
 Written to `audit_logs` (free-form `action`), always with `customerId` in metadata and never any
 secret:
@@ -149,7 +315,21 @@ secret:
 `admin_customer_account_switch_started`, `admin_customer_account_switch_ended`,
 `admin_customer_account_switch_action_blocked`.
 
-## 7. Email verification and password recovery
+From migration 0085:
+
+`security_pin_rotated`, `admin_security_pin_rotated`, `admin_security_pin_policy_updated`,
+`account_username_changed`, `security_pin_challenge_requested`, `security_pin_challenge_resent`,
+`security_pin_verification_failed`, `security_pin_revealed`, `account_recovery_requested`,
+`account_recovery_approved`, `account_recovery_rejected`.
+
+`auth_audit_log` carries the corresponding `event_type` values (widened by 0085) for sign-in-shaped
+events: `username_changed`, `security_pin_rotated`, `security_pin_view_challenge_requested`,
+`security_pin_view_challenge_resent`, `security_pin_view_verification_failed`, `security_pin_viewed`,
+`account_recovery_requested`, `account_recovery_cancelled`, `account_recovery_identity_verified`,
+`account_recovery_approved`, `account_recovery_rejected`. No PIN, code or challenge token ever
+appears in either table; metadata is limited to ids, versions, timestamps and counts.
+
+## 10. Email verification and password recovery
 
 Migration `0059_create_auth_recovery.sql` adds durable, independent recovery primitives without
 putting a bearer link into an ordinary notification or storing it in plaintext.
@@ -188,7 +368,7 @@ Account page. It does not yet gate all customer actions; enforcing verification 
 should be a separately reviewed product decision so existing customers and administrator-created
 accounts are migrated deliberately.
 
-## 8. TOTP multi-factor authentication
+## 11. TOTP multi-factor authentication
 
 Migration `0060_create_totp_mfa.sql` adds optional RFC 6238 TOTP MFA and single-use recovery
 codes. It is deliberately a full login boundary—not merely an account-page preference.
@@ -219,3 +399,38 @@ codes. It is deliberately a full login boundary—not merely an account-page pre
   challenge, failure, enable, disable, and recovery-code events. Passkeys/WebAuthn remain a
   separate future module because they require a reviewed relying-party and origin-registration
   policy.
+
+## 12. Degradation: what happens when something is not configured
+
+The identity layer must not be able to take the platform down, so every dependency has a defined
+failure mode.
+
+| Missing | Effect |
+| --- | --- |
+| `SECURITY_PIN_HMAC_KEY` | Registration and admin account creation still succeed; the account has no PIN yet. `GET /account/security` issues one lazily the first time the card is opened, and "view PIN" returns `503 SECURITY_PIN_UNAVAILABLE` until a key exists. Falls back to `CREDENTIAL_ENCRYPTION_KEY(S)` when unset. |
+| `NOTIFICATION_EMAIL_WEBHOOK_URL` / `_TOKEN` | Codes are still generated and queued, but the drain parks them as `CONFIGURATION_REQUIRED` instead of failing. The UI says email delivery is not configured and points the customer at support. |
+| Username absent on an inserted row | A `BEFORE INSERT` trigger derives one from the email local-part, bounded to the column width. `users.username` is therefore **not** `NOT NULL`: a hard constraint would turn one sloppy `INSERT` (an import, a fixture) into a 500 at a random call site, while the trigger repairs the row instead. |
+| PIN key rotated or lost | Envelopes fail closed: an undecryptable row is marked `FAILED` with "key changed?", and the next rotation issues a fresh PIN. The keyed hash is unaffected. |
+
+## 13. Correctness notes worth remembering
+
+These were real defects found by the integration suite, and each one is worth not reintroducing.
+
+* **A counter incremented inside a transaction that then throws is a counter that never
+  increments.** `verifyChallengeCode` originally updated `attempts` and threw `InvalidCodeError`
+  from inside `withTransaction`, so the rollback erased the update: five wrong guesses left
+  `attempts = 0`, and the cap could never be reached — an unlimited-guess oracle behind a
+  six-digit code. The service now returns an outcome from the transaction and throws *after* it
+  commits.
+* **A drain that selects a column which does not exist never runs.** The PIN mail drain read
+  `q.consumed_at` / `q.verified_at` from `pin_verification_email_queue`, where those columns do not
+  exist (they belong to the challenge). Liveness now comes from a correlated sub-select against
+  `security_pin_challenges`, and it is the challenge — not the queue row — that decides whether a
+  code is still worth delivering.
+* **Rate-limit buckets are per key, so the key must include the route.** `@fastify/rate-limit`
+  keys by client IP by default, which made every route's `config.rateLimit` share one counter: nine
+  requests to a 5-per-10-minutes route also exhausted the global allowance for login. The key is
+  now `${ip}|${routeOptions.url}`.
+* **A field the UI validates must be validated the same way by the database.** The username format
+  rule and the check constraint drifted; the customer saw a 500. They now share
+  `USERNAME_SEPARATOR_PATTERN`.

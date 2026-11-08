@@ -7,13 +7,24 @@ import {
   changeMySecurityNumber,
   changePassword,
   getMyAccount,
+  changeMyUsername,
+  getMyAccountSecurity,
   getMySecurityNumberStatus,
+  requestSecurityPinView,
+  resendSecurityPinCode,
+  revealSecurityPin,
+  verifySecurityPinCode,
+  checkUsernameAvailability,
   removeMyProfileImage,
   revealMySecurityNumber,
   updateMyAccount,
   uploadMyProfileImage,
 } from '../lib/account-api';
-import type { AccountProfile, SecurityNumberStatus } from '../lib/account-types';
+import type {
+  AccountProfile,
+  AccountSecurityPayload,
+  SecurityNumberStatus,
+} from '../lib/account-types';
 import { clearSession, getSupportOrigin, setSession, type StoredUser } from '../lib/auth';
 import { usePageMeta } from '../lib/usePageMeta';
 
@@ -86,6 +97,29 @@ export default function AccountPage() {
   const [currentSecurityNumber, setCurrentSecurityNumber] = useState('');
   const [newSecurityNumber, setNewSecurityNumber] = useState('');
 
+  // --- Account security: username + rotating Security PIN -------------------------------------
+  const [accountSecurity, setAccountSecurity] = useState<AccountSecurityPayload | null>(null);
+  const [usernameDraft, setUsernameDraft] = useState('');
+  const [usernameMessage, setUsernameMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+  const [usernameBusy, setUsernameBusy] = useState(false);
+  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
+
+  /**
+   * The PIN gate is a three-step state machine, and each step is only reachable from the previous
+   * one: `idle` → `code-sent` (a challenge is open) → `revealed` (the PIN has been shown once and
+   * the challenge is spent). The value lives in this component's state only — never in storage,
+   * never in the URL — and is cleared by a timer.
+   */
+  const [pinStage, setPinStage] = useState<'idle' | 'code-sent' | 'revealed'>('idle');
+  const [pinChallengeToken, setPinChallengeToken] = useState<string | null>(null);
+  const [pinMaskedEmail, setPinMaskedEmail] = useState('');
+  const [pinCode, setPinCode] = useState('');
+  const [pinValue, setPinValue] = useState<string | null>(null);
+  const [pinMessage, setPinMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+  const [pinBusy, setPinBusy] = useState(false);
+  const [pinSecondsLeft, setPinSecondsLeft] = useState<number | null>(null);
+  const [pinResendIn, setPinResendIn] = useState(0);
+
   const [imageMessage, setImageMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const [imageBusy, setImageBusy] = useState(false);
   const [hasImage, setHasImage] = useState(false);
@@ -134,6 +168,18 @@ export default function AccountPage() {
         /* Non-fatal — the panel shows its unavailable state. */
       });
 
+    getMyAccountSecurity()
+      .then((res) => {
+        if (cancelled) return;
+        setAccountSecurity(res);
+        setUsernameDraft(res.account.username ?? '');
+        // The server rotates an expired PIN on this read, so `nextRotationAt` is already current.
+        setSecurityStatus((previous) => previous ?? res.securityNumber);
+      })
+      .catch(() => {
+        /* Non-fatal — the Security PIN card shows its unavailable state. */
+      });
+
     apiFetch<MfaStatusResponse>('/api/auth/mfa/status')
       .then((res) => { if (!cancelled) setMfaStatus(res.mfa); })
       .catch(() => { /* Non-fatal — MFA controls report their unavailable state below. */ });
@@ -179,6 +225,26 @@ export default function AccountPage() {
     const timer = setTimeout(() => setRevealedNumber(null), 120_000);
     return () => clearTimeout(timer);
   }, [revealedNumber]);
+
+  // The revealed PIN is wiped when its display window elapses. This is cosmetic — the server has
+  // already spent the challenge, so nothing can re-read it — but a four-digit credential should not
+  // be left on screen in a shared office, or in a React tree, longer than the contract allows.
+  useEffect(() => {
+    if (pinStage !== 'revealed' || pinSecondsLeft === null) return;
+    if (pinSecondsLeft <= 0) {
+      hidePin();
+      return;
+    }
+    const timer = setTimeout(() => setPinSecondsLeft((seconds) => (seconds === null ? null : seconds - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [pinStage, pinSecondsLeft]);
+
+  // Resend cooldown, counted down locally so the button explains itself instead of failing.
+  useEffect(() => {
+    if (pinResendIn <= 0) return;
+    const timer = setTimeout(() => setPinResendIn((seconds) => Math.max(0, seconds - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [pinResendIn]);
 
   async function addPasskey(e: FormEvent) {
     e.preventDefault(); setPasskeyBusy(true); setPasskeyMessage(null);
@@ -394,6 +460,123 @@ export default function AccountPage() {
     }
   }
 
+  // --- Account security handlers ----------------------------------------------------------------
+
+  async function onSaveUsername(e: FormEvent) {
+    e.preventDefault();
+    const next = usernameDraft.trim();
+    if (!next || next === accountSecurity?.account.username) return;
+    setUsernameBusy(true);
+    setUsernameMessage(null);
+    setUsernameSuggestions([]);
+    try {
+      const res = await changeMyUsername(next);
+      setUsernameDraft(res.username);
+      setAccountSecurity((previous) =>
+        previous
+          ? {
+              ...previous,
+              account: { ...previous.account, username: res.username, usernameChangedAt: res.usernameChangedAt },
+            }
+          : previous
+      );
+      setUsernameMessage({
+        kind: 'ok',
+        text: res.unchanged
+          ? 'That is already your username.'
+          : `Your username is now "${res.username}". Use it, or your email address, to sign in.`,
+      });
+    } catch (err) {
+      // The server's conflict message already suggests alternatives; surface both.
+      setUsernameMessage({
+        kind: 'error',
+        text: err instanceof Error ? err.message : 'Could not change your username.',
+      });
+      try {
+        const availability = await checkUsernameAvailability(next);
+        setUsernameSuggestions(availability.suggestions);
+      } catch {
+        /* The suggestions are a convenience; the message above is the authoritative feedback. */
+      }
+    } finally {
+      setUsernameBusy(false);
+    }
+  }
+
+  /** Step 1: ask the server to email a code. Nothing about the PIN is involved yet. */
+  async function onRequestPinView() {
+    setPinBusy(true);
+    setPinMessage(null);
+    try {
+      const res = await requestSecurityPinView();
+      setPinChallengeToken(res.challenge.challengeToken);
+      setPinMaskedEmail(res.challenge.maskedEmail);
+      setPinStage('code-sent');
+      setPinCode('');
+      setPinMessage({ kind: 'ok', text: res.message });
+      setPinResendIn(res.challenge.resendAvailableInSeconds);
+    } catch (err) {
+      setPinMessage({
+        kind: 'error',
+        text: err instanceof Error ? err.message : 'Could not send a verification code.',
+      });
+    } finally {
+      setPinBusy(false);
+    }
+  }
+
+  /** Step 1b: rotate the code. Only possible after the server-side cooldown has elapsed. */
+  async function onResendPinCode() {
+    if (!pinChallengeToken) return;
+    setPinBusy(true);
+    setPinMessage(null);
+    try {
+      const res = await resendSecurityPinCode(pinChallengeToken);
+      setPinMaskedEmail(res.challenge.maskedEmail);
+      setPinMessage({ kind: 'ok', text: res.message });
+      setPinResendIn(res.challenge.resendAvailableInSeconds);
+    } catch (err) {
+      setPinMessage({
+        kind: 'error',
+        text: err instanceof Error ? err.message : 'Could not send a new code.',
+      });
+    } finally {
+      setPinBusy(false);
+    }
+  }
+
+  /** Steps 2 + 3: verify the code, then immediately redeem the challenge for the value. */
+  async function onVerifyPinCode(e: FormEvent) {
+    e.preventDefault();
+    if (!pinChallengeToken) return;
+    setPinBusy(true);
+    setPinMessage(null);
+    try {
+      await verifySecurityPinCode(pinChallengeToken, pinCode.trim());
+      const revealed = await revealSecurityPin(pinChallengeToken);
+      setPinValue(revealed.securityPin.value);
+      setPinSecondsLeft(revealed.securityPin.displayTtlSeconds);
+      setPinStage('revealed');
+      setPinCode('');
+      setPinChallengeToken(null);
+      setPinMessage({ kind: 'ok', text: 'Your current Security PIN is shown below. It hides again automatically.' });
+    } catch (err) {
+      setPinMessage({
+        kind: 'error',
+        text: err instanceof Error ? err.message : 'That code could not be verified.',
+      });
+    } finally {
+      setPinBusy(false);
+    }
+  }
+
+  function hidePin() {
+    setPinValue(null);
+    setPinSecondsLeft(null);
+    setPinStage('idle');
+    setPinMessage(null);
+  }
+
   async function onPickImage(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -447,6 +630,8 @@ export default function AccountPage() {
         <dl className="ch247-definition-list">
           <dt>Customer ID</dt>
           <dd data-testid="customer-id">{profile?.customerId ?? '—'}</dd>
+          <dt>Username</dt>
+          <dd data-testid="account-username">{accountSecurity?.account?.username ?? profile?.username ?? '—'}</dd>
           <dt>Email</dt>
           <dd>{me.email}</dd>
           <dt>Email verification</dt>
@@ -460,6 +645,63 @@ export default function AccountPage() {
           Quote your Customer ID when you contact support or ask about an invoice. It never changes
           and it is not a password — never use it to prove who you are.
         </p>
+
+        {!inSupportMode && accountSecurity?.account && (
+          <form className="ch247-form ch247-form--wide" onSubmit={onSaveUsername}>
+            <label>
+              <span className="ch247-field-label">Username</span>
+              <input
+                value={usernameDraft}
+                onChange={(e) => {
+                  setUsernameDraft(e.target.value);
+                  setUsernameMessage(null);
+                  setUsernameSuggestions([]);
+                }}
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
+                minLength={3}
+                maxLength={32}
+                aria-describedby="account-username-hint"
+                required
+              />
+            </label>
+            <span className="ch247-field-hint" id="account-username-hint">
+              You can sign in with either your username or your email address. 3–32 characters,
+              starting with a letter.
+            </span>
+            <button
+              type="submit"
+              disabled={usernameBusy || !usernameDraft.trim() || usernameDraft.trim() === accountSecurity.account.username}
+            >
+              {usernameBusy ? 'Saving…' : 'Change username'}
+            </button>
+          </form>
+        )}
+        {usernameMessage && (
+          <p className={usernameMessage.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'} role={usernameMessage.kind === 'error' ? 'alert' : 'status'}>
+            {usernameMessage.text}
+          </p>
+        )}
+        {usernameSuggestions.length > 0 && (
+          <p className="ch247-page__hint">
+            Available instead:{' '}
+            {usernameSuggestions.map((suggestion, index) => (
+              <button
+                key={suggestion}
+                type="button"
+                className="ch247-link-button"
+                onClick={() => {
+                  setUsernameDraft(suggestion);
+                  setUsernameSuggestions([]);
+                  setUsernameMessage(null);
+                }}
+              >
+                {index > 0 ? `, ${suggestion}` : suggestion}
+              </button>
+            ))}
+          </p>
+        )}
         {!me.emailVerified && (
           <div className="ch247-placeholder-notice">
             <p>Verify this email address to confirm that CloudHost247 can contact you about your account.</p>
@@ -558,6 +800,123 @@ export default function AccountPage() {
           </div>
         )}
         {mfaMessage && <p className={mfaMessage.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>{mfaMessage.text}</p>}
+      </div>
+
+      <div className="ch247-card" data-testid="security-pin-card">
+        <h2>Security PIN</h2>
+        {accountSecurity?.securityPin ? (
+          <>
+            <dl className="ch247-definition-list">
+              <dt>Security PIN</dt>
+              {/* A literal mask from the server. There is no code path that puts the real digits
+                  here without an email verification in the current session. */}
+              <dd data-testid="security-pin-masked" aria-label="Security PIN hidden">
+                {pinStage === 'revealed' && pinValue ? (
+                  <span className="ch247-security-number" data-testid="revealed-security-pin">{pinValue}</span>
+                ) : (
+                  accountSecurity.securityPin.maskedValue
+                )}
+              </dd>
+              <dt>Rotates</dt>
+              <dd>Every {accountSecurity.securityPin.rotationHours} hours</dd>
+              <dt>Next rotation</dt>
+              <dd>
+                {accountSecurity.securityPin.nextRotationAt
+                  ? new Date(accountSecurity.securityPin.nextRotationAt).toLocaleString()
+                  : 'As soon as you open this page'}
+              </dd>
+            </dl>
+
+            <p className="ch247-page__hint">
+              Your Security PIN is a four-digit code that changes automatically every{' '}
+              {accountSecurity.securityPin.rotationHours} hours. It is stored only as a keyed hash, so
+              nobody — including our staff — can read it from the database. To see the current value we
+              email a six-digit code to your verified address, and the value is shown once, for{' '}
+              {accountSecurity.securityPin.revealDisplayTtlSeconds} seconds.
+            </p>
+
+            {!accountSecurity.securityPin.emailVerificationConfigured && (
+              <p className="ch247-placeholder-notice">
+                Email delivery is not configured on this platform yet, so the verification code cannot be
+                sent. Contact support and they will complete an identity check instead — they still cannot
+                see your PIN.
+              </p>
+            )}
+
+            {!accountSecurity.account.emailVerified && (
+              <p className="ch247-placeholder-notice">
+                Verify your email address above before you can view your Security PIN. This is deliberate:
+                the code is only ever sent to a confirmed address.
+              </p>
+            )}
+
+            {inSupportMode ? (
+              <p className="ch247-status-error">
+                Security PIN access is blocked while an administrator is signed in to this account. An
+                administrator can never view, reset or be told your PIN.
+              </p>
+            ) : pinStage === 'revealed' && pinValue ? (
+              <>
+                <p className="ch247-status-ok" role="status">
+                  This is your current Security PIN{pinSecondsLeft !== null ? ` — it hides in ${pinSecondsLeft}s` : ''}.
+                  Write it down if you need it; we cannot show it again without another email code.
+                </p>
+                <button type="button" className="ch247-button ch247-button--outline" onClick={hidePin}>
+                  Hide it now
+                </button>
+              </>
+            ) : pinStage === 'code-sent' ? (
+              <form className="ch247-form ch247-form--wide" onSubmit={onVerifyPinCode}>
+                <label>
+                  <span className="ch247-field-label">
+                    Six-digit code sent to {pinMaskedEmail || 'your registered email address'}
+                  </span>
+                  <input
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    value={pinCode}
+                    onChange={(e) => setPinCode(e.target.value.replace(/\D/g, ''))}
+                    required
+                  />
+                </label>
+                <button type="submit" disabled={pinBusy || pinCode.length !== 6}>
+                  {pinBusy ? 'Checking…' : 'Verify and show my PIN'}
+                </button>
+                <button
+                  type="button"
+                  className="ch247-button ch247-button--outline"
+                  onClick={onResendPinCode}
+                  disabled={pinBusy || pinResendIn > 0}
+                >
+                  {pinResendIn > 0 ? `Send a new code in ${pinResendIn}s` : 'Send a new code'}
+                </button>
+              </form>
+            ) : (
+              <button
+                type="button"
+                className="ch247-button"
+                onClick={onRequestPinView}
+                disabled={pinBusy || !accountSecurity.securityPin.canView}
+                data-testid="request-security-pin"
+              >
+                {pinBusy ? 'Sending…' : 'Email me a code to see my PIN'}
+              </button>
+            )}
+
+            {pinMessage && (
+              <p
+                className={pinMessage.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}
+                role={pinMessage.kind === 'error' ? 'alert' : 'status'}
+              >
+                {pinMessage.text}
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="ch247-page__hint">Security PIN details are unavailable right now.</p>
+        )}
       </div>
 
       <div className="ch247-card">
