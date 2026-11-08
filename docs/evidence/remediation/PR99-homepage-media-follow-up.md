@@ -33,3 +33,14 @@ An initial Playwright run could not launch Chromium because `libnspr4.so` was no
 - Independent reviewer must inspect the file moves and URL references, verify media is served after a production build, review the test's auth assumptions and record a decision. No reviewer approval is recorded.
 - No external resources or data were created. To roll back, revert the follow-up commit as a whole, restoring both the old asset paths and their references; do not run the mirror's pruning command against the old layout without separately protecting the homepage assets.
 - No merge or production deployment is authorized by this record. Separate explicit production approval is required even after all gates pass.
+
+## Follow-up: unblock frontend typecheck
+
+The candidate based on `9facc7647d0783a1274cf5b1c9663c09701f073f` adds `cloudhost247-node/frontend/tests/unit/footer-back-to-top.test.tsx`: two explicit missing-element errors replace optional chaining before bitwise document-position assertions. Both existing placement assertions remain in force; missing elements fail rather than becoming a numeric bitwise value. No application or footer markup was changed. The latest commit containing this evidence file identifies the candidate to review.
+
+- `npx tsc -p frontend/tsconfig.json --noEmit` from `cloudhost247-node/`: exit 0 on the follow-up working tree.
+- `npx vitest run frontend/tests/unit/footer-back-to-top.test.tsx --maxWorkers=2`: exit 0, six tests passed.
+- `git diff --check`: exit 0 before staging.
+- The previous media and browser checks remain historical local results, not an independent review or proof of live authentication. CI must rerun on the new candidate. The Node dependency audit and PHP release-candidate failures are not addressed by this change.
+
+**Decision remains BLOCKED — NOT VERIFIED:** no independent reviewer or approval recorded; S0.1a and production authorization remain unchanged. Roll back the follow-up commit to restore the previous test file; roll back the preceding media commit separately if needed.

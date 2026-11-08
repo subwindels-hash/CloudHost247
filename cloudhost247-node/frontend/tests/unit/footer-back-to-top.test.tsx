@@ -48,18 +48,20 @@ describe('Footer: Amazon-style back-to-top strip', () => {
     expect(strip.className).toContain('hg-footer__top');
     // It sits after — not inside — the bottom row (copyright / locale).
     const bottom = container.querySelector('.hg-footer__bottom');
-    expect(bottom?.contains(strip)).toBe(false);
-    expect(bottom?.compareDocumentPosition(strip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    if (!bottom) throw new Error('Footer bottom row is missing');
+    expect(bottom.contains(strip)).toBe(false);
+    expect(bottom.compareDocumentPosition(strip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('shows the powered-by line directly below the copyright line', () => {
     const { container } = renderFooter();
     const copyright = container.querySelector('.hg-footer__copyright');
+    if (!copyright) throw new Error('Footer copyright is missing');
     const powered = screen.getByText('Proudly Powered by WINDELS GROUP & COMPANY®');
-    expect(copyright?.textContent).toContain('All rights reserved.');
+    expect(copyright.textContent).toContain('All rights reserved.');
     expect(powered.className).toContain('hg-footer__powered');
-    expect(copyright?.parentElement).toBe(powered.parentElement);
-    expect(copyright?.compareDocumentPosition(powered) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(copyright.parentElement).toBe(powered.parentElement);
+    expect(copyright.compareDocumentPosition(powered) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('places the GeoLite2 credit beside the country in the footer locale area', () => {
