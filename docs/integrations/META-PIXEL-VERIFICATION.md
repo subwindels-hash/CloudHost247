@@ -141,3 +141,9 @@ The seven remaining broad-frontend failures were fixed at their source, without 
 - **One dead-anchor failure:** `AppErrorBoundary` used an empty refresh href. Refresh is now a real button action calling `window.location.reload()`, with two new boundary tests. The repository-wide placeholder-anchor scan is unchanged and passes.
 
 Verification: the three original failing suites now pass **20/20**, the two new regression suites pass **8/8**, and the full frontend unit run passes **67 files / 802 tests** (139.59s). Frontend typecheck and the complete `npm run build` pass. The Meta Chromium harness was rerun after the frontend changes: **16/16**, four locally intercepted Meta requests. No live Meta receipt is claimed.
+
+## Merge readiness with `main` (2026-11-08)
+
+- Merged `origin/main` after PR #102 landed. WHMCS now occupies migrations `0086`–`0088`, so the Meta migration was renumbered to `0089_create_marketing_integrations.sql`; the real migration runner suite passes **10/10**.
+- The Node CI production audit initially failed on pre-existing advisories. Fastify/@fastify/static and transitive URI/glob dependencies were refreshed, and `geoip-lite` was kept on the Node-22-compatible `1.4.10` line with a scoped override to patched `ip-address@^10.7.6`. `npm audit --omit=dev` reports **0 vulnerabilities**; IPv4/IPv6 country lookup, currency geo-hint, marketing consent/config/conversions and migration tests pass.
+- After the merge: server/frontend typechecks, complete build, generator check and the full frontend unit suite (**802/802**) pass. No live Meta receipt or deployment is claimed.
