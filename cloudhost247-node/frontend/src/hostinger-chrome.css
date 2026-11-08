@@ -954,25 +954,42 @@
   padding: 22px 0 26px;
 }
 .hg-footer__bottom-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; }
+.hg-footer__brand-lines { display: grid; gap: 3px; }
 .hg-footer__copyright { margin: 0; font-size: 0.75rem; color: #8793a0; }
-.hg-footer__locale { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #8793a0; }
+.hg-footer__powered { margin: 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; color: #8793a0; }
+/* Locale sits at the right end of the bottom row; brand lines stay left. */
+.hg-footer__locale { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 0.75rem; color: #8793a0; }
 .hg-footer__legal-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-left: auto; }
 .hg-footer__legal-links a { color: #aeb8c2; font-size: 0.75rem; text-decoration: none; }
 .hg-footer__legal-links a:hover { color: #e6c875; text-decoration: underline; }
-/* Section 5 made this a full-width navy band; here it is an inline link in the legal bar. */
+/* Back-to-top strip in Amazon's style: a full-width slate band (Amazon uses #37475A, hover
+   #485769 — the same values kept here) with the whole band as one centred click target.
+   Per design direction it forms the footer's final band, below the bottom row
+   (copyright / locale), instead of opening the footer as Amazon does. An
+   earlier pass demoted it to a small inline link inside that row; the strip stays a band. */
 .hg-theme .hg-footer .hg-footer__top {
-  display: inline-flex;
-  min-height: 0;
-  padding: 0;
-  background: transparent;
-  color: #aeb8c2;
-  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  background: #37475a;
+  color: #fff;
+  font-size: 0.82rem;
   font-weight: 600;
-  letter-spacing: 0;
+  letter-spacing: 0.02em;
+  text-align: center;
   text-decoration: none;
+  cursor: pointer;
 }
-.hg-theme .hg-footer .hg-footer__top:hover,
-.hg-theme .hg-footer .hg-footer__top:focus-visible { background: transparent; color: #e6c875; }
+.hg-theme .hg-footer .hg-footer__top:hover { background: #485769; color: #e6c875; }
+.hg-theme .hg-footer .hg-footer__top:focus-visible {
+  background: #485769;
+  color: #e6c875;
+  outline: 2px solid #e6c875;
+  outline-offset: -2px;
+}
 
 /* ---- Responsive ---- */
 @media (max-width: 1439px) {
@@ -1004,7 +1021,10 @@
   .hg-theme .hg-footer__column h2 { font-size: 0.86rem; }
   .hg-theme .hg-footer__column a { font-size: 0.74rem; }
   .hg-footer__intro { padding-bottom: 28px; margin-bottom: 30px; }
-  .hg-footer__bottom-inner { flex-direction: column; align-items: flex-start; }
+  /* On phones the bottom-row writing (copyright, powered-by, locale) is centred. */
+  .hg-footer__bottom-inner { flex-direction: column; align-items: center; text-align: center; }
+  .hg-footer__brand-lines { justify-items: center; }
+  .hg-footer__locale { margin-left: 0; justify-content: center; }
   .hg-footer__legal-links { gap: 8px 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1665,7 +1685,9 @@
 .hg-theme .hg-footer__column a:hover { color: #735306; text-decoration: underline; }
 .hg-footer__toggle { display: none; }
 .hg-theme .hg-footer__bottom { background: rgba(125, 130, 136, .16); border-top: 1px solid #979ca1; }
-.hg-theme .hg-footer__copyright, .hg-theme .hg-footer__locale, .hg-theme .hg-footer__legal-links a, .hg-theme .hg-footer .hg-footer__top { color: #4b4c4e; }
+/* The back-to-top strip keeps its own slate band + white text (Amazon-style, above);
+   it is deliberately not recoloured with the legal-row text. */
+.hg-theme .hg-footer__copyright, .hg-theme .hg-footer__powered, .hg-theme .hg-footer__locale, .hg-theme .hg-footer__legal-links a { color: #4b4c4e; }
 @media (max-width: 900px) and (min-width: 768px) {
   .hg-theme .hg-footer__columns { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px; }
 }

@@ -69,6 +69,28 @@ test('tools account shortcuts route a guest through login', async ({ page }) => 
   await expect(page.getByText('Missing bearer token')).toHaveCount(0);
 });
 
+test('footer back-to-top strip is a full-width bar that returns to the top', async ({ page }) => {
+  await page.goto('/');
+  const strip = page.getByRole('link', { name: 'Back to top' });
+  await expect(strip).toHaveAttribute('href', '#ch247-top');
+  // Amazon-style strip, placed as the footer's final band below the legal row.
+  const geometry = await strip.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    return {
+      isLastChild: el.parentElement?.lastElementChild === el,
+      widthRatio: rect.width / window.innerWidth,
+      height: rect.height,
+      background: getComputedStyle(el).backgroundColor,
+    };
+  });
+  expect(geometry.isLastChild).toBe(true);
+  expect(geometry.widthRatio).toBeGreaterThan(0.99);
+  await strip.scrollIntoViewIfNeeded();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(400);
+  await strip.click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+});
+
 test('mobile navigation opens and its Pricing link lands on Pricing', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
