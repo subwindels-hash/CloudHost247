@@ -31,6 +31,7 @@
 import 'dotenv/config';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { loadWhmcsConfig } from '../../src/whmcs/config';
 import { WhmcsClient, consoleLogger } from '../../src/whmcs/client';
 import { buildCatalogue } from '../../src/whmcs/catalogue';
@@ -54,6 +55,7 @@ import { collectDiscovery, renderDiscoveryReport, type DiscoveryArtifact } from 
 import { readServiceRegister } from '../../src/whmcs/service-register';
 import { buildMappingReview, renderMappingReview, type MappingProposal } from '../../src/whmcs/mapping-review';
 import { validateDiscoveryArtifact } from '../../src/whmcs/discovery-validation';
+import { renderEvidencePack, buildEvidenceSummary, type EvidenceEnvironment } from '../../src/whmcs/evidence-pack';
 
 const DEFAULT_MAP_PATH = path.join(process.cwd(), 'config', 'whmcs', 'product-map.json');
 const DEFAULT_REGISTER_PATH = path.resolve(process.cwd(), '..', 'config', 'whmcs', 'service-register.csv');
@@ -62,6 +64,8 @@ const DEFAULT_REPORT_PATH = path.resolve(process.cwd(), '..', 'docs', 'WHMCS-DIS
 const DEFAULT_REVIEW_PATH = path.resolve(process.cwd(), '..', 'docs', 'WHMCS-MAPPING-REVIEW.md');
 const DEFAULT_REVIEW_JSON_PATH = path.join(process.cwd(), 'config', 'whmcs', 'mapping-review.json');
 const DEFAULT_PROPOSAL_PATH = path.join(process.cwd(), 'config', 'whmcs', 'mapping-proposal.json');
+const DEFAULT_PACK_PATH = path.resolve(process.cwd(), '..', 'docs', 'WHMCS-APPROVAL-PACK.md');
+const DEFAULT_PACK_JSON_PATH = path.join(process.cwd(), 'config', 'whmcs', 'approval-pack.json');
 
 interface Args {
   command: string;
@@ -76,6 +80,7 @@ interface Args {
   reviewPath: string;
   reviewJsonPath: string;
   proposalPath: string;
+  doctorPath?: string;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -128,6 +133,10 @@ function parseArgs(argv: string[]): Args {
         break;
       case '--report':
         out.reportPath = path.resolve(value ?? out.reportPath);
+        i += 1;
+        break;
+      case '--doctor':
+        out.doctorPath = path.resolve(value ?? 'whmcs-doctor.txt');
         i += 1;
         break;
       case '--register':
@@ -625,12 +634,100 @@ function review(args: Args): void {
   console.log('  nothing was bound. Approve rows first, then bind one service at a time.');
 }
 
+/**
+ * C1.7 step 6: assemble the approval pack from what is actually on disk.
+ *
+ * Reads the map, the discovery artifact (and its sha256), the validation, the review and the optional proposal;
+ * writes one Markdown pack plus a JSON copy. It never runs discovery itself and never binds — the pack is a
+ * *reading* of evidence that already exists, which is why it is safe to regenerate at any time.
+ */
+function evidence(args: Args): void {
+  if (!existsSync(args.registerPath)) fail(`no service register at ${args.registerPath}`, 2);
+  const services = readServiceRegister(args.registerPath);
+  const document = existsSync(args.mapPath) ? readDocument(args.mapPath) : emptyDocument(fingerprintBaseUrl('unconfigured'));
+
+  let discovery: DiscoveryArtifact | null = null;
+  let discoverySha: string | null = null;
+  let discoverySource: string | null = null;
+  if (existsSync(args.discoveryPath)) {
+    const bytes = readFileSync(args.discoveryPath);
+    discovery = JSON.parse(bytes.toString('utf8')) as DiscoveryArtifact;
+    discoverySha = createHash('sha256').update(bytes).digest('hex');
+    discoverySource = path.relative(process.cwd(), args.discoveryPath);
+  }
+
+  // The environment is read through the same loader the application uses, so the pack cannot claim a
+  // configuration the server would refuse.
+  const environment: EvidenceEnvironment = {
+    baseUrlHost: null,
+    baseUrlFingerprint: null,
+    mode: null,
+    mfaRequired: null,
+    credentialsPresent: Boolean(process.env.WHMCS_API_IDENTIFIER && process.env.WHMCS_API_SECRET),
+  };
+  const loaded = loadWhmcsConfig();
+  if (loaded.enabled) {
+    environment.baseUrlHost = new URL(loaded.config.baseUrl).host;
+    environment.baseUrlFingerprint = fingerprintBaseUrl(loaded.config.baseUrl);
+    environment.mode = loaded.config.mode;
+    environment.mfaRequired = loaded.config.ssoRequireMfa;
+  }
+
+  let proposal: MappingProposal | null = null;
+  if (existsSync(args.proposalPath)) {
+    const parsed = JSON.parse(readFileSync(args.proposalPath, 'utf8')) as MappingProposal;
+    proposal = Array.isArray(parsed.entries) ? parsed : null;
+  }
+
+  const validation = discovery ? validateDiscoveryArtifact(discovery) : null;
+  const review = buildMappingReview({ services, discovery, proposal, map: document });
+
+  const doctorOutput = args.doctorPath && existsSync(args.doctorPath) ? readFileSync(args.doctorPath, 'utf8') : null;
+  const secrets = [process.env.WHMCS_API_SECRET, process.env.WHMCS_API_IDENTIFIER].filter(
+    (value): value is string => typeof value === 'string' && value.length > 0,
+  );
+
+  const input = {
+    now: new Date().toISOString(),
+    environment,
+    discovery: discovery && discoverySha && discoverySource
+      ? { artifact: discovery, sha256: discoverySha, source: discoverySource }
+      : null,
+    validation,
+    review,
+    map: document,
+    proposal,
+    doctorOutput,
+    secrets,
+  };
+
+  mkdirSync(path.dirname(DEFAULT_PACK_PATH), { recursive: true });
+  writeFileSync(DEFAULT_PACK_PATH, renderEvidencePack(input), 'utf8');
+  mkdirSync(path.dirname(DEFAULT_PACK_JSON_PATH), { recursive: true });
+  writeFileSync(DEFAULT_PACK_JSON_PATH, `${JSON.stringify(buildEvidenceSummary(input), null, 2)}\n`, 'utf8');
+
+  console.log('Approval pack — C1.7 evidence review');
+  console.log(`  discovery artifact   ${discoverySha ? discoverySha.slice(0, 12) + '…' : 'none captured'}`);
+  const validationLabel = !validation
+    ? 'not run'
+    : validation.usable
+      ? 'usable'
+      : `NOT USABLE (${validation.critical.length} critical)`;
+  console.log(`  snapshot validation  ${validationLabel}`);
+  console.log(`  bindings             ${Object.keys(document.services).length}`);
+  console.log(`  services             ${services.length} (${review.summary['VERIFIED — READY FOR APPROVAL']} verified, ${review.summary['BLOCKED']} blocked)`);
+  console.log(`✓ ${path.relative(process.cwd(), DEFAULT_PACK_PATH)}`);
+  console.log(`✓ ${path.relative(process.cwd(), DEFAULT_PACK_JSON_PATH)}`);
+  console.log('  nothing was bound. The pack recommends; the owner approves; bind stays a separate step.');
+}
+
 const USAGE = `WHMCS catalogue map — discovery and binding.
 
   npm run whmcs:map -- doctor        read-only preflight against the installation (writes nothing)
   npm run whmcs:map -- discover      C1: catalogue JSON + discovery report (writes nothing else)
   npm run whmcs:map -- validate      validate a captured catalogue snapshot (exit 1 if unusable)
   npm run whmcs:map -- review        classify every advertised service (binds nothing)
+  npm run whmcs:map -- evidence      C1.7 approval pack from the artifacts on disk
   npm run whmcs:map -- snapshot      checksummed product-map snapshot from GetProducts
   npm run whmcs:map -- verify        re-check map checksums, provenance and integrity
   npm run whmcs:map -- bind --service <key> --product <pid> [--cycles monthly,annually]
@@ -671,6 +768,9 @@ async function main(): Promise<void> {
       break;
     case 'validate':
       validate(args);
+      break;
+    case 'evidence':
+      evidence(args);
       break;
     case 'review':
       review(args);

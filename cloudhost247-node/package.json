@@ -52,7 +52,8 @@
     "whmcs:doctor": "tsx scripts/whmcs/catalogue-map.ts doctor",
     "whmcs:review": "tsx scripts/whmcs/catalogue-map.ts review",
     "whmcs:validate": "tsx scripts/whmcs/catalogue-map.ts validate",
-    "typecheck:scripts": "tsc -p tsconfig.scripts.json --noEmit"
+    "typecheck:scripts": "tsc -p tsconfig.scripts.json --noEmit",
+    "whmcs:evidence": "tsx scripts/whmcs/catalogue-map.ts evidence"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",

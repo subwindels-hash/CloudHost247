@@ -227,21 +227,38 @@ requirements. Nothing has been purchased, ordered, provisioned or charged at tha
 
 ---
 
-## 8. Step 7: the evidence pack
+## 8. Step 6: the approval pack
 
-Attach all of the following to the approval request, so the reviewer reads the same bytes the run produced:
+Assemble it with one command rather than by copy-paste, so every pack contains the same fields, the same
+provenance and the same statement of what was not verified:
 
-| Item | Where |
+```bash
+npm run whmcs:doctor 2>&1 | tee /tmp/whmcs-doctor.txt     # capture the preflight transcript
+npm run whmcs:evidence -- --doctor /tmp/whmcs-doctor.txt
+```
+
+It writes `docs/WHMCS-APPROVAL-PACK.md` (the document that goes for approval) and
+`config/whmcs/approval-pack.json` (the same facts, for diffing two packs). It reads only what is already on disk:
+the map, the catalogue artifact **and its sha256**, the validation result, the review, the proposal and the captured
+doctor transcript. It never runs discovery itself and never binds, which is why it is safe to regenerate at any time.
+
+| Pack section | Contents |
 | --- | --- |
-| Doctor output | copy the console block into the request |
-| Catalogue artifact | `cloudhost247-node/config/whmcs/catalogue-snapshot.json` |
-| Artifact digest | `sha256sum config/whmcs/catalogue-snapshot.json` |
-| Discovery report | `docs/WHMCS-DISCOVERY-REPORT.md` |
-| Validation result | `npm run whmcs:validate` output |
-| Mapping review | `docs/WHMCS-MAPPING-REVIEW.md` |
-| Review rows (for diffing) | `cloudhost247-node/config/whmcs/mapping-review.json` |
-| Proposal | `cloudhost247-node/config/whmcs/mapping-proposal.json` |
-| Map integrity | `npm run whmcs:map -- verify` (must still report 0 bindings) |
+| Header | Generated at, installation **host only**, installation fingerprint, credentials present (yes/no — values are never read), mode, MFA policy, bindings, dispositions, artifact digest, proposal size and fingerprint |
+| 1. Prerequisites and preflight | What the deployment measured, then the four owner attestations as **unticked** boxes — staging-not-production, read-only role, System URL equality, no credential in the evidence |
+| 2. Discovery and snapshot validation | Capture time, fingerprint, artifact sha256, version, currencies and default, group/product counts, hidden/unpriced/module-less counts, run warnings, and the validation verdict with every critical failure listed |
+| 3. Mapping review | The six-state summary, the reviewer blockers, and the reminder that `VERIFIED — READY FOR APPROVAL` is not certification |
+| 4. Products on the installation | Group, pid, name, visibility, currencies, prices per cycle, provisioning module, **module verified: NOT VERIFIED**, **configurable options: NOT VERIFIED** |
+| 5. Service-to-product evidence | One row per advertised service: page, state, pid, group, product, cycles, missing dependencies |
+| 6. What this pack does not verify | Configurable options, module capability, that no order/invoice/payment/provisioning action was issued, staging status (attested, not measured), and that nothing was bound |
+| 7. Owner decision | A single pending row: decision, owner, date, approved services |
+
+**Sanitisation is a property of the tool, not a habit of the operator.** Every captured line passes through a
+redactor that removes the configured secret and identifier values, credential-shaped pairs (`identifier=`, `secret=`,
+`token=`, `Authorization: …`), bearer tokens, and reduces absolute URLs to their host. A test asserts that a
+transcript containing a secret, an auth header and a full base URL comes out with none of them.
+
+Write the proposal (§7) before running this, or the pack will — correctly — say there is nothing to approve.
 
 ---
 
@@ -299,6 +316,7 @@ C2 begins only after the mapping proposal has been reviewed and explicitly appro
 | Snapshot validation gate | **DONE** | `src/whmcs/discovery-validation.ts`; 14 tests, every critical check reachable from a fixture |
 | Proposal fingerprint integrity | **DONE** | `src/whmcs/mapping-review.ts`; a mismatched fingerprint blocks the rows it touches (3 tests) |
 | Operator CLI type-checked | **DONE** | `tsconfig.scripts.json`, `npm run typecheck:scripts` (part of `npm run build`); it previously was not, and four flag handlers were broken |
+| Approval pack generator (`npm run whmcs:evidence`) | **DONE** | `src/whmcs/evidence-pack.ts`; 12 tests — redaction, provenance, `NOT VERIFIED` markers, unticked attestations |
 | The run itself | **BLOCKED** | §2 — staging URL, read-only credential, version, System URL |
 | Proposal and approval | **NOT STARTED** | written by a human after the run; §7 |
 | C2 wiring | **NOT STARTED** | gated on §9 and explicit approval |
