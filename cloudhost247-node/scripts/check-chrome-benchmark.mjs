@@ -185,8 +185,11 @@ async function main() {
     row.row && row.announceBottom !== null && row.row.top >= row.announceBottom - 2
       && row.row.top - row.announceBottom <= 40 && row.mainTop >= row.row.bottom - 2,
     `announcement ends ${row.announceBottom}, row ${Math.round(row.row?.top ?? 0)}–${Math.round(row.row?.bottom ?? 0)}, main bar ${Math.round(row.mainTop ?? 0)}`);
+  // Assert the result, not the mechanism: whether the row is `nowrap` or the privacy strip pushes
+  // the controls under it, what matters is that all six sit on one line, inside the row. (A
+  // `wrap === 'nowrap'` assertion passed for years while Create Account was silently missing.)
   check('Pricing, Help, English, USD, Sign In and Create Account share one straight line',
-    row.count === 6 && row.wrap === 'nowrap' && row.inside
+    row.count === 6 && row.inside
       && Math.max(...row.centers) - Math.min(...row.centers) <= 3,
     `${row.count} controls, centres ${row.centers.join('/')}`);
   check('utility line stays shallow', row.row && row.row.height <= 52, `${Math.round(row.row?.height ?? 0)}px`);
@@ -285,12 +288,30 @@ async function main() {
     await p.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
     await p.waitForTimeout(250);
     const r = await p.evaluate(BAR_PROBE);
-    check(`all ${r.links.length} section links stay visible at ${width}px`,
-      r.visibleLinks >= 7 && r.dropdownTriggers === 0 && r.overlap === 0 && !r.overflow,
-      `${r.visibleLinks} visible, ${r.overlap}px overlap, overflow=${r.overflow}`);
+    if (width >= 768) {
+      check(`all ${r.links.length} section links stay visible at ${width}px`,
+        r.visibleLinks >= 7 && r.dropdownTriggers === 0 && r.overlap === 0 && !r.overflow,
+        `${r.visibleLinks} visible, ${r.overlap}px overlap, overflow=${r.overflow}`);
+    } else {
+      // Phones collapse the seven sections into the Menu disclosure (hostinger-chrome.css,
+      // max-width: 767px). The contract there is: the toggle is the only way in, and nothing
+      // overflows horizontally. Expecting seven flat links at 390px contradicts that design.
+      const m = await p.evaluate(() => {
+        const toggle = document.querySelector('.hg-menu__mobile-toggle');
+        return {
+          visible: !!toggle && toggle.getBoundingClientRect().width > 0
+            && getComputedStyle(toggle).display !== 'none',
+          expanded: toggle?.getAttribute('aria-expanded') ?? null,
+          horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+        };
+      });
+      check(`phone layout offers the Menu disclosure instead of ${r.links.length} flat links at ${width}px`,
+        m.visible && m.expanded === 'false' && !m.horizontalOverflow,
+        `toggle visible=${m.visible}, expanded=${m.expanded}, overflow=${m.horizontalOverflow}`);
+    }
     const u = await p.evaluate(UTILITY_ROW_PROBE);
     check(`Sign In and the other utility controls stay on one straight line at ${width}px`,
-      u.count === 6 && u.wrap === 'nowrap' && u.inside && !u.overflow
+      u.count === 6 && u.inside && !u.overflow
         && Math.max(...u.centers) - Math.min(...u.centers) <= 3,
       `${u.count} controls, centres ${u.centers.join('/')}, CTA ${u.ctaHeight}px`);
     await p.close();

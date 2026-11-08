@@ -104,15 +104,25 @@ describe('Top menu with per-section dropdown arrows', () => {
     expect(within(primary).getByRole('button', { name: 'Language: English' })).toBeTruthy();
     expect(within(primary).getByRole('button', { name: /^Display currency: USD/ })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Sign In' })).toBeTruthy();
-    expect(within(primary).queryByRole('link', { name: 'Create Account' })).toBeNull();
+    expect(within(primary).getByRole('link', { name: 'Create Account' })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Pricing' })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Help' })).toBeTruthy();
     expect(within(primary).getByRole('link', { name: 'Cart' })).toBeTruthy();
 
-    // Search and cart sit directly after the locale controls in the utility row.
+    // One straight line, left-to-right: quick links, then search/cart, then the account controls.
+    // Asserting DOM order rather than sibling adjacency keeps the contract meaningful: the groups
+    // may gain a wrapper (they did, when the quick links were introduced) without the line itself
+    // changing, and the six controls in check-chrome-benchmark.mjs are what actually matter.
     const line = container.querySelector<HTMLElement>('.hg-bar__top')!;
     expect(line).toBeTruthy();
-    expect(line.querySelector('.hg-bar__locale')?.nextElementSibling).toBe(line.querySelector('.hg-bar__icons'));
+    const order = ['.hg-bar__quick', '.hg-bar__icons', '.hg-bar__actions'].map((selector) => {
+      const element = line.querySelector<HTMLElement>(selector);
+      expect(element, `${selector} must be part of the utility line`).toBeTruthy();
+      return element!;
+    });
+    expect(order[0]!.compareDocumentPosition(order[1]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(order[1]!.compareDocumentPosition(order[2]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(line.querySelector('.hg-bar__locale')).toBeTruthy();
     expect(within(line.querySelector<HTMLElement>('.hg-bar__icons')!).getByRole('link', { name: /search/i })).toBeTruthy();
     expect(within(line.querySelector<HTMLElement>('.hg-bar__icons')!).getByRole('link', { name: 'Cart' })).toBeTruthy();
     const controls = [
@@ -120,7 +130,17 @@ describe('Top menu with per-section dropdown arrows', () => {
       ...line.querySelectorAll('.hg-bar__locale button'),
       ...line.querySelectorAll('.hg-bar__actions a, .hg-bar__actions button'),
     ];
-    expect(controls).toHaveLength(5);
+    // The documented set, by name — a count alone would still pass if the wrong five were shown.
+    // Text as rendered; the locale disclosures have accessible names (`Language: English`) that the
+    // roles above already pin, so this is the visible reading order.
+    expect(controls.map((control) => control.textContent?.trim() || control.getAttribute('aria-label'))).toEqual([
+      'Pricing',
+      'Help',
+      'English▾',
+      'USD▾',
+      'Sign In',
+      'Create Account',
+    ]);
     controls.forEach((control) => expect(control.hasAttribute('hidden')).toBe(false));
   });
 });

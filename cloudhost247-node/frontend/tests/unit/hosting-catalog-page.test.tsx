@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from '../../src/App';
@@ -70,14 +71,15 @@ describe('/hosting — hosting hub with live catalogue', () => {
   });
 
   it('shows plans and prices only from the API when a product is expanded', async () => {
-    let call = 0;
+    // Route by URL, not by call order. Counting calls made this test depend on how many requests
+    // the app shell happens to make first, so an unrelated change elsewhere (or a retry) fed the
+    // plan payload to the catalogue request and the button never appeared.
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => {
-        call += 1;
-        const body = call === 1
-          ? { products: [{ slug: 'cpanel-hosting', name: 'cPanel Hosting', description: 'Everyday hosting.', productType: 'hosting', displayOrder: 1, available: true }] }
-          : {
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = typeof input === 'string' ? input : input.toString();
+        const body = url.includes('/plans')
+          ? {
               product: { slug: 'cpanel-hosting', name: 'cPanel Hosting', description: null, productType: 'hosting', displayOrder: 1, available: true, plans: [] },
               plans: [
                 {
@@ -90,14 +92,17 @@ describe('/hosting — hosting hub with live catalogue', () => {
                   features: [{ name: 'Websites', value: '1', displayOrder: 1 }],
                 },
               ],
-            };
+            }
+          : url.includes('/api/v1/catalog')
+            ? { products: [{ slug: 'cpanel-hosting', name: 'cPanel Hosting', description: 'Everyday hosting.', productType: 'hosting', displayOrder: 1, available: true }] }
+            : {};
         return { ok: true, status: 200, json: async () => body };
       })
     );
 
     const page = await renderHosting();
     const button = await page.findByRole('button', { name: /View plans/ });
-    button.click();
+    await userEvent.click(button);
 
     expect(await page.findByText('Starter')).toBeTruthy();
     expect(page.getByText(/9\.50/)).toBeTruthy();
