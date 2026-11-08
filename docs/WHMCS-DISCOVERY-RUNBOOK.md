@@ -25,6 +25,7 @@ a page orderable. Discovery produces *evidence*; the review produces a *recommen
 
 | # | Step | Command | Writes | Passes when |
 | --- | --- | --- | --- | --- |
+| 0 | Readiness | `npm run whmcs:readiness` | nothing | exit 0 — every check `READY` or `NOT CHECKED` (§2a) |
 | 1 | Preflight | `npm run whmcs:doctor` | nothing | exit 0, three catalogue reads answered, mode is `read-only` |
 | 2 | Fix critical preflight failures | — | — | no `FAILED` line in step 1 (see §3) |
 | 3 | Capture the catalogue | `npm run whmcs:discover` | `config/whmcs/catalogue-snapshot.json`, `docs/WHMCS-DISCOVERY-REPORT.md` | exit 0, product count > 0, warnings read |
@@ -40,6 +41,10 @@ human decisions and cannot be automated away.
 
 ## 2. What must be in hand before step 1
 
+The short version is [`WHMCS-STAGING-ACCESS-HANDOFF.md`](WHMCS-STAGING-ACCESS-HANDOFF.md): what to provide, how it is
+delivered, which permissions and network routes are required, and who is responsible for each. Credentials never
+travel through chat, issues, commits or documentation.
+
 | # | Item | Why it is needed | Who provides it |
 | --- | --- | --- | --- |
 | 1 | **WHMCS base URL** — the install root, `https://`, no `/includes/api.php` suffix | Every request is built from it; a pasted endpoint is refused at startup | Install owner |
@@ -51,6 +56,18 @@ human decisions and cannot be automated away.
 (`WHMCS_BASE_URL`, `WHMCS_API_IDENTIFIER`, `WHMCS_API_SECRET`, `WHMCS_MODE=read-only`) through the approved secrets
 mechanism. The artifacts and reports written by this procedure contain no secret and no base URL — only a sha256
 fingerprint of the URL (tested).
+
+### 2a. Readiness before anything else
+
+```bash
+npm run whmcs:readiness     # read-only; no authenticated request is made
+```
+
+It reports one line per prerequisite — configuration variables by name only, install URL validity (https, with the
+documented loopback exception), the credential channel, an unauthenticated TCP route to the host, the installation
+identity, and whether the discovery/validation tooling is intact. Each line is one of `READY`, `MISSING`, `INVALID`,
+`UNREACHABLE`, or `NOT CHECKED` — the last meaning "cannot be assessed here", which is never reported as a pass.
+Exit code 1 means something would stop the run; fix it before `doctor`.
 
 **Staging only.** This runbook is written for a staging installation. Running it against production is a separate
 decision with its own authorisation, and it changes nothing here: discovery is read-only either way, but the review of
@@ -316,7 +333,9 @@ C2 begins only after the mapping proposal has been reviewed and explicitly appro
 | Snapshot validation gate | **DONE** | `src/whmcs/discovery-validation.ts`; 14 tests, every critical check reachable from a fixture |
 | Proposal fingerprint integrity | **DONE** | `src/whmcs/mapping-review.ts`; a mismatched fingerprint blocks the rows it touches (3 tests) |
 | Operator CLI type-checked | **DONE** | `tsconfig.scripts.json`, `npm run typecheck:scripts` (part of `npm run build`); it previously was not, and four flag handlers were broken |
-| Approval pack generator (`npm run whmcs:evidence`) | **DONE** | `src/whmcs/evidence-pack.ts`; 12 tests — redaction, provenance, `NOT VERIFIED` markers, unticked attestations |
+| Approval pack generator (`npm run whmcs:evidence`) | **DONE** | `src/whmcs/evidence-pack.ts`; redaction (incl. JSON, header, env and Basic-auth shapes), provenance, artifact-swap detection, `NOT VERIFIED` markers, unticked attestations |
+| Readiness diagnostics (`npm run whmcs:readiness`) | **DONE** | `src/whmcs/readiness.ts`; 15 tests — five states, no credential value in the output, no authenticated request |
+| Staging access handoff | **DONE** | [`WHMCS-STAGING-ACCESS-HANDOFF.md`](WHMCS-STAGING-ACCESS-HANDOFF.md) — items to provide, delivery channel, permissions, allow-list, responsibilities |
 | The run itself | **BLOCKED** | §2 — staging URL, read-only credential, version, System URL |
 | Proposal and approval | **NOT STARTED** | written by a human after the run; §7 |
 | C2 wiring | **NOT STARTED** | gated on §9 and explicit approval |

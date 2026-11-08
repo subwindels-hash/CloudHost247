@@ -21,6 +21,7 @@
  *   mapping-review — the service-by-service classification between discovery and any binding
  *   discovery-validation — the gate that decides whether a captured artifact is evidence at all
  *   evidence-pack — the sanitised approval pack assembled from the artifacts, for owner review
+ *   readiness — what would stop a discovery run here, without sending an authenticated request
  *   idempotency — one durable record per order/payment operation, so a retry cannot double-charge
  */
 
@@ -40,4 +41,5 @@ export * from './service-register';
 export * from './mapping-review';
 export * from './discovery-validation';
 export * from './evidence-pack';
+export * from './readiness';
 export * from './idempotency';

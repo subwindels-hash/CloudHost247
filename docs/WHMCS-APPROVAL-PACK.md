@@ -6,7 +6,7 @@
 
 | Field | Value |
 | --- | --- |
-| Generated at | 2026-11-08T15:45:47.039Z |
+| Generated at | 2026-11-08T15:55:38.547Z |
 | Installation (host only) | **not configured** |
 | Installation fingerprint | **none** |
 | Credentials present | **no** |
@@ -15,6 +15,7 @@
 | Bindings in the product map | **0** |
 | Dispositions in the product map | 59 |
 | Discovery artifact | **none — no discovery run has been captured** |
+| Owner approval | **not recorded — this pack is a request, not an approval** |
 | Proposal | **none** |
 
 ## 1. Prerequisites and preflight
@@ -139,6 +140,7 @@ modules to review. This section stays empty rather than being filled from anythi
 - provisioning module capability was not exercised — a configured module is not a working server
 - no order, invoice, payment or provisioning action was issued
 - the installation was treated as staging on the owner's attestation, which this tool cannot check
+- an owner approval was recorded — this tool has no code path that records one, so the pack is a request
 - nothing was bound, priced or made orderable by this pack
 
 ## 7. Owner decision

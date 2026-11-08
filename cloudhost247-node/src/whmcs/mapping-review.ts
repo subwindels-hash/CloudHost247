@@ -90,6 +90,8 @@ export interface MappingReview {
   proposalHint: string | null;
   /** Result of validating the discovery artifact; null when there is no artifact to validate. */
   validation: DiscoveryValidation | null;
+  /** sha256 of the artifact file this review was built from, so the pack can detect a swapped snapshot. */
+  artifactSha256: string | null;
 }
 
 export interface ReviewInput {
@@ -99,6 +101,8 @@ export interface ReviewInput {
   /** Null when nobody has proposed anything yet. */
   proposal: MappingProposal | null;
   map: ProductMapDocument;
+  /** sha256 of the artifact bytes the caller read; recorded so later verification can prove the link. */
+  artifactSha256?: string | null;
 }
 
 const CONFIG_OPTIONS_NOTE = 'not read — WHMCS configurable options need a separate read (slice B2.3)';
@@ -425,7 +429,15 @@ export function buildMappingReview(input: ReviewInput): MappingReview {
       ? 'Next action: write `config/whmcs/mapping-proposal.json` from the discovery artifact, then re-run `npm run whmcs:review`.'
       : null;
 
-  return { rows, summary, blockers, discovered: Boolean(discovery), proposalHint, validation };
+  return {
+    rows,
+    summary,
+    blockers,
+    discovered: Boolean(discovery),
+    proposalHint,
+    validation,
+    artifactSha256: input.artifactSha256 ?? null,
+  };
 }
 
 function escapeCell(value: string): string {
@@ -453,6 +465,9 @@ export function renderMappingReview(review: MappingReview, options: RenderOption
   lines.push(`| Generated at | ${options.generatedAt ?? new Date().toISOString()} |`);
   lines.push(`| Discovery artifact | ${sources.discovery ? `\`${sources.discovery}\`` : '**none — C1 has not run**'} |`);
   lines.push(`| Proposal | ${sources.proposal ? `\`${sources.proposal}\`` : '**none**'} |`);
+  if (review.artifactSha256) {
+    lines.push(`| Artifact digest reviewed | \`${review.artifactSha256}\` |`);
+  }
   lines.push(`| Product map | \`${sources.map ?? 'config/whmcs/product-map.json'}\` |`);
   lines.push(`| Service register | \`${sources.register ?? '../config/whmcs/service-register.csv'}\` |`);
   lines.push('');

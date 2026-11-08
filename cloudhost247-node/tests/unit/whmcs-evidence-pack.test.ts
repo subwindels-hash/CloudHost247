@@ -110,6 +110,10 @@ function baseInput(overrides: Partial<EvidenceInput> = {}): EvidenceInput {
   };
 }
 
+function summaryOf(input: EvidenceInput) {
+  return buildEvidenceSummary(input);
+}
+
 describe('redact', () => {
   it('removes secret values wherever they appear', () => {
     const text = `using ${SECRET} for ${IDENTIFIER}`;
@@ -190,6 +194,68 @@ describe('renderEvidencePack', () => {
     expect(markdown).not.toContain('https://billing.staging.example.com');
     expect(markdown).toContain('billing.staging.example.com');
     expect(markdown).toContain('[redacted]');
+  });
+
+  it('cannot report a validated discovery without a validated artifact', () => {
+    const unvalidated = renderEvidencePack(baseInput({ validation: null }));
+    expect(unvalidated).toContain('**NOT VALIDATED');
+    expect(unvalidated).toContain('does not record the digest');
+
+    const validated = renderEvidencePack(baseInput());
+    expect(validated).not.toContain('**NOT VALIDATED');
+  });
+
+  it('invalidates its own evidence when the artifact changed after the review', () => {
+    const input = baseInput();
+    const stale = buildMappingReview({
+      services: [entry('hosting-vps')],
+      discovery: input.discovery!.artifact,
+      proposal: null,
+      map: EMPTY_MAP,
+      artifactSha256: 'f'.repeat(64),
+    });
+    const markdown = renderEvidencePack({ ...input, review: stale });
+    expect(markdown).toContain('**EVIDENCE INVALIDATED**');
+    expect(markdown).toContain('f'.repeat(64));
+    expect(summaryOf({ ...input, review: stale }).artifactIntegrity.consistent).toBe(false);
+  });
+
+  it('records a consistent digest chain when the review was built from this artifact', () => {
+    const input = baseInput();
+    const reviewed = buildMappingReview({
+      services: [entry('hosting-vps')],
+      discovery: input.discovery!.artifact,
+      proposal: null,
+      map: EMPTY_MAP,
+      artifactSha256: input.discovery!.sha256,
+    });
+    const markdown = renderEvidencePack({ ...input, review: reviewed });
+    expect(markdown).toContain('Consistent — the review records');
+    expect(markdown).not.toContain('EVIDENCE INVALIDATED');
+    expect(summaryOf({ ...input, review: reviewed }).artifactIntegrity.consistent).toBe(true);
+  });
+
+  it('never claims an owner approval', () => {
+    const markdown = renderEvidencePack(baseInput());
+    expect(markdown).toContain('not recorded — this pack is a request, not an approval');
+    expect(markdown).toContain('an owner approval was recorded — this tool has no code path');
+    expect(summaryOf(baseInput()).ownerApproved).toBe(false);
+  });
+
+  it('redacts JSON, header, env and Basic-auth credential shapes', () => {
+    const out = redact(
+      [
+        '{"secret": "json-secret-value", "identifier": "json-id"}',
+        'X-Api-Secret: header-secret-value',
+        'WHMCS_API_SECRET=env-secret-value',
+        'Authorization: Basic YmFzZTY0LWNyZWRz',
+        '#!/bin/sh\npassword=hunter2',
+      ].join('\n'),
+      [],
+    );
+    for (const secret of ['json-secret-value', 'json-id', 'header-secret-value', 'env-secret-value', 'YmFzZTY0LWNyZWRz', 'hunter2']) {
+      expect(out).not.toContain(secret);
+    }
   });
 
   it('marks an unusable artifact as unusable instead of reviewing it anyway', () => {

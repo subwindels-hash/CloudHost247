@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-08T15:45:47.039Z",
+  "generatedAt": "2026-11-08T15:55:38.547Z",
   "stagingOnly": true,
   "environment": {
     "baseUrlHost": null,
@@ -829,11 +829,18 @@
       ]
     }
   ],
+  "artifactIntegrity": {
+    "reviewedSha256": null,
+    "currentSha256": null,
+    "consistent": false
+  },
+  "ownerApproved": false,
   "notVerified": [
     "configurable options were not read (slice B2.3)",
     "provisioning module capability was not exercised — a configured module is not a working server",
     "no order, invoice, payment or provisioning action was issued",
     "the installation was treated as staging on the owner's attestation, which this tool cannot check",
+    "an owner approval was recorded — this tool has no code path that records one, so the pack is a request",
     "nothing was bound, priced or made orderable by this pack"
   ]
 }

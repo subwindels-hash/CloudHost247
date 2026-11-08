@@ -1340,5 +1340,6 @@
   ],
   "discovered": false,
   "proposalHint": "Next action: `npm run whmcs:discover` against staging — this review has no evidence to classify with.",
-  "validation": null
+  "validation": null,
+  "artifactSha256": null
 }

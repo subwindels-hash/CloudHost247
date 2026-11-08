@@ -101,6 +101,10 @@ export interface EvidenceSummary {
     cycles: string[];
     missing: string[];
   }>;
+  /** Whether the review was built from the artifact bytes now on disk. */
+  artifactIntegrity: { reviewedSha256: string | null; currentSha256: string | null; consistent: boolean };
+  /** Always false: no code path in this tool records an owner approval. */
+  ownerApproved: false;
   /** Everything the pack cannot claim, stated once, in one place. */
   notVerified: string[];
 }
@@ -115,17 +119,25 @@ export function redact(text: string, secrets: string[]): string {
       output = output.split(secret).join(REDACTED);
     }
   }
-  // Bearer tokens first: otherwise the pair rule below would treat the word "Bearer" as the value and
-  // leave the token itself in place.
-  output = output.replace(/\bBearer\s+[A-Za-z0-9._\-]+/g, `Bearer ${REDACTED}`);
-  // Credential-shaped pairs, in URLs, query strings, headers and env dumps alike.
-  output = output.replace(
-    /\b(identifier|secret|password|token|access_token|api_key|apikey|authorization)(\s*[:=]\s*)("[^"]*"|'[^']*'|[^\s,&"']+)/gi,
-    (_match, key: string, separator: string) => `${key}${separator}${REDACTED}`,
-  );
-  // Absolute URLs are reduced to their host: a transcript shows *which* installation answered, never the
-  // full path or query, so a captured doctor report can be attached without a second thought.
+  // 1. HTTP auth schemes. These run first: otherwise the pair rule below would treat the word
+  //    "Bearer"/"Basic" as the value and leave the token itself in place.
+  output = output.replace(/\b(Bearer|Basic|Digest|Negotiate)\s+[A-Za-z0-9+/._\-=]+/gi, (_m, scheme: string) => `${scheme} ${REDACTED}`);
+
+  // 2. Credential-shaped pairs in every shape they actually occur: query strings (`?secret=…`),
+  //    env dumps (`WHMCS_API_SECRET=…`), headers (`X-Api-Secret: …`), JSON (`"secret": "…"`) and
+  //    prose (`secret: …`).
+  const KEYS =
+    '(?:x[-_]?api[-_]?secret|x[-_]?api[-_]?identifier|whmcs_api_secret|whmcs_api_identifier|api[-_]?secret|api[-_]?key|apikey|access[-_]?token|identifier|secret|password|passwd|passphrase|token)';
+  const quoted = new RegExp(`(["']?)(${KEYS})(["']?\\s*[:=]\\s*)(["'])((?!\\4).)*\\4`, 'gi');
+  output = output.replace(quoted, (_m, quote: string, key: string, separator: string, valueQuote: string) =>
+    `${quote}${key}${separator}${valueQuote}${REDACTED}${valueQuote}`);
+  const bare = new RegExp(`(\\b${KEYS})(\\s*[:=]\\s*)([^\\s,;&"'\\}\\]]+)`, 'gi');
+  output = output.replace(bare, (_m, key: string, separator: string) => `${key}${separator}${REDACTED}`);
+
+  // 3. Absolute URLs are reduced to their host: a transcript shows *which* installation answered,
+  //    never the full path or a query that might carry a signed parameter.
   output = output.replace(/\bhttps?:\/\/([^\s/]+)(\/\S*)?/gi, '$1');
+  return output;
   return output;
 }
 
@@ -152,6 +164,9 @@ function groupLabel(artifact: DiscoveryArtifact, gid: number): string {
 export function buildEvidenceSummary(input: EvidenceInput): EvidenceSummary {
   const { discovery, validation, review, map, proposal, environment } = input;
   const artifact = discovery?.artifact ?? null;
+
+  const reviewedSha256 = review.artifactSha256 ?? null;
+  const currentSha256 = discovery?.sha256 ?? null;
 
   return {
     generatedAt: input.now,
@@ -213,11 +228,18 @@ export function buildEvidenceSummary(input: EvidenceInput): EvidenceSummary {
       cycles: [...row.cycles],
       missing: [...row.missing],
     })),
+    artifactIntegrity: {
+      reviewedSha256,
+      currentSha256,
+      consistent: reviewedSha256 !== null && currentSha256 !== null && reviewedSha256 === currentSha256,
+    },
+    ownerApproved: false,
     notVerified: [
       'configurable options were not read (slice B2.3)',
       'provisioning module capability was not exercised — a configured module is not a working server',
       'no order, invoice, payment or provisioning action was issued',
       'the installation was treated as staging on the owner\'s attestation, which this tool cannot check',
+      'an owner approval was recorded — this tool has no code path that records one, so the pack is a request',
       'nothing was bound, priced or made orderable by this pack',
     ],
   };
@@ -245,7 +267,18 @@ export function renderEvidencePack(input: EvidenceInput): string {
   add(`| MFA required for SSO | ${summary.environment.mfaRequired === null ? '**unknown**' : summary.environment.mfaRequired ? 'yes' : 'NO — explicit downgrade'} |`);
   add(`| Bindings in the product map | **${summary.map.bindings}** |`);
   add(`| Dispositions in the product map | ${summary.map.dispositions} |`);
-  add(`| Discovery artifact | ${summary.discovery ? `\`${summary.discovery.source}\` (sha256 \`${summary.discovery.sha256}\`)` : '**none — no discovery run has been captured**'} |`);
+  const artifactState = !summary.discovery
+    ? '**none — no discovery run has been captured**'
+    : summary.validation === null
+      ? '**NOT VALIDATED — this file is not evidence until `npm run whmcs:validate` passes**'
+      : !summary.validation.usable
+        ? '**UNUSABLE — validation failed; nothing here may be reviewed or bound**'
+        : 'validated';
+  add(`| Discovery artifact | ${summary.discovery ? `\`${summary.discovery.source}\` (sha256 \`${summary.discovery.sha256}\`) — ${artifactState}` : artifactState} |`);
+  if (summary.artifactIntegrity.reviewedSha256 && !summary.artifactIntegrity.consistent) {
+    add(`| **Artifact integrity** | **EVIDENCE INVALIDATED** — the review was built from \`${summary.artifactIntegrity.reviewedSha256}\`, but the file on disk is \`${summary.artifactIntegrity.currentSha256 ?? 'absent'}\`. The mapping evidence no longer describes this snapshot: re-run \`npm run whmcs:review\`.`);
+  }
+  add('| Owner approval | **not recorded — this pack is a request, not an approval** |');
   add(`| Proposal | ${summary.proposal ? `${summary.proposal.entries} entr(y/ies), fingerprint ${summary.proposal.fingerprint ? `\`${summary.proposal.fingerprint}\`` : '**absent**'}` : '**none**'} |`);
   add('');
 
@@ -316,6 +349,20 @@ export function renderEvidencePack(input: EvidenceInput): string {
       add(`**NOT USABLE** — ${summary.validation.critical.length} critical check(s) failed. Nothing may be reviewed or`);
       add('bound from this artifact. Preserve the report, find the cause, re-run discovery:');
       for (const failure of summary.validation.critical) add(`- ${failure}`);
+    }
+    add('');
+    add('Artifact integrity:');
+    add('');
+    if (summary.artifactIntegrity.reviewedSha256 === null) {
+      add('The mapping review does not record the digest it was built from, so it cannot be tied to this snapshot.');
+      add('Re-run `npm run whmcs:review` and `npm run whmcs:evidence` so the chain is complete.');
+    } else if (summary.artifactIntegrity.consistent) {
+      add(`Consistent — the review records \`${summary.artifactIntegrity.reviewedSha256}\`, which is the digest of the`);
+      add('file on disk. The evidence below describes exactly these bytes.');
+    } else {
+      add(`**EVIDENCE INVALIDATED.** The review was built from \`${summary.artifactIntegrity.reviewedSha256}\` but the`);
+      add(`artifact on disk is \`${summary.artifactIntegrity.currentSha256 ?? 'absent'}\`: the snapshot changed after the`);
+      add('review. Nothing below may be treated as evidence until `npm run whmcs:review` is re-run against the current file.');
     }
     add('');
   }

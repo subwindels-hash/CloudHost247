@@ -32,6 +32,7 @@ import 'dotenv/config';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import net from 'node:net';
 import { loadWhmcsConfig } from '../../src/whmcs/config';
 import { WhmcsClient, consoleLogger } from '../../src/whmcs/client';
 import { buildCatalogue } from '../../src/whmcs/catalogue';
@@ -56,6 +57,12 @@ import { readServiceRegister } from '../../src/whmcs/service-register';
 import { buildMappingReview, renderMappingReview, type MappingProposal } from '../../src/whmcs/mapping-review';
 import { validateDiscoveryArtifact } from '../../src/whmcs/discovery-validation';
 import { renderEvidencePack, buildEvidenceSummary, type EvidenceEnvironment } from '../../src/whmcs/evidence-pack';
+import {
+  assessReadiness,
+  probeTooling,
+  renderReadinessReport,
+  type RouteProbe,
+} from '../../src/whmcs/readiness';
 
 const DEFAULT_MAP_PATH = path.join(process.cwd(), 'config', 'whmcs', 'product-map.json');
 const DEFAULT_REGISTER_PATH = path.resolve(process.cwd(), '..', 'config', 'whmcs', 'service-register.csv');
@@ -582,8 +589,11 @@ function review(args: Args): void {
 
   let discovery: DiscoveryArtifact | null = null;
   let discoverySource: string | null = null;
+  let artifactSha256: string | null = null;
   if (existsSync(args.discoveryPath)) {
-    discovery = JSON.parse(readFileSync(args.discoveryPath, 'utf8')) as DiscoveryArtifact;
+    const bytes = readFileSync(args.discoveryPath);
+    discovery = JSON.parse(bytes.toString('utf8')) as DiscoveryArtifact;
+    artifactSha256 = createHash('sha256').update(bytes).digest('hex');
     discoverySource = path.relative(process.cwd(), args.discoveryPath);
   }
 
@@ -601,7 +611,7 @@ function review(args: Args): void {
     proposalSource = path.relative(process.cwd(), args.proposalPath);
   }
 
-  const result = buildMappingReview({ services, discovery, proposal, map: document });
+  const result = buildMappingReview({ services, discovery, proposal, map: document, artifactSha256 });
 
   mkdirSync(path.dirname(args.reviewPath), { recursive: true });
   writeFileSync(
@@ -680,7 +690,7 @@ function evidence(args: Args): void {
   }
 
   const validation = discovery ? validateDiscoveryArtifact(discovery) : null;
-  const review = buildMappingReview({ services, discovery, proposal, map: document });
+  const review = buildMappingReview({ services, discovery, proposal, map: document, artifactSha256: discoverySha });
 
   const doctorOutput = args.doctorPath && existsSync(args.doctorPath) ? readFileSync(args.doctorPath, 'utf8') : null;
   const secrets = [process.env.WHMCS_API_SECRET, process.env.WHMCS_API_IDENTIFIER].filter(
@@ -721,8 +731,94 @@ function evidence(args: Args): void {
   console.log('  nothing was bound. The pack recommends; the owner approves; bind stays a separate step.');
 }
 
+/**
+ * C1.8 staging access readiness.
+ *
+ * Answers "what would stop a discovery run right now?" without sending a single authenticated request: the only
+ * network activity is an unauthenticated TCP connect, which proves a route exists and carries nothing.
+ */
+async function readiness(): Promise<void> {
+  const env = process.env;
+  const credentialsInEnv = Boolean((env.WHMCS_API_IDENTIFIER ?? '').trim() && (env.WHMCS_API_SECRET ?? '').trim());
+
+  // Which channel supplied the credential — key presence only, never values.
+  let channel: 'environment' | 'dotenv-file' | 'none' = 'none';
+  if (credentialsInEnv) channel = 'environment';
+  if (existsSync(path.join(process.cwd(), '.env'))) {
+    const dotenvText = readFileSync(path.join(process.cwd(), '.env'), 'utf8');
+    if (/^\s*WHMCS_API_SECRET\s*=/m.test(dotenvText)) channel = 'dotenv-file';
+  }
+
+  const loaded = loadWhmcsConfig(env);
+  let route: RouteProbe = { state: 'skipped', reason: 'no valid install URL to probe' };
+  if (loaded.enabled) {
+    route = await probeRoute(loaded.config.baseUrl);
+  }
+
+  const report = assessReadiness({
+    env,
+    secretsChannel: channel,
+    route,
+    tooling: probeTooling({
+      registerPath: path.resolve(process.cwd(), '..', 'config', 'whmcs', 'service-register.csv'),
+      mapPath: DEFAULT_MAP_PATH,
+    }),
+  });
+
+  console.log('WHMCS staging access readiness (read-only, no authenticated requests)');
+  console.log(renderReadinessReport(report));
+  console.log('');
+  console.log(
+    `  ${report.checks.filter((check) => check.state === 'READY').length}/${report.checks.length} check(s) ready` +
+      (report.summary['NOT CHECKED'] > 0 ? `, ${report.summary['NOT CHECKED']} not checkable here` : ''),
+  );
+  console.log('  no credential value, base URL path or API response is printed by this command');
+  if (!report.ready) {
+    console.log('');
+    for (const blocker of report.blockers) console.log(`  ! ${blocker}`);
+    console.log('');
+    console.log('✗ not ready for staging discovery — see docs/WHMCS-STAGING-ACCESS-HANDOFF.md');
+    process.exit(1);
+  }
+  console.log('');
+  console.log('✓ ready: run `npm run whmcs:doctor`, then `npm run whmcs:discover` (runbook §1).');
+}
+
+/** Unauthenticated TCP connect. No TLS handshake, no HTTP request, no credential. */
+function probeRoute(baseUrl: string): Promise<RouteProbe> {
+  return new Promise((resolve) => {
+    let url: URL;
+    try {
+      url = new URL(baseUrl);
+    } catch {
+      resolve({ state: 'skipped', reason: 'the install URL could not be parsed' });
+      return;
+    }
+    const host = url.hostname;
+    const port = Number(url.port || (url.protocol === 'https:' ? 443 : 80));
+    const socket = net.connect({ host, port });
+    let settled = false;
+    const finish = (result: RouteProbe) => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolve(result);
+    };
+    const timer = setTimeout(() => finish({ state: 'unreachable', host, port, reason: 'timed out after 5000 ms' }), 5000);
+    socket.once('connect', () => {
+      clearTimeout(timer);
+      finish({ state: 'ok', host, port });
+    });
+    socket.once('error', (error: NodeJS.ErrnoException) => {
+      clearTimeout(timer);
+      finish({ state: 'unreachable', host, port, reason: error.code ?? error.message });
+    });
+  });
+}
+
 const USAGE = `WHMCS catalogue map — discovery and binding.
 
+  npm run whmcs:map -- readiness     what would stop a discovery run here (no authenticated requests)
   npm run whmcs:map -- doctor        read-only preflight against the installation (writes nothing)
   npm run whmcs:map -- discover      C1: catalogue JSON + discovery report (writes nothing else)
   npm run whmcs:map -- validate      validate a captured catalogue snapshot (exit 1 if unusable)
@@ -762,6 +858,9 @@ async function main(): Promise<void> {
       break;
     case 'discover':
       await discover(args);
+      break;
+    case 'readiness':
+      await readiness();
       break;
     case 'doctor':
       await doctor();
