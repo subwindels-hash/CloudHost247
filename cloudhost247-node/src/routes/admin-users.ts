@@ -49,7 +49,7 @@ import {
 } from '../db/users';
 import { toAdminCustomerSummaryDTO, toAdminUserDetailDTO } from '../dto/account';
 import { auditRequest } from '../lib/audit';
-import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../lib/errors';
+import { ConflictError, ForbiddenError, NotFoundError, ServiceUnavailableError, ValidationError } from '../lib/errors';
 import { signAuthToken } from '../lib/jwt';
 import { hashPassword } from '../lib/password';
 import { authenticate } from '../lib/require-auth';
@@ -65,6 +65,16 @@ import {
   requireReinitialization,
   rotateSecurityNumber,
 } from '../services/security-number-service';
+import {
+  expiryFromNow as pinExpiryFromNow,
+  generatePinSalt,
+  generateSecurityPin,
+  getSecurityPinPolicy,
+  hashSecurityPin,
+  sealSecurityPin,
+} from '../services/security-pin-service';
+import { deriveUsernameCandidate, isUsernameTaken, validateUsernameFormat } from '../services/username-service';
+import { pinKeyOrNull } from '../lib/pin-key';
 
 // Mirrors the split already established in src/routes/admin-customers.ts: routine support work
 // for admin + super_admin, account-integrity actions (role/status/deletion, policy) for
@@ -75,7 +85,7 @@ const ACCOUNT_INTEGRITY_ROLES = ['super_admin'] as const;
 const idParamSchema = z.object({ id: z.string().uuid('id must be a valid UUID') });
 
 const listUsersQuerySchema = z.object({
-  /** Matches email, name, phone, the six-digit Customer ID, or the internal UUID. */
+  /** Matches username, email, name, phone, the Customer ID (9 digits; 6 for legacy), or the uuid. */
   search: z.string().max(255).optional(),
   role: z.enum(['customer', 'staff', 'admin', 'super_admin']).optional(),
   status: z.enum(['active', 'suspended', 'disabled', 'deleted']).optional(),
@@ -90,6 +100,12 @@ const createUserSchema = z.object({
   password: z.string().min(10, 'Password must be at least 10 characters'),
   role: z.enum(['customer', 'staff', 'admin', 'super_admin']).optional(),
   phone: z.string().max(32).nullable().optional(),
+  /**
+   * Optional: when omitted the username is derived from the email local-part and de-duplicated, so
+   * an administrator creating an account is never blocked on naming it. What is *not* allowed is a
+   * name that fails the same reservation/format rules a customer's own choice must pass.
+   */
+  username: z.string().min(3).max(32).optional(),
 });
 
 const updateUserSchema = z
@@ -167,15 +183,51 @@ export async function registerAdminUserRoutes(app: FastifyInstance, env: Env, ov
       throw new ConflictError('An account with this email already exists');
     }
 
+    // Username: validate an explicit choice, otherwise derive a unique one from the email.
+    const requested = input.username
+      ? validateUsernameFormat(input.username)
+      : { ok: true as const, value: deriveUsernameCandidate(input.email), error: undefined };
+    if (!requested.ok) throw new ValidationError(requested.error ?? 'That username is not available');
+    let username = requested.value;
+    if (await isUsernameTaken(pool, username)) {
+      if (input.username) {
+        throw new ConflictError('That username is already taken.');
+      }
+      // Derivation collided (two people with the same local-part): append a numeric suffix so the
+      // account is still created exactly once, deterministically.
+      for (let suffix = 1; suffix <= 50; suffix += 1) {
+        const candidate = `${username.slice(0, 28)}${suffix}`;
+        if (!(await isUsernameTaken(pool, candidate))) {
+          username = candidate;
+          break;
+        }
+      }
+      if (await isUsernameTaken(pool, username)) {
+        throw new ConflictError('Could not derive a unique username; supply one explicitly.');
+      }
+    }
+
+    // Same rule as registration: an unconfigured PIN key defers the PIN, it does not block account
+    // creation. `ensureCurrentPin` issues one as soon as the key exists.
+    const pinKey = pinKeyOrNull();
+
     const policy = await getSecurityNumberPolicy(pool);
+    const pinPolicy = await getSecurityPinPolicy(pool);
     const securityNumber = generateSecurityNumber();
+    const pinSalt = pinKey ? generatePinSalt() : null;
+    const securityPin = pinKey ? generateSecurityPin() : null;
     const { user } = await createUserWithIdentity(pool, {
       email: input.email,
       fullName: input.fullName,
+      username,
       passwordHash: await hashPassword(input.password),
       role,
       securityNumberHash: await hashSecurityNumber(securityNumber),
       securityNumberExpiresAt: expiryFromNow(policy.rotationHours),
+      securityPinHash: pinKey && securityPin && pinSalt ? hashSecurityPin(securityPin, pinSalt, pinKey) : null,
+      securityPinSalt: pinSalt,
+      securityPinEncrypted: pinKey && securityPin ? sealSecurityPin(securityPin, pinKey) : null,
+      securityPinExpiresAt: pinKey ? pinExpiryFromNow(pinPolicy.rotationHours) : null,
     });
 
     if (input.phone !== undefined) {
@@ -186,7 +238,7 @@ export async function registerAdminUserRoutes(app: FastifyInstance, env: Env, ov
       action: 'admin_user_created',
       resourceType: 'user',
       resourceId: user.id,
-      metadata: { customerId: user.customer_id, role, email: user.email },
+      metadata: { customerId: user.customer_id, username: user.username, role, email: user.email },
     });
 
     const created = (await findUserById(pool, user.id))!;

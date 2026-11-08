@@ -120,6 +120,10 @@ describe('migration runner against the real database/migrations SQL files', () =
     // Delivery outcome for an online-store order's digital download links (sent | manual | failed).
     '0082_record_digital_delivery.sql',
     '0083_create_display_fx_rates.sql',
+    '0084_catalog_product_translations.sql',
+    // Customer username, permanent nine-digit Customer ID, the rotating Security PIN, the
+    // six-digit email-verification gate in front of it, and account recovery (0085).
+    '0085_customer_username_pin_and_verification.sql',
   ];
 
   it('finds the committed migration files in order', () => {

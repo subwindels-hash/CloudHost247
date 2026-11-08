@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CUSTOMER_ID_MIN,
   CUSTOMER_ID_SPACE,
   generateCustomerIdCandidate,
   isUniqueViolation,
@@ -13,22 +14,29 @@ import {
 import { SUPPORT_MODE_RESTRICTED_ACTIONS, isSupportModeRestricted } from '../../src/lib/support-mode';
 
 describe('Customer ID generation', () => {
-  it('always produces a zero-padded six-digit string', () => {
+  it('always produces a nine-digit string that never begins with zero', () => {
     for (let i = 0; i < 2000; i += 1) {
       const id = generateCustomerIdCandidate();
-      expect(id).toMatch(/^[0-9]{6}$/);
-      expect(id).toHaveLength(6);
+      expect(id).toMatch(/^[0-9]{9}$/);
+      expect(id).toHaveLength(9);
+      // A leading zero would mean the value was re-padded after being read back as a number, and
+      // nine-digit identifiers are quoted to support verbatim — so it must be canonical.
+      expect(id[0]).not.toBe('0');
       expect(isValidCustomerId(id)).toBe(true);
     }
   });
 
-  it('spans the full space including values that require leading zeros', () => {
+  it('spans the full space rather than clustering on one prefix', () => {
     const seen = new Set<string>();
     for (let i = 0; i < 20_000; i += 1) seen.add(generateCustomerIdCandidate());
-    // With 20k CSPRNG draws from a 1e6 space we expect ~20k distinct values; a broken generator
+    // With 20k CSPRNG draws from a 9e8 space we expect ~20k distinct values; a broken generator
     // (e.g. a fixed prefix, or Math.random seeded identically) collapses this dramatically.
-    expect(seen.size).toBeGreaterThan(15_000);
-    expect(Math.max(...[...seen].map(Number))).toBeLessThan(CUSTOMER_ID_SPACE);
+    expect(seen.size).toBeGreaterThan(19_900);
+    // Every value is inside [100000000, 999999999], and the leading digit is spread across the
+    // whole 1–9 range rather than pinned to a single one.
+    const leadingDigits = new Set([...seen].map((value) => value[0]));
+    expect(leadingDigits.size).toBeGreaterThanOrEqual(8);
+    expect(Math.max(...[...seen].map(Number))).toBeLessThan(CUSTOMER_ID_MIN + CUSTOMER_ID_SPACE);
   });
 
   it('rejects malformed identifiers', () => {

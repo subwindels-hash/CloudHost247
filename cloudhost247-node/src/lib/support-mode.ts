@@ -20,6 +20,12 @@ export const SUPPORT_MODE_RESTRICTED_ACTIONS = [
   'password.change',
   'security_number.reveal',
   'security_number.change',
+  // The rotating Security PIN is readable only by the account owner, so an impersonated session
+  // must not be able to open the verification gate at all.
+  'security_pin.view',
+  'security_pin.change',
+  'username.change',
+  'account.recovery',
   'payment_method.change',
   'account.delete',
   'account.email_change',

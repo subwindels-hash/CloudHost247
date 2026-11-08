@@ -15,20 +15,27 @@ import type { SupportTicketRow, SupportTicketMessageRow } from '../db/support-ti
 
 export interface PublicUserDTO {
   id: string;
+  /** Unique account handle. Display-safe; not a credential on its own (login still needs the
+   * password, and every protected route re-verifies the session server-side). */
+  username: string;
   email: string;
   fullName: string;
   role: string;
   status: string;
-  /** Permanent six-digit account number. Safe to display: it is an identifier, not a secret.
-   * Note what is NOT here and never will be — `security_number_hash` and every other
-   * security_number_* column. The Security Number has its own dedicated status endpoint and is
-   * never folded into a generic user payload (spec §11/§46). */
+  /** Permanent nine-digit account number. Safe to display: it is an identifier, not a secret.
+   *
+   * Note what is NOT here and never will be — `security_pin_hash`, `security_pin_salt`,
+   * `security_number_hash`, and every other security_* column. The Security PIN has its own
+   * dedicated status endpoint (metadata only) and can only be *read* after a fresh six-digit
+   * email verification; the Security Number likewise has its own endpoint. Neither is ever folded
+   * into a generic user payload. */
   customerId: string | null;
 }
 
 export function toPublicUser(user: UserRecord): PublicUserDTO {
   return {
     id: user.id,
+    username: user.username,
     email: user.email,
     fullName: user.full_name,
     role: user.role,
@@ -39,6 +46,10 @@ export function toPublicUser(user: UserRecord): PublicUserDTO {
 
 /** The caller's own account, including the self-editable profile fields (spec §26). */
 export interface AccountProfileDTO extends PublicUserDTO {
+  /** When the username was last changed (null until the first change). */
+  usernameChangedAt: string | null;
+  /** Whether the registered address has been verified. Gates PIN viewing. */
+  emailVerified: boolean;
   phone: string | null;
   addressLine1: string | null;
   city: string | null;
@@ -52,6 +63,8 @@ export interface AccountProfileDTO extends PublicUserDTO {
 export function toAccountProfileDTO(user: UserRecord, hasProfileImage: boolean): AccountProfileDTO {
   return {
     ...toPublicUser(user),
+    usernameChangedAt: user.username_changed_at ?? null,
+    emailVerified: Boolean(user.email_verified_at),
     phone: user.phone ?? null,
     addressLine1: user.address_line1 ?? null,
     city: user.city ?? null,
@@ -244,6 +257,7 @@ export interface TicketDetailDTO extends TicketSummaryDTO {
 
 export interface AdminCustomerSummaryDTO {
   id: string;
+  username: string;
   email: string;
   fullName: string;
   role: string;
@@ -258,6 +272,7 @@ export interface AdminCustomerSummaryDTO {
 export function toAdminCustomerSummaryDTO(user: UserRecord): AdminCustomerSummaryDTO {
   return {
     id: user.id,
+    username: user.username,
     email: user.email,
     fullName: user.full_name,
     role: user.role,

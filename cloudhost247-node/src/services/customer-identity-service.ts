@@ -1,37 +1,61 @@
 /**
- * Customer identity — the permanent, human-readable six-digit Customer ID.
+ * Customer identity — the permanent, human-readable nine-digit Customer ID.
  *
  * Design rules this module enforces (and why):
  *   - The value is generated **server-side only**, from Node's CSPRNG (`randomInt`), never from
  *     `Math.random()` and never from anything a client can influence.
- *   - It is **not** a sequence and not derived from the user's uuid/email, so it leaks neither
- *     signup order nor personal data.
+ *   - It is **not a sequence**: draws come from the full 100,000,000–999,999,999 range, so the value
+ *     leaks neither signup order nor customer volume, and the leading digit is never zero (a
+ *     nine-digit identifier that renders as eight characters invites transcription mistakes).
  *   - Uniqueness is guaranteed by the database (`users_customer_id_unique_idx`), not by a
- *     "SELECT then INSERT" check, which would race under concurrent registrations. We insert a
+ *     "SELECT then INSERT" check, which races under concurrent registrations. We insert a
  *     candidate and retry on the unique violation.
- *   - It is **immutable** once assigned: nothing in this codebase updates `users.customer_id`
- *     after creation, and it is never reused — even for soft-deleted accounts.
+ *   - It is **immutable** once assigned. Migration 0085 installs a trigger that aborts any UPDATE
+ *     which changes a non-null `customer_id`, so the guarantee does not depend on every future
+ *     call site remembering it; nothing in this codebase updates the column after creation, and
+ *     the value is never reused — not even for soft-deleted accounts.
  *   - It never replaces `users.id` (uuid). Every foreign key in the schema still references the
  *     uuid; the Customer ID is a display/lookup identifier for humans (billing, support, admin).
+ *
+ * Backward compatibility: accounts created before migration 0085 hold a six-digit number. Those
+ * values are preserved verbatim (widened in place, never re-issued) — a customer who was told
+ * "000042" keeps that number. `isValidCustomerId` accepts both shapes for that reason; new
+ * accounts are always nine digits.
  */
 import { randomInt, randomUUID } from 'node:crypto';
 import type { Queryable } from '../db/types';
 import { createUser, type UserRecord, type UserRole } from '../db/users';
 
-/** Total six-digit space, including leading zeros ("000042" is a valid Customer ID). */
-export const CUSTOMER_ID_SPACE = 1_000_000;
-export const CUSTOMER_ID_PATTERN = /^[0-9]{6}$/;
+/**
+ * Number of distinct nine-digit identifiers issued by this generator: 100,000,000–999,999,999.
+ * (Zero-padded nine-digit values such as "000000042" are valid in the column for legacy reasons,
+ * but new draws never produce them.)
+ */
+export const CUSTOMER_ID_SPACE = 900_000_000;
+export const CUSTOMER_ID_MIN = 100_000_000;
+/** New identifiers are exactly nine digits and never begin with zero. */
+export const CUSTOMER_ID_PATTERN = /^[0-9]{9}$/;
+/** Legacy six-digit identifiers assigned by migration 0053; preserved, never newly issued. */
+export const LEGACY_CUSTOMER_ID_PATTERN = /^[0-9]{6}$/;
+/** What the database CHECK constraint accepts (see 0085). */
+export const CUSTOMER_ID_DB_PATTERN = /^([0-9]{6}|[0-9]{9})$/;
 
 /** Bounded retries: at realistic customer counts a collision is rare, and each retry is one
  * insert. The loop terminates loudly rather than silently assigning a duplicate or NULL. */
 export const CUSTOMER_ID_MAX_ATTEMPTS = 10;
 
 export function generateCustomerIdCandidate(): string {
-  return String(randomInt(0, CUSTOMER_ID_SPACE)).padStart(6, '0');
+  return String(randomInt(CUSTOMER_ID_MIN, CUSTOMER_ID_MIN + CUSTOMER_ID_SPACE));
 }
 
+/** True for a well-formed nine-digit identifier. */
 export function isValidCustomerId(value: string): boolean {
-  return CUSTOMER_ID_PATTERN.test(value);
+  return typeof value === 'string' && CUSTOMER_ID_PATTERN.test(value);
+}
+
+/** True for either an current nine-digit or a preserved legacy six-digit identifier. */
+export function isKnownCustomerIdFormat(value: string): boolean {
+  return typeof value === 'string' && CUSTOMER_ID_DB_PATTERN.test(value);
 }
 
 /** Postgres unique-violation. Also matches PGlite, which reports the same SQLSTATE. */
@@ -47,9 +71,17 @@ export interface CreateUserWithIdentityInput {
   email: string;
   passwordHash: string;
   fullName: string;
+  /** Chosen (or derived) at registration. Uniqueness is enforced by the database. */
+  username: string;
   role?: UserRole;
   securityNumberHash?: string | null;
   securityNumberExpiresAt?: Date | null;
+  /** Keyed hash + salt of the first four-digit Security PIN (see security-pin-service.ts). */
+  securityPinHash?: string | null;
+  securityPinSalt?: string | null;
+  /** Sealed (AES-GCM) copy of the same PIN, for the verified reveal path. */
+  securityPinEncrypted?: string | null;
+  securityPinExpiresAt?: Date | null;
 }
 
 export interface CreateUserWithIdentityResult {
@@ -59,9 +91,10 @@ export interface CreateUserWithIdentityResult {
 }
 
 /**
- * Creates a user with a guaranteed-unique Customer ID, retrying only on a Customer ID collision.
- * A duplicate *email* is a real, user-facing conflict and is rethrown immediately rather than
- * being retried — otherwise a registration with an already-used email would spin the loop.
+ * Creates a user with a guaranteed-unique nine-digit Customer ID, retrying only on a Customer ID
+ * collision. A duplicate *email* or *username* is a real, user-facing conflict and is rethrown
+ * immediately rather than being retried — otherwise a registration with an already-used value
+ * would spin the loop.
  */
 export async function createUserWithIdentity(
   pool: Queryable,
@@ -76,10 +109,15 @@ export async function createUserWithIdentity(
         email: input.email,
         passwordHash: input.passwordHash,
         fullName: input.fullName,
+        username: input.username,
         role: input.role,
         customerId,
         securityNumberHash: input.securityNumberHash ?? null,
         securityNumberExpiresAt: input.securityNumberExpiresAt ?? null,
+        securityPinHash: input.securityPinHash ?? null,
+        securityPinSalt: input.securityPinSalt ?? null,
+        securityPinEncrypted: input.securityPinEncrypted ?? null,
+        securityPinExpiresAt: input.securityPinExpiresAt ?? null,
       });
       return { user, attempts: attempt };
     } catch (error) {
@@ -99,7 +137,8 @@ export async function createUserWithIdentity(
 
 /**
  * Assigns a Customer ID to an existing account that somehow has none (defence in depth for rows
- * created before 0051 by an out-of-band import; the migration itself already backfills).
+ * created by an out-of-band import; migration 0085 already backfills). Once assigned the value is
+ * immutable — the trigger installed by 0085 rejects any later change.
  */
 export async function ensureCustomerId(pool: Queryable, userId: string): Promise<string | null> {
   for (let attempt = 1; attempt <= CUSTOMER_ID_MAX_ATTEMPTS; attempt += 1) {

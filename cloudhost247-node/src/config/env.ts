@@ -104,6 +104,19 @@ const envSchema = z.object({
   CREDENTIAL_ENCRYPTION_KEY: z.string().optional(),
   CREDENTIAL_ENCRYPTION_KEYS: z.string().optional(),
 
+  // --- Security PIN (migration 0085) ---------------------------------------------------------
+  // Dedicated key material for the rotating four-digit Security PIN: per-value HMAC-SHA-256 for
+  // verification, plus an AES-256-GCM envelope so the customer can be shown the value after
+  // email verification. Minimum 32 characters; the key is domain-separated internally, so one
+  // value safely covers both uses. Optional at boot — when absent the feature degrades rather
+  // than the platform: registration succeeds, the PIN is issued lazily (ensureCurrentPin) and
+  // "view PIN" answers 503 SECURITY_PIN_UNAVAILABLE until it is configured.
+  //
+  // Falls back to CREDENTIAL_ENCRYPTION_KEYS / CREDENTIAL_ENCRYPTION_KEY when unset, so existing
+  // deployments keep working. Set a dedicated value to keep PIN rotation independent of
+  // credential-key rotation.
+  SECURITY_PIN_HMAC_KEY: z.string().min(32).optional(),
+
   // Directory containing the application manifest catalog (manifests/<slug>/manifest.yaml).
   MARKETPLACE_MANIFESTS_DIR: z.string().default('manifests'),
 

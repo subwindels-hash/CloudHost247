@@ -51,6 +51,8 @@ describe('Phase 5D Webhook Pipeline API (POST /api/v1/webhooks/:gateway)', () =>
       email: `customer-${randomUUID()}@example.com`,
       passwordHash: 'hash',
       fullName: 'Webhook Customer',
+      // Migration 0085: every account carries a username. Derive a guaranteed-valid, unique one.
+      username: `wh${randomUUID().replace(/-/g, '').slice(0, 12)}`,
     });
 
     const product = await createProduct(db, {
@@ -1141,6 +1143,7 @@ describe('Phase 5D Webhook Pipeline API (POST /api/v1/webhooks/:gateway)', () =>
         email: `other-owner-${randomUUID()}@example.com`,
         passwordHash: 'hash',
         fullName: 'Other Owner',
+        username: `ow${randomUUID().replace(/-/g, '').slice(0, 12)}`,
       });
 
       // Temporarily disable DB trigger to simulate legacy/corrupted state and test application-level B2 defense

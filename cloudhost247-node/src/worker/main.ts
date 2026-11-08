@@ -4,15 +4,20 @@ import { getPool, closePool } from '../db/pool';
 import { processNextJob, recoverOrphanedJobs, type JobContext } from './handlers';
 import {
   SECURITY_NUMBER_SWEEP_INTERVAL_MS,
+  SECURITY_PIN_SWEEP_INTERVAL_MS,
   scheduleHealthChecks,
   sweepExpiredSupportSessions,
   sweepSecurityNumbers,
+  sweepSecurityPinNotices,
+  sweepSecurityPins,
   sweepSubscriptions,
 } from './sweeps';
 import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { deliverNotificationOutbox } from '../services/notification-outbox-service';
 import { deliverAuthEmailOutbox } from '../services/auth-recovery-service';
+import { deliverPinVerificationEmails } from '../services/security-pin-email-service';
+import { pinKeyOrNull } from '../lib/pin-key';
 import { reconcileServerState } from '../services/infrastructure-reconciliation-service';
 import { revalidateProviderImages } from '../services/os-image-revalidation-service';
 import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
@@ -72,6 +77,7 @@ interface WorkerSchedule {
   lastReconciliation: number;
   lastImageRevalidation: number;
   lastSecurityNumberSweep: number;
+  lastSecurityPinSweep: number;
   lastRevenueGuardianSweep: number;
   lastCloudflareSweep: number;
   lastDomainServicesSweep: number;
@@ -91,6 +97,7 @@ function createWorkerSchedule(): WorkerSchedule {
     lastReconciliation: 0,
     lastImageRevalidation: 0,
     lastSecurityNumberSweep: 0,
+    lastSecurityPinSweep: 0,
     lastRevenueGuardianSweep: 0,
     lastCloudflareSweep: 0,
     lastDomainServicesSweep: 0,
@@ -175,6 +182,16 @@ async function runWorkerCycle(
     if (authDelivery.claimed > 0) {
       logger.log(
         `[worker:${ctx.workerId}] authentication email outbox: ${authDelivery.delivered} delivered, ${authDelivery.retrying} retrying, ${authDelivery.failed} failed, ${authDelivery.cancelled} cancelled, ${authDelivery.configurationRequired} awaiting configuration`
+      );
+    }
+    // Six-digit Security PIN verification codes are time-critical (10-minute TTL), so their queue
+    // is drained on the same tick. Without a configured PIN key the drain parks the rows as
+    // CONFIGURATION_REQUIRED instead of failing them.
+    const pinDelivery = await deliverPinVerificationEmails(ctx.db, { pinKey: pinKeyOrNull() ?? undefined });
+    didWork ||= pinDelivery.claimed > 0;
+    if (pinDelivery.claimed > 0) {
+      logger.log(
+        `[worker:${ctx.workerId}] security pin email queue: ${pinDelivery.delivered} delivered, ${pinDelivery.retrying} retrying, ${pinDelivery.failed} failed, ${pinDelivery.cancelled} cancelled, ${pinDelivery.configurationRequired} awaiting configuration`
       );
     }
   }
@@ -289,6 +306,19 @@ async function runWorkerCycle(
     didWork ||= rotated > 0 || closed > 0;
     if (rotated > 0 || closed > 0) {
       logger.log(`[worker:${ctx.workerId}] security numbers rotated: ${rotated}; support sessions expired: ${closed}`);
+    }
+  }
+  if (now - schedule.lastSecurityPinSweep >= SECURITY_PIN_SWEEP_INTERVAL_MS) {
+    schedule.lastSecurityPinSweep = now;
+    // Proactive rotation plus the (PIN-free) rotation notice. Both are idempotent; the notice is
+    // keyed on the rotation version so a repeated tick sends nothing twice.
+    const pinsRotated = await sweepSecurityPins(ctx.db);
+    const pinsNotified = await sweepSecurityPinNotices(ctx.db);
+    didWork ||= pinsRotated > 0 || pinsNotified > 0;
+    if (pinsRotated > 0 || pinsNotified > 0) {
+      logger.log(
+        `[worker:${ctx.workerId}] security pins rotated: ${pinsRotated}; rotation notices: ${pinsNotified}`
+      );
     }
   }
   if (now - schedule.lastAiControlPlaneSweep >= AI_SWEEP_INTERVAL_MS) {
