@@ -144,10 +144,42 @@ describe('customer identity, security number and support mode', () => {
     for (const url of ['/api/auth/me', '/api/v1/account']) {
       const res = await app().inject({ method: 'GET', url, headers: { authorization: `Bearer ${token}` } });
       expect(res.statusCode).toBe(200);
-      const body = res.body;
-      expect(body).not.toContain(securityNumber.value);
-      expect(body).not.toContain('security_number');
-      expect(body).not.toContain('securityNumberHash');
+
+      // Structural assertions, not `expect(res.body).not.toContain(pin)`. A raw substring scan over
+      // the whole payload reports a leak whenever four digits of a random UUID happen to match the
+      // PIN (id `...99ee-1899654295eb` contains `5429`), and — worse — it would keep passing if the
+      // value were ever exposed under a key whose name or encoding it did not anticipate. Walk the
+      // parsed response instead: no field may hold the value, and no key may describe it.
+      const seen: Array<[string, unknown]> = [];
+      const walk = (node: unknown, path: string): void => {
+        if (Array.isArray(node)) {
+          node.forEach((item, index) => walk(item, `${path}[${index}]`));
+          return;
+        }
+        if (node && typeof node === 'object') {
+          for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+            const next = path ? `${path}.${key}` : key;
+            seen.push([next, value]);
+            walk(value, next);
+          }
+        }
+      };
+      const parsed: unknown = res.json();
+      walk(parsed, '');
+
+      for (const [path, value] of seen) {
+        // Only compare scalars: an object/array key is a container, not a stored credential.
+        if (typeof value === 'string' || typeof value === 'number') {
+          expect(String(value), `${url} leaked the Security PIN at ${path}`).not.toBe(securityNumber.value);
+        }
+        // Any key that names the credential is itself a defect, whatever it holds.
+        expect(path, `${url} exposes a security-number field at ${path}`).not.toMatch(
+          /security[_-]?number(?!_?initialized|_?expires|_?version)/i,
+        );
+      }
+
+      // Belt and braces for the two spellings the payload must never contain at all.
+      expect(res.body).not.toContain('securityNumberHash');
     }
   });
 
