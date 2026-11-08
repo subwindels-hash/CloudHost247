@@ -1,0 +1,5 @@
+  2d  1xYzQq-000456-EF  2.0K  <>
+        user@example.com
+        SMTP error from remote mail server after RCPT TO:<user@example.com>: host mx.example.net [198.51.100.20]: 450 4.7.1 Greylisted
+ 14h  1xYzAb-000123-CD  1.3K  sender@example.com
+        recipient@example.org

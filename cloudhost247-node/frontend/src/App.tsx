@@ -81,6 +81,8 @@ const AdminDeploymentsPage = lazy(() => import('./pages/AdminDeploymentsPage'));
 const AdminServersPage = lazy(() => import('./pages/AdminServersPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage'));
+const AdminEmailTracePage = lazy(() => import('./pages/AdminEmailTracePage'));
+const EmailTracePage = lazy(() => import('./pages/EmailTracePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // CLOUDHOST247 platform services — website builder + AI builder, online store, experts, digital
@@ -355,6 +357,7 @@ export default function App() {
           <Route path="/dashboard/dns" element={<DnsManagementPage />} />
           <Route path="/dashboard/ssl" element={<SslManagementPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/account/email-trace" element={<EmailTracePage />} />
           <Route path="/account/domains" element={<DomainsPage />} />
           <Route path="/account/dns" element={<DnsManagementPage />} />
           <Route path="/account/ssl" element={<SslManagementPage />} />
@@ -438,6 +441,7 @@ export default function App() {
             <Route path="/admin/licenses" element={<AdminLicensesPage />} />
             <Route path="/admin/monitoring" element={<AdminMonitoringPage />} />
             <Route path="/admin/dns" element={<DnsManagementPage />} />
+            <Route path="/admin/email-trace" element={<AdminEmailTracePage />} />
           <Route path="/admin/tools" element={<AdminToolsPage />} />
             <Route path="/admin/ssl" element={<SslManagementPage />} />
             <Route path="/admin/audit-logs" element={<AdminAuditPage />} />

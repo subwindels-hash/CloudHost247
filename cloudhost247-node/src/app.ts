@@ -47,6 +47,8 @@ import { registerMonitoringRoutes } from './routes/monitoring';
 import { registerProvisioningRoutes } from './routes/provisioning';
 import { registerAuditRoutes } from './routes/audit';
 import { registerDnsRoutes } from './routes/dns';
+import { registerEmailTraceCustomerRoutes } from './routes/email-trace-customer';
+import { registerEmailTraceAdminRoutes } from './routes/email-trace-admin';
 import type { DnsPropagationOptions } from './dns/propagation';
 import { registerSslRoutes } from './routes/ssl';
 import { registerFirewallRoutes } from './routes/firewall';
@@ -226,6 +228,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerProvisioningRoutes(instance, env, pool);
     await registerAuditRoutes(instance, env, pool);
     await registerDnsRoutes(instance, env, pool, dnsPropagation ?? {});
+    await registerEmailTraceCustomerRoutes(instance, env, pool);
+    await registerEmailTraceAdminRoutes(instance, env, pool);
     await registerSslRoutes(instance, env, pool);
     await registerFirewallRoutes(instance, env, pool);
 
