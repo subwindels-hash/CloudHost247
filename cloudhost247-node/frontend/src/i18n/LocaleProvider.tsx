@@ -30,7 +30,7 @@ export interface LocaleContextValue {
   /** Switches language and remembers the choice. Returns false, and changes nothing, for an unsupported code. */
   readonly setLocale: (code: string) => boolean;
   /** Advisory default; never overrides an explicit language preference. */
-  readonly suggestCountryLocale: (country: string, resetPreference?: boolean) => void;
+  readonly suggestCountryLocale: (country: string) => void;
 }
 
 function buildValue(locale: LocaleInfo, setLocale: LocaleContextValue['setLocale'], suggestCountryLocale: LocaleContextValue['suggestCountryLocale'] = () => {}): LocaleContextValue {
@@ -80,12 +80,8 @@ interface LocaleProviderProps {
 export function LocaleProvider({ children, initialLocale, savedLocaleHint }: LocaleProviderProps) {
   const explicitChoice = useRef(Boolean(findLocale(readStoredLocale()) || findLocale(savedLocaleHint) || findLocale(initialLocale)));
   const [locale, setLocaleState] = useState<LocaleInfo>(() => {
-    let country: string | null = null;
-    try { country = localStorage.getItem('ch247.country'); } catch { /* storage unavailable */ }
     const explicit = savedLocaleHint ?? initialLocale ?? readStoredLocale();
-    // A visitor-selected country is a stronger hint than the browser default, but never an
-    // override for a saved/manual language. Automatically inferred regions remain a fallback.
-    return findLocale(explicit) ?? localeForCountry(country) ?? resolveLocale(null, browserLanguages());
+    return findLocale(explicit) ?? resolveLocale(null, browserLanguages());
   });
 
   useEffect(() => {
@@ -102,11 +98,7 @@ export function LocaleProvider({ children, initialLocale, savedLocaleHint }: Loc
     return true;
   }, []);
 
-  const suggestCountryLocale = useCallback((country: string, resetPreference = false) => {
-    if (resetPreference) {
-      explicitChoice.current = false;
-      try { localStorage.removeItem(LOCALE_STORAGE_KEY); } catch { /* storage unavailable */ }
-    }
+  const suggestCountryLocale = useCallback((country: string) => {
     const suggestion = localeForCountry(country) ?? getDefaultLocale();
     if (!explicitChoice.current) setLocaleState(suggestion);
   }, []);

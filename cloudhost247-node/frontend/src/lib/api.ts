@@ -5,7 +5,7 @@
  * it is reached through cPanel/Apache/Passenger or a local dev server.
  */
 import { toolsApiPath, toolsHost } from './tools-runtime';
-import { clearSession } from './auth';
+import { clearSession, getToken } from './auth';
 
 export interface ApiError {
   error: string;
@@ -96,7 +96,7 @@ function describeNonJsonResponse(res: Response, path: string, text: string): str
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = toolsHost().embedded ? null : localStorage.getItem('ch247_token');
+  const token = toolsHost().embedded ? null : getToken();
   const res = await fetch(toolsApiPath(path), {
     ...init,
     headers: {

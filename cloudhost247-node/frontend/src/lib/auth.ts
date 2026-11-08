@@ -26,14 +26,13 @@ const AUTH_EVENT = 'ch247-auth-changed';
 const SUPPORT_ORIGIN_KEY = 'ch247_support_origin';
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
 }
 
 export function getStoredUser(): StoredUser | null {
-  const raw = localStorage.getItem(USER_KEY);
-  if (!raw) return null;
   try {
-    return JSON.parse(raw) as StoredUser;
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) as StoredUser : null;
   } catch {
     return null;
   }
@@ -76,10 +75,9 @@ export function setSupportOrigin(origin: SupportOrigin): void {
 }
 
 export function getSupportOrigin(): SupportOrigin | null {
-  const raw = localStorage.getItem(SUPPORT_ORIGIN_KEY);
-  if (!raw) return null;
   try {
-    return JSON.parse(raw) as SupportOrigin;
+    const raw = localStorage.getItem(SUPPORT_ORIGIN_KEY);
+    return raw ? JSON.parse(raw) as SupportOrigin : null;
   } catch {
     return null;
   }

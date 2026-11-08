@@ -285,6 +285,20 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
         reply.code(404).send({ error: 'NOT_FOUND', message: 'Resource not found' });
         return;
       }
+      // With wildcard:false, fastify-static registers only files present at startup. A frontend
+      // rebuild can introduce new hashed assets while this process is still running. Serve those
+      // from the static root rather than returning the SPA shell (or a false 404). Limit this
+      // fallback to flat Vite asset filenames; sendFile enforces the configured root as well.
+      if (route.startsWith('/assets/')) {
+        reply.header('cache-control', 'no-store');
+        if (!/^\/assets\/[a-zA-Z0-9._-]+$/.test(route)) {
+          reply.code(404).send({ error: 'NOT_FOUND', message: 'Asset not found' });
+          return;
+        }
+        return reply.sendFile(route.slice(1), { cacheControl: false });
+      }
+      // HTML must always be fetched again so it references the current hashed build assets.
+      reply.header('cache-control', 'no-store');
       if (route === '/tools' || route.startsWith('/tools/')) {
         const page = resolveToolPage(route);
         if (page && page.path !== route) {
@@ -294,7 +308,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
         // The independent Document Tools module retains its existing routes and authorization.
         if (!['/tools/document','/tools/document/mrz','/tools/document/mrz-parser'].includes(route)) reply.code(404).header('X-Robots-Tag','noindex');
       }
-      reply.type('text/html').sendFile('index.html');
+      reply.type('text/html').sendFile('index.html', { cacheControl: false });
       },
     );
   });

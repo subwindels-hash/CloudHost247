@@ -44,7 +44,8 @@ export default function AiSupportWidget() {
       const raw = localStorage.getItem(SESSION_KEY);
       if (raw) setSession(JSON.parse(raw) as SupportSession);
     } catch {
-      localStorage.removeItem(SESSION_KEY);
+      // Storage may be blocked entirely in an embedded or private browsing context.
+      try { localStorage.removeItem(SESSION_KEY); } catch { /* no stored session available */ }
     }
   }, []);
 

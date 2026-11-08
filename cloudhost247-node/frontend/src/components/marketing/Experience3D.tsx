@@ -11,11 +11,9 @@ import './experience-3d.css';
  * reduced-motion / coarse-pointer / small-screen off switches, so this component adds no new
  * animation controller and no WebGL dependency: it reuses the site's existing motion contract.
  *
- * The planes are decorative (`aria-hidden`). The interactive version is a set of four real buttons
- * with `aria-pressed` that drive an `aria-live` detail panel containing a link to a real page. That
- * means keyboard and screen-reader users get the same information and the same destination as
- * somebody moving a mouse over the stack. Under reduced motion or below 1024px the planes become
- * an ordinary stacked list (see experience-3d.css), never an overlapping pile of invisible layers.
+ * The planes themselves are real buttons with `aria-pressed` that drive an `aria-live` detail
+ * panel and a link to a real page. Keyboard and screen-reader users get the same controls. Under
+ * reduced motion, on touch devices, or below 1024px, they become a static stacked list.
  */
 
 interface Layer {
@@ -66,19 +64,22 @@ export default function Experience3D() {
             <h2 className="hg-h2" id="hg-exp3d-title">Explore the platform in three dimensions</h2>
           </div>
           <p className="hg-lede">
-            Move your pointer across the stack to see its depth, or choose a layer with the controls.
-            Each layer opens the real product area it represents.
+            Move your pointer across the stack to see its depth, then select a layer to explore its product area.
           </p>
         </div>
 
         <div className="hg-exp3d__layout">
           <div className="hg-exp3d__stage" data-tilt data-tilt-max="7">
             <div className="hg-exp3d__glow" aria-hidden="true" />
-            <div className="hg-exp3d__stack" aria-hidden="true">
+            <div className="hg-exp3d__stack" role="group" aria-label="Choose a platform layer">
               {LAYERS.map((layer, index) => (
-                <div
+                <button
+                  type="button"
                   key={layer.id}
                   className={`hg-exp3d__plane${active.id === layer.id ? ' is-active' : ''}`}
+                  aria-pressed={active.id === layer.id}
+                  aria-controls="hg-exp3d-detail"
+                  onClick={() => setActiveId(layer.id)}
                   style={{
                     // Lower layers sit further back in Z and lower on the stage, so the first
                     // (and highlighted) plane is the nearest one rather than being hidden behind
@@ -87,39 +88,21 @@ export default function Experience3D() {
                     '--plane-z': `${(LAYERS.length - 1 - index) * 32}px`,
                   } as CSSProperties}
                 >
-                  <span className="hg-exp3d__plane-step">{layer.step}</span>
+                  <span className="hg-exp3d__plane-step" aria-hidden="true">{layer.step}</span>
                   <span className="hg-exp3d__plane-icon"><Icon name={layer.icon} size={22} /></span>
                   <span className="hg-exp3d__plane-text">
                     <b>{layer.title}</b>
                     <small>{layer.meta}</small>
                   </span>
-                </div>
-              ))}
-            </div>
-            <p className="hg-exp3d__hint" aria-hidden="true">Interactive 3D · pointer or layer controls</p>
-          </div>
-
-          <div className="hg-exp3d__panel">
-            <div className="hg-exp3d__controls" role="group" aria-label="Choose a platform layer">
-              {LAYERS.map((layer) => (
-                <button
-                  type="button"
-                  key={layer.id}
-                  className={`hg-exp3d__control${active.id === layer.id ? ' is-active' : ''}`}
-                  aria-pressed={active.id === layer.id}
-                  aria-controls="hg-exp3d-detail"
-                  onClick={() => setActiveId(layer.id)}
-                >
-                  <Icon name={layer.icon} size={16} />
-                  <span>{layer.title}</span>
-                  <span className="hg-exp3d__control-step" aria-hidden="true">{layer.step}</span>
                 </button>
               ))}
             </div>
+            <p className="hg-exp3d__hint" aria-hidden="true">Select a layer to explore</p>
+          </div>
 
+          <div className="hg-exp3d__panel">
             <div className="hg-exp3d__detail" id="hg-exp3d-detail" aria-live="polite">
-              <p className="hg-exp3d__detail-step">Layer {active.step}</p>
-              <h3 className="hg-h3">{active.title}</h3>
+              <p className="hg-exp3d__detail-step">Layer {active.step} · Details</p>
               <p>{active.description}</p>
               <Link className="hg-link" to={active.to}>
                 {active.cta} <span className="hg-link__arrow" aria-hidden="true">→</span>

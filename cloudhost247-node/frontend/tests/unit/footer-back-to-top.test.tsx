@@ -48,29 +48,39 @@ describe('Footer: Amazon-style back-to-top strip', () => {
     expect(strip.className).toContain('hg-footer__top');
     // It sits after — not inside — the bottom row (copyright / locale).
     const bottom = container.querySelector('.hg-footer__bottom');
-    expect(bottom?.contains(strip)).toBe(false);
-    expect(bottom?.compareDocumentPosition(strip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    if (!bottom) throw new Error('Footer bottom row is missing');
+    expect(bottom.contains(strip)).toBe(false);
+    expect(bottom.compareDocumentPosition(strip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('shows the powered-by line directly below the copyright line', () => {
     const { container } = renderFooter();
     const copyright = container.querySelector('.hg-footer__copyright');
+    if (!copyright) throw new Error('Footer copyright is missing');
     const powered = screen.getByText('Proudly Powered by WINDELS GROUP & COMPANY®');
-    expect(copyright?.textContent).toContain('All rights reserved.');
+    expect(copyright.textContent).toContain('All rights reserved.');
     expect(powered.className).toContain('hg-footer__powered');
-    expect(copyright?.parentElement).toBe(powered.parentElement);
-    expect(copyright?.compareDocumentPosition(powered) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(copyright.parentElement).toBe(powered.parentElement);
+    expect(copyright.compareDocumentPosition(powered) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('places the GeoLite2 credit beside the country in the footer locale area', () => {
+    const { container } = renderFooter();
+    const values = container.querySelector('.hg-footer__locale-values');
+    const credit = container.querySelector('.hg-footer__geo-credit');
+    expect(values?.nextElementSibling).toBe(credit);
+    expect(credit?.textContent).toBe('This product includes GeoLite2 data created by WIL®.');
+    expect(container.querySelector('.hg-footer__brand-lines')?.contains(credit ?? null)).toBe(false);
   });
 
   it('does not render the removed legal-links row in the footer bottom', () => {
     const { container } = renderFooter();
     const footer = container.querySelector('footer.ch247-footer');
     expect(footer?.querySelector('.hg-footer__legal-links')).toBeNull();
-    // The only bottom-row link is the GeoLite2 attribution, not a legal-links row.
     const bottom = container.querySelector('.hg-footer__bottom');
-    const links = bottom?.querySelectorAll('a');
-    expect(links).toHaveLength(1);
-    expect(links?.[0]?.getAttribute('href')).toBe('https://www.maxmind.com');
+    expect(bottom?.querySelectorAll('a')).toHaveLength(0);
+    expect(footer?.textContent).not.toContain('This product includes GeoLite2 data created by MaxMind');
+    expect(footer?.querySelector('a[href="https://www.maxmind.com"]')).toBeNull();
   });
 
   it('smooth-scrolls to the very top and moves focus to the header on click', () => {
