@@ -93,6 +93,8 @@ export default function PromoVideoHero() {
     let currentRequest = true;
     if (previous !== null) videos.current[previous]?.pause();
     if (requestedPlay && visible && !pageHidden) {
+      // Normalize play() across Promise-returning browsers, legacy undefined returns and
+      // synchronous throws; a blocked/unsupported video must not take down the hero.
       void playMedia(element).then((started) => {
         if (currentRequest && !started) setPlaying(false);
       });

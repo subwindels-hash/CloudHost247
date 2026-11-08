@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "source": "whmcs-getproducts",
+  "baseUrlFingerprint": "80c00e100ce65521a6f3b4df0e0de367d660ec7c45dd44698e1149d01fe50729",
+  "whmcsVersion": null,
+  "retrievedAt": "2026-11-08T13:27:05.120Z",
+  "products": [],
+  "services": {},
+  "unmapped": {
+    "cloud": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.736Z"
+    },
+    "cloud-public": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-private": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-enterprise-servers": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-game-servers": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-infrastructure": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-data-centers": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-network": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-operating-systems": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-server-management": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-monitoring": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-backups": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-firewall": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-security": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-ip-management": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "cloud-managed-services": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "developers": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "developers-deployment": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "developers-environments": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "developers-nodejs": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "developers-php": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "developers-python": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "developers-laravel": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "developers-docker": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-web-hosting": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-business": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-wordpress": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-reseller": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-windows": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-email": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-developer": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-api": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-ssl": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-backups": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-migration": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-security": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "platforms": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "platforms-applications": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "platforms-databases": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "platforms-containers": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "platforms-paas": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-vps": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-dedicated": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-cpanel": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-search": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-bulk-search": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-transfer": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-whois": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-extensions": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-appraisal": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-auctions": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-club": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-broker": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "domains-domain-health": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "hosting-catalogue": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:05.737Z"
+    },
+    "plesk-hosting": {
+      "reason": "Not bound: no WHMCS discovery run has been performed on this deployment (WHMCS_BASE_URL and API credentials unset).",
+      "since": "2026-11-08T13:27:43.949Z"
+    },
+    "domain-dns": {
+      "reason": "No domain registrar is configured in WHMCS; ordering stays disabled until one is and availability is verified.",
+      "since": "2026-11-08T13:27:43.949Z"
+    }
+  },
+  "snapshotChecksum": "1007c93189067743fcf078a68719239f9af88bdd2060c30b9aa655e4e6553f0f",
+  "checksum": "8d5036268ab94f0e72efacc7a0b04839a0f31528edebbed14e11ba7abcca78b9"
+}

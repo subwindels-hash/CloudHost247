@@ -31,7 +31,7 @@ CAPI is a separate explicit switch and write-only encrypted credential. A transa
 Each slice requires its own verification before the next starts. Status in the final report distinguishes local verification from deployment/provider verification.
 
 ### Session 1 — canonical configuration and consent
-1. **Slice 1: schema + configuration API.** Migration `cloudhost247-node/database/migrations/0086_create_marketing_integrations.sql`; `src/marketing/{types,config-service}.ts`; `src/routes/admin-marketing.ts`; registration in `src/app.ts`; integration tests `tests/integration/marketing-config-api.test.ts`. Verify real migrations, RBAC, validation, audit, reset, test mode, secret-free DTOs and encrypted CAPI configuration.
+1. **Slice 1: schema + configuration API.** Migration `cloudhost247-node/database/migrations/0089_create_marketing_integrations.sql`; `src/marketing/{types,config-service}.ts`; `src/routes/admin-marketing.ts`; registration in `src/app.ts`; integration tests `tests/integration/marketing-config-api.test.ts`. Verify real migrations, RBAC, validation, audit, reset, test mode, secret-free DTOs and encrypted CAPI configuration.
 2. **Slice 2: consent persistence/API.** `src/marketing/consent-service.ts`, `src/routes/marketing.ts`, `tests/integration/marketing-consent-api.test.ts`. Verify accept/reject/custom/withdraw, opaque cookie, CSRF, expiry, jurisdiction fallback and no PII.
 
 ### Session 2 — public experience

@@ -124,7 +124,16 @@ describe('migration runner against the real database/migrations SQL files', () =
     // Customer username, permanent nine-digit Customer ID, the rotating Security PIN, the
     // six-digit email-verification gate in front of it, and account recovery (0085).
     '0085_customer_username_pin_and_verification.sql',
-  '0086_create_marketing_integrations.sql',
+    // Durable ledger for state-changing WHMCS operations (0086) — one row per order/payment intent,
+    // so a retry after a lost reply reconciles instead of double-charging.
+    '0086_create_whmcs_operations.sql',
+    // B5.1 — one customer identity: the account↔WHMCS-client link and the audit rows for SSO
+    // hand-offs (0087). The token itself is never stored.
+    '0087_create_whmcs_identity.sql',
+    // Cross-instance SSO hand-off budget (0088): one atomic counter row per account per window.
+    '0088_create_whmcs_sso_rate_limits.sql',
+    // Consent-aware Meta Pixel/CAPI configuration, consent, conversion activity and delivery outbox.
+    '0089_create_marketing_integrations.sql',
   ];
 
   it('finds the committed migration files in order', () => {
@@ -216,6 +225,11 @@ describe('migration runner against the real database/migrations SQL files', () =
         'domain_club_memberships',
         'domain_transactions',
         'domain_availability_watches',
+        // WHMCS integration (B2–B5)
+        'whmcs_operations',
+        'whmcs_client_links',
+        'whmcs_sso_handoffs',
+        'whmcs_sso_rate_limits',
       ])
     );
   });

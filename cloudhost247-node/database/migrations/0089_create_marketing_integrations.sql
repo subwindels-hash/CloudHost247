@@ -1,4 +1,4 @@
--- Migration: 0086_create_marketing_integrations.sql
+-- Migration: 0089_create_marketing_integrations.sql
 -- Canonical marketing configuration, privacy choices and conversion delivery ledger.
 -- The runner supplies BEGIN/COMMIT. Additive only; no existing billing/auth table is changed.
 -- A Pixel ID is public configuration. Access tokens live only in the separate secret table.

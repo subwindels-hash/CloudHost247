@@ -62,6 +62,14 @@ export default function Header() {
                 Sign In and Create Account. Browse Plans remains in the account navigation and
                 on My Services; it must not push the signed-out controls onto another line. */}
             <NavLink to="/pricing">{copy.pricing}</NavLink>
+            {/*
+              No third quick link here. The utility line is a documented six-control row
+              (Pricing, Help, language, currency, Sign In, Create Account) and both
+              frontend/tests/unit/hostinger-chrome.test.tsx and scripts/check-chrome-benchmark.mjs
+              fail when a seventh is added — a wrapped or crowded bar is how Create Account went
+              missing before. `/service-plans` stays reachable from /services ("Browse plans"), the
+              catalog pages and the account menu.
+            */}
             <NavLink to="/help">{copy.help}</NavLink>
           </nav>
 

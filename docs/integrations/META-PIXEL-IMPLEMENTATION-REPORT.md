@@ -4,7 +4,7 @@ Date: 2026-11-08 (UTC). Branch: `arena/112e352e-cloudhost247`. Status: **impleme
 
 ## Delivered scope
 
-The canonical implementation lives in the Node platform (`cloudhost247-node/`) and PostgreSQL migration `0086_create_marketing_integrations.sql`. It provides:
+The canonical implementation lives in the Node platform (`cloudhost247-node/`) and PostgreSQL migration `0089_create_marketing_integrations.sql`. It provides:
 
 - Admin configuration and encrypted CAPI token storage at `/api/v1/admin/marketing-integrations/meta-pixel`, with revision checks, audit entries, reset confirmation and an activity view. React console: **Admin → Marketing Integrations → Meta Pixel**.
 - Public bootstrap/consent/browser-event/receipt APIs under `/api/v1/marketing`, an HttpOnly opaque `ch247_marketing_consent` cookie, persisted preference history, CSRF/origin checks and fail-closed runtime behaviour.

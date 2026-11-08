@@ -5,7 +5,7 @@ No live Meta credential or production Events Manager receipt is part of this rep
 
 ## Authority and surfaces
 
-- Canonical configuration, consent, conversion activity and CAPI delivery live in the Node PostgreSQL database (`0086_create_marketing_integrations.sql`).
+- Canonical configuration, consent, conversion activity and CAPI delivery live in the Node PostgreSQL database (`0089_create_marketing_integrations.sql`).
 - React admin: **Admin → Marketing Integrations → Meta Pixel** (`/admin/marketing-integrations/meta-pixel`). Activity and audit tabs are adjacent.
 - WHMCS: **CloudHost247 Marketing → Marketing Integrations** is a read-only bridge. It shows the legacy `facebook_pixel_code` and links to the canonical console using the theme's verified same-origin `platform_base_path`. It never writes the Node database and never installs a second Pixel.
 - Both Smarty themes load the generated copy of `shared/site/marketing.js`. The legacy direct Pixel/noscript initializer is retired. The old theme setting remains only for explicit import.
