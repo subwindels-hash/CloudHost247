@@ -40,3 +40,6 @@ Baseline: HEAD == origin == `d1d255b8` (Phase 13), tree clean.
 3. Deadlock handling unpolished UX-wise (correct, but a retry hint would reduce operator confusion).
 
 **Position unchanged: production NO-GO. Financial integrity under concurrency/failure: certified at internal evidence level; independent human reviewer outstanding.**
+
+
+> **Renumber note (2026-11-09, PR #113 merge):** migration numbers renamed to avoid a collision with main's GA4/forensics 0093–0096 — `0093_refund_idempotency_key.sql` is now **`0097_refund_idempotency_key.sql`**, `0094_refund_idempotency_global_uniqueness.sql` is now **`0098_refund_idempotency_global_uniqueness.sql`**. Content identical (0098 additionally gained `IF NOT EXISTS`, staging checksum reconciled). Authoritative mapping: `docs/ops/MIGRATION-RENUMBER-0093-0094.md`.

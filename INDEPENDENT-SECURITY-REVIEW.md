@@ -39,3 +39,6 @@ failure-mode probes green. Independent human verification of this review's claim
 before the fix is considered *independently* certified.
 
 Marker: `INDEPENDENT-SECONDARY-REVIEW: NOT-APPOINTED`
+
+
+> **Renumber note (2026-11-09, PR #113 merge):** migration numbers renamed to avoid a collision with main's GA4/forensics 0093–0096 — `0093_refund_idempotency_key.sql` is now **`0097_refund_idempotency_key.sql`**, `0094_refund_idempotency_global_uniqueness.sql` is now **`0098_refund_idempotency_global_uniqueness.sql`**. Content identical (0098 additionally gained `IF NOT EXISTS`, staging checksum reconciled). Authoritative mapping: `docs/ops/MIGRATION-RENUMBER-0093-0094.md`.
