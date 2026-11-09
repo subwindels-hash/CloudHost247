@@ -844,6 +844,7 @@ describe('Phase 5D Webhook Pipeline API (POST /api/v1/webhooks/:gateway)', () =>
         headers: {
           'content-type': 'application/json',
           'x-cloudhost-signature': signature,
+          'x-cloudhost-timestamp': String(Date.now()),
         },
         payload: rawBody,
       });

@@ -1,5 +1,5 @@
 {
-  "runAt": "2026-11-09T09:55:33.647Z",
+  "runAt": "2026-11-09T11:16:50.307Z",
   "baseUrl": "http://localhost:3000",
   "probes": [
     {
@@ -108,9 +108,9 @@
       "detail": "status 401"
     },
     {
-      "name": "timestamp-omitted webhook replay: accepted as duplicate (idempotency holds), no second settlement",
+      "name": "P4-F1 closed live: UNSIGNED-timestamp webhook refused (401); stamped replay deduped; no second settlement",
       "pass": true,
-      "detail": "settle1 200, no-ts replay 200 status=already_processed, ledger 2→2, invoice paid"
+      "detail": "settle1 200, no-ts 401 (expect 401), stamped replay 200 status=already_processed, ledger 2→2, invoice paid"
     },
     {
       "name": "API issues no ambient session cookies (bearer tokens only → classic CSRF N/A on API routes)",

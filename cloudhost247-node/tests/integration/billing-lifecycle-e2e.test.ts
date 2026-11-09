@@ -278,6 +278,7 @@ describe('Phase 5G: End-to-End Billing Lifecycle & Automated Reconciliation', ()
       headers: {
         'content-type': 'application/json',
         'x-sandbox-signature': sig,
+        'x-cloudhost-timestamp': String(Date.now()),
       },
       payload: webhookPayload,
     });

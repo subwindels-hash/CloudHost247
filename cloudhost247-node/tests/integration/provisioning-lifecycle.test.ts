@@ -177,7 +177,7 @@ describe('provisioning + subscription dunning lifecycle', () => {
     const hook = await fastify.inject({
       method: 'POST',
       url: '/api/v1/webhooks/sandbox',
-      headers: { 'content-type': 'application/json', 'x-sandbox-signature': signPayload(SANDBOX_SECRET, webhookPayload) },
+      headers: { 'content-type': 'application/json', 'x-sandbox-signature': signPayload(SANDBOX_SECRET, webhookPayload), 'x-cloudhost-timestamp': String(Date.now()) },
       payload: webhookPayload,
     });
     expect(hook.statusCode).toBe(200);
@@ -196,7 +196,7 @@ describe('provisioning + subscription dunning lifecycle', () => {
     const duplicate = await fastify.inject({
       method: 'POST',
       url: '/api/v1/webhooks/sandbox',
-      headers: { 'content-type': 'application/json', 'x-sandbox-signature': signPayload(SANDBOX_SECRET, webhookPayload) },
+      headers: { 'content-type': 'application/json', 'x-sandbox-signature': signPayload(SANDBOX_SECRET, webhookPayload), 'x-cloudhost-timestamp': String(Date.now()) },
       payload: webhookPayload,
     });
     expect(duplicate.statusCode).toBe(200);

@@ -18,6 +18,32 @@ import { getWebhookHandler } from '../payments/gateway-registry';
 import { NotFoundError, UnauthorizedError, ValidationError, ConflictError } from '../lib/errors';
 import { toCents } from '../lib/money';
 
+/**
+ * Phase 5 hardening (finding P4-F4): distinguishes TRANSIENT rejections from TERMINAL ones.
+ *
+ * Transient: the referenced payment/invoice/order doesn't exist yet (a provider can deliver a
+ * webhook before the initiating request has committed). The receiver answers 404 and leaves the
+ * durable event row in `processing` with its lease: after the 60 s lease expires, a redelivery
+ * takes it over and reconciles. Nothing is lost.
+ *
+ * Terminal: parity mismatches (currency/owner/amount/order-agreement) and settled-state
+ * violations can NEVER succeed, no matter how often retried. Their error carries
+ * `webhookTerminalRejection`; after the settlement transaction has rolled back, the receiver
+ * durably records the rejection (status `rejected` + reason + payment link) in a separate,
+ * already-committed write. Redeliveries of the same event id then immediately answer 200 with
+ * status `rejected` instead of re-executing — the provider retry storm stops, and the
+ * audit-grade reason is preserved, without weakening any invariant.
+ */
+interface TerminalRejectionInfo { paymentId: string | null }
+function markTerminal(err: Error, paymentId: string | null): never {
+  (err as Error & { webhookTerminalRejection?: TerminalRejectionInfo }).webhookTerminalRejection = { paymentId };
+  throw err;
+}
+function terminalInfo(err: unknown): TerminalRejectionInfo | null {
+  const e = err as Error & { webhookTerminalRejection?: TerminalRejectionInfo };
+  return e?.webhookTerminalRejection ?? null;
+}
+
 export interface WebhookProcessingResult {
   received: boolean;
   status: 'processed' | 'already_processed' | 'in_progress' | 'ignored' | 'failed' | 'rejected';
@@ -63,7 +89,12 @@ export async function processIncomingWebhook(
     transmissionId: event.providerTransmissionId,
     eventType: event.canonicalEventType,
     providerReference: event.providerPaymentReference,
-    paymentId: event.cloudhostPaymentId,
+    // Do NOT trust the provider-supplied cloudhostPaymentId into the FK column at insert time:
+    // paymentId exists only once the payment row has actually been resolved&verified inside the
+    // settlement transaction (linked then via updateWebhookEventStatus), which also keeps
+    // genuinely-early deliveries (payment row not committed yet) a clean transient 404 instead
+    // of an FK-violation 500 (found by the Phase 5 hardening suite, pre-existing).
+    paymentId: null,
     payloadHash,
     leaseExpiresAt,
   });
@@ -101,8 +132,10 @@ export async function processIncomingWebhook(
     return { received: true, status: 'ignored' };
   }
 
-  // 6. Execute atomic financial settlement inside withTransaction
-  return await withTransaction(pool, async (tx) => {
+  // 6. Execute atomic financial settlement inside withTransaction. Terminal rejections are
+  // persisted AFTER the transaction has rolled back (see markTerminal comment at top).
+  try {
+    return await withTransaction(pool, async (tx) => {
     // A. Payment lookup: by cloudhostPaymentId if supplied, else by (provider, provider_reference)
     let payment: PaymentRow | null = null;
     if (event.cloudhostPaymentId) {
@@ -114,39 +147,36 @@ export async function processIncomingWebhook(
       payment = res.rows[0] ?? null;
     }
 
+    // Transient: the payment may simply not exist yet (delivered before initiation committed).
+    // Leave the leased event row in place — a post-lease redelivery reconciles (P4-F4).
     if (!payment) {
-      await updateWebhookEventStatus(tx, gatewayId, event.providerEventId, 'rejected', 'Payment not found');
       throw new NotFoundError(`No payment record matches webhook reference ${event.providerPaymentReference}`);
     }
 
-    // B. Look up invoice and order
+    // B. Look up invoice and order (also transient: repairable data state, not a judgment).
     const invoice = await findInvoiceById(tx, payment.invoice_id);
     if (!invoice) {
-      await updateWebhookEventStatus(tx, gatewayId, event.providerEventId, 'rejected', 'Invoice not found', payment.id);
       throw new NotFoundError(`Invoice not found for payment ${payment.id}`);
     }
     const order = await findOrderById(tx, invoice.order_id);
     if (!order) {
-      await updateWebhookEventStatus(tx, gatewayId, event.providerEventId, 'rejected', 'Order not found', payment.id);
       throw new NotFoundError(`Order not found for invoice ${invoice.id}`);
     }
 
-    // C. Zero-Trust Invariant Parity Checks (B1–B5)
+    // C. Zero-Trust Invariant Parity Checks (B1–B5) — all TERMINAL: no redelivery can ever
+    // make a mismatched event valid, so the rejection is recorded durably after rollback.
     // B1: Currency parity
     if (payment.currency !== invoice.currency || event.currency !== invoice.currency) {
-      await updateWebhookEventStatus(tx, gatewayId, event.providerEventId, 'rejected', 'Currency mismatch', payment.id);
-      throw new ValidationError(`Webhook currency ${event.currency} violates invoice currency ${invoice.currency}`);
+      markTerminal(new ValidationError(`Webhook currency ${event.currency} violates invoice currency ${invoice.currency}`), payment.id);
     }
     // B2: Payment owner parity
     if (payment.user_id !== invoice.user_id) {
-      await updateWebhookEventStatus(tx, gatewayId, event.providerEventId, 'rejected', 'Owner mismatch', payment.id);
-      throw new ValidationError(`Payment user ${payment.user_id} does not match invoice owner ${invoice.user_id}`);
+      markTerminal(new ValidationError(`Payment user ${payment.user_id} does not match invoice owner ${invoice.user_id}`), payment.id);
     }
     // B4: Amount matching invoice ceiling
     const invoiceCents = toCents(invoice.total_amount);
     if (event.amountCents !== invoiceCents || toCents(payment.amount) !== invoiceCents) {
-      await updateWebhookEventStatus(tx, gatewayId, event.providerEventId, 'rejected', 'Amount mismatch', payment.id);
-      throw new ValidationError(`Webhook amount ${event.amountCents} does not match invoice total ${invoiceCents}`);
+      markTerminal(new ValidationError(`Webhook amount ${event.amountCents} does not match invoice total ${invoiceCents}`), payment.id);
     }
     // B5: Invoice / Order agreement
     if (
@@ -154,15 +184,7 @@ export async function processIncomingWebhook(
       invoice.currency !== order.currency ||
       invoice.total_amount !== order.total_amount
     ) {
-      await updateWebhookEventStatus(
-        tx,
-        gatewayId,
-        event.providerEventId,
-        'rejected',
-        'Order agreement mismatch',
-        payment.id
-      );
-      throw new ValidationError('Invoice fields do not match parent order');
+      markTerminal(new ValidationError('Invoice fields do not match parent order'), payment.id);
     }
 
     // D. State Machine Transitions
@@ -174,15 +196,9 @@ export async function processIncomingWebhook(
       }
 
       if (payment.status !== 'pending') {
-        await updateWebhookEventStatus(
-          tx,
-          gatewayId,
-          event.providerEventId,
-          'rejected',
-          `Cannot transition from ${payment.status}`,
-          payment.id
-        );
-        throw new ConflictError(`Payment ${payment.id} has status ${payment.status} and cannot be marked successful`);
+        // Terminal: a payment already failed/cancelled/refunded can never legitimately become
+        // successful via redelivery of the same event.
+        markTerminal(new ConflictError(`Payment ${payment.id} has status ${payment.status} and cannot be marked successful`), payment.id);
       }
 
       // 1. Atomic payment update
@@ -264,4 +280,21 @@ export async function processIncomingWebhook(
 
     return { received: true, status: 'ignored' };
   });
+  } catch (err) {
+    // The settlement transaction has rolled back. If the rejection was terminal, record the
+    // rejection durably NOW (separate committed write) so identical redeliveries short-circuit
+    // at the durable-rejection branch above with 200/{rejected} instead of re-executing.
+    const terminal = terminalInfo(err);
+    if (terminal) {
+      await updateWebhookEventStatus(
+        pool,
+        gatewayId,
+        event.providerEventId,
+        'rejected',
+        (err as Error).message ?? 'Terminal webhook rejection',
+        terminal.paymentId ?? undefined
+      );
+    }
+    throw err;
+  }
 }

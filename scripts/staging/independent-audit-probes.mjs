@@ -183,10 +183,10 @@ try {
   const adminAnon = (await call('GET', '/api/v1/admin/users', {})).status;
   probe('anonymous admin access is 401', adminAnon === 401, `status ${adminAnon}`);
 
-  // ---- P-9: webhook replay WITHOUT timestamp header (audit finding F-P1 live characterization) ----
-  // The sandbox gateway's freshness check only runs when x-cloudhost-timestamp is present.
-  // Replay a settled payment's identical signed payload with NO timestamp: the event store's
-  // idempotency must still prevent any second settlement. Live proof the finding is bounded.
+  // ---- P-9: Phase-5 hardening live proof (ex-finding P4-F1) ----
+  // The sandbox gateway now REQUIRES a fresh x-cloudhost-timestamp: an otherwise perfectly
+  // signed webbook with no timestamp must be refused (401). A *properly stamped* replay must
+  // still dedup idempotently with no second settlement.
   const initiated = await call('POST', `/api/v1/invoices/${invoiceId}/payments`, { token: tokenA3, body: { gateway: 'sandbox' } });
   const payment = initiated.json?.payment;
   const settleBody = JSON.stringify({
@@ -197,12 +197,13 @@ try {
   const hdrBase = { 'x-sandbox-signature': sign(settleBody) };
   const settle1 = await call('POST', '/api/v1/webhooks/sandbox', { raw: settleBody, headers: { ...hdrBase, 'x-cloudhost-timestamp': String(Date.now()) } });
   const ledgerBefore = (await call('GET', '/api/v1/billing/ledger', { token: tokenA3 })).json?.ledger?.length;
-  const settle2 = await call('POST', '/api/v1/webhooks/sandbox', { raw: settleBody, headers: hdrBase }); // NOTE: no timestamp header
+  const noTs = await call('POST', '/api/v1/webhooks/sandbox', { raw: settleBody, headers: hdrBase }); // hardening: must now FAIL
+  const stampedReplay = await call('POST', '/api/v1/webhooks/sandbox', { raw: settleBody, headers: { ...hdrBase, 'x-cloudhost-timestamp': String(Date.now()) } }); // stamped replay: dedup
   const ledgerAfter = (await call('GET', '/api/v1/billing/ledger', { token: tokenA3 })).json?.ledger?.length;
   const invoiceAfter = (await call('GET', `/api/v1/invoices/${invoiceId}`, { token: tokenA3 })).json?.invoice?.status;
-  probe('timestamp-omitted webhook replay: accepted as duplicate (idempotency holds), no second settlement',
-    settle1.status === 200 && settle2.status === 200 && ledgerBefore === ledgerAfter && invoiceAfter === 'paid',
-    `settle1 ${settle1.status}, no-ts replay ${settle2.status} status=${settle2.json?.status}, ledger ${ledgerBefore}→${ledgerAfter}, invoice ${invoiceAfter}`);
+  probe('P4-F1 closed live: UNSIGNED-timestamp webhook refused (401); stamped replay deduped; no second settlement',
+    settle1.status === 200 && noTs.status === 401 && stampedReplay.status === 200 && stampedReplay.json?.status === 'already_processed' && ledgerBefore === ledgerAfter && invoiceAfter === 'paid',
+    `settle1 ${settle1.status}, no-ts ${noTs.status} (expect 401), stamped replay ${stampedReplay.status} status=${stampedReplay.json?.status}, ledger ${ledgerBefore}→${ledgerAfter}, invoice ${invoiceAfter}`);
 
   // ---- P-10: bearer-API CSRF surface: no session cookies issued ----
   const loginHeaders = await fetch(`${BASE_URL}/api/auth/health`).catch(() => null);
