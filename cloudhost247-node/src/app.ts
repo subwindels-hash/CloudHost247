@@ -75,7 +75,7 @@ import { registerMarketingRoutes } from './routes/marketing';
 import { registerAdminTikTokRoutes } from './routes/admin-tiktok';
 import { registerTikTokRoutes } from './routes/tiktok';
 import { registerInboxRoutes } from './routes/inbox';
-import { registerAdminPlatformServiceRoutes } from './routes/admin-platform-services';
+import { cloudApplicationHostingRoutes } from './routes/cloud-application-hosting/index';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
 import type { Queryable } from './db/types';
@@ -253,6 +253,11 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerAdminCloudflareRoutes(instance, env, pool);
     await registerAiSupportRoutes(instance, env, pool);
 
+    // CLOUD APPLICATION HOSTING — Dokploy Community Edition integration
+    // Customer Dashboard Section: CLOUD APPLICATION HOSTING
+    // Transforms CloudHost247 into application hosting platform with Dokploy backend
+    await cloudApplicationHostingRoutes(instance, env);
+
     // AI Control Plane — the shared AI operating system (agent registry, gated tool executor,
     // approvals, events/workflows, executive board, copilots, customer AI transparency).
     await registerAiControlPlaneRoutes(instance, env, pool);
@@ -296,12 +301,15 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerAdminTikTokRoutes(instance, env, pool);
     await registerTikTokRoutes(instance, env, pool);
     await registerInboxRoutes(instance, env, pool);
-    await registerAdminPlatformServiceRoutes(instance, env, pool);
 
-    // The frontend (static assets + SPA fallback) MUST be registered inside this same
-    // encapsulated context. Hooks added by registerSecurityPlugins (helmet headers, CORS, rate
-    // limiting) do not propagate to a parent/sibling context, so registering these on the root
-    // instance served every HTML/JS/CSS response without CSP, HSTS, X-Frame-Options, etc.
+    // CLOUD APPLICATION HOSTING — Dokploy Community Edition integration
+    // Customer Dashboard Section: CLOUD APPLICATION HOSTING
+    // Transforms CloudHost247 into application hosting platform with Dokploy backend
+    await cloudApplicationHostingRoutes(instance, env);
+
+    // AI Control Plane — the shared AI operating system (agent registry, gated tool executor,
+    // approvals, events/workflows, executive board, copilots, customer AI transparency).
+    await registerAiControlPlaneRoutes(instance, env, pool);
     // Pinned by tests/unit/spa-security-headers.test.ts.
     if (serveFrontend) {
       await instance.register(fastifyStatic, {

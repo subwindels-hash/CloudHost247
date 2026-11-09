@@ -284,6 +284,12 @@ const envSchema = z.object({
   MARKETING_PROVIDER_PLAUSIBLE_TOKEN: z.string().min(8).optional(),
   MARKETING_PROVIDER_GOOGLE_TAG_MANAGER_TOKEN: z.string().min(8).optional(),
   NOTIFICATION_EMAIL_WEBHOOK_TOKEN: z.string().min(16).optional(),
+  
+  // --- Phase 6: Dokploy Community Edition Integration ---------------------------------------
+  // Backend deployment engine configuration. Server-to-server communication only.
+  // Keys stored in server-side secrets; never exposed to browser.
+  DOKPLOY_BASE_URL: z.string().url().optional(),
+  DOKPLOY_API_KEY: z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
