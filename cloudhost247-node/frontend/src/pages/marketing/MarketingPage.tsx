@@ -1,5 +1,6 @@
 import { BASE_CURRENCY } from '../../currency/display-currency';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { trackAnalyticsCatalog, trackAnalyticsSearch, trackAnalyticsSelect, useMarketing } from '../../lib/marketing';
 import { Link, useLocation } from 'react-router-dom';
 import { Icon, CheckIcon, ArrowIcon } from '../../components/ui/Icon';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../../components/CatalogStateBanner';
@@ -358,7 +359,8 @@ function planPrice(plan: PublicPlan) {
   return pricing ?? null;
 }
 
-function Catalog({ section }: { section: MarketingSection }) {
+export function Catalog({ section }: { section: MarketingSection }) {
+  const analytics = useMarketing();
   const catalog = useApiResource<CatalogListResponse>('/api/v1/catalog');
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const plans = useApiResource<ProductPlansResponse>(openSlug ? `/api/v1/catalog/products/${openSlug}/plans` : '');
@@ -368,6 +370,10 @@ function Catalog({ section }: { section: MarketingSection }) {
   // down to a blank screen. A missing array degrades to the honest empty state below.
   const products = catalog.status === 'success' ? (catalog.data?.products ?? []) : [];
   const planList = plans.status === 'success' ? (plans.data?.plans ?? []) : [];
+  const catalogData = catalog.status === 'success' ? catalog.data : null;
+  useEffect(() => {
+    if (catalogData && Array.isArray(catalogData.products) && analytics.analytics?.initialized) trackAnalyticsCatalog(catalogData.products.map(product => product.slug));
+  }, [catalogData, analytics.analytics?.initialized, analytics.consent?.preferences.analytics, analytics.consent?.decided]);
 
   return (
     <>
@@ -397,7 +403,7 @@ function Catalog({ section }: { section: MarketingSection }) {
                   <button
                     type="button"
                     className="ch-btn ch-btn--outline ch-btn--sm"
-                    onClick={() => setOpenSlug(openSlug === product.slug ? null : product.slug)}
+                    onClick={() => { if (openSlug !== product.slug) trackAnalyticsSelect(product.slug); setOpenSlug(openSlug === product.slug ? null : product.slug); }}
                     aria-expanded={openSlug === product.slug}
                   >
                     {openSlug === product.slug ? 'Hide plans' : 'View plans'}
@@ -470,7 +476,7 @@ interface SearchEntry {
   description: string;
 }
 
-function SiteSearch({ section }: { section: MarketingSection }) {
+export function SiteSearch({ section }: { section: MarketingSection }) {
   const [query, setQuery] = useState('');
   const entries: SearchEntry[] = useMemo(() => {
     const list: SearchEntry[] = [];
@@ -498,7 +504,7 @@ function SiteSearch({ section }: { section: MarketingSection }) {
   return (
     <>
       <h2>{section.heading}</h2>
-      <form className="ch-search-box" role="search" onSubmit={(event) => event.preventDefault()}>
+      <form className="ch-search-box" role="search" onSubmit={(event) => { event.preventDefault(); if (needle.length >= 2) trackAnalyticsSearch(); }}>
         <label className="ch-visually-hidden" htmlFor="ch-site-search">Search services, tools and documents</label>
         <input
           id="ch-site-search"
@@ -508,9 +514,10 @@ function SiteSearch({ section }: { section: MarketingSection }) {
           placeholder="Try “vps”, “dns”, “refund”, “deployment”…"
           autoComplete="off"
         />
+        <button className="ch-btn ch-btn--outline" type="submit">Search</button>
       </form>
       <p className="ch-muted" style={{ fontSize: '0.82rem', marginTop: '10px' }}>
-        Searched in your browser — the query is never sent to the server.
+        Searched in your browser — the query is never sent to the server. With analytics permission, submitting a search may record an event without the query.
       </p>
       {needle.length >= 2 ? (
         results.length > 0 ? (

@@ -3,7 +3,10 @@ import { PGlite } from '@electric-sql/pglite';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PgliteClient } from '../../database/db-client';
 import { migrateUp } from '../../database/migrate';
-import { loadEnv } from '../../src/config/env';
+import { loadEnv, resetEnvCache } from '../../src/config/env';
+import { defaultGa4 } from '../../src/marketing/ga4-config';
+import { encryptSecret } from '../../src/lib/crypto';
+import { getKeyRing } from '../../src/lib/keyring';
 import { buildApp } from '../../src/app';
 import { createProduct } from '../../src/db/catalog-products';
 import { createPlan } from '../../src/db/catalog-plans';
@@ -908,6 +911,27 @@ describe('Phase 5D Webhook Pipeline API (POST /api/v1/webhooks/:gateway)', () =>
       const ledgerRows = (await db.query("SELECT * FROM billing_ledger WHERE invoice_id=$1 AND entry_type='payment'", [invoiceId])).rows;
       expect(ledgerRows).toHaveLength(1);
       await app.close();
+    });
+
+    it('never queues GA4 for duplicate signed but unreviewed Stripe webhook payments even with attribution', async () => {
+      const oldKey=process.env.CREDENTIAL_ENCRYPTION_KEY, oldDb=process.env.DATABASE_URL, oldJwt=process.env.JWT_SECRET;
+      process.env.CREDENTIAL_ENCRYPTION_KEY='a'.repeat(64); process.env.DATABASE_URL=env.DATABASE_URL; process.env.JWT_SECRET=env.JWT_SECRET; resetEnvCache();
+      const app=buildApp({...env,GA4_PURCHASE_DELIVERY_ENABLED:true,GA4_PURCHASE_STAGING_AUTHORIZED:true,GA4_PURCHASE_MEASUREMENT_ID:'G-1234567890',GA4_PURCHASE_API_SECRET:'dummy-secret'}, {serveFrontend:false,pool:db});
+      try {
+        const {orderId,payment,providerReference}=await createFixture('stripe','19.99','USD');
+        const session=randomUUID();
+        await db.query("INSERT INTO marketing_consent_sessions(id,token_hash,decided,preferences) VALUES($1,$2,true,$3)",[session,'a'.repeat(64),JSON.stringify({essential:true,analytics:true,marketing:false})]);
+        await db.query("UPDATE marketing_integrations SET enabled=true,website_domain='localhost',configuration=$1 WHERE provider_key='google_analytics'",[JSON.stringify({...defaultGa4,enabled:true,websiteDomain:'localhost',measurementId:'G-1234567890',streamReviewed:true,userDataReviewed:true})]);
+        const product=await createProduct(db,{id:randomUUID(),slug:'web-hosting',name:'Hosting',productType:'hosting'});
+        await db.query("INSERT INTO order_items(id,order_id,product_id,product_name_snapshot,plan_name_snapshot,billing_period,quantity,unit_price_amount,currency,line_total_amount) VALUES($1,$2,$3,'Hosting','Starter','monthly',1,19.99,'USD',19.99)",[randomUUID(),orderId,product.id]);
+        await db.query("INSERT INTO ga4_checkout_contexts(order_id,consent_session_id,config_revision,measurement_id,client_id_ciphertext) VALUES($1,$2,1,'G-1234567890',$3)",[orderId,session,encryptSecret(getKeyRing(),'123.456')]);
+        const payload=JSON.stringify({id:`evt_ga4_${randomUUID()}`,type:'payment_intent.succeeded',created:Math.floor(Date.now()/1000),data:{object:{id:providerReference,amount:1999,currency:'usd',metadata:{payment_id:payment.id}}}});
+        const timestamp=Math.floor(Date.now()/1000), signature=createHmac('sha256',STRIPE_SECRET).update(`${timestamp}.${payload}`).digest('hex');
+        const req={method:'POST' as const,url:'/api/v1/webhooks/stripe',headers:{'content-type':'application/json','stripe-signature':`t=${timestamp},v1=${signature}`},payload};
+        expect((await app.inject(req)).json().status).toBe('processed');
+        expect((await app.inject(req)).json().status).toBe('already_processed');
+        expect((await db.query('SELECT * FROM ga4_purchase_outbox WHERE order_id=$1',[orderId])).rows).toHaveLength(0);
+      } finally { await app.close(); if(oldKey===undefined) delete process.env.CREDENTIAL_ENCRYPTION_KEY; else process.env.CREDENTIAL_ENCRYPTION_KEY=oldKey; if(oldDb===undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL=oldDb; if(oldJwt===undefined) delete process.env.JWT_SECRET; else process.env.JWT_SECRET=oldJwt; resetEnvCache(); }
     });
 
     it('18. commits exactly one transition under concurrent 8-way burst delivery', async () => {

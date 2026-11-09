@@ -1,3 +1,4 @@
+import { ga4CheckoutContext } from '../marketing/ga4-checkout-context';
 import { checkoutConsentContext } from '../marketing/consent-service';
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
@@ -168,7 +169,8 @@ export async function registerCommerceRoutes(app: FastifyInstance, env: Env, ove
   app.post('/api/v1/orders', async (request, reply) => {
     const auth = await authenticate(request, env, pool);
     const marketingContext = await checkoutConsentContext(pool, request, env);
-    const order = await checkoutCart(pool, auth.userId, randomUUID, marketingContext);
+    const analyticsContext = await ga4CheckoutContext(pool, request);
+    const order = await checkoutCart(pool, auth.userId, randomUUID, marketingContext, analyticsContext);
     reply.code(201);
     return { order };
   });

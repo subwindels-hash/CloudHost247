@@ -20,6 +20,7 @@ describe('public contact form', () => {
       expect(bad.statusCode).toBe(400);
       const response = await app.inject({ method: 'POST', url: '/api/v1/contact', payload });
       expect(response.statusCode).toBe(201);
+      expect(response.json().received).toBe(true);
       const { rows } = await db.query<{ subject: string; contact_email: string; body: string; unread_for_staff: number }>(
         `SELECT c.subject, c.contact_email, c.unread_for_staff, m.body FROM inbox_conversations c JOIN inbox_messages m ON m.conversation_id = c.id`
       );

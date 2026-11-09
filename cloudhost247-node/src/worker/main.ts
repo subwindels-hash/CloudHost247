@@ -1,3 +1,4 @@
+import { drainGa4Purchases } from '../marketing/ga4-purchase-delivery';
 import 'dotenv/config';
 import { loadEnv } from '../config/env';
 import { getPool, closePool } from '../db/pool';
@@ -132,16 +133,7 @@ async function runWorkerCycle(
   schedule: WorkerSchedule,
   logger: WorkerLogger,
   concurrency: number,
-  authEmailEnv: Pick<
-    ReturnType<typeof loadEnv>,
-    | 'APP_URL'
-    | 'JWT_SECRET'
-    | 'NODE_ENV'
-    | 'FX_FEED_URL'
-    | 'FX_FEED_TOKEN'
-    | 'EMAIL_TRACE_RETENTION_DAYS'
-    | 'EMAIL_TRACE_COLLECTION_RUN_RETENTION_DAYS'
-  >
+  authEmailEnv: ReturnType<typeof loadEnv>
 ): Promise<WorkerCycleOutcome> {
   let didWork = false;
   const recovered = await recoverOrphanedJobs(ctx);
@@ -218,8 +210,11 @@ async function runWorkerCycle(
   if (now - schedule.lastMarketingDrain >= NOTIFICATION_OUTBOX_INTERVAL_MS) {
     schedule.lastMarketingDrain = now;
     const marketing = await drainCapiOutbox(ctx.db, { workerId: ctx.workerId });
-    const tiktok = await drainTikTokOutbox(ctx.db, { workerId: ctx.workerId });
-    if (tiktok.claimed > 0 || tiktok.failed > 0) logger.log(`[worker:${ctx.workerId}] TikTok outbox: ${tiktok.delivered} API-accepted, ${tiktok.retried} retrying, ${tiktok.failed} dead-letter, ${tiktok.cancelled} cancelled`);
+    try {
+      const ga = await drainGa4Purchases(ctx.db, authEmailEnv);
+      didWork ||= ga.claimed > 0 || ga.unknown > 0;
+      if (ga.claimed || ga.unknown) logger.log(`[worker:${ctx.workerId}] GA4 purchase outbox: ${ga.httpAccepted} HTTP-accepted, ${ga.unknown} unknown, ${ga.cancelled} cancelled (not Google verification)`);
+    } catch { logger.error(`[worker:${ctx.workerId}] GA4 purchase outbox unavailable`); }
     const marketingWork = marketing.claimed > 0 || marketing.failed > 0;
     didWork ||= marketingWork;
     if (marketingWork) logger.log(`[worker:${ctx.workerId}] Meta outbox: ${marketing.delivered} API-accepted, ${marketing.retried} retrying, ${marketing.failed} dead-letter, ${marketing.cancelled} cancelled`);

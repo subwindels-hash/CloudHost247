@@ -125,7 +125,7 @@ export async function registerAdminBillingRoutes(app: FastifyInstance, env: Env,
     const payment = await confirmManualPayment(pool, auth.userId, id, randomUUID, {
       ipAddress: request.ip,
       userAgent: request.headers['user-agent'] ?? null,
-    });
+    }, env);
 
     return { payment };
   });

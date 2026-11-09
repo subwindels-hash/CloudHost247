@@ -1,26 +1,49 @@
 {
-  "product": "CloudHost247",
-  "releaseCandidate": "phase-16-rc1",
-  "generatedAt": "2026-11-09T16:05:00Z",
-  "commit": "9c0d38ea+phase16",
-  "branch": "arena/fe9b2088-cloudhost247",
-  "components": {
-    "api": { "package": "cloudhost247-node", "version": "0.1.0", "migrations": 94, "tables": 221 },
-    "frontend": { "embedded": "cloudhost247-node/frontend (Vite SPA)", "buildCheck": "tsc exit 0" },
-    "whmcsModules": ["modules/servers/cloudhost247_email*", "modules/servers/phoneservices_*", "modules/addons/phoneservices", "modules/servers/* (RDP, Smtphosting, lteproxy, soyoustart)"]
+ "product": "CloudHost247",
+ "releaseCandidate": "phase-16-rc1",
+ "generatedAt": "2026-11-09T16:05:00Z",
+ "commit": "9c0d38ea+phase16",
+ "branch": "arena/fe9b2088-cloudhost247",
+ "components": {
+  "api": {
+   "package": "cloudhost247-node",
+   "version": "0.1.0",
+   "migrations": 96,
+   "tables": 221
   },
-  "evidenceChain": {
-    "phase10_reproduction": "docs/staging/phase10-reproduction-run-2026-11-09.log (164/164)",
-    "realPg": "docs/staging/phase10-realpg-evidence-2026-11-09.json (92→94 migrations, 6/6 probes)",
-    "apiOnRealPg": "docs/staging/phase11-api-realpg-smoke-2026-11-09.json (5/5)",
-    "financialConcurrency": "docs/staging/FINANCIAL-CONCURRENCY-TEST-RESULTS.json (8/8, hardened semantics)",
-    "adversarial": "tests/integration/phase13-adversarial.test.ts (6/6) + phase16-idempotency-hardening (4/4)",
-    "testsThisPhase": "27/27 targeted financial-regression + migrate inventory 94"
+  "frontend": {
+   "embedded": "cloudhost247-node/frontend (Vite SPA)",
+   "buildCheck": "tsc exit 0"
   },
-  "gates": {
-    "production": "NO-GO",
-    "limitedRelease": "CONDITIONAL GO-eligible (manual billing, COMING-SOON checkout-disabled)",
-    "openP1Tasks": ["CT-01","CT-02","CT-03(partial)","CT-04","CT-05","CT-06","CT-07","CT-08"],
-    "independentSecondaryReview": "NOT-APPOINTED"
-  }
+  "whmcsModules": [
+   "modules/servers/cloudhost247_email*",
+   "modules/servers/phoneservices_*",
+   "modules/addons/phoneservices",
+   "modules/servers/* (RDP, Smtphosting, lteproxy, soyoustart)"
+  ]
+ },
+ "evidenceChain": {
+  "phase10_reproduction": "docs/staging/phase10-reproduction-run-2026-11-09.log (164/164)",
+  "realPg": "docs/staging/phase10-realpg-evidence-2026-11-09.json (92\u219294 migrations, 6/6 probes)",
+  "apiOnRealPg": "docs/staging/phase11-api-realpg-smoke-2026-11-09.json (5/5)",
+  "financialConcurrency": "docs/staging/FINANCIAL-CONCURRENCY-TEST-RESULTS.json (8/8, hardened semantics)",
+  "adversarial": "tests/integration/phase13-adversarial.test.ts (6/6) + phase16-idempotency-hardening (4/4)",
+  "testsThisPhase": "27/27 targeted financial-regression + migrate inventory 94"
+ },
+ "gates": {
+  "production": "NO-GO",
+  "limitedRelease": "CONDITIONAL GO-eligible (manual billing, COMING-SOON checkout-disabled)",
+  "openP1Tasks": [
+   "CT-01",
+   "CT-02",
+   "CT-03(partial)",
+   "CT-04",
+   "CT-05",
+   "CT-06",
+   "CT-07",
+   "CT-08"
+  ],
+  "independentSecondaryReview": "NOT-APPOINTED"
+ },
+ "postPhase16Notes": "PR #113 merge: Phase-14/16 migrations renumbered 0093->0097, 0094->0098 (version collision with main\u2019s GA4/forensics 0093-0096). See docs/ops/MIGRATION-RENUMBER-0093-0094.md."
 }
