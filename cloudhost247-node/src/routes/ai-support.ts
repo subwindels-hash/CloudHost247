@@ -269,7 +269,34 @@ async function escalate(
 export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, override?: Queryable) {
   const db = override ?? getPool(env);
 
-  app.post('/api/v1/ai-support/conversations', async (request, reply) => {
+  /**
+   * AI endpoints are the only place a single anonymous request triggers retrieval and writes to the
+   * database, so they get their own buckets rather than relying on the global 300/minute.
+   *
+   * The global limiter keys on `ip|route`, so without these a client could open 300 conversations
+   * and post 300 messages per minute; the audit measured exactly that. These ceilings are set for
+   * what a person actually does (a conversation is a burst of a few dozen turns at most) and are
+   * still well inside the global window.
+   *
+   * Authenticated callers are keyed by account ID, anonymous visitors by IP. Keying by account and
+   * not only by IP means a signed-in customer behind a shared office NAT is not throttled by
+   * colleagues, while an anonymous attacker cannot escape the IP bucket by dropping the token.
+   */
+  const aiRateKey = async (request: FastifyRequest): Promise<string> => {
+    // Identity is resolved the same way the handler resolves it, but a failure here must never fall
+    // back to a shared bucket: an unverifiable token is treated as anonymous (its own IP bucket).
+    try {
+      const auth = await optionalAuth(request, env, db);
+      return auth?.userId ? `user:${auth.userId}` : `ip:${request.ip}`;
+    } catch {
+      return `ip:${request.ip}`;
+    }
+  };
+
+  app.post('/api/v1/ai-support/conversations', {
+    // Opening conversations: a person opens one, occasionally a few. Ten a minute is generous.
+    config: { rateLimit: { max: 10, timeWindow: '1 minute', keyGenerator: aiRateKey } },
+  }, async (request, reply) => {
     const auth = await optionalAuth(request, env, db);
     const token = randomBytes(32).toString('base64url');
     const conversationId = randomUUID();
@@ -303,7 +330,11 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
     return { conversation: { ...row, access_token_hash: undefined }, messages: messages.rows };
   });
 
-  app.post<{ Params: { id: string } }>('/api/v1/ai-support/conversations/:id/messages', async (request) => {
+  app.post<{ Params: { id: string } }>('/api/v1/ai-support/conversations/:id/messages', {
+    // Each message triggers retrieval. 30/minute is far above human typing speed and still bounds
+    // the cost one client can impose.
+    config: { rateLimit: { max: 30, timeWindow: '1 minute', keyGenerator: aiRateKey } },
+  }, async (request) => {
     const input = parse(messageSchema, request.body);
     const { row, auth } = await getCustomerConversation(db, request, env, request.params.id);
 

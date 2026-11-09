@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../db/types';
 import { chunkDocument } from './chunking';
+import { releaseWorkerCycleLease, tryAcquireWorkerCycleLease } from '../worker/worker-lease';
 import {
   discoverWebsiteDocuments,
   fingerprintOf,
@@ -52,7 +53,12 @@ export interface SyncResult {
   removed: number;
   failed: number;
   durationMs: number;
-  status: 'succeeded' | 'partial' | 'failed';
+  status: 'succeeded' | 'partial' | 'failed' | 'busy';
+  /**
+   * True when another sync already held the lock, so this call did no work and reported nothing
+   * about the corpus. A `busy` result must never be read as "0 documents changed".
+   */
+  busy?: boolean;
   notes: string[];
 }
 
@@ -258,10 +264,55 @@ async function syncDocument(
  * Full reconciliation. This is the operation the worker runs and the operation the administrator's
  * "Reindex everything" button runs — the difference is only who is recorded as the trigger.
  */
+/**
+ * Lease name for the website-knowledge sync. Reuses the platform's existing database-backed
+ * worker lease (0058) rather than introducing a second locking mechanism: it already provides
+ * expiry, crash recovery and holder-checked release.
+ */
+export const KNOWLEDGE_SYNC_LEASE_NAME = 'ai-knowledge-sync';
+const KNOWLEDGE_SYNC_LEASE_MS = 120_000;
+
 export async function syncWebsiteKnowledge(db: Queryable, options: SyncOptions = {}): Promise<SyncResult> {
   const startedAt = Date.now();
   const trigger = options.trigger ?? 'manual';
   const notes: string[] = [];
+
+  // Serialise the whole reconciliation. Two overlapping runs used to interleave their
+  // read-then-write passes and report a misleading `failed=2` for what were really upsert
+  // conflicts — the corpus healed, but the ledger recorded failures that never happened.
+  // A caller that cannot get the lease does no work and says so, instead of reporting zeros.
+  const lease = { name: KNOWLEDGE_SYNC_LEASE_NAME, holder: randomUUID(), leaseMs: KNOWLEDGE_SYNC_LEASE_MS };
+  if (!(await tryAcquireWorkerCycleLease(db, lease))) {
+    return {
+      runId: 'not-started',
+      discovered: 0,
+      indexed: 0,
+      unchanged: 0,
+      skipped: 0,
+      excluded: 0,
+      removed: 0,
+      failed: 0,
+      durationMs: Date.now() - startedAt,
+      status: 'busy',
+      busy: true,
+      notes: ['Another website-knowledge sync is already running, so this run did nothing.'],
+    };
+  }
+
+  try {
+    return await runSync(db, options, trigger, notes, startedAt);
+  } finally {
+    await releaseWorkerCycleLease(db, lease).catch(() => undefined);
+  }
+}
+
+async function runSync(
+  db: Queryable,
+  options: SyncOptions,
+  trigger: SyncTrigger,
+  notes: string[],
+  startedAt: number
+): Promise<SyncResult> {
   const runId = await startRun(db, trigger, options.triggeredBy ?? null);
 
   let discovery: DiscoveryResult;

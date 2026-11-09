@@ -204,3 +204,65 @@ describe('audit: an unreadable page fails loudly instead of indexing nothing', (
     }
   }, 120_000);
 });
+
+describe('audit: concurrent syncs are serialised', () => {
+  it('reports busy, and does no work, while another sync holds the lock', async () => {
+    const { PGlite } = await import('@electric-sql/pglite');
+    const { PgliteClient } = await import('../../database/db-client');
+    const { migrateUp } = await import('../../database/migrate');
+    const { syncWebsiteKnowledge, KNOWLEDGE_SYNC_LEASE_NAME } = await import('../../src/ai-website/knowledge-sync');
+    const { tryAcquireWorkerCycleLease, releaseWorkerCycleLease } = await import('../../src/worker/worker-lease');
+
+    const db = new PGlite();
+    await migrateUp(new PgliteClient(db), { isProduction: false });
+    try {
+      // Hold the lease the way a competing process would. Asserting on two racing Promise.all
+      // calls would only be deterministic if they always overlapped, which they do not.
+      const holder = { name: KNOWLEDGE_SYNC_LEASE_NAME, holder: 'test-competitor', leaseMs: 60_000 };
+      expect(await tryAcquireWorkerCycleLease(db, holder)).toBe(true);
+
+      const blocked = await syncWebsiteKnowledge(db, { trigger: 'event' });
+      expect(blocked.busy).toBe(true);
+      expect(blocked.status).toBe('busy');
+      expect(blocked.notes.join(' ')).toMatch(/already running/i);
+      // Crucially it must not report zeros as though it had run.
+      expect(blocked.discovered).toBe(0);
+      expect(blocked.runId).toBe('not-started');
+
+      // It really did no work: no sources were written while the lock was held.
+      const sources = await db.query<{ n: number }>(`SELECT count(*)::int AS n FROM ai_knowledge_sources`);
+      expect(sources.rows[0]!.n).toBe(0);
+
+      // Releasing lets the next sync proceed normally.
+      await releaseWorkerCycleLease(db, holder);
+      const after = await syncWebsiteKnowledge(db, { trigger: 'manual' });
+      expect(after.busy).toBeFalsy();
+      expect(after.status).toBe('succeeded');
+      expect(after.discovered).toBeGreaterThan(300);
+      expect(after.failed).toBe(0);
+    } finally {
+      await db.close();
+    }
+  }, 180_000);
+
+  it('releases the lock even when the sync itself throws', async () => {
+    const { PGlite } = await import('@electric-sql/pglite');
+    const { PgliteClient } = await import('../../database/db-client');
+    const { migrateUp } = await import('../../database/migrate');
+    const { syncWebsiteKnowledge, KNOWLEDGE_SYNC_LEASE_NAME } = await import('../../src/ai-website/knowledge-sync');
+    const db = new PGlite();
+    await migrateUp(new PgliteClient(db), { isProduction: false });
+    try {
+      // A discovery result that is structurally wrong makes the sync fail on its own terms.
+      await syncWebsiteKnowledge(db, { trigger: 'manual', discovery: null as never }).catch(() => undefined);
+      const held = await db.query<{ n: number }>(
+        `SELECT count(*)::int AS n FROM worker_cycle_leases WHERE name = $1`,
+        [KNOWLEDGE_SYNC_LEASE_NAME]
+      );
+      // A throw must not strand the lock, or every later sync would report busy forever.
+      expect(held.rows[0]!.n).toBe(0);
+    } finally {
+      await db.close();
+    }
+  }, 180_000);
+});
