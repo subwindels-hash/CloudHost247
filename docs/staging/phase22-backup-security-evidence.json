@@ -1,0 +1,34 @@
+{
+ "generatedAt": "2026-11-09T17:00:23.541Z",
+ "chain": "pg_dump(custom) -> AES-256-GCM envelope (same format as src/lib/crypto.ts) -> decrypt -> pg_restore -> verify",
+ "environment": "authorized non-production staging (unix socket), process-local key custody (no cloud account)",
+ "dump": {
+  "format": "custom (-Fc)",
+  "sha256": "fe17068ec7381a940ca09614681e14aa421730be23df611c03105507d46969da",
+  "durationMs": 143
+ },
+ "encryptedArtifact": {
+  "sha256": "aee91216b251943fd0027829ee708fbd6520d5e168d132e066c1b6f33e6cfa28",
+  "lengthInMTtiveCipher": true,
+  "encryptedIsNotPlaintext": true
+ },
+ "rotationCompatibility": true,
+ "tamperFailsClosed": true,
+ "integrityChecksumMatch": true,
+ "restore": {
+  "target": "clean fresh database (dropped post-run)",
+  "durationMs": 1445,
+  "success": true
+ },
+ "verification": {
+  "tables": {
+   "source": 221,
+   "restored": 221,
+   "match": true
+  },
+  "migrationsAndChecksumsMatch": true,
+  "financialTablePresent": true
+ },
+ "retentionInvariant": "Envelopes encrypted under an older ring version remain decryptable when that version is retained in the ring; version is pinned inside the envelope.",
+ "allPassed": true
+}
