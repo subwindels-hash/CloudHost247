@@ -52,7 +52,7 @@ describe('canonical Meta Pixel configuration', () => {
     expect((await save(1, { testMode: true, testEventCode: null })).statusCode).toBe(400);
     expect((await save(1, { unknown: true })).statusCode).toBe(400);
     expect((await save(99)).statusCode).toBe(409);
-    expect((await db.query('SELECT revision,enabled FROM marketing_integrations')).rows[0]).toEqual({ revision: 1, enabled: false });
+    expect((await db.query("SELECT revision,enabled FROM marketing_integrations WHERE provider_key='meta_pixel'")).rows[0]).toEqual({ revision: 1, enabled: false });
   });
   it('saves, tests honestly, detects stale writes, audits and resets only with confirmation', async () => {
     const saved = await save(1, { testMode: true, testEventCode: 'TEST123' });
@@ -93,7 +93,7 @@ describe('canonical Meta Pixel configuration', () => {
     await db.exec(`CREATE FUNCTION reject_marketing_audit() RETURNS trigger AS $$ BEGIN IF NEW.resource_type='marketing_integration' THEN RAISE EXCEPTION 'audit unavailable'; END IF; RETURN NEW; END; $$ LANGUAGE plpgsql;
       CREATE TRIGGER reject_marketing_audit BEFORE INSERT ON audit_logs FOR EACH ROW EXECUTE FUNCTION reject_marketing_audit();`);
     expect((await save(1)).statusCode).toBe(500);
-    expect((await db.query('SELECT revision,enabled FROM marketing_integrations')).rows[0]).toEqual({ revision: 1, enabled: false });
+    expect((await db.query("SELECT revision,enabled FROM marketing_integrations WHERE provider_key='meta_pixel'")).rows[0]).toEqual({ revision: 1, enabled: false });
   });
   it('fails closed when no encryption key is available', async () => {
     const old = process.env.CREDENTIAL_ENCRYPTION_KEY;

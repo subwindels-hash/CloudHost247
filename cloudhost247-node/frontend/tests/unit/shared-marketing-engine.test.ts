@@ -10,7 +10,7 @@ const source = readFileSync(resolve(__dirname, '../../../../shared/site/marketin
 const bootstrap = (marketing = false, decided = false) => ({
   configuration: { enabled: true, pixelId: '123456789012345', revision: 1, testMode: false, consentPolicy: 'global_opt_in' },
   googleAds: { enabled: false, destination: null, remarketingEnabled: false, actions: null, defaultCurrency: null, diagnostic: 'disabled' },
-  consent: { marketingGranted: marketing, decided, preferences: { essential: true, analytics: false, marketing }, csrfToken: 'csrf-private', policyVersion: 1 },
+  consent: { marketingGranted: marketing, decided, preferences: { essential: true, analytics: false, marketing }, csrfToken: 'csrf-private', policyVersion: 1, expiresAt: '2099-01-01T00:00:00.000Z' },
 });
 
 describe('canonical shared browser marketing engine', () => {
@@ -108,7 +108,7 @@ describe('canonical shared browser marketing engine', () => {
     expect(calls[calls.length - 1]).toEqual(['consent', 'revoke']);
   });
   it('preserves legacy GA4 under analytics consent and holds GTM until both analytics and advertising consent', async () => {
-    response = bootstrap(false, false); response.consent.preferences.analytics = true;
+    response = bootstrap(false, true); response.consent.preferences.analytics = true;
     await engine().initialize({ apiBase: '/api/v1/marketing', window: dom.window, ga4Id: 'G-TEST12345', gtmId: 'GTM-AB12CDE' });
     expect(dom.window.document.getElementById('ch247-google-tag')).not.toBeNull();
     expect(dom.window.document.getElementById('ch247-google-tag-manager')).toBeNull();

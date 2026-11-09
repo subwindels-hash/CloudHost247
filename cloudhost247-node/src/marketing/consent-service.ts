@@ -14,7 +14,7 @@ export const CONSENT_MAX_AGE_SECONDS = 180 * 24 * 60 * 60;
 const OPT_IN_COUNTRIES = new Set(['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IS','IE','IT','LV','LI','LT','LU','MT','NL','NO','PL','PT','RO','SK','SI','ES','SE','GB','CH','NG','BR','ZA','KE','GH','CA','AU','NZ','JP','KR','IN','AR','CL','CO','TH','VN']);
 export interface ConsentRow {
   id: string; token_hash: string; preferences: Preferences; decided: boolean;
-  jurisdiction: string | null; policy_version: number; expires_at: string; updated_at: string;
+  jurisdiction: string | null; policy_version: number; expires_at: string; updated_at: string; ga4_consent_revision: number;
 }
 export interface ConsentContext { row: ConsentRow; token: string; csrfToken: string }
 export function hashConsentToken(token: string) { return createHash('sha256').update(token).digest('hex'); }
@@ -77,7 +77,7 @@ export function consentDTO(context: ConsentContext, policy: string) {
     decided: current && row.decided, marketingGranted: consentGranted(row),
     jurisdiction: row.jurisdiction, jurisdictionSource: row.jurisdiction ? 'verified_network_geo_advisory' : 'unknown',
     requiresOptIn: requiresOptIn(policy, row.jurisdiction), policyVersion: CONSENT_POLICY_VERSION,
-    expiresAt: row.expires_at, updatedAt: row.updated_at, csrfToken: context.csrfToken,
+    expiresAt: row.expires_at, updatedAt: row.updated_at, analyticsRevision: row.ga4_consent_revision, csrfToken: context.csrfToken,
   };
 }
 export function assertConsentMutation(request: FastifyRequest, context: ConsentContext, env: Env) {
@@ -109,8 +109,22 @@ export async function saveConsent(pool: Queryable, token: string, action: string
     const row = (await tx.query<ConsentRow>('SELECT * FROM marketing_consent_sessions WHERE token_hash=$1 AND expires_at>now() FOR UPDATE', [hashConsentToken(token)])).rows[0];
     if (!row) throw new ForbiddenError('Cookie preference session expired. Reload preferences.');
     const previouslyGranted = consentGranted(row);
-    const { rows } = await tx.query<ConsentRow>(`UPDATE marketing_consent_sessions SET preferences=$1,decided=true,policy_version=$2,updated_at=now() WHERE id=$3 RETURNING *`, [JSON.stringify(preferences), CONSENT_POLICY_VERSION, row.id]);
+    const { rows } = await tx.query<ConsentRow>(`UPDATE marketing_consent_sessions SET preferences=$1,decided=true,policy_version=$2,ga4_consent_revision=ga4_consent_revision+1,updated_at=now() WHERE id=$3 RETURNING *`, [JSON.stringify(preferences), CONSENT_POLICY_VERSION, row.id]);
     await tx.query(`INSERT INTO marketing_consent_history(id,session_id,action,preferences,jurisdiction,policy_version) VALUES($1,$2,$3,$4,$5,$6)`, [randomUUID(),row.id,action,JSON.stringify(preferences),row.jurisdiction,CONSENT_POLICY_VERSION]);
+    // Withdrawn analytics cannot remain attributable, even if the visitor later re-consents.
+    if (!preferences.analytics) {
+      // A sending claim may already be in flight. Its outcome is unknown, not cancelled;
+      // keep the claim token briefly so the same worker can record a response if one arrives.
+      // The sender's final eligibility check requires status=sending, so withdrawal before
+      // dispatch still prevents a request. No unknown row is automatically retried.
+      await tx.query(`UPDATE ga4_purchase_outbox SET
+        status=CASE WHEN status='sending' THEN 'unknown' ELSE 'cancelled' END,updated_at=now(),
+        claim_token=CASE WHEN status='sending' THEN claim_token ELSE NULL END,
+        lease_until=CASE WHEN status='sending' THEN lease_until ELSE NULL END
+        WHERE status IN ('queued','sending') AND order_id IN (SELECT order_id FROM ga4_checkout_contexts WHERE consent_session_id=$1)`, [row.id]);
+      await tx.query('DELETE FROM ga4_checkout_contexts WHERE consent_session_id=$1', [row.id]);
+      await tx.query('DELETE FROM ga4_browser_ids WHERE consent_session_id=$1', [row.id]);
+    }
     if (previouslyGranted && !preferences.marketing) await tx.query(`UPDATE marketing_delivery_outbox SET status='cancelled',worker_id=NULL,lease_until=NULL,last_error='Marketing consent withdrawn',updated_at=now()
       WHERE id IN (SELECT o.id FROM marketing_delivery_outbox o JOIN marketing_events e ON e.id=o.event_id WHERE e.session_id=$1 AND o.status IN ('queued','retry','processing'))`, [row.id]);
     return rows[0]!;

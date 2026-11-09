@@ -4,7 +4,7 @@ import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogS
 import { ApproxAmount } from '../components/ApproxAmount';
 import { useApiResource } from '../lib/useApiResource';
 import { usePageMeta } from '../lib/usePageMeta';
-import { trackMarketing } from '../lib/marketing';
+import { trackAnalyticsCatalog, trackAnalyticsItem, trackAnalyticsSelect, trackMarketing, useMarketing } from '../lib/marketing';
 import { formatPrice, type CatalogListResponse, type ProductPlansResponse } from '../lib/catalog-types';
 import { money, titleCase, type PlatformPlan } from '../lib/platform-api';
 
@@ -21,6 +21,11 @@ const PLATFORM_SERVICES: Record<string, string> = {
 export function ServicePlansIndex() {
   usePageMeta('Service plans', 'Browse published CloudHost247 service plans and pricing.');
   const catalog = useApiResource<CatalogListResponse>('/api/v1/catalog/products');
+  const analytics = useMarketing();
+  const catalogData = catalog.status === 'success' ? catalog.data : null;
+  useEffect(() => {
+    if (catalogData && analytics.analytics?.initialized) trackAnalyticsCatalog(catalogData.products.filter(product => product.available).map(product => product.slug));
+  }, [catalogData, analytics.analytics?.initialized, analytics.consent?.preferences.analytics, analytics.consent?.decided]);
   return (
     <main className="ch247-page ch247-page--wide ch247-stack">
       <div className="ch247-card">
@@ -38,7 +43,7 @@ export function ServicePlansIndex() {
               <h3>{product.name}</h3>
               {product.description && <p>{product.description}</p>}
               <p className="ch247-page__hint">{product.available ? 'View published plans and prices' : 'Not currently available'}</p>
-              <Link className="ch247-button ch247-button--small" to={`/service-plans/catalog/${encodeURIComponent(product.slug)}`}>View plans</Link>
+              <Link className="ch247-button ch247-button--small" to={`/service-plans/catalog/${encodeURIComponent(product.slug)}`} onClick={() => { if (product.available) trackAnalyticsSelect(product.slug); }}>View plans</Link>
             </article>
           ))}
         </div>}
@@ -61,11 +66,15 @@ export function ServicePlansIndex() {
 
 export function CatalogServicePlansPage() {
   const { slug = '' } = useParams();
+  const analytics = useMarketing();
   usePageMeta('Service plans', 'Explore published service plans.');
   const valid = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
   const result = useApiResource<ProductPlansResponse>(`/api/v1/catalog/products/${encodeURIComponent(valid ? slug : 'invalid')}/plans`);
   const catalogData = result.status === 'success' ? result.data : null;
   useEffect(() => { if (!catalogData?.product.available) return; const product = catalogData.product; trackMarketing('ViewContent', { content_ids: [slug], content_name: product.name, content_category: product.productType, content_type: 'product_group' }, `view:${slug}`); }, [catalogData, slug]);
+  useEffect(() => {
+    if (catalogData?.product.available && catalogData.product.slug === slug && analytics.analytics?.initialized) trackAnalyticsItem(slug);
+  }, [catalogData, slug, analytics.analytics?.initialized, analytics.consent?.preferences.analytics, analytics.consent?.decided]);
   return (
     <main className="ch247-page ch247-page--wide ch247-stack">
       <Link to="/service-plans">← All service plans</Link>
@@ -96,12 +105,16 @@ export function CatalogServicePlansPage() {
 
 export function PlatformServicePlansPage() {
   const { kind = '' } = useParams();
+  const analytics = useMarketing();
   const name = PLATFORM_SERVICES[kind];
   usePageMeta(name ? `${name} plans` : 'Service plans', 'Explore published platform service plans.');
   const result = useApiResource<{ plans: PlatformPlan[] }>('/api/v1/platform-services/plans');
   const plans = result.status === 'success' ? result.data.plans.filter((plan) => plan.service_kind === kind) : [];
   const platformData = result.status === 'success' ? result.data : null;
   useEffect(() => { if (!name || !platformData) return; const published = platformData.plans.filter(plan => plan.service_kind === kind); if (published.length > 0) trackMarketing('ViewContent', { content_ids: [`platform:${kind}`], content_name: name, content_category: kind, content_type: 'product_group' }, `view:platform:${kind}`); }, [name, kind, platformData]);
+  useEffect(() => {
+    if (Object.prototype.hasOwnProperty.call(PLATFORM_SERVICES, kind) && platformData?.plans.some(plan => plan.service_kind === kind && plan.status === 'published') && analytics.analytics?.initialized) trackAnalyticsItem(`platform:${kind}`);
+  }, [kind, platformData, analytics.analytics?.initialized, analytics.consent?.preferences.analytics, analytics.consent?.decided]);
   return (
     <main className="ch247-page ch247-page--wide ch247-stack">
       <Link to="/service-plans">← All service plans</Link>

@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
+import AdminGoogleAnalyticsSettings from './AdminGoogleAnalyticsSettings';
 import { getMetaConfiguration, getMetaActivity, getMetaAudit, metaAdminSend, getTikTokConfiguration, getTikTokDiagnostics, getTikTokActivity, tiktokAdminSend, type MetaAdminConfiguration, type MetaActivity, type MetaAuditEntry, type TikTokAdminConfiguration, type TikTokDiagnostics } from '../lib/marketing-admin-api';
 import { formatDateTime } from '../components/revenue-guardian/rg-widgets';
 
-const TABS = [{ id: 'meta-pixel', label: 'Meta Pixel' }, { id: 'tiktok-pixel', label: 'TikTok Pixel' }, { id: 'activity', label: 'Event activity' }, { id: 'audit', label: 'Configuration history' }] as const;
+const TABS = [{ id: 'meta-pixel', label: 'Meta Pixel' }, { id: 'tiktok-pixel', label: 'TikTok Pixel' }, { id: 'google-analytics', label: 'Google Analytics' }, { id: 'activity', label: 'Event activity' }, { id: 'audit', label: 'Configuration history' }] as const;
 const TIKTOK_EVENT_NAMES = ['PageView', 'ViewContent', 'Search', 'AddToCart', 'InitiateCheckout', 'AddPaymentInfo', 'PlaceAnOrder', 'CompletePayment', 'SubmitForm', 'CompleteRegistration', 'Contact', 'Subscribe'] as const;
 const statusLabel = (value: string | null) => value ? value.replace(/_/g, ' ') : 'Not tested';
 
@@ -24,7 +25,7 @@ export default function AdminMarketingIntegrationsPage() {
         {TABS.map(t => <Link key={t.id} className={`ch247-button ${t.id === tab ? '' : 'ch247-button--outline'}`} aria-current={t.id === tab ? 'page' : undefined} to={`/admin/marketing-integrations/${t.id}`}>{t.label}</Link>)}
       </nav>
     </header>
-    {tab === 'meta-pixel' ? <MetaPixelSettings /> : tab === 'tiktok-pixel' ? <TikTokPixelSettings /> : tab === 'activity' ? <EventActivity /> : <ConfigurationHistory />}
+    {tab === 'meta-pixel' ? <MetaPixelSettings /> : tab === 'tiktok-pixel' ? <TikTokPixelSettings /> : tab === 'google-analytics' ? <AdminGoogleAnalyticsSettings /> : tab === 'activity' ? <EventActivity /> : <ConfigurationHistory />}
   </div>;
 }
 

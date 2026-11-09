@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { trackMarketing } from '../lib/marketing';
+import { trackAnalyticsItem, trackMarketing, useMarketing } from '../lib/marketing';
 import { useApiResource } from '../lib/useApiResource';
 import { formatPrice, type ProductPlansResponse } from '../lib/catalog-types';
 import { CatalogErrorBanner, CatalogLoadingBanner } from './CatalogStateBanner';
@@ -20,6 +20,7 @@ import { ApproxAmount } from './ApproxAmount';
  *    it is never hidden and never shown with an invented price
  */
 export function ProductPlansSection({ slug }: { slug: string }) {
+  const analytics = useMarketing();
   const result = useApiResource<ProductPlansResponse>(`/api/v1/catalog/products/${slug}/plans`);
   const data = result.status === 'success' ? result.data : null;
   useEffect(() => {
@@ -27,6 +28,9 @@ export function ProductPlansSection({ slug }: { slug: string }) {
     const product = data.product;
     trackMarketing('ViewContent', { content_ids: [slug], content_name: product.name, content_category: product.productType, content_type: 'product_group' }, `view:${slug}`);
   }, [data, slug]);
+  useEffect(() => {
+    if (data?.product.available && data.product.slug === slug && analytics.analytics?.initialized) trackAnalyticsItem(slug);
+  }, [data, slug, analytics.analytics?.initialized, analytics.consent?.preferences.analytics, analytics.consent?.decided]);
 
   if (result.status === 'loading') {
     return <CatalogLoadingBanner label="Loading plans and pricing…" />;

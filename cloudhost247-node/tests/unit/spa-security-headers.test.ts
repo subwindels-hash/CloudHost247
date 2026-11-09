@@ -31,9 +31,15 @@ describe('security headers on frontend responses', () => {
 
   const expectHardened = (headers: Record<string, unknown>) => {
     expect(headers['content-security-policy']).toEqual(expect.stringContaining("default-src 'self'"));
-    expect(headers['content-security-policy']).toEqual(expect.stringContaining('https://www.googletagmanager.com'));
+    const policy = String(headers['content-security-policy']);
+    const script = policy.split(';').find(d => d.trim().startsWith('script-src '))!;
+    const connect = policy.split(';').find(d => d.trim().startsWith('connect-src '))!;
+    expect(script).toContain('https://www.googletagmanager.com');
+    expect(script).not.toContain("'unsafe-inline'");
+    expect(script).not.toContain('*');
+    expect(connect).toContain('https://www.google-analytics.com');
+    expect(connect).not.toContain('*');
     expect(headers['content-security-policy']).toEqual(expect.stringContaining('https://www.googleadservices.com'));
-    expect(String(headers['content-security-policy'])).not.toContain('*');
     expect(headers['x-frame-options']).toBe('SAMEORIGIN');
     expect(headers['x-content-type-options']).toBe('nosniff');
     expect(headers['strict-transport-security']).toEqual(expect.stringContaining('max-age='));

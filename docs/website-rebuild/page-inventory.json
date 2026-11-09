@@ -7532,7 +7532,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "What Is My IP",
-        "description": "Show the public IP this request arrived from, plus connection details."
+        "description": "Show the public IP verified for this connection, or say plainly why none is claimed."
       },
       "hero_artwork": {
         "svg": "",
@@ -7562,7 +7562,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "What Is My IP",
-        "description": "Show the public IP this request arrived from, plus connection details."
+        "description": "Show the public IP verified for this connection, or say plainly why none is claimed."
       },
       "hero_artwork": {
         "svg": "",

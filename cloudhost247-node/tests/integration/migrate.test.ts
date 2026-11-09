@@ -140,6 +140,9 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0091_add_google_ads_integration.sql',
     // TikTok Pixel + Events API as another provider on the 0089 marketing tables.
     '0092_add_tiktok_pixel_integration.sql',
+    '0093_add_ga4_configuration.sql',
+    '0094_add_ga4_checkout_context.sql',
+    '0095_add_ga4_purchase_delivery.sql',
   ];
 
   it('finds the committed migration files in order', () => {

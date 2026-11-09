@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { apiFetch } from '../lib/api';
-import { trackMarketing } from '../lib/marketing';
+import { trackAnalyticsContact, trackMarketing } from '../lib/marketing';
 import { trackTikTok } from '../lib/tiktok';
 import { usePageMeta } from '../lib/usePageMeta';
 import './contact-page.css';
@@ -10,21 +10,25 @@ const departments = ['General support', 'Billing', 'Abuse & security', 'Privacy 
 export default function ContactPage() {
   usePageMeta('Contact', 'Contact the CloudHost247 team.');
   const [sending, setSending] = useState(false);
+  const submitting = useRef(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (sending) return;
+    if (submitting.current) return;
+    submitting.current = true;
     const form = event.currentTarget;
     const data = new FormData(form);
     setSending(true);
     setStatus('idle');
     try {
-      const response = await apiFetch<{ marketingEvent?: { eventName: string; eventId: string; customData: Record<string, unknown> } | null }>('/api/v1/contact', {
+      const response = await apiFetch<{ received: boolean; marketingEvent?: { eventName: string; eventId: string; customData: Record<string, unknown> } | null }>('/api/v1/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(Object.fromEntries(data.entries())),
       });
+      if (response.received !== true) throw new Error('Contact submission not confirmed');
+      trackAnalyticsContact();
       if (response.marketingEvent) {
         trackMarketing(response.marketingEvent.eventName, response.marketingEvent.customData, response.marketingEvent.eventId);
         trackMarketing('Lead', { content_name: 'Contact form' }, response.marketingEvent.eventId.replace(/^contact:/,'lead:'));
@@ -35,6 +39,7 @@ export default function ContactPage() {
     } catch {
       setStatus('error');
     } finally {
+      submitting.current = false;
       setSending(false);
     }
   }
