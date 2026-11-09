@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import geoip from 'geoip-lite';
 import { whereAlpha2 } from 'iso-3166-1';
-import { resolveVisitorIp } from './visitor-ip';
+import { resolveVisitorIpFromRequest, VISITOR_IP_VARY } from './visitor-ip';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
@@ -26,9 +26,8 @@ export async function registerCurrencyRoutes(app: FastifyInstance, env: Env, ove
   // The bundled GeoLite database is local: visitor IPs are not sent to a third party.
   app.get('/api/v1/currency/geo-country', async (request, reply) => {
     reply.header('Cache-Control', 'private, no-store, max-age=0');
-    reply.header('Vary', 'CF-Connecting-IP, X-Forwarded-For');
-    const forwarded = request.headers['x-forwarded-for'];
-    const ip = resolveVisitorIp(request.raw.socket.remoteAddress, typeof forwarded === 'string' ? forwarded : undefined, env.VISITOR_IP_MODE, env.VISITOR_IP_TRUSTED_PROXIES);
+    reply.header('Vary', VISITOR_IP_VARY);
+    const ip = resolveVisitorIpFromRequest(request, env).ip;
     let country: string | null = null;
     if (ip) {
       try {

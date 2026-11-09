@@ -32,6 +32,15 @@ function apiProxy() {
   return {
     target: API_TARGET,
     changeOrigin: true,
+    /**
+     * Act as a *correctly configured* edge for the API behind us: append the address this proxy
+     * observed to X-Forwarded-For, the way a sane Apache/nginx/Cloudflare setup does. Without it the
+     * API sees only this dev server's socket and the menu-bar IP detector can never verify an
+     * address, however the outer preview proxy behaves. Appending (not overwriting) is what makes
+     * the chain authoritative: `resolveVisitorIpDetail` walks it right-to-left and stops at the
+     * first untrusted hop, so anything a client prepends is ignored. Production never runs Vite.
+     */
+    xfwd: true,
     configure(proxy: { on: (event: string, handler: (...args: unknown[]) => void) => void }) {
       proxy.on('error', (_error: unknown, _request: unknown, response: unknown) => {
         const res = response as {

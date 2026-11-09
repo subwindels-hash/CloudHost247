@@ -139,7 +139,7 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
   'reverse-ip': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true }, { name: 'refresh', label: 'Bypass the cache', type: 'checkbox' } ] },
 
   'ip-lookup': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true }, { name: 'includeReverse', label: 'Include reverse DNS', type: 'checkbox', defaultValue: true } ] },
-  'my-ip': { method: 'GET', fields: [], intro: 'Reports the address this platform’s edge observed for your connection, plus the headers your browser sent.' },
+  'my-ip': { method: 'GET', fields: [], intro: 'Reports the address this platform’s network boundary verified for your connection — and says plainly when it cannot verify one — plus the non-credential headers your browser sent.' },
   'ip-whois': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true } ] },
   'domain-to-ip': { method: 'GET', fields: [ { name: 'domain', label: 'Domain', type: 'text', required: true } ] },
   'ip-to-hostname': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true } ] },

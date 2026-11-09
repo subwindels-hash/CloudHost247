@@ -26,6 +26,53 @@ describe('visitor privacy indicator', () => {
   });
 });
 
+/**
+ * A bare "unavailable" was indistinguishable from a broken request, so the widget could not tell a
+ * visitor whether this deployment never switched detection on or their own connection failed. The
+ * endpoint now names the reason; these pin that the widget reports the server's reason and never
+ * invents one of its own.
+ */
+describe('visitor privacy indicator: why nothing was detected', () => {
+  const cases = [
+    ['disabled', 'IP: not enabled', /switched off on this server/i],
+    ['unverified', 'IP: unverified', /could not be verified/i],
+    ['not_public', 'IP: not public', /not a public one/i],
+  ] as const;
+
+  it.each(cases)('renders the server reason %s instead of a bare "unavailable"', async (reason, label, explanation) => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ ip: null, reason, privacyStatus: 'unknown' }), { status: 200 }));
+    render(<VisitorPrivacy />);
+    await screen.findByText(label);
+    // The full reason is inside the live region for assistive tech, and a tooltip for pointer users.
+    const ip = document.querySelector('.ch247-visitor-privacy__ip')!;
+    expect(ip.textContent).toContain(label);
+    expect(ip.textContent).toMatch(explanation);
+    expect(ip.getAttribute('title')).toMatch(explanation);
+    // Still no claim of protection either way.
+    expect(screen.getByRole('region', { name: 'Privacy status' }).textContent).toContain('Privacy status cannot be verified');
+  });
+
+  it('falls back to "unavailable" when the request itself fails or the reason is not one it knows', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ ip: null, reason: 'something-new', privacyStatus: 'unknown' }), { status: 200 }));
+    const { unmount } = render(<VisitorPrivacy />);
+    await screen.findByText('IP: unavailable');
+    unmount();
+
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('nope', { status: 500 }));
+    render(<VisitorPrivacy />);
+    await screen.findByText('IP: unavailable');
+  });
+
+  it('reports no reason at all once an address is detected', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ ip: '8.8.8.8', reason: 'detected' }), { status: 200 }));
+    render(<VisitorPrivacy />);
+    await screen.findByText('IP: 8.8.8.8');
+    const ip = document.querySelector('.ch247-visitor-privacy__ip')!;
+    expect(ip.querySelector('.sr-only')).toBeNull();
+    expect(ip.getAttribute('title')).toMatch(/as this server observed it/i);
+  });
+});
+
 it('shows the detected country next to the IP without a country selector', async () => {
   const { LocaleProvider } = await import('../../src/i18n/LocaleProvider');
   const { CurrencyProvider } = await import('../../src/currency/CurrencyProvider');

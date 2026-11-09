@@ -9,6 +9,7 @@
 import { ipLookup, ispLookup, lookupAsn, myIp, domainToIpTool } from '../ip/ip-service';
 import { ipWhois, asnWhois } from '../ip/whois';
 import { reverseDnsLookup } from '../dns/lookup';
+import { resolveVisitorIpFromRequest } from '../../routes/visitor-ip';
 import {
   cidrToRange,
   compressIpv6,
@@ -60,7 +61,10 @@ export const ipNetworkHandlers: Record<string, ToolHandler> = {
       getCipher?: () => { name?: string } | null;
     } | null;
     return myIp({
-      ip: context.request.ip,
+      // Same verified boundary as the header's IP detector, so the menu bar and this tool always
+      // give one answer. `context.request.ip` is never used here: the app trusts proxy headers
+      // globally, which makes that value caller-controlled.
+      resolution: resolveVisitorIpFromRequest(context.request, context.env),
       headers: context.request.headers as Record<string, string | string[] | undefined>,
       protocol: context.request.protocol,
       socket: socket ?? null,

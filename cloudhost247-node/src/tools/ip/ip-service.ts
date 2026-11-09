@@ -13,6 +13,9 @@ import { performance } from 'node:perf_hooks';
 import type { Queryable } from '../../db/types';
 import { blockedReason, parseIp, fetchWithGuard } from '../core/ssrf';
 import { invalidInput } from '../core/errors';
+import { MASK } from '../core/redact';
+import { VISITOR_IP_REASON_EXPLANATION } from '../../routes/visitor-ip';
+import type { VisitorIpReason, VisitorIpResolution } from '../../routes/visitor-ip';
 import { hasUsableProvider, providerSecret, recordProviderOutcome, usableProviders } from '../core/providers';
 import type { ProviderView } from '../core/providers';
 import { queryType, normalizeDomain, pickResolver } from '../dns/common';
@@ -331,9 +334,21 @@ export async function ispLookup(db: Queryable, input: { address: string }): Prom
 }
 
 export interface MyIpResult {
+  /** The verified address, split by family. A connection carries one family, so one is always null. */
   ipv4: string | null;
   ipv6: string | null;
-  detectedAddress: string;
+  /** The verified address, or null when the deployment's network boundary could not confirm one. */
+  detectedAddress: string | null;
+  /**
+   * Whether `detectedAddress` was verified, and why not when it was not. This is the same
+   * boundary the header's IP detector uses, so the two surfaces can never disagree.
+   */
+  detection: {
+    status: 'detected' | 'unavailable';
+    reason: VisitorIpReason;
+    explanation: string;
+  };
+  /** The forwarding chain exactly as it arrived. Client-supplied input, never a verified answer. */
   forwardedFor: string[];
   userAgent: string;
   headers: Record<string, string>;
@@ -345,33 +360,43 @@ export interface MyIpResult {
 }
 
 /**
+ * Headers never echoed back by the `my-ip` tool.
+ *
+ * The tool shows a visitor the headers their own browser sent, which is useful — but repeating an
+ * `HttpOnly` session cookie or a bearer token inside a readable JSON body hands that credential to
+ * any script running on the page, defeating the protection that made it unreadable in the first
+ * place. The key is still listed, so the visitor can see the header was sent; only the value is
+ * withheld, matching the conservative rule in `src/tools/core/redact.ts`.
+ */
+const HEADER_ECHO_DENYLIST = new Set(['cookie', 'set-cookie', 'authorization', 'proxy-authorization', 'x-api-key']);
+
+/**
  * "What is my IP" (spec §17). Reports only what the edge actually observed — no fingerprinting
  * beyond the headers the browser sent, and no attempt to reach back to the client.
+ *
+ * The address comes from {@link resolveVisitorIpDetail}, the same deployment-verified boundary the
+ * header's IP detector uses. It deliberately does **not** read Fastify's `request.ip`: the app sets
+ * `trustProxy: true` globally, so `request.ip` is the leftmost `X-Forwarded-For` value and any
+ * caller can set it to anything. Reporting that as "your IP" would be both spoofable and, behind a
+ * reverse proxy with no forwarding header, the proxy's own private address — a loopback or RFC1918
+ * value presented to a visitor as their public IP.
  */
 export function myIp(input: {
-  ip: string;
+  resolution: VisitorIpResolution;
   headers: Record<string, string | string[] | undefined>;
   protocol: string;
   socket: { encrypted?: boolean; getPeerCertificate?: (detailed?: boolean) => Record<string, unknown>; getProtocol?: () => string | null; getCipher?: () => { name?: string } | null } | null;
 }): MyIpResult {
-  const parseAddress = (value: string): { v4: string | null; v6: string | null } => {
-    const first = value.split(',')[0]?.trim() ?? '';
-    const withoutPort = first.startsWith('[') ? first.slice(1, first.indexOf(']')) : first;
-    const parsed = parseIp(withoutPort);
-    if (!parsed) return { v4: null, v6: null };
-    return parsed.version === 4 ? { v4: parsed.normalized, v6: null } : { v4: null, v6: parsed.normalized };
-  };
-
   const forwarded = String(input.headers['x-forwarded-for'] ?? '')
     .split(',')
     .map((entry) => entry.trim())
     .filter(Boolean);
-  const detected = forwarded[forwarded.length - 1] ?? input.ip;
-  const { v4, v6 } = parseAddress(detected);
-  const altForwarded = forwarded.find((entry) => {
-    const parsed = parseAddress(entry);
-    return (v4 && parsed.v6) || (v6 && parsed.v4);
-  });
+
+  // One connection has one family. The verified address is reported in its own slot and the other
+  // stays null, rather than fishing a second family out of an unverified forwarding chain.
+  const verified = input.resolution.ip ? parseIp(input.resolution.ip) : null;
+  const ipv4 = verified && verified.version === 4 ? verified.normalized : null;
+  const ipv6 = verified && verified.version === 6 ? verified.normalized : null;
 
   const tls =
     input.socket && input.socket.encrypted === true
@@ -385,18 +410,28 @@ export function myIp(input: {
   const headers: Record<string, string> = {};
   for (const [key, value] of Object.entries(input.headers)) {
     if (value === undefined) continue;
-    headers[key] = Array.isArray(value) ? value.join(', ') : String(value);
+    headers[key] = HEADER_ECHO_DENYLIST.has(key.toLowerCase())
+      ? MASK
+      : Array.isArray(value) ? value.join(', ') : String(value);
   }
 
+  const detected = input.resolution.reason === 'detected';
   return {
-    ipv4: v4 ?? (altForwarded ? parseAddress(altForwarded).v4 : null),
-    ipv6: v6 ?? (altForwarded ? parseAddress(altForwarded).v6 : null),
-    detectedAddress: detected,
+    ipv4,
+    ipv6,
+    detectedAddress: input.resolution.ip,
+    detection: {
+      status: detected ? 'detected' : 'unavailable',
+      reason: input.resolution.reason,
+      explanation: VISITOR_IP_REASON_EXPLANATION[input.resolution.reason],
+    },
     forwardedFor: forwarded,
     userAgent: String(input.headers['user-agent'] ?? 'unknown'),
     headers,
     connection: { protocol: input.protocol, tls },
-    note: 'CloudHost247 reports the address its edge observed. If you are behind a proxy or NAT, that may be the proxy\'s address rather than your device\'s.',
+    note: detected
+      ? 'CloudHost247 verified this address against its own network boundary. If you are behind a proxy or NAT, the address is the one that boundary observed, which may be the proxy\'s address rather than your device\'s.'
+      : 'No address is claimed. CloudHost247 reports only an address it can verify against its own network boundary, and never substitutes a forwarding header, a proxy\'s private address or a guess.',
   };
 }
 
