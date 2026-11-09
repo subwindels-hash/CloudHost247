@@ -1,5 +1,5 @@
 import { openAnswerWithModel, type ModelEvidence } from './grounded-model';
-import { cheapestPrice, formatPrice, selectRelevantPrices, type LiveFacts, type LivePrice } from './live-facts';
+import { cheapestPrice, formatMoney, formatPrice, selectRelevantPrices, type LiveFacts, type LivePrice } from './live-facts';
 import type { RetrievalResult, RetrievedChunk } from './retrieval';
 import type { QuestionIntent, QueryUnderstanding, ServiceEntity } from './query-understanding';
 import { foldText, isSafeInternalPath, truncate } from './types';
@@ -78,6 +78,25 @@ export interface ComposeOptions {
 
 const MAX_BODY = 1800;
 
+/**
+ * A question whose subject is only a pronoun: it cannot be answered without a previous turn.
+ * Deliberately narrow — it matches only turns with no named subject at all, so "how much is it" and
+ * "is it down" are recognised as bare follow-ups while "webhosting prices" is not.
+ */
+const PRONOUN_ONLY_QUESTION = new RegExp(
+  '^\\s*'
+  + '(?:(?:how much|how many|what(?:\'s| is)?|which|is|are|does|do|can|will|was|were)\\s*)?'
+  + '(?:(?:does|do|is|are|was|were|will|can)\\s*)?'
+  + '(?:it|that|this|they|them|those|these)'
+  + '(?:\\s+(?:cost|costs|price|pricing|down|available|work|do|include|come with|per month|a month|again))?'
+  + '[\\s?!.]*$',
+  'i'
+);
+
+function isBarePronounQuestion(raw: string): boolean {
+  return PRONOUN_ONLY_QUESTION.test(raw.trim());
+}
+
 function clampBody(text: string): string {
   if (text.length <= MAX_BODY) return text;
   return `${truncate(text, MAX_BODY - 1)}\n\nAsk me to expand on any part of this.`;
@@ -115,10 +134,22 @@ export function extractExcerpt(content: string, terms: readonly string[], maxCha
       }
     }
   }
-  const start = Math.max(0, Math.min(bestIndex - 60, text.length - maxChars));
-  let excerpt = text.slice(start, start + maxChars).trim();
+  let start = Math.max(0, Math.min(bestIndex - 60, text.length - maxChars));
+  let end = Math.min(text.length, start + maxChars);
+  // Snap to word boundaries. Slicing at a fixed offset cut words in half and the customer read
+  // excerpts that began mid-word ("…ontent management systems"), which looks like corruption.
+  // The snap is unconditional: a word is never shown in part, even when that costs a few characters.
+  if (start > 0 && text[start - 1] !== ' ') {
+    const space = text.indexOf(' ', start);
+    if (space >= 0) start = space + 1;
+  }
+  if (end < text.length && text[end] !== ' ') {
+    const space = text.lastIndexOf(' ', end);
+    if (space > start) end = space;
+  }
+  let excerpt = text.slice(start, end).trim();
   if (start > 0) excerpt = `…${excerpt}`;
-  if (start + maxChars < text.length) excerpt = `${excerpt}…`;
+  if (end < text.length) excerpt = `${excerpt}…`;
   return excerpt;
 }
 
@@ -194,7 +225,13 @@ function gapSentence(understanding: QueryUnderstanding): string {
 function formatPriceBlock(prices: LivePrice[], understanding: QueryUnderstanding): { text: string; link: AnswerLink[] } {
   const links: AnswerLink[] = [];
   if (prices.length === 0) return { text: '', link: links };
-  const lines = prices.slice(0, 8).map((price) => `• ${price.productName} — ${price.planName}: ${formatPrice(price)}`);
+  // The plan name already carries the product name for most catalogue rows ("VPS Basic"), so
+  // repeating the product produced "VPS Basic — VPS Basic: USD 19 per month".
+  const lines = prices.slice(0, 8).map((price) => {
+    const alreadyNamed = foldText(price.planName).includes(foldText(price.productName));
+    const label = alreadyNamed ? price.planName : `${price.productName} — ${price.planName}`;
+    return `• ${label}: ${formatPrice(price)}`;
+  });
   const cheapest = cheapestPrice(prices);
   const wantsCheapest = /\bcheap(?:est)?\b|\baffordable\b|\bbudget\b|\blowest\b/i.test(understanding.raw);
   const header = wantsCheapest && cheapest
@@ -266,6 +303,32 @@ function composeDeterministic(
     const secondExcerpt = extractExcerpt(secondChunk.content, terms, 320);
     if (foldText(secondExcerpt) !== foldText(excerpt)) {
       sections.push(`Also relevant — ${second.title}:\n${secondExcerpt}`);
+    }
+  }
+
+  // Domain pricing is a different catalogue (per-extension offerings, not plans), and the plan
+  // price list has no row for it. Without this branch a ".com renewal price" question fell through
+  // to whatever website prose matched, which is how a customer could ask a price and be told about
+  // infrastructure instead.
+  // `.com` needs its own alternative: a word boundary cannot precede a dot, so putting the dotted
+  // TLDs inside a special character class makes ".com" unmatchable.
+  const asksAboutDomains = /\b(?:domains?|tlds?|extensions?)\b|\.[a-z]{2,}\b/i.test(understanding.raw);
+  if (understanding.intent === 'pricing' && asksAboutDomains && options.facts?.domainPrices?.available) {
+    // Extensions are stored without the leading dot ("com"), while customers write ".com". The
+    // comparison normalises both sides; comparing the raw forms silently matched nothing.
+    const wanted = (understanding.raw.match(/\.[a-z]{2,}/gi) ?? []).map((value) => value.slice(1).toLowerCase());
+    const rows = options.facts.domainPrices.extensions.filter(
+      (row) => wanted.length === 0 || wanted.includes(row.extension.replace(/^\./, '').toLowerCase())
+    );
+    const lines = rows.slice(0, 8).flatMap((row) => {
+      const parts: string[] = [];
+      if (row.registration) parts.push(`registration ${formatMoney(row.registration)}`);
+      if (row.renewal) parts.push(`renewal ${formatMoney(row.renewal)}`);
+      if (row.transfer) parts.push(`transfer ${formatMoney(row.transfer)}`);
+      return parts.length > 0 ? [`• .${row.extension.replace(/^\./, '')} — ${parts.join(', ')}`] : [];
+    });
+    if (lines.length > 0) {
+      sections.push(`These are the current published domain prices:\n${lines.join('\n')}`);
     }
   }
 
@@ -374,6 +437,13 @@ export async function composeAnswer(
 
   // One-word or bare-noun questions with no resolved offering are genuinely ambiguous.
   if (understanding.tokens.length <= 1 && understanding.entities.length === 0 && retrieval?.empty) {
+    return clarify(understanding);
+  }
+
+  // "how much is it?" carries no subject of its own. Without a previous turn to resolve the pronoun,
+  // any page that happens to score well is a coincidence, not an answer — and a pricing question
+  // answered with a page that quotes no price is worse than asking which service the customer means.
+  if (isBarePronounQuestion(understanding.raw) && understanding.entities.length === 0 && !options.previousTopic) {
     return clarify(understanding);
   }
 

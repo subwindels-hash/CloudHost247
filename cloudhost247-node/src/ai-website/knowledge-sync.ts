@@ -176,8 +176,16 @@ async function syncDocument(
     }
 
     const content = page.content;
-    const chunks = chunkDocument(content ?? { title: page.title, description: '', headings: [], body: '', faqs: [], relatedLinks: [], prices: [], updatedAt: null });
-    const words = (content?.body ?? '').split(/\s+/).filter(Boolean).length;
+    // A page the discovery step could not read is a failure, not a success. Indexing an empty
+    // document would record the source as "indexed" with zero retrievable knowledge and hide the
+    // real problem: the admin console would show a healthy corpus while that page silently answered
+    // nothing. Throwing routes it through the normal failure path (counter, note, last_error_at).
+    const bodyText = (content?.body ?? '').trim();
+    if (bodyText.length === 0) {
+      throw new Error('No readable content was discovered for this page');
+    }
+    const chunks = chunkDocument(content!);
+    const words = bodyText.split(/\s+/).filter(Boolean).length;
 
     const upserted = await upsertSource(db, {
       sourceKey: page.sourceKey,
@@ -210,6 +218,9 @@ async function syncDocument(
       const existing = await findSourceByKey(db, page.sourceKey);
       if (existing) await markSourceFailed(db, existing.id, message);
       else {
+        // The failure has to survive the very failure that caused it. If the insert itself is what
+        // went wrong, still leave a row so the admin console lists the page as failed rather than
+        // showing a corpus that simply never mentions it.
         const created = await upsertSource(db, {
           sourceKey: page.sourceKey,
           title: page.title,
@@ -221,11 +232,23 @@ async function syncDocument(
           category: page.category,
           fingerprint,
           wordCount: 0,
+        }).catch(async () => {
+          const { rows } = await db.query<{ id: string }>(
+            `INSERT INTO ai_knowledge_sources
+               (id, title, source_type, source_kind, source_key, surface, url, fingerprint, word_count, sync_status)
+             VALUES (gen_random_uuid(), $1, 'doc', $2, $3, $4, $5, $6, 0, 'failed')
+             ON CONFLICT (source_key) DO UPDATE SET updated_at = now()
+             RETURNING id`,
+            [page.title.slice(0, 255), page.kind, page.sourceKey, page.surface ?? 'spa', page.url, fingerprint]
+          );
+          return { id: rows[0]!.id, created: true, changed: true };
         });
         await markSourceFailed(db, created.id, message);
       }
-    } catch {
-      /* the note above already records the original failure */
+    } catch (recordError) {
+      // The note above already records the original failure; this adds why the ledger row could not
+      // be updated, so a broken failure path is visible instead of silently looking healthy.
+      addNote(notes, `${page.sourceKey}: could not record failure (${(recordError as Error).message})`);
     }
     return 'failed';
   }

@@ -66,7 +66,7 @@ export interface UpsertSourceInput {
   url: string;
   aliases: string[];
   section: string;
-  category: string;
+  category: string | null;
   fingerprint: string;
   wordCount: number;
 }
@@ -102,8 +102,8 @@ export async function upsertSource(
         input.surface,
         input.url,
         JSON.stringify(input.aliases),
-        input.section.slice(0, 80) || null,
-        input.category.slice(0, 80) || null,
+        (input.section ?? '').slice(0, 80) || null,
+        (input.category ?? '').slice(0, 80) || null,
         input.fingerprint,
         input.wordCount,
       ]
@@ -131,8 +131,8 @@ export async function upsertSource(
       input.surface,
       input.url,
       JSON.stringify(input.aliases),
-      input.section.slice(0, 80) || null,
-      input.category.slice(0, 80) || null,
+      (input.section ?? '').slice(0, 80) || null,
+      (input.category ?? '').slice(0, 80) || null,
       input.fingerprint,
       input.wordCount,
     ]

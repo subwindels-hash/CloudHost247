@@ -39,6 +39,14 @@ export interface LiveFacts {
   prices: LivePrice[];
   /** Products that exist publicly but are not yet purchasable (status = draft). */
   comingSoon: string[];
+  /**
+   * Domain registration/renewal/transfer prices, read from the same offering tables the domain
+   * shop uses. Absent prices mean "cannot verify", never "free".
+   */
+  domainPrices?: {
+    available: boolean;
+    extensions: Array<{ extension: string; registration: string | null; renewal: string | null; transfer: string | null }>;
+  };
   /** Human-readable reason the catalogue could not be read, for an honest answer. */
   unavailableReason: string | null;
 }
@@ -83,6 +91,20 @@ export function formatPrice(price: Pick<LivePrice, 'amount' | 'currency' | 'bill
     ? ` plus ${price.currency} ${Number(price.setupFee).toLocaleString('en-US')} setup`
     : '';
   return `${price.currency} ${formatted} ${describeBillingPeriod(price.billingPeriod)}${setup}`;
+}
+
+/**
+ * Formats a bare amount from the domain offering tables, which store plain numeric strings with no
+ * currency column of their own. A non-numeric value is passed through rather than shown as "NaN".
+ */
+export function formatMoney(amount: string, currency = 'USD'): string {
+  const value = Number(amount);
+  if (!Number.isFinite(value)) return amount;
+  const formatted = value.toLocaleString('en-US', {
+    minimumFractionDigits: value % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+  return `${currency} ${formatted}`;
 }
 
 /**
@@ -140,7 +162,11 @@ export async function resolveLiveFacts(
         }
       }
     }
-    return { available: true, products, prices, comingSoon, unavailableReason: null };
+    // Domain prices live in their own tables (the domain shop's, not the plan catalogue), so a
+    // ".com price" question has nothing to quote without this. Failure here must not fail the whole
+    // catalogue read: plans are still answerable, domains just become "cannot verify".
+    const domainPrices = await resolveDomainPriceFacts(db).catch(() => ({ available: false, extensions: [] }));
+    return { available: true, products, prices, comingSoon, domainPrices, unavailableReason: null };
   } catch (error) {
     return {
       ...EMPTY_FACTS,
@@ -176,10 +202,8 @@ export async function loadCatalogDocuments(db: Queryable): Promise<RawDocument[]
       product.name,
       product.description ?? '',
       `Product type: ${product.productType}`,
-      planNames.length > 0
-        ? `Published plans: ${planNames.join(', ')}.`
-        : 'This product is listed publicly but currently has no purchasable plans, so it must not be offered as available.',
-      `Current prices and plan resources are read live from the CloudHost247 catalogue on the ${url} page; the assistant must quote them from the catalogue, never from memory.`,
+      planNames.length > 0 ? `Published plans: ${planNames.join(', ')}.` : '',
+      `Current prices and plan resources are shown on the ${url} page and are always quoted from the live catalogue.`,
       'You can order it from the CloudHost247 cart as a signed-in or new customer.',
     ];
     documents.push({

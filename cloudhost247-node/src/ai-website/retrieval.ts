@@ -361,8 +361,9 @@ export async function retrieveKnowledge(
   question: string,
   options: RetrieveOptions = {}
 ): Promise<RetrievalResult> {
+  const vocabulary = websiteVocabulary();
   const understanding = understandQuery(question, {
-    vocabulary: websiteVocabulary(),
+    vocabulary,
     // The previous customer turn is only ever used to resolve a pronoun or a bare follow-up; it
     // never contributes to the query terms used for scoring beyond `retrievalQueryFor`.
     previousQuery: options.previousCustomerMessage ?? null,
@@ -426,9 +427,14 @@ export async function retrieveKnowledge(
   // Coverage check: if the customer's central word appears nowhere on the site, no amount of
   // incidental overlap makes an answer honest. "Can you forecast the weather next month?" shares
   // "next" and "month" with a support page; that is not an answer.
+  //
+  // The comparison is against the corpus vocabulary, *not* against `terms`. `terms` is built from
+  // the customer's own tokens, so comparing an ungrounded token against it always succeeds and the
+  // guard could never fire — which is exactly what happened: "policy on interstellar travel"
+  // quoted /legal with confidence, and "mobile phone plan" quoted Email Hosting.
   const ungrounded = (understanding.ungroundedTokens ?? []).filter((token) => token.length >= 4);
   if (ungrounded.length > 0) {
-    const missing = ungrounded.filter((token) => ![...terms].some((term) => term.includes(token) || token.includes(term)));
+    const missing = ungrounded.filter((token) => !vocabulary.has(token));
     if (missing.length >= Math.max(1, Math.ceil(ungrounded.length / 2))) {
       return {
         understanding,

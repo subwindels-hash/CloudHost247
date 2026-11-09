@@ -404,12 +404,38 @@ export function understandQuery(
     if (account && !entities.some((entity) => entity.id === 'account')) entities.unshift(account);
   }
 
+  /**
+   * Words that ask *how* to answer rather than *what* about: "cost", "cheapest", "accept", "speak",
+   * "human". They carry no subject matter of their own, so their absence from the corpus is not a
+   * coverage gap — "cheapest vps" is about VPS even though the site never writes the word "cheapest".
+   * Treating them as gaps would refuse exactly the pricing and escalation questions the assistant
+   * must still handle. Subject words like "interstellar" and "travel" are deliberately not here.
+   */
+  const QUESTION_SCAFFOLDING = new Set([
+    'cost', 'costs', 'cheap', 'cheapest', 'cheaper', 'afford', 'affordable', 'budget', 'lowest',
+    'price', 'priced', 'quote', 'fee', 'fees', 'charge', 'charged', 'charges', 'exact', 'exactly',
+    'accept', 'accepted', 'available', 'offer', 'offers', 'provide', 'provides', 'sell', 'sells',
+    'support', 'supported', 'help', 'fast', 'slow', 'quick', 'quickly', 'good', 'best', 'better',
+    'speak', 'talk', 'chat', 'human', 'person', 'agent', 'someone', 'anyone', 'team', 'staff',
+    'recommend', 'suggest', 'need', 'want', 'looking', 'prefer', 'option', 'options', 'include',
+    'included', 'allow', 'allowed', 'possible', 'kind', 'kinds', 'type', 'types', 'sort', 'way',
+    'time', 'times', 'long', 'much', 'many', 'year', 'years', 'month', 'months', 'day', 'days',
+    'free', 'paid', 'work', 'works', 'working', 'broken', 'stuck', 'wrong', 'issue', 'issues',
+    'problem', 'problems', 'error', 'errors', 'fix', 'fixed', 'else', 'other', 'another', 'anything',
+  ]);
+
   const expansionList = [...expansions];
   const ungroundedTokens = content.filter((token) => {
     if (vocabulary.has(token)) return false;
     const corrected = correctedTokens[content.indexOf(token)] ?? token;
     if (corrected !== token) return false;
     if (SERVICE_ENTITIES.some((entity) => entity.aliases.some((alias) => alias.split(' ').includes(token)))) return false;
+    // A compound the corpus does not spell as one word ("webhosting" → "web" + "hosting") is
+    // covered whenever both halves are known vocabulary. Without this, writing two real words
+    // together looked like inventing a third.
+    const halves = splitCompound(token, vocabulary);
+    if (halves && halves.length > 1 && halves.every((half) => vocabulary.has(half))) return false;
+    if (QUESTION_SCAFFOLDING.has(token)) return false;
     // An abbreviation legitimately expands to a word the corpus has ("wp" → "wordpress"); that is
     // coverage, not a gap.
     return !expansionList.some((term) => term.startsWith(token) || token.startsWith(term));
