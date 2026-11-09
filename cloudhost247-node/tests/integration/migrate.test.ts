@@ -143,6 +143,9 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0093_add_ga4_configuration.sql',
     '0094_add_ga4_checkout_context.sql',
     '0095_add_ga4_purchase_delivery.sql',
+    // Native Email Trace & Forensics Analyzer (0096). Version 0092 was already owned by the
+    // TikTok integration, so this schema follows the GA4 migrations with its own unique version.
+    '0096_create_email_forensics.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -1,4 +1,4 @@
--- Migration: 0092_create_email_forensics.sql
+-- Migration: 0096_create_email_forensics.sql
 -- Purpose: storage for the native Email Trace & Forensics Analyzer — a defensive header-analysis
 -- feature that works without any external email-tracing or IP-lookup API.
 --
