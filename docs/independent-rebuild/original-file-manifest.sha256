@@ -1,4 +1,5 @@
 # SHA-256 inventory of vendor-derived components after the CloudHost247 rebrand
+# Updated 2026-11-08: legacy footer marketing runtime cache-buster for the GA4 integration.
 # Original vendor baseline commit: 432989b8e20f65b1db3c2eeadc15cc4b5b736e82
 # Generated: 2026-09-27; regenerated 2026-09-28 for the legacy rebrand;
 # regenerated 2026-10-01 after the vendor theme-helper addon was retired
@@ -682,7 +683,7 @@ be0e58f1531498ea4473d99fcb0a8bc1b027c1c7061a4132eb41649febace0fd  templates/clou
 d81734e6a607cdfe9b026780ffae1f9789015cfa37664789d780e214d484fc6b  templates/cloudhost247_legacy/fonts/suraj.ttf
 4a51f4ee6adf98b1a97d959d27ae67859bba1babea3a2391733782c36d59c126  templates/cloudhost247_legacy/fonts/suraj.woff
 7d786efd7899b86ff51dc595890d3298e4a7e4c4e27e9233c5ed9dba8b480cd1  templates/cloudhost247_legacy/fonts/suraj.woff2
-13af8a31150fd4bfd25c28f7ca13b4c5835b3d81816fe02b9f89e247d394b2a1  templates/cloudhost247_legacy/footer.tpl
+6ed4def6dda67b010c344adca5fa242135b308efe00182326503d6848355bdf5  templates/cloudhost247_legacy/footer.tpl
 50d509547342b4799fad411b4c88434c8dfd19696ac2cb83403ad704de3c3893  templates/cloudhost247_legacy/forwardpage.tpl
 0ad9930762862fb5097ad06a323f5e6a9a1e07878d22312c1c34d5c0dd0298a5  templates/cloudhost247_legacy/future-element.tpl
 e2433e69f08cbe1e0eff3ab58297bb2688827fcb1ae0f2f07096be21495758e4  templates/cloudhost247_legacy/header.tpl
