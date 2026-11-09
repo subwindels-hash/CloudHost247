@@ -1,13 +1,54 @@
 # CloudHost247 Production Readiness Report
 
-**Date:** 2026-10-13  
-**Branch:** arena/e5e168c8-cloudhost247  
-**Platform Status:** ✅ Running (Port 3000)  
-**Verification Status:** ✅ All Checks Passing
+> ## ⏳ Certification status as of 2026-11-09 — supersedes the 2026-10-13 claim below
+>
+> **Source verification: PASSED. Production certification: NOT YET GRANTED. Deployment stays frozen.**
+>
+> Post-verification audit on branch `arena/fe9b2088-cloudhost247` (HEAD `c578ff2f`):
+>
+> **Passed (executed evidence):** release-candidate gate exit 0 (incl. rendered-site audit
+> with verified Smarty 4.5.6); 2,901/2,901 vitest tests (232 files); 18/18 PHP behavioural
+> suites; PHP lint clean on 7.4 and 8.2 legs (842 first-party targets); 678 Python
+> static/security tests; 20/20 server-agent protocol tests; TypeScript 0 errors; production
+> build OK; `npm audit --omit=dev` 0 vulnerabilities; vendor integrity baseline byte-verified;
+> 3 defects found by the audit and repaired (`c0582183`, `cca9e458`, `bae36080`), re-verified,
+> zero regressions. See `VERIFICATION-REPORT-2026-11-09.md`, `POST-VERIFICATION-AUDIT.md`,
+> `MODULE-INTEGRITY-REPORT.md`.
+>
+> **Not yet certified (blocked on infrastructure/credentials, not on code):**
+> B-1 Playwright browser e2e · B-2 licensed-WHMCS staging functional tests · B-3 production
+> PostgreSQL financial probes (`verify:financial`, `verify:authorization` CLI form) ·
+> B-4 payment/provider sandbox certification (owner credentials required) · B-5 quarantined
+> migrations 0023/0024/0025/0041 (explicit owner authorization required).
+> Full plans per item: `POST-VERIFICATION-AUDIT.md` §3.
+>
+> **Required owner decisions before certification:**
+> 1. Authorize and review each quarantined migration (0023/0024/0025/0041) individually.
+> 2. Provide staging environment: licensed WHMCS install + PostgreSQL + target cPanel account.
+> 3. Decide which payment providers to sandbox-certify first and supply test credentials.
+> 4. Approve production environment secrets issuance (JWT, encryption keys, PIN key, webhook secrets).
+> 5. Decide WHMCS integration mode (`read-only` vs `full`) for production — default stays `read-only`.
+>
+> **Prioritized remediation plan:**
+> P0 — B-2 staging stand-up (unblocks B-3 and parts of B-4/B-5). P0 — B-5 migration review
+> (blocks any production DB progress). P1 — B-1 browser e2e on a browser-capable host.
+> ~~P1 — G-1 marketplace-admin test gap~~ **CLOSED** (`marketplace-admin-categories.test.ts`,
+> 6/6 pass). P2 — B-4 sandbox certification per provider.
+> P3 — schedule recurring `npm audit` + dependency refresh in CI.
+>
+> The 2026-10-13 report below remains as historical evidence of the source-level state at
+> that date; its "production-ready" headline is superseded by the certification status above.
 
 ---
 
-## Executive Summary
+**Date:** 2026-10-13  
+**Branch:** arena/e5e168c8-cloudhost247  
+**Platform Status:** ✅ Running (Port 3000)  
+**Verification Status:** ✅ All Checks Passing (source-level, as of that date)
+
+---
+
+## Executive Summary (historical, 2026-10-13)
 
 **The CloudHost247 repository is production-ready.** After comprehensive audit and verification:
 
