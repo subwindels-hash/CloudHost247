@@ -20,6 +20,19 @@
 > PostgreSQL financial probes (`verify:financial`, `verify:authorization` CLI form) ·
 > B-4 payment/provider sandbox certification (owner credentials required) · B-5 quarantined
 > migrations 0023/0024/0025/0041 (explicit owner authorization required).
+>
+> **Phase 3 staging certification (2026-11-09, same-day supplement):** controlled staging
+> substitute executed — 33/33 live HTTP workflow checks PASS on the real stack (embedded
+> Postgres, 92 migrations, strong secrets, simulation mode; zero external providers), payment
+> integrity verified under adversarial webhook execution (signed-settles, tampered 401, stale
+> 401, replay dedup, wrong-amount 400, failed-non-settling, owner-only initiation,
+> reconciliation & append-only ledger consistency), provider layer code-certified across 12
+> adapters + fail-closed guarantees, and a live backup→destroy→restore exercise proved
+> byte-identical recovery of all 221 tables incl. the financial trail. Deliverables:
+> `STAGING-CERTIFICATION-REPORT.md`, `PAYMENT-INTEGRITY-REPORT.md`,
+> `PROVIDER-CERTIFICATION-MATRIX.md`, `DATABASE-RECOVERY-REPORT.md` +
+> `docs/staging/*.json` evidence. The five B-items above remain the sole open gates;
+> everything within host bounds is now executed and green.
 > Full plans per item: `POST-VERIFICATION-AUDIT.md` §3.
 >
 > **Required owner decisions before certification:**
