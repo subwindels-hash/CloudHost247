@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { understandQuery } from '../../src/ai-website/query-understanding';
-import { websiteVocabulary } from '../../src/ai-website/website-discovery';
+import { websiteVocabulary, buildVocabulary, WEBSITE_PROJECTION } from '../../src/ai-website/website-discovery';
 import { extractExcerpt } from '../../src/ai-website/answer-composer';
 import { loadCatalogDocuments } from '../../src/ai-website/live-facts';
 import type { DiscoveryResult } from '../../src/ai-website/website-discovery';
@@ -16,10 +16,47 @@ import type { Queryable } from '../../src/db/types';
 
 const vocabulary = websiteVocabulary();
 
+describe('audit: the corpus vocabulary covers what is actually indexed', () => {
+  it('includes words that only appear in body prose or FAQs', () => {
+    // The vocabulary was built from titles and headings only, so a word that appeared solely in a
+    // page body counted as "not on the site" — the same test that decides whether to refuse to
+    // answer. Body and FAQ text are indexed and quotable, so they must count as coverage.
+    const doc = (WEBSITE_PROJECTION as unknown as { documents: Array<Record<string, unknown>> }).documents
+      .find((entry) => Array.isArray(entry.faqs) && (entry.faqs as unknown[]).length > 0);
+    expect(doc, 'projection must contain at least one page with FAQs').toBeTruthy();
+    const faq = (doc!.faqs as Array<{ question: string; answer: string }>)[0]!;
+
+    const vocabulary = buildVocabulary();
+    const distinctive = faq.answer
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((word) => word.length >= 8)
+      .find((word) => !buildVocabulary({
+        documents: [{
+          title: doc!.title, description: '', body: '', section: '', category: '',
+          headings: [], faqs: [],
+        }],
+      } as never).has(word));
+
+    if (distinctive) {
+      expect(vocabulary.has(distinctive), `"${distinctive}" should be covered`).toBe(true);
+    }
+    // Strong invariant: every long word in a real FAQ answer is in the vocabulary.
+    const longWords = faq.answer.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length >= 6);
+    for (const word of longWords) {
+      expect(vocabulary.has(word), `"${word}" from an indexed FAQ must be in the vocabulary`).toBe(true);
+    }
+  });
+});
+
 describe('audit: coverage guard actually fires on unsupported subjects', () => {
   it('marks genuinely unknown subject words as ungrounded', () => {
+    // "interstellar" appears nowhere on the site; "travel" does (in prose), and since body text is
+    // now part of the coverage vocabulary, only the truly unknown word is flagged. One flagged word
+    // out of a two-word subject is enough for the guard to fire.
     const u = understandQuery('What is your policy on interstellar travel?', { vocabulary });
-    expect(u.ungroundedTokens).toEqual(expect.arrayContaining(['interstellar', 'travel']));
+    expect(u.ungroundedTokens).toContain('interstellar');
+    expect(u.ungroundedTokens ?? []).not.toContain('policy');
   });
 
   it('never marks ordinary question scaffolding as ungrounded', () => {

@@ -226,6 +226,11 @@ const PROTECTED_QUERY_WORDS = new Set([
   'hosting', 'host', 'domain', 'domains', 'email', 'ssl', 'vps', 'dns', 'server', 'servers',
   'backup', 'backups', 'support', 'ticket', 'tickets', 'invoice', 'invoices', 'payment', 'billing',
   'account', 'login', 'password', 'policy', 'policies', 'terms', 'privacy', 'uptime', 'sla',
+  // Product and protocol names that are one edit from an unrelated common word. "voip" was being
+  // corrected to "void" (both appear on the site), which turned a real service question into
+  // nonsense before it was ever searched.
+  'voip', 'smtp', 'imap', 'pop3', 'ssd', 'nvme', 'http', 'https', 'ipv4', 'ipv6', 'ssh', 'ftp',
+  'cpanel', 'whm', 'letsencrypt', 'mysql', 'mariadb', 'postgres', 'redis', 'node', 'laravel',
 ]);
 
 export function correctToken(token: string, vocabulary: ReadonlySet<string>): { token: string; corrected: boolean } {

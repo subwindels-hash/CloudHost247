@@ -309,6 +309,14 @@ export function buildVocabulary(source: WebsiteProjection = WEBSITE_PROJECTION):
     add(document.section);
     add(document.category);
     for (const heading of document.headings ?? []) add(heading);
+    // Body prose and FAQs are indexed and quotable, so a word that appears only there is content the
+    // assistant genuinely has. Leaving them out made the coverage guard call real answers unknown:
+    // the FAQ text is where most of the support vocabulary lives.
+    add(document.body);
+    for (const faq of document.faqs ?? []) {
+      add(faq.question);
+      add(faq.answer);
+    }
   }
   return vocabulary;
 }
