@@ -9,20 +9,22 @@ import { JSDOM } from 'jsdom';
 const source = readFileSync(resolve(__dirname, '../../../../shared/site/marketing.js'), 'utf8');
 const bootstrap = (marketing = false, decided = false) => ({
   configuration: { enabled: true, pixelId: '123456789012345', revision: 1, testMode: false, consentPolicy: 'global_opt_in' },
+  googleAds: { enabled: false, destination: null, remarketingEnabled: false, actions: null, defaultCurrency: null, diagnostic: 'disabled' },
   consent: { marketingGranted: marketing, decided, preferences: { essential: true, analytics: false, marketing }, csrfToken: 'csrf-private', policyVersion: 1 },
 });
 
 describe('canonical shared browser marketing engine', () => {
-  let dom: InstanceType<typeof JSDOM>; let calls: Array<any[]>; let requests: Array<{ url: string; init: any }>; let response: any;
+  let dom: InstanceType<typeof JSDOM>; let calls: Array<any[]>; let googleCalls: Array<any[]>; let requests: Array<{ url: string; init: any }>; let response: any;
   beforeEach(() => {
     dom = new JSDOM('<!doctype html><html><head></head><body></body></html>', { url: 'https://cloudhost247.com/', runScripts: 'outside-only' });
     dom.window.sessionStorage.clear();
-    calls = []; requests = []; response = bootstrap();
+    calls = []; googleCalls = []; requests = []; response = bootstrap();
     (dom.window as any).HTMLDialogElement.prototype.showModal = function () { this.open = true; };
     (dom.window as any).HTMLDialogElement.prototype.close = function () { this.open = false; };
     dom.window.eval(source);
     const w = dom.window as any;
     w.fbq = (...args: any[]) => calls.push(args);
+    w.gtag = (...args: any[]) => googleCalls.push(args);
     w.fetch = vi.fn(async (url: string, init: any) => {
       requests.push({ url, init });
       return { ok: true, json: async () => url.endsWith('/bootstrap') ? response : { consent: response.consent } };
@@ -30,7 +32,7 @@ describe('canonical shared browser marketing engine', () => {
   });
   afterEach(() => dom.window.close());
   const engine = () => (dom.window as any).CloudHost247Marketing;
-  const init = () => engine().initialize({ apiBase: '/api/v1/marketing', window: { location: { hostname: 'cloudhost247.com', pathname: '/', origin: 'https://cloudhost247.com', reload: vi.fn() }, sessionStorage: dom.window.sessionStorage, addEventListener: dom.window.addEventListener.bind(dom.window), get fbq() { return (dom.window as any).fbq; }, set fbq(v) { (dom.window as any).fbq = v; } } });
+  const init = () => engine().initialize({ apiBase: '/api/v1/marketing', window: dom.window });
   it('does not initialize, inject SDK or send PageView before consent', async () => {
     await init();
     expect(calls).toEqual([]);
@@ -104,6 +106,58 @@ describe('canonical shared browser marketing engine', () => {
     await new Promise(resolve => setTimeout(resolve, 0));
     expect(engine().snapshot().consent.marketingGranted).toBe(false);
     expect(calls[calls.length - 1]).toEqual(['consent', 'revoke']);
+  });
+  it('preserves legacy GA4 under analytics consent and holds GTM until both analytics and advertising consent', async () => {
+    response = bootstrap(false, false); response.consent.preferences.analytics = true;
+    await engine().initialize({ apiBase: '/api/v1/marketing', window: dom.window, ga4Id: 'G-TEST12345', gtmId: 'GTM-AB12CDE' });
+    expect(dom.window.document.getElementById('ch247-google-tag')).not.toBeNull();
+    expect(dom.window.document.getElementById('ch247-google-tag-manager')).toBeNull();
+    expect(googleCalls.filter(c => c[0] === 'config' && c[1] === 'G-TEST12345')).toHaveLength(1);
+    expect(googleCalls.some(c => c[0] === 'consent' && c[1] === 'update' && c[2].analytics_storage === 'granted' && c[2].ad_storage === 'denied')).toBe(true);
+    expect(googleCalls.some(c => c[0] === 'event' && c[1] === 'page_view' && c[2].send_to === 'G-TEST12345')).toBe(true);
+    response.consent = { ...response.consent, decided: true, marketingGranted: true, preferences: { essential: true, analytics: true, marketing: true } };
+    await engine().acceptAll();
+    expect(dom.window.document.getElementById('ch247-google-tag-manager')).not.toBeNull();
+    expect(googleCalls.filter(c => c[0] === 'config' && c[1] === 'G-TEST12345')).toHaveLength(1);
+  });
+  it('loads the official Google tag only after advertising consent and applies Consent Mode v2 before configuration', async () => {
+    response = bootstrap(false, false);
+    response.googleAds = { enabled: true, destination: 'AW-123456789', remarketingEnabled: false, actions: { purchase: { label: 'Purchase_01' }, lead: { label: 'Lead_01' } }, defaultCurrency: '', diagnostic: 'configured' };
+    await init();
+    expect(dom.window.document.getElementById('ch247-google-tag')).toBeNull();
+    expect(googleCalls).toEqual([]);
+    response.consent.marketingGranted = true; response.consent.decided = true; response.consent.preferences.marketing = true;
+    await engine().refresh();
+    expect(dom.window.document.querySelector('script[src="https://www.googletagmanager.com/gtag/js?id=AW-123456789"]')).not.toBeNull();
+    const defaultAt = googleCalls.findIndex(c => c[0] === 'consent' && c[1] === 'default');
+    const configAt = googleCalls.findIndex(c => c[0] === 'config' && c[1] === 'AW-123456789');
+    expect(defaultAt).toBeGreaterThanOrEqual(0); expect(defaultAt).toBeLessThan(configAt);
+    expect(googleCalls[defaultAt][2]).toEqual({ ad_storage: 'denied', analytics_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' });
+    expect(googleCalls.some(c => c[0] === 'consent' && c[1] === 'update' && c[2].ad_storage === 'granted')).toBe(true);
+  });
+  it('sends only configured conversions and preserves verified purchase ID, value and native currency', async () => {
+    response = bootstrap(true, true);
+    response.googleAds = { enabled: true, destination: 'AW-123456789', remarketingEnabled: false, actions: { purchase: { label: 'Purchase_01' }, lead: { label: 'Lead_01' } }, defaultCurrency: 'NGN', diagnostic: 'configured' };
+    await init();
+    const receipt = { verified: true, status: 'successful', eventId: 'purchase:payment-123', googleItems: [{ id: 'catalog:cloud:starter', name: 'Cloud Starter', quantity: 2 }], customData: { value: 84500, currency: 'NGN', content_ids: ['shared-plan'], content_type: 'product' } };
+    expect(engine().trackPurchase(receipt)).toBe(true);
+    expect(engine().trackPurchase(receipt)).toBe(false);
+    const conversion = googleCalls.find(c => c[0] === 'event' && c[1] === 'conversion' && c[2].send_to === 'AW-123456789/Purchase_01');
+    expect(conversion?.[2]).toMatchObject({ value: 84500, currency: 'NGN', transaction_id: 'purchase:payment-123', items: [{ id: 'catalog:cloud:starter', google_business_vertical: 'custom', quantity: 2, name: 'Cloud Starter' }] });
+    engine().track('Lead', { content_name: 'Enquiry' }, 'lead:verified-123');
+    expect(googleCalls.some(c => c[0] === 'event' && c[1] === 'conversion' && c[2].send_to === 'AW-123456789/Lead_01')).toBe(true);
+    expect(googleCalls.some(c => c[0] === 'event' && c[1] === 'conversion' && c[2].send_to === 'AW-123456789/undefined')).toBe(false);
+  });
+  it('updates Google consent to denied on withdrawal and does not dispatch after withdrawal', async () => {
+    response = bootstrap(true, true);
+    response.googleAds = { enabled: true, destination: 'AW-123456789', remarketingEnabled: true, actions: { lead: { label: 'Lead_01' } }, defaultCurrency: '', diagnostic: 'configured' };
+    await init();
+    response.consent = bootstrap(false, true).consent;
+    await engine().withdrawConsent();
+    expect(googleCalls.some(c => c[0] === 'consent' && c[1] === 'update' && c[2].ad_storage === 'denied' && c[2].ad_user_data === 'denied' && c[2].ad_personalization === 'denied')).toBe(true);
+    const before = googleCalls.length;
+    expect(engine().track('Lead', {}, 'lead:withdrawn-123')).toBe(false);
+    expect(googleCalls).toHaveLength(before);
   });
   it('fails closed on network errors and supports reopening preferences', async () => {
     (dom.window as any).fetch = vi.fn(async () => { throw new Error('offline'); });

@@ -16,6 +16,7 @@ export default function AdminMarketingIntegrationsPage() {
     <header className="ch247-card">
       <p className="ch247-page__hint"><Link to="/admin">Admin</Link> / Marketing Integrations</p>
       <h1>Marketing Integrations</h1>
+      <p><Link to="/admin/integrations/google-ads">Google Ads conversion settings →</Link></p>
       <p className="ch247-page__hint">One configuration for the CloudHost247 website and client area. Marketing stays off until the visitor gives permission.</p>
       <nav className="ch247-inline-actions" aria-label="Marketing integration sections" style={{ flexWrap: 'wrap', marginTop: '1rem' }}>
         {TABS.map(t => <Link key={t.id} className={`ch247-button ${t.id === tab ? '' : 'ch247-button--outline'}`} aria-current={t.id === tab ? 'page' : undefined} to={`/admin/marketing-integrations/${t.id}`}>{t.label}</Link>)}
