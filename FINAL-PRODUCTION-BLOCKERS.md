@@ -55,6 +55,17 @@ either — sandbox secret is a local random dev value in git-ignored `.env`); no
 no quarantined migration executed; no super_admin self-created (boundary observed); no security
 gate bypassed; all 2,901 suite tests and both evidence-producing runs preserved.
 
+
+## Phase 6 note (2026-11-09): externally-gated items re-verified as *absent*
+
+The Phase 6 sweep (BROWSER/WHMCS-CPANEL/PROVIDER-INTEGRATION/PAYMENT-PROVIDER/EMAIL-DELIVERY/
+POSTGRESQL certification reports + PHASE-6-CERTIFICATION-SUMMARY.md) independently re-measured
+every external gate on this environment, dated 2026-11-09T13:40Z: no browser binaries and
+Playwright CDN unreachable (B-1 unchanged); no WHMCS license/cPanel account (B-2 unchanged);
+no external Postgres service (B-3 unchanged); zero provider/payment/registrar/email credentials
+and no provider egress (B-4, B-4b unchanged); B-5 untouched by restriction. Every stopped
+certification carries its authorization-discipline record; every procedure is written and ready.
+
 ## Certification verdict
 
 - **Phase 3 staging certification: INDEPENDENTLY VALIDATED — reproducible, complete within its

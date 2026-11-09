@@ -62,6 +62,15 @@
 > **Remaining blockers are exclusively external** (owner credentials/licensing, real hosting
 > infrastructure, owner authorizations, ops decisions) — itemized with L1–L4 levels in
 > FINAL-PRODUCTION-BLOCKERS.md. Production certification still NOT GRANTED.
+>
+> **Phase 6 external certification attempt (2026-11-09):** every gate inspected under explicit
+> authorization discipline and STOPPED with dated evidence — no browsers/CMS licenses/provider
+> credentials/email relay/external Postgres exist in this environment (sweep proof in
+> PHASE-6-CERTIFICATION-SUMMARY.md). Six certification reports (BROWSER, WHMCS-CPANEL,
+> PROVIDER-INTEGRATION, PAYMENT-PROVIDER, EMAIL-DELIVERY, POSTGRESQL) document each stop plus
+> ready-to-execute procedures; nothing external was simulated or claimed. Standing executed
+> evidence unchanged and green: suite 2,916/2,916; staging smoke 33/33; probes 23/23;
+> release-candidate gate exit 0 (HEAD `5ecd29d9` → `…6000500c` document-only deltas).
 > Full plans per item: `POST-VERIFICATION-AUDIT.md` §3.
 >
 > **Required owner decisions before certification:**
