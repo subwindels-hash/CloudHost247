@@ -599,6 +599,32 @@ trackable, not to claim it is already satisfied.
 18. [ ] Existing WHMCS/PHP functionality on the same hosting account confirmed unaffected by this
     app's presence (no shared-path collisions, no `.htaccess` conflicts).
 
+## Appendix D — deployment rollback procedure (staging and production)
+
+The deployment is forward-reversible without special tooling:
+
+1. **Before every deploy**, keep the previous build: retain the prior `dist/` bundle tarball and
+   the commit SHA that produced it (builds are deterministic from `npm ci --omit=dev`).
+2. **Code rollback:** swap the application root back to the previous `dist/` (Passenger reads
+   `tmp/restart.txt` to pick up the change — `mkdir -p tmp && touch tmp/restart.txt`), then confirm
+   `/health` returns 200 and `/ready` reports the database reachable. Total downtime: the Passenger
+   restart window.
+3. **Database rollback:** migrations are forward-only by design — none of the 92 applied migrations
+   is reversible by entwined down-scripts, so a *code* rollback NEVER runs a newer migration. If a
+   released migration is incompatible with the previous code, deploy an additional corrective
+   migration (new, additive) instead of editing the historic file — the migration loader checksums
+   applied files and will refuse a tampered one (`verify:manifest`).
+4. **Config rollback:** environment changes (`.env` on cPanel) are edited in place; keep the prior
+   value set in the change ticket. Any change to `CREDENTIAL_ENCRYPTION_KEYS` must follow the key
+   ring rotation procedure (see OPERATIONAL-READINESS-REPORT.md §Secrets).
+5. **Static content rollback:** the SPA’s previous `public/` bundle is redeployed verbatim; the
+   deployed-files checksum suite (`verify:manifest`) confirms the bundle is exactly the recorded one.
+6. **Evidence:** every rollback must be logged in the ops journal with SHA-before/after and the
+   reason. A rollback that loses audit trail of *which build ran when* is itself an incident.
+
+*Example restore drill this procedure is paired with: `scripts/staging/db-recovery-exercise.mjs`
+(see COMPLETE-DATABASE-RECOVERY-REPORT.md).*
+
 ---
 
 *Last updated alongside Phase 1 of the Node platform rebuild. See the Phase 1 completion report
