@@ -43,18 +43,18 @@ export async function registerEmailForensicsCustomerRoutes(
   if (!env.EMAIL_FORENSICS_ENABLED) return;
   const pool = overridePool ?? getPool(env);
 
-  // Accept raw upload bodies for the .eml / text file endpoint so Fastify does not try to
-  // parse them as JSON.
-  app.addContentTypeParser(
-    'message/rfc822',
-    { parseAs: 'string' },
-    (_req: FastifyRequest, body: string) => body,
-  );
-  app.addContentTypeParser(
-    'text/plain',
-    { parseAs: 'string' },
-    (_req: FastifyRequest, body: string) => body,
-  );
+  // Accept raw upload bodies for the .eml / text file endpoint so Fastify does not try to parse them
+  // as JSON.
+  //
+  // These use the full `(request, body, done)` form deliberately. A two-argument parser is treated as
+  // a synchronous "return the body" parser, and it silently hangs the request: the reply is never
+  // sent and the connection stays open until the client gives up. The upload endpoint is the only
+  // route that accepts these content types, so the symptom was a hung `.eml` upload with no error.
+  const rawBody = (request: FastifyRequest, body: string | Buffer, done: (error: Error | null, result?: string) => void) => {
+    done(null, typeof body === 'string' ? body : body.toString('utf8'));
+  };
+  app.addContentTypeParser('message/rfc822', { parseAs: 'string' }, rawBody);
+  app.addContentTypeParser('text/plain', { parseAs: 'string' }, rawBody);
 
   // ------------------------------------------------------------------
   // POST /api/v1/email-forensics/analyze — paste raw headers

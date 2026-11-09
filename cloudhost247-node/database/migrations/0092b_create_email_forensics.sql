@@ -1,4 +1,8 @@
--- Migration: 0092_create_email_forensics.sql
+-- Migration: 0092b_create_email_forensics.sql
+-- Renamed from 0092_create_email_forensics.sql: the migration runner records only the numeric
+-- version prefix, so shipping two files sharing '0092' made the second one fail with a duplicate
+-- schema_migrations primary key and blocked every later migration. '0092b' sorts with the other
+-- 0092 files and remains a distinct runner version. No SQL changed by this rename.
 -- Purpose: storage for the native Email Trace & Forensics Analyzer — a defensive header-analysis
 -- feature that works without any external email-tracing or IP-lookup API.
 --

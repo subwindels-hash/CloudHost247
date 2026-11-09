@@ -15,6 +15,7 @@ import {
 import { createPlan, findPlanById, listAllPlansForProduct, setPlanStatus, updatePlan } from '../db/catalog-plans';
 import { createPricing, findPricingById, listAllPricingForPlan, updatePricing } from '../db/catalog-pricing';
 import { listAllFeaturesForPlan, replacePlanFeatures } from '../db/catalog-features';
+import { scheduleKnowledgeSync } from '../ai-website/knowledge-sync';
 import { requireRole } from '../lib/require-role';
 import { NotFoundError, ValidationError } from '../lib/errors';
 import { toAdminFeature, toAdminPlan, toAdminPricing, toAdminProduct } from '../dto/catalog';
@@ -215,6 +216,7 @@ export async function registerCatalogAdminRoutes(app: FastifyInstance, env: Env,
     await assertAdmin(request);
     const input = parseOrThrow(createProductSchema, request.body);
     const product = await createProduct(pool, { id: randomUUID(), ...input });
+    scheduleKnowledgeSync(pool, [`catalog:product:${product.slug}`], { triggeredBy: 'catalog-admin' });
     reply.code(201);
     return { product: toAdminProduct(product) };
   });
@@ -225,6 +227,7 @@ export async function registerCatalogAdminRoutes(app: FastifyInstance, env: Env,
     const patch = parseOrThrow(updateProductSchema, request.body);
     const product = await updateProduct(pool, id, patch);
     if (!product) throw new NotFoundError('No product was found with that id');
+    scheduleKnowledgeSync(pool, [`catalog:product:${product.slug}`], { triggeredBy: 'catalog-admin' });
     return { product: toAdminProduct(product) };
   });
 
@@ -234,6 +237,7 @@ export async function registerCatalogAdminRoutes(app: FastifyInstance, env: Env,
     const { status } = parseOrThrow(statusSchema, request.body);
     const product = await setProductStatus(pool, id, status);
     if (!product) throw new NotFoundError('No product was found with that id');
+    scheduleKnowledgeSync(pool, [`catalog:product:${product.slug}`], { triggeredBy: 'catalog-admin' });
     return { product: toAdminProduct(product) };
   });
 

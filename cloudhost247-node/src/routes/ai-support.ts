@@ -12,6 +12,7 @@ import { createTicket } from '../db/support-tickets';
 import { createNotification } from '../services/notification-service';
 import { recordTikTokServerConversion } from '../tiktok/event-service';
 import { decideSupportResponse, listSupportKnowledge, type EscalationReason } from '../services/ai-support-operator';
+import { recordUnansweredQuestion, questionKey, resolveUnansweredQuestion } from '../ai-website/unanswered';
 
 const id = z.string().uuid('conversation id must be a valid UUID');
 const email = z.string().trim().email().max(320);
@@ -53,6 +54,12 @@ async function getCustomerConversation(
   return { row, auth };
 }
 
+interface MessageProvenance {
+  links?: Array<{ label: string; url: string; kind?: string }>;
+  evidence?: Array<{ url: string; title: string; kind?: string; section?: string | null }>;
+  grounded?: boolean;
+}
+
 async function addMessage(
   db: Queryable,
   conversationId: string,
@@ -61,14 +68,31 @@ async function addMessage(
   authorId: string | null = null,
   intent: string | null = null,
   confidence: number | null = null,
-  sources: string[] = []
+  sources: string[] = [],
+  provenance: MessageProvenance = {}
 ) {
+  // Links and evidence are stored on the message, so a reopened conversation shows exactly what the
+  // customer was offered — and an admin reviewing an answer can see its sources without replaying
+  // retrieval against a corpus that has since changed.
   const result = await db.query<any>(
     `INSERT INTO ai_support_messages
-       (id, conversation_id, author_type, author_id, body, intent, confidence, knowledge_sources)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     RETURNING id, conversation_id, author_type, author_id, body, intent, confidence, knowledge_sources, created_at`,
-    [randomUUID(), conversationId, authorType, authorId, body, intent, confidence, JSON.stringify(sources)]
+       (id, conversation_id, author_type, author_id, body, intent, confidence, knowledge_sources, links, evidence, grounded)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+     RETURNING id, conversation_id, author_type, author_id, body, intent, confidence, knowledge_sources,
+               links, evidence, grounded, created_at`,
+    [
+      randomUUID(),
+      conversationId,
+      authorType,
+      authorId,
+      body,
+      intent,
+      confidence,
+      JSON.stringify(sources),
+      JSON.stringify(provenance.links ?? []),
+      JSON.stringify(provenance.evidence ?? []),
+      provenance.grounded === true,
+    ]
   );
   await db.query(
     `UPDATE ai_support_conversations SET last_message_at = now(), updated_at = now() WHERE id = $1`,
@@ -272,7 +296,7 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
   app.get<{ Params: { id: string } }>('/api/v1/ai-support/conversations/:id', async (request) => {
     const { row } = await getCustomerConversation(db, request, env, request.params.id);
     const messages = await db.query(
-      `SELECT id, author_type, body, intent, confidence, knowledge_sources, created_at
+      `SELECT id, author_type, body, intent, confidence, knowledge_sources, links, evidence, grounded, created_at
          FROM ai_support_messages WHERE conversation_id = $1 ORDER BY created_at ASC`,
       [row.id]
     );
@@ -301,7 +325,10 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
       [row.id]
     );
     await addMessage(db, row.id, 'CUSTOMER', input.message, auth?.userId ?? null);
-    const decision = await decideSupportResponse(db, input.message, { previousMessages: previous.rows });
+    const decision = await decideSupportResponse(db, input.message, {
+      previousMessages: previous.rows,
+      currentPath: typeof request.headers['x-cloudhost-page'] === 'string' ? request.headers['x-cloudhost-page'] : null,
+    });
 
     await auditRequest(db, request, auth?.userId ?? null, {
       action: decision.kind === 'ESCALATE' ? 'AI_ESCALATION_TRIGGERED' : decision.kind === 'NEWSLETTER' ? 'NEWSLETTER_SUBSCRIPTION_REQUESTED' : 'AI_RESPONSE_GENERATED',
@@ -317,7 +344,32 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
       });
     }
 
+    // A question the corpus could not answer is recorded *before* hand-off, so the gap survives even
+    // if a human answers it well — that is how the coverage report stays honest about what the AI
+    // itself could not do.
+    if (decision.kind === 'ESCALATE' && (decision.reason === 'AI_UNABLE_TO_ANSWER')) {
+      await recordUnansweredQuestion(db, {
+        question: input.message,
+        intent: decision.intent,
+        conversationId: row.id,
+        messageId: null,
+      });
+    }
     if (decision.kind === 'ESCALATE') {
+      // The assistant's own wording is part of the transcript. Without it a handed-off conversation
+      // shows the customer's question followed by silence, and the agent cannot see what the
+      // customer was already told.
+      await addMessage(
+        db,
+        row.id,
+        'AI',
+        decision.body,
+        null,
+        decision.intent,
+        decision.confidence,
+        decision.sources,
+        { links: decision.links, evidence: decision.evidence, grounded: false }
+      );
       const transfer = await escalate(db, row, decision.reason ?? 'OTHER');
       await auditRequest(db, request, auth?.userId ?? null, {
         action: transfer.assignedAgentId ? 'HUMAN_TRANSFER_COMPLETED' : 'SUPPORT_TICKET_CREATED',
@@ -343,8 +395,18 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
 
     // Newsletter is an AI answer plus a distinct, explicit form. Persisting it as an AI message
     // fixes the important visitor experience where the form appeared with no explanatory reply.
-    const response = await addMessage(db, row.id, 'AI', decision.body, null, decision.intent, decision.confidence, decision.sources);
-    return { decision, response };
+    const response = await addMessage(
+      db,
+      row.id,
+      'AI',
+      decision.body,
+      null,
+      decision.intent,
+      decision.confidence,
+      decision.sources,
+      { links: decision.links, evidence: decision.evidence, grounded: decision.origin === 'website' || decision.engine === 'reviewed' }
+    );
+    return { decision: { ...decision, followUps: decision.followUps ?? [] }, response };
   });
 
   app.patch<{ Params: { id: string } }>('/api/v1/ai-support/conversations/:id/contact', async (request) => {
@@ -562,6 +624,86 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
       metadata: input,
     });
     return { conversation: row };
+  });
+
+  /**
+   * Answer feedback from the customer.
+   *
+   * Ownership is checked the same way as reading the conversation (account or visitor token), so a
+   * rating can only be attached to a message the requester can already see. One rating per message;
+   * changing your mind updates the row.
+   */
+  app.post<{ Params: { id: string; messageId: string } }>('/api/v1/ai-support/conversations/:id/messages/:messageId/feedback', async (request) => {
+    const input = parse(
+      z.object({
+        rating: z.enum(['up', 'down']),
+        reason: z.enum(['incorrect', 'incomplete', 'unclear', 'outdated', 'wrong_link', 'other']).optional(),
+        comment: z.string().trim().max(1000).optional(),
+      }),
+      request.body
+    );
+    const messageId = parse(id, request.params.messageId);
+    const { row, auth } = await getCustomerConversation(db, request, env, request.params.id);
+    const message = await db.query<{ id: string; author_type: string }>(
+      `SELECT id, author_type FROM ai_support_messages WHERE id = $1 AND conversation_id = $2`,
+      [messageId, row.id]
+    );
+    if (!message.rows[0]) throw new NotFoundError('Message not found');
+    if (message.rows[0].author_type !== 'AI') throw new ValidationError('Only an assistant answer can be rated');
+
+    await db.query(
+      `INSERT INTO ai_support_feedback (message_id, conversation_id, user_id, rating, reason, comment)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (message_id) DO UPDATE
+          SET rating = EXCLUDED.rating, reason = EXCLUDED.reason, comment = EXCLUDED.comment, created_at = now()`,
+      [messageId, row.id, auth?.userId ?? null, input.rating, input.reason ?? null, input.comment ?? null]
+    );
+    await auditRequest(db, request, auth?.userId ?? null, {
+      action: 'AI_ANSWER_RATED',
+      resourceType: 'ai_support_message',
+      resourceId: messageId,
+      metadata: { rating: input.rating, reason: input.reason ?? null },
+    });
+    // A negative rating on an answer with no grounded evidence is a coverage gap as well as a
+    // quality signal; record it so the content team sees the question, not just the complaint.
+    if (input.rating === 'down') {
+      const question = await db.query<{ body: string }>(
+        `SELECT body FROM ai_support_messages
+          WHERE conversation_id = $1 AND author_type = 'CUSTOMER' AND created_at <= (SELECT created_at FROM ai_support_messages WHERE id = $2)
+          ORDER BY created_at DESC LIMIT 1`,
+        [row.id, messageId]
+      );
+      if (question.rows[0]?.body) {
+        await recordUnansweredQuestion(db, {
+          question: question.rows[0].body,
+          intent: 'negative_feedback',
+          conversationId: row.id,
+          messageId,
+        });
+      }
+    }
+    return { saved: true };
+  });
+
+  /** Mark a recorded gap as covered once content exists, so the coverage report stays trustworthy. */
+  app.patch('/api/v1/admin/ai-support/knowledge/gaps/:questionKey', async (request) => {
+    const auth = await requireRole(request, env, db, ['admin', 'super_admin']);
+    const input = parse(
+      z.object({ resolved: z.boolean(), note: z.string().trim().max(500).optional() }),
+      request.body
+    );
+    const key = parse(z.string().trim().min(4).max(200), (request.params as { questionKey: string }).questionKey);
+    if (input.resolved) {
+      const updated = await resolveUnansweredQuestion(db, key, auth.userId, input.note ?? null);
+      if (!updated) throw new NotFoundError('Question not found or already resolved');
+    }
+    await auditRequest(db, request, auth.userId, {
+      action: 'AI_KNOWLEDGE_GAP_UPDATED',
+      resourceType: 'ai_support_unanswered_question',
+      resourceId: key,
+      metadata: { resolved: input.resolved },
+    });
+    return { questionKey: key, resolved: input.resolved };
   });
 
   app.put('/api/v1/admin/ai-support/presence', async (request) => {
