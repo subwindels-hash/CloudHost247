@@ -31,7 +31,7 @@ export function orderItemMarketingId(item: { id: string; product_slug?: string |
   if (item.product_slug && item.plan_slug) return `catalog:${item.product_slug}:${item.plan_slug}`;
   return item.id;
 }
-const ORDER_ITEM_MARKETING_SELECT = `oi.id, oi.quantity, p.slug AS product_slug, pp.slug AS plan_slug, oi.metadata
+const ORDER_ITEM_MARKETING_SELECT = `oi.id, oi.quantity, p.slug AS product_slug, pp.slug AS plan_slug, p.name AS product_name, pp.name AS plan_name, oi.metadata
        FROM order_items oi
        LEFT JOIN products p ON p.id=oi.product_id
        LEFT JOIN product_plans pp ON pp.id=oi.plan_id`;
@@ -92,8 +92,9 @@ export async function verifiedPurchaseReceipt(pool: Queryable, userId: string, i
       AND EXISTS(SELECT 1 FROM marketing_conversion_contexts c WHERE c.order_id=i.order_id AND c.session_id=$3)
     ORDER BY p.completed_at DESC LIMIT 1`, [invoiceId,userId,sessionId])).rows[0];
   if (!payment) throw new NotFoundError('No verified successful payment is available for this invoice');
-  const items = (await pool.query<{ id: string; quantity: number; product_slug: string | null; plan_slug: string | null; metadata: Record<string, unknown> | null }>(`SELECT ${ORDER_ITEM_MARKETING_SELECT} WHERE oi.order_id=$1 ORDER BY oi.created_at,oi.id`, [payment.order_id])).rows;
+  const items = (await pool.query<{ id: string; quantity: number; product_slug: string | null; plan_slug: string | null; product_name:string|null; plan_name:string|null; metadata: Record<string, unknown> | null }>(`SELECT ${ORDER_ITEM_MARKETING_SELECT} WHERE oi.order_id=$1 ORDER BY oi.created_at,oi.id`, [payment.order_id])).rows;
   const contents = items.map(item => ({ id: orderItemMarketingId(item), quantity: item.quantity }));
+  const googleItems = items.map(item => ({ id: orderItemMarketingId(item), name: item.plan_name || item.product_name || undefined, quantity: item.quantity }));
   return { verified: true as const, status: 'successful' as const, eventId: `purchase:${payment.id}`,
-    customData: { value: Number(payment.amount), currency: payment.currency, content_type: 'product' as const, content_ids: contents.map(c => c.id), contents, num_items: contents.reduce((n,c) => n+c.quantity,0) } };
+    googleItems, customData: { value: Number(payment.amount), currency: payment.currency, content_type: 'product' as const, content_ids: contents.map(c => c.id), contents, num_items: contents.reduce((n,c) => n+c.quantity,0) } };
 }

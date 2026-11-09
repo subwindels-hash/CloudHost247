@@ -15,6 +15,7 @@ export interface MarketingSnapshot {
 }
 export interface PurchaseReceipt {
   verified: true; status: 'successful'; eventId: string;
+  googleItems?: Array<{ id: string; name?: string; quantity: number }>;
   customData: { currency: string; value: number; content_ids: string[]; contents: Array<{ id: string; quantity: number }>; content_type: 'product' };
 }
 interface MarketingEngine {
