@@ -43,6 +43,9 @@ Nothing is claimed as tested that was not executed. In particular, **no live AI 
 | Does typo tolerance work? | **Yes** | §5.1 — `vsp`, `wrodpress`, `cp panel`, compounds |
 | Is live catalogue pricing correct? | **Yes** | §5.4 — USD 19/month quoted from active plans |
 | Are domain prices answered? | **Yes, after fix** | §6.4 — was never wired; now quoted |
+| Is a price ever quoted for the wrong product? | **No, after fix** | §6.7 — the whole-catalogue fallback was removed |
+| Are concurrent syncs serialised? | **Yes, after fix** | §7.3 — database lease, `busy` instead of false failures |
+| Is there an AI-specific rate limit? | **Yes, after fix** | §8.5 — 10/min create, 30/min messages, per account or IP |
 | Are embeddings implemented? | **No** | §12.3 — nothing in the code path |
 | Is a live provider verified? | **No, and not claimed** | §9 |
 | Is the Unified Inbox implemented? | **No** | §9.3 — out of scope, unchanged |
@@ -68,10 +71,11 @@ Nine defects were found. Six are fixed in this branch; three are accepted limita
 | 3 | Bare pronoun answered as a confident answer with no price | **High** | **Fixed** | `answer-composer.ts` |
 | 4 | `relatedPages` dead **and** logically unable to emit | Medium | **Removed** | `retrieval.ts` |
 | 5 | Domain prices never answered (`resolveDomainPriceFacts` never called) | High | **Fixed** | `live-facts.ts`, `answer-composer.ts` |
-| 6 | Concurrent syncs race and report a misleading failure count | Medium | **Accepted** (§7.3) | `knowledge-sync.ts` |
+| 6 | Concurrent syncs race and report a misleading failure count | Medium | **Fixed** (§7.3) | `knowledge-sync.ts` |
 | 7 | Per-source failure path unreachable: unreadable page indexed as success | Medium | **Fixed** | `knowledge-sync.ts` |
 | 8 | Status questions have no live status grounding | Low | **Accepted** (§6.5) | — |
 | 9 | Curated layer can answer without website grounding (VoIP), and `voip` was corrupted to `void` | Low / Medium | **Partly fixed** (§6.3) | `query-understanding.ts`, `ai/knowledge.ts` |
+| 10 | Wrong product's price quoted when the question named no catalogue product | **Critical** | **Fixed** (§6.7) | `live-facts.ts`, `answer-composer.ts` |
 
 Two further defects were found *while fixing* 4/5/7 and are included in the fixes: a null-`category` crash in `upsertSource` (latent), and mid-word excerpt truncation (presentation).
 
@@ -263,13 +267,36 @@ Two matching bugs were fixed with it, both found by testing rather than reading:
 
 `how much is it?` returned `ANSWER` conf 0.86 citing `/platforms` — a pricing question answered with a page that quotes no price, and no disambiguation. Pronoun-only turns with no previous topic now `CLARIFY`. This does not affect follow-ups: with a previous topic the turn still resolves and answers.
 
-### 6.7 Residual: `mobile phone plan` (**open, documented**)
+### 6.7 `mobile phone plan` — wrong price fixed, prose still open
 
-`Do you offer a mobile phone plan?` still returns `ANSWER` 0.58 citing `/hosting/email`, `/cloud/managed-services`, `/help`. Every word is genuine website vocabulary ("mobile", "phone", "plan" all appear separately), so no word-level guard can distinguish it from a legitimate question — the page fragments never appear together. Doing this correctly requires **semantic** matching (embeddings), which is not implemented (§12.3).
+Investigating this turned up a worse defect than a relevance miss. With a seeded catalogue, "Do you offer a mobile phone plan?" was answered with:
 
-The mitigation that *does* hold is worth recording: no price, plan name or policy is invented. The answer quotes Email Hosting, which the customer can see is not a mobile plan. This is a *relevance* failure, not a fabrication, and it fails visibly.
+> These are the current published CloudHost247 catalogue prices:
+> **• Email Hosting — Mail Basic: USD 4.50 per month**
 
----
+A real price, for the wrong product, stated confidently. That is the one failure the assistant must never have.
+
+**Fixed.** `selectRelevantPrices` scored every plan against the question and, when nothing matched, fell back to `pool = scored` — the entire catalogue, cheapest first. Any question naming a product CloudHost247 does not sell therefore returned a valid-looking price list. No match now means **no price**; the composer says so accurately and names the products that do have published prices, taken from the catalogue rather than guessed. (The previous fallback wording was also wrong in the other direction — it blamed the catalogue for a gap that was really in the question.)
+
+```
+"Do you offer a mobile phone plan?"  -> no price quoted
+"Do you sell a mobile plan?"         -> no price quoted
+"Can I buy a laptop from you?"       -> ESCALATE, no price
+"Do you sell GPU mining rigs?"       -> ESCALATE, no price
+"How much does email hosting cost?"  -> USD 4.50 per month (unchanged)
+```
+
+**Still open: the prose.** "mobile plan" continues to excerpt the Email Hosting page. Three signals were measured to see whether a word-level fix is honest, and none separates the cases:
+
+| Signal | False case | Legitimate case | Verdict |
+| --- | --- | --- | --- |
+| Single-chunk word coverage | `mobile phone plan` = 0.67 | `VPS Basic cost` = 0.33 | Inverted — would refuse real questions |
+| Phrase bigrams present | 0/2 (`mobile phone`, `phone plan`) | 0/2 (`VPS Basic`, `uptime guarantee`) | No separation |
+| Product name in top page | "hosting" genuinely present | "hosting" genuinely present | No separation |
+
+The mechanism is clear from the retrieval trace: the words match *different* sources — "phone" matches `/help` ("Do you offer phone support?"), "plan" matches `/hosting/email`, and no chunk contains the phrase. Distinguishing that from a real question needs **semantic** matching of product names, i.e. embeddings, which are not implemented (§12.3).
+
+**Why this is recorded as open rather than patched.** A heuristic tuned until these six examples pass would be fitted to the test set and would misfire on the next real customer. The honest position: the answer is closed in the part that could mislead about money, and remains a relevance miss in the part that cannot.
 
 ## 7. Sync and regression (S3)
 
@@ -295,20 +322,31 @@ No manual entry, no keyword list, no code change. The page was discovered, index
 | `detectDrift` after sync | `{changed:[], missing:[], unexpected:[]}` |
 | Route removal | `deleteSourcesNotIn` prunes sources absent from discovery; covered by integration tests |
 
-### 7.3 Defect 6 — concurrent syncs (**accepted limitation, quantified**)
+### 7.3 Defect 6 — concurrent syncs (**fixed**)
 
-Two overlapping `syncWebsiteKnowledge` runs:
+Two overlapping `syncWebsiteKnowledge` runs used to interleave their read-then-write passes:
 
 ```
 run A: indexed=396
 run B: indexed=394 failed=2
 after both: 1444 chunks / 406 sources / 0 failed
-third run : idempotent at 1444/406
 ```
 
-The failure is **transient and self-healing** — the corpus settles correctly and a re-run is clean. What is wrong is the *reporting*: the losing run reports `failed=2` for what is really an upsert conflict, and the ledger briefly records failures that are not real.
+The corpus healed, so the damage was never the data — it was the reporting. The losing run claimed `failed=2` for rows that were only contending, and the ledger briefly recorded failures that never happened.
 
-**Not fixed in this branch.** A correct fix is a sync-level advisory lock or conflict-safe upsert, which changes write semantics on a production table and deserves its own review. The current behaviour is fail-visible rather than silently corrupt, which is why it is recorded as a limitation rather than a blocker. Operational note: schedule one sync owner (the worker) and treat concurrent triggers (admin "reindex" during a worker sweep) as expected to collide.
+**Fix.** The sync now holds the platform's existing database-backed lease (`worker_cycle_leases`, migration 0058) for the whole reconciliation. That primitive already provided the three properties required — expiry, crash recovery, and duplicate-job protection (its conflict predicate is part of a single UPSERT, so two processes cannot both win) — so no second locking mechanism was added. A caller that cannot get the lease returns `status: 'busy'` with `busy: true` and explicitly does no work, rather than returning zeros that read as "nothing changed". Release is in a `finally`, so a throwing sync cannot strand the lock.
+
+Verified:
+
+```
+A: status=succeeded busy=false indexed=396 failed=0
+B: status=busy      busy=true  indexed=0   failed=0
+after both: 406 sources / 1000 chunks / failed sources: 0
+later sync: status=succeeded unchanged=406
+leases held after: 0
+```
+
+Two regression tests cover it: one deliberately holds the lock (deterministic, rather than relying on two promises to overlap) and asserts the blocked call wrote nothing; the other proves a throwing sync still releases.
 
 ### 7.4 Defect 7 — the failure path was unreachable (**fixed**)
 
@@ -384,15 +422,30 @@ All 11 admin routes are guarded; reads require `staff|admin|super_admin`, mutati
 
 The split was confirmed with the owner as intended (staff can look, only admins can change). Mutating calls are audited via `auditRequest`.
 
-### 8.5 Rate limiting — **gap, accepted with a recommendation**
+### 8.5 Rate limiting — **fixed**
 
-The AI endpoints inherit only the global limiter: **300 requests/minute per `ip|route`** (`plugins/security.ts:322`). There is **no AI-specific throttle**. Measured behaviour: a burst of 320 anonymous conversation creations was accepted up to **300** before the first 429; likewise 300 messages accepted on a single conversation.
+The AI endpoints originally inherited only the global limiter: 300 requests/minute per `ip|route`. Measured, that meant a burst of **300 anonymous conversation creations** was accepted before the first 429, and 300 messages on a single conversation.
 
-Consequence: an unauthenticated client can open ~300 conversations and post ~300 messages per minute, each triggering a retrieval. At 27 ms median that is cheap per call but unbounded in aggregate, and it writes rows into `ai_support_conversations`/`ai_support_messages`.
+**Fix.** Both AI endpoints now have their own buckets, using the codebase's existing per-route `config.rateLimit` convention:
 
-**Not fixed in this branch** — a limit here is a product decision (per-IP, per-conversation, or per-session, and what the customer-visible message should say), not a correctness fix, and changing it silently could throttle real customers. Recommended before launch: a dedicated bucket on `POST .../messages` and on conversation creation, materially below 300/min.
+| Endpoint | Limit |
+| --- | --- |
+| `POST /api/v1/ai-support/conversations` | 10 / minute |
+| `POST /api/v1/ai-support/conversations/:id/messages` | 30 / minute |
 
-Input validation **is** correct — 6/6 as expected:
+Authenticated callers are keyed by **account ID**, anonymous visitors by **IP**. That asymmetry is deliberate: a signed-in customer behind a shared office NAT is not throttled by colleagues, while an anonymous client cannot escape the IP bucket by dropping the token. The ceilings are set for what a person actually does — a conversation is a burst of a few dozen turns at most.
+
+Verified:
+
+```
+anonymous create:  created=10 limited=10
+alice create:      created=10 limited=4
+bob first create:  201   (separate account, not throttled by alice)
+message burst:     accepted=30 limited=10
+429 body:          {"error":"ERROR","message":"Rate limit exceeded, retry in 1 minute"}
+```
+
+Input validation was already correct — 6/6 as expected:
 
 | Case | Result |
 | --- | --- |
@@ -508,11 +561,22 @@ The first test passes on both trees because `ungroundedTokens` was populated cor
 
 ## 12. Outstanding integration requirements (S6 deliverable 5)
 
-### 12.1 Before production (blocking)
+### 12.1 Before production
 
-1. **Decide and set the AI rate limit** (§8.5). No AI-specific throttle exists today.
-2. **Resolve sync concurrency** (§7.3) — advisory lock or conflict-safe upsert, and ensure one sync owner.
-3. **Deploy-time smoke test.** Every result in this report comes from PGlite with real migrations. A staging deployment against real PostgreSQL must reproduce: cold sync, warm sync, drift, pricing, and the escalation set.
+1. ~~Decide and set the AI rate limit~~ — **done** (§8.5): 10/min conversation creation, 30/min messages, keyed per account or per IP.
+2. ~~Resolve sync concurrency~~ — **done** (§7.3): the existing database lease now serialises syncs; a blocked run reports `busy` rather than false failures.
+3. **Deploy-time smoke test — still required.** Every result in this report comes from PGlite with real migrations. A staging deployment against real PostgreSQL must reproduce: cold sync, warm sync, drift, pricing, the escalation set, and the rate-limit ceilings.
+4. **Decide the merge history** (§13.1). A trial merge has been built and verified; the decision is the maintainers'.
+
+### 12.1a Semantic retrieval (open, needs a decision)
+
+Recorded as a design decision rather than a task, because it is a new subsystem and not a tweak:
+
+- **What is missing:** matching a question's product concept to a catalogue product's meaning. Both remaining relevance failures (mobile plan → Email Hosting; `mobile phone plan` excerpting the wrong page) come from this.
+- **What it would need:** an embedding provider, a vector column, and a backfill/refresh path. `0097` records why it is currently absent: `pgvector` is not available on the supported cPanel PostgreSQL, and the embedded engine used by the test suite does not provide it either. So this is not a code-only change — it depends on infrastructure.
+- **What was rejected and why:** word-level heuristics. Measured in §6.7; single-chunk coverage is *inverted* between the false and legitimate cases, phrase bigrams do not separate them, and the top page genuinely contains the words. Tuning a heuristic until the six known examples pass would be fitting to the test set.
+
+Until this is decided, the assistant's behaviour on such questions is: **no invented price** (defect 10 fixed), an honest "I could not find that", and the retrieved page shown with its links so the customer can see what was matched.
 
 ### 12.2 Before enabling a provider (non-blocking)
 
@@ -531,31 +595,42 @@ The first test passes on both trees because `ungroundedTokens` was populated cor
 
 ## 13. Production readiness verdict (S6 deliverable 6)
 
-**Not certified.** The evidence supports a narrower, defensible statement:
+**Not certified for production.** That verdict has not changed, and it is worth being precise about why, because the code is considerably stronger than when the audit began.
 
-> The deterministic website-knowledge engine is implemented, tested, and works: it ingests the whole site without hand-teaching, tolerates typos and compounds, answers from published content, quotes live catalogue prices, refuses instead of inventing when it has no content, scopes conversations correctly, and restricts knowledge management to admins. Backend, integration and frontend suites are green. Three defects remain open (sync concurrency, AI rate limiting, semantic relevance), and no live model provider has been verified.
+### 13.1 What is established, and what each layer of evidence proves
 
-Reasons it is not certified:
+The instruction to keep these separate is correct, and is the reason this section exists at all. **2,273 passing unit tests do not certify anything** — they establish only the behaviours they exercise.
 
-1. **No deployment verification.** Everything ran on PGlite. A passing suite is not a deployment certificate.
-2. **No provider verification.** Model phrasing has never executed against a real endpoint.
-3. **Open rate-limit gap** on an unauthenticated, write-heavy endpoint.
-4. **Known sync race** that can temporarily misreport failures.
-5. **Residual relevance failure** on out-of-scope products (§6.7) that only semantic matching would fix.
+| Layer | Status | What it actually proves |
+| --- | --- | --- |
+| Code implementation | Complete for the defect register | The logic exists and is readable |
+| Automated tests | 2,273 unit / 1,000 frontend green | The specific asserted behaviours hold |
+| Integration verification | 963 integration tests green; ~40 targeted re-runs | The pieces work together on a real (embedded) database |
+| Database / migration | Real migrations on PGlite (PG 16.4) | The schema applies and is idempotent |
+| Staging verification | **Not performed** | — |
+| External provider certification | **Not performed** (§9) | — |
+| Production certification | **Not achieved** | — |
 
-Recommended path to certification: fix items 1–3 in §12.1, enable the provider in staging, re-run this audit's harness family against the deployment, then certify.
+### 13.2 Why it is still not certified
 
-### 13.1 The pull request cannot be merged automatically, and why
+1. **No deployment verification.** Everything ran on PGlite. A passing suite is not a deployment certificate; the real PostgreSQL, the Passenger process model, and the cPanel environment are untested by this work.
+2. **No provider verification.** Model phrasing has never executed against a real endpoint. No credentials exist in this environment and none were invented.
+3. **Semantic retrieval is absent** (§12.1a), so questions about products CloudHost247 does not sell can still retrieve a plausible-looking page.
+4. **The merge history is unresolved** (§13.3) — until the two lines are combined, this branch's fixes are not in any release.
 
-PR #114 is open against `main` and GitHub reports it **CONFLICTING**. This is not a content conflict in the audit's changes; it is a history problem that a human must resolve:
+### 13.3 The merge, decided by evidence rather than by force
 
-- `main` (`cbbe4f7`, a merge commit for PR #112) is an **orphan snapshot with a single commit and no shared history** with this branch (`git merge-base` returns nothing).
-- `main`'s tree **does not contain the AI Website Intelligence work at all** — no `src/ai-website/*`, no `docs/AI_WEBSITE_INTELLIGENCE.md`, no `AdminAiKnowledgePage.tsx`, no `ai-website-knowledge.test.ts`. This branch adds those 24 paths.
-- The migration numbering was the only hard collision. `main` moved email forensics to `0096`; this branch had put the AI knowledge schema at `0096` and parked email forensics at `0092b`. **Resolved:** the AI knowledge migration is now `0097_ai_website_knowledge.sql`, which is free on both lines, and the expected-tail test resolves the email-forensics prefix from the directory instead of assuming one history.
+The audit was asked not to force-merge the orphan `main` snapshot and to compare both trees first. That comparison was done, and then a **trial merge** was built and verified rather than reasoned about:
 
-Resolving this by inventing a merge would risk either dropping the AI subsystem or dropping whatever `main` rebuild contains. It is deliberately **left to the maintainers**: either merge with unrelated histories once the intended base is agreed, or re-establish `main` on the real history. This audit does not rewrite histories or push to `main`.
+- 9,229 shared files, of which **17 differ**; exactly **1 path** exists only on `main`.
+- Of the 17, **13 are this branch's AI work** (`main` never moved them off the common base) and **4 are `main`-only work** that must be preserved: the contact-page redesign (`ContactPage.tsx`, `contact-page.css`), one email-forensics test, and the migrate test.
+- The only hard collision was the migration number, now resolved: `main` moved email forensics to `0096`, so the AI knowledge schema is `0097` — free on both lines.
 
----
+**What a correct merge looks like** (built as a trial branch, not pushed to `main`): take this branch's version of the 13 AI files, take `main`'s version of the 3 files it changed independently, resolve `migrate.test.ts` to the branch-aware version, and **delete `0092b_create_email_forensics.sql`** — in the merged tree `0096` is authoritative, and keeping both would apply the same schema twice under two version prefixes.
+
+**Verification of the trial merge:** TypeScript clean, and 2,321 tests pass across unit + the AI integration suites + `migrate.test.ts` + the `main`-only email-forensics test. Getting there required one real fix: the merge initially carried *both* email-forensics migrations, and the migration test caught it — which is exactly what that test is for. The `migrate.test.ts` change (resolving the prefix from the directory and sorting the tail with the runner's collation) is deliberate: the same test file now passes against the unmerged branch (`0092b_` present) and against the merged tree (`0096_` present).
+
+The remaining decision is procedural, not technical, and belongs to the maintainers.
 
 ## 14. Remediation commits
 
