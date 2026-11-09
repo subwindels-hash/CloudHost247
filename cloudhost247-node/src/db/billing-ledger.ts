@@ -8,6 +8,7 @@ export interface LedgerEntryRow {
   amount: string;
   currency: string;
   description: string;
+  idempotency_key?: string | null;
   created_at: string;
 }
 
@@ -21,6 +22,8 @@ export interface RecordLedgerEntryInput {
   amount: string;
   currency: string;
   description: string;
+  /** Phase 14: optional idempotency key for staff refunds (unique per invoice, immutable with the entry). */
+  idempotencyKey?: string | null;
 }
 
 /**
@@ -51,22 +54,22 @@ export async function recordLedgerEntry(tx: Queryable, input: RecordLedgerEntryI
   // written at all and the throw below is the only outcome.
   const { rows } = input.invoiceId
     ? await tx.query<LedgerEntryRow>(
-        `INSERT INTO billing_ledger (id, user_id, invoice_id, entry_type, amount, currency, description)
-         SELECT $1, i.user_id, i.id, $3, $4::numeric(12,2), i.currency, $5
+        `INSERT INTO billing_ledger (id, user_id, invoice_id, entry_type, amount, currency, description, idempotency_key)
+         SELECT $1, i.user_id, i.id, $3, $4::numeric(12,2), i.currency, $5, $8
          FROM invoices i
          WHERE i.id = $2
            AND i.user_id = $6
            AND i.currency = $7
          RETURNING *`,
-        [input.id, input.invoiceId, input.entryType, input.amount, input.description, input.userId, input.currency]
+        [input.id, input.invoiceId, input.entryType, input.amount, input.description, input.userId, input.currency, input.idempotencyKey ?? null]
       )
     : // A standalone entry with no invoice (e.g. an account-level credit) has no invoice to
       // derive from, so the caller's own values are used. No cross-row invariant applies.
       await tx.query<LedgerEntryRow>(
-        `INSERT INTO billing_ledger (id, user_id, invoice_id, entry_type, amount, currency, description)
-         VALUES ($1, $2, NULL, $3, $4, $5, $6)
+        `INSERT INTO billing_ledger (id, user_id, invoice_id, entry_type, amount, currency, description, idempotency_key)
+         VALUES ($1, $2, NULL, $3, $4, $5, $6, $7)
          RETURNING *`,
-        [input.id, input.userId, input.entryType, input.amount, input.currency, input.description]
+        [input.id, input.userId, input.entryType, input.amount, input.currency, input.description, input.idempotencyKey ?? null]
       );
 
   const row = rows[0];

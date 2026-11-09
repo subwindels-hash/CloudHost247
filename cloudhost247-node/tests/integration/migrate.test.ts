@@ -140,6 +140,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0091_add_google_ads_integration.sql',
     // TikTok Pixel + Events API as another provider on the 0089 marketing tables.
     '0092_add_tiktok_pixel_integration.sql',
+    // Phase 14 (P14-02 remediation): idempotency key on billing_ledger refund entries.
+    '0093_refund_idempotency_key.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -1,0 +1,47 @@
+{
+ "generatedAt": "2026-11-09T15:54:20.690Z",
+ "engine": "PostgreSQL 16.2 (real, unix socket)",
+ "allPassed": true,
+ "results": [
+  {
+   "scenario": "S1 two simultaneous partial refunds",
+   "detail": "results=[OK | ERR:Refund amount of $60.00 exceeds refundable balance of $40.00] refundedTotal=60",
+   "pass": true
+  },
+  {
+   "scenario": "S2 concurrent refunds on distinct invoices (same customer has both)",
+   "detail": "A=OK B=OK",
+   "pass": true
+  },
+  {
+   "scenario": "S3 concurrent refund + cancel (unpaid invoice)",
+   "detail": "cancel=OK refund=ERR:Cannot refund an invoice in 'unpaid' status finalStatus=void refundEntries=0",
+   "pass": true
+  },
+  {
+   "scenario": "S4 timeout + retry with same idempotency key",
+   "detail": "refundEntries=1 refundedTotal=40.00 retryStatus=partially_refunded",
+   "pass": true
+  },
+  {
+   "scenario": "S5 concurrent duplicate refund with SAME idempotency key",
+   "detail": "A=OK B=OK refundEntries=1 total=30.00",
+   "pass": true
+  },
+  {
+   "scenario": "S6 connection destroyed mid-transaction (no COMMIT)",
+   "detail": "refundEntries=0 invoiceStatus=paid",
+   "pass": true
+  },
+  {
+   "scenario": "S7 engineered deadlock detection & rollback recovery",
+   "detail": "tx1=ERR:40P01 tx2=DONE",
+   "pass": true
+  },
+  {
+   "scenario": "S8 idempotent replay after full refund",
+   "detail": "replay status=refunded refunds=0",
+   "pass": true
+  }
+ ]
+}

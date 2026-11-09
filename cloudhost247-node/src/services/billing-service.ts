@@ -164,7 +164,8 @@ export async function adminIssueRefund(
   amountCents: number,
   reason: string,
   genId: () => string,
-  audit: AuditContext = {}
+  audit: AuditContext = {},
+  idempotencyKey: string | null = null
 ): Promise<AdminInvoiceDetailDTO> {
   if (!Number.isInteger(amountCents) || amountCents <= 0) {
     throw new ValidationError('Refund amount must be a positive integer in cents');
@@ -191,6 +192,18 @@ export async function adminIssueRefund(
     );
     const lockedInvoice = locked[0];
     if (!lockedInvoice) throw new NotFoundError('No invoice was found with that id');
+
+    // Phase 14 (P14-02): idempotent replay. If a caller retries with the same idempotency key
+    // (e.g. after an HTTP timeout during the first attempt), the refund must be recognized as
+    // already issued — no second ledger entry, no second refund — and return the current state.
+    if (idempotencyKey) {
+      const { rows: existing } = await tx.query<{ id: string }>(
+        `SELECT id FROM billing_ledger WHERE invoice_id = $1 AND entry_type = 'refund' AND idempotency_key = $2 LIMIT 1`,
+        [invoiceId, idempotencyKey]
+      );
+      if (existing[0]) return 'idempotent-replay';
+    }
+
     if (lockedInvoice.status !== 'paid' && lockedInvoice.status !== 'partially_refunded') {
       throw new ValidationError(`Cannot refund an invoice in '${lockedInvoice.status}' status`);
     }
@@ -214,7 +227,9 @@ export async function adminIssueRefund(
     const newInvoiceStatus = fullRefund ? 'refunded' : 'partially_refunded';
     const newOrderPaymentStatus = fullRefund ? 'refunded' : 'partially_refunded';
 
-    // 1. Append refund entry into immutable billing ledger
+    // 1. Append refund entry into immutable billing ledger (with the idempotency key, if supplied —
+    // the unique partial index is the last line of defense against a duplicated refund even if the
+    // caller's retry races the original).
     await recordLedgerEntry(tx, {
       id: genId(),
       userId: invoice.user_id,
@@ -223,6 +238,7 @@ export async function adminIssueRefund(
       amount: fromCents(amountCents),
       currency: invoice.currency,
       description: `Staff refund: ${reason.trim()}`,
+      idempotencyKey,
     });
 
     // 2. Update invoice status
