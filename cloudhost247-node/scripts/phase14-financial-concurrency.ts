@@ -88,7 +88,7 @@ async function main() {
     const key = `p14-s4-${randomUUID()}`;
     await adminIssueRefund(pool as never, s.admin, s.invoiceId, 4000, 'S4 first attempt', randomUUID, {}, key);
     // Simulated client timeout: the refund already committed; the retry arrives with the same key.
-    const retry = await adminIssueRefund(pool as never, s.admin, s.invoiceId, 4000, 'S4 retry after timeout', randomUUID, {}, key);
+    const retry = await adminIssueRefund(pool as never, s.admin, s.invoiceId, 4000, 'S4 first attempt', randomUUID, {}, key) // true retry: same invoice, amount AND reason;
     const led = await ledgerTotals(s.invoiceId);
     const refunds = led.find((l) => l.entry_type === 'refund');
     const ok = refunds?.n === 1 && Number.parseFloat(refunds.total) === 40 && retry.status === 'partially_refunded';
@@ -99,11 +99,11 @@ async function main() {
   {
     const s = await seedPaidInvoice(60);
     const k1 = `p14-s5-${randomUUID()}`;
-    await adminIssueRefund(pool as never, s.admin, s.invoiceId, 3000, 'S5 first', randomUUID, {}, k1);
+    await adminIssueRefund(pool as never, s.admin, s.invoiceId, 3000, 'S5 duplicate retry', randomUUID, {}, k1);
     // Same key concurrently from two sessions — DB-level unique index must allow only one insert even under race.
     const [q1, q2] = await Promise.all([
-      adminIssueRefund(pool as never, s.admin, s.invoiceId, 3000, 'S5 dup key caller A', randomUUID, {}, k1).then(() => 'OK').catch((e: Error) => `ERR:${(e as Error).message.slice(0, 50)}`),
-      adminIssueRefund(pool as never, s.admin, s.invoiceId, 3000, 'S5 dup key caller B', randomUUID, {}, k1).then(() => 'OK').catch((e: Error) => `ERR:${(e as Error).message.slice(0, 50)}`),
+      adminIssueRefund(pool as never, s.admin, s.invoiceId, 3000, 'S5 duplicate retry', randomUUID, {}, k1).then(() => 'OK').catch((e: Error) => `ERR:${(e as Error).message.slice(0, 50)}`),
+      adminIssueRefund(pool as never, s.admin, s.invoiceId, 3000, 'S5 duplicate retry', randomUUID, {}, k1).then(() => 'OK').catch((e: Error) => `ERR:${(e as Error).message.slice(0, 50)}`),
     ]);
     const led = await ledgerTotals(s.invoiceId);
     const refunds = led.find((l) => l.entry_type === 'refund');
@@ -157,8 +157,8 @@ async function main() {
   {
     const s = await seedPaidInvoice(90);
     const key = `p14-s8-${randomUUID()}`;
-    await adminIssueRefund(pool as never, s.admin, s.invoiceId, 9000, 'S8 original', randomUUID, {}, key);
-    const replayDetail = await adminIssueRefund(pool as never, s.admin, s.invoiceId, 9000, 'S8 replay same key', randomUUID, {}, key);
+    await adminIssueRefund(pool as never, s.admin, s.invoiceId, 9000, 'S9 retry: identical operation', randomUUID, {}, key);
+    const replayDetail = await adminIssueRefund(pool as never, s.admin, s.invoiceId, 9000, 'S9 retry: identical operation', randomUUID, {}, key);
     record('S8 idempotent replay after full refund', `replay status=${replayDetail.status} refunds=${(replayDetail.ledger as Array<{entry_type:string}>).filter((e) => e.entry_type === 'refund').length}`, replayDetail.status === 'refunded');
   }
 

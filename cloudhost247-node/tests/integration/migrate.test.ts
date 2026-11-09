@@ -142,6 +142,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0092_add_tiktok_pixel_integration.sql',
     // Phase 14 (P14-02 remediation): idempotency key on billing_ledger refund entries.
     '0093_refund_idempotency_key.sql',
+    // Phase 16 hardening: refund idempotency keys become globally unique (one key = one operation).
+    '0094_refund_idempotency_global_uniqueness.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -17,7 +17,7 @@ import {
 } from '../db/billing-ledger';
 import { listOrderItemsForOrder, setOrderPaymentStatus, setOrderStatus, type OrderRow } from '../db/orders';
 import { cancelAllPendingPaymentsForInvoice, listPaymentsForInvoice } from '../db/payments';
-import { NotFoundError, ValidationError } from '../lib/errors';
+import { ConflictError, NotFoundError, ValidationError } from '../lib/errors';
 import { fromCents, toCents } from '../lib/money';
 import { recordAuthEvent } from '../db/users';
 import {
@@ -196,12 +196,28 @@ export async function adminIssueRefund(
     // Phase 14 (P14-02): idempotent replay. If a caller retries with the same idempotency key
     // (e.g. after an HTTP timeout during the first attempt), the refund must be recognized as
     // already issued — no second ledger entry, no second refund — and return the current state.
+    //
+    // Phase 16 hardening: the key identifies ONE operation globally (unique index), and a replay
+    // is only honored when invoice, amount AND reason all match the original. Reusing a key for a
+    // different invoice or with altered parameters is a conflict, never a silent replay.
     if (idempotencyKey) {
-      const { rows: existing } = await tx.query<{ id: string }>(
-        `SELECT id FROM billing_ledger WHERE invoice_id = $1 AND entry_type = 'refund' AND idempotency_key = $2 LIMIT 1`,
-        [invoiceId, idempotencyKey]
+      const { rows: existing } = await tx.query<{ invoice_id: string | null; amount: string; description: string }>(
+        `SELECT invoice_id, amount, description FROM billing_ledger WHERE entry_type = 'refund' AND idempotency_key = $1 LIMIT 1`,
+        [idempotencyKey]
       );
-      if (existing[0]) return 'idempotent-replay';
+      const prior = existing[0];
+      if (prior) {
+        const sameOperation =
+          prior.invoice_id === invoiceId &&
+          toCents(prior.amount) === amountCents &&
+          prior.description === `Staff refund: ${reason.trim()}`;
+        if (!sameOperation) {
+          throw new ConflictError(
+            'This idempotency key belongs to a different refund operation — generate a new key instead of reusing one'
+          );
+        }
+        return 'idempotent-replay';
+      }
     }
 
     if (lockedInvoice.status !== 'paid' && lockedInvoice.status !== 'partially_refunded') {
