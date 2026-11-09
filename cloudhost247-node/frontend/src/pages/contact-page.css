@@ -285,9 +285,9 @@
 }
 
 .ch247-contact-page .ch247-contact__form [role='status'] {
-  border: 1px solid rgba(38, 100, 54, .28);
-  background: rgba(235, 249, 237, .92);
-  color: #245a2a;
+  border: 1px solid rgba(95, 69, 10, .28);
+  background: rgba(251, 245, 228, .92);
+  color: #5f450a;
 }
 
 .ch247-contact-page .ch247-contact__form [role='alert'] {
