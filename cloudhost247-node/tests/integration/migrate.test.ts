@@ -163,11 +163,16 @@ const EXPECTED_MIGRATIONS = [
     // accepts whichever of the two valid spellings is present rather than hard-coding one history
     // and failing on the other. The AI knowledge migration is 0097 in both, because 0096 now
     // belongs to email forensics on the release line.
-    EMAIL_FORENSICS_MIGRATION,
-    '0093_add_ga4_configuration.sql',
-    '0094_add_ga4_checkout_context.sql',
-    '0095_add_ga4_purchase_delivery.sql',
-    '0097_ai_website_knowledge.sql',
+    // The email-forensics prefix sorts differently depending on which line it came from
+    // (`0092b_` lands before 0093, `0096_` lands after 0095), so the tail is sorted with the same
+    // collation the runner uses instead of being written in one hard-coded order.
+    ...[
+      EMAIL_FORENSICS_MIGRATION,
+      '0093_add_ga4_configuration.sql',
+      '0094_add_ga4_checkout_context.sql',
+      '0095_add_ga4_purchase_delivery.sql',
+      '0097_ai_website_knowledge.sql',
+    ].sort(),
   ];
 
   it('finds the committed migration files in order', () => {
