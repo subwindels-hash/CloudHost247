@@ -45,15 +45,18 @@ export async function registerEmailForensicsCustomerRoutes(
 
   // Accept raw upload bodies for the .eml / text file endpoint so Fastify does not try to
   // parse them as JSON.
+  // Content-type parsers MUST call done(err, result): an arity-2 sync-returning parser never
+  // advances the request pipeline (the request simply hangs — reproduced with a minimal Fastify
+  // app in the PR-113 merge debug session). Do not "simplify" back to `=> body`.
   app.addContentTypeParser(
     'message/rfc822',
     { parseAs: 'string' },
-    (_req: FastifyRequest, body: string) => body,
+    (_req: FastifyRequest, body: string, done: (err: Error | null, result?: unknown) => void) => { done(null, body); },
   );
   app.addContentTypeParser(
     'text/plain',
     { parseAs: 'string' },
-    (_req: FastifyRequest, body: string) => body,
+    (_req: FastifyRequest, body: string, done: (err: Error | null, result?: unknown) => void) => { done(null, body); },
   );
 
   // ------------------------------------------------------------------

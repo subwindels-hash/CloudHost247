@@ -146,6 +146,11 @@ describe('migration runner against the real database/migrations SQL files', () =
     // Native Email Trace & Forensics Analyzer (0096). Version 0092 was already owned by the
     // TikTok integration, so this schema follows the GA4 migrations with its own unique version.
     '0096_create_email_forensics.sql',
+    // Phase 14 (P14-02 remediation): idempotency key on billing_ledger refund entries.
+    // (Renumbered 0093->0097 during the PR merge: main had independently taken 0093-0096.)
+    '0097_refund_idempotency_key.sql',
+    // Phase 16 hardening: refund idempotency keys become globally unique (one key = one operation).
+    '0098_refund_idempotency_global_uniqueness.sql',
   ];
 
   it('finds the committed migration files in order', () => {

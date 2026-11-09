@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { issueAdminRefund, type AdminInvoiceDetail } from '../lib/admin-billing-api';
 
 interface AdminRefundModalProps {
@@ -27,6 +27,11 @@ export function AdminRefundModal({ isOpen, onClose, invoice, onRefundSuccess }: 
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Phase 15 (A): ONE idempotency key per refund operation, generated when this dialog opens and
+  // reused for every retry of THIS submission — a timeout + safe retry can never create two refunds.
+  // Closing+reopening the dialog (a deliberate new operation) generates a new key.
+  const idempotencyKey = useMemo(() => crypto.randomUUID(), [invoice.id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -50,11 +55,20 @@ export function AdminRefundModal({ isOpen, onClose, invoice, onRefundSuccess }: 
 
     setSubmitting(true);
     try {
-      const updated = await issueAdminRefund(invoice.id, amountCents, reason.trim());
+      const updated = await issueAdminRefund(invoice.id, amountCents, reason.trim(), idempotencyKey);
       onRefundSuccess(updated);
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to issue refund.');
+      const message = String(err?.message || 'Failed to issue refund.');
+      const looksTransient = /timeout|timed out|network|fetch|5\d\d|abort|deadlock/i.test(message);
+      // Phase 15 (B): for transient/ambiguous outcomes, the operator MUST check the invoice's
+      // final refund state before retrying — the retry reuses the same idempotency key, so a
+      // refund that already succeeded will be returned, not duplicated.
+      setError(
+        looksTransient
+          ? `${message} The request outcome is uncertain. Check the invoice ledger for a completed refund before retrying — a retry from this dialog reuses the same idempotency key and will report the existing refund instead of creating a second one.`
+          : message
+      );
     } finally {
       setSubmitting(false);
     }

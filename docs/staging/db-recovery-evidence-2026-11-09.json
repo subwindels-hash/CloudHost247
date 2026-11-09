@@ -1,0 +1,57 @@
+{
+  "runAt": "2026-11-09T09:25:54.662Z",
+  "dataDir": "/home/user/CloudHost247/cloudhost247-node/.dev-db-pg",
+  "backupDir": "/tmp/ch247-db-backup-1794216354662",
+  "steps": [
+    {
+      "step": "snapshot live database",
+      "pass": true,
+      "detail": "221 tables; migrations applied: 92"
+    },
+    {
+      "step": "staging tenants present before disaster",
+      "pass": true,
+      "detail": "staging customers: 10"
+    },
+    {
+      "step": "financial records present before disaster",
+      "pass": true,
+      "detail": "[{\"entry_type\":\"charge\",\"n\":10},{\"entry_type\":\"payment\",\"n\":5}]"
+    },
+    {
+      "step": "file-level backup taken",
+      "pass": true,
+      "detail": "/tmp/ch247-db-backup-1794216354662"
+    },
+    {
+      "step": "primary storage destroyed (simulated)",
+      "pass": true,
+      "detail": "/home/user/CloudHost247/cloudhost247-node/.dev-db-pg.destroyed-1bac5128"
+    },
+    {
+      "step": "restore from backup copy",
+      "pass": true,
+      "detail": "/home/user/CloudHost247/cloudhost247-node/.dev-db-pg"
+    },
+    {
+      "step": "restored database fingerprint == pre-loss fingerprint",
+      "pass": true,
+      "detail": "221 tables identical; ledger sha256=d48542c55826f169…"
+    },
+    {
+      "step": "migration compatibility preserved",
+      "pass": true,
+      "detail": "schema_migrations rows=92"
+    },
+    {
+      "step": "tenant isolation rows preserved",
+      "pass": true,
+      "detail": "users=11"
+    },
+    {
+      "step": "financial record preservation (ledger append-only rows intact)",
+      "pass": true,
+      "detail": "billing_ledger sha256 match: true"
+    }
+  ]
+}

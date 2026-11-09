@@ -23,6 +23,23 @@ before consent. The SHA-256 inventory in
 `docs/independent-rebuild/original-file-manifest.sha256` was re-cut for exactly
 these three paths; no side-car override was introduced.
 
+## Vendor integrity baseline re-cut — 2026-11-09
+
+The consent-aware Google Ads and TikTok Pixel integrations deliberately changed
+two more vendor-derived legacy-theme files after the 2026-11-08 re-cut:
+
+- `templates/cloudhost247_legacy/footer.tpl` — passes the legacy GA4, GTM and
+  Baidu identifiers to the shared marketing runtime as inert `data-*`
+  attributes (no unconditional loaders) and adds the TikTok runtime script.
+- `templates/cloudhost247_legacy/cloudhost247_legacy_includes/seo-trackers.tpl` —
+  completes the retirement of the direct GA4/Baidu/GTM initializers that fired
+  before consent; the canonical consent-gated owners live in the shared
+  marketing runtime.
+
+The SHA-256 inventory in
+`docs/independent-rebuild/original-file-manifest.sha256` was re-cut for exactly
+these two paths; no side-car override was introduced.
+
 ## Approved naming rules
 
 - **Legal/company name:** `CloudHost247 Isc.` (including the final period).

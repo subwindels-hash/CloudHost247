@@ -116,7 +116,16 @@
       "title": "cPanel deployment",
       "summary": "This document covers deploying, updating, and operating the new independent Node.js/TypeScript platform (cloudhost247-node/) on cPanel shared hosting only, using cPanel's Application Manager (Passenge",
       "source": "docs/CPANEL_DEPLOYMENT.md",
-      "bytes": 37540
+      "bytes": 39438
+    },
+    {
+      "slug": "integrations-google-ads",
+      "href": "/docs/integrations-google-ads",
+      "section": "Operations",
+      "title": "Google Ads integration",
+      "summary": "CloudHost247 provides an optional browser-side Google Ads tag integration managed from Admin → Google Ads conversions (/admin/integrations/google-ads). It uses the existing marketing integration store",
+      "source": "docs/integrations/GOOGLE-ADS.md",
+      "bytes": 14023
     }
   ]
 }

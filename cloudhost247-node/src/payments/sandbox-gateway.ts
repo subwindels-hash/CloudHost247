@@ -39,13 +39,16 @@ export class SandboxGateway implements PaymentGateway, WebhookHandler {
     const signature = getHdr('x-cloudhost-signature') || getHdr('x-sandbox-signature') || getHdr('x-signature');
     if (!signature) return false;
 
-    // Optional timestamp header freshness check
+    // Timestamp freshness is MANDATORY for this gateway (Phase 5 hardening, finding P4-F1).
+    // An omitted timestamp used to skip the freshness window entirely; replay was still bounded
+    // by webhook-event idempotency, but the window should not depend on the dedup store being
+    // reachable. A sandbox webhook without a parseable in-window timestamp is rejected outright,
+    // exactly like Stripe requires `t=` in `Stripe-Signature`.
     const timestamp = getHdr('x-cloudhost-timestamp');
-    if (timestamp) {
-      const timeMs = parseInt(timestamp, 10);
-      if (!isNaN(timeMs) && Math.abs(Date.now() - timeMs) > 300 * 1000) {
-        return false;
-      }
+    if (!timestamp) return false;
+    const timeMs = parseInt(timestamp, 10);
+    if (isNaN(timeMs) || Math.abs(Date.now() - timeMs) > 300 * 1000) {
+      return false;
     }
 
     return verifySignature(secret, rawBody.toString('utf8'), signature);
@@ -71,15 +74,20 @@ export class SandboxGateway implements PaymentGateway, WebhookHandler {
       outcome = 'failed';
     }
 
+    // Standardized amount representation (Phase 5 hardening, finding P4-F2):
+    //   - string  → decimal MAJOR units, exact-cent parsed via toCents ("10.00" → 1000) — PRIMARY
+    //   - number  → integer MINOR units only (1000 = $10.00); fractional numbers are rejected:
+    //               10.5 as a number would silently mean ten and a half CENTS, an ambiguity no
+    //               financial field may carry
+    // Anything else (missing, boolean, object, fractional number, malformed string) throws so
+    // the receiver answers 400 "Malformed webhook payload" instead of guessing an amount.
     let amountCents = 0;
-    try {
-      if (typeof json.amount === 'string') {
-        amountCents = toCents(json.amount);
-      } else if (typeof json.amount === 'number') {
-        amountCents = json.amount;
-      }
-    } catch {
-      amountCents = 0;
+    if (typeof json.amount === 'string') {
+      amountCents = toCents(json.amount);
+    } else if (typeof json.amount === 'number' && Number.isInteger(json.amount) && json.amount >= 0) {
+      amountCents = json.amount;
+    } else {
+      throw new TypeError('Sandbox webhook requires amount as a decimal string (major units) or integer cents (number)');
     }
 
     const providerReference = String(json.providerReference || '');

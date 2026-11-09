@@ -41,6 +41,9 @@ const listLedgerQuerySchema = z.object({
 const refundInvoiceSchema = z.object({
   amountCents: z.number().int().positive('Refund amount must be a positive integer in cents'),
   reason: z.string().min(1, 'Reason is required').max(2000),
+  // Phase 15 (A): idempotency is MANDATORY. The admin UI generates one key per refund operation
+  // and preserves it across retries; a refund without a key can silently duplicate after a timeout.
+  idempotencyKey: z.string().min(8, 'An idempotency key is required').max(128),
 });
 
 const cancelInvoiceSchema = z.object({
@@ -78,12 +81,12 @@ export async function registerAdminBillingRoutes(app: FastifyInstance, env: Env,
   app.post<{ Params: { id: string } }>('/api/v1/admin/invoices/:id/refund', async (request) => {
     const auth = await requireRole(request, env, pool, BILLING_STAFF_ROLES);
     const { id } = parseOrThrow(idParamSchema, request.params);
-    const { amountCents, reason } = parseOrThrow(refundInvoiceSchema, request.body);
+    const { amountCents, reason, idempotencyKey } = parseOrThrow(refundInvoiceSchema, request.body);
 
     const invoice = await adminIssueRefund(pool, auth.userId, id, amountCents, reason, randomUUID, {
       ipAddress: request.ip,
       userAgent: request.headers['user-agent'] ?? null,
-    });
+    }, idempotencyKey ?? null);
 
     return { invoice };
   });
