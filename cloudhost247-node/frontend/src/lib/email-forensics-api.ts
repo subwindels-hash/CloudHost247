@@ -23,6 +23,8 @@ export interface AnalyzeFileInput {
 }
 
 export interface HistoryParams {
+  /** index signature permits passing whole param objects into the shared query serializer. */
+  [key: string]: string | number | undefined;
   status?: 'pending' | 'complete' | 'failed';
   limit?: number;
   offset?: number;

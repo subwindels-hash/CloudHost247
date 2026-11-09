@@ -20,7 +20,7 @@ import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogS
 import {
   analyzeFile, analyzeHeaders, deleteAnalysis, detailToResult, fetchAnalysis,
   fetchDatabaseStatus, fetchHistory, fetchReport, type EmailForensicsResult,
-  type AnalysisSummary,
+  type AnalysisSummary, type IpCandidate,
 } from '../lib/email-forensics-api';
 import './email-forensics.css';
 
