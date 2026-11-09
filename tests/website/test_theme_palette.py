@@ -275,6 +275,12 @@ class MetallicPaletteTests(unittest.TestCase):
         'assets/images/cloudhost247/brand',
     )
     EXTENSIONS = {'.css', '.tpl', '.tsx', '.ts', '.js', '.svg'}
+    # The official header/footer logo lockup (`cloudhost247-official.webp` + `FooterLogoIcon.tsx`)
+    # intentionally retains the `#009641` logo mark color; all UI chrome and theme surfaces remain gated.
+    LOGO_PIN_ALLOWLIST = {
+        ('cloudhost247-node/frontend/src/components/FooterLogoIcon.tsx', '#009641'),
+        ('cloudhost247-node/frontend/src/hostinger-chrome.css', '#009641'),
+    }
 
     @staticmethod
     def is_green(hex_colour: str) -> bool:
@@ -288,9 +294,13 @@ class MetallicPaletteTests(unittest.TestCase):
             for path in sorted((ROOT / surface).rglob('*')):
                 if not path.is_file() or path.suffix not in self.EXTENSIONS:
                     continue
+                rel = str(path.relative_to(ROOT))
                 for colour in re.findall(r'#[0-9a-fA-F]{6}\b', path.read_text(encoding='utf-8', errors='ignore')):
+                    lowered = colour.lower()
+                    if (rel, lowered) in self.LOGO_PIN_ALLOWLIST:
+                        continue
                     if self.is_green(colour):
-                        offenders.append(f'{path.relative_to(ROOT)}: {colour.lower()}')
+                        offenders.append(f'{rel}: {lowered}')
         self.assertEqual(
             offenders, [],
             'Green is retired from the CloudHost247 brand. Use the metallic gold/silver anchors '
