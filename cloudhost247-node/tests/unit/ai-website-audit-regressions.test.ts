@@ -266,3 +266,33 @@ describe('audit: concurrent syncs are serialised', () => {
     }
   }, 180_000);
 });
+
+describe('audit: a price is never quoted for a product the question did not name', () => {
+  const facts = {
+    available: true,
+    products: [],
+    prices: [
+      { productName: 'Email Hosting', planName: 'Mail Basic', amount: '4.50', currency: 'USD', billingPeriod: 'monthly', setupFee: null, url: '/hosting/email' },
+      { productName: 'VPS Hosting', planName: 'VPS Basic', amount: '19', currency: 'USD', billingPeriod: 'monthly', setupFee: null, url: '/hosting/vps' },
+    ],
+    comingSoon: [],
+    unavailableReason: null,
+  };
+
+  it('returns no price when nothing in the catalogue matches the question', async () => {
+    const { selectRelevantPrices } = await import('../../src/ai-website/live-facts');
+    // "mobile phone plan" names no CloudHost247 product. The old behaviour fell back to the whole
+    // catalogue, cheapest first, so this question was answered with "Email Hosting — USD 4.50".
+    expect(selectRelevantPrices(facts as never, ['mobile', 'phone', 'plan'])).toEqual([]);
+  });
+
+  it('still quotes the price when the question does name the product', async () => {
+    const { selectRelevantPrices } = await import('../../src/ai-website/live-facts');
+    // "hosting" legitimately matches both products, so both are offered — but the one the question
+    // actually names ("email") must rank first, and its real price must be the one shown.
+    const priced = selectRelevantPrices(facts as never, ['email', 'hosting', 'cost']);
+    expect(priced.length).toBeGreaterThan(0);
+    expect(priced[0]!.productName).toBe('Email Hosting');
+    expect(priced[0]!.amount).toBe('4.50');
+  });
+});

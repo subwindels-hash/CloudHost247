@@ -245,7 +245,17 @@ export function selectRelevantPrices(facts: LiveFacts, terms: readonly string[],
     return { price, score };
   });
   const matched = scored.filter((entry) => entry.score > 0);
-  const pool = matched.length > 0 ? matched : scored;
+  /**
+   * No product or plan name matched the question, so there is no price that answers it.
+   *
+   * This used to fall back to the whole catalogue, cheapest first. With a seeded catalogue,
+   * "Do you offer a mobile phone plan?" — a product CloudHost247 does not sell — was answered with
+   * a confident price list beginning "Email Hosting — Mail Basic: USD 4.50 per month". That is the
+   * one failure the assistant must never have: quoting a real price for the wrong product. An empty
+   * list makes the caller say it cannot quote a price instead, which is the honest answer.
+   */
+  if (matched.length === 0) return [];
+  const pool = matched;
   return pool
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;

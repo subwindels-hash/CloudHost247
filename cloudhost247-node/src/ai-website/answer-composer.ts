@@ -336,8 +336,21 @@ function composeDeterministic(
   if (understanding.intent === 'pricing' && options.facts?.available) {
     const prices = selectRelevantPrices(options.facts, [...terms, ...retrieval.entities.map((entity) => entity.label)], 8);
     const block = formatPriceBlock(prices, understanding);
-    if (block.text) sections.push(block.text);
-    else sections.push('The catalogue is readable but has no published price for that product group, so there is no price I can quote. A draft or unpublished product is never presented as purchasable.');
+    if (block.text) {
+      sections.push(block.text);
+    } else if (options.facts.prices.length > 0) {
+      // Nothing in the catalogue matched, so there is no price that answers this question. Say so
+      // accurately and name what does have a price — verified from the catalogue, not guessed. The
+      // old wording ("no published price for that product group") blamed the catalogue for a gap
+      // that is really in the question.
+      const names = [...new Set(options.facts.prices.map((price) => price.productName))].slice(0, 8);
+      sections.push(
+        'I could not match that to any published CloudHost247 product, so I will not quote a price. '
+        + `The products with published prices right now are: ${names.join(', ')}.`
+      );
+    } else {
+      sections.push('The catalogue is readable but has no published price for that product group, so there is no price I can quote. A draft or unpublished product is never presented as purchasable.');
+    }
   } else if (understanding.intent === 'pricing' && options.facts && !options.facts.available) {
     sections.push('I cannot reach the published catalogue at the moment, so I will not quote a price from memory. CloudHost247 Support can confirm the current price.');
   }
