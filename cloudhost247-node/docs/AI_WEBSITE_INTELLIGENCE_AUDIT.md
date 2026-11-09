@@ -545,6 +545,16 @@ Reasons it is not certified:
 
 Recommended path to certification: fix items 1–3 in §12.1, enable the provider in staging, re-run this audit's harness family against the deployment, then certify.
 
+### 13.1 The pull request cannot be merged automatically, and why
+
+PR #114 is open against `main` and GitHub reports it **CONFLICTING**. This is not a content conflict in the audit's changes; it is a history problem that a human must resolve:
+
+- `main` (`cbbe4f7`, a merge commit for PR #112) is an **orphan snapshot with a single commit and no shared history** with this branch (`git merge-base` returns nothing).
+- `main`'s tree **does not contain the AI Website Intelligence work at all** — no `src/ai-website/*`, no `docs/AI_WEBSITE_INTELLIGENCE.md`, no `AdminAiKnowledgePage.tsx`, no `ai-website-knowledge.test.ts`. This branch adds those 24 paths.
+- Consequently the branch's `0096_ai_website_knowledge.sql` collides by filename with `main`'s `0096_create_email_forensics.sql`, and this branch's `0092b_` carries the local renumber workaround for the *other* numbering clash (`0092_add_tiktok_pixel_integration.sql`).
+
+Resolving this by inventing a merge would risk either dropping the AI subsystem or dropping whatever `main` rebuild contains. It is deliberately **left to the maintainers**: either merge with unrelated histories once the intended base is agreed, or re-establish `main` on the real history. This audit does not rewrite histories or push to `main`.
+
 ---
 
 ## 14. Remediation commits
