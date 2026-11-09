@@ -461,39 +461,3 @@ export async function retrieveKnowledge(
   };
 }
 
-/**
- * Related content for an answer: pages the retrieved documents themselves advertise as related,
- * filtered to verified routes. This is how "you may also need" suggestions stay real.
- */
-export async function relatedPages(
-  db: Queryable,
-  urls: readonly string[],
-  verify: (candidate: string) => string | null,
-  limit = 3
-): Promise<Array<{ url: string; title: string }>> {
-  const out: Array<{ url: string; title: string }> = [];
-  const seen = new Set(urls);
-  for (const url of urls) {
-    if (out.length >= limit) break;
-    try {
-      const { rows } = await db.query<{ url: string | null; title: string }>(
-        `SELECT url, title FROM ai_knowledge_sources
-          WHERE url = ANY($1::text[]) AND sync_status = 'indexed'
-          LIMIT 12`,
-        [[url]]
-      );
-      void rows;
-    } catch {
-      /* related suggestions are optional */
-    }
-  }
-  for (const url of urls) {
-    if (out.length >= limit) break;
-    const verified = verify(url);
-    if (verified && !seen.has(verified)) {
-      out.push({ url: verified, title: verified });
-      seen.add(verified);
-    }
-  }
-  return out;
-}
