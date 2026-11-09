@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { randomBytes, createHash } from 'node:crypto';
 import { join } from 'node:path';
-import { FsStorageAdapter, StorageAdapter, StoredObjectMetadata, sha256File, sha256Buffer } from '../../src/backups/storage-adapter';
+import { FsStorageAdapter, StorageAdapter, StoredObjectMetadata, sha256File, sha256Buffer, AccessDeniedError } from '../../src/backups/storage-adapter';
 import { BackupWorker, InMemoryBackupInventory } from '../../src/backups/backup-worker';
 
 /** Phase 23 Session 6 — worker unit battery. */
@@ -94,6 +94,15 @@ describe('Phase 23 — backup worker [unit]', () => {
     const recovered = await w.restoreBufferFrom((await inv.get(r.backupId))!.artifact_key);
     expect(recovered.length).toBeGreaterThan(0);
     expect(recovered.toString()).toContain('TABLE data');
+  });
+
+  it('unauthorized object access rejection: a denying adapter aborts the run, inventory shows failed', async () => {
+    class Denying extends FsStorageAdapter { override async putObject(): Promise<void> { throw new AccessDeniedError('AccessDenied: put object refused'); } }
+    const inv = new InMemoryBackupInventory();
+    const w = new BackupWorker(depsFor(new Denying(storeDir), {}), inv);
+    await expect(w.run('staging')).rejects.toThrow(/AccessDenied/);
+    const rows = await inv.completedForEnv('staging');
+    expect(rows).toHaveLength(0);
   });
 
   it('rotation compatibility: artifact written under v1 decrypts under a ring containing v2 after rotation', async () => {
