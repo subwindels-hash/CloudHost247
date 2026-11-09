@@ -469,7 +469,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | `src/services/ai-support-operator.ts` | Clean. Guard rails precede knowledge; provenance persisted. |
 | `src/routes/ai-support.ts` | Clean. Tenant scoping fail-closed; validation complete. No AI-specific throttle (§8.5). |
 | `src/routes/ai-knowledge-admin.ts` | Clean. All 11 routes role-guarded and audited. |
-| `database/migrations/0096_ai_website_knowledge.sql` | Clean. Additive, idempotent, no extension required — correctly extends the existing store. |
+| `database/migrations/0097_ai_website_knowledge.sql` | Clean. Additive, idempotent, no extension required — correctly extends the existing store. |
 | `frontend/src/pages/AdminAiKnowledgePage.tsx` | Clean. Follows existing admin conventions. |
 | `frontend/src/components/AiSupportWidget.tsx` | Clean. |
 
@@ -551,7 +551,7 @@ PR #114 is open against `main` and GitHub reports it **CONFLICTING**. This is no
 
 - `main` (`cbbe4f7`, a merge commit for PR #112) is an **orphan snapshot with a single commit and no shared history** with this branch (`git merge-base` returns nothing).
 - `main`'s tree **does not contain the AI Website Intelligence work at all** — no `src/ai-website/*`, no `docs/AI_WEBSITE_INTELLIGENCE.md`, no `AdminAiKnowledgePage.tsx`, no `ai-website-knowledge.test.ts`. This branch adds those 24 paths.
-- Consequently the branch's `0096_ai_website_knowledge.sql` collides by filename with `main`'s `0096_create_email_forensics.sql`, and this branch's `0092b_` carries the local renumber workaround for the *other* numbering clash (`0092_add_tiktok_pixel_integration.sql`).
+- The migration numbering was the only hard collision. `main` moved email forensics to `0096`; this branch had put the AI knowledge schema at `0096` and parked email forensics at `0092b`. **Resolved:** the AI knowledge migration is now `0097_ai_website_knowledge.sql`, which is free on both lines, and the expected-tail test resolves the email-forensics prefix from the directory instead of assuming one history.
 
 Resolving this by inventing a merge would risk either dropping the AI subsystem or dropping whatever `main` rebuild contains. It is deliberately **left to the maintainers**: either merge with unrelated histories once the intended base is agreed, or re-establish `main` on the real history. This audit does not rewrite histories or push to `main`.
 

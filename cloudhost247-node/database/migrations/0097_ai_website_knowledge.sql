@@ -1,4 +1,4 @@
--- Migration: 0096_ai_website_knowledge.sql
+-- Migration: 0097_ai_website_knowledge.sql
 -- Purpose: make the EXISTING AI knowledge base (0066) the single source of truth for everything the
 -- public CloudHost247 website publishes — every page, tool, document, policy, product, service,
 -- announcement and FAQ — so the AI chat assistant can answer from real retrieved content instead of

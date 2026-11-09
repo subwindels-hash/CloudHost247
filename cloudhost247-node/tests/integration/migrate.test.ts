@@ -25,7 +25,21 @@ describe('migration runner against the real database/migrations SQL files', () =
     await db.close();
   });
 
-  const EXPECTED_MIGRATIONS = [
+  /**
+ * Email forensics landed under two different prefixes depending on which line of work it followed:
+ * `0092b_` on the AI branch, `0096_` on the release branch. The runner keys on the version prefix,
+ * so either is valid as long as only one of them is present. Resolved from the directory rather
+ * than assumed, so this test asserts ordering instead of a particular history.
+ */
+const EMAIL_FORENSICS_MIGRATION = (() => {
+  const names = listMigrationFiles().map((file) => file.name);
+  const found = names.find((name) => name === '0096_create_email_forensics.sql')
+    ?? names.find((name) => name === '0092b_create_email_forensics.sql');
+  if (!found) throw new Error('email forensics migration is missing from database/migrations');
+  return found;
+})();
+
+const EXPECTED_MIGRATIONS = [
     '0001_create_users.sql',
     '0002_create_auth_audit_log.sql',
     '0003_create_revoked_tokens.sql',
@@ -140,13 +154,20 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0091_add_google_ads_integration.sql',
     // TikTok Pixel + Events API as another provider on the 0089 marketing tables.
     '0092_add_tiktok_pixel_integration.sql',
-    // Native Email Trace & Forensics Analyzer storage. Renamed from 0092_create_email_forensics.sql:
-    // two files sharing a numeric version made the runner's schema_migrations insert collide.
-    '0092b_create_email_forensics.sql',
+    // Native Email Trace & Forensics Analyzer storage.
+    //
+    // Two independent lines of work hit the same collision: version 0092 was already owned by the
+    // TikTok integration, so this schema cannot use it. This branch (the AI Website Intelligence
+    // work, based on PR #110) parked it at 0092b; the release line moved it to 0096. The prefix is
+    // recorded in schema_migrations, but the *ordering* is what matters, so the expected tail
+    // accepts whichever of the two valid spellings is present rather than hard-coding one history
+    // and failing on the other. The AI knowledge migration is 0097 in both, because 0096 now
+    // belongs to email forensics on the release line.
+    EMAIL_FORENSICS_MIGRATION,
     '0093_add_ga4_configuration.sql',
     '0094_add_ga4_checkout_context.sql',
     '0095_add_ga4_purchase_delivery.sql',
-    '0096_ai_website_knowledge.sql',
+    '0097_ai_website_knowledge.sql',
   ];
 
   it('finds the committed migration files in order', () => {

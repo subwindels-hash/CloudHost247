@@ -89,7 +89,7 @@ here so the final counts are not inflated with invented "articles".
 
 ## 2. Phase 2 — Decisions
 
-**D1. One knowledge system, extended.** Migration `0096_ai_website_knowledge.sql` adds
+**D1. One knowledge system, extended.** Migration `0097_ai_website_knowledge.sql` adds
 `source_kind`, `source_key`, `url`, `section`, `category`, `fingerprint`, `sync_status`,
 `last_synced_at`, `excluded`, and the chunk columns `url`, `page_title`, `section`, `category`,
 `fingerprint`, `search_text`, plus a generated `tsvector` and a GIN index — all on the existing
@@ -167,7 +167,7 @@ without an automated test in §11 that exercises it.
 | `src/routes/catalog-admin.ts` | modified | Catalogue create/update/status publish an event that reindexes that product immediately. |
 | `src/worker/main.ts` | modified | Schedules the knowledge sweep in the existing loop, isolated so a failing reindex cannot stop billing or provisioning. |
 | `src/app.ts` | modified | Registers the admin knowledge routes. |
-| `database/migrations/0096_ai_website_knowledge.sql` | new | Extends the existing knowledge tables; adds sync ledger, exclusions, answer feedback and the unanswered-question queue; message provenance columns. |
+| `database/migrations/0097_ai_website_knowledge.sql` | new | Extends the existing knowledge tables; adds sync ledger, exclusions, answer feedback and the unanswered-question queue; message provenance columns. |
 | `frontend/src/components/AiSupportWidget.tsx` | modified | Rendering of verified links with in-panel navigation, feedback, typing indicator, follow-up suggestions, keyboard/Escape handling, live region, retry without a phantom message. |
 | `frontend/src/pages/AdminAiKnowledgePage.tsx` | new | The knowledge control centre UI. |
 | `frontend/src/ai-support.css` | modified | Widget affordances and control-centre layout, `prefers-reduced-motion`, focus-visible. |
