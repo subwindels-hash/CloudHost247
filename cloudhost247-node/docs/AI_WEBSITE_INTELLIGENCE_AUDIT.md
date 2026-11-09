@@ -534,7 +534,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 
 | Suite | Result | Note |
 | --- | --- | --- |
-| `tests/unit` | **157 files / 2,269 tests passed, 0 failed** | includes the 8 new audit regressions |
+| `tests/unit` | **157 files / 2,273 tests passed, 0 failed** | includes the 12 audit regressions |
 | `tests/integration` | **963 passed, 17 skipped, 0 failed** (99 files) | baseline on `e9d29d4`; AI subsets re-run after fixes: 37/37 and 19/19 |
 | `frontend/tests` | **80 files / 1,000 tests passed, 0 failed** | |
 
@@ -542,7 +542,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 
 ### 11.2 Regression tests — verified to fail without the fixes
 
-`tests/unit/ai-website-audit-regressions.test.ts` — 8 tests. Each was run against `e9d29d4` to confirm it genuinely catches the defect:
+`tests/unit/ai-website-audit-regressions.test.ts` — 12 tests. Each was run against `e9d29d4` to confirm it genuinely catches the defect:
 
 | Test | Fails on `e9d29d4`? |
 | --- | --- |
@@ -554,6 +554,10 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | does not begin an excerpt mid-word | **yes** |
 | counts a document with no content as failed and records it | **yes** |
 | vocabulary covers what is actually indexed | **yes** |
+| reports busy, and does no work, while another sync holds the lock | **yes** (no lease existed) |
+| releases the lock even when the sync itself throws | **yes** (no lease existed) |
+| returns no price when nothing in the catalogue matches | **yes** (quoted the whole catalogue) |
+| still quotes the price when the question names the product | passes on both — guards against over-correcting |
 
 The first test passes on both trees because `ungroundedTokens` was populated correctly all along — the bug was in `retrieval.ts`'s comparison, which cannot be exercised without a database. That is stated plainly rather than presented as a passing regression.
 
@@ -628,7 +632,7 @@ The audit was asked not to force-merge the orphan `main` snapshot and to compare
 
 **What a correct merge looks like** (built as a trial branch, not pushed to `main`): take this branch's version of the 13 AI files, take `main`'s version of the 3 files it changed independently, resolve `migrate.test.ts` to the branch-aware version, and **delete `0092b_create_email_forensics.sql`** — in the merged tree `0096` is authoritative, and keeping both would apply the same schema twice under two version prefixes.
 
-**Verification of the trial merge:** TypeScript clean, and 2,321 tests pass across unit + the AI integration suites + `migrate.test.ts` + the `main`-only email-forensics test. Getting there required one real fix: the merge initially carried *both* email-forensics migrations, and the migration test caught it — which is exactly what that test is for. The `migrate.test.ts` change (resolving the prefix from the directory and sorting the tail with the runner's collation) is deliberate: the same test file now passes against the unmerged branch (`0092b_` present) and against the merged tree (`0096_` present).
+**Verification of the trial merge:** TypeScript clean, and **2,328 tests pass** (161 files) across unit + the AI integration suites + `migrate.test.ts` + the `main`-only email-forensics test — after every fix in this report was applied, not just the audit branch as it stood earlier. Getting there required one real fix: the merge initially carried *both* email-forensics migrations, and the migration test caught it — which is exactly what that test is for. The `migrate.test.ts` change (resolving the prefix from the directory and sorting the tail with the runner's collation) is deliberate: the same test file now passes against the unmerged branch (`0092b_` present) and against the merged tree (`0096_` present).
 
 The remaining decision is procedural, not technical, and belongs to the maintainers.
 
@@ -636,8 +640,27 @@ The remaining decision is procedural, not technical, and belongs to the maintain
 
 | Commit | Content |
 | --- | --- |
-| `46328e5` | Fixes defects 1, 2, 3, 5, 7 (+ null-category crash, excerpt truncation, duplicate price label). Removes `relatedPages`. 7 regression tests. |
-| `a70fc64` | Vocabulary covers body prose and FAQs (defect 2 follow-on); `voip`/protocol names protected from typo correction (defect 9a). +1 regression test. |
-| this commit | This audit report; audit harness removed. |
+| `46328e5` | Fixes defects 1, 2, 3, 5, 7 (+ null-category crash, excerpt truncation, duplicate price label). Removes `relatedPages`. |
+| `a70fc64` | Vocabulary covers body prose and FAQs (defect 2 follow-on); `voip`/protocol names protected from typo correction (defect 9a). |
+| `7be677c` | This audit report; `relatedPages` actually removed; harness deleted. |
+| `5d91abe` | Records why the PR could not merge automatically. |
+| `4cda79c` | AI knowledge migration renumbered to `0097`; migration-tail test made history-agnostic. |
+| `43704e9` | Sync serialisation on the existing lease; AI rate limiting (defects 6, and the §8.5 gap). |
+| `ea7b41f` | No price for a product the question did not name (defect 10). |
+| this commit | Report updated with the verification of every fix above, and of the trial merge. |
 
-Branch `arena/b55a0c26-cloudhost247`, based on `e9d29d4`, PR opened against `main`. **Not merged. Not deployed. No production credentials activated. No customer settings changed.**
+Branch `arena/b55a0c26-cloudhost247`, based on `e9d29d4`, PR #114 against `main`.
+**Not merged. Not deployed. No production credentials activated. No customer settings changed.**
+
+---
+
+## 15. What is still needed, in one list
+
+For the next integration phase, in the order that unblocks the most:
+
+1. **Merge decision** (§13.3) — the tree comparison and a verified trial merge are done; the choice of how to combine the histories is the maintainers'.
+2. **Staging deployment** (§12.1 item 3) — reproduce cold sync, warm sync, drift, pricing, escalations and the rate-limit ceilings on real PostgreSQL.
+3. **Semantic retrieval decision** (§12.1a) — needs embeddings and a vector store; `pgvector` is unavailable on the supported platform, so this is an infrastructure decision, not a code change.
+4. **Provider certification** (§9) — set the three `AI_LLM_*` values and smoke-test phrasing, validation fallback and timeout against a real endpoint. Until then, no claim of provider-backed operation is valid.
+
+And the standing caution, because it is the one most likely to be misread: **2,273 passing unit tests do not certify a production system.** They establish that the behaviours they assert still hold. Staging, provider and production certification are separate steps, and none of them has been done.
