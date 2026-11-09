@@ -10,6 +10,7 @@ import { useAuthState } from '../layout/useAuthState';
 import { usePageMeta } from '../lib/usePageMeta';
 import {
   buildToolInput,
+  isFieldActive,
   toolForm,
   toolsApi,
   type ToolEnvelope,
@@ -358,19 +359,45 @@ export default function ToolPage() {
           ) : (
             <div className="tools-fields">
               {form.fields
-                .filter(
-                  (field) =>
-                    !field.showWhen ||
-                    field.showWhen.equals.includes(
-                      String(values[field.showWhen.field] ?? '')
-                    )
-                )
+                .filter((field) => isFieldActive(form, field, values))
                 .map((field) => (
-                  <label key={field.name} className="tools-field">
-                    <span>
-                      {field.label}
-                      {field.required ? <abbr title="required"> *</abbr> : null}
-                    </span>
+                  <div key={field.name} className="tools-field-group">
+                    {field.name === 'image' ? (
+                      <label className="tools-field">
+                        <span>Upload image file</span>
+                        <input
+                          type="file"
+                          aria-label="Upload image file"
+                          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0];
+                            if (!file) return;
+                            if (file.size > 9 * 1024 * 1024) {
+                              setError('Choose an image under 9 MB.');
+                              return;
+                            }
+                            setError(null);
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              if (typeof reader.result === 'string') {
+                                setValues((current) => ({
+                                  ...current,
+                                  [field.name]: reader.result as string,
+                                }));
+                              }
+                            };
+                            reader.onerror = () => setError('Could not read the selected image file.');
+                            reader.readAsDataURL(file);
+                          }}
+                        />
+                        <small>Reads the image locally into a data URL below before running the tool.</small>
+                      </label>
+                    ) : null}
+                    <label className="tools-field">
+                      <span>
+                        {field.label}
+                        {field.required ? <abbr title="required"> *</abbr> : null}
+                      </span>
                     {field.type === 'textarea' ? (
                       <textarea
                         rows={6}
@@ -435,7 +462,8 @@ export default function ToolPage() {
                       />
                     )}
                     {field.help ? <small>{field.help}</small> : null}
-                  </label>
+                    </label>
+                  </div>
                 ))}
               {form.fields.length === 0 ? (
                 <p className="tools-muted">

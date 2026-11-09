@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Footer from '../../src/layout/Footer';
 import Header from '../../src/layout/Header';
+import { MENU_LOGO_PRIMARY_COLOR, MENU_LOGO_SECONDARY_COLOR } from '../../src/components/FooterLogoIcon';
 import { clearSession, getToken, setSession } from '../../src/lib/auth';
 
 /**
@@ -101,7 +102,15 @@ describe('Header: authentication-aware navigation', () => {
     const band = container.querySelector('.hg-footer-brandband');
     const copyright = container.querySelector('.hg-footer__bottom');
     expect(band?.nextElementSibling).toBe(copyright);
-    expect(within(band as HTMLElement).getByRole('img', { name: 'CloudHost247' }).tagName.toLowerCase()).toBe('svg');
+    const footerLogo = within(band as HTMLElement).getByRole('img', { name: 'CloudHost247' });
+    expect(footerLogo.tagName.toLowerCase()).toBe('svg');
+    const accentPath = footerLogo.querySelector('path[data-logo-part="accent"]');
+    const wordmarkPath = footerLogo.querySelector('path[data-logo-part="wordmark"]');
+    expect(accentPath?.getAttribute('fill')).toBe(MENU_LOGO_PRIMARY_COLOR);
+    expect(MENU_LOGO_PRIMARY_COLOR).toBe('#009641');
+    expect(wordmarkPath?.getAttribute('fill')).toBe(MENU_LOGO_SECONDARY_COLOR);
+    expect(MENU_LOGO_SECONDARY_COLOR).toBe('#ffffff');
+    expect(within(copyright as HTMLElement).getByRole('button', { name: 'Cookie settings' }).className).toContain('ch247-cookie-settings');
     for (const card of ['Visa', 'Mastercard', 'Verve', 'American Express', 'Discover', 'JCB', 'Diners Club']) {
       expect(within(band as HTMLElement).getByRole('img', { name: card }).tagName.toLowerCase()).toBe('svg');
     }

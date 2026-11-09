@@ -18,6 +18,8 @@ import {
   TOOL_CATALOG,
   NON_RUNNABLE_TOOL_SLUGS,
 } from '../../../src/tools/catalog';
+import { missingHandlers, runnableSlugs, targetFor } from '../../../src/tools/handlers';
+import { buildToolInput, toolForm } from '../../src/lib/tools-api';
 import { apiFetch } from '../../src/lib/api';
 const catalog = {
   tools: TOOL_CATALOG.map((t) => ({
@@ -136,5 +138,83 @@ describe('every production tools route', () => {
     await apiFetch('/api/tools/catalog');
     expect(fetch.mock.calls[0]?.[0]).toBe('/platform/api/tools/catalog');
     expect(fetch.mock.calls[0]?.[1].headers.Authorization).toBeUndefined();
+  });
+
+  it('verifies all 75 tools have complete handlers, form schemas, multi-mode inputs and image uploads', async () => {
+    expect(TOOL_CATALOG).toHaveLength(75);
+    expect(missingHandlers()).toEqual([]);
+    expect(runnableSlugs()).toHaveLength(70);
+
+    for (const entry of TOOL_CATALOG) {
+      if (NON_RUNNABLE_TOOL_SLUGS.has(entry.slug)) continue;
+      const form = toolForm(entry.slug);
+      if (entry.slug === 'my-ip') {
+        expect(form.fields).toHaveLength(0);
+      } else {
+        expect(form.fields.length, `${entry.slug} should expose structured form fields`).toBeGreaterThan(0);
+      }
+    }
+
+    // Multi-mode input builders must omit inactive showWhen fields and support every backend mode.
+    expect(
+      buildToolInput('json-tools', {
+        operation: 'diff',
+        text: 'stale-hidden-text',
+        before: '{"a":1}',
+        after: '{"a":2}',
+      })
+    ).toEqual({ operation: 'diff', before: '{"a":1}', after: '{"a":2}' });
+
+    expect(
+      buildToolInput('url-tools', {
+        operation: 'resolve',
+        url: 'https://stale.example/',
+        base: 'https://example.com/docs/',
+        relative: '../pricing',
+      })
+    ).toEqual({ operation: 'resolve', base: 'https://example.com/docs/', relative: '../pricing' });
+
+    expect(
+      buildToolInput('encoding-tools', {
+        mode: 'inspect-jwt',
+        text: 'stale-text',
+        token: 'eyJhbGciOiJIUzI1NiJ9.e30.sig',
+      })
+    ).toEqual({ inspectJwt: true, token: 'eyJhbGciOiJIUzI1NiJ9.e30.sig' });
+
+    expect(
+      buildToolInput('password-tools', {
+        operation: 'hash',
+        value: 'hello',
+        algorithm: 'bcrypt',
+      })
+    ).toEqual({ operation: 'hash', value: 'hello', algorithm: 'bcrypt' });
+
+    // Unchecking a default-on checkbox explicitly sends false instead of falling back to server true.
+    expect(
+      buildToolInput('lorem-ipsum', {
+        paragraphs: '2',
+        format: 'plain',
+        startWithLorem: false,
+      })
+    ).toEqual({ paragraphs: 2, format: 'plain', startWithLorem: false });
+
+    // Domain/DNS target labels cover nameserver-lookup, cname-lookup and whois.
+    expect(targetFor('nameserver-lookup', { domain: 'example.com' })).toBe('example.com');
+    expect(targetFor('cname-lookup', { domain: 'www.example.com' })).toBe('www.example.com');
+    expect(targetFor('whois', { domain: 'example.com' })).toBe('example.com');
+
+    // Image tools render an accessible file-upload picker alongside the data URL field.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => catalog })
+    );
+    render(
+      <MemoryRouter initialEntries={['/tools/qr-scanner']}>
+        <ToolPage />
+      </MemoryRouter>
+    );
+    await screen.findByRole('heading', { level: 1, name: 'QR Scanner' });
+    expect(screen.getByLabelText('Upload image file')).toBeTruthy();
   });
 });

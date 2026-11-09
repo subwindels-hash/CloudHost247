@@ -10,7 +10,7 @@ export interface MarketingConsent {
 }
 export interface MarketingSnapshot {
   ready: boolean; initializedPixel: string | null; error: string | null;
-  configuration: { enabled: boolean; pixelId: string | null; revision: number; diagnostic: string } | null;
+  configuration: { enabled: boolean; pixelId: string | null; revision: number; diagnostic: string; consentBannerEnabled?: boolean } | null;
   consent: MarketingConsent | null;
 }
 export interface PurchaseReceipt {
@@ -19,7 +19,7 @@ export interface PurchaseReceipt {
   customData: { currency: string; value: number; content_ids: string[]; contents: Array<{ id: string; quantity: number }>; content_type: 'product' };
 }
 interface MarketingEngine {
-  initialize(options?: { apiBase?: string }): Promise<MarketingEngine>;
+  initialize(options?: { apiBase?: string; bannerEnabled?: boolean | null }): Promise<MarketingEngine>;
   ready(): Promise<MarketingEngine>; refresh(): Promise<MarketingSnapshot>; snapshot(): MarketingSnapshot;
   subscribe(fn: (state: MarketingSnapshot) => void): () => void;
   track(name: string, data?: Record<string, unknown>, eventId?: string): boolean;

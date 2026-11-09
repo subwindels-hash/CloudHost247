@@ -33,7 +33,7 @@ describe('public Meta runtime and persisted cookie consent', () => {
   }
   it('fails closed with no config/choice and issues only an essential opaque HttpOnly cookie', async () => {
     const session = await bootstrap();
-    expect(session.body.configuration).toMatchObject({ enabled: false, pixelId: null, diagnostic: 'missing_configuration' });
+    expect(session.body.configuration).toMatchObject({ enabled: false, pixelId: null, consentBannerEnabled: false, diagnostic: 'missing_configuration' });
     expect(session.body.consent).toMatchObject({ decided: false, marketingGranted: false, requiresOptIn: true, preferences: { essential: true, analytics: false, marketing: false } });
     expect(String(session.headers['set-cookie'])).toContain('HttpOnly; SameSite=Lax');
     expect(session.cookie).toMatch(new RegExp(`^${CONSENT_COOKIE}=[a-f0-9]{64}$`));
