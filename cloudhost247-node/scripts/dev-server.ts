@@ -40,6 +40,11 @@ async function main() {
     }
   }
 
+  // Deliberately no Domain Services fixture: nothing in the repository may seed the extension
+  // catalogue (tests/security/test_domain_data_provenance.py, and the release-candidate gate that
+  // runs it). A local database with no registrar connected therefore renders the honest empty
+  // state, exactly as a fresh install does.
+
   const app = buildApp(env, { serveFrontend: false, pool: db });
   await app.listen({ port: PORT, host: '0.0.0.0' });
   // eslint-disable-next-line no-console

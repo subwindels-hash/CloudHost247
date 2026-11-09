@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { useApiResource } from '../../lib/useApiResource';
 import { listExtensions, type ExtensionEntry } from '../../lib/domain-services-api';
@@ -10,9 +11,17 @@ import { formatPrice } from '../../components/domain-services/ui';
  */
 export default function ExtensionsPage() {
   usePageMeta('Domain Extensions', 'Browse domain extensions, prices and requirements.');
-  const [search, setSearch] = useState('');
+  // `?search=` lets a price tag elsewhere on the site open this page already filtered to that
+  // extension (see components/domain/TldPriceRow). The input stays editable afterwards.
+  const [params] = useSearchParams();
+  const incomingSearch = (params.get('search') ?? '').trim();
+  const [search, setSearch] = useState(incomingSearch);
   const [onlyTrending, setOnlyTrending] = useState(false);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(incomingSearch);
+  useEffect(() => {
+    setSearch(incomingSearch);
+    setQuery(incomingSearch);
+  }, [incomingSearch]);
 
   const extensions = useApiResource<{ extensions: ExtensionEntry[] }>(
     `/api/v1/domain-services/extensions${query.trim() ? `?search=${encodeURIComponent(query.trim())}` : ''}`

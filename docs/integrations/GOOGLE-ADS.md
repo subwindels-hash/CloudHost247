@@ -66,7 +66,7 @@ If browser delivery later proves insufficient, retain the browser tag as the app
 
 ## Security and deployment
 
-Migration `0090_add_google_ads_integration.sql` adds the provider row and extends the provider identifier constraint; apply the repository’s standard database migrations during deployment. Admin API endpoints require the existing `admin`/`super_admin` roles, use optimistic revision checks, and audit every save/test. No Google API credential is stored. CSP remains enabled and adds only the Google tag and Google conversion request hosts required by the browser integration.
+Migration `0091_add_google_ads_integration.sql` adds the provider row and extends the provider identifier constraint; apply the repository’s standard database migrations during deployment. Admin API endpoints require the existing `admin`/`super_admin` roles, use optimistic revision checks, and audit every save/test. No Google API credential is stored. CSP remains enabled and adds only the Google tag and Google conversion request hosts required by the browser integration.
 
 No additional environment secret is required. Production activation requires an independently managed Google Ads account, an authorized administrator, a website conversion destination and labels, suitable privacy disclosures/consent, and provider-side verification. Account linking, action creation/category, campaign setup, legal review, and Google receipt are external dependencies.
 
