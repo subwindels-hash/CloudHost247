@@ -134,6 +134,8 @@ export const dnsHandlers: Record<string, ToolHandler> = {
 
 /** Targets used for history/audit rows, so a run is always attributable to the thing it checked. */
 export const dnsTargets: Record<string, (input: Record<string, unknown>) => string | null> = {
+  'nameserver-lookup': (input) => targetLabel(typeof input.domain === 'string' ? input.domain : null),
+  'cname-lookup': (input) => targetLabel(typeof input.domain === 'string' ? input.domain : null),
   'dns-propagation': (input) => targetLabel(typeof input.domain === 'string' ? input.domain : null),
   'dns-lookup': (input) => targetLabel(typeof input.name === 'string' ? input.name : typeof input.domain === 'string' ? input.domain : null),
   'dns-health': (input) => targetLabel(typeof input.domain === 'string' ? input.domain : null),

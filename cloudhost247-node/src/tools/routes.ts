@@ -343,6 +343,12 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
 
     app.post(`${prefix}/tools/:slug`, executeHandler);
     app.get(`${prefix}/tools/:slug`, async (request, reply) => {
+      // Same rule as the POST sibling above, and the reason it matters most on this verb: `my-ip`
+      // is a GET and answers with the caller's own address plus the headers their browser sent.
+      // Without an explicit directive an intermediary (Cloudflare, Apache mod_cache, a cPanel
+      // proxy) is free to store that and hand one visitor's result to the next. Public result
+      // caching stays the typed executor cache's job, per the tool's own `cacheSeconds`.
+      reply.header('Cache-Control', 'no-store');
       const slug = (request.params as { slug?: string }).slug ?? '';
       const entry = catalogEntry(slug);
       try {

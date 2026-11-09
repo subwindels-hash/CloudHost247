@@ -39,6 +39,7 @@ describe('security headers on frontend responses', () => {
     expect(script).not.toContain('*');
     expect(connect).toContain('https://www.google-analytics.com');
     expect(connect).not.toContain('*');
+    expect(headers['content-security-policy']).toEqual(expect.stringContaining('https://www.googleadservices.com'));
     expect(headers['x-frame-options']).toBe('SAMEORIGIN');
     expect(headers['x-content-type-options']).toBe('nosniff');
     expect(headers['strict-transport-security']).toEqual(expect.stringContaining('max-age='));

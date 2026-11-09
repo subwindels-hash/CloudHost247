@@ -118,7 +118,7 @@
       "name": "What Is My IP",
       "path": "/tools/ip/my-ip",
       "category": "ip",
-      "description": "Show the public IP this request arrived from, plus connection details.",
+      "description": "Show the public IP verified for this connection, or say plainly why none is claimed.",
       "visibility": "public"
     },
     {

@@ -1,5 +1,6 @@
 import { queueGa4PurchaseBestEffort } from '../marketing/ga4-purchase-delivery';
 import { recordVerifiedPaymentBestEffort } from '../marketing/conversion-service';
+import { recordVerifiedTikTokPaymentBestEffort } from '../tiktok/event-service';
 import type { Env } from '../config/env';
 import type { Queryable } from '../db/types';
 import { withTransaction } from '../db/transaction';
@@ -191,6 +192,7 @@ export async function confirmManualPayment(
     // Consent-gated marketing outbox; no effect on payment verification or billing semantics.
     await recordVerifiedPaymentBestEffort(tx, payment.id);
     if (analyticsEnv) await queueGa4PurchaseBestEffort(tx, analyticsEnv, payment.id);
+    await recordVerifiedTikTokPaymentBestEffort(tx, payment.id);
 
     await recordAuthEvent(tx, {
       id: genId(),

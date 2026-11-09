@@ -321,7 +321,75 @@
   -webkit-text-fill-color: transparent;
 }
 .hg-hero__sub { font-size: 1.16rem; line-height: 1.68; color: var(--hg-body); max-width: 540px; margin: 0 0 28px; }
-.hg-hero__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 26px; }
+/* Homepage hero calls to action: a single white capsule holding two segments, the way a plan
+   switcher works. Create Account is the filled gold segment, See plans the quiet one. The capsule
+   hugs its content and is centred under the domain search field: the row below is exactly as wide as
+   that field, so its midpoint is the field's midpoint rather than the wider text column's. */
+.hg-hero__cta-row {
+  display: flex;
+  justify-content: center;
+  width: min(540px, 100%);
+  margin-bottom: 26px;
+}
+.hg-hero__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: fit-content;
+  /* Matches the domain search field, so the pill's right edge lines up with the input above it. */
+  max-width: min(540px, 100%);
+  padding: 5px;
+  border: 1px solid var(--hg-line);
+  border-radius: var(--hg-radius-pill);
+  background: #fff;
+  box-shadow: var(--hg-shadow-sm), 0 1px 2px rgba(12, 28, 38, 0.05);
+}
+.hg-hero__ctas .hg-btn {
+  min-height: 48px;
+  padding: 0 28px;
+  border: 1px solid transparent;
+  border-radius: var(--hg-radius-pill);
+  font-size: 0.97rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  box-shadow: none;
+  transition: filter 0.2s ease, color 0.16s ease, background-color 0.16s ease;
+}
+/* A dedicated gold ramp for the segment: deep bronze at both ends, a bright band just left of
+   centre. It is drawn at 100% of the button width, so a full-width segment on a phone keeps the same
+   sheen instead of being stretched into a dark-to-light diagonal. */
+.hg-hero__ctas .hg-btn:not(.hg-btn--ghost) {
+  background:
+    linear-gradient(180deg, rgba(74, 54, 8, 0.14) 0%, rgba(255, 255, 255, 0.08) 40%, rgba(255, 255, 255, 0.12) 58%, rgba(74, 54, 8, 0.1) 100%),
+    linear-gradient(100deg, #a0740b 0%, #c9a03a 16%, #f2e0a8 30%, #fdf1c9 42%, #d9b95e 56%, #b98c1c 68%, #c19b3c 78%, #d9b96a 90%, #cfae59 100%);
+  background-size: 100% 100%, 100% 100%;
+  border-color: rgba(122, 88, 12, 0.5);
+  color: #241a02;
+  text-shadow: 0 1px 0 rgba(255, 246, 214, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 246, 214, 0.8), inset 0 -1px 0 rgba(74, 54, 8, 0.3),
+              0 4px 12px rgba(90, 63, 6, 0.18);
+}
+.hg-hero__ctas .hg-btn:not(.hg-btn--ghost):hover {
+  background-position: 0 0, 0 0;
+  filter: saturate(1.06) brightness(1.04);
+  transform: none;
+  color: #241a02;
+  box-shadow: inset 0 1px 0 rgba(255, 246, 214, 0.85), inset 0 -1px 0 rgba(74, 54, 8, 0.3),
+              0 6px 16px rgba(90, 63, 6, 0.24);
+}
+.hg-hero__ctas .hg-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: #44546a;
+  text-shadow: none;
+}
+.hg-hero__ctas .hg-btn--ghost:hover {
+  background: #f2f3f4;
+  border-color: transparent;
+  color: var(--hg-ink);
+  transform: none;
+}
 .hg-domain {
   display: flex;
   align-items: center;
@@ -404,7 +472,20 @@
 
 /* --- Pricing ---------------------------------------------------------------- */
 .hg-pricing { background: linear-gradient(180deg, #fff, var(--hg-accent-tint)); }
-.hg-tabs { display: inline-flex; gap: 4px; padding: 5px; border: 1px solid var(--hg-line); border-radius: var(--hg-radius-pill); background: #fff; box-shadow: var(--hg-shadow-sm); margin-bottom: 38px; }
+/* Plan switcher (Websites / VPS hosting / Cloud hosting). Sits centred under the centred section
+   heading, so it is a block-level shrink-to-fit flex row rather than an inline one. */
+.hg-tabs {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--hg-line);
+  border-radius: var(--hg-radius-pill);
+  background: #fff;
+  box-shadow: var(--hg-shadow-sm);
+  margin: 0 auto 38px;
+}
 .hg-tabs button {
   border: 0; background: transparent; color: var(--hg-body);
   padding: 10px 22px; border-radius: var(--hg-radius-pill);
@@ -804,7 +885,9 @@
 @media (max-width: 640px) {
   .hg-wrap { width: min(1200px, calc(100% - 32px)); }
   .hg-hero h1 { font-size: 2.5rem; }
-  .hg-hero__ctas .hg-btn { width: 100%; }
+  /* The pill still fits on a normal phone, so it stays a compact, centred capsule. */
+  .hg-hero__ctas { max-width: 100%; }
+  .hg-hero__ctas .hg-btn { padding: 0 20px; }
   .hg-domain { flex-wrap: wrap; border-radius: var(--hg-radius-sm); }
   .hg-domain input { flex-basis: calc(100% - 40px); }
   .hg-domain button { width: 100%; }
@@ -813,13 +896,30 @@
   .hg-float { font-size: 0.7rem; padding: 8px 11px; }
   .hg-showcase__tabs { grid-template-columns: 1fr; }
   .hg-showcase__panel { padding: 24px; }
-  .hg-tabs { width: 100%; overflow-x: auto; }
-  .hg-tabs button { flex: 1; white-space: nowrap; padding: 10px 14px; }
+  /* Phones get the full width; the three labels share it equally and are sized so none of them is
+     clipped at 320px (`overflow-x: auto` used to cut "Cloud hosting" in half). */
+  .hg-tabs { width: 100%; }
+  .hg-tabs button { flex: 1 1 0; min-width: 0; white-space: nowrap; padding: 10px 8px; font-size: 0.84rem; }
   .hg-account-hero__inner { flex-direction: column; padding: 26px; }
   .hg-account-hero__actions .hg-btn { flex: 1 1 44%; }
   .hg-quick { padding: 20px; }
   .hg-quick__grid { grid-template-columns: 1fr; }
 }
+@media (max-width: 379px) {
+  /* Three labels no longer fit one row inside the pill: they keep their natural width and share two
+     rows instead of having "Cloud hosting" clipped. */
+  .hg-tabs { flex-wrap: wrap; }
+  .hg-tabs button { flex: 1 1 auto; }
+}
+@media (max-width: 359px) {
+  /* Smallest phones: tighten the capsule instead of stacking it, so it stays one row. */
+  .hg-hero__ctas { border-radius: 18px; }
+  .hg-hero__ctas .hg-btn { padding: 0 14px; font-size: 0.86rem; letter-spacing: -0.02em; }
+  /* The gold accent phrase is nowrap at every width, which widened the hero column past a 320 px
+     viewport and pushed every hero row (search bar, chips, CTAs) out of line. Let it wrap here. */
+  .hg-hero h1 .hg-accent { white-space: normal; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hg-theme .hg-btn, .hg-theme .hg-card, .hg-theme .hg-usecase, .hg-theme .hg-browser { transition: none !important; transform: none !important; }
 }

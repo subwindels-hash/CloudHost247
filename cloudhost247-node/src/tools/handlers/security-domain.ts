@@ -122,6 +122,7 @@ export const securityDomainHandlers: Record<string, ToolHandler> = {
 };
 
 export const securityDomainTargets: Record<string, (input: Record<string, unknown>) => string | null> = {
+  whois: (input) => targetLabel(typeof input.domain === 'string' ? input.domain : null),
   'ssl-checker': (input) => targetLabel(typeof input.host === 'string' ? input.host : typeof input.domain === 'string' ? input.domain : typeof input.url === 'string' ? input.url : null),
   'ip-blacklist': (input) => targetLabel(typeof input.address === 'string' ? input.address : typeof input.ip === 'string' ? input.ip : null),
   'password-tools': () => null,

@@ -31,7 +31,7 @@ assert(login.ok, `admin login failed: ${login.status}`);
 const session = await login.json();
 const adminHeaders = { 'Content-Type': 'application/json', Authorization: `Bearer ${session.token}` };
 const current = (await (await fetch(`${BASE}/api/v1/admin/marketing-integrations/meta-pixel`, { headers: adminHeaders })).json()).configuration;
-const saved = await fetch(`${BASE}/api/v1/admin/marketing-integrations/meta-pixel`, { method: 'PUT', headers: { ...adminHeaders, 'x-config-revision': String(current.revision) }, body: JSON.stringify({ expectedRevision: current.revision, configuration: { displayName: 'Meta Pixel', pixelId: PIXEL, websiteDomain: 'localhost', enabled: true, testMode: true, testEventCode: 'TEST_BROWSER', consentPolicy: 'global_opt_in', capi: { enabled: false, apiVersion: 'v26.0' } } }) });
+const saved = await fetch(`${BASE}/api/v1/admin/marketing-integrations/meta-pixel`, { method: 'PUT', headers: { ...adminHeaders, 'x-config-revision': String(current.revision) }, body: JSON.stringify({ expectedRevision: current.revision, configuration: { displayName: 'Meta Pixel', pixelId: PIXEL, websiteDomain: 'localhost', enabled: true, testMode: true, testEventCode: 'TEST_BROWSER', consentPolicy: 'global_opt_in', consentBannerEnabled: true, capi: { enabled: false, apiVersion: 'v26.0' } } }) });
 assert(saved.ok, `config save failed: ${saved.status} ${await saved.text()}`);
 
 const browser = await launch();

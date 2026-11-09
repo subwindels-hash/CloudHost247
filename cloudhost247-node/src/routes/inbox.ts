@@ -1,4 +1,5 @@
 import { recordServerConversion } from '../marketing/conversion-service';
+import { recordTikTokServerConversion } from '../tiktok/event-service';
 /**
  * Unified Inbox API.
  *
@@ -87,6 +88,7 @@ export async function registerInboxRoutes(app: FastifyInstance, env: Env, overri
       body: input.message,
     }));
     const marketing = message.created ? await recordServerConversion(pool, request, env.APP_URL, { name: 'Contact', id: `contact:${message.messageId}`, data: { content_name: 'Contact form', content_category: input.department } }).catch(() => null) : null;
+    if (message.created) await recordTikTokServerConversion(pool, request, env.APP_URL, { name: 'Contact', id: `contact:${message.messageId}`, data: { content_name: 'Contact form', content_category: input.department } }).catch(() => null);
     return reply.code(201).send({ received: true, marketingEvent: marketing?.recorded ? { eventName: 'Contact', eventId: marketing.eventId, customData: { content_name: 'Contact form', content_category: input.department } } : null });
   });
 

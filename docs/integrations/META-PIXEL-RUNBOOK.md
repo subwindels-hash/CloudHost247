@@ -67,7 +67,7 @@ Reset requires an explicit confirmation dialog (API confirmation value `RESET`).
 
 ## Known limitations
 
-- The legacy WHMCS theme still contains separate Google Analytics, Baidu and GTM snippets that are not governed by this Meta consent engine. They must be reviewed/retired or consent-gated separately before claiming site-wide optional-tracking compliance.
+- The legacy WHMCS theme's existing Google Analytics, Baidu and GTM identifiers now flow through the shared runtime and wait for the corresponding analytics consent (GTM also requires marketing consent because its container contents are not inspectable). A GTM container must still be configured with per-tag Consent Mode requirements; arbitrary custom tags are not proven safe by gating the container load alone.
 - No advanced matching (email/phone/name) is sent by default. A helper exists for a future separately reviewed integration.
 - WHMCS order-form `complete.tpl` is not a Node payment authority; this change does not fabricate a WHMCS Purchase from an unpaid order confirmation. WHMCS-side purchase measurement would need a verified WHMCS payment hook/bridge and is not implemented here.
 - Local tests and browser interception cannot establish live Meta receipt. Production verification requires real credentials, Pixel Helper/Test Events and Events Manager evidence.

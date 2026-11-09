@@ -6,7 +6,7 @@ import type { Queryable } from '../db/types';
 import { withTransaction } from '../db/transaction';
 import { safeEqual } from '../lib/crypto';
 import { ForbiddenError, ValidationError } from '../lib/errors';
-import { resolveVisitorIp } from '../routes/visitor-ip';
+import { resolveVisitorIpFromRequest } from '../routes/visitor-ip';
 import { CONSENT_POLICY_VERSION, defaultPreferences, preferencesSchema, type Preferences } from './types';
 
 export const CONSENT_COOKIE = 'ch247_marketing_consent';
@@ -35,7 +35,7 @@ export function cookieValue(request: FastifyRequest, name: string): string | nul
   return null;
 }
 export function resolveJurisdiction(request: FastifyRequest, env: Env): string | null {
-  const ip = resolveVisitorIp(request.raw.socket.remoteAddress, typeof request.headers['x-forwarded-for'] === 'string' ? request.headers['x-forwarded-for'] : undefined, env.VISITOR_IP_MODE, env.VISITOR_IP_TRUSTED_PROXIES);
+  const ip = resolveVisitorIpFromRequest(request, env).ip;
   if (!ip) return null;
   try { const country = geoip.lookup(ip)?.country; return country && /^[A-Z]{2}$/.test(country) ? country : null; }
   catch { return null; }
@@ -141,13 +141,13 @@ export function safeSourceUrl(value: unknown, appUrl: string): string {
   return new URL(path, base).toString().slice(0,2048);
 }
 
-export interface CheckoutConsentContext { sessionId: string; sourceUrl: string; fbp: string | null; fbc: string | null }
+export interface CheckoutConsentContext { sessionId: string; sourceUrl: string; fbp: string | null; fbc: string | null; ttp: string | null; ttclid: string | null }
 /** Read the current choice before checkout; the order transaction attaches it atomically below. */
 export async function checkoutConsentContext(pool: Queryable, request: FastifyRequest, env: Env): Promise<CheckoutConsentContext | null> {
   try {
     const row = await requestConsent(pool, request);
     if (!consentGranted(row)) return null;
-    return { sessionId: row!.id, sourceUrl: safeSourceUrl(request.headers.referer, env.APP_URL), fbp: cookieValue(request, '_fbp'), fbc: cookieValue(request, '_fbc') };
+    return { sessionId: row!.id, sourceUrl: safeSourceUrl(request.headers.referer, env.APP_URL), fbp: cookieValue(request, '_fbp'), fbc: cookieValue(request, '_fbc'), ttp: cookieValue(request, '_ttp'), ttclid: cookieValue(request, 'ttclid') };
   } catch { return null; }
 }
 /** Optional marketing context uses a savepoint so a marketing failure cannot roll back a valid order. */

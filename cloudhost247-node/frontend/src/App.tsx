@@ -81,6 +81,8 @@ const AdminDeploymentsPage = lazy(() => import('./pages/AdminDeploymentsPage'));
 const AdminServersPage = lazy(() => import('./pages/AdminServersPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const AdminAuditPage = lazy(() => import('./pages/AdminAuditPage'));
+const AdminEmailTracePage = lazy(() => import('./pages/AdminEmailTracePage'));
+const EmailTracePage = lazy(() => import('./pages/EmailTracePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // CLOUDHOST247 platform services — website builder + AI builder, online store, experts, digital
@@ -171,6 +173,7 @@ const CloudflareServicesPage = lazy(() => import('./pages/cloudflare/CloudflareS
 const CloudflareServicePage = lazy(() => import('./pages/cloudflare/CloudflareServicePage'));
 const AdminCloudflarePage = lazy(() => import('./pages/AdminCloudflarePage'));
 const AdminMarketingIntegrationsPage = lazy(() => import('./pages/AdminMarketingIntegrationsPage'));
+const AdminGoogleAdsPage = lazy(() => import('./pages/AdminGoogleAdsPage'));
 const AdminDomainServicesPage = lazy(() => import('./pages/AdminDomainServicesPage'));
 const DomainSearchPage = lazy(() => import('./pages/domains/SearchPage'));
 const DomainTransferPage = lazy(() => import('./pages/domains/TransferPage'));
@@ -355,6 +358,7 @@ export default function App() {
           <Route path="/dashboard/dns" element={<DnsManagementPage />} />
           <Route path="/dashboard/ssl" element={<SslManagementPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/account/email-trace" element={<EmailTracePage />} />
           <Route path="/account/domains" element={<DomainsPage />} />
           <Route path="/account/dns" element={<DnsManagementPage />} />
           <Route path="/account/ssl" element={<SslManagementPage />} />
@@ -438,6 +442,7 @@ export default function App() {
             <Route path="/admin/licenses" element={<AdminLicensesPage />} />
             <Route path="/admin/monitoring" element={<AdminMonitoringPage />} />
             <Route path="/admin/dns" element={<DnsManagementPage />} />
+            <Route path="/admin/email-trace" element={<AdminEmailTracePage />} />
           <Route path="/admin/tools" element={<AdminToolsPage />} />
             <Route path="/admin/ssl" element={<SslManagementPage />} />
             <Route path="/admin/audit-logs" element={<AdminAuditPage />} />
@@ -445,7 +450,9 @@ export default function App() {
             <Route path="/admin/cloudflare/:tab" element={<AdminCloudflarePage />} />
             <Route path="/admin/integrations/cloudflare" element={<AdminCloudflarePage />} />
             <Route path="/admin/marketing-integrations" element={<AdminMarketingIntegrationsPage />} />
+            <Route path="/admin/integrations/google-ads" element={<AdminGoogleAdsPage />} />
             <Route path="/admin/marketing-integrations/:provider" element={<AdminMarketingIntegrationsPage />} />
+            <Route path="/admin/integrations/tiktok-pixel" element={<AdminMarketingIntegrationsPage />} />
             {/* Domain Services control room: providers + credentials + real Test Connection,
                 extension catalogue + trending, auctions, transfers, Domain Club plans. */}
             <Route path="/admin/domain-services" element={<AdminDomainServicesPage />} />

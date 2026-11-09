@@ -15,6 +15,7 @@ export const configurationSchema = z.object({
   testMode: z.boolean(),
   testEventCode: z.union([z.string().trim().regex(/^[A-Za-z0-9_-]{1,64}$/, 'Test Event Code may contain letters, digits, underscores and hyphens'), z.null()]),
   consentPolicy: z.enum(['global_opt_in', 'jurisdiction_opt_in']),
+  consentBannerEnabled: z.boolean().default(false),
   capi: z.object({ enabled: z.boolean(), apiVersion: z.string().regex(/^v(?:2[3-9]|[3-9][0-9])\.0$/, 'Use a supported Graph API version such as v26.0') }).strict(),
 }).strict().superRefine((value, ctx) => {
   if (value.enabled && !value.pixelId) ctx.addIssue({ code: 'custom', path: ['pixelId'], message: 'A Pixel ID is required before enabling Meta Pixel' });
@@ -25,7 +26,7 @@ export type MetaConfiguration = z.infer<typeof configurationSchema>;
 
 export const defaultConfiguration: MetaConfiguration = {
   displayName: 'CloudHost247 Meta Pixel', websiteDomain: '', enabled: false, pixelId: null,
-  testMode: false, testEventCode: null, consentPolicy: 'global_opt_in',
+  testMode: false, testEventCode: null, consentPolicy: 'global_opt_in', consentBannerEnabled: false,
   capi: { enabled: false, apiVersion: 'v26.0' },
 };
 
@@ -56,6 +57,7 @@ export function configurationDTO(row: IntegrationRow) {
     providerKey: META_PROVIDER, displayName: row.display_name, websiteDomain: row.website_domain,
     enabled: row.enabled, pixelId: c.pixelId, testMode: c.testMode,
     testEventCode: c.testEventCode, consentPolicy: c.consentPolicy,
+    consentBannerEnabled: Boolean(c.consentBannerEnabled),
     capi: { ...c.capi, hasToken: Boolean(row.has_capi_token) },
     revision: row.revision, lastConfigurationUpdate: row.last_configuration_update,
     lastConfigurationTestAt: row.last_configuration_test_at,
@@ -74,6 +76,7 @@ export function runtimeConfiguration(row: IntegrationRow | null, hostname: strin
     testMode: active && row!.configuration.testMode,
     testEventCode: active && row!.configuration.testMode ? row!.configuration.testEventCode : null,
     consentPolicy: row?.configuration.consentPolicy ?? 'global_opt_in' as const,
+    consentBannerEnabled: Boolean(row?.configuration.consentBannerEnabled),
     policyVersion: CONSENT_POLICY_VERSION,
     revision: row?.revision ?? 0,
     diagnostic: !row || !row.configuration.pixelId ? 'missing_configuration' : !row.enabled ? 'disabled' : !matches ? 'domain_mismatch' : 'configured',

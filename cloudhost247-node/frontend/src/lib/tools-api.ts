@@ -139,7 +139,7 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
   'reverse-ip': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true }, { name: 'refresh', label: 'Bypass the cache', type: 'checkbox' } ] },
 
   'ip-lookup': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true }, { name: 'includeReverse', label: 'Include reverse DNS', type: 'checkbox', defaultValue: true } ] },
-  'my-ip': { method: 'GET', fields: [], intro: 'Reports the address this platform’s edge observed for your connection, plus the headers your browser sent.' },
+  'my-ip': { method: 'GET', fields: [], intro: 'Reports the address this platform’s network boundary verified for your connection — and says plainly when it cannot verify one — plus the non-credential headers your browser sent.' },
   'ip-whois': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true } ] },
   'domain-to-ip': { method: 'GET', fields: [ { name: 'domain', label: 'Domain', type: 'text', required: true } ] },
   'ip-to-hostname': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true } ] },
@@ -177,10 +177,59 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
   'server-os': { method: 'POST', fields: [ { name: 'url', label: 'URL', type: 'text', required: true, placeholder: 'https://example.com/' } ] },
   'smtp-tester': { method: 'POST', fields: [ { name: 'target', label: 'Domain or e-mail address', type: 'text', required: true }, { name: 'port', label: 'Port', type: 'number', min: 1, max: 65535, defaultValue: 25 }, { name: 'recipient', label: 'Recipient to probe (optional)', type: 'text', help: 'Sends RCPT TO with an empty MAIL FROM. Only do this for mailboxes you are authorised to test.' }, { name: 'acknowledgeRecipientCheck', label: 'I am authorised to probe that recipient', type: 'checkbox' } ] },
   'email-header': { method: 'POST', fields: [ { name: 'headers', label: 'Raw message headers', type: 'textarea', required: true, placeholder: 'Paste the full headers (View → Show original).' } ] },
-  'json-tools': { method: 'POST', fields: [ select('operation', 'Operation', ['validate', 'format', 'minify', 'query', 'to-csv', 'from-csv', 'diff'], { required: true, defaultValue: 'format' }), { name: 'text', label: 'JSON or CSV input', type: 'textarea', required: true }, { name: 'path', label: 'JSONPath (for query)', type: 'text', placeholder: '$.items[0].name' }, { name: 'before', label: 'Before (for diff)', type: 'textarea' }, { name: 'after', label: 'After (for diff)', type: 'textarea' }, { name: 'sortKeys', label: 'Sort keys', type: 'checkbox' } ] },
-  'encoding-tools': { method: 'POST', fields: [ select('format', 'Format', ['base64', 'base64url', 'hex', 'url', 'html', 'unicode-escape', 'binary', 'rot13', 'rot47'], { required: true, defaultValue: 'base64' }), select('mode', 'Mode', ['encode', 'decode'], { defaultValue: 'encode' }), { name: 'text', label: 'Text', type: 'textarea', required: true }, { name: 'token', label: '…or inspect a JWT', type: 'text', help: 'A JWT is decoded locally; the signature is NOT verified (that needs the issuer’s key).' } ] },
-  'url-tools': { method: 'POST', fields: [ select('operation', 'Operation', ['components', 'parameters', 'resolve', 'campaign', 'strip-tracking', 'compare'], { required: true, defaultValue: 'components' }), { name: 'url', label: 'URL', type: 'text', required: true }, { name: 'base', label: 'Base URL (for resolve)', type: 'text' }, { name: 'relative', label: 'Relative URL (for resolve)', type: 'text' }, { name: 'source', label: 'utm_source', type: 'text' }, { name: 'medium', label: 'utm_medium', type: 'text' }, { name: 'campaign', label: 'utm_campaign', type: 'text' }, { name: 'first', label: 'First URL (for compare)', type: 'text' }, { name: 'second', label: 'Second URL (for compare)', type: 'text' } ] },
-  'mrz-generator': { method: 'POST', intro: 'Generates, validates and parses ICAO Doc 9303 TD3 machine-readable zones. The page at /tools/mrz-generator runs this in your browser; the API processes the values in memory for one request and never caches, logs or stores them.', fields: [ select('mode', 'Mode', ['generate', 'validate', 'parse'], { required: true, defaultValue: 'generate' }), { name: 'mrz', label: 'MRZ (two lines, for validate/parse)', type: 'textarea', placeholder: 'Two 44-character lines, e.g. from the tool page\u2019s Generate Test Data button' }, { name: 'issuingState', label: 'Issuing state (3 letters)', type: 'text', placeholder: 'UTO' }, { name: 'surname', label: 'Surname', type: 'text', placeholder: 'SURNAME' }, { name: 'givenNames', label: 'Given names', type: 'text', placeholder: 'GIVEN NAMES' }, { name: 'nationality', label: 'Nationality (3 letters)', type: 'text', placeholder: 'UTO' }, { name: 'documentNumber', label: 'Document number', type: 'text', placeholder: 'AB1234567' }, { name: 'dateOfBirth', label: 'Date of birth (YYMMDD)', type: 'text', placeholder: 'YYMMDD' }, { name: 'sex', label: 'Sex', type: 'text', placeholder: 'F' }, { name: 'expiryDate', label: 'Expiry date (YYMMDD)', type: 'text', placeholder: 'YYMMDD' }, { name: 'optionalData', label: 'Optional data', type: 'text', placeholder: 'OPTIONAL' } ] },
+  'json-tools': {
+    method: 'POST',
+    fields: [
+      select('operation', 'Operation', ['validate', 'format', 'minify', 'query', 'to-csv', 'from-csv', 'diff'], { required: true, defaultValue: 'format' }),
+      { name: 'text', label: 'JSON or CSV input', type: 'textarea', required: true, showWhen: { field: 'operation', equals: ['validate', 'format', 'minify', 'query', 'to-csv', 'from-csv'] } },
+      { name: 'path', label: 'JSONPath (for query)', type: 'text', required: true, placeholder: '$.items[0].name', showWhen: { field: 'operation', equals: ['query'] } },
+      { name: 'before', label: 'Before (for diff)', type: 'textarea', required: true, showWhen: { field: 'operation', equals: ['diff'] } },
+      { name: 'after', label: 'After (for diff)', type: 'textarea', required: true, showWhen: { field: 'operation', equals: ['diff'] } },
+      { name: 'sortKeys', label: 'Sort keys', type: 'checkbox', showWhen: { field: 'operation', equals: ['format'] } },
+    ],
+  },
+  'encoding-tools': {
+    method: 'POST',
+    fields: [
+      select('mode', 'Mode', ['encode', 'decode', 'inspect-jwt'], { required: true, defaultValue: 'encode' }),
+      select('format', 'Format', ['base64', 'base64url', 'hex', 'url', 'html', 'unicode-escape', 'binary', 'rot13', 'rot47'], { required: true, defaultValue: 'base64', showWhen: { field: 'mode', equals: ['encode', 'decode'] } }),
+      { name: 'text', label: 'Text', type: 'textarea', required: true, showWhen: { field: 'mode', equals: ['encode', 'decode'] } },
+      { name: 'token', label: 'JWT token', type: 'textarea', required: true, help: 'A JWT is decoded locally; the signature is NOT verified (that needs the issuer’s key).', showWhen: { field: 'mode', equals: ['inspect-jwt'] } },
+    ],
+  },
+  'url-tools': {
+    method: 'POST',
+    fields: [
+      select('operation', 'Operation', ['components', 'parameters', 'resolve', 'campaign', 'strip-tracking', 'compare'], { required: true, defaultValue: 'components' }),
+      { name: 'url', label: 'URL', type: 'text', required: true, placeholder: 'https://example.com/path?x=1', showWhen: { field: 'operation', equals: ['components', 'parameters', 'campaign', 'strip-tracking'] } },
+      { name: 'base', label: 'Base URL', type: 'text', required: true, placeholder: 'https://example.com/docs/', showWhen: { field: 'operation', equals: ['resolve'] } },
+      { name: 'relative', label: 'Relative URL', type: 'text', required: true, placeholder: '../pricing', showWhen: { field: 'operation', equals: ['resolve'] } },
+      { name: 'source', label: 'utm_source', type: 'text', required: true, placeholder: 'newsletter', showWhen: { field: 'operation', equals: ['campaign'] } },
+      { name: 'medium', label: 'utm_medium', type: 'text', required: true, placeholder: 'email', showWhen: { field: 'operation', equals: ['campaign'] } },
+      { name: 'campaign', label: 'utm_campaign', type: 'text', required: true, placeholder: 'spring_launch', showWhen: { field: 'operation', equals: ['campaign'] } },
+      { name: 'term', label: 'utm_term (optional)', type: 'text', showWhen: { field: 'operation', equals: ['campaign'] } },
+      { name: 'content', label: 'utm_content (optional)', type: 'text', showWhen: { field: 'operation', equals: ['campaign'] } },
+      { name: 'first', label: 'First URL', type: 'text', required: true, placeholder: 'https://example.com/?b=2&a=1', showWhen: { field: 'operation', equals: ['compare'] } },
+      { name: 'second', label: 'Second URL', type: 'text', required: true, placeholder: 'https://example.com/?a=1&b=2', showWhen: { field: 'operation', equals: ['compare'] } },
+    ],
+  },
+  'mrz-generator': {
+    method: 'POST',
+    intro: 'Generates, validates and parses ICAO Doc 9303 TD3 machine-readable zones. The page at /tools/mrz-generator runs this in your browser; the API processes the values in memory for one request and never caches, logs or stores them.',
+    fields: [
+      select('mode', 'Mode', ['generate', 'validate', 'parse'], { required: true, defaultValue: 'generate' }),
+      { name: 'mrz', label: 'MRZ (two lines, for validate/parse)', type: 'textarea', required: true, placeholder: 'Two 44-character lines, e.g. from the tool page\u2019s Generate Test Data button', showWhen: { field: 'mode', equals: ['validate', 'parse'] } },
+      { name: 'issuingState', label: 'Issuing state (3 letters)', type: 'text', required: true, placeholder: 'UTO', showWhen: { field: 'mode', equals: ['generate'] } },
+      { name: 'surname', label: 'Surname', type: 'text', required: true, placeholder: 'SURNAME', showWhen: { field: 'mode', equals: ['generate'] } },
+      { name: 'givenNames', label: 'Given names', type: 'text', required: true, placeholder: 'GIVEN NAMES', showWhen: { field: 'mode', equals: ['generate'] } },
+      { name: 'nationality', label: 'Nationality (3 letters)', type: 'text', required: true, placeholder: 'UTO', showWhen: { field: 'mode', equals: ['generate'] } },
+      { name: 'documentNumber', label: 'Document number', type: 'text', required: true, placeholder: 'AB1234567', showWhen: { field: 'mode', equals: ['generate'] } },
+      { name: 'dateOfBirth', label: 'Date of birth (YYMMDD)', type: 'text', required: true, placeholder: 'YYMMDD', showWhen: { field: 'mode', equals: ['generate'] } },
+      { name: 'sex', label: 'Sex', type: 'text', required: true, placeholder: 'F', showWhen: { field: 'mode', equals: ['generate'] } },
+      { name: 'expiryDate', label: 'Expiry date (YYMMDD)', type: 'text', required: true, placeholder: 'YYMMDD', showWhen: { field: 'mode', equals: ['generate'] } },
+      { name: 'optionalData', label: 'Optional data', type: 'text', placeholder: 'OPTIONAL', showWhen: { field: 'mode', equals: ['generate'] } },
+    ],
+  },
   'user-agent': { method: 'POST', fields: [ { name: 'userAgent', label: 'User-Agent string', type: 'text', help: 'Leave empty and enable the option below to parse your own browser’s user-agent.' }, { name: 'fromRequest', label: 'Parse my browser’s user-agent', type: 'checkbox', defaultValue: true } ] },
 
   'broken-links': { method: 'POST', fields: [ { name: 'url', label: 'Page URL', type: 'text', required: true }, { name: 'maxLinks', label: 'Maximum links to check', type: 'number', min: 1, max: 100, defaultValue: 40 }, { name: 'includeExternal', label: 'Also check external links', type: 'checkbox', defaultValue: true } ] },
@@ -190,7 +239,18 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
 
   'ssl-checker': { method: 'POST', fields: [ { name: 'host', label: 'Hostname', type: 'text', required: true, placeholder: 'example.com' }, { name: 'port', label: 'Port', type: 'number', min: 1, max: 65535, defaultValue: 443 }, { name: 'skipProtocolProbe', label: 'Skip the protocol probes (faster)', type: 'checkbox' } ] },
   'ip-blacklist': { method: 'POST', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true } ] },
-  'password-tools': { method: 'POST', fields: [ select('operation', 'Operation', ['generate', 'score', 'hash'], { required: true, defaultValue: 'generate' }), { name: 'length', label: 'Length (generate)', type: 'number', min: 4, max: 256, defaultValue: 20 }, select('preset', 'Preset (generate)', ['strong', 'pin', 'memorable', 'maximum'], { defaultValue: 'strong' }), { name: 'password', label: 'Password to score', type: 'text' }, { name: 'value', label: 'Value to hash', type: 'textarea' }, select('algorithm', 'Hash algorithm', ['sha256', 'sha1', 'sha512', 'md5'], { defaultValue: 'sha256' }) ] },
+  'password-tools': {
+    method: 'POST',
+    fields: [
+      select('operation', 'Operation', ['generate', 'score', 'hash'], { required: true, defaultValue: 'generate' }),
+      { name: 'length', label: 'Length', type: 'number', min: 4, max: 256, defaultValue: 20, showWhen: { field: 'operation', equals: ['generate'] } },
+      select('preset', 'Preset', ['strong', 'pin', 'memorable', 'maximum'], { defaultValue: 'strong', showWhen: { field: 'operation', equals: ['generate'] } }),
+      { name: 'excludeAmbiguous', label: 'Exclude look-alike characters (0/O, 1/l/I)', type: 'checkbox', showWhen: { field: 'operation', equals: ['generate'] } },
+      { name: 'password', label: 'Password to score', type: 'text', required: true, showWhen: { field: 'operation', equals: ['score'] } },
+      { name: 'value', label: 'Value to hash', type: 'textarea', required: true, showWhen: { field: 'operation', equals: ['hash'] } },
+      select('algorithm', 'Hash algorithm', ['sha256', 'sha1', 'sha512', 'md5', 'bcrypt'], { defaultValue: 'sha256', showWhen: { field: 'operation', equals: ['hash'] } }),
+    ],
+  },
   'bin-checker': { method: 'POST', fields: [ { name: 'bin', label: 'BIN / IIN (6–8 digits)', type: 'text', required: true, placeholder: '424242' } ] },
 
   punycode: { method: 'POST', fields: [ { name: 'domain', label: 'Domain', type: 'text', required: true, placeholder: 'münchen.de' }, select('mode', 'Direction', ['to-ascii', 'to-unicode'], { defaultValue: 'to-ascii' }) ] },
@@ -207,7 +267,16 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
   'qr-scanner': { method: 'POST', fields: [ { name: 'image', label: 'Image as base64 data URL', type: 'textarea', required: true, help: 'Decoded locally; the QR content is never visited.' } ] },
   'wifi-qr': { method: 'POST', fields: [ { name: 'ssid', label: 'Network name (SSID)', type: 'text', required: true }, { name: 'password', label: 'Password', type: 'text' }, select('security', 'Security', ['WPA', 'WEP', 'nopass'], { defaultValue: 'WPA' }), { name: 'hidden', label: 'Hidden network', type: 'checkbox' } ] },
   'time-card': { method: 'POST', fields: [ { name: 'entries', label: 'Clock-in/out pairs (one per line: HH:MM HH:MM)', type: 'textarea', required: true, placeholder: '09:00 17:30\n09:15 17:45' }, { name: 'defaultBreakMinutes', label: 'Break per day (minutes)', type: 'number', min: 0, max: 720, defaultValue: 30 }, { name: 'weeklyOvertimeAfterMinutes', label: 'Weekly overtime after (minutes)', type: 'number', min: 0, max: 10080, defaultValue: 2400 }, { name: 'hourlyRate', label: 'Hourly rate (optional)', type: 'number', min: 0 } ] },
-  'color-tools': { method: 'POST', fields: [ select('operation', 'Operation', ['convert', 'contrast', 'palette', 'color-blindness'], { defaultValue: 'convert' }), { name: 'color', label: 'Colour', type: 'text', placeholder: '#3366CC' }, { name: 'foreground', label: 'Foreground (contrast)', type: 'text' }, { name: 'background', label: 'Background (contrast)', type: 'text' }, select('kind', 'Palette kind', ['complementary', 'analogous', 'triadic', 'split-complementary', 'tetradic', 'monochromatic', 'shades', 'tints'], { defaultValue: 'complementary' }) ] },
+  'color-tools': {
+    method: 'POST',
+    fields: [
+      select('operation', 'Operation', ['convert', 'contrast', 'palette', 'color-blindness'], { required: true, defaultValue: 'convert' }),
+      { name: 'color', label: 'Colour', type: 'text', required: true, placeholder: '#3366CC', showWhen: { field: 'operation', equals: ['convert', 'palette', 'color-blindness'] } },
+      { name: 'foreground', label: 'Foreground colour', type: 'text', required: true, placeholder: '#111827', showWhen: { field: 'operation', equals: ['contrast'] } },
+      { name: 'background', label: 'Background colour', type: 'text', required: true, placeholder: '#FFFFFF', showWhen: { field: 'operation', equals: ['contrast'] } },
+      select('kind', 'Palette kind', ['complementary', 'analogous', 'triadic', 'split-complementary', 'tetradic', 'monochromatic', 'shades', 'tints'], { defaultValue: 'complementary', showWhen: { field: 'operation', equals: ['palette'] } }),
+    ],
+  },
   'image-ocr': { method: 'POST', fields: [ { name: 'image', label: 'Image as base64 data URL', type: 'textarea', required: true }, { name: 'language', label: 'Language hint', type: 'text', placeholder: 'eng' } ] },
   'reverse-image-search': { method: 'POST', fields: [ { name: 'image', label: 'Image as base64 data URL', type: 'textarea', required: true } ] },
 };
@@ -218,13 +287,26 @@ export function toolForm(slug: string): ToolForm {
   return TOOL_FORMS[slug] ?? { method: 'POST', fields: [] };
 }
 
+/** True when a field's `showWhen` condition is satisfied by the active form state. */
+export function isFieldActive(form: ToolForm, field: ToolField, values: Record<string, string | boolean>): boolean {
+  if (!field.showWhen) return true;
+  const controller = form.fields.find((candidate) => candidate.name === field.showWhen!.field);
+  const raw = values[field.showWhen.field] ?? controller?.defaultValue ?? '';
+  return field.showWhen.equals.includes(String(raw));
+}
+
 /** Converts form values (all strings) into the JSON body the API expects. */
 export function buildToolInput(slug: string, values: Record<string, string | boolean>): Record<string, unknown> {
   const form = toolForm(slug);
   const input: Record<string, unknown> = {};
   for (const field of form.fields) {
-    const value = values[field.name];
-    if (value === undefined || value === '' || value === false) continue;
+    if (!isFieldActive(form, field, values)) continue;
+    const value = values[field.name] ?? field.defaultValue;
+    if (value === undefined || value === '') continue;
+    if (value === false) {
+      if (field.type === 'checkbox' && field.defaultValue === true) input[field.name] = false;
+      continue;
+    }
     if (field.name === 'entries' && typeof value === 'string') {
       const entries = value
         .split('\n')
@@ -263,6 +345,10 @@ export function buildToolInput(slug: string, values: Record<string, string | boo
       continue;
     }
     input[field.name] = value;
+  }
+  if (slug === 'encoding-tools' && input.mode === 'inspect-jwt') {
+    const token = input.token;
+    return { inspectJwt: true, ...(token !== undefined ? { token } : {}) };
   }
   return input;
 }

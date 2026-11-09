@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Footer from '../../src/layout/Footer';
 import Header from '../../src/layout/Header';
+import { MENU_LOGO_PRIMARY_COLOR, MENU_LOGO_SECONDARY_COLOR } from '../../src/components/FooterLogoIcon';
 import { clearSession, getToken, setSession } from '../../src/lib/auth';
 
 /**
@@ -25,7 +26,7 @@ describe('Header: authentication-aware navigation', () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows Sign In and Create Account, but no account controls, when logged out', () => {
+  it('shows Sign In, but no Create Account or account controls, when logged out', () => {
     render(
       <MemoryRouter>
         <Header />
@@ -35,10 +36,9 @@ describe('Header: authentication-aware navigation', () => {
     const logo = screen.getByRole('link', { name: 'CloudHost247 — home' }).querySelector('img');
     expect(logo?.getAttribute('src')).toContain('cloudhost247-official.webp');
     expect(screen.getByRole('link', { name: 'Sign In' })).toBeTruthy();
-    // Create Account is the sixth utility control and must be visible to a signed-out visitor:
-    // docs/UTILITY-ROW.md and scripts/check-chrome-benchmark.mjs both count it on that line, and
-    // without it the header offers no route into registration at all.
-    expect(screen.getByRole('link', { name: 'Create Account' })).toBeTruthy();
+    // The compact Create Account button was removed from the utility line by request, so the header
+    // must not grow it back: registration is reached from the hero capsule and the plans section.
+    expect(screen.queryByRole('link', { name: 'Create Account' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Dashboard' })).toBeNull();
     expect(screen.queryByText('Log out')).toBeNull();
   });
@@ -102,7 +102,15 @@ describe('Header: authentication-aware navigation', () => {
     const band = container.querySelector('.hg-footer-brandband');
     const copyright = container.querySelector('.hg-footer__bottom');
     expect(band?.nextElementSibling).toBe(copyright);
-    expect(within(band as HTMLElement).getByRole('img', { name: 'CloudHost247' }).tagName.toLowerCase()).toBe('svg');
+    const footerLogo = within(band as HTMLElement).getByRole('img', { name: 'CloudHost247' });
+    expect(footerLogo.tagName.toLowerCase()).toBe('svg');
+    const accentPath = footerLogo.querySelector('path[data-logo-part="accent"]');
+    const wordmarkPath = footerLogo.querySelector('path[data-logo-part="wordmark"]');
+    expect(accentPath?.getAttribute('fill')).toBe(MENU_LOGO_PRIMARY_COLOR);
+    expect(MENU_LOGO_PRIMARY_COLOR).toBe('#009641');
+    expect(wordmarkPath?.getAttribute('fill')).toBe(MENU_LOGO_SECONDARY_COLOR);
+    expect(MENU_LOGO_SECONDARY_COLOR).toBe('#ffffff');
+    expect(within(copyright as HTMLElement).getByRole('button', { name: 'Cookie settings' }).className).toContain('ch247-cookie-settings');
     for (const card of ['Visa', 'Mastercard', 'Verve', 'American Express', 'Discover', 'JCB', 'Diners Club']) {
       expect(within(band as HTMLElement).getByRole('img', { name: card }).tagName.toLowerCase()).toBe('svg');
     }

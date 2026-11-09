@@ -1,5 +1,6 @@
 import { toolsApiPath } from '../lib/tools-runtime';
 import { FormEvent, useEffect, useState } from 'react';
+import { trackTikTok } from '../lib/tiktok';
 import { getToken } from '../lib/auth';
 import { useAuthState } from '../layout/useAuthState';
 
@@ -165,6 +166,7 @@ export default function AiSupportWidget() {
       });
       if (!response.ok) throw new Error((await response.json()).message ?? 'Subscription failed');
       const data = await response.json();
+      if (data.marketingEvent?.eventId) trackTikTok('Subscribe', { content_name: 'Newsletter subscription', content_category: 'newsletter' }, data.marketingEvent.eventId);
       setShowSubscribe(false);
       setMessages((current) => [
         ...current,

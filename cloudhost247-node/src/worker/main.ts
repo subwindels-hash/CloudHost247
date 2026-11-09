@@ -17,6 +17,7 @@ import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service'
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { deliverNotificationOutbox } from '../services/notification-outbox-service';
 import { drainCapiOutbox, pruneMarketingRetention } from '../marketing/capi-worker';
+import { drainTikTokOutbox } from '../tiktok/events-api-worker';
 import { deliverAuthEmailOutbox } from '../services/auth-recovery-service';
 import { deliverPinVerificationEmails } from '../services/security-pin-email-service';
 import { pinKeyOrNull } from '../lib/pin-key';
@@ -26,6 +27,7 @@ import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
 import { sweepCloudflareJobs } from './cloudflare-sweep';
 import { syncDisplayRates, FxFeedError } from '../services/fx-service';
 import { sweepDomainServices, DOMAIN_SERVICES_SWEEP_INTERVAL_MS } from './domain-services-sweep';
+import { sweepEmailTrace, EMAIL_TRACE_SWEEP_INTERVAL_MS } from './email-trace-sweep';
 import { runAiSweep, AI_SWEEP_INTERVAL_MS } from '../ai-os/jobs/sweep';
 import { monitorSweep, providerHealthSweep, resolverHealthSweep } from '../tools/worker/sweep';
 import { getSetting } from '../db/ops-tables';
@@ -89,6 +91,7 @@ interface WorkerSchedule {
   lastToolsHealthSweep: number;
   lastToolsMonitorSweep: number;
   lastFxSync: number;
+  lastEmailTraceSweep: number;
 }
 
 function createWorkerSchedule(): WorkerSchedule {
@@ -111,6 +114,7 @@ function createWorkerSchedule(): WorkerSchedule {
     lastToolsHealthSweep: 0,
     lastToolsMonitorSweep: 0,
     lastFxSync: 0,
+    lastEmailTraceSweep: 0,
   };
 }
 
@@ -316,6 +320,25 @@ async function runWorkerCycle(
       logger.log(
         `[worker:${ctx.workerId}] tools monitors: ${monitors.checked} checked, ${monitors.changed} changed, ${monitors.notified} notification(s) delivered, ${monitors.errors} error(s)`
       );
+    }
+  }
+  if (now - schedule.lastEmailTraceSweep >= EMAIL_TRACE_SWEEP_INTERVAL_MS) {
+    schedule.lastEmailTraceSweep = now;
+    try {
+      const trace = await sweepEmailTrace(ctx.db, {
+        retentionDays: authEmailEnv.EMAIL_TRACE_RETENTION_DAYS,
+        runRetentionDays: authEmailEnv.EMAIL_TRACE_COLLECTION_RUN_RETENTION_DAYS,
+      });
+      didWork ||= trace.eventsCollected > 0 || trace.retention.eventsDeleted > 0;
+      if (trace.servers > 0 || trace.retention.eventsDeleted > 0) {
+        logger.log(
+          `[worker:${ctx.workerId}] email trace: ${trace.servers} source(s) collected (${trace.ok} ok, ${trace.partial} partial, ${trace.failed} failed, ${trace.skipped} skipped), ${trace.eventsCollected} event(s), ${trace.duplicates} duplicate(s) suppressed; retention removed ${trace.retention.eventsDeleted} event(s), held ${trace.retention.eventsHeld}, removed ${trace.retention.runsDeleted} run(s)`
+        );
+      }
+    } catch (error) {
+      // Collection is peripheral to the rest of the worker: a failing mail host must not stop
+      // billing, provisioning or notifications from being swept.
+      logger.error(`[worker:${ctx.workerId}] email trace sweep failed: ${(error as Error).message}`);
     }
   }
   if (now - schedule.lastRevenueGuardianSweep >= REVENUE_GUARDIAN_SWEEP_INTERVAL_MS) {

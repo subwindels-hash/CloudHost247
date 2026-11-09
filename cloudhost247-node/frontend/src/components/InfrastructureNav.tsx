@@ -12,6 +12,7 @@ export type InfrastructureNavKey =
   | 'dns'
   | 'ssl'
   | 'monitoring'
+  | 'email-trace'
   | 'logs';
 
 const LINKS: Array<{ key: InfrastructureNavKey; to: string; label: string }> = [
@@ -26,6 +27,7 @@ const LINKS: Array<{ key: InfrastructureNavKey; to: string; label: string }> = [
   { key: 'dns', to: '/admin/dns', label: 'DNS Zones' },
   { key: 'ssl', to: '/admin/ssl', label: 'SSL Certs' },
   { key: 'monitoring', to: '/admin/monitoring', label: 'Monitoring' },
+  { key: 'email-trace', to: '/admin/email-trace', label: 'Email Trace' },
   { key: 'logs', to: '/admin/infrastructure/logs', label: 'Audit & Logs' },
 ];
 

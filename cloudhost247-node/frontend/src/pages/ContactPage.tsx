@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { apiFetch } from '../lib/api';
 import { trackAnalyticsContact, trackMarketing } from '../lib/marketing';
+import { trackTikTok } from '../lib/tiktok';
 import { usePageMeta } from '../lib/usePageMeta';
 import './contact-page.css';
 
@@ -31,6 +32,7 @@ export default function ContactPage() {
       if (response.marketingEvent) {
         trackMarketing(response.marketingEvent.eventName, response.marketingEvent.customData, response.marketingEvent.eventId);
         trackMarketing('Lead', { content_name: 'Contact form' }, response.marketingEvent.eventId.replace(/^contact:/,'lead:'));
+        trackTikTok('SubmitForm', { content_name: 'Contact form', content_category: 'contact' }, response.marketingEvent.eventId.replace(/^contact:/, 'submit:'));
       }
       form.reset();
       setStatus('success');

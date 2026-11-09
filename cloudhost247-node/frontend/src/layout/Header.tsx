@@ -63,12 +63,12 @@ export default function Header() {
                 on My Services; it must not push the signed-out controls onto another line. */}
             <NavLink to="/pricing">{copy.pricing}</NavLink>
             {/*
-              No third quick link here. The utility line is a documented six-control row
-              (Pricing, Help, language, currency, Sign In, Create Account) and both
+              No third quick link here. The utility line is a documented five-control row
+              (Pricing, Help, language, currency, Sign In) and both
               frontend/tests/unit/hostinger-chrome.test.tsx and scripts/check-chrome-benchmark.mjs
-              fail when a seventh is added — a wrapped or crowded bar is how Create Account went
-              missing before. `/service-plans` stays reachable from /services ("Browse plans"), the
-              catalog pages and the account menu.
+              fail when a sixth is added — a wrapped or crowded bar is how controls went missing
+              before. `/service-plans` stays reachable from /services ("Browse plans"), the catalog
+              pages and the account menu.
             */}
             <NavLink to="/help">{copy.help}</NavLink>
           </nav>
@@ -97,18 +97,12 @@ export default function Header() {
                 </button>
               </>
             ) : (
-              <>
-                <NavLink className="hg-bar__text-link" to={UTILITY.signIn.to}>
-                  {copy.signIn}
-                </NavLink>
-                {/* The compact CTA belongs on this line — it is the sixth utility control the
-                    chrome contract and scripts/check-chrome-benchmark.mjs both count
-                    (Pricing, Help, English, USD, Sign In, Create Account). Removing it leaves a
-                    signed-out visitor with no visible route into registration from the header. */}
-                <NavLink className="hg-btn hg-btn--sm" to={UTILITY.createAccount.to}>
-                  {copy.createAccount}
-                </NavLink>
-              </>
+              /* Signed out: Sign In only. The header carried a compact Create Account button as a
+                 sixth utility control; it was removed on request, so registration is reached from
+                 the hero capsule, the plans section and the account pages instead. */
+              <NavLink className="hg-bar__text-link" to={UTILITY.signIn.to}>
+                {copy.signIn}
+              </NavLink>
             )}
           </div>
         </div>

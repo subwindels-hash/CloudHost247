@@ -55,7 +55,20 @@ jobs:
         run: npx tsc -p frontend/tsconfig.json --noEmit
 
       - name: Unit + integration tests (includes real migrations run against an embedded Postgres engine)
-        run: npm test
+        # `tee` keeps the output on the runner so a failure can be summarised as check annotations in
+        # the next step. A failed run's log blob is not always retrievable, and a red check with no
+        # readable reason is a defect nobody can fix — the annotation survives that outage.
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee /tmp/vitest.log
+
+      - name: Summarise test failures as annotations
+        if: failure()
+        run: |
+          [ -f /tmp/vitest.log ] || exit 0
+          grep -aE 'FAIL |AssertionError|Error:|Test Files|Tests  |Unhandled|timed out' /tmp/vitest.log \
+            | head -n 40 | sed 's/%/%25/g; s/\r//g' \
+            | while IFS= read -r line; do echo "::error::$line"; done
 
       - name: Build server + frontend (production artifacts)
         run: npm run build

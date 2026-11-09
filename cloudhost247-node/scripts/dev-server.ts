@@ -20,6 +20,29 @@ import { migrateUp } from '../database/migrate';
 const DATA_DIR = process.env.PGLITE_DATA_DIR ?? path.join(process.cwd(), '.dev-db-pg');
 const PORT = Number(process.env.PORT ?? 3000);
 
+/**
+ * Development/preview only: make the menu-bar IP detector actually able to detect.
+ *
+ * `npm run dev` and the hosted preview sit behind at least one proxy (the Vite dev server, and in
+ * Arena one more edge in front of it). With the production default `VISITOR_IP_MODE=off` the header
+ * can therefore only ever say "not enabled", which makes the feature untestable by simply running
+ * the app. Here — and only here, this file is never deployed — an unset mode becomes
+ * `trusted-proxy` trusting the local hops, so whatever address the outer proxy carries (edge header
+ * or appended chain) is verified and shown. Set VISITOR_IP_MODE explicitly to override, including
+ * back to `off`. Production (`server.js` / `src/server.ts`) keeps the fail-closed default.
+ */
+const DEV_TRUSTED_PROXIES = '127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,169.254.0.0/16,100.64.0.0/10';
+if (!process.env.VISITOR_IP_MODE) {
+  process.env.VISITOR_IP_MODE = 'trusted-proxy';
+  process.env.VISITOR_IP_TRUSTED_PROXIES ??= DEV_TRUSTED_PROXIES;
+  // eslint-disable-next-line no-console
+  console.log('[dev-server] VISITOR_IP_MODE unset: using trusted-proxy with local hops only, so the');
+  // eslint-disable-next-line no-console
+  console.log('[dev-server] menu-bar IP detector can verify addresses the dev/preview proxy carries.');
+  // eslint-disable-next-line no-console
+  console.log('[dev-server] Production keeps VISITOR_IP_MODE=off until the real boundary is configured.');
+}
+
 async function main() {
   const env = loadEnv();
   const db = await PGlite.create(DATA_DIR);
@@ -39,6 +62,11 @@ async function main() {
       console.log('[dev-server] catalogue was empty — loaded database/seed/dev-catalog-seed.sql (dev fixtures, not real prices)');
     }
   }
+
+  // Deliberately no Domain Services fixture: nothing in the repository may seed the extension
+  // catalogue (tests/security/test_domain_data_provenance.py, and the release-candidate gate that
+  // runs it). A local database with no registrar connected therefore renders the honest empty
+  // state, exactly as a fresh install does.
 
   const app = buildApp(env, { serveFrontend: false, pool: db });
   await app.listen({ port: PORT, host: '0.0.0.0' });
