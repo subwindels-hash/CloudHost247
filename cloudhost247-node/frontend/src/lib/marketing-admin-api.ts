@@ -4,6 +4,7 @@ export interface MetaAdminConfiguration {
   providerKey: 'meta_pixel'; displayName: string; websiteDomain: string; enabled: boolean;
   pixelId: string | null; testMode: boolean; testEventCode: string | null;
   consentPolicy: 'global_opt_in' | 'jurisdiction_opt_in';
+  consentBannerEnabled?: boolean;
   capi: { enabled: boolean; apiVersion: string; hasToken: boolean };
   revision: number; lastConfigurationUpdate: string | null; lastConfigurationTestAt: string | null;
   lastConfigurationTestStatus: string | null; lastError: string | null;

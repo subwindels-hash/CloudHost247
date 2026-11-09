@@ -6,7 +6,7 @@ import AdminMarketingIntegrationsPage from '../../src/pages/AdminMarketingIntegr
 import { META_ADMIN_API } from '../../src/lib/marketing-admin-api';
 import { setSession, clearSession } from '../../src/lib/auth';
 
-const config = { providerKey: 'meta_pixel', displayName: 'CloudHost247 Meta Pixel', websiteDomain: 'cloudhost247.com', enabled: false, pixelId: '123456789012345', testMode: false, testEventCode: null, consentPolicy: 'global_opt_in', capi: { enabled: false, apiVersion: 'v26.0', hasToken: true }, revision: 2, lastConfigurationUpdate: null, lastConfigurationTestAt: null, lastConfigurationTestStatus: null, lastError: null };
+const config = { providerKey: 'meta_pixel', displayName: 'CloudHost247 Meta Pixel', websiteDomain: 'cloudhost247.com', enabled: false, pixelId: '123456789012345', testMode: false, testEventCode: null, consentPolicy: 'global_opt_in', consentBannerEnabled: false, capi: { enabled: false, apiVersion: 'v26.0', hasToken: true }, revision: 2, lastConfigurationUpdate: null, lastConfigurationTestAt: null, lastConfigurationTestStatus: null, lastError: null };
 function page() { return render(<MemoryRouter initialEntries={['/admin/marketing-integrations/meta-pixel']}><Routes><Route path="/admin/marketing-integrations/:provider" element={<AdminMarketingIntegrationsPage />} /></Routes></MemoryRouter>); }
 describe('Marketing Integrations admin', () => {
   beforeEach(() => {
@@ -21,6 +21,7 @@ describe('Marketing Integrations admin', () => {
     expect(screen.getByText('Not tested', { exact: false })).toBeTruthy();
     expect(screen.getByLabelText(/^Meta access token/).getAttribute('type')).toBe('password');
     expect(screen.getByLabelText(/^Meta access token/).getAttribute('value')).toBe('');
+    expect((screen.getByLabelText(/Show “Your privacy choices” cookie banner automatically/) as HTMLInputElement).checked).toBe(false);
   });
   it('saves test mode through the protected API and reports no fabricated receipt', async () => {
     page(); fireEvent.click(await screen.findByLabelText('Enable test mode'));

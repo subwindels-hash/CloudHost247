@@ -159,6 +159,25 @@ describe('canonical shared browser marketing engine', () => {
     expect(engine().track('Lead', {}, 'lead:withdrawn-123')).toBe(false);
     expect(googleCalls).toHaveLength(before);
   });
+  it('keeps the "Your privacy choices" cookie banner disabled by default while still allowing manual Cookie settings', async () => {
+    await init();
+    const banner = dom.window.document.querySelector('.ch247-cookie-banner') as HTMLElement;
+    expect(banner).not.toBeNull();
+    expect(banner.hidden).toBe(true);
+    expect(engine().snapshot().consent.marketingGranted).toBe(false);
+    engine().openPreferences();
+    expect((dom.window.document.querySelector('dialog') as HTMLDialogElement).open).toBe(true);
+    expect(banner.hidden).toBe(true);
+  });
+  it('shows the cookie banner only when consentBannerEnabled is explicitly enabled and visitor has not decided', async () => {
+    response.configuration.consentBannerEnabled = true;
+    await init();
+    const banner = dom.window.document.querySelector('.ch247-cookie-banner') as HTMLElement;
+    expect(banner.hidden).toBe(false);
+    response.consent = bootstrap(false, true).consent;
+    await engine().rejectOptional();
+    expect(banner.hidden).toBe(true);
+  });
   it('fails closed on network errors and supports reopening preferences', async () => {
     (dom.window as any).fetch = vi.fn(async () => { throw new Error('offline'); });
     await init(); expect(engine().snapshot().ready).toBe(false);

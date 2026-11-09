@@ -52,6 +52,7 @@ function MetaPixelSettings() {
         expectedRevision: config.revision,
         configuration: { displayName: config.displayName, websiteDomain: config.websiteDomain, enabled: config.enabled, pixelId: config.pixelId || null,
           testMode: config.testMode, testEventCode: config.testEventCode || null, consentPolicy: config.consentPolicy,
+          consentBannerEnabled: Boolean(config.consentBannerEnabled),
           capi: { enabled: config.capi.enabled, apiVersion: config.capi.apiVersion } },
         ...(token ? { capiAccessToken: token } : {}), ...(removeToken ? { removeCapiToken: true } : {}),
       });
@@ -94,7 +95,8 @@ function MetaPixelSettings() {
         <label>Consent policy<select value={config.consentPolicy} onChange={e => update({ consentPolicy: e.target.value as MetaAdminConfiguration['consentPolicy'] })}><option value="global_opt_in">Explicit opt-in worldwide (recommended)</option><option value="jurisdiction_opt_in">Jurisdiction-aware rules; unknown regions opt-in</option></select></label>
       </div>
       <label className="ch247-marketing-admin__check"><input type="checkbox" checked={config.enabled} onChange={e => update({ enabled: e.target.checked })} /> Enable Meta Pixel for consented visitors</label>
-      <p className="ch247-page__hint">Enabling never bypasses cookie consent. Registration and checkout acceptance are not marketing consent.</p>
+      <label className="ch247-marketing-admin__check"><input type="checkbox" checked={Boolean(config.consentBannerEnabled)} onChange={e => update({ consentBannerEnabled: e.target.checked })} /> Show “Your privacy choices” cookie banner automatically</label>
+      <p className="ch247-page__hint">The cookie banner is disabled by default; optional analytics and marketing cookies remain off until a visitor opts in via Cookie settings or the banner. Registration and checkout acceptance are not marketing consent.</p>
       <fieldset className="ch247-marketing-admin__fieldset"><legend>Test mode</legend>
         <label className="ch247-marketing-admin__check"><input type="checkbox" checked={config.testMode} onChange={e => update({ testMode: e.target.checked })} /> Enable test mode</label>
         <label>Test Event Code<input value={config.testEventCode ?? ''} placeholder="Code from Meta Test Events" autoComplete="off" onChange={e => update({ testEventCode: e.target.value })} /></label>
