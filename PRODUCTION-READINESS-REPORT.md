@@ -33,6 +33,21 @@
 > `PROVIDER-CERTIFICATION-MATRIX.md`, `DATABASE-RECOVERY-REPORT.md` +
 > `docs/staging/*.json` evidence. The five B-items above remain the sole open gates;
 > everything within host bounds is now executed and green.
+>
+> **Phase 4 independent audit (2026-11-09, post-certification):** a separate probe suite
+> (fresh code, fresh accounts, forged-token vectors — no Phase-3 reuse) re-derived the
+> security-critical claims **23/23 PASS** (role-forgery 403, expired/wrong-secret/wrong-sv 401,
+> logout revocation, TOTP replay/single-use refusals, cross-tenant read *and* payment-initiation
+> 404, admin boundaries, timestamp-omitted webhook replay bounded by idempotency). Source-level
+> payment audit: invariants enforced inside the settlement transaction and by DB triggers.
+> Recovery audit: PASS-criteria cannot be satisfied by omission (spine tables checksummed;
+> D4-F1 notes count-level verification for the other 215 tables). Phase 3 classified: 30/33
+> functional + 3 disclosed availability-limited steps. New deliverables:
+> `INDEPENDENT-STAGING-AUDIT.md`, `PAYMENT-SECURITY-AUDIT.md`, `DATABASE-RECOVERY-AUDIT.md`,
+> `AUTHENTICATION-SECURITY-AUDIT.md`, `FINAL-PRODUCTION-BLOCKERS.md` (L1–L4 verification
+> levels, Gates A–C). **Phase 3 stands validated. Production certification remains NOT GRANTED
+> on Gates A (credentials/licensing), B (infrastructure), C (five low-severity hardening/ops
+> items found by this audit — none blocking, all named).**
 > Full plans per item: `POST-VERIFICATION-AUDIT.md` §3.
 >
 > **Required owner decisions before certification:**
