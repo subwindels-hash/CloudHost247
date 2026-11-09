@@ -41,7 +41,7 @@
 .ch247-knowledge-centre .ch247-table button:hover:not(:disabled){border-color:#b8860b;color:#5f450a}
 .ch247-muted{color:#5b6b85;font-size:.88rem}
 .ch247-status-error{color:#b42318;font-size:.9rem}
-.ch247-status-success{color:#0a7a3d;font-size:.9rem}
+.ch247-status-success{color:var(--ch-green);font-size:.9rem}
 .ch247-kb-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin:1rem 0}
 .ch247-kb-tile{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:.85rem;display:flex;flex-direction:column;gap:.15rem}
 .ch247-kb-tile strong{font-size:1.5rem;line-height:1.1;color:#1b242c}

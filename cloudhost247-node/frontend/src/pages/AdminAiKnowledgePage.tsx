@@ -72,8 +72,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  indexed: '#0a7a3d',
-  unchanged: '#0a7a3d',
+  indexed: 'var(--ch-green)',
+  unchanged: 'var(--ch-green)',
   skipped: '#8a6410',
   excluded: '#8a6410',
   failed: '#b42318',
@@ -419,7 +419,7 @@ export default function AdminAiKnowledgePage() {
                 <tr key={run.id}>
                   <td>{formatDate(run.started_at)}</td>
                   <td>{run.trigger}</td>
-                  <td><span style={{ color: run.status === 'succeeded' ? '#0a7a3d' : run.status === 'partial' ? '#8a6410' : '#b42318', fontWeight: 600 }}>{run.status}</span></td>
+                  <td><span style={{ color: run.status === 'succeeded' ? 'var(--ch-green)' : run.status === 'partial' ? '#8a6410' : '#b42318', fontWeight: 600 }}>{run.status}</span></td>
                   <td>{run.indexed}</td>
                   <td>{run.discovered}</td>
                   <td>{run.removed}</td>
