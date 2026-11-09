@@ -593,7 +593,7 @@ Until this is decided, the assistant's behaviour on such questions is: **no inve
 | Previous claim | Audit finding |
 | --- | --- |
 | "Embeddings: optional, configurable" | **Not implemented.** No embedding code path, no vector column, no cosine search. `retrieval.ts:32` says so itself: *"There is no embedding stage by default."* `0096` states `pgvector` is unavailable. |
-| Suite counts "unit 2261 / frontend 1000 / integration 979" | Unit **2,269**, frontend **1,000**, integration **963 passed + 17 skipped**. The integration figure appears to have counted skipped tests as passed. |
+| Suite counts "unit 2261 / frontend 1000 / integration 979" | Unit **2,269** at the time of that correction (**2,274** after the Phase 28 tests, §13.4), frontend **1,000**, integration **963 passed + 17 skipped**. The integration figure appears to have counted skipped tests as passed. |
 | "Completion" framing | Two customer-facing defects were shipping (defects 1 and 2). The guard documented as protecting against unsupported questions had never executed. |
 
 ---
@@ -645,7 +645,7 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 | --- | --- | --- |
 | 1 — commits and diff | grep the committed source (not the working tree) for each of the five required actions; then **revert all seven fixed files to `e9d29d4` and re-run the regression suite** | **Pass.** All five actions present. Reverted tree: **10 of 13** regression tests fail. The 3 that pass are the deliberate counter-cases documented in §11.2 |
 | 2 — migration compatibility | run the migration runner on both histories: this branch, and `origin/main` with only `0097` copied in | **Pass on both.** 97 migrations; `0097` is the tail on the branch and follows `0096` on `main`; **no duplicate prefixes**; first run applies 97, second run applies 0 |
-| 3 — CI on the PR head | `scripts/release-candidate-check.sh` run locally, plus the GitHub checks on the pushed head | **Was failing; two real causes found and fixed** (see below) |
+| 3 — CI on the PR head | `scripts/release-candidate-check.sh` run locally, plus the GitHub checks on the pushed head | **Was failing; two real causes found and fixed** (see below), then **all five checks green on `2ba7b86`**: Node 22.12 (23m35s), Node 24.8 (16m19s), Release candidate PHP 7.4 (3m9s), PHP 8.2 (2m28s), content hygiene (13s) |
 | 4 — test suite | `tsc --noEmit` + `vitest run tests/unit` on the clean clone | **Clean typecheck; 157 files / 2,274 tests passed** |
 | 5 — branding / hygiene | the release-candidate checker's retired-palette and generated-surface stages | **Pass after the two fixes below** |
 
@@ -654,7 +654,7 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 1. **Stale generated site surfaces.** `scripts/site/generate.mjs` projects SPA routes into the published site. The admin AI-knowledge console and the email-forensics page were both added without regenerating, so `/admin/ai-support/knowledge` and `/account/email-forensics` were missing from `SPA_ROUTE_PATTERNS` — the routes existed in the app but were never projected. Regenerated in `2b1615c`.
 2. **Retired palette.** The checker rejects `#0a7a3d` and `#166534`. The palette was re-finished in gold/silver; `--ch-green` is now a **legacy alias name that resolves to gold ink `#5f450a`** (`design-system.css:55`). The AI knowledge console, the support widget's success text and the forensics OK badge were the last raw-green holdouts. They now use `var(--ch-green)` / `var(--ch-ok-soft)`. Both files predate this branch, so this blocked CI for a reason unrelated to the AI subsystem — but it blocked it, and a red pipeline is not something to describe as green.
 
-**One thing this gate-3 run does not prove:** the CI job also lints PHP, and **PHP is not installed in this environment** (no root, so it cannot be). The checker was exercised with a stub `php` that exits 0. That validates the *checker's own logic* end to end; it **does not lint any PHP**. Where the release-candidate job's PHP stage is concerned, the honest statement is *not verified here* — CI is the only place it has actually run.
+**On PHP linting, precisely.** PHP is not installed in this environment (no root, so it cannot be), and the local gate runs used a stub `php` that exits 0. That exercised the *checker's own logic* end to end but **linted no PHP**. The release-candidate job's two PHP stages have since run for real in CI and passed on both 7.4 and 8.2 — so PHP syntax across the shipped tree *is* verified, just not by anything done here. The distinction matters: the local exit code was never evidence about PHP.
 
 ## 14. Remediation commits
 
@@ -685,5 +685,7 @@ For the next integration phase, in the order that unblocks the most:
 2. **Staging deployment** (§12.1 item 3) — reproduce cold sync, warm sync, drift, pricing, escalations and the rate-limit ceilings on real PostgreSQL.
 3. **Semantic retrieval decision** (§12.1a) — needs embeddings and a vector store; `pgvector` is unavailable on the supported platform, so this is an infrastructure decision, not a code change.
 4. **Provider certification** (§9) — set the three `AI_LLM_*` values and smoke-test phrasing, validation fallback and timeout against a real endpoint. Until then, no claim of provider-backed operation is valid.
+
+**Pipeline status on the head commit: green.** All five required checks pass on `2ba7b86`. That closes gate 3 and removes the last blocker that was not a design decision. It does not change the verdict below, because a green pipeline is still automated test verification — not staging, not provider, not production.
 
 And the standing caution, because it is the one most likely to be misread: **2,274 passing unit tests do not certify a production system.** They establish that the behaviours they assert still hold. Staging, provider and production certification are separate steps, and none of them has been done.
