@@ -645,7 +645,7 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 | --- | --- | --- |
 | 1 — commits and diff | grep the committed source (not the working tree) for each of the five required actions; then **revert all seven fixed files to `e9d29d4` and re-run the regression suite** | **Pass.** All five actions present. Reverted tree: **10 of 13** regression tests fail. The 3 that pass are the deliberate counter-cases documented in §11.2 |
 | 2 — migration compatibility | run the migration runner on both histories: this branch, and `origin/main` with only `0097` copied in | **Pass on both.** 97 migrations; `0097` is the tail on the branch and follows `0096` on `main`; **no duplicate prefixes**; first run applies 97, second run applies 0 |
-| 3 — CI on the PR head | `scripts/release-candidate-check.sh` run locally, plus the GitHub checks on the pushed head | **Was failing; two real causes found and fixed** (see below), then **all five checks green on `2ba7b86`**: Node 22.12 (23m35s), Node 24.8 (16m19s), Release candidate PHP 7.4 (3m9s), PHP 8.2 (2m28s), content hygiene (13s) |
+| 3 — CI on the PR head | `scripts/release-candidate-check.sh` run locally, plus the GitHub checks on the pushed head | **Was failing; two real causes found and fixed** (see below), then **all five checks green on the final head `ae1edf0`**: Node 22.12 (22m57s), Node 24.8 (16m24s), Release candidate PHP 7.4 (2m24s), PHP 8.2 (2m13s), content hygiene (14s) |
 | 4 — test suite | `tsc --noEmit` + `vitest run tests/unit` on the clean clone | **Clean typecheck; 157 files / 2,274 tests passed** |
 | 5 — branding / hygiene | the release-candidate checker's retired-palette and generated-surface stages | **Pass after the two fixes below** |
 
@@ -671,6 +671,7 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 | `56dc94c` | **Phase 28.** Two regression tests strengthened after they were found not to catch their own defects, plus a retrieval-level abstention test (13 tests total). |
 | `2b1615c` | **Phase 28.** Regenerate site surfaces: the admin knowledge route and email-forensics page were never projected. |
 | `fa92626` | **Phase 28.** Replace retired-green hexes with design-system tokens in the knowledge console, support widget and forensics badge. |
+| `2ba7b86` / `ae1edf0` | **Phase 28.** Record the re-verification and the green pipeline in this report. |
 
 Branch `arena/b55a0c26-cloudhost247`, based on `e9d29d4`, PR #114 against `main`.
 **Not merged. Not deployed. No production credentials activated. No customer settings changed.**
@@ -686,6 +687,8 @@ For the next integration phase, in the order that unblocks the most:
 3. **Semantic retrieval decision** (§12.1a) — needs embeddings and a vector store; `pgvector` is unavailable on the supported platform, so this is an infrastructure decision, not a code change.
 4. **Provider certification** (§9) — set the three `AI_LLM_*` values and smoke-test phrasing, validation fallback and timeout against a real endpoint. Until then, no claim of provider-backed operation is valid.
 
-**Pipeline status on the head commit: green.** All five required checks pass on `2ba7b86`. That closes gate 3 and removes the last blocker that was not a design decision. It does not change the verdict below, because a green pipeline is still automated test verification — not staging, not provider, not production.
+**Pipeline status on the final head (`ae1edf0`): green.** All five required checks pass. That closes gate 3 and removes the last blocker that was not a design decision, so nothing technical now stands between this branch and a merge review. It does not change the verdict in §13, because a green pipeline is still automated test verification — not staging, not provider, not production.
+
+**One caveat on that green, stated because it is easy to overread.** GitHub reports the PR as `CONFLICTING` (`mergeable: CONFLICTING`). The checks run against the branch head, not against a merge commit, so they say *this branch is sound*; they say nothing about the combination. The combination is the subject of §13.3, and it has been built and tested separately.
 
 And the standing caution, because it is the one most likely to be misread: **2,274 passing unit tests do not certify a production system.** They establish that the behaviours they assert still hold. Staging, provider and production certification are separate steps, and none of them has been done.
