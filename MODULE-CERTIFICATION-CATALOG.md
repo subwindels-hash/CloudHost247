@@ -36,3 +36,7 @@ drill. Their completion converts "Internally tested" rows into "Provider-certifi
 Support attachments: not implemented (by design earlier; escalation path exists but no binary
 upload claims). Browser runtime: CT-07 blocked. Hosting email quotas: QUEUE-based; configurable,
 not externally verified.
+
+
+## Phase 19 additions
+Operational ownership / failure dependency / customer impact per module: `docs/module-operations-matrix.md`. Runtime config matrix (96 env keys): `docs/runtime-configuration-matrix.md`. Verdict additions are evidence-linked; no state changes.
