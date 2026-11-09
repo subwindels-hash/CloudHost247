@@ -1,63 +1,46 @@
 /* =============================================================================
-   Contact Us — premium brushed bronze-silver page with a silver-bronze form.
+   Contact Us — homepage AssistantShowcase silver-band background.
 
-   The metal ramps and grain come from shared/site/metals.css, so this page uses
-   the same physical palette as the rest of the published site rather than a
-   flat colour. The area behind the form is a reflective silver field with warm
-   bronze specular bands — not a gold surface — and it carries no repeating
-   wordmark. Two decorative star fields (page-wide and inside the form card)
-   drift, twinkle and rotate; a slow travelling light glint passes over the
-   moving stars without any fast blinking. The hero uses a neutral ink overlay
-   with no gold cast, so the photo keeps its natural colour and the page-wide
-   stars remain visible above it. Every moving layer is GPU-only,
-   pointer-transparent and disabled under prefers-reduced-motion.
+   The fine diagonal brushed-silver finish is copied from the homepage section
+   headed "More confidence at every step." It uses the same #c0c0c0 base,
+   115deg hairline stripe layer and 160deg silver ramp — no separate bitmap,
+   no gold/bronze gradient, no moving star field and no wordmark. The form card
+   gets a translucent silver veil over the same finish so its controls stay
+   readable. The hero keeps its neutral ink overlay. Slow metallic sheen and
+   the hero title shine remain, with reduced-motion/print guards.
    ========================================================================== */
 
 .ch247-contact-page {
+  --contact-assistant-silver-bg:
+    repeating-linear-gradient(115deg, #ffffff2e 0 2px, #0000000d 2px 4px),
+    linear-gradient(135deg, #ffffff99 0%, #ffffff00 32%),
+    linear-gradient(160deg, #e9ecef 0%, #d3d7db 16%, #c2c7cd 40%, #b2b7be 56%, #c9cdd2 74%, #e3e6e9 100%);
   position: relative;
   isolation: isolate;
   overflow: hidden;
   overflow: clip;
   color: #17202a;
-  background:
-    radial-gradient(ellipse at 12% 8%, rgba(255, 255, 255, .68), transparent 42%),
-    radial-gradient(ellipse at 88% 92%, rgba(122, 88, 12, .28), transparent 48%),
-    linear-gradient(104deg, transparent 28%, rgba(140, 101, 17, .22) 42%, rgba(255, 255, 255, .20) 48%, rgba(140, 101, 17, .14) 56%, rgba(255, 255, 255, .08) 62%, transparent 72%),
-    repeating-linear-gradient(115deg, rgba(255, 255, 255, .045) 0 1px, transparent 1px 5px, rgba(140, 101, 17, .035) 5px 6px, transparent 6px 11px),
-    linear-gradient(90deg, rgba(13, 17, 22, .20), transparent 42%, transparent 58%, rgba(13, 17, 22, .26)),
-    var(--metal-grain, repeating-linear-gradient(115deg, rgba(255, 255, 255, .055) 0 1px, rgba(0, 0, 0, .022) 1px 2px, transparent 2px 4px)),
-    var(--metal-ramp-silver, linear-gradient(115deg, #62676d 0%, #9ba1a8 11%, #c0c0c0 23%, #e5e4e2 32%, #ffffff 37%, #c9cacc 47%, #858585 59%, #e5e4e2 72%, #a8adb3 86%, #62676d 100%));
-  background-size: 140% 140%, 130% 130%, 240% 100%, auto, 100% 100%, auto, 190% 100%;
-  background-position: center, center, 50% 50%, center, center, center, 50% 50%;
+  background-color: #c0c0c0;
+  background-image: var(--contact-assistant-silver-bg);
 }
 
-/* A slow shared light sweep. It paints above the star layer (z-index 2) but
-   below readable content (z-index 3), so the glint passes over the moving
-   decorations without turning them into a fast blink. */
+/* A slow metallic sheen above the striped surface (z-index 2) but below
+   readable content (z-index 3). No star field is layered here. */
 .ch247-contact-page::after {
   content: '';
   position: absolute;
   inset: -20% -60%;
   z-index: 2;
   pointer-events: none;
-  background: linear-gradient(104deg, transparent 42%, rgba(255, 255, 255, .46) 49%, rgba(255, 255, 255, .16) 54%, transparent 61%);
+  background: linear-gradient(104deg, transparent 42%, rgba(255, 255, 255, .30) 49%, rgba(255, 255, 255, .10) 54%, transparent 61%);
   mix-blend-mode: screen;
   opacity: 0;
   transform: translate3d(-120%, 0, 0);
   animation: ch247-contact-specular 16s ease-in-out infinite;
 }
 
-.ch247-contact-page__stars {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-/* Neutral ink scrim only: the photograph's own colours stay intact. The page-level
-   star layer is a sibling of this section, so stars still move over it; below it,
-   the uncluttered brushed bronze-silver field holds the form. */
+/* Neutral ink scrim only: the photograph's own colours stay intact. Below the
+   hero, the uncluttered fine silver-stripe field holds the form. */
 .ch247-contact-page .ch247-contact-hero {
   position: relative;
   z-index: auto;
@@ -102,7 +85,7 @@
 }
 
 .ch247-contact-page .ch247-contact-hero__eyebrow span { color: #e5e4e2; }
-.ch247-contact-page .ch247-contact__eyebrow span { color: #a8780c; }
+.ch247-contact-page .ch247-contact__eyebrow span { color: #858585; }
 
 .ch247-contact-page .ch247-contact-hero h1 {
   width: fit-content;
@@ -128,17 +111,19 @@
   }
 }
 
-/* The section inherits the page's brushed bronze-silver field; no repeating
-   wordmark is layered between the metal and the form. */
+/* The section inherits the homepage-style silver band; no repeating wordmark
+   or star field is layered between the metal and the form. */
 .ch247-contact-page .ch247-contact-section {
   position: relative;
   z-index: auto;
   padding-block: clamp(3.5rem, 7vw, 6rem);
   background: transparent;
+  border-top: 1px solid #a7acb3;
+  border-bottom: 1px solid #a7acb3;
 }
 
-/* The form sits on real silver with a restrained bronze reflection and a
-   silver-bronze edge, so it stays distinct from the darker metal behind it. */
+/* The form uses the same homepage silver finish behind a translucent veil,
+   with a graphite-silver edge and shadow to keep it raised above the band. */
 .ch247-contact-page .ch247-contact {
   position: relative;
   z-index: 3;
@@ -146,11 +131,12 @@
   margin: 0 auto;
   padding: clamp(1.5rem, 4vw, 3rem);
   overflow: hidden;
-  border: 2px solid transparent;
+  border: 2px solid rgba(98, 103, 109, .62);
   border-radius: 24px;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, .98) 0%, #e5e4e2 20%, #c0c0c0 36%, #f3f1e8 52%, rgba(140, 101, 17, .48) 68%, #d9d3c6 80%, #e5e4e2 100%) padding-box,
-    var(--metal-ramp-silver, linear-gradient(115deg, #62676d, #c0c0c0, #ffffff, #858585, #a8adb3, #62676d)) border-box;
+  background-color: #c0c0c0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .78), rgba(255, 255, 255, .78)),
+    var(--contact-assistant-silver-bg);
   box-shadow:
     0 30px 80px rgba(13, 17, 22, .32),
     0 8px 22px rgba(23, 29, 36, .18),
@@ -171,10 +157,9 @@
 .ch247-contact-page .ch247-contact::before {
   z-index: 0;
   background:
-    radial-gradient(ellipse at 6% 0%, rgba(255, 255, 255, .72), transparent 46%),
-    radial-gradient(ellipse at 100% 100%, rgba(140, 101, 17, .16), transparent 50%),
-    var(--metal-grain, repeating-linear-gradient(115deg, rgba(255, 255, 255, .055) 0 1px, rgba(0, 0, 0, .022) 1px 2px, transparent 2px 4px));
-  opacity: .72;
+    radial-gradient(ellipse at 6% 0%, rgba(255, 255, 255, .62), transparent 46%),
+    radial-gradient(ellipse at 100% 100%, rgba(98, 103, 109, .08), transparent 50%);
+  opacity: .7;
 }
 
 .ch247-contact-page .ch247-contact::after {
@@ -182,20 +167,10 @@
   inset-block: -30%;
   inset-inline: -80%;
   border-radius: 0;
-  background: linear-gradient(104deg, transparent 40%, rgba(255, 255, 255, .52) 49%, rgba(214, 203, 180, .16) 56%, transparent 66%);
+  background: linear-gradient(104deg, transparent 40%, rgba(255, 255, 255, .52) 49%, rgba(255, 255, 255, .16) 56%, transparent 66%);
   opacity: 0;
   transform: translate3d(-120%, 0, 0);
   animation: ch247-contact-specular 11s ease-in-out infinite;
-}
-
-.ch247-contact-card__stars {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
-  pointer-events: none;
-  opacity: .38;
-  mix-blend-mode: multiply;
 }
 
 .ch247-contact-page .ch247-contact__content {
@@ -208,7 +183,7 @@
   align-items: center;
   gap: .5rem;
   margin: 0 0 .7rem;
-  color: #5f450a;
+  color: #4d5257;
   font-size: .72rem;
   font-weight: 800;
   letter-spacing: .13em;
@@ -216,12 +191,12 @@
 }
 
 .ch247-contact-page .ch247-contact__eyebrow span {
-  color: #a8780c;
+  color: #858585;
 }
 
 .ch247-contact-page .ch247-contact h2 {
   margin: 0 0 .55rem;
-  color: #241a02;
+  color: #17202a;
   font-size: clamp(1.65rem, 3vw, 2.15rem);
   font-weight: 800;
   letter-spacing: -.03em;
@@ -242,7 +217,7 @@
 
 .ch247-contact-page .ch247-contact__form label {
   margin-top: .7rem;
-  color: #2c2108;
+  color: #2f353c;
   font-weight: 700;
 }
 
@@ -252,10 +227,10 @@
   width: 100%;
   min-width: 0;
   padding: .9rem 1rem;
-  border: 1px solid rgba(122, 88, 12, .42);
+  border: 1px solid rgba(74, 79, 84, .42);
   border-radius: 10px;
   background: rgba(255, 255, 255, .94);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 2px 8px rgba(62, 42, 4, .06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 2px 8px rgba(23, 29, 36, .06);
   color: #17202a;
   font: inherit;
   transition: border-color 180ms ease, box-shadow 180ms ease;
@@ -266,26 +241,26 @@
 }
 
 .ch247-contact-page .ch247-contact__form :is(input, select, textarea):hover {
-  border-color: rgba(184, 134, 11, .72);
+  border-color: rgba(98, 103, 109, .72);
 }
 
 .ch247-contact-page .ch247-contact__form :is(input, select, textarea):focus-visible {
-  outline: 3px solid rgba(184, 134, 11, .68);
+  outline: 3px solid rgba(98, 103, 109, .68);
   outline-offset: 2px;
-  border-color: #b8860b;
-  box-shadow: 0 0 0 5px rgba(230, 200, 117, .22);
+  border-color: #858585;
+  box-shadow: 0 0 0 5px rgba(192, 192, 192, .35);
 }
 
 .ch247-contact-page .ch247-contact__form .ch247-button {
   justify-self: start;
   margin-top: 1.35rem;
   padding: .85rem 1.65rem;
-  border: 1px solid rgba(122, 88, 12, .7);
+  border: 1px solid rgba(74, 79, 84, .7);
   border-radius: 999px;
-  background: var(--metal-ramp-gold, linear-gradient(115deg, #7a580c, #e6c875, #fff4cf, #d4af37, #a8780c));
+  background: var(--metal-ramp-silver, linear-gradient(115deg, #62676d, #c0c0c0, #ffffff, #858585, #a8adb3, #62676d));
   background-size: 200% 100%;
-  color: #241a02 !important;
-  box-shadow: inset 0 1px 0 rgba(255, 246, 214, .8), 0 12px 26px rgba(90, 63, 6, .22);
+  color: #17202a !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 12px 26px rgba(23, 29, 36, .22);
   font-weight: 800;
   transition: background-position 720ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
@@ -293,7 +268,7 @@
 .ch247-contact-page .ch247-contact__form .ch247-button:hover:not(:disabled) {
   transform: translateY(-2px);
   background-position: 100% 50%;
-  box-shadow: inset 0 1px 0 rgba(255, 246, 214, .8), 0 18px 34px rgba(90, 63, 6, .3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 18px 34px rgba(23, 29, 36, .3);
 }
 
 .ch247-contact-page .ch247-contact__form .ch247-button:disabled {
@@ -321,88 +296,16 @@
   color: #7a1717;
 }
 
-/* Four-point bronze sparkles. The gradient gives each point a polished-metal
-   highlight; the centre glint and drop shadow keep them legible on both the
-   dark hero and the champagne-gold field. */
-.ch247-bronze-star {
-  position: absolute;
-  left: var(--star-x);
-  top: var(--star-y);
-  width: var(--star-size);
-  height: var(--star-size);
-  display: block;
-  clip-path: polygon(50% 0%, 58% 36%, 100% 50%, 58% 64%, 50% 100%, 42% 64%, 0% 50%, 42% 36%);
-  background: linear-gradient(135deg, #fff4cf 0%, #e6c875 18%, #b8860b 38%, #7a580c 52%, #d4af37 70%, #fff4cf 86%, #8c6511 100%);
-  filter: drop-shadow(0 0 6px rgba(122, 88, 12, .68));
-  opacity: 0;
-  transform: translate3d(0, 18vh, 0) rotate(0deg) scale(.65);
-  animation: ch247-bronze-star-drift var(--star-duration) linear var(--star-delay) infinite;
-  will-change: transform, opacity;
-}
-
-.ch247-bronze-star::before {
-  content: '';
-  position: absolute;
-  inset: -25%;
-  pointer-events: none;
-  background: linear-gradient(100deg, transparent 38%, rgba(255, 255, 255, .95) 48%, rgba(255, 244, 207, .55) 53%, transparent 64%);
-  transform: translate3d(-130%, 0, 0);
-  opacity: 0;
-  animation: ch247-bronze-star-light var(--star-light-duration) ease-in-out var(--star-light-delay) infinite;
-  will-change: transform, opacity;
-}
-
-.ch247-bronze-star::after {
-  content: '';
-  position: absolute;
-  inset: 38%;
-  border-radius: 50%;
-  background: #fff9e5;
-  box-shadow: 0 0 8px 3px rgba(255, 244, 207, .42);
-}
-
-@keyframes ch247-bronze-star-drift {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 18vh, 0) rotate(0deg) scale(.65);
-  }
-  12%, 88% {
-    opacity: var(--star-opacity);
-  }
-  50% {
-    transform: translate3d(var(--star-drift), -5vh, 0) rotate(180deg) scale(1.08);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(var(--star-drift), -28vh, 0) rotate(360deg) scale(.7);
-  }
-}
-
-/* A slow travelling highlight across each drifting star: a glint, not a blink. */
-@keyframes ch247-bronze-star-light {
-  0%, 12% {
-    opacity: 0;
-    transform: translate3d(-130%, 0, 0);
-  }
-  28% {
-    opacity: 1;
-  }
-  68%, 100% {
-    opacity: 0;
-    transform: translate3d(130%, 0, 0);
-  }
-}
-
 @keyframes ch247-contact-specular {
   0%, 10% {
     opacity: 0;
     transform: translate3d(-120%, 0, 0);
   }
   28% {
-    opacity: .48;
+    opacity: .34;
   }
   58% {
-    opacity: .32;
+    opacity: .22;
     transform: translate3d(120%, 0, 0);
   }
   100% {
@@ -425,26 +328,9 @@
     border-radius: 18px;
   }
 
-  .ch247-contact-page .ch247-contact-page__stars {
-    opacity: .72;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ch247-contact-page .ch247-bronze-star {
-    animation: none !important;
-    opacity: var(--star-opacity);
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-    will-change: auto;
-  }
-
-  .ch247-contact-page .ch247-bronze-star::before {
-    animation: none !important;
-    opacity: 0;
-    transform: translate3d(-130%, 0, 0);
-    will-change: auto;
-  }
-
   .ch247-contact-page .ch247-contact-hero h1,
   .ch247-contact-page::after,
   .ch247-contact-page .ch247-contact::after {
@@ -458,8 +344,6 @@
 }
 
 @media print {
-  .ch247-contact-page__stars,
-  .ch247-contact-card__stars,
   .ch247-contact-page::after,
   .ch247-contact-page .ch247-contact::after {
     display: none !important;
