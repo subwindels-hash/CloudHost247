@@ -2,7 +2,7 @@
  * Email Trace & Forensics Analyzer — integration tests against the real API routes.
  *
  * Runs against an embedded PGlite Postgres migrated with the real migration files (including
- * 0092_create_email_forensics.sql). Every request is injected through Fastify's `app.inject`,
+ * 0096_create_email_forensics.sql). Every request is injected through Fastify's `app.inject`,
  * so the full middleware stack (auth, rate limiting, error handling) is exercised.
  *
  * No external APIs are hit: DNS lookups in these tests resolve against whatever is configured
