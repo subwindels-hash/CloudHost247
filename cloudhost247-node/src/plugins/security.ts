@@ -16,11 +16,12 @@ export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https://www.facebook.com', 'https://www.google.com', 'https://www.googleadservices.com', 'https://googleads.g.doubleclick.net'],
+        imgSrc: ["'self'", 'data:', 'https://www.facebook.com', 'https://www.google.com', 'https://www.googleadservices.com', 'https://googleads.g.doubleclick.net', 'https://analytics.tiktok.com'],
         styleSrc: ["'self'", "'unsafe-inline'"],
         // Only explicitly used Meta and Google tag origins; no inline scripts or wildcard hosts.
-        scriptSrc: ["'self'", 'https://connect.facebook.net', 'https://www.googletagmanager.com'],
-        connectSrc: ["'self'", 'https://connect.facebook.net', 'https://www.facebook.com', 'https://www.google.com', 'https://www.googleadservices.com', 'https://googleads.g.doubleclick.net', 'https://www.googletagmanager.com'],
+        // TikTok's official pixel library is served only from analytics.tiktok.com.
+        scriptSrc: ["'self'", 'https://connect.facebook.net', 'https://www.googletagmanager.com', 'https://analytics.tiktok.com'],
+        connectSrc: ["'self'", 'https://connect.facebook.net', 'https://www.facebook.com', 'https://www.google.com', 'https://www.googleadservices.com', 'https://googleads.g.doubleclick.net', 'https://www.googletagmanager.com', 'https://analytics.tiktok.com'],
       },
     },
   });

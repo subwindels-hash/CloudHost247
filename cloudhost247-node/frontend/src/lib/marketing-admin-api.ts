@@ -22,3 +22,26 @@ export function metaAdminSend<T>(method: 'PUT' | 'POST', path: string, body: unk
 }
 export function getMetaActivity() { return apiFetch<{ events: MetaActivity[]; deliveryMeaning: string }>(`${META_ADMIN_API}/activity`); }
 export function getMetaAudit() { return apiFetch<{ entries: MetaAuditEntry[] }>(`${META_ADMIN_API}/audit`); }
+
+export const TIKTOK_ADMIN_API = '/api/v1/admin/marketing-integrations/tiktok-pixel';
+export interface TikTokAdminConfiguration {
+  providerKey: 'tiktok_pixel'; displayName: string; websiteDomain: string; enabled: boolean;
+  pixelId: string | null; testMode: boolean; testEventCode: string | null;
+  remarketingEnabled: boolean; enabledEvents: string[];
+  eventsApi: { enabled: boolean; hasToken: boolean };
+  revision: number; lastConfigurationUpdate: string | null; lastConfigurationTestAt: string | null;
+  lastConfigurationTestStatus: string | null; lastError: string | null;
+}
+export interface TikTokDiagnostics {
+  pixelId: string | null; enabled: boolean; installationStatus: string; pixelInitialization: string;
+  consentConfiguration: string; eventsApiConnection: string; enabledEvents: string[];
+  lastSuccessfulTest: string | null; lastServerDeliveryStatus: string | null; lastServerDeliveredAt: string | null;
+  eventsRecorded: number; duplicateEventWarnings: number;
+}
+export function getTikTokConfiguration() { return apiFetch<{ configuration: TikTokAdminConfiguration }>(TIKTOK_ADMIN_API); }
+export function tiktokAdminSend<T>(method: 'PUT' | 'POST', path: string, body: unknown) {
+  return apiFetch<T>(`${TIKTOK_ADMIN_API}${path}`, { method, body: JSON.stringify(body) });
+}
+export function getTikTokActivity() { return apiFetch<{ events: MetaActivity[]; deliveryMeaning: string }>(`${TIKTOK_ADMIN_API}/activity`); }
+export function getTikTokAudit() { return apiFetch<{ entries: MetaAuditEntry[] }>(`${TIKTOK_ADMIN_API}/audit`); }
+export function getTikTokDiagnostics() { return apiFetch<{ configuration: TikTokAdminConfiguration; diagnostics: TikTokDiagnostics }>(`${TIKTOK_ADMIN_API}/diagnostics`); }

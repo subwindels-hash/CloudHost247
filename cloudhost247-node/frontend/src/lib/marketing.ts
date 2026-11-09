@@ -41,6 +41,11 @@ export function useMarketing() {
 }
 export function trackMarketing(name: string, data: Record<string, unknown>, eventId: string) {
   void marketingEngine().ready().then(() => marketingEngine().track(name, data, eventId));
+  // TikTok mirrors the same funnel event with the SAME eventId (its own
+  // provider-scoped dedup key server-side). Names TikTok does not support
+  // (e.g. Meta-only Lead/Purchase) are refused by the TikTok runtime itself.
+  const tiktok = (window as unknown as { CloudHost247TikTok?: { ready(): Promise<unknown>; track(n: string, d: Record<string, unknown>, id: string): boolean } }).CloudHost247TikTok;
+  if (tiktok) void tiktok.ready().then(() => tiktok.track(name, data, eventId));
 }
 
 /** Only the owner-authenticated, backend-verified receipt endpoint can produce a Purchase.

@@ -137,6 +137,9 @@ describe('migration runner against the real database/migrations SQL files', () =
     // Native Email Trace Centre (0090): collected Exim evidence, per-server collection sources and
     // collection-run bookkeeping. No message body, subject or credential column exists by design.
     '0090_create_email_trace_centre.sql',
+    '0091_add_google_ads_integration.sql',
+    // TikTok Pixel + Events API as another provider on the 0089 marketing tables.
+    '0092_add_tiktok_pixel_integration.sql',
   ];
 
   it('finds the committed migration files in order', () => {

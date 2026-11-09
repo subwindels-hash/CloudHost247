@@ -127,13 +127,13 @@ export function safeSourceUrl(value: unknown, appUrl: string): string {
   return new URL(path, base).toString().slice(0,2048);
 }
 
-export interface CheckoutConsentContext { sessionId: string; sourceUrl: string; fbp: string | null; fbc: string | null }
+export interface CheckoutConsentContext { sessionId: string; sourceUrl: string; fbp: string | null; fbc: string | null; ttp: string | null; ttclid: string | null }
 /** Read the current choice before checkout; the order transaction attaches it atomically below. */
 export async function checkoutConsentContext(pool: Queryable, request: FastifyRequest, env: Env): Promise<CheckoutConsentContext | null> {
   try {
     const row = await requestConsent(pool, request);
     if (!consentGranted(row)) return null;
-    return { sessionId: row!.id, sourceUrl: safeSourceUrl(request.headers.referer, env.APP_URL), fbp: cookieValue(request, '_fbp'), fbc: cookieValue(request, '_fbc') };
+    return { sessionId: row!.id, sourceUrl: safeSourceUrl(request.headers.referer, env.APP_URL), fbp: cookieValue(request, '_fbp'), fbc: cookieValue(request, '_fbc'), ttp: cookieValue(request, '_ttp'), ttclid: cookieValue(request, 'ttclid') };
   } catch { return null; }
 }
 /** Optional marketing context uses a savepoint so a marketing failure cannot roll back a valid order. */

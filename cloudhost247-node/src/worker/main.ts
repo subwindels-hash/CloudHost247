@@ -16,6 +16,7 @@ import { sweepOperatingSystemLifecycle } from '../services/os-lifecycle-service'
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { deliverNotificationOutbox } from '../services/notification-outbox-service';
 import { drainCapiOutbox, pruneMarketingRetention } from '../marketing/capi-worker';
+import { drainTikTokOutbox } from '../tiktok/events-api-worker';
 import { deliverAuthEmailOutbox } from '../services/auth-recovery-service';
 import { deliverPinVerificationEmails } from '../services/security-pin-email-service';
 import { pinKeyOrNull } from '../lib/pin-key';
@@ -217,6 +218,8 @@ async function runWorkerCycle(
   if (now - schedule.lastMarketingDrain >= NOTIFICATION_OUTBOX_INTERVAL_MS) {
     schedule.lastMarketingDrain = now;
     const marketing = await drainCapiOutbox(ctx.db, { workerId: ctx.workerId });
+    const tiktok = await drainTikTokOutbox(ctx.db, { workerId: ctx.workerId });
+    if (tiktok.claimed > 0 || tiktok.failed > 0) logger.log(`[worker:${ctx.workerId}] TikTok outbox: ${tiktok.delivered} API-accepted, ${tiktok.retried} retrying, ${tiktok.failed} dead-letter, ${tiktok.cancelled} cancelled`);
     const marketingWork = marketing.claimed > 0 || marketing.failed > 0;
     didWork ||= marketingWork;
     if (marketingWork) logger.log(`[worker:${ctx.workerId}] Meta outbox: ${marketing.delivered} API-accepted, ${marketing.retried} retrying, ${marketing.failed} dead-letter, ${marketing.cancelled} cancelled`);

@@ -81,7 +81,7 @@
 {include file="$template/cloudhost247_legacy_includes/cookie-offers.tpl"}
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247_legacy/css/marketing.css?v=20261108">
 <div class="container"><button type="button" class="ch247-cookie-settings" data-cookie-settings>Cookie settings</button></div>
-{if $ch247Site.platform}<script src="{$WEB_ROOT}/templates/cloudhost247_legacy/js/marketing.js?v=20261108" data-marketing-api="{$ch247Site.platform|escape}/api/v1/marketing" data-ga4-id="{$cloudhost247.settings.google_analytics_code|default:''|escape:'html'}" data-gtm-id="{$cloudhost247.settings.google_tag_manager_code|default:''|escape:'html'}" data-baidu-id="{$cloudhost247.settings.baidu_analytics_code|default:''|escape:'html'}" defer></script>{/if}
+{if $ch247Site.platform}<script src="{$WEB_ROOT}/templates/cloudhost247_legacy/js/marketing.js?v=20261108" data-marketing-api="{$ch247Site.platform|escape}/api/v1/marketing" data-ga4-id="{$cloudhost247.settings.google_analytics_code|default:''|escape:'html'}" data-gtm-id="{$cloudhost247.settings.google_tag_manager_code|default:''|escape:'html'}" data-baidu-id="{$cloudhost247.settings.baidu_analytics_code|default:''|escape:'html'}" defer></script><script src="{$WEB_ROOT}/templates/cloudhost247_legacy/js/tiktok.js?v=20261108" data-marketing-api="{$ch247Site.platform|escape}/api/v1/marketing" defer></script>{/if}
 {include file="$template/cloudhost247_legacy_includes/livechatoptions.tpl"}
 </body>
 </html>

@@ -1,17 +1,19 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
-import { getMetaConfiguration, getMetaActivity, getMetaAudit, metaAdminSend, type MetaAdminConfiguration, type MetaActivity, type MetaAuditEntry } from '../lib/marketing-admin-api';
+import { getMetaConfiguration, getMetaActivity, getMetaAudit, metaAdminSend, getTikTokConfiguration, getTikTokDiagnostics, getTikTokActivity, tiktokAdminSend, type MetaAdminConfiguration, type MetaActivity, type MetaAuditEntry, type TikTokAdminConfiguration, type TikTokDiagnostics } from '../lib/marketing-admin-api';
 import { formatDateTime } from '../components/revenue-guardian/rg-widgets';
 
-const TABS = [{ id: 'meta-pixel', label: 'Meta Pixel' }, { id: 'activity', label: 'Event activity' }, { id: 'audit', label: 'Configuration history' }] as const;
+const TABS = [{ id: 'meta-pixel', label: 'Meta Pixel' }, { id: 'tiktok-pixel', label: 'TikTok Pixel' }, { id: 'activity', label: 'Event activity' }, { id: 'audit', label: 'Configuration history' }] as const;
+const TIKTOK_EVENT_NAMES = ['PageView', 'ViewContent', 'Search', 'AddToCart', 'InitiateCheckout', 'AddPaymentInfo', 'PlaceAnOrder', 'CompletePayment', 'SubmitForm', 'CompleteRegistration', 'Contact', 'Subscribe'] as const;
 const statusLabel = (value: string | null) => value ? value.replace(/_/g, ' ') : 'Not tested';
 
 /** Canonical marketing console. The legacy WHMCS key is an import source, never a second owner. */
 export default function AdminMarketingIntegrationsPage() {
   usePageMeta('Marketing Integrations', 'Centrally manage consent-aware Meta Pixel and Conversions API settings.');
   const { provider } = useParams();
-  const tab = TABS.some(t => t.id === provider) ? provider! : 'meta-pixel';
+  const { pathname } = useLocation();
+  const tab = pathname.includes('tiktok-pixel') ? 'tiktok-pixel' : TABS.some(t => t.id === provider) ? provider! : 'meta-pixel';
   return <div className="ch247-stack ch247-marketing-admin">
     <header className="ch247-card">
       <p className="ch247-page__hint"><Link to="/admin">Admin</Link> / Marketing Integrations</p>
@@ -22,7 +24,7 @@ export default function AdminMarketingIntegrationsPage() {
         {TABS.map(t => <Link key={t.id} className={`ch247-button ${t.id === tab ? '' : 'ch247-button--outline'}`} aria-current={t.id === tab ? 'page' : undefined} to={`/admin/marketing-integrations/${t.id}`}>{t.label}</Link>)}
       </nav>
     </header>
-    {tab === 'meta-pixel' ? <MetaPixelSettings /> : tab === 'activity' ? <EventActivity /> : <ConfigurationHistory />}
+    {tab === 'meta-pixel' ? <MetaPixelSettings /> : tab === 'tiktok-pixel' ? <TikTokPixelSettings /> : tab === 'activity' ? <EventActivity /> : <ConfigurationHistory />}
   </div>;
 }
 
@@ -123,4 +125,111 @@ function ConfigurationHistory() {
   const [entries, setEntries] = useState<MetaAuditEntry[]>([]); const [error, setError] = useState('');
   useEffect(() => { getMetaAudit().then(r => setEntries(r.entries)).catch(e => setError(e instanceof Error ? e.message : 'History unavailable')); }, []);
   return <section className="ch247-card"><h2>Configuration history</h2><p className="ch247-page__hint">Audited saves, tests, imports and resets. Credentials are excluded.</p>{error && <p role="alert">{error}</p>}{!error && entries.length === 0 && <p>No configuration changes recorded.</p>}<div className="ch247-table-wrap"><table className="ch247-table"><thead><tr><th>Time</th><th>Action</th><th>Actor</th></tr></thead><tbody>{entries.map(e => <tr key={e.id}><td>{formatDateTime(e.created_at)}</td><td>{e.action}</td><td>{e.actor_id ?? 'System'}</td></tr>)}</tbody></table></div></section>;
+}
+
+function TikTokPixelSettings() {
+  const [config, setConfig] = useState<TikTokAdminConfiguration | null>(null);
+  const [diagnostics, setDiagnostics] = useState<TikTokDiagnostics | null>(null);
+  const [activity, setActivity] = useState<MetaActivity[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [token, setToken] = useState('');
+  const [removeToken, setRemoveToken] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  async function load() {
+    setError('');
+    try {
+      const [cfg, diag, act] = await Promise.all([getTikTokConfiguration(), getTikTokDiagnostics(), getTikTokActivity()]);
+      setConfig(cfg.configuration); setDiagnostics(diag.diagnostics); setActivity(act.events);
+    } catch (e) { setError(e instanceof Error ? e.message : 'Could not load TikTok configuration'); }
+  }
+  useEffect(() => { void load(); }, []);
+  function update(patch: Partial<TikTokAdminConfiguration>) { if (config) setConfig({ ...config, ...patch }); }
+  function toggleEvent(name: string, on: boolean) {
+    if (!config) return;
+    const next = on ? [...new Set([...config.enabledEvents, name])] : config.enabledEvents.filter(e => e !== name);
+    if (next.length > 0) update({ enabledEvents: next });
+  }
+  async function save(event?: FormEvent) {
+    event?.preventDefault(); if (!config || busy) return;
+    setBusy(true); setError(''); setMessage('');
+    try {
+      const result = await tiktokAdminSend<{ configuration: TikTokAdminConfiguration }>('PUT', '', {
+        expectedRevision: config.revision,
+        configuration: { displayName: config.displayName, websiteDomain: config.websiteDomain, enabled: config.enabled, pixelId: config.pixelId || null,
+          testMode: config.testMode, testEventCode: config.testEventCode || null, remarketingEnabled: config.remarketingEnabled,
+          enabledEvents: config.enabledEvents, eventsApi: { enabled: config.eventsApi.enabled } },
+        ...(token ? { eventsApiAccessToken: token } : {}), ...(removeToken ? { removeEventsApiToken: true } : {}),
+      });
+      setConfig(result.configuration); setToken(''); setRemoveToken(false);
+      setMessage('Configuration saved. This does not confirm TikTok event receipt — verify in TikTok Events Manager.');
+      window.dispatchEvent(new Event('ch247:marketing-refresh'));
+      await load();
+    } catch (e) { setError(e instanceof Error ? e.message : 'Save failed'); void load(); }
+    finally { setBusy(false); }
+  }
+  async function test() {
+    setBusy(true); setError('');
+    try { const result = await tiktokAdminSend<{ message: string }>('POST', '/test', {}); setMessage(result.message); await load(); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Test failed'); }
+    finally { setBusy(false); }
+  }
+  async function reset() {
+    if (!config) return; setBusy(true); setError('');
+    try { const result = await tiktokAdminSend<{ configuration: TikTokAdminConfiguration }>('POST', '/reset', { expectedRevision: config.revision, confirmation: 'RESET' }); setConfig(result.configuration); setToken(''); setConfirmReset(false); setMessage('TikTok integration reset and disabled. Audit history is retained.'); await load(); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Reset failed'); await load(); }
+    finally { setBusy(false); }
+  }
+  if (!config) return <section className="ch247-card"><p role={error ? 'alert' : 'status'}>{error || 'Loading TikTok Pixel configuration…'}</p>{error && <button onClick={() => void load()}>Retry</button>}</section>;
+  return <>
+    {message && <p className="ch247-card" role="status">{message}</p>}
+    {error && <p className="ch247-card" role="alert">{error}</p>}
+    <form className="ch247-card ch247-stack" onSubmit={save}>
+      <div className="ch247-marketing-admin__heading"><div><h2>TikTok Pixel</h2><p className="ch247-page__hint">Official browser Pixel + optional Events API · centrally managed · revision {config.revision}</p></div><span className="ch247-badge">{config.enabled ? 'Enabled' : 'Disabled'}</span></div>
+      <div className="ch247-marketing-admin__fields">
+        <label>Pixel name<input required maxLength={120} value={config.displayName} onChange={e => update({ displayName: e.target.value })} /></label>
+        <label>TikTok Pixel ID<input required pattern="[A-Za-z0-9]{16,32}" placeholder="Pixel code from TikTok Events Manager" value={config.pixelId ?? ''} onChange={e => update({ pixelId: e.target.value })} /><small>Alphanumeric pixel code — a public identifier, not an access token. Arbitrary scripts cannot be entered here.</small></label>
+        <label>Website domain<input required placeholder="cloudhost247.com" value={config.websiteDomain} onChange={e => update({ websiteDomain: e.target.value })} /><small>Hostname only. The runtime refuses a domain mismatch.</small></label>
+      </div>
+      <label className="ch247-marketing-admin__check"><input type="checkbox" checked={config.enabled} onChange={e => update({ enabled: e.target.checked })} /> Enable TikTok Pixel for consented visitors</label>
+      <p className="ch247-page__hint">Enabling never bypasses cookie consent: TikTok loads only after the visitor grants the shared Advertising/Marketing consent category, independently of Meta Pixel and Google settings.</p>
+      <label className="ch247-marketing-admin__check"><input type="checkbox" checked={config.remarketingEnabled} onChange={e => update({ remarketingEnabled: e.target.checked })} /> Enable remarketing / audience tracking (consent-aware)</label>
+      <p className="ch247-page__hint">Remarketing uses product-interaction events for audience building in your TikTok Ads account. Dynamic product advertising additionally requires a verified TikTok catalog in Events Manager — it is not claimed active here.</p>
+      <fieldset className="ch247-marketing-admin__fieldset"><legend>Standard & lead events</legend>
+        {TIKTOK_EVENT_NAMES.map(name => <label key={name} className="ch247-marketing-admin__check"><input type="checkbox" checked={config.enabledEvents.includes(name)} onChange={e => toggleEvent(name, e.target.checked)} /> {name}{['Contact', 'SubmitForm', 'CompleteRegistration', 'Subscribe'].includes(name) ? ' (lead)' : ''}</label>)}
+        <p className="ch247-page__hint">CompletePayment can only be created by verified payment confirmation, never by a browser claim. Disabling a lead event stops it immediately.</p>
+      </fieldset>
+      <fieldset className="ch247-marketing-admin__fieldset"><legend>Test mode</legend>
+        <label className="ch247-marketing-admin__check"><input type="checkbox" checked={config.testMode} onChange={e => update({ testMode: e.target.checked })} /> Enable test mode</label>
+        <label>Test Event Code<input value={config.testEventCode ?? ''} placeholder="Code from TikTok Events Manager Test Events" autoComplete="off" onChange={e => update({ testEventCode: e.target.value })} /></label>
+        <p className="ch247-page__hint">Test traffic carries the test event code so it does not generate production conversions or distort campaign reporting.</p>
+      </fieldset>
+      <fieldset className="ch247-marketing-admin__fieldset"><legend>Events API (server-side, optional)</legend>
+        <p className="ch247-page__hint">Credential: {config.eventsApi.hasToken ? 'Stored encrypted; write-only' : 'Not configured — Events API remains pending external TikTok account configuration until an authorized token is stored'}. Server events share the browser event_id for deduplication and are never sent without marketing consent.</p>
+        <label className="ch247-marketing-admin__check"><input type="checkbox" checked={config.eventsApi.enabled} onChange={e => update({ eventsApi: { ...config.eventsApi, enabled: e.target.checked } })} /> Enable Events API delivery</label>
+        <label>TikTok access token<input type="password" autoComplete="new-password" value={token} placeholder={config.eventsApi.hasToken ? 'Leave blank to keep the stored token' : 'Write-only authorized access token'} onChange={e => setToken(e.target.value)} /><small>Never returned by the API, logged, or sent to the browser.</small></label>
+        <label className="ch247-marketing-admin__check"><input type="checkbox" checked={removeToken} onChange={e => setRemoveToken(e.target.checked)} /> Remove stored token (disable Events API first)</label>
+      </fieldset>
+      <div className="ch247-inline-actions" style={{ flexWrap: 'wrap' }}><button className="ch247-button" disabled={busy} type="submit">Save Changes</button><button type="button" disabled={busy} onClick={() => void test()}>Test configuration</button><button type="button" disabled={busy} onClick={() => void load()}>Reload</button><button type="button" className="ch247-button--danger" disabled={busy} onClick={() => setConfirmReset(true)}>Reset Configuration</button></div>
+    </form>
+    {diagnostics && <section className="ch247-card"><h2>Diagnostics</h2><dl className="ch247-marketing-admin__status">
+      <div><dt>Pixel ID</dt><dd>{diagnostics.pixelId || 'Not configured'}</dd></div>
+      <div><dt>Integration state</dt><dd>{diagnostics.enabled ? 'Enabled' : 'Disabled'}</dd></div>
+      <div><dt>Installation status</dt><dd>{statusLabel(diagnostics.installationStatus)}</dd></div>
+      <div><dt>Pixel initialization</dt><dd>Central runtime (bootstrap-driven, consent-gated, duplicate-init protected)</dd></div>
+      <div><dt>Consent configuration</dt><dd>Shared marketing consent required before load</dd></div>
+      <div><dt>Events API connection</dt><dd>{statusLabel(diagnostics.eventsApiConnection)}</dd></div>
+      <div><dt>Enabled events</dt><dd>{diagnostics.enabledEvents.join(', ') || 'None'}</dd></div>
+      <div><dt>Last successful test</dt><dd>{formatDateTime(diagnostics.lastSuccessfulTest)}</dd></div>
+      <div><dt>Configuration test status</dt><dd>{statusLabel(config.lastConfigurationTestStatus)}</dd></div>
+      <div><dt>Last configuration update</dt><dd>{formatDateTime(config.lastConfigurationUpdate)}</dd></div>
+      <div><dt>Last server-side delivery</dt><dd>{diagnostics.lastServerDeliveryStatus ? `${statusLabel(diagnostics.lastServerDeliveryStatus)}${diagnostics.lastServerDeliveredAt ? ` · ${formatDateTime(diagnostics.lastServerDeliveredAt)}` : ''}` : 'No server delivery yet'}</dd></div>
+      <div><dt>Events recorded</dt><dd>{diagnostics.eventsRecorded}</dd></div>
+      <div><dt>Duplicate event warnings</dt><dd>{diagnostics.duplicateEventWarnings}</dd></div>
+      <div><dt>Last error</dt><dd>{config.lastError || 'No configuration error recorded'}</dd></div>
+    </dl><p className="ch247-page__hint">“Delivered” means the TikTok Events API accepted a request (code 0). Only TikTok Events Manager / Test Events can verify provider-side receipt and deduplication. No customer browsing history or token is shown here.</p></section>}
+    <section className="ch247-card"><h2>Recent TikTok event activity</h2>{activity.length === 0 ? <p>No TikTok events recorded. No delivery is implied.</p> : <div className="ch247-table-wrap"><table className="ch247-table"><thead><tr><th>Event / ID</th><th>Occurred</th><th>Channel</th><th>Server delivery</th><th>Consent now</th></tr></thead><tbody>{activity.map(e => <tr key={e.id}><td><strong>{e.event_name}</strong><small className="ch247-marketing-admin__event-id">{e.event_id}</small></td><td>{formatDateTime(e.occurred_at)}</td><td>{e.channel}</td><td>{e.delivery_status ? `${statusLabel(e.delivery_status)} · ${e.attempts} attempt(s)${e.http_status ? ` · HTTP ${e.http_status}` : ''}${e.last_error ? ` · ${e.last_error}` : ''}` : 'Browser only / not queued'}</td><td>{e.marketing_consent_current ? 'Granted' : 'Not granted / expired'}</td></tr>)}</tbody></table></div>}</section>
+    {confirmReset && <div className="ch247-card" role="alertdialog" aria-labelledby="tiktok-confirm-title"><h2 id="tiktok-confirm-title">Reset TikTok Pixel?</h2><p>This disables tracking, removes the stored Events API token and cancels pending TikTok deliveries. Configuration audit history remains.</p><div className="ch247-inline-actions"><button disabled={busy} onClick={() => void reset()}>Confirm reset</button><button disabled={busy} onClick={() => setConfirmReset(false)}>Cancel</button></div></div>}
+  </>;
 }
