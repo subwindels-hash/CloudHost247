@@ -17,35 +17,36 @@ import type { Queryable } from '../../src/db/types';
 const vocabulary = websiteVocabulary();
 
 describe('audit: the corpus vocabulary covers what is actually indexed', () => {
-  it('includes words that only appear in body prose or FAQs', () => {
-    // The vocabulary was built from titles and headings only, so a word that appeared solely in a
-    // page body counted as "not on the site" — the same test that decides whether to refuse to
-    // answer. Body and FAQ text are indexed and quotable, so they must count as coverage.
-    const doc = (WEBSITE_PROJECTION as unknown as { documents: Array<Record<string, unknown>> }).documents
-      .find((entry) => Array.isArray(entry.faqs) && (entry.faqs as unknown[]).length > 0);
-    expect(doc, 'projection must contain at least one page with FAQs').toBeTruthy();
-    const faq = (doc!.faqs as Array<{ question: string; answer: string }>)[0]!;
+  /**
+   * The vocabulary was built from titles, descriptions, sections and headings only — never body
+   * prose or FAQ answers. Since body and FAQ text is indexed and quotable, a word that appeared
+   * only there counted as "not on the site", in the very check that decides whether to refuse.
+   *
+   * The assertion is over the *whole* projection against both builders, because a single FAQ
+   * happened to contain no word that discriminated the two implementations: the earlier version of
+   * this test passed against the defective code, which made it worthless.
+   */
+  it('includes words that appear only in body prose or FAQ answers', () => {
+    const documents = (WEBSITE_PROJECTION as unknown as { documents: Array<Record<string, unknown>> }).documents;
+    const metadataOnly = buildVocabulary({
+      documents: documents.map((doc) => ({
+        title: doc.title, description: doc.description, body: '', section: doc.section,
+        category: doc.category, headings: doc.headings, faqs: [],
+      })),
+    } as never);
+    const full = buildVocabulary(WEBSITE_PROJECTION);
 
-    const vocabulary = buildVocabulary();
-    const distinctive = faq.answer
-      .toLowerCase()
-      .split(/[^a-z0-9]+/)
-      .filter((word) => word.length >= 8)
-      .find((word) => !buildVocabulary({
-        documents: [{
-          title: doc!.title, description: '', body: '', section: '', category: '',
-          headings: [], faqs: [],
-        }],
-      } as never).has(word));
+    // Words present in indexed body/FAQ text but absent from metadata-only vocabulary.
+    const bodyOnly = [...full].filter((word) => !metadataOnly.has(word) && word.length >= 6);
+    expect(bodyOnly.length, 'projection must contain body/FAQ-only words').toBeGreaterThan(100);
 
-    if (distinctive) {
-      expect(vocabulary.has(distinctive), `"${distinctive}" should be covered`).toBe(true);
-    }
-    // Strong invariant: every long word in a real FAQ answer is in the vocabulary.
-    const longWords = faq.answer.toLowerCase().split(/[^a-z0-9]+/).filter((word) => word.length >= 6);
-    for (const word of longWords) {
-      expect(vocabulary.has(word), `"${word}" from an indexed FAQ must be in the vocabulary`).toBe(true);
-    }
+    // Every one of them must be covered, or the coverage guard will call real content unknown.
+    const uncovered = bodyOnly.filter((word) => !full.has(word));
+    expect(uncovered).toEqual([]);
+
+    // And the production accessor must agree with the full builder, not the metadata one.
+    const declared = websiteVocabulary();
+    expect(bodyOnly.filter((word) => !declared.has(word))).toEqual([]);
   });
 });
 
@@ -295,4 +296,45 @@ describe('audit: a price is never quoted for a product the question did not name
     expect(priced[0]!.productName).toBe('Email Hosting');
     expect(priced[0]!.amount).toBe('4.50');
   });
+});
+
+describe('audit: retrieval refuses questions whose subject is not on the site', () => {
+  /**
+   * The critical defect. `retrieveKnowledge` compared the question's unknown words against `terms`,
+   * a list built from those same words, so the guard could never fire. Both questions below quoted
+   * legal pages with confidence instead of refusing.
+   *
+   * This needs a database, which is why the guard's own failure had no unit test before: the
+   * `ungroundedTokens` value was always correct, and only the comparison was broken.
+   */
+  it('returns no evidence for a subject the site never mentions', async () => {
+    const { PGlite } = await import('@electric-sql/pglite');
+    const { PgliteClient } = await import('../../database/db-client');
+    const { migrateUp } = await import('../../database/migrate');
+    const { syncWebsiteKnowledge } = await import('../../src/ai-website/knowledge-sync');
+    const { retrieveKnowledge } = await import('../../src/ai-website/retrieval');
+
+    const db = new PGlite();
+    await migrateUp(new PgliteClient(db), { isProduction: false });
+    try {
+      await syncWebsiteKnowledge(db, { trigger: 'manual' });
+
+      for (const question of [
+        'What is your policy on interstellar travel?',
+        'Do you sell quantum computers?',
+        'Can you forecast the weather next month?',
+      ]) {
+        const result = await retrieveKnowledge(db, question, {});
+        expect(result.pages, `${question} must not retrieve evidence`).toEqual([]);
+        expect(result.empty).toBe(true);
+      }
+
+      // The counter-case: a real question must still retrieve, or the guard would be useless.
+      const real = await retrieveKnowledge(db, 'What is VPS hosting?', {});
+      expect(real.empty).toBe(false);
+      expect(real.pages.length).toBeGreaterThan(0);
+    } finally {
+      await db.close();
+    }
+  }, 180_000);
 });
