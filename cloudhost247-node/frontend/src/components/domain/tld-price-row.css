@@ -1,0 +1,47 @@
+/* Popular extension tags under a domain search field. Ink pills with a gold price, so the row sits
+   under the hero's search bar as a compact price list rather than competing with the primary CTA. */
+.tld-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 20px;
+}
+.tld-row__list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+
+.tld-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 6px 11px;
+  border: 1px solid #10171d;
+  border-radius: 999px;
+  background: #10171d;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.1;
+  text-decoration: none;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+.tld-chip b { font-weight: 750; letter-spacing: -0.01em; }
+.tld-chip span { color: #e6c875; font-weight: 700; }
+.tld-chip:hover { background: #1d272f; border-color: #1d272f; transform: translateY(-1px); }
+.tld-chip:focus-visible { outline: 3px solid #b8860b; outline-offset: 2px; }
+
+.tld-row__all {
+  margin-left: 4px;
+  color: var(--hg-ink);
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tld-row__all:hover { color: var(--hg-accent-dark); text-decoration: underline; }
+.tld-row__all:focus-visible { outline: 3px solid #b8860b; outline-offset: 2px; border-radius: 6px; }
+
+@media (max-width: 560px) {
+  .tld-row { gap: 8px; }
+  .tld-chip { padding: 6px 10px; font-size: 0.76rem; }
+  .tld-row__all { font-size: 0.76rem; }
+}

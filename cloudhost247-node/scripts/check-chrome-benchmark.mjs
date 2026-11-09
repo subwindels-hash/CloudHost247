@@ -113,7 +113,7 @@ const BAR_PROBE = () => {
       english: [...(primary?.querySelectorAll('button') ?? [])].some((b) => /Language:/.test(b.getAttribute('aria-label') ?? '') && visible(b)),
       usd: [...(primary?.querySelectorAll('button') ?? [])].some((b) => /Display currency:/.test(b.getAttribute('aria-label') ?? '') && visible(b)),
       signIn: [...(primary?.querySelectorAll('a') ?? [])].some((a) => a.textContent?.trim() === 'Sign In' && visible(a)),
-      createAccount: [...(primary?.querySelectorAll('a') ?? [])].some((a) => a.textContent?.trim() === 'Create Account' && visible(a)),
+      signUpButton: [...(primary?.querySelectorAll('a') ?? [])].some((a) => a.textContent?.trim() === 'Create Account' && visible(a)),
     },
     overlap: Math.round(overlap),
     overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
@@ -138,7 +138,6 @@ const UTILITY_ROW_PROBE = () => {
     ...top.querySelectorAll('.hg-bar__locale button'),
     ...top.querySelectorAll('.hg-bar__actions a, .hg-bar__actions button'),
   ].map(box);
-  const cta = top.querySelector('a.hg-btn--sm');
   return {
     row,
     announceBottom: announce ? box(announce).bottom : null,
@@ -147,7 +146,6 @@ const UTILITY_ROW_PROBE = () => {
     centers: items.map((i) => Math.round(i.cy)),
     inside: items.every((i) => i.top >= row.top - 1 && i.bottom <= row.bottom + 1
       && i.x >= row.x - 1 && i.right <= row.right + 1),
-    ctaHeight: cta ? Math.round(box(cta).height) : 0,
     wrap: getComputedStyle(top).flexWrap,
     overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
   };
@@ -174,8 +172,8 @@ async function main() {
     bar.carets === bar.links.length && bar.panels === 1 && bar.panelHidden,
     `${bar.carets} carets, ${bar.panels} closed panel`);
   const settings = bar.settings;
-  check('English, USD, Sign In and Create Account are all shown in the bar',
-    settings.english && settings.usd && settings.signIn && settings.createAccount,
+  check('English, USD and Sign In are all shown in the bar, with no sign-up button',
+    settings.english && settings.usd && settings.signIn && !settings.signUpButton,
     JSON.stringify(settings));
   check('back-to-top anchor target exists', bar.topAnchor);
   check('no overlap or overflow at 1440px', bar.overlap === 0 && !bar.overflow, `${bar.overlap}px`);
@@ -186,16 +184,13 @@ async function main() {
       && row.row.top - row.announceBottom <= 40 && row.mainTop >= row.row.bottom - 2,
     `announcement ends ${row.announceBottom}, row ${Math.round(row.row?.top ?? 0)}–${Math.round(row.row?.bottom ?? 0)}, main bar ${Math.round(row.mainTop ?? 0)}`);
   // Assert the result, not the mechanism: whether the row is `nowrap` or the privacy strip pushes
-  // the controls under it, what matters is that all six sit on one line, inside the row. (A
-  // `wrap === 'nowrap'` assertion passed for years while Create Account was silently missing.)
-  check('Pricing, Help, English, USD, Sign In and Create Account share one straight line',
-    row.count === 6 && row.inside
+  // the controls under it, what matters is that all five sit on one line, inside the row. (A
+  // `wrap === 'nowrap'` assertion passed for years while a control was silently missing.)
+  check('Pricing, Help, English, USD and Sign In share one straight line',
+    row.count === 5 && row.inside
       && Math.max(...row.centers) - Math.min(...row.centers) <= 3,
     `${row.count} controls, centres ${row.centers.join('/')}`);
   check('utility line stays shallow', row.row && row.row.height <= 52, `${Math.round(row.row?.height ?? 0)}px`);
-  check('Create Account button is compact enough for the line',
-    row.ctaHeight > 0 && row.ctaHeight <= 34 && row.ctaHeight <= (row.row?.height ?? 0),
-    `${row.ctaHeight}px tall`);
 
   // ---- Dropdown arrows: each one opens that section's real registry sub-links ----
   const caretInfo = await page.evaluate(() => [...document.querySelectorAll('.hg-menu__caret')].map((c) => ({
@@ -311,9 +306,9 @@ async function main() {
     }
     const u = await p.evaluate(UTILITY_ROW_PROBE);
     check(`Sign In and the other utility controls stay on one straight line at ${width}px`,
-      u.count === 6 && u.inside && !u.overflow
+      u.count === 5 && u.inside && !u.overflow
         && Math.max(...u.centers) - Math.min(...u.centers) <= 3,
-      `${u.count} controls, centres ${u.centers.join('/')}, CTA ${u.ctaHeight}px`);
+      `${u.count} controls, centres ${u.centers.join('/')}`);
     await p.close();
   }
 

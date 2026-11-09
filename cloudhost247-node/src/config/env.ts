@@ -129,6 +129,18 @@ const envSchema = z.object({
 
   // --- Phase 6: Deployment worker -------------------------------------------------------------
   WORKER_ID: z.string().min(1).max(64).default(() => `worker-${process.pid}`),
+  /**
+   * Email Trace Centre. Collection is opt-in per server (`email_trace_sources.collection_enabled`);
+   * these settings only bound the sweep and the retention window.
+   */
+  EMAIL_TRACE_SWEEP_INTERVAL_MS: z.coerce.number().int().min(60_000).max(3_600_000).default(300_000),
+  EMAIL_TRACE_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(30),
+  EMAIL_TRACE_COLLECTION_RUN_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(90),
+  /** Mask the local part of addresses in trace lists (deployments that show lists beyond the owner). */
+  EMAIL_TRACE_MASK_ADDRESSES: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().min(250).max(60_000).default(2000),
   WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(4),
   // How long a claimed-but-unrenewed deployment lease stays valid before another worker may

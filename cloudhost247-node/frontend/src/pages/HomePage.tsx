@@ -14,6 +14,8 @@ import { BRAND, UTILITY, NAV_SECTIONS } from '../navigation/registry.generated';
 import Experience3D from '../components/marketing/Experience3D';
 import CreationShowcase from '../components/marketing/CreationShowcase';
 import AssistantShowcase from '../components/marketing/AssistantShowcase';
+import AssuranceStrip from '../components/marketing/AssuranceStrip';
+import TldPriceRow from '../components/domain/TldPriceRow';
 import PromoVideoHero from '../components/marketing/PromoVideoHero';
 
 /**
@@ -21,7 +23,7 @@ import PromoVideoHero from '../components/marketing/PromoVideoHero';
  *
  * The page is deliberately built as a conversion funnel, in the same order as hostinger.com:
  * promo marquee (shared chrome) → split hero with a product screenshot → capability strip →
- * tabbed pricing cards → interactive 3D platform stack → "explore more" cards → AI builder prompt → tabbed feature showcase →
+ * tabbed pricing cards → service-assurance strip → interactive 3D platform stack → "explore more" cards → AI builder prompt → tabbed feature showcase →
  * use-case gallery → "more power" link list → FAQ accordion → full-width CTA → dark footer
  * (shared chrome).
  *
@@ -413,9 +415,12 @@ export default function HomePage() {
               />
               <button className="hg-btn hg-btn--sm" type="submit">{copy.search}</button>
             </form>
-            <div className="hg-hero__ctas">
-              <Link className="hg-btn" to={UTILITY.createAccount.to}>{copy.createAccount}</Link>
-              <Link className="hg-btn hg-btn--ghost" to="/#pricing">{copy.seePlans}</Link>
+            <TldPriceRow />
+            <div className="hg-hero__cta-row">
+              <div className="hg-hero__ctas">
+                <Link className="hg-btn" to={UTILITY.createAccount.to}>{copy.createAccount}</Link>
+                <Link className="hg-btn hg-btn--ghost" to="/#pricing">{copy.seePlans}</Link>
+              </div>
             </div>
             <ul className="hg-hero__points">
               <li><Check /> Live catalogue pricing, never a stale price list</li>
@@ -445,6 +450,10 @@ export default function HomePage() {
 
       {/* 3. Tabbed pricing cards */}
       <PricingSection />
+
+      {/* 3a. Service assurances — the five promises that apply to every plan. Sits directly under
+             the plans so the promises are read while the price is still on screen. */}
+      <AssuranceStrip />
 
       {/* Illustrative website concepts follow the plans, without inventing customer stories. */}
       <CreationShowcase />

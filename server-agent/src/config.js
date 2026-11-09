@@ -14,8 +14,12 @@
  *   CH247_BACKUP_DIR     backup archive root (default /opt/cloudhost247/backups)
  *   CH247_REPORT_SECONDS metrics report interval (default 60; 0 disables)
  *   CH247_MAX_SKEW       signature timestamp tolerance in seconds (default 60)
+ *   CH247_MAIL_MAINLOG_PATHS  comma-separated allowlist of Exim message logs the read-only mail
+ *                        trace operation may read (default /var/log/exim_mainlog,/var/log/exim/mainlog).
+ *                        Nothing outside this list can ever be read, whatever the control plane asks.
  */
 import process from 'node:process';
+import { DEFAULT_MAINLOG_PATHS } from './mail-trace.js';
 
 export class AgentConfigError extends Error {
   constructor(missing) {
@@ -37,6 +41,11 @@ export function loadConfig(env = process.env) {
     backupDir: env.CH247_BACKUP_DIR ?? '/opt/cloudhost247/backups',
     reportSeconds: Number.parseInt(env.CH247_REPORT_SECONDS ?? '60', 10),
     maxSkewSeconds: Number.parseInt(env.CH247_MAX_SKEW ?? '60', 10),
+    // The mail-trace allowlist is server-side configuration, never request input.
+    mainlogPaths: env.CH247_MAIL_MAINLOG_PATHS
+      ? env.CH247_MAIL_MAINLOG_PATHS.split(',').map((entry) => entry.trim()).filter(Boolean)
+      : DEFAULT_MAINLOG_PATHS,
+    version: AGENT_VERSION,
   };
 }
 

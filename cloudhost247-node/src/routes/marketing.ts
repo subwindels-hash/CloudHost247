@@ -5,6 +5,7 @@ import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
 import { ValidationError } from '../lib/errors';
 import { loadConfiguration } from '../marketing/config-service';
+import { googleAdsRuntime, loadGoogleAds } from '../marketing/google-ads';
 import { runtimeConfiguration } from '../marketing/types';
 import { ensureConsent, consentDTO, assertConsentMutation, saveConsent, requestConsent, consentGranted, safeSourceUrl } from '../marketing/consent-service';
 import { authenticate } from '../lib/require-auth';
@@ -21,9 +22,9 @@ export async function registerMarketingRoutes(app: FastifyInstance, env: Env, ov
   };
   app.get(`${base}/bootstrap`, { config: { rateLimit: { max: 120, timeWindow: '1 minute' } } }, async (request, reply) => {
     privateResponse(reply);
-    const [row, consent] = await Promise.all([loadConfiguration(pool), ensureConsent(pool, request, reply, env)]);
+    const [row, googleAdsRow, consent] = await Promise.all([loadConfiguration(pool), loadGoogleAds(pool), ensureConsent(pool, request, reply, env)]);
     const runtime = runtimeConfiguration(row, request.hostname);
-    return { configuration: runtime, consent: consentDTO(consent, runtime.consentPolicy) };
+    return { configuration: runtime, googleAds: googleAdsRuntime(googleAdsRow, request.hostname), consent: consentDTO(consent, runtime.consentPolicy) };
   });
   app.put(`${base}/consent`, { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } }, async (request, reply) => {
     privateResponse(reply);

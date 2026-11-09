@@ -1,4 +1,6 @@
--- Migration: 0090_add_tiktok_pixel_integration.sql
+-- Migration: 0092_add_tiktok_pixel_integration.sql
+-- Renumbered from 0090: main added 0090 (email trace) and 0091 (Google Ads)
+-- first, so this runs after them and extends their provider constraints.
 -- TikTok Pixel + Events API as a second provider on the canonical marketing
 -- infrastructure created by 0089 (configuration, encrypted secrets, consent
 -- sessions, deduplicated events and the delivery outbox are shared, never
@@ -8,7 +10,7 @@
 
 ALTER TABLE marketing_integrations DROP CONSTRAINT marketing_integrations_provider_check;
 ALTER TABLE marketing_integrations ADD CONSTRAINT marketing_integrations_provider_check
-  CHECK (provider_key IN ('meta_pixel', 'tiktok_pixel'));
+  CHECK (provider_key IN ('meta_pixel', 'google_ads', 'tiktok_pixel'));
 
 -- The 0089 enabled-requires-id check hard-codes Meta's numeric Pixel ID.
 -- Replace it with a provider-conditional equivalent (Meta rule unchanged;
@@ -18,6 +20,7 @@ ALTER TABLE marketing_integrations ADD CONSTRAINT marketing_integrations_enabled
   NOT enabled OR (
     website_domain <> '' AND (
       (provider_key = 'meta_pixel' AND configuration->>'pixelId' ~ '^[1-9][0-9]{4,31}$')
+      OR (provider_key = 'google_ads' AND configuration->>'customerId' ~ '^[0-9]{10}$' AND configuration->>'conversionId' ~ '^[0-9]{5,20}$')
       OR (provider_key = 'tiktok_pixel' AND configuration->>'pixelId' ~ '^[A-Za-z0-9]{16,32}$')
     )
   )

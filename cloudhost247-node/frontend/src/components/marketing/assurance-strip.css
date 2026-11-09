@@ -1,0 +1,79 @@
+/* Service-assurance strip: five promises in one white card directly under the pricing section.
+   The card runs edge to edge across the whole viewport, so it reads as a full-width band under the
+   plans while keeping its hairline border, five equal columns, vertical rules between them, and a
+   blue icon + two-line label per item (the seal is the one warm accent). Icon colour is set here
+   rather than in the SVGs so the marks stay reusable. */
+.assurance { background: #fff; padding: 0; }
+
+.assurance__panel {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: stretch;
+  margin: 0;
+  padding: 14px 6px;
+  list-style: none;
+  /* Flush with both screen edges, so the side rules are dropped and only the top and bottom edges
+     carry the hairline; the soft shadow would have nowhere to fall, so it goes too. */
+  border-top: 1px solid #e6e8eb;
+  border-bottom: 1px solid #e6e8eb;
+  background: #fff;
+}
+
+.assurance__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px clamp(10px, 1.4vw, 24px);
+  min-width: 0;
+}
+/* Now that the band is flush with the screen, the first and last items get a little more air so
+   their icons and labels do not sit hard against the viewport edges. */
+.assurance__item:first-child { padding-left: clamp(16px, 2vw, 34px); }
+.assurance__item:last-child { padding-right: clamp(16px, 2vw, 34px); }
+/* Rules are drawn inset rather than as full-height borders, the way the reference separates the
+   five items without boxing them in. */
+.assurance__item + .assurance__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16%;
+  bottom: 16%;
+  width: 1px;
+  background: #e6e8eb;
+}
+
+.assurance__icon { flex: 0 0 auto; display: grid; place-items: center; width: 40px; color: #1d4ed8; }
+.assurance__item--refund .assurance__icon { color: #f0a01a; }
+
+.assurance__label {
+  color: #11151a;
+  font-size: clamp(0.86rem, 0.55vw + 0.55rem, 1rem);
+  font-weight: 600;
+  line-height: 1.38;
+  letter-spacing: -0.01em;
+}
+
+/* The card follows the pricing block; the two neighbouring sections give back the air their own
+   padding would otherwise add around it. `:has()` degrades to the plain 88px/100px rhythm. */
+.hg-pricing:has(+ .assurance) { padding-bottom: 28px; }
+.assurance + .creation-showcase { padding-top: 48px; }
+
+/* Below five-across the cells narrow and the rules would stop mid-row, so they are dropped and the
+   grid spacing does the separating; the card and its rounded border stay. */
+@media (max-width: 1179px) {
+  .assurance__panel { grid-template-columns: repeat(3, 1fr); row-gap: 4px; }
+  .assurance__item { justify-content: flex-start; }
+  .assurance__item + .assurance__item::before { display: none; }
+}
+@media (max-width: 767px) {
+  .assurance__panel { grid-template-columns: repeat(2, 1fr); padding: 8px 4px; }
+  .assurance__item { padding: 8px 12px; }
+  .hg-pricing:has(+ .assurance) { padding-bottom: 24px; }
+  .assurance + .creation-showcase { padding-top: 40px; }
+}
+@media (max-width: 479px) {
+  .assurance__panel { grid-template-columns: 1fr; row-gap: 0; }
+  .assurance__item { padding: 9px 12px; }
+  .assurance__item + .assurance__item::before { display: block; left: 12px; right: 12px; top: 0; bottom: auto; width: auto; height: 1px; }
+}

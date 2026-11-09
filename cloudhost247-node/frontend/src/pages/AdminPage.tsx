@@ -70,6 +70,7 @@ export default function AdminPage() {
           <Link to="/admin/settings">Platform settings →</Link>
           <Link to="/admin/settings/tools/mrz">Tools → MRZ settings →</Link>
           <Link to="/admin/audit">Audit log →</Link>
+          <Link to="/admin/email-trace">Email trace centre →</Link>
           <Link to="/admin/tickets">Manage support tickets →</Link>
           <Link to="/admin/ai-support">AI support &amp; human handoffs →</Link>
           <Link to="/admin/ai-command">AI Command Center — control plane →</Link>
@@ -78,6 +79,7 @@ export default function AdminPage() {
           <Link to="/admin/cloudflare">Cloudflare — reseller & zones →</Link>
           <Link to="/admin/marketing-integrations">Marketing Integrations — Meta Pixel →</Link>
           <Link to="/admin/integrations/tiktok-pixel">Marketing Integrations — TikTok Pixel →</Link>
+          <Link to="/admin/integrations/google-ads">Google Ads conversions →</Link>
           <Link to="/admin/ledger">Financial audit ledger →</Link>
         </p>
 

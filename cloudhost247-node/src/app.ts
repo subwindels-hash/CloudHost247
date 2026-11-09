@@ -47,6 +47,8 @@ import { registerMonitoringRoutes } from './routes/monitoring';
 import { registerProvisioningRoutes } from './routes/provisioning';
 import { registerAuditRoutes } from './routes/audit';
 import { registerDnsRoutes } from './routes/dns';
+import { registerEmailTraceCustomerRoutes } from './routes/email-trace-customer';
+import { registerEmailTraceAdminRoutes } from './routes/email-trace-admin';
 import type { DnsPropagationOptions } from './dns/propagation';
 import { registerSslRoutes } from './routes/ssl';
 import { registerFirewallRoutes } from './routes/firewall';
@@ -66,6 +68,7 @@ import { registerLogoMakerRoutes } from './routes/logo-maker';
 import { registerExpertRoutes } from './routes/experts';
 import { registerMarketingServiceRoutes } from './routes/marketing-services';
 import { registerAdminMarketingRoutes } from './routes/admin-marketing';
+import { registerAdminGoogleAdsRoutes } from './routes/admin-google-ads';
 import { registerMarketingRoutes } from './routes/marketing';
 import { registerAdminTikTokRoutes } from './routes/admin-tiktok';
 import { registerTikTokRoutes } from './routes/tiktok';
@@ -228,6 +231,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerProvisioningRoutes(instance, env, pool);
     await registerAuditRoutes(instance, env, pool);
     await registerDnsRoutes(instance, env, pool, dnsPropagation ?? {});
+    await registerEmailTraceCustomerRoutes(instance, env, pool);
+    await registerEmailTraceAdminRoutes(instance, env, pool);
     await registerSslRoutes(instance, env, pool);
     await registerFirewallRoutes(instance, env, pool);
 
@@ -282,6 +287,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerExpertRoutes(instance, env, pool);
     await registerMarketingServiceRoutes(instance, env, pool);
     await registerAdminMarketingRoutes(instance, env, pool);
+    await registerAdminGoogleAdsRoutes(instance, env, pool);
     await registerMarketingRoutes(instance, env, pool);
     await registerAdminTikTokRoutes(instance, env, pool);
     await registerTikTokRoutes(instance, env, pool);

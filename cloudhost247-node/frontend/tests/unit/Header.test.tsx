@@ -25,7 +25,7 @@ describe('Header: authentication-aware navigation', () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows Sign In and Create Account, but no account controls, when logged out', () => {
+  it('shows Sign In, but no Create Account or account controls, when logged out', () => {
     render(
       <MemoryRouter>
         <Header />
@@ -35,10 +35,9 @@ describe('Header: authentication-aware navigation', () => {
     const logo = screen.getByRole('link', { name: 'CloudHost247 — home' }).querySelector('img');
     expect(logo?.getAttribute('src')).toContain('cloudhost247-official.webp');
     expect(screen.getByRole('link', { name: 'Sign In' })).toBeTruthy();
-    // Create Account is the sixth utility control and must be visible to a signed-out visitor:
-    // docs/UTILITY-ROW.md and scripts/check-chrome-benchmark.mjs both count it on that line, and
-    // without it the header offers no route into registration at all.
-    expect(screen.getByRole('link', { name: 'Create Account' })).toBeTruthy();
+    // The compact Create Account button was removed from the utility line by request, so the header
+    // must not grow it back: registration is reached from the hero capsule and the plans section.
+    expect(screen.queryByRole('link', { name: 'Create Account' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Dashboard' })).toBeNull();
     expect(screen.queryByText('Log out')).toBeNull();
   });
