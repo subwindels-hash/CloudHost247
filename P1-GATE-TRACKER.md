@@ -11,6 +11,10 @@ Created 2026-11-09 against verified HEAD `6e334eec` (== origin/arena/fe9b2088-cl
 - **⚠ Honest governance note:** owner and verifier are the same person. That is a real
   independence limitation — closures signed by the same person who provisioned the dependency carry a
   single-person risk. If a second accountable party ever exists, reassign verifier to them.
+- **Standing recommendation recorded (Phase 13 acceptance note):** appoint a second independent
+  reviewer for the final CLOSED-PASS signatures on CT-01..CT-08. Until that reviewer exists, every
+  closure record must carry the marker `INDEPENDENT-SECONDARY-REVIEW: NOT-APPOINTED` so the absence
+  is explicit rather than presumed.
 
 ## Acceptance rule for EVERY closure task (binding)
 

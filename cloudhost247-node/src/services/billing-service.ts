@@ -178,30 +178,42 @@ export async function adminIssueRefund(
     throw new NotFoundError('No invoice was found with that id');
   }
 
-  if (invoice.status !== 'paid' && invoice.status !== 'partially_refunded') {
-    throw new ValidationError(`Cannot refund an invoice in '${invoice.status}' status`);
-  }
-
-  const ledgerEntries = await listLedgerEntriesForInvoice(pool, invoiceId);
-  const totalPaidCents = ledgerEntries
-    .filter((e) => e.entry_type === 'payment')
-    .reduce((sum, e) => sum + toCents(e.amount), 0);
-  const totalRefundedCents = ledgerEntries
-    .filter((e) => e.entry_type === 'refund')
-    .reduce((sum, e) => sum + toCents(e.amount), 0);
-
-  const maxRefundableCents = totalPaidCents - totalRefundedCents;
-  if (amountCents > maxRefundableCents) {
-    throw new ValidationError(
-      `Refund amount of $${fromCents(amountCents)} exceeds refundable balance of $${fromCents(maxRefundableCents)}`
+  // Phase 13 remediation (P0 over-refund race): the refundable-cap validation MUST be evaluated
+  // against a locked snapshot. Reading the ledger outside a transaction let two concurrent staff
+  // refunds both observe the pre-refund balance and both pass validation (double-refund). All
+  // reads that the refund decision depends on now happen inside the transaction AFTER locking the
+  // invoice row with SELECT ... FOR UPDATE, so the second waiter re-evaluates against the first
+  // refund's committed ledger rows.
+  const isFullRefund = await withTransaction(pool, async (tx) => {
+    const { rows: locked } = await tx.query<{ status: string }>(
+      `SELECT status FROM invoices WHERE id = $1 FOR UPDATE`,
+      [invoiceId]
     );
-  }
+    const lockedInvoice = locked[0];
+    if (!lockedInvoice) throw new NotFoundError('No invoice was found with that id');
+    if (lockedInvoice.status !== 'paid' && lockedInvoice.status !== 'partially_refunded') {
+      throw new ValidationError(`Cannot refund an invoice in '${lockedInvoice.status}' status`);
+    }
 
-  const isFullRefund = totalRefundedCents + amountCents === totalPaidCents;
-  const newInvoiceStatus = isFullRefund ? 'refunded' : 'partially_refunded';
-  const newOrderPaymentStatus = isFullRefund ? 'refunded' : 'partially_refunded';
+    const ledgerEntries = await listLedgerEntriesForInvoice(tx, invoiceId);
+    const totalPaidCents = ledgerEntries
+      .filter((e) => e.entry_type === 'payment')
+      .reduce((sum, e) => sum + toCents(e.amount), 0);
+    const totalRefundedCents = ledgerEntries
+      .filter((e) => e.entry_type === 'refund')
+      .reduce((sum, e) => sum + toCents(e.amount), 0);
 
-  await withTransaction(pool, async (tx) => {
+    const maxRefundableCents = totalPaidCents - totalRefundedCents;
+    if (amountCents > maxRefundableCents) {
+      throw new ValidationError(
+        `Refund amount of $${fromCents(amountCents)} exceeds refundable balance of $${fromCents(maxRefundableCents)}`
+      );
+    }
+
+    const fullRefund = totalRefundedCents + amountCents === totalPaidCents;
+    const newInvoiceStatus = fullRefund ? 'refunded' : 'partially_refunded';
+    const newOrderPaymentStatus = fullRefund ? 'refunded' : 'partially_refunded';
+
     // 1. Append refund entry into immutable billing ledger
     await recordLedgerEntry(tx, {
       id: genId(),
@@ -237,6 +249,8 @@ export async function adminIssueRefund(
         reason: reason.trim(),
       },
     });
+
+    return fullRefund;
   });
 
   return adminGetInvoiceDetail(pool, invoiceId);
