@@ -534,7 +534,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 
 | Suite | Result | Note |
 | --- | --- | --- |
-| `tests/unit` | **157 files / 2,273 tests passed, 0 failed** | includes the 12 audit regressions |
+| `tests/unit` | **157 files / 2,274 tests passed, 0 failed** | includes the 13 audit regressions |
 | `tests/integration` | **963 passed, 17 skipped, 0 failed** (99 files) | baseline on `e9d29d4`; AI subsets re-run after fixes: 37/37 and 19/19 |
 | `frontend/tests` | **80 files / 1,000 tests passed, 0 failed** | |
 
@@ -542,7 +542,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 
 ### 11.2 Regression tests — verified to fail without the fixes
 
-`tests/unit/ai-website-audit-regressions.test.ts` — 12 tests. Each was run against `e9d29d4` to confirm it genuinely catches the defect:
+`tests/unit/ai-website-audit-regressions.test.ts` — 13 tests. Each was run against `e9d29d4` to confirm it genuinely catches the defect:
 
 | Test | Fails on `e9d29d4`? |
 | --- | --- |
@@ -558,6 +558,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | releases the lock even when the sync itself throws | **yes** (no lease existed) |
 | returns no price when nothing in the catalogue matches | **yes** (quoted the whole catalogue) |
 | still quotes the price when the question names the product | passes on both — guards against over-correcting |
+| returns no evidence for a subject the site never mentions | **yes** (added late; the earlier suite had no retrieval-level abstention test at all) |
 
 The first test passes on both trees because `ungroundedTokens` was populated correctly all along — the bug was in `retrieval.ts`'s comparison, which cannot be exercised without a database. That is stated plainly rather than presented as a passing regression.
 
@@ -603,12 +604,12 @@ Until this is decided, the assistant's behaviour on such questions is: **no inve
 
 ### 13.1 What is established, and what each layer of evidence proves
 
-The instruction to keep these separate is correct, and is the reason this section exists at all. **2,273 passing unit tests do not certify anything** — they establish only the behaviours they exercise.
+The instruction to keep these separate is correct, and is the reason this section exists at all. **2,274 passing unit tests do not certify anything** — they establish only the behaviours they exercise.
 
 | Layer | Status | What it actually proves |
 | --- | --- | --- |
 | Code implementation | Complete for the defect register | The logic exists and is readable |
-| Automated tests | 2,273 unit / 1,000 frontend green | The specific asserted behaviours hold |
+| Automated tests | 2,274 unit / 1,000 frontend green | The specific asserted behaviours hold |
 | Integration verification | 963 integration tests green; ~40 targeted re-runs | The pieces work together on a real (embedded) database |
 | Database / migration | Real migrations on PGlite (PG 16.4) | The schema applies and is idempotent |
 | Staging verification | **Not performed** | — |
@@ -636,6 +637,25 @@ The audit was asked not to force-merge the orphan `main` snapshot and to compare
 
 The remaining decision is procedural, not technical, and belongs to the maintainers.
 
+### 13.4 Independent re-verification of the remediation (Phase 28)
+
+The remediation above was re-checked from scratch, on a **clean clone of the pushed branch** rather than in the working tree that produced it, because a claim that only reproduces on the machine that made it is not evidence.
+
+| Gate | Method | Result |
+| --- | --- | --- |
+| 1 — commits and diff | grep the committed source (not the working tree) for each of the five required actions; then **revert all seven fixed files to `e9d29d4` and re-run the regression suite** | **Pass.** All five actions present. Reverted tree: **10 of 13** regression tests fail. The 3 that pass are the deliberate counter-cases documented in §11.2 |
+| 2 — migration compatibility | run the migration runner on both histories: this branch, and `origin/main` with only `0097` copied in | **Pass on both.** 97 migrations; `0097` is the tail on the branch and follows `0096` on `main`; **no duplicate prefixes**; first run applies 97, second run applies 0 |
+| 3 — CI on the PR head | `scripts/release-candidate-check.sh` run locally, plus the GitHub checks on the pushed head | **Was failing; two real causes found and fixed** (see below) |
+| 4 — test suite | `tsc --noEmit` + `vitest run tests/unit` on the clean clone | **Clean typecheck; 157 files / 2,274 tests passed** |
+| 5 — branding / hygiene | the release-candidate checker's retired-palette and generated-surface stages | **Pass after the two fixes below** |
+
+**Two gate-3 failures, both genuine, neither caused by the AI work being wrong:**
+
+1. **Stale generated site surfaces.** `scripts/site/generate.mjs` projects SPA routes into the published site. The admin AI-knowledge console and the email-forensics page were both added without regenerating, so `/admin/ai-support/knowledge` and `/account/email-forensics` were missing from `SPA_ROUTE_PATTERNS` — the routes existed in the app but were never projected. Regenerated in `2b1615c`.
+2. **Retired palette.** The checker rejects `#0a7a3d` and `#166534`. The palette was re-finished in gold/silver; `--ch-green` is now a **legacy alias name that resolves to gold ink `#5f450a`** (`design-system.css:55`). The AI knowledge console, the support widget's success text and the forensics OK badge were the last raw-green holdouts. They now use `var(--ch-green)` / `var(--ch-ok-soft)`. Both files predate this branch, so this blocked CI for a reason unrelated to the AI subsystem — but it blocked it, and a red pipeline is not something to describe as green.
+
+**One thing this gate-3 run does not prove:** the CI job also lints PHP, and **PHP is not installed in this environment** (no root, so it cannot be). The checker was exercised with a stub `php` that exits 0. That validates the *checker's own logic* end to end; it **does not lint any PHP**. Where the release-candidate job's PHP stage is concerned, the honest statement is *not verified here* — CI is the only place it has actually run.
+
 ## 14. Remediation commits
 
 | Commit | Content |
@@ -647,7 +667,10 @@ The remaining decision is procedural, not technical, and belongs to the maintain
 | `4cda79c` | AI knowledge migration renumbered to `0097`; migration-tail test made history-agnostic. |
 | `43704e9` | Sync serialisation on the existing lease; AI rate limiting (defects 6, and the §8.5 gap). |
 | `ea7b41f` | No price for a product the question did not name (defect 10). |
-| this commit | Report updated with the verification of every fix above, and of the trial merge. |
+| `1fb1b1c` | Records the verification of the five integration actions in this report. |
+| `56dc94c` | **Phase 28.** Two regression tests strengthened after they were found not to catch their own defects, plus a retrieval-level abstention test (13 tests total). |
+| `2b1615c` | **Phase 28.** Regenerate site surfaces: the admin knowledge route and email-forensics page were never projected. |
+| `fa92626` | **Phase 28.** Replace retired-green hexes with design-system tokens in the knowledge console, support widget and forensics badge. |
 
 Branch `arena/b55a0c26-cloudhost247`, based on `e9d29d4`, PR #114 against `main`.
 **Not merged. Not deployed. No production credentials activated. No customer settings changed.**
@@ -663,4 +686,4 @@ For the next integration phase, in the order that unblocks the most:
 3. **Semantic retrieval decision** (§12.1a) — needs embeddings and a vector store; `pgvector` is unavailable on the supported platform, so this is an infrastructure decision, not a code change.
 4. **Provider certification** (§9) — set the three `AI_LLM_*` values and smoke-test phrasing, validation fallback and timeout against a real endpoint. Until then, no claim of provider-backed operation is valid.
 
-And the standing caution, because it is the one most likely to be misread: **2,273 passing unit tests do not certify a production system.** They establish that the behaviours they assert still hold. Staging, provider and production certification are separate steps, and none of them has been done.
+And the standing caution, because it is the one most likely to be misread: **2,274 passing unit tests do not certify a production system.** They establish that the behaviours they assert still hold. Staging, provider and production certification are separate steps, and none of them has been done.
