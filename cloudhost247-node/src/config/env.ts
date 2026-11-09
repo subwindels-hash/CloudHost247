@@ -141,6 +141,22 @@ const envSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((value) => value === 'true'),
+
+  // --- Email Trace & Forensics Analyzer ---------------------------------------------------
+  /** Maximum uploaded .eml / raw-header file size in bytes (default 5 MB). */
+  EMAIL_FORENSICS_MAX_FILE_SIZE: z.coerce.number().int().min(10_000).max(50_000_000).default(5_000_000),
+  /** Default retention for forensics analyses, in days. */
+  EMAIL_FORENSICS_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(30),
+  /** Feature toggle: when false, the customer/admin forensics pages answer 503. */
+  EMAIL_FORENSICS_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((value) => value === 'true'),
+  /** Roles that may administer the forensics feature (database-update, kill-switch, audit logs). */
+  EMAIL_FORENSICS_ADMIN_ROLES: z
+    .string()
+    .default('admin,super_admin')
+    .transform((value) => value.split(',').map((s) => s.trim()).filter(Boolean)),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().min(250).max(60_000).default(2000),
   WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(32).default(4),
   // How long a claimed-but-unrenewed deployment lease stays valid before another worker may

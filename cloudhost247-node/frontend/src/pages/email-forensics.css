@@ -1,0 +1,244 @@
+/**
+ * Email Trace & Forensics Analyzer — presentation only.
+ *
+ * Deliberately small: the page reuses the existing `ch247-*` primitives (cards, tables, buttons,
+ * banners) and only adds what the forensics vocabulary needs — IP candidate badges, hop rows,
+ * forensic assessment groups and report-action buttons. No colour is used to mean "safe" or
+ * "unsafe"; colours distinguish extracted vs approximate vs unverified evidence classes.
+ */
+
+.ef-card {
+  border: 1px solid #e4e9f3;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin: 0.75rem 0;
+  background: #fff;
+}
+
+.ef-card h1 {
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem 0;
+  color: #10233f;
+}
+
+.ef-card h2 {
+  font-size: 1.1rem;
+  margin: 1rem 0 0.5rem 0;
+  color: #10233f;
+  border-bottom: 1px solid #e4e9f3;
+  padding-bottom: 0.25rem;
+}
+
+.ef-card h3 {
+  font-size: 1rem;
+  margin: 0.75rem 0 0.4rem 0;
+  color: #40506b;
+}
+
+.ef-intro {
+  color: #40506b;
+  font-size: 0.95rem;
+  margin: 0 0 1rem 0;
+}
+
+.ef-hint {
+  color: #6b7a90;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.ef-note {
+  color: #40506b;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.ef-warn {
+  color: #8a6d1b;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.ef-limits {
+  color: #6b7a90;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin: 0.75rem 0 0 0;
+  border-top: 1px solid #f0f2f5;
+  padding-top: 0.5rem;
+}
+
+.ef-input-group {
+  margin: 1rem 0;
+}
+
+.ef-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #10233f;
+  margin-bottom: 0.4rem;
+}
+
+.ef-textarea {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.ef-upload {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.ef-file-name {
+  font-size: 0.9rem;
+  color: #40506b;
+}
+
+.ef-file-error {
+  color: #b3261e;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  display: block;
+}
+
+.ef-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.ef-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.ef-table th,
+.ef-table td {
+  border: 1px solid #e4e9f3;
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.ef-table th {
+  background: #fbfcfe;
+  font-weight: 600;
+  color: #40506b;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ef-table tr:nth-child(even) td {
+  background: #fbfcfe;
+}
+
+.ef-label-col {
+  font-weight: 600;
+  color: #40506b;
+  width: 30%;
+}
+
+.ef-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.ef-small {
+  font-size: 0.8rem;
+  color: #6b7a90;
+}
+
+.ef-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ef-badge--ok { background: #dcfce7; color: #166534; }
+.ef-badge--warn { background: #fef3c7; color: #92400e; }
+.ef-badge--bad { background: #fee2e2; color: #991b1b; }
+.ef-badge--neutral { background: #e2e8f0; color: #475569; }
+
+.ef-btn-delete {
+  color: #b3261e;
+  background: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.ef-btn-delete:hover {
+  background: #fee2e2;
+}
+
+.ef-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.ef-history-count {
+  font-size: 0.85rem;
+  color: #6b7a90;
+}
+
+.ef-admin-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.ef-admin-stat {
+  border: 1px solid #e4e9f3;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  background: #fbfcfe;
+}
+
+.ef-admin-stat__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #10233f;
+  display: block;
+}
+
+.ef-admin-stat__label {
+  font-size: 0.8rem;
+  color: #6b7a90;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.ef-admin-note {
+  font-size: 0.85rem;
+  color: #6b7a90;
+  margin-top: 0.75rem;
+  font-style: italic;
+}
+
+.ef-audit-table {
+  margin-top: 1rem;
+}
+
+.ef-disclaimer {
+  font-size: 0.8rem;
+  color: #6b7a90;
+  font-style: italic;
+  margin-top: 1rem;
+  border-top: 1px solid #f0f2f5;
+  padding-top: 0.75rem;
+}
