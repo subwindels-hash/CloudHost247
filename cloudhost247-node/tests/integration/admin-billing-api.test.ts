@@ -83,7 +83,7 @@ describe('Admin Billing API (/api/v1/admin/invoices, /api/v1/admin/billing/ledge
     const resRefund = await app.inject({
       method: 'POST',
       url: `/api/v1/admin/invoices/${invoiceId}/refund`,
-      payload: { amountCents: 1000, reason: 'test' },
+      payload: { amountCents: 1000, reason: 'test', idempotencyKey: `test-${randomUUID()}` },
     });
     expect(resRefund.statusCode).toBe(401);
 
@@ -116,7 +116,7 @@ describe('Admin Billing API (/api/v1/admin/invoices, /api/v1/admin/billing/ledge
       method: 'POST',
       url: `/api/v1/admin/invoices/${invoiceId}/refund`,
       headers,
-      payload: { amountCents: 1000, reason: 'test' },
+      payload: { amountCents: 1000, reason: 'test', idempotencyKey: `test-${randomUUID()}` },
     });
     expect(resRefund.statusCode).toBe(403);
 
@@ -231,7 +231,7 @@ describe('Admin Billing API (/api/v1/admin/invoices, /api/v1/admin/billing/ledge
       method: 'POST',
       url: `/api/v1/admin/invoices/${order.invoiceId}/refund`,
       headers: { authorization: `Bearer ${admin.token}` },
-      payload: { amountCents: 10001, reason: 'Accidental over-refund' },
+      payload: { amountCents: 10001, reason: 'Accidental over-refund', idempotencyKey: `test-${randomUUID()}` },
     });
     expect(overRefundRes.statusCode).toBe(400);
 
@@ -240,7 +240,7 @@ describe('Admin Billing API (/api/v1/admin/invoices, /api/v1/admin/billing/ledge
       method: 'POST',
       url: `/api/v1/admin/invoices/${order.invoiceId}/refund`,
       headers: { authorization: `Bearer ${admin.token}` },
-      payload: { amountCents: 4000, reason: 'Customer requested 40% discount retrospectively' },
+      payload: { amountCents: 4000, reason: 'Customer requested 40% discount retrospectively', idempotencyKey: `test-${randomUUID()}` },
     });
     expect(partialRefundRes.statusCode).toBe(200);
     const partialInvoice = partialRefundRes.json().invoice;
@@ -252,7 +252,7 @@ describe('Admin Billing API (/api/v1/admin/invoices, /api/v1/admin/billing/ledge
       method: 'POST',
       url: `/api/v1/admin/invoices/${order.invoiceId}/refund`,
       headers: { authorization: `Bearer ${admin.token}` },
-      payload: { amountCents: 6000, reason: 'Remaining refund balance' },
+      payload: { amountCents: 6000, reason: 'Remaining refund balance', idempotencyKey: `test-${randomUUID()}` },
     });
     expect(fullRefundRes.statusCode).toBe(200);
     const fullInvoice = fullRefundRes.json().invoice;
@@ -264,7 +264,7 @@ describe('Admin Billing API (/api/v1/admin/invoices, /api/v1/admin/billing/ledge
       method: 'POST',
       url: `/api/v1/admin/invoices/${order.invoiceId}/refund`,
       headers: { authorization: `Bearer ${admin.token}` },
-      payload: { amountCents: 500, reason: 'Extra' },
+      payload: { amountCents: 500, reason: 'Extra', idempotencyKey: `test-${randomUUID()}` },
     });
     expect(redundantRefundRes.statusCode).toBe(400);
 

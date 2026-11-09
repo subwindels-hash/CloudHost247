@@ -41,9 +41,9 @@ const listLedgerQuerySchema = z.object({
 const refundInvoiceSchema = z.object({
   amountCents: z.number().int().positive('Refund amount must be a positive integer in cents'),
   reason: z.string().min(1, 'Reason is required').max(2000),
-  // Phase 14: callers that might retry after a timeout SHOULD send an idempotency key; retries
-  // with the same key return the already-issued refund without duplicating it.
-  idempotencyKey: z.string().min(8).max(128).optional(),
+  // Phase 15 (A): idempotency is MANDATORY. The admin UI generates one key per refund operation
+  // and preserves it across retries; a refund without a key can silently duplicate after a timeout.
+  idempotencyKey: z.string().min(8, 'An idempotency key is required').max(128),
 });
 
 const cancelInvoiceSchema = z.object({

@@ -128,7 +128,7 @@ describe('Phase 5G: End-to-End Billing Lifecycle & Automated Reconciliation', ()
       method: 'POST',
       url: `/api/v1/admin/invoices/${invoiceId}/refund`,
       headers: { authorization: `Bearer ${admin.token}` },
-      payload: { amountCents: 4000, reason: '40% partial refund for SLA credit' },
+      payload: { amountCents: 4000, reason: '40% partial refund for SLA credit', idempotencyKey: `test-${randomUUID()}` },
     });
     expect(refund40Res.statusCode).toBe(200);
     expect(refund40Res.json().invoice.status).toBe('partially_refunded');
@@ -138,7 +138,7 @@ describe('Phase 5G: End-to-End Billing Lifecycle & Automated Reconciliation', ()
       method: 'POST',
       url: `/api/v1/admin/invoices/${invoiceId}/refund`,
       headers: { authorization: `Bearer ${admin.token}` },
-      payload: { amountCents: 6000, reason: 'Final refund balance' },
+      payload: { amountCents: 6000, reason: 'Final refund balance', idempotencyKey: `test-${randomUUID()}` },
     });
     expect(refund60Res.statusCode).toBe(200);
     expect(refund60Res.json().invoice.status).toBe('refunded');

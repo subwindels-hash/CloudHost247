@@ -66,10 +66,15 @@ export async function fetchAdminInvoiceDetail(invoiceId: string): Promise<AdminI
   return res.invoice;
 }
 
-export async function issueAdminRefund(invoiceId: string, amountCents: number, reason: string): Promise<AdminInvoiceDetail> {
+export async function issueAdminRefund(
+  invoiceId: string,
+  amountCents: number,
+  reason: string,
+  idempotencyKey: string
+): Promise<AdminInvoiceDetail> {
   const res = await apiFetch<{ invoice: AdminInvoiceDetail }>(`/api/v1/admin/invoices/${invoiceId}/refund`, {
     method: 'POST',
-    body: JSON.stringify({ amountCents, reason }),
+    body: JSON.stringify({ amountCents, reason, idempotencyKey }),
   });
   return res.invoice;
 }
