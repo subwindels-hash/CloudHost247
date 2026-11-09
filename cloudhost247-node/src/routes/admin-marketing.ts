@@ -7,6 +7,7 @@ import { requireRole } from '../lib/require-role';
 import { requestAuditContext } from '../lib/audit';
 import { ValidationError } from '../lib/errors';
 import { configurationSchema, pixelIdSchema, domainSchema } from '../marketing/types';
+import { ga4Schema, defaultGa4, getGa4, ga4Audit, saveGa4, testGa4 } from '../marketing/ga4-config';
 import { getAdminConfiguration, saveConfiguration, testConfiguration, resetConfiguration, importLegacyConfiguration, listActivity, configurationAudit } from '../marketing/config-service';
 
 const ADMIN_ROLES = ['admin', 'super_admin'] as const;
@@ -22,6 +23,31 @@ function parse<T>(schema: z.ZodType<T>, input: unknown): T {
 
 export async function registerAdminMarketingRoutes(app: FastifyInstance, env: Env, overridePool?: Queryable) {
   const pool = overridePool ?? getPool(env);
+  const ga = '/api/v1/admin/marketing-integrations/google-analytics';
+  app.get(ga, async (request, reply) => {
+    await requireRole(request, env, pool, ADMIN_ROLES);
+    reply.header('Cache-Control', 'private, no-store');
+    return { configuration: await getGa4(pool) };
+  });
+  app.get(`${ga}/audit`, async (request, reply) => {
+    await requireRole(request, env, pool, ADMIN_ROLES);
+    reply.header('Cache-Control', 'private, no-store');
+    return { entries: await ga4Audit(pool) };
+  });
+  app.put(ga, async request => {
+    const auth = await requireRole(request, env, pool, ADMIN_ROLES);
+    const input = parse(z.object({ expectedRevision: z.number().int().min(1), configuration: ga4Schema }).strict(), request.body);
+    return { configuration: await saveGa4(pool, auth.userId, input.expectedRevision, input.configuration, requestAuditContext(request)) };
+  });
+  app.post(`${ga}/test`, async request => {
+    const auth = await requireRole(request, env, pool, ADMIN_ROLES);
+    return testGa4(pool, auth.userId, requestAuditContext(request));
+  });
+  app.post(`${ga}/reset`, async request => {
+    const auth = await requireRole(request, env, pool, ADMIN_ROLES);
+    const input = parse(z.object({ expectedRevision: z.number().int().min(1), confirmation: z.literal('RESET') }).strict(), request.body);
+    return { configuration: await saveGa4(pool, auth.userId, input.expectedRevision, defaultGa4, requestAuditContext(request), true) };
+  });
   const base = '/api/v1/admin/marketing-integrations/meta-pixel';
   app.get(base, async request => {
     await requireRole(request, env, pool, ADMIN_ROLES);

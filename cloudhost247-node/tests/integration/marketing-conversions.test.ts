@@ -36,7 +36,7 @@ describe('verified conversions and CAPI delivery', () => {
   afterEach(async () => { await app.close(); await db.close(); vi.restoreAllMocks(); });
   async function enableCapi(capi = true) {
     const config = { ...defaultConfiguration, pixelId: '123456789012345', websiteDomain: 'localhost', enabled: true, capi: { enabled: capi, apiVersion: 'v26.0' } };
-    await db.query(`UPDATE marketing_integrations SET enabled=true,website_domain='localhost',configuration=$1`, [JSON.stringify(config)]);
+    await db.query(`UPDATE marketing_integrations SET enabled=true,website_domain='localhost',configuration=$1 WHERE provider_key='meta_pixel'`, [JSON.stringify(config)]);
     if (capi) {
       const { encryptSecret } = await import('../../src/lib/crypto'); const { getKeyRing } = await import('../../src/lib/keyring');
       await db.query(`INSERT INTO marketing_integration_secrets(provider_key,secret_key,encrypted_value) VALUES('meta_pixel','capi_access_token',$1) ON CONFLICT(provider_key,secret_key) DO UPDATE SET encrypted_value=EXCLUDED.encrypted_value`, [encryptSecret(getKeyRing(), TOKEN)]);
@@ -110,7 +110,7 @@ describe('verified conversions and CAPI delivery', () => {
     expect(await drainCapiOutbox(db, { fetchImpl: fetchImpl as unknown as typeof fetch })).toMatchObject({ failed: 1 });
     expect((await db.query('SELECT status FROM marketing_delivery_outbox')).rows[0].status).toBe('dead_letter');
     await db.query(`UPDATE marketing_delivery_outbox SET status='queued',attempts=0`);
-    await db.query(`UPDATE marketing_integrations SET enabled=false`);
+    await db.query(`UPDATE marketing_integrations SET enabled=false WHERE provider_key='meta_pixel'`);
     expect(await drainCapiOutbox(db, { fetchImpl: fetchImpl as unknown as typeof fetch })).toMatchObject({ claimed: 0 });
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });

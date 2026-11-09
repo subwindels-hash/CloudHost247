@@ -16,11 +16,11 @@ export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https://www.facebook.com'],
+        imgSrc: ["'self'", 'data:', 'https://www.facebook.com', 'https://www.googletagmanager.com', 'https://www.google-analytics.com', 'https://region1.google-analytics.com'],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        // Only Meta's official SDK origin; no inline scripts or wildcard hosts.
-        scriptSrc: ["'self'", 'https://connect.facebook.net'],
-        connectSrc: ["'self'", 'https://connect.facebook.net', 'https://www.facebook.com'],
+        // Official Meta and Google tag origins only; no inline scripts or wildcard hosts.
+        scriptSrc: ["'self'", 'https://connect.facebook.net', 'https://www.googletagmanager.com'],
+        connectSrc: ["'self'", 'https://connect.facebook.net', 'https://www.facebook.com', 'https://www.googletagmanager.com', 'https://www.google-analytics.com', 'https://region1.google-analytics.com'],
       },
     },
   });

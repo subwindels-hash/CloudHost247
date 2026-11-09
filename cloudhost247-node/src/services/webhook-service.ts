@@ -1,3 +1,4 @@
+import { queueGa4PurchaseBestEffort } from '../marketing/ga4-purchase-delivery';
 import { recordVerifiedPaymentBestEffort } from '../marketing/conversion-service';
 import { createHash, randomUUID } from 'node:crypto';
 import type { Env } from '../config/env';
@@ -220,6 +221,7 @@ export async function processIncomingWebhook(
 
       // Consent-gated marketing outbox; no effect on payment verification or billing semantics.
       await recordVerifiedPaymentBestEffort(tx, payment.id);
+      await queueGa4PurchaseBestEffort(tx, env, payment.id);
 
       // 5. Audit log
       const auditSql = `

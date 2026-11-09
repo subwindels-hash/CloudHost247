@@ -1,6 +1,6 @@
 /* CloudHost247 canonical marketing runtime. Shared by React and both Smarty themes.
  * No inline executable configuration, no third-party request before consent, one Meta owner.
- * Optional analytics is a consent category only; no analytics provider is installed here.
+ * GA4 is limited to explicit analytics consent and approved public routes.
  */
 (function (root) {
   'use strict';
@@ -8,6 +8,7 @@
   var EVENTS = ['PageView','ViewContent','Search','AddToCart','InitiateCheckout','AddPaymentInfo','Purchase','CompleteRegistration','Lead','Contact'];
   var DATA_KEYS = ['content_ids','contents','content_type','content_name','content_category','currency','value','num_items'];
   var state = { config: null, consent: null, ready: false, initialized: null, lastPage: null, epoch: 0, requestRevision: 0, queue: [], seen: new Set(), error: null };
+  var ga = { config: null, initialized: null, lastPage: null, itemViews: new Set(), listSent: false, status: 'not_started', error: null, expiryTimer: null, captureKey: null, capturePending: null };
   var listeners = new Set();
   var options = { apiBase: '/api/v1/marketing', fetch: null, document: null, window: null, reportEvents: true };
   var initializationPromise = null;
@@ -18,7 +19,7 @@
   function doc() { return options.document || root.document; }
   function fetcher() { return options.fetch || root.fetch.bind(root); }
   function emit() { listeners.forEach(function (fn) { fn(snapshot()); }); }
-  function snapshot() { return { ready: state.ready, configuration: state.config, consent: state.consent, error: state.error, initializedPixel: state.initialized }; }
+  function snapshot() { return { ready: state.ready, configuration: state.config, consent: state.consent, error: state.error, initializedPixel: state.initialized, analytics: { initialized: ga.initialized, status: ga.status, error: ga.error } }; }
   function endpoint(path) { return options.apiBase.replace(/\/$/, '') + path; }
   function storageRead() {
     try { var list = JSON.parse(win().sessionStorage.getItem(seenKey) || '[]'); return Array.isArray(list) ? list.filter(function (v) { return typeof v === 'string'; }).slice(-1000) : []; } catch (_) { return []; }
@@ -111,8 +112,254 @@
     if (state.ready) send(); else if (state.queue.length < 50) state.queue.push(send);
     return true;
   }
+  // Restrict measurement to known public, static routes: never send dynamic account identifiers,
+  // query strings, titles or user-supplied search terms. Other paths are deliberately unmeasured.
+  // This is an explicit, reviewed static-path list, not a wildcard or CMS-derived runtime list.
+  var GA_PUBLIC_PATHS = [
+    '/', '/about', '/aboutus.php', '/acceptable-use-policy.php',
+    '/api-hosting.php', '/applications.php', '/backup-policy.php', '/backups.php',
+    '/blog', '/blog.php', '/business-hosting.php', '/cloud',
+    '/cloud/backups', '/cloud/data-centers', '/cloud/enterprise-servers', '/cloud/firewall',
+    '/cloud/game-servers', '/cloud/infrastructure', '/cloud/ip-management', '/cloud/managed-services',
+    '/cloud/monitoring', '/cloud/network', '/cloud/operating-systems', '/cloud/private',
+    '/cloud/public', '/cloud/security', '/cloud/server-management', '/cloudhost247-hosting.php',
+    '/contact', '/cookie-policy.php', '/cpanel-hosting.php', '/cybercrime-policy.php',
+    '/data-centers.php', '/data-deletion.php', '/data-privacy-notice-and-consent-form.php', '/data-protection-standards.php',
+    '/dedicated-server', '/dedicated-server.php', '/deployments.php', '/developer-friendly.php',
+    '/developers', '/developers/deployment', '/developers/docker', '/developers/environments',
+    '/developers/laravel', '/developers/nodejs', '/developers/php', '/developers/python',
+    '/dns-management.php', '/docker-hosting.php', '/docs', '/documentation.php',
+    '/domain', '/domain-agreement.php', '/domain-brokerage-terms.php', '/domain-dns.php',
+    '/domain-renewal-policy.php', '/domain.php', '/domainregistrationaddendum.php', '/domains',
+    '/email-hosting.php', '/enterprise-servers.php', '/fair-usage-policy.php', '/faqs.php',
+    '/firewall.php', '/game-servers.php', '/help', '/help-center.php',
+    '/hosting', '/hosting/api', '/hosting/backups', '/hosting/business',
+    '/hosting/cpanel', '/hosting/dedicated', '/hosting/developer', '/hosting/email',
+    '/hosting/migration', '/hosting/reseller', '/hosting/security', '/hosting/ssl',
+    '/hosting/vps', '/hosting/web-hosting', '/hosting/windows', '/hosting/wordpress',
+    '/index.php', '/infrastructure.php', '/ip-management.php', '/laravel-hosting.php',
+    '/legal', '/legal-notice.php', '/legal.php', '/legal/acceptable-use',
+    '/legal/backup-policy', '/legal/cookies', '/legal/cybercrime-policy', '/legal/data-deletion',
+    '/legal/data-protection-standards', '/legal/domain-agreement', '/legal/domain-brokerage-terms', '/legal/domain-registration-addendum',
+    '/legal/domain-renewal-policy', '/legal/fair-usage', '/legal/legal-notice', '/legal/privacy-notice-and-consent',
+    '/legal/privacy-policy', '/legal/refund-policy', '/legal/terms', '/legal/trademark',
+    '/managed-services.php', '/migration.php', '/monitoring.php', '/network.php',
+    '/nodejs-hosting.php', '/offers', '/offers.php', '/operating-systems.php',
+    '/paas.php', '/php-hosting.php', '/platforms', '/platforms/applications',
+    '/platforms/containers', '/platforms/databases', '/platforms/paas', '/plesk-hosting.php',
+    '/pricing', '/privacy-policy', '/privacy-policy.php', '/python-hosting.php',
+    '/refund-and-cancellation-policy.php', '/refund-policy.php', '/reseller-hosting.php', '/search',
+    '/security', '/security.php', '/server-management.php', '/ssl-certificate.php',
+    '/status', '/terms-of-service.php', '/trademark-policy.php', '/vps-hosting',
+    '/vps-hosting.php', '/vps-privatecloud.php', '/vps-publiccloud.php', '/web-hosting',
+    '/web-hosting.php', '/website-design.php', '/websites', '/windows-hosting.php',
+    '/wordpress-hosting.php',
+    '/service-plans', '/service-plans/catalog/web-hosting', '/service-plans/catalog/vps-hosting',
+    '/service-plans/catalog/dedicated-server', '/service-plans/catalog/cpanel-hosting',
+    '/service-plans/catalog/business-hosting', '/service-plans/catalog/wordpress-hosting',
+    '/service-plans/catalog/reseller-hosting', '/service-plans/catalog/windows-hosting',
+    '/service-plans/catalog/email-hosting', '/service-plans/catalog/ssl-certificate',
+    '/service-plans/catalog/public-cloud', '/service-plans/catalog/private-cloud',
+    '/service-plans/platform/website_builder', '/service-plans/platform/ai_builder',
+    '/service-plans/platform/online_store', '/service-plans/platform/marketing',
+    '/service-plans/platform/inbox', '/service-plans/platform/logo_maker',
+  ];
+  function gaAllowed(path) {
+    return GA_PUBLIC_PATHS.indexOf(path) !== -1 && !win().location.search && !win().location.hash;
+  }
+  function gaGranted() {
+    return Boolean(ga.config && ga.config.enabled && /^G-[A-Z0-9]{10}$/.test(ga.config.measurementId || '') && state.consent && state.consent.decided && state.consent.policyVersion === 1 && state.consent.preferences && state.consent.preferences.analytics === true && typeof state.consent.expiresAt === 'string' && Date.parse(state.consent.expiresAt) > Date.now());
+  }
+  function cancelGaExpiration() {
+    if (ga.expiryTimer !== null && typeof win().clearTimeout === 'function') win().clearTimeout(ga.expiryTimer);
+    ga.expiryTimer = null;
+  }
+  function scheduleGaExpiration() {
+    cancelGaExpiration();
+    if (!ga.initialized || ga.status === 'stopped' || !gaGranted() || typeof win().setTimeout !== 'function') return;
+    // Browsers clamp long timers to a signed 32-bit delay; recheck rather than
+    // relying on the 30-second config refresh when a preference expires.
+    var delay = Math.min(Date.parse(state.consent.expiresAt) - Date.now(), 2147483647);
+    ga.expiryTimer = win().setTimeout(function () {
+      ga.expiryTimer = null;
+      if (!gaGranted()) { stopGa(); win().location.reload(); }
+      else scheduleGaExpiration();
+    }, Math.max(0, delay));
+  }
+  function stopGa() {
+    cancelGaExpiration();
+    var w = win();
+    if (ga.initialized) w['ga-disable-' + ga.initialized] = true;
+    ga.lastPage = null; ga.itemViews.clear(); ga.listSent = false; ga.status = 'stopped'; ga.capturePending = null; ga.captureKey = null;
+    // Clear the standard analytics cookies visible to this origin on opt-out/disable.
+    var d = doc(), parts = w.location.hostname.split('.'), domains = ['', w.location.hostname];
+    for (var i = 1; i < parts.length; i++) domains.push('.' + parts.slice(i).join('.'));
+    String(d.cookie || '').split(';').forEach(function (entry) {
+      var name = entry.trim().split('=')[0];
+      if (!/^_ga(?:_[A-Z0-9]+)?$/.test(name)) return;
+      domains.forEach(function (domain) { d.cookie = name + '=; Max-Age=0; Path=/' + (domain ? '; Domain=' + domain : '') + '; SameSite=Lax'; });
+    });
+  }
+  // Ask the official tag for its client_id only after explicit consent and only when the
+  // server has enabled purchase attribution. Never derive or synthesize a missing identifier.
+  function captureGaClientId() {
+    var w = win();
+    if (!gaGranted() || ga.status !== 'loaded_not_verified' || !gaAllowed(w.location.pathname) ||
+        !ga.config.purchaseCapture || !ga.initialized || ga.initialized !== ga.config.measurementId || !state.consent.csrfToken || !Number.isInteger(state.consent.analyticsRevision)) return;
+    var id = ga.initialized, revision = ga.config.revision, consentRevision = state.consent.analyticsRevision, csrf = state.consent.csrfToken;
+    var key = id + ':' + revision + ':' + consentRevision + ':' + csrf;
+    if (ga.captureKey === key || ga.capturePending === key) return;
+    ga.capturePending = key;
+    try {
+      w.gtag('get', id, 'client_id', function (clientId) {
+        if (ga.capturePending !== key || !gaGranted() || ga.status !== 'loaded_not_verified' || !gaAllowed(w.location.pathname) ||
+            !ga.config.purchaseCapture || ga.config.revision !== revision || ga.initialized !== id || state.consent.csrfToken !== csrf || state.consent.analyticsRevision !== consentRevision ||
+            typeof clientId !== 'string' || !/^[0-9]{1,20}\.[0-9]{1,20}$/.test(clientId)) { if (ga.capturePending === key) ga.capturePending = null; return; }
+        void fetcher()(endpoint('/ga4-client-id'), { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Consent-CSRF': csrf },
+          body: JSON.stringify({ clientId: clientId, revision: revision, consentRevision: consentRevision }) }).then(function (response) {
+          if (ga.capturePending === key && response.ok) ga.captureKey = key;
+        }).catch(function () { /* no fabricated identifier or checkout impact */ }).finally(function () { if (ga.capturePending === key) ga.capturePending = null; });
+      });
+    } catch (_) { ga.capturePending = null; }
+  }
+  function gaPage(path) {
+    var w = win(), d = doc();
+    if (ga.status === 'stopped') return false;
+    // Route callbacks can resolve after a later SPA navigation. Never load or send a
+    // stale route on a different current page, especially a private customer page.
+    if (path !== w.location.pathname) {
+      if (ga.initialized && !gaAllowed(w.location.pathname)) { stopGa(); w.location.reload(); }
+      return false;
+    }
+    if (!gaGranted() || !gaAllowed(path)) {
+      // Google's loaded SDK can install automatic listeners. Unload it on transition to a
+      // non-public route rather than trusting route-level suppression alone.
+      if (ga.initialized) { stopGa(); w.location.reload(); }
+      return false;
+    }
+    if (ga.initialized && ga.initialized !== ga.config.measurementId) { stopGa(); w.location.reload(); return false; }
+    if (!ga.initialized) {
+      // Refuse to compete with an already installed Google tag or GTM container.
+      var existing = d.querySelector('script[src*="googletagmanager.com/gtag/js"],script[src*="googletagmanager.com/gtm.js"]');
+      if (existing || w.gtag) { ga.status = 'duplicate_warning'; ga.error = 'Another Google tag or GTM container is present; GA4 was not initialized.'; emit(); return false; }
+      var id = ga.config.measurementId;
+      w['ga-disable-' + id] = false;
+      w.dataLayer = w.dataLayer || [];
+      if (!w.gtag) w.gtag = function () { w.dataLayer.push(arguments); };
+      w.gtag('js', new Date());
+      var settings = { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false, page_location: w.location.origin + path, page_title: 'CloudHost247', page_referrer: '' };
+      if (ga.config.testMode) settings.debug_mode = true;
+      w.gtag('config', id, settings);
+      ga.initialized = id; ga.status = 'loading'; scheduleGaExpiration();
+      var script = d.createElement('script'); script.id = 'ch247-ga4-sdk'; script.async = true;
+      script.referrerPolicy = 'origin'; script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+      script.onload = function () { if (ga.status === 'loading' && gaGranted()) { ga.status = 'loaded_not_verified'; captureGaClientId(); emit(); } };
+      script.onerror = function () { if (ga.status !== 'loading') return; ga.status = 'load_error'; ga.error = 'Google tag could not load; check connectivity and CSP.'; emit(); };
+      d.head.appendChild(script);
+    }
+    if (ga.lastPage === path) return false;
+    ga.itemViews.clear(); ga.listSent = false;
+    var page = { send_to: ga.config.measurementId, page_location: w.location.origin + path, page_title: 'CloudHost247', page_referrer: '' };
+    if (ga.config.testMode) page.debug_mode = true;
+    w.gtag('event', 'page_view', page);
+    ga.lastPage = path; return true;
+  }
+  // Only the contact form success path calls this. No form fields, event IDs, or
+  // user-supplied values are accepted by this API. Do not queue events before consent.
+  function gaContact() {
+    var w = win(), path = w.location.pathname;
+    if (path !== '/contact' || !gaAllowed(path) || !gaGranted() || !ga.initialized || ga.initialized !== ga.config.measurementId || ga.status === 'stopped' || ga.status === 'load_error') return false;
+    var data = { send_to: ga.initialized, page_location: w.location.origin + path, page_title: 'CloudHost247', page_referrer: '' };
+    if (ga.config.testMode) data.debug_mode = true;
+    try { w.gtag('event', 'contact', data); return true; } catch (_) { return false; }
+  }
+  // Only fixed public catalog identifiers are accepted. Product names, user input,
+  // pricing and currencies are intentionally excluded rather than inferred.
+  var GA_ITEM_PATHS = {
+    '/web-hosting': 'web-hosting', '/vps-hosting': 'vps-hosting', '/dedicated-server': 'dedicated-server',
+    '/hosting/web-hosting': 'web-hosting', '/hosting/vps': 'vps-hosting', '/hosting/dedicated': 'dedicated-server',
+    '/hosting/cpanel': 'cpanel-hosting', '/hosting/business': 'business-hosting',
+    '/hosting/wordpress': 'wordpress-hosting', '/hosting/reseller': 'reseller-hosting',
+    '/hosting/windows': 'windows-hosting', '/hosting/email': 'email-hosting', '/hosting/ssl': 'ssl-certificate',
+    '/cloud/public': 'public-cloud', '/cloud/private': 'private-cloud',
+    '/service-plans/catalog/web-hosting': 'web-hosting', '/service-plans/catalog/vps-hosting': 'vps-hosting',
+    '/service-plans/catalog/dedicated-server': 'dedicated-server', '/service-plans/catalog/cpanel-hosting': 'cpanel-hosting',
+    '/service-plans/catalog/business-hosting': 'business-hosting', '/service-plans/catalog/wordpress-hosting': 'wordpress-hosting',
+    '/service-plans/catalog/reseller-hosting': 'reseller-hosting', '/service-plans/catalog/windows-hosting': 'windows-hosting',
+    '/service-plans/catalog/email-hosting': 'email-hosting', '/service-plans/catalog/ssl-certificate': 'ssl-certificate',
+    '/service-plans/catalog/public-cloud': 'public-cloud', '/service-plans/catalog/private-cloud': 'private-cloud',
+    '/service-plans/platform/website_builder': 'platform:website_builder', '/service-plans/platform/ai_builder': 'platform:ai_builder',
+    '/service-plans/platform/online_store': 'platform:online_store', '/service-plans/platform/marketing': 'platform:marketing',
+    '/service-plans/platform/inbox': 'platform:inbox', '/service-plans/platform/logo_maker': 'platform:logo_maker'
+  };
+  function gaViewItem(itemId) {
+    var w = win(), path = w.location.pathname;
+    if (typeof itemId !== 'string' || !Object.prototype.hasOwnProperty.call(GA_ITEM_PATHS, path) || GA_ITEM_PATHS[path] !== itemId || !gaAllowed(path) || !gaGranted() || !ga.initialized || ga.initialized !== ga.config.measurementId || ga.status === 'stopped' || ga.status === 'load_error') return false;
+    gaPage(path);
+    if (ga.itemViews.has(itemId)) return false;
+    var data = { send_to: ga.initialized, page_location: w.location.origin + path, page_title: 'CloudHost247', page_referrer: '', items: [{ item_id: itemId }] };
+    if (ga.config.testMode) data.debug_mode = true;
+    try { w.gtag('event', 'view_item', data); ga.itemViews.add(itemId); return true; } catch (_) { return false; }
+  }
+  // Public catalogues: only known published IDs, never arbitrary catalogue text.
+  var GA_LIST_ITEMS = ['web-hosting','vps-hosting','dedicated-server','cpanel-hosting','business-hosting','wordpress-hosting','reseller-hosting','windows-hosting','email-hosting','ssl-certificate','public-cloud','private-cloud'];
+  var GA_CATALOG_PATHS = { '/hosting': 'hosting-catalog', '/pricing': 'pricing-catalog', '/offers': 'offers-catalog', '/service-plans': 'service-plans-catalog' };
+  function gaCatalogReady() {
+    var path = win().location.pathname;
+    return Object.prototype.hasOwnProperty.call(GA_CATALOG_PATHS, path) && gaAllowed(path) && gaGranted() && ga.initialized && ga.initialized === ga.config.measurementId && ga.status !== 'stopped' && ga.status !== 'load_error';
+  }
+  function gaCatalogEvent(name, ids) {
+    if (!gaCatalogReady() || !Array.isArray(ids) || ids.length > 100) return false;
+    var known = [];
+    ids.forEach(function (id) { if (typeof id === 'string' && GA_LIST_ITEMS.indexOf(id) !== -1 && known.indexOf(id) === -1) known.push(id); });
+    if (!known.length) return false;
+    var w = win(), path = w.location.pathname;
+    gaPage(path);
+    if (name === 'view_item_list' && ga.listSent) return false;
+    if (name !== 'view_item_list' && (name !== 'select_item' || known.length !== 1)) return false;
+    var data = { send_to: ga.initialized, page_location: w.location.origin + path, page_title: 'CloudHost247', page_referrer: '', item_list_id: GA_CATALOG_PATHS[path], items: known.map(function (id) { return { item_id: id }; }) };
+    if (ga.config.testMode) data.debug_mode = true;
+    try { w.gtag('event', name, data); if (name === 'view_item_list') ga.listSent = true; return true; } catch (_) { return false; }
+  }
+  // WHMCS' public catalogue exposes only coarse, fixed product categories to GA4.
+  // Never read product names, IDs, prices, links, customer details or query strings.
+  var GA_WHMCS_KINDS = { hosting: 'whmcs-hosting', vps: 'whmcs-vps', dedicated: 'whmcs-dedicated' };
+  function gaWhmcsReady() {
+    var path = win().location.pathname;
+    return path === '/cloudhost247-hosting.php' && gaAllowed(path) && gaGranted() && ga.initialized && ga.initialized === ga.config.measurementId && ga.status !== 'stopped' && ga.status !== 'load_error';
+  }
+  function gaWhmcsCatalog(name, kind) {
+    if (!gaWhmcsReady()) return false;
+    var w = win(), root = doc().querySelector('[data-ch247-ga-whmcs-catalog]');
+    if (!root) return false;
+    var ids = [];
+    if (name === 'view_item_list') {
+      var cards = root.querySelectorAll('[data-ch247-ga-whmcs-kind]');
+      for (var i = 0; i < cards.length && i < 200; i++) {
+        var value = cards[i].getAttribute('data-ch247-ga-whmcs-kind');
+        if (Object.prototype.hasOwnProperty.call(GA_WHMCS_KINDS, value) && ids.indexOf(GA_WHMCS_KINDS[value]) < 0) ids.push(GA_WHMCS_KINDS[value]);
+      }
+    } else if (name === 'select_item' && typeof kind === 'string' && Object.prototype.hasOwnProperty.call(GA_WHMCS_KINDS, kind)) ids.push(GA_WHMCS_KINDS[kind]);
+    if (!ids.length) return false;
+    gaPage(w.location.pathname);
+    if (name === 'view_item_list' && ga.listSent) return false;
+    var data = { send_to: ga.initialized, page_location: w.location.origin + w.location.pathname, page_title: 'CloudHost247', page_referrer: '', item_list_id: 'whmcs-public-catalog', items: ids.map(function (id) { return { item_id: id }; }) };
+    if (ga.config.testMode) data.debug_mode = true;
+    try { w.gtag('event', name, data); if (name === 'view_item_list') ga.listSent = true; return true; } catch (_) { return false; }
+  }
+  // Site search runs in-browser. The free-text query may be sensitive and is never
+  // passed to this API: the fixed marker is not the user's actual search term.
+  function gaSearch() {
+    var w = win(), path = w.location.pathname;
+    if (path !== '/search' || !gaAllowed(path) || !gaGranted() || !ga.initialized || ga.initialized !== ga.config.measurementId || ga.status === 'stopped' || ga.status === 'load_error') return false;
+    gaPage(path);
+    var data = { send_to: ga.initialized, page_location: w.location.origin + path, page_title: 'CloudHost247', page_referrer: '', search_term: '[not collected]' };
+    if (ga.config.testMode) data.debug_mode = true;
+    try { w.gtag('event', 'search', data); return true; } catch (_) { return false; }
+  }
   function pageView(path) {
     path = String(path || win().location.pathname);
+    gaPage(path);
     if (!granted() || (state.lastPage === path || state.seen.has(state.config.pixelId + ':PageView:page:' + state.config.revision + ':' + path.replace(/[^A-Za-z0-9._-]/g,'_').slice(0,100)))) return false;
     var id = 'page:' + state.config.revision + ':' + path.replace(/[^A-Za-z0-9._-]/g,'_').slice(0,100);
     if (dispatch('PageView', {}, id, true)) { state.lastPage = path; return true; }
@@ -121,7 +368,9 @@
   function applyBootstrap(payload) {
     if (!payload || !payload.configuration || !payload.consent || typeof payload.consent.csrfToken !== 'string') throw new Error('Invalid marketing configuration response');
     var previouslyGranted = granted();
-    state.config = payload.configuration; state.consent = payload.consent;
+    state.config = payload.configuration; ga.config = payload.analytics || null; state.consent = payload.consent;
+    if (!gaGranted() && ga.initialized) { stopGa(); win().location.reload(); }
+    else if (gaGranted()) { gaPage(win().location.pathname); scheduleGaExpiration(); gaWhmcsCatalog('view_item_list'); captureGaClientId(); }
     if (!granted()) { if (previouslyGranted || state.initialized) stop(); state.ready = false; }
     else { state.ready = true; loadMeta(); pageView(); }
     var queued = state.queue.splice(0); if (granted()) queued.forEach(function (fn) { fn(); });
@@ -139,6 +388,8 @@
       if (revision !== state.requestRevision) return snapshot();
       state.ready = false; state.config = null; state.consent = null; state.queue = [];
       if (state.initialized) stop();
+      if (ga.initialized) { stopGa(); win().location.reload(); }
+      ga.config = null;
       state.error = 'Cookie preferences could not be loaded. Optional tracking remains off.'; emit();
       return snapshot();
     });
@@ -151,17 +402,43 @@
     d.addEventListener('click', function (event) {
       var target = event.target && event.target.closest && event.target.closest('[data-cookie-settings]');
       if (target) { event.preventDefault(); openPreferences(); }
+      var link = event.target && event.target.closest && event.target.closest('[data-ch247-ga-whmcs-select]');
+      var catalogue = link && doc().querySelector('[data-ch247-ga-whmcs-catalog]');
+      var card = link && link.closest('[data-ch247-ga-whmcs-kind]');
+      if (catalogue && card && catalogue.contains(link) && catalogue.contains(card)) gaWhmcsCatalog('select_item', card.getAttribute('data-ch247-ga-whmcs-kind'));
     });
     win().addEventListener('ch247:cookie-settings', openPreferences);
     win().addEventListener('ch247:marketing-refresh', function () { void refresh(); });
+    d.addEventListener('visibilitychange', function () {
+      if (d.visibilityState !== 'visible') return;
+      // Background timer throttling can delay expiry; disable before awaiting the network.
+      if (ga.initialized && !gaGranted()) { stopGa(); win().location.reload(); return; }
+      void refresh();
+    });
+    // Long-lived SPA tabs periodically recheck admin disablement; a failed check stops tracking.
+    var refreshTimer = null;
+    function startRefreshTimer() {
+      if (refreshTimer === null && typeof win().setInterval === 'function') refreshTimer = win().setInterval(function () { if (ga.initialized && d.visibilityState !== 'hidden') void refresh(); }, 30000);
+    }
+    startRefreshTimer();
     win().addEventListener('storage', function (event) {
       if (event.key !== consentSignalKey) return;
       // Other tabs fail closed immediately; the server refresh then restores only a current grant.
-      state.requestRevision++; stop(); state.consent = null; state.ready = false; state.queue = [];
+      state.requestRevision++; stop(); if (ga.initialized) { stopGa(); win().location.reload(); } state.consent = null; state.ready = false; state.queue = [];
       state.error = 'Privacy choice changed in another tab. Refreshing your choice.'; emit();
       void refresh();
     });
-    win().addEventListener('pagehide', function () { state.queue = []; });
+    win().addEventListener('pagehide', function (event) {
+      state.queue = []; if (refreshTimer !== null) { win().clearInterval(refreshTimer); refreshTimer = null; }
+      cancelGaExpiration();
+      // A frozen bfcache tab cannot receive config/consent updates. Suppress it before
+      // freezing; a full reload on restore obtains current consent before any new dispatch.
+      if (event.persisted && ga.initialized) { win()['ga-disable-' + ga.initialized] = true; ga.status = 'stopped'; }
+    });
+    win().addEventListener('pageshow', function (event) {
+      if (event.persisted && ga.initialized) win().location.reload();
+      else if (event.persisted) { startRefreshTimer(); void refresh(); }
+    });
     initializationPromise = refresh().then(function () { renderPreferences(); return api; });
     return initializationPromise;
   }
@@ -175,6 +452,8 @@
   function performChange(action, preferences) {
     if (!state.consent) return refresh().then(function () { return Promise.reject(new Error(state.error || 'Preferences unavailable')); });
     var revision = ++state.requestRevision;
+    // Stop analytics as soon as a withdrawal is requested, even if the save later fails.
+    if (ga.initialized && (action === 'withdraw' || action === 'reject_optional' || (action === 'save_preferences' && preferences && preferences.analytics === false))) stopGa();
     return fetcher()(endpoint('/consent'), { method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Consent-CSRF': state.consent.csrfToken },
       body: JSON.stringify({ action: action, preferences: preferences, policyVersion: 1 })
     }).then(function (response) { return response.json().then(function (body) { if (!response.ok) throw new Error(body.message || 'Preferences could not be saved'); return body; }); }).then(function (body) {
@@ -182,8 +461,12 @@
       var previouslyGranted = granted();
       state.consent = body.consent;
       try { win().localStorage.setItem(consentSignalKey, String(Date.now()) + ':' + Math.random()); } catch (_) { /* storage unavailable */ }
-      if (!granted()) { stop(); state.ready = false; if (previouslyGranted) win().location.reload(); }
+      var gaShouldUnload = Boolean(!gaGranted() && ga.initialized);
+      if (gaShouldUnload) stopGa();
+      else if (gaGranted()) { gaPage(win().location.pathname); scheduleGaExpiration(); gaWhmcsCatalog('view_item_list'); captureGaClientId(); }
+      if (!granted()) { stop(); state.ready = false; }
       else { state.ready = true; loadMeta(); pageView(); var queued = state.queue.splice(0); queued.forEach(function (fn) { fn(); }); }
+      if ((previouslyGranted && !granted()) || gaShouldUnload) win().location.reload();
       emit(); return snapshot();
     });
   }
@@ -192,7 +475,7 @@
     var d = doc();
     if (d.getElementById('ch247-cookie-preferences')) return;
     var region = d.createElement('div'); region.id = 'ch247-cookie-preferences';
-    region.innerHTML = '<section class="ch247-cookie-banner" role="region" aria-label="Cookie choices"><div><h2>Your privacy choices</h2><p>Essential cookies keep the website working. Optional analytics and Meta advertising cookies are off until you allow them. You can change your choice at any time.</p><p class="ch247-cookie-status" role="status"></p></div><div class="ch247-cookie-actions"><button type="button" data-consent-action="accept_all" class="ch247-button">Accept All</button><button type="button" data-consent-action="reject_optional" class="ch247-button ch247-button--outline">Reject Optional Cookies</button><button type="button" data-consent-action="customize" class="ch247-button ch247-button--outline">Customize Preferences</button></div></section><dialog class="ch247-cookie-dialog" aria-labelledby="ch247-cookie-title"><form method="dialog"><h2 id="ch247-cookie-title">Cookie preferences</h2><p>Allow each optional purpose separately. Accepting terms, registering or checking out does not grant marketing permission.</p><fieldset><legend>Essential — always on</legend><p>Security, cart continuity and storing this privacy choice.</p><label><input type="checkbox" checked disabled> Essential cookies</label></fieldset><label class="ch247-cookie-toggle"><input name="analytics" type="checkbox"> Analytics cookies</label><p>Permission for optional measurement. No additional analytics provider is enabled by this Meta integration.</p><label class="ch247-cookie-toggle"><input name="marketing" type="checkbox"> Marketing cookies</label><p>Meta Pixel conversion measurement and advertising/retargeting. If enabled, Meta may receive browser identifiers and your interaction events.</p><p class="ch247-cookie-dialog-error" role="alert"></p><div class="ch247-cookie-actions"><button type="submit" class="ch247-button">Save Preferences</button><button type="button" data-consent-action="withdraw" class="ch247-button ch247-button--outline">Withdraw Consent</button><button type="button" data-consent-action="close" class="ch247-button ch247-button--outline">Cancel</button></div></form></dialog>';
+    region.innerHTML = '<section class="ch247-cookie-banner" role="region" aria-label="Cookie choices"><div><h2>Your privacy choices</h2><p>Essential cookies keep the website working. Optional analytics and Meta advertising cookies are off until you allow them. You can change your choice at any time.</p><p class="ch247-cookie-status" role="status"></p></div><div class="ch247-cookie-actions"><button type="button" data-consent-action="accept_all" class="ch247-button">Accept All</button><button type="button" data-consent-action="reject_optional" class="ch247-button ch247-button--outline">Reject Optional Cookies</button><button type="button" data-consent-action="customize" class="ch247-button ch247-button--outline">Customize Preferences</button></div></section><dialog class="ch247-cookie-dialog" aria-labelledby="ch247-cookie-title"><form method="dialog"><h2 id="ch247-cookie-title">Cookie preferences</h2><p>Allow each optional purpose separately. Accepting terms, registering or checking out does not grant marketing permission.</p><fieldset><legend>Essential — always on</legend><p>Security, cart continuity and storing this privacy choice.</p><label><input type="checkbox" checked disabled> Essential cookies</label></fieldset><label class="ch247-cookie-toggle"><input name="analytics" type="checkbox"> Analytics cookies</label><p>Optional Google Analytics measurement on supported public pages when enabled. Your choice can be withdrawn at any time.</p><label class="ch247-cookie-toggle"><input name="marketing" type="checkbox"> Marketing cookies</label><p>Meta Pixel conversion measurement and advertising/retargeting. If enabled, Meta may receive browser identifiers and your interaction events.</p><p class="ch247-cookie-dialog-error" role="alert"></p><div class="ch247-cookie-actions"><button type="submit" class="ch247-button">Save Preferences</button><button type="button" data-consent-action="withdraw" class="ch247-button ch247-button--outline">Withdraw Consent</button><button type="button" data-consent-action="close" class="ch247-button ch247-button--outline">Cancel</button></div></form></dialog>';
     d.body.appendChild(region);
     var dialog = region.querySelector('dialog');
     var banner = region.querySelector('.ch247-cookie-banner');
@@ -235,7 +518,7 @@
   }
   var api = { initialize: initialize, refresh: refresh, ready: function () { return initializationPromise || Promise.resolve(api); }, snapshot: snapshot,
     subscribe: function (fn) { listeners.add(fn); fn(snapshot()); return function () { listeners.delete(fn); }; },
-    track: track, trackPurchase: purchase, pageView: pageView, openPreferences: openPreferences,
+    track: track, trackPurchase: purchase, trackAnalyticsContact: gaContact, trackAnalyticsSearch: gaSearch, trackAnalyticsItem: gaViewItem, trackAnalyticsCatalog: function (ids) { return gaCatalogEvent('view_item_list', ids); }, trackAnalyticsSelect: function (id) { return gaCatalogEvent('select_item', [id]); }, pageView: pageView, openPreferences: openPreferences,
     acceptAll: function () { return change('accept_all'); }, rejectOptional: function () { return change('reject_optional'); },
     savePreferences: function (preferences) { return change('save_preferences', preferences); }, withdrawConsent: function () { return change('withdraw'); }
   };

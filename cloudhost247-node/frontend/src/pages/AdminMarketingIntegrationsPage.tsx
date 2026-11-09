@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
+import AdminGoogleAnalyticsSettings from './AdminGoogleAnalyticsSettings';
 import { getMetaConfiguration, getMetaActivity, getMetaAudit, metaAdminSend, type MetaAdminConfiguration, type MetaActivity, type MetaAuditEntry } from '../lib/marketing-admin-api';
 import { formatDateTime } from '../components/revenue-guardian/rg-widgets';
 
-const TABS = [{ id: 'meta-pixel', label: 'Meta Pixel' }, { id: 'activity', label: 'Event activity' }, { id: 'audit', label: 'Configuration history' }] as const;
+const TABS = [{ id: 'meta-pixel', label: 'Meta Pixel' }, { id: 'google-analytics', label: 'Google Analytics' }, { id: 'activity', label: 'Event activity' }, { id: 'audit', label: 'Configuration history' }] as const;
 const statusLabel = (value: string | null) => value ? value.replace(/_/g, ' ') : 'Not tested';
 
 /** Canonical marketing console. The legacy WHMCS key is an import source, never a second owner. */
@@ -21,7 +22,7 @@ export default function AdminMarketingIntegrationsPage() {
         {TABS.map(t => <Link key={t.id} className={`ch247-button ${t.id === tab ? '' : 'ch247-button--outline'}`} aria-current={t.id === tab ? 'page' : undefined} to={`/admin/marketing-integrations/${t.id}`}>{t.label}</Link>)}
       </nav>
     </header>
-    {tab === 'meta-pixel' ? <MetaPixelSettings /> : tab === 'activity' ? <EventActivity /> : <ConfigurationHistory />}
+    {tab === 'meta-pixel' ? <MetaPixelSettings /> : tab === 'google-analytics' ? <AdminGoogleAnalyticsSettings /> : tab === 'activity' ? <EventActivity /> : <ConfigurationHistory />}
   </div>;
 }
 

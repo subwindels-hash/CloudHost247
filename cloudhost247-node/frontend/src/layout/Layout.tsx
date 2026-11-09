@@ -48,11 +48,11 @@ export function isMarketingSurface(pathname: string): boolean {
 }
 
 export default function Layout() {
-  const { pathname, hash } = useLocation();
+  const { pathname, hash, search } = useLocation();
   const marketing = isMarketingSurface(pathname);
   useMarketing();
   useEffect(() => { startMarketing(); }, []);
-  useEffect(() => { void window.CloudHost247Marketing.ready().then(() => window.CloudHost247Marketing.pageView(pathname)); }, [pathname]);
+  useEffect(() => { void window.CloudHost247Marketing.ready().then(() => window.CloudHost247Marketing.pageView(pathname)); }, [pathname, search, hash]);
 
   // A 320 ms opacity-only transition between routes. Opacity (not transform) is deliberate: it
   // cannot shift layout or hurt CLS, and `metals.css` disables it under reduced motion. The

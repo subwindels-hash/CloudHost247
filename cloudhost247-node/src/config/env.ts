@@ -239,6 +239,12 @@ const envSchema = z.object({
     // Optional domain-separated key for anonymous cookie-consent CSRF. Falls back to JWT_SECRET
   // through a one-way HMAC derivation; never reused directly as an authentication token.
   MARKETING_CONSENT_SECRET: z.string().min(32).optional(),
+  // Server-only Measurement Protocol configuration; never included in a browser response.
+  GA4_PURCHASE_DELIVERY_ENABLED: boolFromString.optional().default(false),
+  // Operator attests the property/stream and payment data are authorized and staging-only.
+  GA4_PURCHASE_STAGING_AUTHORIZED: boolFromString.optional().default(false),
+  GA4_PURCHASE_MEASUREMENT_ID: z.string().optional(),
+  GA4_PURCHASE_API_SECRET: z.string().optional(),
   MARKETING_PROVIDER_GOOGLE_SEARCH_CONSOLE_TOKEN: z.string().min(8).optional(),
   MARKETING_PROVIDER_AHREFS_TOKEN: z.string().min(8).optional(),
   MARKETING_PROVIDER_SEMRUSH_TOKEN: z.string().min(8).optional(),

@@ -29,7 +29,7 @@ describe('public Meta runtime and persisted cookie consent', () => {
     return app.inject({ method: 'PUT', url: `${BASE}/consent`, headers: { cookie: session.cookie, origin: 'http://localhost:3000', host: 'localhost:3000', 'x-consent-csrf': session.body.consent.csrfToken }, payload: { action, preferences, policyVersion: 1 } });
   }
   async function enable(domain = 'localhost') {
-    await db.query(`UPDATE marketing_integrations SET enabled=true,website_domain=$1,configuration=$2`, [domain, JSON.stringify({ ...defaultConfiguration, pixelId: '123456789012345', websiteDomain: domain, enabled: true })]);
+    await db.query(`UPDATE marketing_integrations SET enabled=true,website_domain=$1,configuration=$2 WHERE provider_key='meta_pixel'`, [domain, JSON.stringify({ ...defaultConfiguration, pixelId: '123456789012345', websiteDomain: domain, enabled: true })]);
   }
   it('fails closed with no config/choice and issues only an essential opaque HttpOnly cookie', async () => {
     const session = await bootstrap();
