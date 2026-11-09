@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-11-09T15:15:05.157Z",
+  "checks": [
+    {
+      "name": "GET /api/health",
+      "expected": "200",
+      "observed": "200",
+      "pass": true
+    },
+    {
+      "name": "A creates SSL cert (real PG write)",
+      "expected": "201",
+      "observed": "201",
+      "pass": true
+    },
+    {
+      "name": "B cannot list A's certificate",
+      "expected": "no cross-tenant rows",
+      "observed": "0 visible",
+      "pass": true
+    },
+    {
+      "name": "B cannot read A's certificate by id",
+      "expected": "404",
+      "observed": "404",
+      "pass": true
+    },
+    {
+      "name": "anonymous is refused",
+      "expected": "401",
+      "observed": "401",
+      "pass": true
+    }
+  ],
+  "allPassed": true
+}
