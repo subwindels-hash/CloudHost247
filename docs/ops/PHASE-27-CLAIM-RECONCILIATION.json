@@ -1,0 +1,139 @@
+{
+ "generatedAt": "2026-11-09T18:0?:00Z",
+ "baseline": {
+  "branch": "arena/fe9b2088-cloudhost247",
+  "head": "6f22f7154a4ab401ceb4885ac77851340b2b3fbb",
+  "remote": "== HEAD",
+  "workingTree": "one timestamp-only artifact diff (re-committed as part of Phase 27 artifacts)"
+ },
+ "phases": [
+  {
+   "phase": 10,
+   "claims": [
+    {
+     "claim": "Full vitest run reproduction",
+     "attestation": "164/164 on Phase-10 log",
+     "reproducedNow": false,
+     "classification": "INTERNALLY VERIFIED",
+     "limitation": "Full-suite wall-clock exceeds this environment's bash budget; Phase 25 executed two 37-case waves + targeted suites instead"
+    }
+   ]
+  },
+  {
+   "phase": 10,
+   "claims": [
+    {
+     "claim": "Real-PG migrations verify",
+     "attestation": "92\u219294 migrations, checksums",
+     "reproducedNow": true,
+     "classification": "INTERNALLY VERIFIED"
+    }
+   ]
+  },
+  {
+   "phase": 14,
+   "claims": [
+    {
+     "claim": "8/8 real-PG concurrency scenarios",
+     "reproducedNow": true,
+     "classification": "INTERNALLY VERIFIED"
+    }
+   ]
+  },
+  {
+   "phase": 13,
+   "claims": [
+    {
+     "claim": "Refund race P0 fix + P0 probe",
+     "reproducedNow": true,
+     "classification": "INTERNALLY VERIFIED"
+    }
+   ]
+  },
+  {
+   "phase": 16,
+   "claims": [
+    {
+     "claim": "Global refund idempotency hardening",
+     "reproducedNow": true,
+     "classification": "INTERNALLY VERIFIED"
+    }
+   ]
+  },
+  {
+   "phase": 17,
+   "claims": [
+    {
+     "claim": "12-journey junction integrity",
+     "reproducedNow": true,
+     "classification": "INTERNALLY VERIFIED",
+     "limitation": "Journey #12 (browser) BLOCKED CT-07"
+    }
+   ]
+  },
+  {
+   "phase": 21,
+   "claims": [
+    {
+     "claim": "Key rotation",
+     "reproducedNow": false,
+     "classification": "IMPLEMENTED+DOCUMENTED",
+     "limitation": "executed once; evidence committed docs/staging/phase21-key-rotation-evidence.json"
+    }
+   ]
+  },
+  {
+   "phase": 22,
+   "claims": [
+    {
+     "claim": "Encrypted backup\u2192restore",
+     "reproducedNow": false,
+     "classification": "IMPLEMENTED+INTERNALLY TESTED",
+     "limitation": "executed once; evidence committed docs/staging/phase22-backup-security-evidence.json"
+    }
+   ]
+  },
+  {
+   "phase": 23,
+   "claims": [
+    {
+     "claim": "Backup worker 9/9",
+     "reproducedNow": true,
+     "classification": "INTERNALLY TESTED"
+    }
+   ]
+  },
+  {
+   "phase": 25,
+   "claims": [
+    {
+     "claim": "Two fresh 37+37 cross-module waves",
+     "classification": "INTERNALLY TESTED"
+    }
+   ]
+  },
+  {
+   "phase": 26,
+   "claims": [
+    {
+     "claim": "CT-06 escrow topology",
+     "classification": "IMPLEMENTED (documentation)",
+     "limitation": "no credentials \u2014 no execution"
+    }
+   ]
+  }
+ ],
+ "externalGates": {
+  "CT-01": "BLOCKED",
+  "CT-02": "BLOCKED",
+  "CT-03": "BLOCKED",
+  "CT-04": "BLOCKED",
+  "CT-05": "BLOCKED",
+  "CT-06": "BLOCKED",
+  "CT-07": "BLOCKED",
+  "CT-08": "BLOCKED"
+ },
+ "independentReview": "NOT-APPOINTED (retained blocker)",
+ "releaseDecision": "NO-GO",
+ "evidenceCommittedOnly": "docs/** are documentation, not runtime proof of provider execution"
+}

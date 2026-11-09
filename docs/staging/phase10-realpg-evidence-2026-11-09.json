@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T16:40:16.052Z",
+  "generatedAt": "2026-11-09T18:23:22.366Z",
   "postgresVersion": "PostgreSQL 16.2 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 10.2.1 20210130 (Red Hat 10.2.1-11), 64-bit",
   "migrations": {
     "applied": 0,
