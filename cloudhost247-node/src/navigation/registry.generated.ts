@@ -1800,6 +1800,7 @@ export const PUBLIC_DOC_ROUTES: string[] = [
   "/docs/cpanel-deployment",
   "/docs/domain-brokerage",
   "/docs/domain-services-architecture",
+  "/docs/integrations-google-ads",
   "/docs/mrz-developer-tool",
   "/docs/passkey",
   "/docs/platform-services-architecture",

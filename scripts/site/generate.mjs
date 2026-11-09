@@ -144,6 +144,7 @@ export const PUBLISHED_DOCS = [
   { file: 'PASSKEY.md', section: 'Accounts', title: 'Passkeys and WebAuthn' },
   { file: 'MRZ_DEVELOPER_TOOL.md', section: 'Accounts', title: 'Document tools (MRZ)' },
   { file: 'CPANEL_DEPLOYMENT.md', section: 'Operations', title: 'cPanel deployment' },
+  { file: 'integrations/GOOGLE-ADS.md', section: 'Operations', title: 'Google Ads integration' },
   // docs/NODE_PLATFORM_STATUS.md is deliberately NOT published: it is the internal phase-acceptance
   // ledger and references branch names, pull requests, commit hashes and unexecuted migrations.
   // It stays in the repository for engineers; a public reader has no use for it and a customer
