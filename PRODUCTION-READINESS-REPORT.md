@@ -48,6 +48,20 @@
 > levels, Gates A–C). **Phase 3 stands validated. Production certification remains NOT GRANTED
 > on Gates A (credentials/licensing), B (infrastructure), C (five low-severity hardening/ops
 > items found by this audit — none blocking, all named).**
+>
+> **Phase 5 gate closure (2026-11-09):** all Phase-4 internally controllable findings CLOSED
+> with executable evidence — P4-F1/F2/F3/F4 payment hardening (mandatory webhook timestamps,
+> standardized amounts, webhook throttling, durable terminal-vs-transient rejection semantics;
+> plus one pre-existing FK-ordering defect found & fixed), D4-F1 byte-level full-database
+> recovery (221 tables + schema/constraints/indexes/sequences), browser-ceremony suite prepared
+> (execution still environment-blocked), operational readiness verified (logging + redaction,
+> queues, recovery, rotation, incident audit trail) and a deployment rollback procedure added.
+> Commits `9a65b269`, `8d30a9bd`, `50ef5af0`, `95973ffc`. See PHASE-5-HARDENING-REPORT.md,
+> PAYMENT-RECONCILIATION-REPORT.md, COMPLETE-DATABASE-RECOVERY-REPORT.md,
+> AUTHENTICATION-E2E-REPORT.md, EXTERNAL-INTEGRATION-READINESS.md, OPERATIONAL-READINESS-REPORT.md.
+> **Remaining blockers are exclusively external** (owner credentials/licensing, real hosting
+> infrastructure, owner authorizations, ops decisions) — itemized with L1–L4 levels in
+> FINAL-PRODUCTION-BLOCKERS.md. Production certification still NOT GRANTED.
 > Full plans per item: `POST-VERIFICATION-AUDIT.md` §3.
 >
 > **Required owner decisions before certification:**

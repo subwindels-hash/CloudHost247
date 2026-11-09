@@ -39,13 +39,13 @@ claims) remains superseded by `PRODUCTION-READINESS-REPORT.md`.
 ### Gate C — Phase-4 audit recommendations (pre-production hardening)
 | ID | Item | Severity |
 |---|---|---|
-| P4-F1 | Require timestamp header on sandbox gateway webhooks (currently optional; dedup already bounds impact — proven live) | low |
-| P4-F2 | Document `amount` as string-major-units-first in sandbox contract | cosmetic |
-| P4-F3 | Explicit per-route throttle or edge WAF for webhook endpoints in production | operational |
-| P4-F4 | Reconcile rejected-webhook HTTP semantics with each real provider's retry policy at integration time | integration |
+| ~~P4-F1~~ | **CLOSED (Phase 5, commit 9a65b269):** timestamp header required; missing/malformed/stale → 401 (suite F1a/b + live probe P-9) | closed |
+| ~~P4-F2~~ | **CLOSED (9a65b269):** string=major units (toCents), number=integer cents only, fractional/missing → 400 (suite F2a-c) | closed |
+| P4-F3 | **Code half CLOSED (9a65b269): 300/min per-IP throttle on webhook routes (suite F3).** Edge/WAF fleet half remains operational | partial → OPS-1 |
+| P4-F4 | **Code half CLOSED (9a65b269): durable terminal/transient rejection split + retry-storm short-circuit (suite F4a/b, PAYMENT-RECONCILIATION-REPORT.md).** Per-provider mapping at integration time remains | partial → B-4 |
 | D4-F1 | Extend recovery drill checksums to all tables (not only the financial/identity spine) | low |
 | OPS-1 | Fleet-wide rate limiting at the edge (in-code limits are per-instance; `tsx watch` reload retains counters — dev-only caveat discovered during audit) | operational |
-| OPS-2 | Live admin-refund execution test on staging once a super_admin exists (code+suite verified; execution requires the role boundary honored) | pending-run |
+| OPS-2 | Live admin-refund execution drill once a super_admin exists on authorized staging (refund logic suite-verified: partial+full, ledger + audit + cap) | pending-run |
 | OPS-3 | Production backup cadence + off-host storage verification (today's drill proved method, not schedule) | operational |
 
 ## Stopped-at-authorization log (Phase 3+4 cumulative)
@@ -58,7 +58,9 @@ gate bypassed; all 2,901 suite tests and both evidence-producing runs preserved.
 ## Certification verdict
 
 - **Phase 3 staging certification: INDEPENDENTLY VALIDATED — reproducible, complete within its
-  declared scope, trustworthy.** 33/33 claim-level checks verified (30 functional / 3
+  declared scope, trustworthy. Phase 5 (this file updated): all internally controllable findings
+  from the Phase-4 audit (P4-F1..F4, D4-F1) CLOSED with executable evidence; browser ceremony
+  suite prepared (execution awaiting any Chromium); rollback procedure documented.** 33/33 claim-level checks verified (30 functional / 3
   availability-limited, disclosed); 23/23 independent security probes pass; payment settlement
   invariants hold under adversarial conditions; recovery proves backup→restore integrity for the
   staging database.
