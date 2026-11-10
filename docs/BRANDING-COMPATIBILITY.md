@@ -40,6 +40,103 @@ The SHA-256 inventory in
 `docs/independent-rebuild/original-file-manifest.sha256` was re-cut for exactly
 these two paths; no side-car override was introduced.
 
+## Vendor integrity baseline re-cut — 2026-11-10
+
+The move to global positioning (next section) deliberately changed one
+vendor-derived legacy-theme file:
+
+- `templates/cloudhost247_legacy/fairusagepolicy.tpl` — the scope sentence of
+  the Fair Usage Policy now ends "…and related server resources worldwide."
+  instead of "…across Nigeria and globally.", the same wording as the
+  first-party rendering and the shared legal text.
+
+The SHA-256 inventory in
+`docs/independent-rebuild/original-file-manifest.sha256` was re-cut for exactly
+this one path; no side-car override was introduced.
+
+This re-cut does not make the strict check green. When it was made, the check
+was already reporting three other legacy-theme paths —
+`templates/cloudhost247_legacy/cookiepolicy.tpl`, `footer.tpl` and
+`privacypolicy.tpl` — which the visitor-intelligence work (commit `fa218690`,
+merged 2026-11-10) edited without a re-cut. They are untouched here: the reason
+for those edits has to be recorded by the change that made them.
+
+## Global positioning
+
+**Applied:** 2026-11-10. CloudHost247 is positioned as a global provider, not a
+Nigeria-first one. Two rules follow, and `tests/website/test_global_positioning.py`
+enforces both:
+
+1. Copy that describes the company or its services names no country as its
+   market. "Global" and "worldwide" say who CloudHost247 serves. They are never
+   a claim about offices, data centres, certifications or tenure — data-centre
+   regions are still published only from configuration (`shared/site/README.md`,
+   "Honesty rules").
+2. Jurisdictional facts keep their country. Removing them would hide where the
+   company answers in law, or make a statutory calculator misstate whose rules
+   it applies.
+
+### What changed
+
+| Surface | Before | After |
+| --- | --- | --- |
+| Brand line — `brand.descriptor` in `shared/site/registry.json` (new key) | — | Global Cloud Hosting & Digital Infrastructure |
+| Brand description — `brand.description`, and its hand copies in `cloudhost247-node/frontend/index.html`, `modules/addons/cloudhost247_theme/lib/Site.php` and `templates/cloudhost247/homepage.tpl` | "…gives businesses, developers and organizations the infrastructure…" | "…gives businesses, developers and organizations worldwide the infrastructure…" |
+| Application home page title (`HomePage.tsx`, `index.html` title and `og:title`) | CloudHost247 — Hosting, Cloud, Domains & Developer Platform | CloudHost247 — Global Cloud Hosting & Digital Infrastructure (read from the registry) |
+| Legacy home-page slogan — `hometrusbusiness` in `lang/overrides/english.php` | Trusted by Businesses for Global Service, Local Relationships | Global Cloud Hosting & Digital Infrastructure |
+| Fair Usage Policy scope (shared text, both theme templates, generated copies) | "…across Nigeria and globally." | "…worldwide." |
+| Business Tools hub, fallback summary (`cloudhost247-node/src/tools/presentation.ts`) | "…for Nigerian businesses." | "…that run in your browser. Statutory tools name the jurisdiction they apply to." |
+| Home page AI prompt example | "…a design studio in Abuja…" | "…a design studio…" |
+| Employee ID Card page — phone, emergency-contact and address examples; structured-data price currency | a Lagos address and +234 numbers; `NGN` | descriptive examples; `USD`, the same as `BusinessToolWorkspacePage.tsx` |
+| Currency menu examples (`CurrencySwitcher.tsx`) | NGN listed first | the billing registry's own order (GBP, EUR, NGN, …) after the USD base |
+
+The WHMCS home page title ("Build. Host. Deploy. Scale. | CloudHost247") was
+already location-neutral and is unchanged.
+
+### What was kept, and why
+
+- **Governing law** — Terms & Conditions §14 and the legacy
+  `termsofservice.tpl` jurisdiction line.
+- **Data protection** — the Nigeria Data Protection Act 2023 and Nigeria Data
+  Protection Commission references in the Data Privacy Notice and Consent Form
+  (shared text, both templates, and its entry in the legal index).
+- **.ng domain disputes** — the NIRA procedure in the Trademark & Copyright
+  Infringement Policy and `trademark-policy.php`.
+- **Statutory Business Tools** — the PAYE, pension, VAT and employer-cost
+  calculators and the HMO and PFA comparisons implement Nigerian statutes and
+  registers. Their names, slugs, naira units and "Nigeria (federal)" jurisdiction
+  notes are the honest description of what they compute.
+- **Functional support** — NGN in the currency registries, `.ng` in TLD lists,
+  the Paystack gateway, and Nigerian-format sample rows in the ID-card CSV
+  template (the template rows must pass the tool's own validation).
+
+### Still to be decided
+
+None of these was changed; each needs a decision from the brand owner.
+
+- `docs/policies/Fair Usage Policy.pdf` still carries the earlier scope
+  sentence. It has to be re-issued with the published wording and signed off;
+  until then, re-running `scripts/site/extract-legal-pdf.mjs` restores the
+  earlier sentence. See "Amendments to the base text" in
+  `shared/site/content/legal/README.md`.
+- Business Tools generators (`cloudhost247-node/src/tools/business/registry.ts`)
+  default to NGN, a 7.5% tax rate and Nigerian governing law, and their example
+  placeholders name Lagos. Changing a default changes what the tool produces, so
+  it is a product decision rather than a wording one.
+- The Website Builder domain-search widget lists `.com,.net,.org,.ng` in its
+  default pricing strip (`Starters.php`, `WidgetCatalog.php`).
+- `hometrusbusiness` was updated in English only; the other 26 files in
+  `lang/overrides/` still translate the earlier slogan. The two legacy demo
+  templates that print it (`all-element-cloudhost247.tpl`, `future-element.tpl`)
+  follow it with a hard-coded "20" and the word "Years", so the heading reads
+  "Global Cloud Hosting & Digital Infrastructure 20 Years". The number is vendor
+  demo copy, not a CloudHost247 fact, and both templates are baseline-locked.
+- Other vendor demo strings in `lang/overrides/` still name a national market:
+  `banner4truebussnes` ("Trusted by British Businesses for 20 Years") and
+  `vpsinstantprovisiontext2` ("…VPS hosting service providers in India…"), each
+  in the English file and in its translations across the other 26. They are
+  printed only by legacy-theme templates.
+
 ## Approved naming rules
 
 - **Legal/company name:** `CloudHost247 Isc.` (including the final period).

@@ -5,8 +5,12 @@ import '../i18n/language-switcher.css';
 
 // These are examples, not exchange rates or a list of billable currencies. A code remains
 // disabled until the server publishes a current, validated rate for it.
+//
+// The first eleven are the billing registry's currencies (src/currency/registry.ts) in its own
+// order after the USD base, rather than one market's currency promoted to the top of the menu;
+// the rest are further examples in no particular ranking.
 const COMMON_CURRENCIES = [
-  'NGN', 'GBP', 'EUR', 'CAD', 'AUD', 'GHS', 'KES', 'ZAR', 'INR', 'JPY', 'KRW',
+  'GBP', 'EUR', 'NGN', 'CAD', 'AUD', 'GHS', 'KES', 'ZAR', 'INR', 'JPY', 'KRW',
   'AED', 'SAR', 'EGP', 'MAD', 'TZS', 'UGX', 'RWF', 'XOF', 'XAF', 'CNY', 'HKD',
   'SGD', 'MYR', 'IDR', 'PHP', 'PKR', 'BDT', 'NZD', 'CHF', 'SEK', 'NOK', 'DKK',
   'PLN', 'TRY', 'MXN', 'BRL', 'ARS', 'CLP', 'COP',

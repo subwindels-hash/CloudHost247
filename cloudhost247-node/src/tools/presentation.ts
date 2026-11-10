@@ -22,11 +22,13 @@ export function resolveToolPage(path: string) {
   if (path === BUSINESS_TOOLS_ROOT || path === `${BUSINESS_TOOLS_ROOT}/`) {
     const catalogued = TOOL_CATALOG.find((tool) => tool.path === path);
     if (catalogued) return catalogued;
+    // The suite is not positioned at one country. Each tool that applies a statute carries its own
+    // jurisdiction note (and says so on its page); the hub does not speak for all of them.
     return {
       path: BUSINESS_TOOLS_ROOT,
       name: 'Business Tools',
       summary:
-        'Payroll, HR and finance calculators, generators and comparisons for Nigerian businesses.',
+        'Payroll, HR and finance calculators, generators and comparisons that run in your browser. Statutory tools name the jurisdiction they apply to.',
     };
   }
   if (path.startsWith(`${BUSINESS_TOOLS_ROOT}/`)) {

@@ -7,7 +7,7 @@
 <section class="policy-content">
     <div class="container">
         <h3>Introduction</h3>
-        <p>The use of CloudHost247 Isc. products and services is governed by this Fair Usage Policy. It applies to all hosting plans, including shared hosting, reseller hosting, and WordPress hosting, whether they are advertised with limited or "unlimited" resources such as disk space, bandwidth/data transfer, email accounts, databases, and related server resources across Nigeria and globally.</p>
+        <p>The use of CloudHost247 Isc. products and services is governed by this Fair Usage Policy. It applies to all hosting plans, including shared hosting, reseller hosting, and WordPress hosting, whether they are advertised with limited or "unlimited" resources such as disk space, bandwidth/data transfer, email accounts, databases, and related server resources worldwide.</p>
         <p>Our hosting services are designed to remain affordable by allowing multiple customers to share the same server infrastructure. To maintain performance and reliability for all users, each customer must ensure that their usage does not negatively impact other users on the same server.</p>
 
         <h3>Acceptable Use of Resources</h3>

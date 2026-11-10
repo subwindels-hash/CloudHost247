@@ -13,6 +13,22 @@ replace the base extraction without silently deleting the Meta Pixel / preferenc
 Addenda are not part of the signed PDFs; they require their own legal review and take effect only when
 the corresponding platform implementation is published.
 
+## Amendments to the base text
+
+The base text is the PDF wording. A deliberate departure from a signed PDF is listed here, so a
+reviewer can see exactly where the published text and the PDF differ, and so that re-running the PDF
+extractor cannot undo it unnoticed.
+
+| Date | Policy | Wording in the PDF | Published wording | Why |
+| --- | --- | --- | --- | --- |
+| 2026-11-10 | Fair Usage Policy (`fair-usage-policy.txt`, and the same sentence in `templates/cloudhost247/includes/legal/fairusagepolicy.tpl` and `templates/cloudhost247_legacy/fairusagepolicy.tpl`) | "…and related server resources across Nigeria and globally." | "…and related server resources worldwide." | Global brand positioning. The scope of the policy is unchanged: it applied everywhere before and applies everywhere now. |
+
+`docs/policies/Fair Usage Policy.pdf` still carries the earlier wording. It has to be re-issued and
+signed off with the published wording. Until it is, running `scripts/site/extract-legal-pdf.mjs`
+restores the earlier sentence; `tests/website/test_global_positioning.py` then fails and points
+back to this section. No other policy text was changed: governing law, the Nigeria Data Protection
+Act references and the .ng dispute procedure are jurisdictional facts and stay exactly as signed.
+
 ## List markers
 
 A line that starts with `- ` is a list item. Consecutive items become one `<ul>`. A short line
@@ -28,4 +44,5 @@ check `scripts/check-malformed-bullets.mjs` (run by CI) fails the build if one i
   from its body. Re-typesetting these from the signed PDFs is a legal-review task, not a formatting one.
 * `help-center.txt` numbers its steps inline (`1. Visit … 2. Click …`). These are kept as inline text.
 * The PDF base wording was not reworded; the preservation check compares letters and digits in order.
-  Platform addenda are explicit additions, not edits to the signed PDF text.
+  Platform addenda are explicit additions, not edits to the signed PDF text. The one deliberate
+  departure from a signed PDF is recorded under "Amendments to the base text" above.
