@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { downloadFile, runListing, runStudio, type StudioResponse } from '../../lib/design-studio';
-import StudioFrame, { StudioCheck, StudioField, StudioInput, StudioTextarea } from '../../components/design-studio/StudioFrame';
+import StudioFrame, { StudioField, StudioInput, StudioTextarea } from '../../components/design-studio/StudioFrame';
 
 type Tab = 'preview' | 'batch';
 
@@ -96,6 +96,12 @@ export default function LabelDesignerPage() {
   const [values, setValues] = useState<Record<string, string>>({});
   const [elements, setElements] = useState<ElementSpec[]>([]);
   const [tab, setTab] = useState<Tab>('preview');
+  /**
+   * One label or a whole sheet. The default is one label: a 70 × 40 mm label rendered on an A4 page
+   * is a tiny rectangle in the corner, which is useless for checking the design. The sheet view is
+   * there for the thing it is good at — seeing how many fit and whether the grid lines up.
+   */
+  const [sheet, setSheet] = useState(false);
   const [result, setResult] = useState<StudioResponse | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ code: string; message: string } | null>(null);
@@ -126,7 +132,11 @@ export default function LabelDesignerPage() {
     const controller = new AbortController();
     abort.current = controller;
     setBusy(true);
-    const response = await runStudio('label-designer', { action: 'preview', templateId, values, pdf: true }, controller.signal);
+    const response = await runStudio(
+      'label-designer',
+      { action: 'preview', templateId, values, singlePage: !sheet, pdf: true },
+      controller.signal
+    );
     if (controller.signal.aborted) return;
     setBusy(false);
     if (!response.ok || !response.data) {
@@ -135,11 +145,12 @@ export default function LabelDesignerPage() {
     }
     setError(null);
     setResult(response.data);
-    // The element list is the document's own, not a copy kept in the page: what the table shows is
-    // exactly what the renderer walked.
-    const documentElements = response.data.document.elements as unknown as ElementSpec[] | undefined;
-    if (documentElements) setElements(documentElements);
-  }, [templateId, values]);
+    // The element list comes from the response's meta, not from a copy kept in the page and not from
+    // the response `document` (which is a page of draw ops): what the table shows is exactly what the
+    // renderer laid out.
+    const servedElements = (response.data.meta as { elements?: ElementSpec[] }).elements;
+    if (servedElements) setElements(servedElements);
+  }, [templateId, values, sheet]);
 
   useEffect(() => {
     const timer = setTimeout(() => void run(), 250);
@@ -239,15 +250,17 @@ export default function LabelDesignerPage() {
                   maxLength={2 * 1024 * 1024}
                   placeholder={'sku,price,gtin\nCH-1001,12.50,4006381333931'}
                 />
-                <StudioCheck
-                  label="Fill the editor with the column template for this label"
-                  checked={false}
-                  onChange={async () => {
-                    const response = await runStudio('label-designer', { action: 'csv', templateId, csv: 'column\n' });
+                <button
+                  type="button"
+                  className="ch247-button ch247-button--ghost ch247-button--small"
+                  onClick={async () => {
+                    const response = await runStudio('label-designer', { action: 'csv', templateId, csv: 'placeholder\n' });
                     const template = (response.data as unknown as { templateCsv?: string } | undefined)?.templateCsv;
                     if (template) setCsv(template);
                   }}
-                />
+                >
+                  Insert this template&rsquo;s columns
+                </button>
               </div>
               <div className="ch247-studio__actions">
                 <button type="button" className="ch247-button" onClick={() => void runBatch()} disabled={batchBusy || csv.trim() === ''}>
@@ -302,6 +315,9 @@ export default function LabelDesignerPage() {
           <div className="ch247-studio__actions">
             <button type="button" className="ch247-button" onClick={() => void run()} disabled={busy}>
               {busy ? 'Generating…' : 'Regenerate preview'}
+            </button>
+            <button type="button" className="ch247-button ch247-button--outline" aria-pressed={sheet} onClick={() => setSheet((previous) => !previous)}>
+              {sheet ? 'Show one label' : 'Show the full sheet'}
             </button>
           </div>
         </>

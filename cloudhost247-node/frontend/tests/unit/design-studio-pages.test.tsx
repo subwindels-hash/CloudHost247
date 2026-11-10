@@ -158,6 +158,29 @@ describe('Label Designer page', () => {
     expect(screen.queryByLabelText(/Recipient block/i)).toBeNull();
   });
 
+  it('previews one label by default and sends singlePage when the sheet view is chosen', async () => {
+    const fetchMock = stubApi({
+      '/api/tools/label-designer': (body: Record<string, unknown>) =>
+        body.action === 'templates' ? { success: true, data: { templates: [] } } : envelope({ tool: 'label-designer' }),
+    });
+    renderPage(<LabelDesignerPage />);
+
+    // A 70 × 40 mm label on an A4 page is a rectangle in the corner; the default has to be the label.
+    await waitFor(() => {
+      const preview = fetchMock.mock.calls.find((entry) => JSON.parse(String((entry[1] as RequestInit).body ?? '{}')).action === 'preview');
+      expect(preview).toBeTruthy();
+      expect(JSON.parse(String((preview?.[1] as RequestInit).body)).singlePage).toBe(true);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /show the full sheet/i }));
+    await waitFor(() => {
+      const calls = fetchMock.mock.calls
+        .map((entry) => JSON.parse(String((entry[1] as RequestInit).body ?? '{}')) as { action?: string; singlePage?: boolean })
+        .filter((body) => body.action === 'preview');
+      expect(calls.at(-1)?.singlePage).toBe(false);
+    });
+  });
+
   it('reports every CSV row with its line number and never claims a silently dropped row', async () => {
     stubApi({
       '/api/tools/label-designer': (body: Record<string, unknown>) => {

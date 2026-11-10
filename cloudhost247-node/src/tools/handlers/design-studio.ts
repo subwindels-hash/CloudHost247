@@ -44,6 +44,7 @@ import type { ToolHandler } from './kit';
 import { bool, maybeNum, maybeStr, oneOf, str, targetLabel } from './kit';
 import { buildBarcodeDocument, barcodeSettingsFromInput, describeBarcode } from '../design-studio/barcode/generator';
 import { BARCODE_FORMATS, findBarcodeFormat } from '../design-studio/shared/barcode-catalog';
+import { encodeBarcode } from '../design-studio/shared/barcode-engine';
 import { renderDocumentSvg, renderPreviewSvg } from '../design-studio/shared/svg-renderer';
 import { renderDocumentPdf } from '../design-studio/shared/pdf-renderer';
 import type { DesignDocument } from '../design-studio/shared/draw-ops';
@@ -199,7 +200,31 @@ function labelDocumentFromInput(input: Record<string, unknown>): { document: Lab
     if (patch.style && typeof patch.style === 'object') base.style = { ...base.style, ...(patch.style as LabelDocument['style']) };
     if (patch.sheet && typeof patch.sheet === 'object') base.sheet = { ...base.sheet, ...(patch.sheet as LabelDocument['sheet']) };
   }
+  // Top-level `values` is the shorthand the page uses: the field list for the chosen template, keyed
+  // by binding. Without it a caller could send `{templateId, values:{sku}}` and get the template's
+  // sample data back — a preview that silently ignores the form is worse than an error.
+  const loose = labelValuesFromInput(input.values);
+  if (loose) base.values = { ...base.values, ...loose };
   return { document: base, templateId };
+}
+
+/**
+ * Coerce a binding-values record.
+ *
+ * Only string values survive (a number is stringified, because a label prints text), keys are capped
+ * at the length a binding key can be, and values at 400 characters — the same limit the shipping
+ * fields use. Unknown keys are kept: the document decides which bindings it reads, and dropping a
+ * key here would make "I sent it but the label is blank" a mystery.
+ */
+function labelValuesFromInput(value: unknown): LabelDocument['values'] | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const values: LabelDocument['values'] = {};
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    if (key.length === 0 || key.length > 60) continue;
+    if (typeof raw === 'string') values[key] = raw.slice(0, 400);
+    else if (typeof raw === 'number' && Number.isFinite(raw)) values[key] = String(raw);
+  }
+  return values;
 }
 
 const labelDesigner: ToolHandler = async (input) => {
@@ -243,8 +268,27 @@ const labelDesigner: ToolHandler = async (input) => {
           issues.push({ level: 'warn', field: key, message: `No value for “${key}” — that element will print empty on this label.` });
         }
       }
+      // Encode the row's symbols here, with the row's own values, so a value the symbology cannot
+      // carry (an EAN-13 with the wrong number of digits, say) rejects *that row* instead of being
+      // counted as printable and failing later when the whole batch is laid out.
+      for (const element of document.elements) {
+        if (element.kind !== 'barcode') continue;
+        const key = element.binding.key;
+        if (!key || !(key in mapping)) continue;
+        const cell = String(values[key] ?? (document.values[key] ?? '')).trim();
+        if (cell === '') continue;
+        try {
+          encodeBarcode({ formatId: element.formatId, payload: cell });
+        } catch (caught) {
+          issues.push({
+            level: 'error',
+            field: key,
+            message: `${element.name}: ${caught instanceof Error ? caught.message : 'this value cannot be encoded.'}`,
+          });
+        }
+      }
       return { issues };
-    });
+    }, { detectDuplicates: true });
     const rejected = batch.results.filter((row) => !row.accepted);
     return {
       action,
@@ -256,6 +300,8 @@ const labelDesigner: ToolHandler = async (input) => {
       rejected: batch.rejected,
       warnings: batch.warnings,
       capped: parsed.rows.length >= MAX_CSV_ROWS,
+      // `rejectedRowsCsv` keeps the original column order and appends Line/Error, which is what a
+      // spreadsheet user can fix and re-import without moving columns around.
       rejectedCsv: rejected.length > 0 ? toCsv(['Line', 'Error', ...parsed.headers], rejected.map((row) => [
         row.line,
         row.issues.filter((issue) => issue.level === 'error').map((issue) => issue.message).join(' '),
@@ -298,6 +344,17 @@ const labelDesigner: ToolHandler = async (input) => {
       perPage: layout.perPage,
       labels: layout.labels.map((label) => ({ rowIndex: label.rowIndex, slot: label.slot, issues: label.issues })),
       templateId: document.templateId ?? null,
+      // The element list is what the page's "what will print" table renders. It has to come from the
+      // document that was actually laid out: the response `document` is a page of draw ops, which is
+      // the right thing to render and the wrong thing to explain.
+      elements: document.elements.map((element) => ({
+        id: element.id,
+        kind: element.kind,
+        name: element.name,
+        binding: element.kind === 'text' ? undefined : (element as { binding?: { key?: string } }).binding,
+        formatId: element.kind === 'barcode' ? element.formatId : undefined,
+        moduleMm: element.kind === 'barcode' ? element.moduleMm : undefined,
+      })),
     },
   });
 };

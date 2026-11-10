@@ -106,6 +106,47 @@ describe('Design Studio API', () => {
     expect(body.svg).toContain('<svg');
   });
 
+  it('applies top-level `values` to the template instead of silently returning its sample data', async () => {
+    // The page posts a flat `values` record keyed by binding. If the handler only honoured
+    // `document.values`, every field on that form would be ignored and the preview would show the
+    // template's example data — a form that looks broken without saying so.
+    const response = await runTool('label-designer', {
+      action: 'preview',
+      templateId: 'product-50x30',
+      values: { sku: 'CH-9999', price: 1250 },
+    });
+    expect(response.statusCode).toBe(200);
+    const body = response.json().data;
+    const texts = (body.document.pages[0].ops as Array<{ kind: string; text?: string }>)
+      .filter((op) => op.kind === 'text')
+      .map((op) => op.text);
+    expect(texts).toContain('CH-9999');
+    // A numeric value is stringified: a label prints text, not numbers.
+    expect(texts).toContain('1250');
+    expect(texts).not.toContain('CH-1001');
+
+    // The element list the page explains the template with comes from the laid-out document.
+    expect(body.meta.elements.map((entry: { id: string }) => entry.id)).toContain('sku');
+    expect(body.meta.elements.find((entry: { id: string }) => entry.id === 'gtin').formatId).toBe('ean13');
+  });
+
+  it('rejects the specific CSV row whose value its symbology cannot carry', async () => {
+    const response = await runTool('label-designer', {
+      action: 'csv',
+      templateId: 'product-50x30',
+      csv: 'sku,price,gtin\nCH-1001,12.50,4006381333931\nCH-1002,9.99,12345\n',
+    });
+    expect(response.statusCode).toBe(200);
+    const body = response.json().data;
+    expect(body.accepted).toBe(1);
+    expect(body.rejected).toBe(1);
+    const rejectedRow = body.rows.find((row: { accepted: boolean }) => !row.accepted);
+    expect(rejectedRow.line).toBe(3);
+    expect(rejectedRow.issues[0].message).toMatch(/EAN-13/);
+    // A rejected row comes back as a CSV that keeps its original values.
+    expect(body.rejectedCsv).toContain('CH-1002');
+  });
+
   it('maps CSV columns for a label batch and reports rejected rows with their line numbers', async () => {
     const response = await runTool('label-designer', {
       action: 'csv',
