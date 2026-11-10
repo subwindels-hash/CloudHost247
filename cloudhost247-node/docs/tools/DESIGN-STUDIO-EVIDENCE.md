@@ -14,7 +14,7 @@ lifecycle integrity, forced-overwrite sunset, frontend integrity, regression).
 | Migrations correct on fresh install and existing database | **Verified locally** on PostgreSQL 16.2 |
 | Frontend cannot invoke unconditional overwrites | **Verified locally** (code + test) |
 | Production / staging certification | **NOT CLAIMED.** Nothing was deployed. |
-| Full-repository regression suite | **NOT RUN.** See "What was not run". |
+| Full-repository regression suite | **PASS — 3,494 passed, 0 failed, 26 skipped** (278 files) |
 
 Nothing in this document changes an existing certification conclusion, and nothing here lifts a
 staging or production hold.
@@ -101,6 +101,7 @@ Nothing in the code extends the date. `FORCED_OVERWRITE_SUNSET` is a constant as
 | design-studio units + API + templates + migration + `migrate.test.ts` + tools-api | **14 files, 274 passed, 2 skipped** |
 | Real-PostgreSQL suites (`npm run test:postgres`) | **2 files, 12 passed** |
 | Frontend | **84 files, 1055 passed** |
+| **Full backend suite** (`vitest run tests`) | **278 files, 3,494 passed, 0 failed, 26 skipped** |
 | `npm run build:frontend`, `npm run build:tools` | **clean** |
 
 ### Migrations — fresh install and existing database
@@ -122,15 +123,39 @@ a primary key on `version`, so on a **fresh install** the second file failed and
 production-only failure for anyone creating a new database. The block was renumbered to
 **0102 / 0103 / 0104**, and `has no two migration files sharing a version number` now guards it.
 
-## 6. What was not run
+## 6. What was not run, and what the skips mean
 
-* **The full repository test suite.** The complete backend suite is long-running; this block ran the
-  design-studio, migration and tools-API suites plus all frontend tests. Other backend areas were not
-  exercised, and a change in shared code (for example `src/lib/errors.ts`, which gained no change here)
-  would not have been caught.
+**The full backend suite has now been run**: `vitest run tests` → **278 files, 3,494 passed, 0 failed,
+26 skipped**. It was run twice: the first run exposed one failure, which was a real one (see below).
+
+### The 26 skips, itemised
+
+None of them is a silent pass; each names its gate.
+
+| Suite | Tests | Gate | Verified this block? |
+| --- | --- | --- | --- |
+| `design-studio-templates-postgres.test.ts` | 7 | `TEST_POSTGRES_URL` unset in the full run | **Yes**, separately, against PostgreSQL 16.2 — 6 tests pass (+1 conditional skip) |
+| `ga4-purchase-postgres.test.ts` | 11 | `GA4_PG_TEST_CONFIRM=disposable` + `GA4_PG_TEST_SOCKET` | **Yes** — 5 pass on a disposable socket server; the other 6 are `it.skip` historical cases that no environment enables |
+| `tool-page-status.test.ts` | 6 | needs a built SPA shell in `public/` | **Yes** — built the frontend, 6 pass |
+| `design-studio-templates-migration.test.ts` (2 real-PostgreSQL cases) | 2 | `TEST_POSTGRES_URL` | **Yes**, 6 pass with the server |
+
+The GA4 suite was worth the effort: it is the suite most likely to have been disturbed by renumbering
+migrations 0099→0102–0104, and it passes.
+
+### Still not run
+
 * **Anything outside this sandbox.** No staging deployment, no production deployment, no provider
   operations, no financial transactions.
 * **Load or soak testing.** "Ten writers" is a race, not a capacity test.
+* **The two-database-replica case.** Every test here uses one primary.
+
+### A second defect found by the full run
+
+`tests/integration/ga4-reconciliation-migration.test.ts` asserted the *exact* list of migrations
+applied after 0092. Adding 0102–0104 made a GA4 test fail for a reason that had nothing to do with
+GA4. The fix pins the GA4 migrations exactly and asserts the *ordering and completeness* of the rest,
+so the next unrelated migration does not break a test that is not about it. Loosening the assertion
+until it passed would have removed the check that nothing is skipped.
 
 ## 7. Outstanding limitations
 
@@ -152,9 +177,16 @@ production-only failure for anyone creating a new database. The block was renumb
 # real-PostgreSQL suites (skipped, loudly, when TEST_POSTGRES_URL is unset)
 TEST_POSTGRES_URL=postgresql://user@host:5432/postgres npm run test:postgres
 
-# the rest
+# the GA4 outbox suite, which needs its own disposable socket server
+GA4_PG_TEST_CONFIRM=disposable GA4_PG_TEST_SOCKET=/path/to/socket/dir \
+  npx vitest run tests/integration/ga4-purchase-postgres.test.ts
+
+# everything
 npx tsc --noEmit && (cd frontend && npx tsc -p tsconfig.json --noEmit)
-npx vitest run tests/unit/design-studio tests/integration/design-studio-api.test.ts \
-  tests/integration/design-studio-templates.test.ts tests/integration/migrate.test.ts
+npx vitest run tests          # 278 files, 3494 pass, 26 skipped without the gates above
 npx vitest run frontend/tests
 ```
+
+The disposable server used for this report was PostgreSQL 16.2 started from a throwaway install under
+`/tmp`, with the OS user granted a role so the GA4 harness could connect over its unix socket. It is
+not a project dependency, and it was stopped afterwards.
