@@ -104,8 +104,11 @@ function renderBarcode(op: DrawBarcode): string {
 
   if (op.showText && encoded.texts.length > 0 && textHeight > 0) {
     const textTop = originY + barsHeight;
+    // Cap height as a share of the caption strip: the strip is sized by the module and is the only
+    // measurement the caller controls, so the caption is derived from it rather than from the
+    // encoder's layout units (which vary per symbology and are not millimetres).
+    const sizeMm = Math.max(1.2, textHeight * 0.7);
     for (const entry of encoded.texts) {
-      const sizeMm = Math.max(1.1, (entry.size / encoded.heightUnits) * scaleY);
       const x = originX + entry.x * scaleX;
       const y = textTop + Math.max(0, (textHeight - sizeMm) / 2) + sizeMm * 0.72;
       out.push(

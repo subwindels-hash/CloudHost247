@@ -414,11 +414,26 @@ export function completeIdentifier(formatId: string, value: string): { value: st
  * only its presentation.
  */
 function encoderOptions(format: BarcodeFormat, options: EncodeOptions): Record<string, unknown> {
-  const opts: Record<string, unknown> = { bcid: format.bcid, text: options.payload, scale: 1, includetext: false };
+  /*
+   * `includetext` must be ON for linear formats, or BWIPP never draws the human-readable line — and
+   * `texts` then comes back empty, which the renderer silently obeys by leaving the caption band
+   * blank. That was the shipped behaviour: every linear symbol reserved 8 modules of space under the
+   * bars and printed nothing in it, so an EAN-13 with no digits under it passed every geometry test
+   * (the bars were correct!) and failed the only test that matters — a person reading the number.
+   * The layout decides whether the caption is *kept*; the encoder decides whether it is *drawn*.
+   */
+  const opts: Record<string, unknown> = {
+    bcid: format.bcid,
+    text: options.payload,
+    scale: 1,
+    includetext: format.family === 'linear',
+  };
   if (format.family === 'linear') {
     // A tall symbol gives the renderer room to scale height independently; the value is in
     // millimetres at BWIPP's nominal scale and is only a shape hint here.
     opts.height = 15;
+    // Centre the caption under the symbol, the way the retail specifications lay it out.
+    opts.textxalign = 'center';
   }
   if (format.id === 'qrcode' || format.id === 'microqrcode') {
     opts.eclevel = (options.errorCorrection ?? 'M').toUpperCase();
@@ -791,6 +806,9 @@ export function darkModuleCount(matrix: boolean[][]): number {
 /* Physical layout                                                     */
 /* ------------------------------------------------------------------ */
 
+/** Caption strip height in modules: the retail rule of thumb is 8–10. */
+export const DEFAULT_CAPTION_SCALE = 10;
+
 export interface BarcodeLayoutOptions {
   /** Physical width of one narrow bar / module, in millimetres. Defaults to the format minimum. */
   moduleMm?: number;
@@ -798,7 +816,7 @@ export interface BarcodeLayoutOptions {
   barHeightMm?: number;
   /** Show the human-readable line. Defaults to true for linear formats (never for 2D). */
   showText?: boolean;
-  /** Caption height as a multiple of the module size, default 8× (i.e. ~8 modules tall). */
+  /** Caption height as a multiple of the module size, default 10× (the retail rule of thumb is 8–10). */
   textScale?: number;
 }
 
@@ -818,6 +836,19 @@ export interface BarcodeLayout {
 }
 
 /**
+ * Height of the human-readable caption strip, in millimetres.
+ *
+ * One function, exported, because two callers need the same number for different reasons: the layout
+ * adds it to the footprint, and a label document subtracts it from an element box to find out how tall
+ * the *bars* may be. When those two calculations lived in separate files with separate constants
+ * (`× 10` here, `× 8` there) every barcode label overflowed its own element by two modules and the
+ * layout reported a fit error for a box that had been measured to fit.
+ */
+export function captionHeightMm(moduleMm: number, textScale = DEFAULT_CAPTION_SCALE): number {
+  return round(moduleMm * textScale, 3);
+}
+
+/**
  * Convert an encoded symbol into a physical footprint, in millimetres.
  *
  * This is the one place that decides how big a symbol will actually be on paper, and it derives
@@ -834,7 +865,16 @@ export function layoutBarcode(encoded: EncodedBarcode, options: BarcodeLayoutOpt
   const quietMm = round(encoded.quietModules * moduleMm, 3);
   const is2d = encoded.family === '2d';
   const showText = is2d ? false : options.showText !== false;
-  const textHeightMm = showText ? round(moduleMm * (options.textScale ?? 8), 3) : 0;
+  /*
+   * The caption gets 10 modules of height (the retail rule of thumb is 8–10), and the *cap height* of
+   * the printed line is arithmetic on that strip — not a rescale of BWIPP's font size.
+   *
+   * BWIPP reports `font.height` in its own layout units (10 for a 20-unit cell), and the renderers used
+   * to apply `size / heightUnits × scaleY`, which landed somewhere between 1 mm and 20 mm depending on
+   * the symbol. A human-readable line that is too small to read is as useless as no line at all, so the
+   * strip is the authority: cap height is a fixed fraction of it, whatever the encoder said.
+   */
+  const textHeightMm = showText ? captionHeightMm(moduleMm, options.textScale) : 0;
   const barsHeightMm = is2d
     ? round(encoded.heightUnits * perUnit, 3)
     : Math.max(moduleMm * 5, options.barHeightMm ?? 15);

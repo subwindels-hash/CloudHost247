@@ -73,6 +73,83 @@ const CASES: Case[] = [
   { formatId: 'microqrcode', payload: 'M-QR-247', expect: 'M-QR-247' },
 ];
 
+describe('human-readable text', () => {
+  /**
+   * A linear barcode without a readable number under it fails the one job a person does with it:
+   * typing the number into a form when the scanner will not cooperate. Every geometry test in this
+   * file passed while the caption band was blank, because the bars themselves were correct — the
+   * encoder was called with `includetext: false`, so `encoded.texts` was empty and the renderers
+   * dutifully drew nothing. These assertions cover both halves: the text is captured, and it is drawn
+   * at a size a person can read on the printed symbol.
+   */
+  const LINEAR = ['code128', 'code39', 'code93', 'ean13', 'ean8', 'upca', 'itf14', 'interleaved2of5', 'gs1-128'] as const;
+  const PAYLOAD: Record<string, string> = {
+    code128: 'CH247-2026-000123',
+    code39: 'CH-IT-417',
+    code93: 'CH247-93',
+    ean13: '4006381333931',
+    ean8: '96385074',
+    upca: '036000291452',
+    // 13 digits: the check digit is calculated, which is also what a real carton GTIN looks like.
+    itf14: '1061414112345',
+    interleaved2of5: '1234567890',
+    'gs1-128': '(01)09521234543213(10)BATCH7',
+  };
+
+  it('captures the human-readable line for every linear format', () => {
+    for (const formatId of LINEAR) {
+      const encoded = encodeBarcode({ formatId, payload: PAYLOAD[formatId]! });
+      expect(encoded.texts.length, `${formatId} produced no readable text`).toBeGreaterThan(0);
+      expect(encoded.texts[0]!.text.trim().length, `${formatId} produced blank text`).toBeGreaterThan(0);
+    }
+  });
+
+  it('keeps the caption out of the 2D formats, where there is none', () => {
+    for (const formatId of ['qrcode', 'datamatrix', 'pdf417'] as const) {
+      const encoded = encodeBarcode({ formatId, payload: 'CH247-2026-000123' });
+      expect(encoded.texts, `${formatId} should not claim a human-readable line`).toEqual([]);
+    }
+  });
+
+  it('sizes the caption from the caption strip, not from the encoder’s layout units', () => {
+    // 0.3 mm modules × a 10-module strip = a 3 mm strip; 70% of it is a ~2.1 mm cap height, which is
+    // the smallest size that still reads on a 300 dpi print. A caption below ~1 mm is unreadable.
+    const encoded = encodeBarcode({ formatId: 'code128', payload: 'CH247-2026-000123' });
+    const layout = layoutBarcode(encoded, { moduleMm: 0.3, barHeightMm: 20, showText: true });
+    expect(layout.showText).toBe(true);
+    expect(layout.textHeightMm).toBeCloseTo(3, 2);
+    const svg = renderDocumentSvg({
+      title: 'caption',
+      pages: [
+        {
+          width: layout.widthMm,
+          height: layout.heightMm,
+          ops: [
+            {
+              kind: 'barcode',
+              x: 0,
+              y: 0,
+              w: layout.widthMm,
+              h: layout.heightMm,
+              moduleMm: layout.moduleMm,
+              encoded,
+              colour: '#000000',
+              background: '#ffffff',
+              showText: true,
+              textHeight: layout.textHeightMm,
+              quietMm: layout.quietMm,
+            },
+          ],
+        },
+      ],
+      warnings: [],
+    } as never);
+    const fontSize = Number((svg.match(/font-size="([\d.]+)"/) ?? [])[1]);
+    expect(fontSize, 'the caption font size').toBeGreaterThan(1.9);
+    expect(svg).toContain('CH247-2026-000123');
+  });
+});
+
 describe('barcode engine: rendered symbols decode', () => {
   for (const testCase of CASES) {
     it(`round-trips ${testCase.formatId}`, async () => {

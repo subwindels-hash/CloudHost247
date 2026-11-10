@@ -286,7 +286,8 @@ async function drawBarcode(
   if (op.showText && encoded.texts.length > 0 && textHeight > 0) {
     const font = await fontFor(_pdf, 'mono', state);
     for (const entry of encoded.texts) {
-      const sizeMm = Math.max(1.2, (entry.size / encoded.heightUnits) * scaleY);
+      // Same rule as the SVG renderer: cap height is a share of the caption strip the caller sized.
+      const sizeMm = Math.max(1.2, textHeight * 0.7);
       const size = mmToPoints(sizeMm);
       const text = sanitiseForWinAnsi(entry.text, state.warnings);
       const width = font.widthOfTextAtSize(text, size);

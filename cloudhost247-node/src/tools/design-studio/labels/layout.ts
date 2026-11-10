@@ -25,6 +25,7 @@
 
 import {
   BarcodeError,
+  captionHeightMm,
   encodeBarcode,
   encodeQrMatrix,
   layoutBarcode,
@@ -276,7 +277,8 @@ function barcodeOps(element: BarcodeElement, context: ElementContext, box: { x: 
   // height straight through makes every symbol overflow its own element by the quiet zone.
   const showText = element.showText && encoded.family === 'linear';
   const quietMm = encoded.quietModules * element.moduleMm;
-  const textHeightMm = showText ? round(element.moduleMm * 8, 3) : 0;
+  // The caption strip is the engine's rule, not a second copy of it.
+  const textHeightMm = showText ? captionHeightMm(element.moduleMm) : 0;
   const layout = layoutBarcode(encoded, {
     moduleMm: element.moduleMm,
     barHeightMm: Math.max(3, round(box.height - quietMm * 2 - textHeightMm, 3)),

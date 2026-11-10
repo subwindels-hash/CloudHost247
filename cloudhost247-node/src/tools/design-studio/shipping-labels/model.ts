@@ -313,9 +313,14 @@ export function buildShippingTemplate(id: string = DEFAULT_SHIPPING_TEMPLATE): L
       elements: [
         field('senderName', 'Sender', { x: 0, y: 0, width: 52, height: 3 }, { size: 2.1, colour: '#5a6577', wrap: false }),
         field('recipientName', 'Recipient', { x: 0, y: 3.6, width: 52, height: 6 }, { size: 3.4, family: 'sans-bold', wrap: false }),
-        field('recipientAddress', 'Recipient address', { x: 0, y: 9.8, width: 52, height: 9 }, { size: 2.6 }),
+        // The address is the one block that must never be clipped: a three-line address at 2.6 mm needs
+        // 9.8 mm, so the box is 10 (it ends at 19.8, clearing the Code 128 that starts at 20).
+        field('recipientAddress', 'Recipient address', { x: 0, y: 9.8, width: 52, height: 10 }, { size: 2.6 }),
         field('pieces', 'Pieces', { x: 53, y: 3.6, width: 11, height: 5 }, { size: 2.6, align: 'right' }),
-        field('carrier', 'Carrier', { x: 53, y: 9.8, width: 11, height: 6 }, { size: 2.2, align: 'right', colour: '#5a6577' }),
+        // A carrier name in an 11 mm column wraps to three lines; 6 mm held two and clipped the third.
+        // Truncating a carrier name is not an option (it is the company the parcel is entrusted to), so
+        // the box takes the height instead — it still clears the barcode at y 20.
+        field('carrier', 'Carrier', { x: 53, y: 8.6, width: 11, height: 9 }, { size: 2.2, align: 'right', colour: '#5a6577' }),
         // 200 modules at 0.25 mm = 50 mm of bars, 2.5 mm quiet each side, 2 mm HRI.
         barcode('reference', 'code128', 0.25, { x: 0, y: 20, width: 64, height: 14 }, true),
       ],

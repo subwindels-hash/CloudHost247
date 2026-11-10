@@ -127,10 +127,17 @@ export const LABEL_TEMPLATES: readonly LabelTemplate[] = [
             x: 27, y: 5.4, width: 18, height: 3.2,
             style: { ...SANS, size: 3, family: 'sans-bold', align: 'right', wrap: false },
           }),
+          /*
+           * Fitted, not guessed: BWIPP's EAN-13 is 95 modules wide, so at 0.3 mm the bars are 28.5 mm
+           * and the quiet zone (11 modules a side) adds 6.6 mm — 35.1 mm, inside the 41 mm box. The
+           * height is quiet zone (3.3 mm) + bars + caption strip (a 0.3 mm module → 3 mm ≈ 10 modules),
+           * which at 12.6 mm leaves a 6.3 mm tall symbol. It was 12 mm box = 3 mm bars, and the caption
+           * strip needs its 3 mm before the bars get any — hence 12.6.
+           */
           element({
             kind: 'barcode', id: 'gtin', name: 'EAN-13', binding: { key: 'gtin' },
             formatId: 'ean13', moduleMm: 0.3, showText: true, colour: '#000000',
-            x: 2, y: 11, width: 41, height: 12,
+            x: 2, y: 10.4, width: 41, height: 12.6,
           }),
         ],
       }),
