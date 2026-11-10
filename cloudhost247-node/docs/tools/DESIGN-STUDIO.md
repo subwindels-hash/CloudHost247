@@ -32,32 +32,25 @@ So the engine is built once and parameterised:
 
 ```
 src/tools/design-studio/
-  shared/units.ts          mm/cm/in/px conversion, paper sizes, print scaling
-  shared/barcode-catalog.ts the format registry (bcid, validation, capability, notes)
-  shared/barcode-engine.ts  bwip-js → normalised draw ops (SVG path data, module grids)
-  shared/qr-engine.ts       qrcode → module grid (QR, Micro QR via bwip-js, Data Matrix)
-  shared/svg-renderer.ts    draw ops → standalone SVG
-  shared/pdf-renderer.ts    draw ops → print-ready PDF (pdf-lib, exact mm)
-  shared/csv.ts             CSV parse/serialise, formula-injection hardening, row validation
-  shared/validate.ts        colour/text/dimension validation with actionable messages
-  labels/model.ts           label document model (elements, styles, units)
-  labels/templates.ts       system templates (label sizes + layouts)
-  labels/layout.ts          document → pages → sheets → draw ops
-  labels/renderer.ts        labels document → SVG/PDF/PNG
-  labels/csv-import.ts      CSV → label batches with field mapping
-  labels/repository.ts      saved-template persistence contract (ownership enforced)
-  shipping/schema.ts        sender/recipient/shipment schema + validation
-  shipping/templates.ts     shipping layouts (no invented carriers)
-  shipping/generator.ts     shipping label document
-  vda/spec.ts               verified VDA-4902 field/dimension specification + limitations
-  vda/templates.ts          A5 master label and KLT (210 × 74 mm) layouts
-  vda/validation.ts         standard-specific required-field rules
-  vda/generator.ts          VDA label document
-  business-cards/schema.ts  contact schema, vCard 3.0 / MeCard payload builders
-  business-cards/templates.ts eight card designs, front/back
-  business-cards/generator.ts card document
-  api/handlers.ts           Tools Center handlers for the five slugs
-  api/routes.ts             /api/tools/design-studio/* (templates, CSV, batch, export)
+  shared/units.ts            mm/cm/in/px conversions
+  shared/validate.ts         colour/text/dimension validation with actionable messages
+  shared/draw-ops.ts         the page model every renderer consumes (rect, line, text, barcode)
+  shared/text-metrics.ts     text width/cap-height measurement for the bundled fonts
+  shared/svg-renderer.ts     draw ops → SVG preview
+  shared/pdf-renderer.ts     draw ops → print-ready PDF (pdf-lib, exact mm)
+  shared/barcode-engine.ts   bwip-js encoding, module sizing, human-readable captions
+  shared/barcode-catalog.ts  the 17 supported symbologies and their constraints
+  shared/csv.ts              CSV parse/serialise, formula-injection hardening, row validation
+  barcode/generator.ts       barcode document + fit checks
+  labels/model.ts            label document model (elements, styles, units)
+  labels/templates.ts        system templates (label sizes + layouts)
+  labels/layout.ts           document → pages → sheets → draw ops
+  shipping-labels/model.ts   generic shipping layouts (no invented carriers)
+  vda/spec.ts                VDA-4902 field/dimension specification + limitations
+  vda/schema.ts              VDA input schema and validation
+  vda/generator.ts           VDA label document
+  business-cards/model.ts    contact schema, vCard/MeCard payloads, eight card designs
+  templates/repository.ts    saved-template persistence (ownership enforced)
 ```
 
 ## 2. Honesty rules baked into the engine
@@ -74,9 +67,9 @@ src/tools/design-studio/
 * **VDA-4902 is documented, not certified.** `vda/spec.ts` records the version, the two label
   sizes, the field list and the PDF417/Code 39 payload structure, plus an explicit statement that
   resemblance is not certification.
-* **Privacy.** Generation runs in the browser. Nothing in this module writes to the database;
-  templates saved by a signed-in user are stored in the existing Tools Center template store with
-  the owner's user id, and no contact or shipment data is logged.
+* **Privacy.** Rendering happens on the server and nothing is written per generation — a preview is
+  not stored. The one thing that persists is a template a signed-in user explicitly saves; it is
+  owner-scoped, and its audit row records the name and kind only, never the document.
 
 ## 3. Units and geometry
 
@@ -135,12 +128,45 @@ Per-tool actions travel in the body, not in new routes:
 | `shipping-label-generator` | `preview` (default), `templates` | `templateId, code, shipment` |
 | `qr-business-card-designer` | `preview` (default), `templates`, `payload` | `templateId, side, payloadFormat, contact` |
 
-**Not yet exposed.** `src/tools/design-studio/templates/repository.ts` and migration
-`0099_create_design_studio_templates.sql` implement owner-scoped saved templates, but no route uses
-them and the SPA has no save/load control, so there is deliberately no endpoint here for it: a
-documented endpoint that 404s is worse than an absent one. The same applies to a standalone
-`/export` route — the envelope above already carries the PDF, which is the only export the pages
-need. Wiring the repository to routes is the next step if saved templates are wanted.
+### Saved templates
+
+A signed-in user's layouts persist in the existing template store —
+`src/tools/design-studio/templates/repository.ts`, migration
+`0099_create_design_studio_templates.sql` — behind these routes
+(`src/routes/design-studio-templates.ts`, mounted on both `/api` and `/api/v1`):
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/tools/design-studio/templates?kind=label` | List the caller's templates (**no** documents), newest first |
+| `POST` | `/api/tools/design-studio/templates` | Save one: `{ kind, name, summary?, document, sourceTemplate? }` |
+| `GET` | `/api/tools/design-studio/templates/:id` | Read one, document included |
+| `PUT` | `/api/tools/design-studio/templates/:id` | Update name, summary or document |
+| `POST` | `/api/tools/design-studio/templates/:id/duplicate` | Copy under a new name |
+| `DELETE` | `/api/tools/design-studio/templates/:id` | Delete |
+
+`kind` is one of `label`, `shipping`, `vda`, `card`. Rules the routes enforce rather than document:
+
+* **Authentication is required** — an anonymous call is a 401, never a row under a placeholder owner.
+* **Ownership is a 404, not a 403.** Another account's template is indistinguishable from one that
+  does not exist, so the endpoint cannot be used to enumerate ids.
+* **Names are unique per owner and kind**, and a clash returns advice ("You already have a label
+  template called … Rename this one or update the existing template."), not a raw constraint error.
+  The same name in a *different* kind is allowed.
+* **`document` is an opaque layout object** (≤ 2 MB serialised). The list endpoint omits it; only the
+  single-template read returns it.
+* **Audit rows record `{kind, name, sourceTemplate}`** on save and delete — never the document. A
+  saved label can carry a customer's address in its values, and an audit log is not the place for it.
+
+In the SPA, `SavedTemplatesPanel` (one component, used by the label, shipping and card pages) lists,
+loads, saves and deletes. What a template *contains* is each studio's decision: the Label Designer
+stores `{ templateId, values }`, the shipping page `{ templateId, code, shipment }`, the card page
+`{ templateId, side, payloadFormat, contact }`. Loading a template restores those fields, and the
+label page sends the whole stored object back with the next preview so a changed size or extra
+element survives the round trip. The panel says plainly what will be stored; a visitor who is not
+signed in sees why saving needs an account instead of a button that can only fail.
+
+Not exposed: a standalone `/export` route — the envelope above already carries the PDF, which is the
+only export the pages need.
 
 ## 6. Verification status vocabulary
 

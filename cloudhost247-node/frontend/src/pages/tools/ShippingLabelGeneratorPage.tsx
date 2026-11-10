@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { runListing, runStudio, type StudioResponse } from '../../lib/design-studio';
 import StudioFrame, { StudioField, StudioInput, StudioSelect, StudioTextarea } from '../../components/design-studio/StudioFrame';
+import SavedTemplatesPanel from '../../components/design-studio/SavedTemplatesPanel';
 
 interface TemplateMeta {
   id: string;
@@ -202,6 +203,24 @@ export default function ShippingLabelGeneratorPage() {
       result={result}
       busy={busy}
       error={error}
+          extra={
+        <SavedTemplatesPanel
+          kind="shipping"
+          document={{ templateId, code, shipment }}
+          defaultName={templateId}
+          summary={template?.name ?? templateId}
+          onLoad={(document) => {
+            // The carrier code is part of the layout in the practical sense: the same label printed
+            // with the wrong symbology is a different, unreadable parcel. Restore it with the layout.
+            if (typeof document.templateId === 'string') setTemplateId(document.templateId);
+            if (typeof document.code === 'string') setCode(document.code);
+            const loaded = document.shipment;
+            if (loaded && typeof loaded === 'object' && !Array.isArray(loaded)) {
+              setShipment((previous) => ({ ...previous, ...(loaded as Record<string, string>) }));
+            }
+          }}
+        />
+      }
       exports={{ stem: templateId, pdf: true, svg: true, png: true, print: true }}
       resultDetail={
         result && carrierNotice ? (

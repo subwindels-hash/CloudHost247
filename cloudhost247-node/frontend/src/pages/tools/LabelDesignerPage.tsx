@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { downloadFile, runListing, runStudio, type StudioResponse } from '../../lib/design-studio';
 import StudioFrame, { StudioField, StudioInput, StudioTextarea } from '../../components/design-studio/StudioFrame';
+import SavedTemplatesPanel from '../../components/design-studio/SavedTemplatesPanel';
 
 type Tab = 'preview' | 'batch';
 
@@ -114,6 +115,12 @@ export default function LabelDesignerPage() {
 
   const abort = useRef<AbortController | null>(null);
 
+  // A loaded saved template is a document, not a set of form fields: it can carry a size, a style and
+  // elements this page has no inputs for. It is therefore sent with the preview rather than unpacked
+  // into state, and it is dropped the moment the operator picks a different template — otherwise the
+  // next preview would print the old layout under the new template's name.
+  const [savedDocument, setSavedDocument] = useState<Record<string, unknown> | null>(null);
+
   // One templates call populates the picker. It is a server call rather than a constant so the page
   // can never list a template the generator does not have.
   useEffect(() => {
@@ -134,7 +141,7 @@ export default function LabelDesignerPage() {
     setBusy(true);
     const response = await runStudio(
       'label-designer',
-      { action: 'preview', templateId, values, singlePage: !sheet, pdf: true },
+      { action: 'preview', templateId, values, singlePage: !sheet, pdf: true, ...(savedDocument ? { document: savedDocument } : {}) },
       controller.signal
     );
     if (controller.signal.aborted) return;
@@ -150,7 +157,7 @@ export default function LabelDesignerPage() {
     // renderer laid out.
     const servedElements = (response.data.meta as { elements?: ElementSpec[] }).elements;
     if (servedElements) setElements(servedElements);
-  }, [templateId, values, sheet]);
+  }, [templateId, values, sheet, savedDocument]);
 
   useEffect(() => {
     const timer = setTimeout(() => void run(), 250);
@@ -194,6 +201,7 @@ export default function LabelDesignerPage() {
                 onClick={() => {
                   setTemplateId(template.id);
                   setValues({});
+                  setSavedDocument(null);
                 }}
               >
                 <strong>{template.name}</strong>
@@ -321,6 +329,22 @@ export default function LabelDesignerPage() {
             </button>
           </div>
         </>
+      }
+      extra={
+        <SavedTemplatesPanel
+          kind="label"
+          document={savedDocument ? { ...savedDocument, templateId, values } : { templateId, values }}
+          defaultName={templates.find((template) => template.id === templateId)?.name ?? templateId}
+          summary={templateId}
+          onLoad={(document) => {
+            // A saved label restores the template it was built on and the values that were typed. Any
+            // other keys in the document (a changed size, extra elements) travel with the preview.
+            if (typeof document.templateId === 'string') setTemplateId(document.templateId);
+            const loadedValues = document.values;
+            setValues(loadedValues && typeof loadedValues === 'object' && !Array.isArray(loadedValues) ? (loadedValues as Record<string, string>) : {});
+            setSavedDocument(document);
+          }}
+        />
       }
       result={result}
       busy={busy}

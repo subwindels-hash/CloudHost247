@@ -47,6 +47,11 @@ export interface StudioFrameProps {
   related?: Array<{ title: string; href: string; blurb: string }>;
   /** Extra content under the intro — warnings, notices. */
   notice?: ReactNode;
+  /**
+   * A section under the workbench and above the long-form copy — currently the saved-templates panel.
+   * It lives here rather than in each page so all studios put it in the same place.
+   */
+  extra?: ReactNode;
 }
 
 /**
@@ -274,6 +279,7 @@ export default function StudioFrame({
   faq,
   related,
   notice,
+  extra,
 }: StudioFrameProps) {
   const exportsEnabled = exports && result && !result.blocked;
 
@@ -388,6 +394,8 @@ export default function StudioFrame({
           </div>
         </div>
       </div>
+
+      {extra}
 
       {usage ? <section className="ch247-studio__panel ch247-studio__prose">{usage}</section> : null}
 

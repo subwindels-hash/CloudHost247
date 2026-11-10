@@ -253,6 +253,13 @@
   min-height: 2.35rem;
 }
 
+/* A row of buttons inside a table cell: no top margin, so the cell does not grow. */
+.ch247-studio__actions--inline {
+  margin-top: 0;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
 /* --- Issues --------------------------------------------------------------------- */
 
 .ch247-studio__issues {

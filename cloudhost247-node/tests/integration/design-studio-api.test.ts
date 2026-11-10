@@ -106,6 +106,33 @@ describe('Design Studio API', () => {
     expect(body.svg).toContain('<svg');
   });
 
+  it('restores a saved label: the template, its values and its element list come back', async () => {
+    // The round trip that matters for saved templates: what the panel stores is this page's document,
+    // and posting it back must reproduce the label rather than the template's sample data.
+    const saved = {
+      templateId: 'asset-tag-60x25',
+      values: { asset: 'CH-ASSET-4471', description: 'Plateau rig', owner: 'Facilities' },
+    };
+    const restored = await runTool('label-designer', { action: 'preview', ...saved });
+    expect(restored.statusCode).toBe(200);
+    const texts = (restored.json().data.document.pages[0].ops as Array<{ kind: string; text?: string }>)
+      .filter((op) => op.kind === 'text')
+      .map((op) => op.text);
+    expect(texts).toContain('CH-ASSET-4471');
+    expect(texts).toContain('Plateau rig');
+
+    // A restored document may also carry a changed size; it is applied over the template so a
+    // template update cannot leave a label that is the wrong size but looks right in the form.
+    const resized = await runTool('label-designer', {
+      action: 'preview',
+      templateId: 'asset-tag-60x25',
+      values: saved.values,
+      document: { widthMm: 62 },
+    });
+    expect(resized.statusCode).toBe(200);
+    expect(resized.json().data.meta.labelSize.width).toBe(62);
+  });
+
   it('applies top-level `values` to the template instead of silently returning its sample data', async () => {
     // The page posts a flat `values` record keyed by binding. If the handler only honoured
     // `document.values`, every field on that form would be ignored and the preview would show the

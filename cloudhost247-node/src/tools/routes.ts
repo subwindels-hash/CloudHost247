@@ -34,6 +34,7 @@ import { listHistory, clearHistory, listFavorites, addFavorite, removeFavorite, 
 import { CATEGORY_LABELS, NON_PERSISTABLE_TOOL_SLUGS, NON_RUNNABLE_TOOL_SLUGS, catalogEntry } from './catalog';
 import { handlerFor, targetFor, missingHandlers } from './handlers';
 import { registerAdminToolsRoutes } from '../routes/admin-tools';
+import { registerDesignStudioTemplateRoutes } from '../routes/design-studio-templates';
 import { createMonitor, deleteMonitor, listMonitorEvents, listMonitors, updateMonitor, evaluateMonitor, applyMonitorEvaluation } from './diagnostics/monitors';
 import { reportExport } from './diagnostics/library';
 import { explainToolResult } from './core/explain';
@@ -660,4 +661,7 @@ export async function registerToolsRoutes(app: FastifyInstance, env: Env, overri
 
   // The platform's Super Admin surface for the Tools Center lives in its own module.
   await registerAdminToolsRoutes(app, env, pool);
+  // Design Studio saved templates: the one part of the module that stores anything, and the only part
+  // that requires an account.
+  await registerDesignStudioTemplateRoutes(app, env, pool);
 }

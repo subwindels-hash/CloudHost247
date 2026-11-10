@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { copyText, runListing, runStudio, type StudioResponse } from '../../lib/design-studio';
 import StudioFrame, { StudioCheck, StudioField, StudioInput, StudioSelect, StudioTextarea } from '../../components/design-studio/StudioFrame';
+import SavedTemplatesPanel from '../../components/design-studio/SavedTemplatesPanel';
 
 interface CardTemplateMeta {
   id: string;
@@ -262,6 +263,23 @@ export default function QrBusinessCardPage() {
       result={result}
       busy={busy}
       error={error}
+      extra={
+        <SavedTemplatesPanel
+          kind="card"
+          document={{ templateId, side, payloadFormat, contact }}
+          defaultName={templateId}
+          summary={templates.find((entry) => entry.id === templateId)?.name ?? templateId}
+          onLoad={(document) => {
+            if (typeof document.templateId === 'string') setTemplateId(document.templateId);
+            if (document.side === 'front' || document.side === 'back' || document.side === 'both') setSide(document.side);
+            if (document.payloadFormat === 'vcard' || document.payloadFormat === 'mecard') setPayloadFormat(document.payloadFormat);
+            const loaded = document.contact;
+            if (loaded && typeof loaded === 'object' && !Array.isArray(loaded)) {
+              setContact((previous) => ({ ...previous, ...(loaded as Record<string, string>) }));
+            }
+          }}
+        />
+      }
       exports={{ stem: payloadFormat, pdf: true, svg: true, png: true, print: true }}
       resultDetail={
         payload ? (
