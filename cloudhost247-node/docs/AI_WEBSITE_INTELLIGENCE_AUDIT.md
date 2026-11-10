@@ -118,7 +118,11 @@ POST /api/v1/ai-support/conversations/:id/messages        routes/ai-support.ts
 
 **Ingestion.** `website-discovery.ts` reads **only** `content/website-knowledge.generated.json`, a projection compiled from the site source by `scripts/site/generate-ai-knowledge.mjs`. There is no database or customer-data source. Verified by grep: no `SELECT` from any customer table exists in the discovery or sync path.
 
-**Corpus, measured:** 409 documents discovered, 396 indexed, 3 excluded, 10 skipped (non-retrievable pages), 0 failed. 409 documents / ~1001 chunks / 377 routes / 922 kB.
+**Corpus, measured:** 409 documents discovered, 396 indexed, 3 excluded, 10 skipped (non-retrievable pages), 0 failed; **406 sources and 1,000 chunks** in the tables after sync, because a document that indexes cleanly yields exactly one source. 409 documents / 378 routes / 840 kB of projection JSON.
+
+*Re-measured in Phase 28. The earlier figures in this paragraph were ~1,001 chunks / 377 routes / 922 kB. The chunk count was an estimate rather than a query, and the route and byte figures had drifted as the site changed. They are now re-derivable rather than re-quotable: `npx tsx scripts/measure-website-knowledge.ts` prints every number in this paragraph, cold and warm, against PGlite with the real migrations. The old harness was deleted after use, which is precisely why these three figures were able to drift unnoticed — a number nobody can re-run is a number that quietly becomes false.*
+
+*One thing that script surfaces, worth stating because it looks alarming and is not: **10 sources have no chunks.** They are the documents the sync recorded as `skipped`, with `sync_status = 'skipped'` — pages with too little retrievable body text to be worth indexing. That is the intended behaviour of defect 7's fix: an unretrievable page is **recorded** rather than silently dropped, so an operator can see what the assistant cannot answer from.*
 
 **Indexing.** `chunking.ts` splits per document into page, section and FAQ chunks. `website-knowledge-repo.ts` writes them into the pre-existing `ai_knowledge_sources` / `ai_knowledge_chunks` tables (originally `0096`; renumbered to `0097` after `main` took `0096` — see §13.3), extending the AI Control Plane store rather than creating a second one — this matches the standing "no second knowledge system" constraint.
 
@@ -370,9 +374,9 @@ Fixing this exposed a **latent crash**: `upsertSource` called `.slice()` on a `c
 
 ## 8. Security and safety (S5)
 
-### 8.1 Tenant isolation — **verified, 8/8**
+### 8.1 Tenant isolation — **verified, 8/8, now committed as a test**
 
-Probed against a live app instance with two signed-in customers and one anonymous visitor:
+Probed against a live app instance with two signed-in customers and one anonymous visitor. **In Phase 28 this matrix was committed** as `holds the full tenant-isolation matrix` in `tests/integration/ai-website-knowledge.test.ts`, because only one of its rows had ever been reproducible by anyone but the person who ran it. That test was verified to fail when the ownership guard is disabled, so it is a real check rather than a decoration:
 
 | Probe | Expected | Observed |
 | --- | --- | --- |
@@ -385,7 +389,11 @@ Probed against a live app instance with two signed-in customers and one anonymou
 | GET A's conversation as B | 404 | 404 |
 | GET A's conversation as A | 200 | 200 |
 
-Scoping is fail-closed: `ownsByAccount` and `ownsByVisitorToken` must both be false to reach the `NotFoundError`, and creation always uses 32 random bytes, so the empty-token hash can never match a stored hash. Access tokens are never returned in conversation reads (`access_token_hash: undefined`).
+Scoping is fail-closed (`src/routes/ai-support.ts:51-53`): the `NotFoundError` is thrown unless `ownsByAccount` **or** `ownsByVisitorToken` is true. Creation uses 32 random bytes, so an empty-token hash cannot match a stored hash. Access tokens are never returned in conversation reads.
+
+**Discrimination check (Phase 28):** the guard was temporarily disabled (`if (false && !ownsByAccount && …)`) and the test failed on the second probe — `stranger reads it with their own valid token: expected 200 to be 404` — then the source was restored byte-for-byte. A test that cannot fail on the defect it names is not evidence; this one can.
+
+**What the test does not cover:** the matrix proves the *route-level* check with well-formed tokens, not against a forged or expired JWT, and not against a token that is valid for a *different* conversation owned by the same account. Those are properties of the token scheme, not of this endpoint, and they are unchanged by this work.
 
 ### 8.2 Prompt injection — **not exploitable**
 
@@ -536,6 +544,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | --- | --- | --- |
 | `tests/unit` | **157 files / 2,274 tests passed, 0 failed** | includes the 13 audit regressions |
 | `tests/integration` | **963 passed, 17 skipped, 0 failed** (99 files) | baseline on `e9d29d4`; AI subsets re-run after fixes: 37/37 and 19/19 |
+| `tests/integration/ai-website-knowledge.test.ts` | **15 passed** (Phase 28, on the final head) | includes the committed tenant-isolation matrix (§8.1) |
 | `frontend/tests` | **80 files / 1,000 tests passed, 0 failed** | |
 
 **A trap worth recording.** Running Vitest from inside `frontend/` instead of the repository root produces **2 spurious failures** (`footer-back-to-top`, `language-switcher`) plus an unhandled `window.matchMedia` error. The cause is that the root `vitest.config.ts` supplies `setupFiles: ['./frontend/tests/setup.ts']` and `environmentMatchGlobs`; invoking from a subdirectory skips both. These are **not product defects** and the prior "1000 green" claim was correct — but only when run canonically. Use `npm test` from `cloudhost247-node/`.
@@ -668,6 +677,8 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 | 4 — test suite | `tsc --noEmit` + `vitest run tests/unit` on the clean clone | **Clean typecheck; 157 files / 2,274 tests passed** |
 | 5 — branding / hygiene | the release-candidate checker's retired-palette and generated-surface stages | **Pass after the two fixes below** |
 | 6 — merge recommendation | the evidence above, plus the tree comparison and trial merge in §13.3 | **Written up in §14a** — merge the code via a reviewed merge commit, after running the §12.1b checklist against that merged tree |
+
+**A note on numbers that could not be re-run.** The corpus figures in §4 were originally produced by a harness deleted after it had served its purpose, so they could be quoted but not re-derived. Re-measured in Phase 28, three of the four had drifted (§4). Nothing here depended on them, but the pattern generalises: any figure in this report that cannot be reproduced by a command committed alongside it should be treated as a claim, not a measurement. The sync numbers now have such a command (`scripts/measure-website-knowledge.ts`); the security probe results in §8 still do not, and are marked as reproduced-at-the-time for that reason.
 
 **Two gate-3 failures, both genuine, neither caused by the AI work being wrong:**
 

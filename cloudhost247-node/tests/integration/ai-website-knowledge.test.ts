@@ -300,6 +300,98 @@ describe('AI support endpoints', () => {
     expect(stolen.statusCode).toBe(404);
   });
 
+  /**
+   * The isolation matrix in §8.1 of the audit report was originally probed by hand against a
+   * running instance, and only the "B holds A's token" row was ever committed as a test. That
+   * left the highest-stakes claim in the report resting on a one-off run. This asserts every
+   * row instead, so the claim is reproducible by anyone who runs the suite.
+   *
+   * The three principal cases the token scheme has to survive:
+   *  - a different visitor's *valid* token (no leak between anonymous customers),
+   *  - *no* token (the id alone must never be sufficient),
+   *  - an *empty* token, whose hash must never match a stored hash.
+   * Plus the authenticated dimension: a signed-in customer must not reach an anonymous
+   * conversation, and must reach their own.
+   */
+  it('holds the full tenant-isolation matrix', async () => {
+    const app = buildApp(env, { serveFrontend: false, pool: db });
+
+    const owner = await app.inject({ method: 'POST', url: '/api/v1/ai-support/conversations' });
+    expect(owner.statusCode).toBe(201);
+    const conversation = owner.json() as { conversationId: string; accessToken: string };
+    const path = `/api/v1/ai-support/conversations/${conversation.conversationId}`;
+
+    // A visitor holding a *valid* token that is simply not the right one.
+    const stranger = await app.inject({ method: 'POST', url: '/api/v1/ai-support/conversations' });
+    const strangerToken = (stranger.json() as { accessToken: string }).accessToken;
+
+    // Two signed-in customers.
+    const alice = await customerToken('alice');
+    const bob = await customerToken('bob');
+
+    const probes: Array<[string, string | undefined, number]> = [
+      ['owner reads own conversation', conversation.accessToken, 200],
+      ['stranger reads it with their own valid token', strangerToken, 404],
+      ['no token at all', undefined, 404],
+      ['empty token', '', 404],
+      ['signed-in customer with no relation to it', await customerToken('mallory'), 404],
+    ];
+
+    for (const [label, token, expected] of probes) {
+      const response = await app.inject({
+        method: 'GET',
+        url: path,
+        headers: token === undefined ? {} : { 'x-ai-conversation-token': token },
+      });
+      expect(response.statusCode, label).toBe(expected);
+    }
+
+    // An authenticated conversation is scoped to its account, and a peer cannot read it.
+    const aliceCreated = await app.inject({
+      method: 'POST',
+      url: '/api/v1/ai-support/conversations',
+      headers: { authorization: `Bearer ${await alice}` },
+    });
+    expect(aliceCreated.statusCode).toBe(201);
+    const aliceConversation = aliceCreated.json() as { conversationId: string };
+    const alicePath = `/api/v1/ai-support/conversations/${aliceConversation.conversationId}`;
+
+    const bobReadingAlice = await app.inject({
+      method: 'GET',
+      url: alicePath,
+      headers: { authorization: `Bearer ${await bob}` },
+    });
+    expect(bobReadingAlice.statusCode, 'B reads A over the authenticated path').toBe(404);
+
+    const aliceReadingOwn = await app.inject({
+      method: 'GET',
+      url: alicePath,
+      headers: { authorization: `Bearer ${await alice}` },
+    });
+    expect(aliceReadingOwn.statusCode, 'A reads their own').toBe(200);
+
+    // An anonymous visitor holding a valid token must not reach an account conversation either.
+    const visitorReadingAlice = await app.inject({
+      method: 'GET',
+      url: alicePath,
+      headers: { 'x-ai-conversation-token': strangerToken },
+    });
+    expect(visitorReadingAlice.statusCode, 'visitor reads A').toBe(404);
+
+    // Access tokens are secrets: they must never appear in a conversation read.
+    expect(JSON.stringify(aliceReadingOwn.json())).not.toContain('access');
+  });
+
+  async function customerToken(label: string): Promise<string> {
+    const id = randomUUID();
+    await db.query(
+      `INSERT INTO users (id, email, password_hash, full_name, role, status)
+       VALUES ($1, $2, $3, 'Isolation Customer', 'customer', 'active')`,
+      [id, `${label}-${id.slice(0, 8)}@example.test`, await hashPassword('Test-password-123')]
+    );
+    return signAuthToken(env, { sub: id, role: 'customer', email: `${label}-${id.slice(0, 8)}@example.test` });
+  }
+
   it('serves the admin knowledge centre under RBAC and audits a reindex', async () => {
     const app = buildApp(env, { serveFrontend: false, pool: db });
 
