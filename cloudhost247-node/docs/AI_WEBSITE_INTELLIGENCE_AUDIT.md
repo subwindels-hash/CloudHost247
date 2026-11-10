@@ -5,7 +5,7 @@
 **Implementation milestone audited:** `e9d29d4` ("Website-aware AI knowledge + support assistant")
 **Audit branch:** `arena/b55a0c26-cloudhost247`
 **Date:** 9 November 2026
-**Verdict up front:** **NOT CERTIFIED FOR PRODUCTION.** The deterministic engine is real and works. Two customer-facing defects were shipping (internal instruction text leaking into answers, and a safety guard that provably could never fire), plus several integration gaps. Ten defects were found. Seven are fixed and covered by regression tests, one dead helper was removed rather than fixed, one is partly fixed, and one is recorded as an accepted limitation with the reason. Nothing was merged, deployed or activated.
+**Verdict up front:** **NOT CERTIFIED FOR PRODUCTION.** The deterministic engine is real and works. Two customer-facing defects were shipping (internal instruction text leaking into answers, and a safety guard that provably could never fire), plus several integration gaps. Twelve defects were found: nine fixed and covered by regression tests (two of them dormant until a provider is configured), one dead helper removed rather than fixed, one partly fixed, and one recorded as an accepted limitation with the reason. Nothing was merged, deployed or activated.
 
 ---
 
@@ -52,6 +52,8 @@ Nothing is claimed as tested that was not executed. In particular, **no live AI 
 | Are admin knowledge operations correctly restricted? | **Yes** | §8.4 — staff read, admin mutate, verified by request |
 | Is tenant isolation correct? | **Yes** | §8.1 — 8/8 probes as expected, **all 8 now committed as a test** and verified to fail if the guard is removed |
 | Does the system refuse instead of inventing? | **Mostly — 3 accepted gaps** | §6.2, §6.3, §6.5 |
+| Is the optional model layer's output checked before it is shown? | **Yes, and now tested** | §9.2 — 24 tests; two defects found and fixed |
+| Would the assistant break if a provider were enabled? | **No — it fails closed** | §9.2 — every error path returns `null` and falls back |
 | Is it production-certified? | **No** | §13 |
 
 The distinction the task asked for is real and should be kept in customer/internal communication:
@@ -62,7 +64,9 @@ The distinction the task asked for is real and should be kept in customer/intern
 
 ## 2. Defect register
 
-Ten defects were found. **Seven fixed** (1, 2, 3, 5, 6, 7, 10), **one removed** as dead code (4), **one partly fixed** (9), **one accepted** as a limitation (8). The count in an earlier revision of this document said nine; defect 10 was found late, while testing the fix for defect 9, and the summary was not updated with it.
+Twelve defects were found, across two passes. **Nine fixed** (1, 2, 3, 5, 6, 7, 10, 11, 12), **one removed** as dead code (4), **one partly fixed** (9), **one accepted** as a limitation (8).
+
+The two passes are worth distinguishing. Defects 1–10 came from auditing the working system; 11 and 12 came from writing the first tests the model-phrasing layer had ever had, and are **dormant** — unreachable until a provider is configured. That is the clearest argument in this report for testing the configured path even when it cannot run: the untested branch held two bugs, and nobody had looked at it because it "wasn't in use".
 
 | # | Defect | Severity | Status | Where |
 | --- | --- | --- | --- | --- |
@@ -76,6 +80,10 @@ Ten defects were found. **Seven fixed** (1, 2, 3, 5, 6, 7, 10), **one removed** 
 | 8 | Status questions have no live status grounding | Low | **Accepted** (§6.5) | — |
 | 9 | Curated layer can answer without website grounding (VoIP), and `voip` was corrupted to `void` | Low / Medium | **Partly fixed** (§6.3) | `query-understanding.ts`, `ai/knowledge.ts` |
 | 10 | Wrong product's price quoted when the question named no catalogue product | **Critical** | **Fixed** (§6.7) | `live-facts.ts`, `answer-composer.ts` |
+| 11 | `validateModelAnswer` read `/month` in `US$ 19/month` as a link and discarded the whole answer | Medium — **dormant** | **Fixed** (§9.2) | `answer-composer.ts` |
+| 12 | Model completion returned untrimmed, so provider whitespace reached the answer | Low — **dormant** | **Fixed** (§9.2) | `grounded-model.ts` |
+
+Defects 11 and 12 were found in Phase 28, while writing the first tests this layer had ever had, and they are **dormant**: neither can fire until a provider is configured, because the model is never called without one. That is also why they survived a full audit — every existing test, and every hand-run probe, took the `modelText === null` branch. Dormant is not the same as absent: enabling a provider would have activated both immediately, and 11 would have degraded the assistant silently, in the direction of *less* helpful answers rather than wrong ones.
 
 Two further defects were found *while fixing* 4/5/7 and are included in the fixes: a null-`category` crash in `upsertSource` (latent), and mid-word excerpt truncation (presentation).
 
