@@ -157,13 +157,19 @@ A signed-in user's layouts persist in the existing template store —
 * **Audit rows record `{kind, name, sourceTemplate}`** on save and delete — never the document. A
   saved label can carry a customer's address in its values, and an audit log is not the place for it.
 
-In the SPA, `SavedTemplatesPanel` (one component, used by the label, shipping and card pages) lists,
-loads, saves and deletes. What a template *contains* is each studio's decision: the Label Designer
+In the SPA, `SavedTemplatesPanel` (one component, used by all four studio pages) lists, loads, saves
+and deletes. What a template *contains* is each studio's decision: the Label Designer
 stores `{ templateId, values }`, the shipping page `{ templateId, code, shipment }`, the card page
 `{ templateId, side, payloadFormat, contact }`. Loading a template restores those fields, and the
 label page sends the whole stored object back with the next preview so a changed size or extra
 element survives the round trip. The panel says plainly what will be stored; a visitor who is not
 signed in sees why saving needs an account instead of a button that can only fail.
+
+Each page also supplies a `validateLoad` guard, because the document is stored across releases: a
+template saved against a layout this build no longer offers is refused with a message and the editor
+is left exactly as it was. Applying it anyway would place stored elements on a different layout — a
+label that looks finished and is wrong, which is the failure mode the whole issue list exists to
+prevent.
 
 Not exposed: a standalone `/export` route — the envelope above already carries the PDF, which is the
 only export the pages need.

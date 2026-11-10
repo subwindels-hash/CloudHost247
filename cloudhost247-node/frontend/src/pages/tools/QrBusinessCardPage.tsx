@@ -269,6 +269,13 @@ export default function QrBusinessCardPage() {
           document={{ templateId, side, payloadFormat, contact }}
           defaultName={templateId}
           summary={templates.find((entry) => entry.id === templateId)?.name ?? templateId}
+          validateLoad={(document) => {
+            const saved = document.templateId;
+            if (typeof saved !== 'string') return 'That template has no card design stored, so it cannot be placed on this page.';
+            return templates.some((entry) => entry.id === saved)
+              ? null
+              : `That card was saved from the “${saved}” design, which this build no longer offers. Nothing was changed.`;
+          }}
           onLoad={(document) => {
             if (typeof document.templateId === 'string') setTemplateId(document.templateId);
             if (document.side === 'front' || document.side === 'back' || document.side === 'both') setSide(document.side);

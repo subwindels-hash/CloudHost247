@@ -209,6 +209,13 @@ export default function ShippingLabelGeneratorPage() {
           document={{ templateId, code, shipment }}
           defaultName={templateId}
           summary={template?.name ?? templateId}
+          validateLoad={(document) => {
+            const saved = document.templateId;
+            if (typeof saved !== 'string') return 'That template has no layout name stored, so it cannot be placed on this page.';
+            return templates.some((entry) => entry.id === saved)
+              ? null
+              : `That template was saved from the “${saved}” layout, which this build no longer offers. Nothing was changed.`;
+          }}
           onLoad={(document) => {
             // The carrier code is part of the layout in the practical sense: the same label printed
             // with the wrong symbology is a different, unreadable parcel. Restore it with the layout.

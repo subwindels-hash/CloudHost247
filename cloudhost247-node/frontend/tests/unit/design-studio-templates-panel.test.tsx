@@ -214,6 +214,28 @@ describe('saved templates panel', () => {
     expect(screen.getByText(/Loaded “Despatch”/)).toBeTruthy();
   });
 
+  it('refuses a template the page can no longer place, and leaves the editor untouched', async () => {
+    // A template saved against a layout this build has dropped. Applying it would print the stored
+    // elements on a different layout — a label that looks finished and is wrong.
+    const document = { templateId: 'retired-90x60', values: { recipient: 'Ada' } };
+    const onLoad = vi.fn();
+    stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary()], count: 1 },
+      'GET design-studio/templates/tpl-1': { template: { ...summary(), document } },
+    });
+    renderPanel({
+      onLoad,
+      validateLoad: (candidate) => (candidate.templateId === 'retired-90x60' ? 'That layout is no longer offered. Nothing was changed.' : null),
+    });
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /load/i }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('no longer offered');
+    expect(onLoad).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Loaded “Despatch”/)).toBeNull();
+  });
+
   it('says there is nothing to save when the page has not generated a document', async () => {
     stubApi({ 'GET design-studio/templates?kind=label': { templates: [], count: 0 } });
     renderPanel({ document: null });

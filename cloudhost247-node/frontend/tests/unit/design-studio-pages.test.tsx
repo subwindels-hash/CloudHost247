@@ -344,3 +344,33 @@ describe('QR Business Card page', () => {
     await waitFor(() => expect(screen.getByText(/An SVG logo is refused/i)).toBeTruthy());
   });
 });
+
+/**
+ * Every studio page that produces a layout offers to keep it.
+ *
+ * This is a wiring test, and it is worth having as one: the panel is a single component passed into
+ * `StudioFrame` from four different pages, and the way it silently disappears is a page forgetting the
+ * `extra` prop — no error, no failing assertion elsewhere, just a studio with no way to save. The
+ * signed-out branch is used deliberately, so the assertion needs no API stub beyond the page's own
+ * listing call and cannot pass by accident on a page that only renders signed in.
+ */
+describe('saved templates are reachable from every studio that makes a layout', () => {
+  const pages: Array<[string, JSX.Element, string]> = [
+    ['label designer', <LabelDesignerPage />, '/api/tools/label-designer'],
+    ['shipping label generator', <ShippingLabelGeneratorPage />, '/api/tools/shipping-label-generator'],
+    ['VDA 4902 label generator', <Vda4902LabelPage />, '/api/tools/vda-4902-label-generator'],
+    ['QR business card designer', <QrBusinessCardPage />, '/api/tools/qr-business-card-designer'],
+  ];
+
+  for (const [name, page, path] of pages) {
+    it(`offers saved templates on the ${name}`, async () => {
+      localStorage.clear();
+      stubApi({ [path]: { success: true, data: { templates: [], fields: [] } } });
+      renderPage(page);
+      await waitFor(() => expect(screen.getByRole('heading', { level: 2, name: /saved templates/i })).toBeTruthy());
+      // Signed out: it explains rather than offering a save that can only fail.
+      expect(screen.getByText(/needs an account/i)).toBeTruthy();
+      expect(screen.queryByRole('button', { name: /save this template/i })).toBeNull();
+    });
+  }
+});

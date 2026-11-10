@@ -336,6 +336,12 @@ export default function LabelDesignerPage() {
           document={savedDocument ? { ...savedDocument, templateId, values } : { templateId, values }}
           defaultName={templates.find((template) => template.id === templateId)?.name ?? templateId}
           summary={templateId}
+          validateLoad={(document) => {
+            const saved = document.templateId;
+            if (typeof saved !== 'string') return 'That template has no layout name stored, so it cannot be placed on this page.';
+            const known = templates.length > 0 ? templates.some((template) => template.id === saved) : saved in TEMPLATE_FIELDS;
+            return known ? null : `That template was saved from the “${saved}” layout, which this build no longer offers. Nothing was changed — pick a template and set it up again.`;
+          }}
           onLoad={(document) => {
             // A saved label restores the template it was built on and the values that were typed. Any
             // other keys in the document (a changed size, extra elements) travel with the preview.

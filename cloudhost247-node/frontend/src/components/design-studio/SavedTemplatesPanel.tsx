@@ -31,12 +31,22 @@ export interface SavedTemplatesPanelProps {
   onLoad: (document: Record<string, unknown>) => void;
   /** Optional one-line description stored beside the name. */
   summary?: string;
+  /**
+   * Decides whether a stored document can be applied to this page.
+   *
+   * Return a message to refuse the load, or `null` to accept it. The case this exists for: a template
+   * saved when the studio offered a layout that a later release removed. Applying it anyway would put
+   * the stored elements onto a different layout, so the label would look finished and be wrong. The
+   * page knows which layouts it still offers; the panel does not, so the check belongs to the page and
+   * the message is shown here, where the operator clicked.
+   */
+  validateLoad?: (document: Record<string, unknown>) => string | null;
 }
 
 /** What a save will contain, stated plainly. Owned by the page, not guessed by the panel. */
 export const SAVE_NOTE = 'A saved label keeps its template and the values you typed, so reopening it restores the label exactly as it was.';
 
-export default function SavedTemplatesPanel({ kind, document, defaultName, onLoad, summary }: SavedTemplatesPanelProps) {
+export default function SavedTemplatesPanel({ kind, document, defaultName, onLoad, summary, validateLoad }: SavedTemplatesPanelProps) {
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -99,6 +109,12 @@ export default function SavedTemplatesPanel({ kind, document, defaultName, onLoa
     setBusy(false);
     if (!result.ok || !result.data) {
       setError(result.error ?? 'That template could not be loaded.');
+      return;
+    }
+    const refusal = validateLoad?.(result.data.template.document) ?? null;
+    if (refusal) {
+      // Nothing was applied: the editor is exactly as the operator left it.
+      setError(refusal);
       return;
     }
     onLoad(result.data.template.document);

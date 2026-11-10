@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { runListing, runStudio, type StudioResponse } from '../../lib/design-studio';
 import StudioFrame, { StudioCheck, StudioField, StudioInput, StudioSelect } from '../../components/design-studio/StudioFrame';
+import SavedTemplatesPanel from '../../components/design-studio/SavedTemplatesPanel';
 
 interface VdaFieldSpec {
   no: number;
@@ -167,6 +168,32 @@ export default function Vda4902LabelPage() {
       result={result}
       busy={busy}
       error={error}
+      extra={
+        <SavedTemplatesPanel
+          kind="vda"
+          document={{ format, data, mixedLoad, germanCaptions, version: '4' }}
+          defaultName={`VDA 4902 ${format === 'klt' ? 'KLT' : 'master label'}`}
+          summary={`VDA 4902 version 4 · ${format === 'klt' ? 'KLT 210 × 74 mm' : 'A5 master'}`}
+          validateLoad={(document) =>
+            // There are only two formats, both fixed by the standard. A document naming anything else
+            // was not saved by this page, and guessing a format would print the wrong size.
+            document.format === 'master' || document.format === 'klt'
+              ? null
+              : 'That template is not a VDA 4902 label: it does not name one of the two standard formats. Nothing was changed.'
+          }
+          onLoad={(document) => {
+            // The format is part of the layout, not the data: an A5 layout printed on a KLT tag is a
+            // different label at a different size. Restore it before the field list re-filters.
+            if (document.format === 'master' || document.format === 'klt') setFormat(document.format);
+            if (typeof document.mixedLoad === 'boolean') setMixedLoad(document.mixedLoad);
+            if (typeof document.germanCaptions === 'boolean') setGermanCaptions(document.germanCaptions);
+            const loaded = document.data;
+            if (loaded && typeof loaded === 'object' && !Array.isArray(loaded)) {
+              setData((previous) => ({ ...previous, ...(loaded as Record<string, string>) }));
+            }
+          }}
+        />
+      }
       exports={{ stem: format, pdf: true, svg: true, png: true, print: true }}
       resultDetail={
         result ? (
