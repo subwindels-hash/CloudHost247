@@ -544,10 +544,21 @@ export function buildCardDocument(
       elements.push(contactField('lastName', 'Last name', { x: 0, y: 9.5, width: width - 10, height: 8 }, { size: 5, family: 'sans-bold', colour: ink, align: 'center' }));
       elements.push(contactField('title', 'Title', { x: 0, y: 17, width: width - 10, height: 4 }, { size: 2.4, colour: muted, align: 'center' }));
     } else {
+      /* Every box below is measured from the *label* origin, which is what `checkBounds` compares
+         against — but the padding moves the content origin, so a box ending exactly at
+         `height - paddingMm` is the last one that is fully inside. The company line used to end at
+         `height - 6.5` on a 55 mm card, i.e. 3.5 mm below the padded content area and past the page
+         edge: the print clipped the bottom of "CloudHost247 Ltd", and only a *warning* said so, which
+         the test that asserted "no errors" never saw. The title and company now sit inside the
+         margin, and the pair is right-aligned with the name block above it. */
+      const textWidth = width - 40;
       elements.push(contactField('firstName', 'First name', nameBox, { size: 5.4, family: 'sans-bold', colour: ink, wrap: false }));
       elements.push(contactField('lastName', 'Last name', { x: 0, y: height - 18.5, width: width - 12, height: 7 }, { size: 5.4, family: 'sans-bold', colour: ink, wrap: false }));
-      elements.push(contactField('title', 'Title', { x: 0, y: height - 11, width: width - 40, height: 4 }, { size: 2.4, colour: muted, wrap: false }));
-      elements.push(contactField('company', 'Company', { x: 0, y: height - 6.5, width: width - 40, height: 4 }, { size: 2.6, colour: ink, wrap: false }));
+      // Both boxes end at `height - paddingMm` at the latest: the element origin is already inset by
+      // the padding, so that is the last line that prints.
+      const padding = 5;
+      elements.push(contactField('title', 'Title', { x: 0, y: height - 13, width: textWidth, height: 2.9 }, { size: 2.4, colour: muted, wrap: false }));
+      elements.push(contactField('company', 'Company', { x: 0, y: height - 9.5 + (padding - 5), width: textWidth, height: 3.1 }, { size: 2.6, colour: ink, wrap: false }));
     }
     return defaultLabelDocument({
       name: `${meta.name} — front`,
@@ -600,7 +611,9 @@ export function buildCardDocument(
       contactField('email', 'Email', { x: textX, y: 8.5, width: textWidth, height: 4 }, { size: 2.4, colour: ink, wrap: false }),
       contactField('website', 'Website', { x: textX, y: 13, width: textWidth, height: 4 }, { size: 2.4, colour: muted, wrap: false }),
       contactField('address', 'Address', { x: textX, y: 17.5, width: textWidth, height: 6 }, { size: 2.1, colour: muted }),
-      contactField('note', 'Note', { x: textX, y: height - 8, width: textWidth, height: 5 }, { size: 2.1, colour: muted })
+      // The note is the last line on the card: it ends exactly at the padded content edge
+      // (`height − 2 × paddingMm`), which is why it is 3 mm tall rather than 5.
+      contactField('note', 'Note', { x: textX, y: height - 10, width: textWidth, height: 5 }, { size: 2.1, colour: muted })
     );
   }
   if (contact.logoDataUrl) {

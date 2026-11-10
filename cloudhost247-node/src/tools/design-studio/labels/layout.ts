@@ -155,6 +155,12 @@ interface ElementContext {
   issues: Issue[];
   /** Elements are clipped to this box (the label, minus nothing — padding is applied per element). */
   clip: { x: number; y: number; width: number; height: number };
+  /**
+   * Extra inset (`style.paddingMm`) already added to `originX`/`originY`, so the bounds check can
+   * measure against the *content* area. It cannot be recovered from the origin — an unpadded document
+   * and a document whose element happens to start at the padding offset look identical.
+   */
+  pad?: number;
 }
 
 function transform(element: LabelElement, context: ElementContext): { x: number; y: number; width: number; height: number } {
@@ -426,27 +432,42 @@ function noticeLabel(message: string, box: { x: number; y: number; width: number
 function elementOps(element: LabelElement, context: ElementContext): DrawOp[] {
   if (!element.visible) return [];
   const box = transform(element, context);
-  const issues: Issue[] = checkBounds(
-    `elements.${element.id}`,
-    box,
-    { width: context.label.width, height: context.label.height },
-    { critical: element.kind === 'barcode' || element.kind === 'symbol', name: `“${element.name}”` }
-  );
-  // Bounds are measured against the label, so convert absolute page coordinates back first.
+  /*
+   * Bounds are measured against the label's *content* area, not the whole label.
+   *
+   * Element coordinates are relative to the padded content origin (`paddingMm` moves the origin), so
+   * the space an element may occupy is `label − 2 × padding`. Measuring against the full label size
+   * let an element sit up to one padding-depth past the content area — and therefore past the page —
+   * without a word of complaint: the classic-white business-card front shipped with its company line
+   * 1.4 mm off the card, clipped in print. The inset applies at the bottom and right edges only,
+   * because the origin already accounts for the top and left ones.
+   */
+  const pad = Math.max(0, context.pad ?? 0);
+  const content = { width: context.label.width - pad, height: context.label.height - pad };
   const relative = { x: box.x - context.originX, y: box.y - context.originY, width: box.width, height: box.height };
-  issues.length = 0;
-  issues.push(
-    ...checkBounds(`elements.${element.id}`, relative, { width: context.label.width, height: context.label.height }, {
-      critical: element.kind === 'barcode' || element.kind === 'symbol',
-      name: `“${element.name}”`,
-    })
-  );
-  // Bounds warnings on decorative elements are only interesting when they cut off visible content.
-  for (const issue of issues) {
-    if (issue.level === 'error' || element.kind === 'barcode' || element.kind === 'symbol' || element.kind === 'image') {
-      context.issues.push(issue);
-    }
-  }
+  /*
+   * Rects and rules are grounds, not content: an accent band or a panel behind the QR is *supposed*
+   * to run to the edge (the templates place them at deliberately negative offsets), and nothing is
+   * lost when it does — a clipped ground still reads as a ground. Everything that carries information
+   * must be fully on the page, because the part that is not there is information the reader does not
+   * get. So the bounds check applies to content elements only.
+   */
+  const issues = element.kind === 'rect' || element.kind === 'line'
+    ? []
+    : checkBounds(`elements.${element.id}`, relative, content, {
+        critical: element.kind === 'barcode' || element.kind === 'symbol',
+        name: `“${element.name}”`,
+      });
+  /*
+   * Every element's bounds matter, so every bounds issue is reported.
+   *
+   * This used to keep warnings only for barcodes, symbols and images, on the theory that a decorative
+   * box overhanging the edge is harmless. Text is not decorative: the classic-white card front ended
+   * `company` 1.4 mm below the page and the only complaint was a warning that this filter threw away,
+   * so the layout reported "clean" while the print cut the line in half. An overhang is a warning
+   * because the part outside the page simply does not print — but it is always worth saying.
+   */
+  for (const issue of issues) context.issues.push(issue);
 
   const ops: DrawOp[] = [];
   switch (element.kind) {
@@ -571,7 +592,7 @@ export function layoutLabel(document: LabelDocument, row: LabelValues, slot: Slo
   // Padding is applied by moving the *content origin*, so elements keep their authored coordinates
   // and an author can deliberately place something in the margin by using a negative offset.
   const padding = Math.max(0, document.style.paddingMm);
-  const padded: ElementContext = { ...context, originX: slot.x + padding, originY: slot.y + padding };
+  const padded: ElementContext = { ...context, originX: slot.x + padding, originY: slot.y + padding, pad: padding };
   for (const element of document.elements) {
     const elementIssuesBefore = padded.issues.length;
     const elementOpsList = elementOps(element, padded);

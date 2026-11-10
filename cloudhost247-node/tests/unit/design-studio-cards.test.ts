@@ -156,12 +156,41 @@ describe('card templates and layout', () => {
     }
   });
 
-  it('lays out every template and side with no errors', () => {
+  /**
+   * Both sides of all eight templates must lay out with *no issues at all* — not merely no errors.
+   *
+   * This test previously asserted errors only, and that is exactly how the classic-white front shipped
+   * with its company line hanging 3.5 mm below the page edge: an element that overruns the label is a
+   * warning (the overhanging part simply does not print), so "no errors" was true while the printed
+   * card cut the bottom off "CloudHost247 Ltd". A template that clips its own text is not shippable,
+   * so the assertion is on the whole issue list.
+   */
+  it('lays out every template and side with no issues at all', () => {
     for (const template of CARD_TEMPLATES) {
       for (const side of ['front', 'back'] as const) {
         const layout = layoutLabelDocument(buildCardDocument(template.id, side, CONTACT)!);
-        const errors = layout.issues.filter((issue) => issue.level === 'error').map((issue) => issue.message);
-        expect(errors, `${template.id}/${side}: ${errors.join(' / ')}`).toEqual([]);
+        const issues = layout.issues.filter((issue) => issue.level !== 'info').map((issue) => `${issue.level}: ${issue.message}`);
+        expect(issues, `${template.id}/${side}: ${issues.join(' / ')}`).toEqual([]);
+      }
+    }
+  });
+
+  it('keeps every card element inside the page, padding included', () => {
+    // Independent of the layout engine's own bounds check: measure the raw element boxes against the
+    // card size, so a future template cannot rely on the warning being ignored.
+    for (const template of CARD_TEMPLATES) {
+      for (const side of ['front', 'back'] as const) {
+        const document = buildCardDocument(template.id, side, CONTACT)!;
+        const padding = document.style.paddingMm ?? 0;
+        for (const element of document.elements) {
+          if (element.kind === 'rect' || element.kind === 'line') continue; // decorative full-bleed
+          const right = element.x + element.width + padding;
+          const bottom = element.y + element.height + padding;
+          expect(right, `${template.id}/${side}/${element.id} runs off the right edge`).toBeLessThanOrEqual(document.widthMm + 0.01);
+          expect(bottom, `${template.id}/${side}/${element.id} runs off the bottom edge`).toBeLessThanOrEqual(document.heightMm + 0.01);
+          expect(element.x, `${template.id}/${side}/${element.id} starts left of the page`).toBeGreaterThanOrEqual(-0.01);
+          expect(element.y, `${template.id}/${side}/${element.id} starts above the page`).toBeGreaterThanOrEqual(-0.01);
+        }
       }
     }
   });
