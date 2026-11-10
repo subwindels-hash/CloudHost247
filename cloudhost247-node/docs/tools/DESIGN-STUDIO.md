@@ -132,7 +132,7 @@ Per-tool actions travel in the body, not in new routes:
 
 A signed-in user's layouts persist in the existing template store —
 `src/tools/design-studio/templates/repository.ts`, migration
-`0099_create_design_studio_templates.sql` — behind these routes
+`0102_create_design_studio_templates.sql`, `0103_…_revision.sql`, `0104_…_forced_at.sql` — behind these routes
 (`src/routes/design-studio-templates.ts`, mounted on both `/api` and `/api/v1`):
 
 | Method | Path | Purpose |
@@ -182,17 +182,25 @@ destructive in different ways, so they are different calls:
   from. An optional check would protect only the callers who opted in, and the last unconditional
   writer would win — the same silent data loss, just rarer. There is no unconditional code path in the
   repository at all.
-* **The compatibility path is explicit, audited and dated.** A client that genuinely cannot send a
-  revision sends `force: true` (or `X-Design-Studio-Allow-Unconditional: true`). That request:
-  writes with a different audit action (`DESIGN_STUDIO_TEMPLATE_FORCED`), stamps `last_forced_at` on
-  the row so the users of the escape hatch are a query rather than archaeology, returns a `warning`
-  stating that any edit since the last read has been replaced, and remains owner-scoped. Sending both
-  `force` and `expectedRevision` is a 400: a caller that knows the version can do the safe thing.
-  **Sunset `DESIGN_STUDIO_FORCED_OVERWRITE_SUNSET`: 2026-05-09**, after which the function, the route
-  branch and `last_forced_at` are removed. No second extension — each one re-opens the window.
-* **The SPA has no access to the compatibility path.** Its client type requires `expectedRevision`, and
-  it refuses to load a template that arrives without a version number rather than inventing one.
-Migration `0100_add_design_studio_template_revision.sql` adds the counter with `DEFAULT 1`, so every
+* **The compatibility path is closed.** It used to accept `force: true` (or
+  `X-Design-Studio-Allow-Unconditional: true`) and write without the check. Its published sunset was
+  **2026-05-09**, which has passed, so it now answers **410 Gone** with the one-line fix (read the
+  template, send `revision` as `expectedRevision`). 410 rather than 400: "this operation was removed" is
+  a different message from "you sent something malformed", and a legacy client needs the first one.
+* **Why the date was honoured, not moved.** The published sunset came from a wrong sum: the intent was
+  six months from 2026-11-09 (**2027-05-09**), and 2026-05-09 was written instead, so the path shipped
+  already expired. A sunset that moves when it is inconvenient is decoration, and the whole reason this
+  path was fenced was to stop it becoming the quiet default. It is closed at the date that was
+  published. The error and the reasoning live in `templates/sunset.ts`, next to the constant.
+* **Re-opening is an explicit, per-deployment act.** `DESIGN_STUDIO_ALLOW_FORCED_OVERWRITE=true`
+  restores the path for one server, logs a warning at registration (not only when used), and keeps the
+  separate audit action and `last_forced_at` stamp. It is an emergency lever for a client mid-migration
+  and must never be set in production. There is no second *date* extension in the module at all — a new
+  one would be a new decision with new evidence, not a constant edited in place.
+* **The SPA has no access to the compatibility path.** Its client type requires `expectedRevision`, it
+  refuses to load a template that arrives without a version number rather than inventing one, and a
+  test asserts that no request it makes carries `force` or the header.
+Migration `0103_add_design_studio_template_revision.sql` adds the counter with `DEFAULT 1`, so every
 template saved by an earlier release is version 1 and keeps working without a re-save. Nothing about
 the stored document changes.
 
@@ -224,21 +232,23 @@ only export the pages need.
 
 Recorded here rather than discovered later:
 
-* **The concurrency tests run against PGlite**, which serialises requests within a single connection.
-  They therefore prove the *predicate* — that a write whose `WHERE revision = $n` does not match
-  returns 409 and changes nothing, verified by deleting that predicate and watching the test fail with
-  `[200, 200]` — rather than a true two-connection race. The protection is single-statement and needs
-  no read-modify-write window, so it holds when serialised, but "tested under real concurrency" is a
-  Postgres test we do not yet have, and it should not be claimed until there is one.
+* **Concurrency is now tested against real PostgreSQL** (`tests/integration/design-studio-templates-postgres.test.ts`,
+  `npm run test:postgres`, needs `TEST_POSTGRES_URL`). The PGlite suite still exists and still proves the
+  predicate; the PostgreSQL suite proves the behaviour two independent backends actually have, including
+  that a second writer blocks on the row lock and then matches zero rows after the first commits. It
+  skips loudly when no server is configured. Details and the mutation check are in
+  `docs/tools/DESIGN-STUDIO-EVIDENCE.md`.
 * **No revision history is kept.** A version-safe overwrite prevents losing an edit; it does not let
   anyone recover one. `revision` is a counter, not a log — after an overwrite the previous document is
   gone.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.
-* **The forced-overwrite path still exists** until 2026-05-09. While it does, a client that uses it can
-  lose another writer's edit; the column, the audit action and the warning make it visible and
-  countable but do not prevent it.
+* **The forced-overwrite path still exists — for one deployment, on request.** Its date-based sunset
+  passed on 2026-05-09 and the route now answers 410. `DESIGN_STUDIO_ALLOW_FORCED_OVERWRITE=true`
+  re-opens it for a single deployment, so the risk is not *gone*, only made deliberate: while that
+  variable is set, a client using it can lose another writer's edit, and only the audit action, the
+  `last_forced_at` stamp and the boot warning say so.
 
 ## 6. Verification status vocabulary
 

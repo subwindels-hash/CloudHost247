@@ -452,3 +452,44 @@ describe('the client cannot overwrite without naming a version', () => {
     expect(screen.queryByRole('button', { name: /save over/i })).toBeNull();
   });
 });
+
+describe('the SPA cannot invoke an unconditional overwrite', () => {
+  it('never sends `force` and always sends both payload keys the API requires', async () => {
+    // The API's compatibility path is closed (410), so a client that used it would be broken — and a
+    // client that sent `force` before the closure would have been selecting the lost-update bug. This
+    // asserts the shape of every write the panel makes, across the three operations it can perform.
+    const calls = stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary({ revision: 2 })], count: 1 },
+      'GET design-studio/templates/tpl-1': { template: { ...summary({ revision: 2 }), document: { templateId: 'address-70x40', values: {} } } },
+      'PUT design-studio/templates/tpl-1': { template: summary({ revision: 3 }) },
+      'PATCH design-studio/templates/tpl-1': { template: summary({ name: 'Renamed' }) },
+      'DELETE design-studio/templates/tpl-1': { deleted: true },
+    });
+    renderPanel({ document: { templateId: 'address-70x40', values: { recipient: 'Ada' } } });
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+
+    fireEvent.click(screen.getByRole('button', { name: /^load$/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /save over “Despatch”/i }));
+    fireEvent.click(screen.getByRole('button', { name: /replace “Despatch”/i }));
+    await waitFor(() => expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(1));
+
+    const writes = calls.filter((call) => ['PUT', 'PATCH', 'POST'].includes(call.method));
+    expect(writes.length).toBeGreaterThan(0);
+    for (const call of writes) {
+      expect(call.body, `${call.method} ${call.url}`).not.toHaveProperty('force');
+      expect(JSON.stringify(call.body)).not.toMatch(/allow-unconditional/i);
+    }
+
+    // Every PUT names the revision; no PUT names a name (an overwrite is not a rename).
+    for (const put of writes.filter((call) => call.method === 'PUT')) {
+      expect(Number.isInteger(put.body?.expectedRevision)).toBe(true);
+      expect(put.body).not.toHaveProperty('name');
+    }
+    // And no request sends the compatibility header.
+    const headers = (globalThis.fetch as unknown as { mock: { calls: Array<[unknown, RequestInit?]> } }).mock.calls;
+    for (const [, init] of headers) {
+      const sent = JSON.stringify(init?.headers ?? {});
+      expect(sent.toLowerCase()).not.toContain('allow-unconditional');
+    }
+  });
+});

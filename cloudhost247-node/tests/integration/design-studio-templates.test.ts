@@ -499,9 +499,17 @@ describe('Design Studio saved templates', () => {
       expect(stored.json().template.lastForcedAt).toBeUndefined();
     });
 
-    it('offers an explicit, audited compatibility path for clients that cannot send a revision', async () => {
+    it('closes the compatibility path at its published sunset with a 410 and a fix', async () => {
+      // The published sunset (2026-05-09) has passed. The path is gone, and a legacy client gets a
+      // diagnosis — not a 400 that reads like a typo, and not a silent write.
       const created = await save({ kind: 'label', name: 'Legacy client', document: DOCUMENT });
       const id = created.json().template.id;
+
+      for (const payload of [{ document: { ...DOCUMENT, widthMm: 88 }, force: true }, { document: { ...DOCUMENT, widthMm: 88 } }]) {
+        const response = await app.inject({ method: 'PUT', url: `${base}/${id}`, headers: auth(ownerToken), payload });
+        // No expectedRevision → 400 (malformed); with force → 410 (removed operation).
+        expect([400, 410]).toContain(response.statusCode);
+      }
 
       const forced = await app.inject({
         method: 'PUT',
@@ -509,71 +517,320 @@ describe('Design Studio saved templates', () => {
         headers: auth(ownerToken),
         payload: { document: { ...DOCUMENT, widthMm: 88 }, force: true },
       });
-      expect(forced.statusCode).toBe(200);
-      expect(forced.json().template.document.widthMm).toBe(88);
-      expect(forced.json().template.revision).toBe(2);
-      // The caller cannot see what it replaced, so the answer says what it may have destroyed.
-      expect(forced.json().warning).toMatch(/cannot be recovered/i);
+      expect(forced.statusCode).toBe(410);
+      expect(forced.json().error).toBe('FORCED_OVERWRITE_SUNSET');
+      expect(forced.json().message).toContain('2026-05-09');
+      // The remedy has to be actionable, or the client is stuck.
+      expect(forced.json().message).toMatch(/expectedRevision/);
 
-      // The exception is countable in the audit log, under its own action.
-      const audit = await client.query<{ metadata: Record<string, unknown> }>(
-        "SELECT metadata FROM audit_logs WHERE action = 'DESIGN_STUDIO_TEMPLATE_FORCED' AND resource_id = $1",
-        [id]
-      );
-      expect(audit.rows).toHaveLength(1);
-      expect(audit.rows[0]?.metadata).toMatchObject({ revision: 2, previousRevision: 1 });
-      expect(JSON.stringify(audit.rows[0]?.metadata)).not.toContain('recipient');
-
-      // And it is a query, not archaeology: the row says it was last written without a check.
-      const stamped = await client.query<{ last_forced_at: Date | null }>(
-        'SELECT last_forced_at FROM design_studio_templates WHERE id = $1',
-        [id]
-      );
-      expect(stamped.rows[0]?.last_forced_at).not.toBeNull();
+      // Nothing was written by any of those attempts.
+      const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(stored.json().template.revision).toBe(1);
+      expect(stored.json().template.document).toEqual(DOCUMENT);
     });
 
-    it('accepts the compatibility header form, and refuses force alongside a revision', async () => {
+    it('closes the header form of the compatibility path too', async () => {
       const created = await save({ kind: 'label', name: 'Header client', document: DOCUMENT });
       const id = created.json().template.id;
-
       const viaHeader = await app.inject({
         method: 'PUT',
         url: `${base}/${id}`,
         headers: { ...auth(ownerToken), 'x-design-studio-allow-unconditional': 'true' },
         payload: { document: { ...DOCUMENT, widthMm: 77 } },
       });
-      expect(viaHeader.statusCode).toBe(200);
-      expect(viaHeader.json().template.revision).toBe(2);
-
-      // Naming both is a contradiction: a caller that knows the revision can do the safe thing.
-      const both = await app.inject({
-        method: 'PUT',
-        url: `${base}/${id}`,
-        headers: auth(ownerToken),
-        payload: { document: DOCUMENT, expectedRevision: 2, force: true },
-      });
-      expect(both.statusCode).toBe(400);
-      expect(both.json().message).toMatch(/not both/i);
-
-      // Refused before any write: the forced save above is still the stored version.
-      const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
-      expect(stored.json().template.document.widthMm).toBe(77);
-      expect(stored.json().template.revision).toBe(2);
+      expect(viaHeader.statusCode).toBe(410);
+      expect(viaHeader.json().error).toBe('FORCED_OVERWRITE_SUNSET');
     });
 
-    it('keeps the compatibility path owner-scoped', async () => {
-      // "Skip the version check" must never quietly mean "skip ownership".
+    it('refuses a forced overwrite from another account by the same rule as any other', async () => {
+      // "Skip the version check" must never quietly mean "skip ownership". Now that the path is closed
+      // the answer is 410 for everyone, but the ownership assertion still matters for the re-opened
+      // case: this drives the repository directly to prove the user_id predicate is in the statement.
       const created = await save({ kind: 'label', name: 'Not yours', document: DOCUMENT });
       const id = created.json().template.id;
       const stolen = await app.inject({
         method: 'PUT',
         url: `${base}/${id}`,
         headers: auth(otherToken),
-        payload: { document: { ...DOCUMENT, widthMm: 999 }, force: true },
+        payload: { document: { ...DOCUMENT, widthMm: 999 }, expectedRevision: 1 },
       });
       expect(stolen.statusCode).toBe(404);
+
       const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(stored.json().template.document).toEqual(DOCUMENT);
+      expect(stored.json().template.revision).toBe(1);
+    });
+
+    it('duplicates under a new name so the copy can be edited independently', async () => {
+      const created = await save({ kind: 'label', name: 'Original', document: DOCUMENT });
+      const duplicate = await app.inject({
+        method: 'POST',
+        url: `${base}/${created.json().template.id}/duplicate`,
+        headers: auth(ownerToken),
+        payload: { name: 'Original (copy)' },
+      });
+      expect(duplicate.statusCode).toBe(200);
+      expect(duplicate.json().template.name).toBe('Original (copy)');
+      expect(duplicate.json().template.id).not.toBe(created.json().template.id);
+      expect(duplicate.json().template.document).toEqual(DOCUMENT);
+
+      const list = await app.inject({ method: 'GET', url: base, headers: auth(ownerToken) });
+      expect(list.json().count).toBe(2);
+    });
+
+    it('deletes the template and its audit trail records the event without the document', async () => {
+      const created = await save({ kind: 'label', name: 'Disposable', document: DOCUMENT });
+      const id = created.json().template.id;
+
+      const removed = await app.inject({ method: 'DELETE', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(removed.statusCode).toBe(200);
+      expect(removed.json().deleted).toBe(true);
+
+      const gone = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(gone.statusCode).toBe(404);
+
+      const { rows } = await client.query<{ metadata: unknown }>(
+        "SELECT metadata FROM audit_logs WHERE action = 'DESIGN_STUDIO_TEMPLATE_DELETED' AND resource_id = $1",
+        [id]
+      );
+      expect(rows).toHaveLength(1);
+      // The audit row names the event; it must not become a second copy of the customer's layout.
+      expect(JSON.stringify(rows[0]?.metadata ?? {})).not.toContain('elements');
+    });
+
+    it('keeps the same id and bumps the revision when a layout is overwritten', async () => {
+      const created = await save({ kind: 'label', name: 'Tuned layout', document: DOCUMENT });
+      const id = created.json().template.id;
+      expect(created.json().template.revision).toBe(1);
+
+      const changed = { ...DOCUMENT, widthMm: 100, heightMm: 150 };
+      const updated = await app.inject({
+        method: 'PUT',
+        url: `${base}/${id}`,
+        headers: auth(ownerToken),
+        payload: { document: changed, expectedRevision: 1 },
+      });
+      expect(updated.statusCode).toBe(200);
+      expect(updated.json().template.id).toBe(id);
+      expect(updated.json().template.revision).toBe(2);
+
+      // One row, not two: an overwrite is not a new template.
+      const list = await app.inject({ method: 'GET', url: base, headers: auth(ownerToken) });
+      expect(list.json().count).toBe(1);
+      expect(list.json().templates[0].id).toBe(id);
+      expect(list.json().templates[0].revision).toBe(2);
+      // The list still carries no document, only its version.
+      expect(list.json().templates[0].document).toBeUndefined();
+    });
+
+    it('refuses a stale overwrite with 409 and leaves the stored layout untouched', async () => {
+      const created = await save({ kind: 'label', name: 'Shared layout', document: DOCUMENT });
+      const id = created.json().template.id;
+
+      // Tab A saves first.
+      const first = await app.inject({
+        method: 'PUT',
+        url: `${base}/${id}`,
+        headers: auth(ownerToken),
+        payload: { document: { ...DOCUMENT, widthMm: 100 }, expectedRevision: 1 },
+      });
+      expect(first.statusCode).toBe(200);
+
+      // Tab B still believes it is version 1. It must not win.
+      const stale = await app.inject({
+        method: 'PUT',
+        url: `${base}/${id}`,
+        headers: auth(ownerToken),
+        payload: { document: { ...DOCUMENT, widthMm: 999 }, expectedRevision: 1 },
+      });
+      expect(stale.statusCode).toBe(409);
+      expect(stale.json().message).toContain('nothing was overwritten');
+      expect(stale.json().message).toContain('revision 2');
+
+      // Tab A's layout survived; the stale write left no trace at all.
+      const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(stored.json().template.document.widthMm).toBe(100);
+      expect(stored.json().template.revision).toBe(2);
+    });
+
+    it('leaves the template intact when an overwrite is rejected for its contents', async () => {
+      const created = await save({ kind: 'label', name: 'Fragile', document: DOCUMENT });
+      const id = created.json().template.id;
+
+      // Each of these is refused before the UPDATE runs. The failure mode being ruled out is a
+      // half-applied write leaving a template the picker still lists but the editor cannot open.
+      const rejected: Array<[Record<string, unknown>, number, RegExp]> = [
+        [{ expectedRevision: 1 }, 400, /must include the document/i],
+        [{ document: [1, 2, 3], expectedRevision: 1 }, 400, /document must be an object/i],
+        [{ document: DOCUMENT, expectedRevision: 0 }, 400, /expectedRevision/i],
+        [{ document: DOCUMENT, expectedRevision: 'latest' }, 400, /expectedRevision/i],
+        // Above the 2 MB document cap the request is refused by Fastify's own body limit (413) before
+        // the repository sees it — also a clean refusal, and the same guarantee: nothing was written.
+        [{ document: { blob: 'x'.repeat(2 * 1024 * 1024 + 16) }, expectedRevision: 1 }, 413, /too large|payload/i],
+      ];
+      for (const [payload, status, message] of rejected) {
+        const response = await app.inject({ method: 'PUT', url: `${base}/${id}`, headers: auth(ownerToken), payload });
+        expect(response.statusCode, JSON.stringify(payload).slice(0, 80)).toBe(status);
+        expect(response.json().message).toMatch(message);
+      }
+
+      const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(stored.statusCode).toBe(200);
+      expect(stored.json().template.revision).toBe(1);
+      expect(stored.json().template.document).toEqual(DOCUMENT);
+    });
+
+    it('only renames a conflict into advice: an overwrite cannot steal another template’s name', async () => {
+      // Overwrite deliberately does not accept a name, so the unique index is never in play: the way to
+      // change a name is PATCH. This asserts the split holds at the API surface.
+      const created = await save({ kind: 'label', name: 'Named once', document: DOCUMENT });
+      const id = created.json().template.id;
+      await save({ kind: 'label', name: 'Taken', document: DOCUMENT });
+
+      const sneaky = await app.inject({
+        method: 'PUT',
+        url: `${base}/${id}`,
+        headers: auth(ownerToken),
+        payload: { name: 'Taken', document: DOCUMENT, expectedRevision: 1 },
+      });
+      expect(sneaky.statusCode).toBe(200);
+      // The name in the body was ignored: an overwrite replaces content, not identity.
+      expect(sneaky.json().template.name).toBe('Named once');
+      expect(sneaky.json().template.revision).toBe(2);
+    });
+
+    it('lets exactly one of two concurrent conditional overwrites win', async () => {
+      // The point of putting the check in the WHERE clause rather than a read-then-write: two requests
+      // fired together, both holding revision 1, must not both report success. With a read-then-write
+      // in TypeScript both would pass their check and the second would silently overwrite the first.
+      const created = await save({ kind: 'label', name: 'Contended', document: DOCUMENT });
+      const id = created.json().template.id;
+
+      const write = (widthMm: number) =>
+        app.inject({
+          method: 'PUT',
+          url: `${base}/${id}`,
+          headers: auth(ownerToken),
+          payload: { document: { ...DOCUMENT, widthMm }, expectedRevision: 1 },
+        });
+
+      const results = await Promise.all([write(80), write(120)]);
+      const statuses = results.map((response) => response.statusCode).sort();
+      expect(statuses).toEqual([200, 409]);
+
+      // Exactly one revision bump, and the stored layout is the winner's — not a blend of the two.
+      const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(stored.json().template.revision).toBe(2);
+      expect([80, 120]).toContain(stored.json().template.document.widthMm);
+    });
+
+    it('renames without touching the document, and refuses a rename that smuggles one in', async () => {
+      const created = await save({ kind: 'label', name: 'Before', document: DOCUMENT });
+      const id = created.json().template.id;
+
+      const renamed = await app.inject({ method: 'PATCH', url: `${base}/${id}`, headers: auth(ownerToken), payload: { name: 'After' } });
+      expect(renamed.statusCode).toBe(200);
+      expect(renamed.json().template.name).toBe('After');
+      // A rename is not a version: the layout is the same, so the revision does not move.
+      expect(renamed.json().template.revision).toBe(1);
+      expect(renamed.json().template.document).toEqual(DOCUMENT);
+
+      const smuggled = await app.inject({
+        method: 'PATCH',
+        url: `${base}/${id}`,
+        headers: auth(ownerToken),
+        payload: { name: 'Sneaky', document: { ...DOCUMENT, widthMm: 999 } },
+      });
+      expect(smuggled.statusCode).toBe(400);
+      expect(smuggled.json().message).toMatch(/cannot change its document/i);
+
+      const empty = await app.inject({ method: 'PATCH', url: `${base}/${id}`, headers: auth(ownerToken), payload: {} });
+      expect(empty.statusCode).toBe(400);
+      expect(empty.json().message).toMatch(/new "name" or "summary"/i);
+
+      // Neither refusal changed anything.
+      const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(stored.json().template.name).toBe('After');
       expect(stored.json().template.document.widthMm).toBe(DOCUMENT.widthMm);
+    });
+
+    it('reports a rename collision as a 409 with advice, and keeps the old name', async () => {
+      const first = await save({ kind: 'label', name: 'Mine', document: DOCUMENT });
+      await save({ kind: 'label', name: 'Yours', document: DOCUMENT });
+      const id = first.json().template.id;
+
+      const clash = await app.inject({ method: 'PATCH', url: `${base}/${id}`, headers: auth(ownerToken), payload: { name: 'yours' } });
+      // Case-insensitive: "yours" and "Yours" are the same name to a human reading a picker.
+      expect(clash.statusCode).toBe(409);
+      expect(clash.json().message).toMatch(/Rename this one or update the existing template/i);
+
+      const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(stored.json().template.name).toBe('Mine');
+    });
+
+    it('refuses an overwrite with no expectedRevision instead of writing blind', async () => {
+      // The loophole this closes: if the revision is optional, the database check protects only the
+      // clients that opted in, and the last unconditional writer wins. That is the same silent
+      // data-loss bug the column was added to prevent, just rarer.
+      const created = await save({ kind: 'label', name: 'Checked', document: DOCUMENT });
+      const id = created.json().template.id;
+
+      // A client that saved a prior version and then sends a bare document must not be obeyed.
+      await app.inject({ method: 'PUT', url: `${base}/${id}`, headers: auth(ownerToken), payload: { document: { ...DOCUMENT, widthMm: 90 }, expectedRevision: 1 } });
+
+      const blind = await app.inject({ method: 'PUT', url: `${base}/${id}`, headers: auth(ownerToken), payload: { document: { ...DOCUMENT, widthMm: 999 } } });
+      expect(blind.statusCode).toBe(400);
+      expect(blind.json().message).toMatch(/expectedRevision/i);
+      // The message has to say where the number comes from, or the caller is stuck.
+      expect(blind.json().message).toMatch(/GET \/templates\/:id/i);
+
+      const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(stored.json().template.document.widthMm).toBe(90);
+      expect(stored.json().template.revision).toBe(2);
+      expect(stored.json().template.lastForcedAt).toBeUndefined();
+    });
+
+    it('closes the compatibility path at its published sunset with a 410 and a fix', async () => {
+      // The published sunset (2026-05-09) has passed. The path is gone, and a legacy client gets a
+      // diagnosis — not a 400 that reads like a typo, and not a silent write.
+      const created = await save({ kind: 'label', name: 'Legacy client', document: DOCUMENT });
+      const id = created.json().template.id;
+
+      for (const payload of [{ document: { ...DOCUMENT, widthMm: 88 }, force: true }, { document: { ...DOCUMENT, widthMm: 88 } }]) {
+        const response = await app.inject({ method: 'PUT', url: `${base}/${id}`, headers: auth(ownerToken), payload });
+        // No expectedRevision → 400 (malformed); with force → 410 (removed operation).
+        expect([400, 410]).toContain(response.statusCode);
+      }
+
+      const forced = await app.inject({
+        method: 'PUT',
+        url: `${base}/${id}`,
+        headers: auth(ownerToken),
+        payload: { document: { ...DOCUMENT, widthMm: 88 }, force: true },
+      });
+      expect(forced.statusCode).toBe(410);
+      expect(forced.json().error).toBe('FORCED_OVERWRITE_SUNSET');
+      expect(forced.json().message).toContain('2026-05-09');
+      // The remedy has to be actionable, or the client is stuck.
+      expect(forced.json().message).toMatch(/expectedRevision/);
+
+      // Nothing was written by any of those attempts.
+      const stored = await app.inject({ method: 'GET', url: `${base}/${id}`, headers: auth(ownerToken) });
+      expect(stored.json().template.revision).toBe(1);
+      expect(stored.json().template.document).toEqual(DOCUMENT);
+    });
+
+    it('closes the header form of the compatibility path too', async () => {
+      const created = await save({ kind: 'label', name: 'Header client', document: DOCUMENT });
+      const id = created.json().template.id;
+      const viaHeader = await app.inject({
+        method: 'PUT',
+        url: `${base}/${id}`,
+        headers: { ...auth(ownerToken), 'x-design-studio-allow-unconditional': 'true' },
+        payload: { document: { ...DOCUMENT, widthMm: 77 } },
+      });
+      expect(viaHeader.statusCode).toBe(410);
+      expect(viaHeader.json().error).toBe('FORCED_OVERWRITE_SUNSET');
     });
 
     it('records overwrites and renames in the audit log by name and version, never by document', async () => {

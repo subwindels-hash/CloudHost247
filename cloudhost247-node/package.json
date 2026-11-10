@@ -26,6 +26,7 @@
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:postgres": "vitest run tests/integration/design-studio-templates-postgres.test.ts tests/integration/design-studio-templates-migration.test.ts",
     "migrate": "node dist/database/migrate.js up",
     "migrate:status": "node dist/database/migrate.js status",
     "migrate:verify": "node dist/database/migrate.js verify",

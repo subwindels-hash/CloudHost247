@@ -92,9 +92,9 @@ export const savedTemplates = {
    *
    * `expectedRevision` is required — by this type and by the API. The type exists so no call site can
    * forget it; the API requiring it means a caller that *did* forget gets a 400 rather than a write
-   * that silently replaces whatever was there. There is no unconditional variant here on purpose: the
-   * compatibility path in the API (`force: true`) exists for integrations we cannot change, and a
-   * first-party client using it would be choosing the bug.
+   * that silently replaces whatever was there. There is no unconditional variant here, and none could
+   * work: the API's compatibility path (`force: true`) was removed at its published sunset
+   * 2026-05-09 and now answers 410 Gone.
    */
   overwrite: (id: string, input: { document: Record<string, unknown>; summary?: string; expectedRevision: number }) =>
     call<{ template: SavedTemplate; warning?: string }>(`${BASE}/${encodeURIComponent(id)}`, { method: 'PUT', body: input }),

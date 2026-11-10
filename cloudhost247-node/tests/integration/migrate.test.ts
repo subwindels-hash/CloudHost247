@@ -153,6 +153,13 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0098_refund_idempotency_global_uniqueness.sql',
     // Consent-gated, optional Visitor Intelligence collection and aggregate reporting.
     '0099_create_visitor_intelligence.sql',
+    // Design Studio saved templates (0102-0104). Deliberately numbered after 0099: this branch was
+    // written when 0099 was the next free version, and `main` independently took 0099 for Visitor
+    // Intelligence. Two files sharing a version makes the migration runner's primary key collide on a
+    // fresh install — the second one fails and rolls back — so the block moved rather than argued.
+    '0102_create_design_studio_templates.sql',
+    '0103_add_design_studio_template_revision.sql',
+    '0104_add_design_studio_template_forced_at.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -23,7 +23,7 @@ import type { FastifyInstance } from 'fastify';
 import type { Env } from '../config/env';
 import type { Queryable } from '../db/types';
 import { getPool } from '../db/pool';
-import { ValidationError } from '../lib/errors';
+import { HttpError, ValidationError } from '../lib/errors';
 import { authenticate } from '../lib/require-auth';
 import { auditRequest } from '../lib/audit';
 import {
@@ -39,6 +39,7 @@ import {
   renameTemplate,
   type TemplateKind,
 } from '../tools/design-studio/templates/repository';
+import { forcedOverwriteStatus, sunsetMessage } from '../tools/design-studio/templates/sunset';
 
 function templateKind(value: unknown): TemplateKind | undefined {
   if (typeof value !== 'string' || value === '') return undefined;
@@ -55,6 +56,18 @@ function templateKind(value: unknown): TemplateKind | undefined {
  * so a client that pins the versioned alias keeps working.
  */
 export async function registerDesignStudioTemplateRoutes(app: FastifyInstance, env: Env, pool: Queryable | null): Promise<void> {
+  // The re-open lever is announced once at registration, not only when it is used. An operator who
+  // left it set after an incident should not have to read a request log to find out.
+  const forced = forcedOverwriteStatus(new Date());
+  if (forced.allowed && forced.reason === 're-opened by environment') {
+    app.log.warn(
+      { sunset: forced.sunset },
+      'Design Studio: unconditional template overwrites are ENABLED by DESIGN_STUDIO_ALLOW_FORCED_OVERWRITE. ' +
+        'This restores a path that was removed on the sunset date and lets concurrent saves discard each other. ' +
+        'Unset it as soon as the client that needed it can send expectedRevision.'
+    );
+  }
+
   const register = (prefix: string) => {
     const base = `${prefix}/tools/design-studio/templates`;
 
@@ -105,12 +118,16 @@ export async function registerDesignStudioTemplateRoutes(app: FastifyInstance, e
      * saved. A request without it is a 400 that says where the number comes from, not a best-effort
      * write.
      *
-     * ### Compatibility path (deprecated)
+     * ### Compatibility path — CLOSED
      *
-     * A client that genuinely cannot supply a revision can send `force: true` (or
-     * `X-Design-Studio-Allow-Unconditional: true`) and the write proceeds without the check. That path
-     * is deliberately loud: a different audit action, `last_forced_at` on the row, and a response that
-     * states what it may have destroyed. Sunset **2026-05-09**; see `docs/tools/DESIGN-STUDIO.md`.
+     * It used to accept `force: true` (or `X-Design-Studio-Allow-Unconditional: true`) and write
+     * without the check. Its published sunset was **2026-05-09**, which has passed, so it now answers
+     * **410 Gone** with instructions rather than overwriting anything. The date was reached by a
+     * miscalculation (the intent was six months from 2026-11-09, i.e. 2027-05-09), and it is honoured
+     * rather than extended: see `templates/sunset.ts` for that reasoning in full.
+     *
+     * `DESIGN_STUDIO_ALLOW_FORCED_OVERWRITE=true` re-opens it for one deployment. That is an emergency
+     * lever, never a recommendation, and it must not be set in production.
      */
     app.put(`${base}/:id`, async (request) => {
       const db = pool ?? getPool(env);
@@ -128,6 +145,12 @@ export async function registerDesignStudioTemplateRoutes(app: FastifyInstance, e
       }
 
       if (forced) {
+        const status = forcedOverwriteStatus(new Date());
+        if (!status.allowed) {
+          // 410, not 400: "this operation used to exist" is a different message from "you sent
+          // something malformed", and a legacy client needs the first one to understand the fix.
+          throw new HttpError(410, sunsetMessage(), 'FORCED_OVERWRITE_SUNSET');
+        }
         const { template, previousRevision } = await overwriteTemplateForced(db, auth.userId, id, {
           document: body.document,
           summary: body.summary,
