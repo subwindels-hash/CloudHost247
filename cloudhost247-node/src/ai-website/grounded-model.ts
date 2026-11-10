@@ -131,7 +131,10 @@ export async function openAnswerWithModel(request: GroundedModelRequest, env: En
     const text = anthropic
       ? ((json.content as Array<{ type: string; text?: string }> | undefined)?.find((part) => part.type === 'text')?.text ?? '')
       : ((json.choices as Array<{ message?: { content?: string } }> | undefined)?.[0]?.message?.content ?? '');
-    return text.trim() ? text : null;
+    // Trim before returning, not just before testing for emptiness: the untrimmed string used to be
+    // returned, so leading and trailing whitespace from the provider reached the composed answer.
+    const trimmed = text.trim();
+    return trimmed ? trimmed : null;
   } catch {
     return null;
   } finally {

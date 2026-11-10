@@ -28,7 +28,7 @@ Nothing is claimed as tested that was not executed. In particular, **no live AI 
 | --- | --- |
 | Runtime | Node.js 22.22.3 |
 | Database | PGlite (embedded PostgreSQL 16.4), real migrations from `database/migrations` |
-| Backend suites | `tests/unit` (157 files), `tests/integration` (99 files) |
+| Backend suites | `tests/unit` (158 files), `tests/integration` (99 files) |
 | Frontend suite | `frontend/tests` (80 files, jsdom) |
 | Canonical runner | `npm test` from `cloudhost247-node/` — see §11.1 for a trap here |
 
@@ -411,6 +411,10 @@ Six attacks were tried, plus a multi-turn variant where a previous assistant tur
 
 Two of these produce an **off-topic but honestly-cited answer** (citing `/hosting/vps` for the "VPS is free" prompt) rather than a refusal. That is the same class as §6.7 — a relevance issue, not a compliance failure. The model never followed an instruction and never asserted anything false.
 
+**These probes are now committed** in `tests/integration/ai-website-knowledge.test.ts` (`describe('prompt injection')`), running over HTTP against the synced corpus. That placement matters: an earlier attempt put them in a unit test with a stub database, where every one of them passed **trivially** — retrieval found nothing, so the assistant escalated everything, including the control question "What does VPS hosting include?". A test that passes for the same reason on a benign input proves nothing. The integration file is where "VPS" genuinely resolves to `/hosting/vps`, so the multi-turn case can assert a real `ANSWER` and the probes can be trusted.
+
+**What these probes do *not* cover, stated plainly.** With no provider configured, `openAnswerWithModel` returns `null` before any network call, so every result above is the **deterministic** layer. No model ever saw these attacks, which means the report's earlier sentence "the model never followed an instruction" described a model that never ran. The structural defences are real — the system prompt labels evidence as untrusted, and `validateModelAnswer` rejects any link or price not in the evidence (§9.2 now tests both) — but **the model's actual susceptibility to these attacks is unverified** and will remain so until a real endpoint is tested. That is the honest position, and it is the one §12.2 lists as outstanding.
+
 Structural protection: **customer-authored content cannot enter the index.** Discovery reads only the compiled site projection; no ticket, message, order, invoice or user row is ever a knowledge source (verified by grep). The injection surface is therefore the site's own content plus the current message, and the current message is never treated as instructions.
 
 ### 8.3 Customer data exposure — **none found**
@@ -486,7 +490,7 @@ Input validation was already correct — 6/6 as expected:
 | `AI_LLM_API_KEY` | required |
 | `AI_LLM_MODEL` | required |
 | `AI_LLM_API_STYLE` | `openai` (default) or `anthropic` |
-| `AI_LLM_TIMEOUT_MS` | default 60,000 |
+| `AI_LLM_TIMEOUT_MS` | default 60,000 (`env.ts`); the module-level fallback is 30,000, which only applies if the parsed value is absent |
 
 Both OpenAI-style (`POST /chat/completions`, `bearer`) and Anthropic-style (`POST /messages`, `x-api-key` + `anthropic-version`) request shapes are implemented.
 
@@ -501,7 +505,20 @@ modelAvailability: { configured: false, reason: 'No model endpoint is configured
 
 **No live provider was contacted, and this report does not claim otherwise.** No credentials exist in this environment and none were requested or fabricated. The provider path is therefore **read, not executed**.
 
-What reading establishes (labelled as READ, not tested): the feature is opt-in, degrades to the deterministic engine on any error, and its output is validated against retrieved evidence, verified links and live price strings before being shown — the model is a phrasing layer, never a source of facts.
+What reading establishes: the feature is opt-in, degrades to the deterministic engine on any error, and its output is validated against retrieved evidence, verified links and live price strings before being shown — the model is a phrasing layer, never a source of facts.
+
+**Correction, Phase 28: the provider path was not merely unexecuted, it was untested.** `grounded-model.ts` had **zero test coverage** — no test constructed a request or stubbed a response, because with no credentials configured the module returns `null` on its first line and every existing test took the deterministic branch. So both halves of the model path were unverified: what gets sent, and what is accepted back.
+
+Stubbing `fetch` needs no credentials, so this was testable all along. `tests/unit/ai-website-model-grounding.test.ts` now covers it — **24 tests**: availability reporting (including that a reason never leaks a configured value), fail-closed behaviour for non-200 / thrown / empty / malformed responses, both request shapes, the token never appearing in the request body, and the evidence block being labelled untrusted in the system prompt.
+
+**Two real defects were found while writing those tests, and both are fixed:**
+
+1. **`validateModelAnswer` read the billing period as a link.** The URL matcher had no left boundary, so the `/month` in `US$ 19/month` was extracted as a path, resolved to nothing, and the answer was **discarded as containing an unknown link**. The model is actively invited to write prices that way, so a correctly grounded answer quoting a monthly price would be silently thrown away and replaced by the deterministic wording — which would look like "the model just isn't very good" rather than a bug. Fixed with a lookbehind that requires a path to start a word; both directions are now asserted, including that genuine invented paths are still rejected.
+2. **The completion was returned untrimmed.** `return text.trim() ? text : null` tested the trimmed string and returned the untrimmed one, so provider whitespace reached the composed answer. Fixed by returning the trimmed text.
+
+Each fix was verified by reintroducing the defect and watching the matching test fail (2 failures and 1 failure respectively), then restoring the source. **That is what makes these 24 tests evidence rather than decoration** — the distinction the rest of this report keeps making, applied here to itself.
+
+**Still not verified, and not implied by the above:** a real provider was never contacted. Whether a given model actually obeys the "quote only the evidence" instruction, how it phrases things, and whether its latency fits the 30 s default timeout are all properties of the endpoint, not of this code. §12.2 remains outstanding.
 
 ### 9.3 Requirements to enable, and non-goals
 
@@ -523,8 +540,8 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | `src/ai-website/knowledge-sync.ts` | **Fixed** — empty document now fails and is recorded; failure recording can no longer be swallowed; syncs serialised on the database lease (§7.3). |
 | `src/ai-website/live-facts.ts` | **Fixed** — instruction text removed; domain prices wired in. |
 | `src/ai-website/retrieval.ts` | **Fixed** — coverage guard now real. `relatedPages` removed (dead + broken). |
-| `src/ai-website/answer-composer.ts` | **Fixed** — pronoun clarification, word-boundary excerpts, domain price block, duplicate label. `gapSentence` unused. |
-| `src/ai-website/grounded-model.ts` | Clean, fails closed. Not executed against a provider (§9.2). |
+| `src/ai-website/answer-composer.ts` | **Fixed** — pronoun clarification, word-boundary excerpts, domain price block, duplicate label, and `validateModelAnswer` no longer mistakes `/month` for a link (§9.2). `gapSentence` unused. |
+| `src/ai-website/grounded-model.ts` | **Fixed** — completion now trimmed; **now tested** (24 tests, §9.2). Fails closed on every error path. Still not executed against a real provider. |
 | `src/ai-website/unanswered.ts` | Clean. Records gaps for the admin view. |
 | `src/ai-website/knowledge-worker.ts` | Clean. Schedules sync; shares the concurrency caveat (§7.3). |
 | `src/services/ai-support-operator.ts` | Clean. Guard rails precede knowledge; provenance persisted. |
@@ -542,7 +559,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 
 | Suite | Result | Note |
 | --- | --- | --- |
-| `tests/unit` | **157 files / 2,274 tests passed, 0 failed** | includes the 13 audit regressions |
+| `tests/unit` | **158 files / 2,298 tests passed, 0 failed** | includes the 13 audit regressions and the 24 model-grounding tests |
 | `tests/integration` | **963 passed, 17 skipped, 0 failed** (99 files) | baseline on `e9d29d4`; AI subsets re-run after fixes: 37/37 and 19/19 |
 | `tests/integration/ai-website-knowledge.test.ts` | **15 passed** (Phase 28, on the final head) | includes the committed tenant-isolation matrix (§8.1) |
 | `frontend/tests` | **80 files / 1,000 tests passed, 0 failed** | |
@@ -621,7 +638,7 @@ Until this is decided, the assistant's behaviour on such questions is: **no inve
 | Previous claim | Audit finding |
 | --- | --- |
 | "Embeddings: optional, configurable" | **Not implemented.** No embedding code path, no vector column, no cosine search. `retrieval.ts:32` says so itself: *"There is no embedding stage by default."* `0097` states `pgvector` is unavailable. |
-| Suite counts "unit 2261 / frontend 1000 / integration 979" | Unit **2,269** at the time of that correction (**2,274** after the Phase 28 tests, §13.4), frontend **1,000**, integration **963 passed + 17 skipped**. The integration figure appears to have counted skipped tests as passed. |
+| Suite counts "unit 2261 / frontend 1000 / integration 979" | Unit **2,269** at the time of that correction (**2,298** after the Phase 28 tests, §13.4), frontend **1,000**, integration **963 passed + 17 skipped**. The integration figure appears to have counted skipped tests as passed. |
 | "Completion" framing | Two customer-facing defects were shipping (defects 1 and 2). The guard documented as protecting against unsupported questions had never executed. |
 
 ---
@@ -632,12 +649,12 @@ Until this is decided, the assistant's behaviour on such questions is: **no inve
 
 ### 13.1 What is established, and what each layer of evidence proves
 
-The instruction to keep these separate is correct, and is the reason this section exists at all. **2,274 passing unit tests do not certify anything** — they establish only the behaviours they exercise.
+The instruction to keep these separate is correct, and is the reason this section exists at all. **2,298 passing unit tests do not certify anything** — they establish only the behaviours they exercise.
 
 | Layer | Status | What it actually proves |
 | --- | --- | --- |
 | Code implementation | Complete for the defect register | The logic exists and is readable |
-| Automated tests | 2,274 unit / 1,000 frontend green | The specific asserted behaviours hold |
+| Automated tests | 2,298 unit / 1,000 frontend green | The specific asserted behaviours hold |
 | Integration verification | 963 integration tests green; ~40 targeted re-runs | The pieces work together on a real (embedded) database |
 | Database / migration | Real migrations on PGlite (PG 16.4) | The schema applies and is idempotent |
 | Staging verification | **Not performed** | — |
@@ -674,7 +691,7 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 | 1 — commits and diff | grep the committed source (not the working tree) for each of the five required actions; then **revert all seven fixed files to `e9d29d4` and re-run the regression suite** | **Pass.** All five actions present. Reverted tree: **10 of 13** regression tests fail. The 3 that pass are the deliberate counter-cases documented in §11.2 |
 | 2 — migration compatibility | run the migration runner on both histories: this branch, and `origin/main` with only `0097` copied in | **Pass on both.** 97 migrations; `0097` is the tail on the branch and follows `0096` on `main`; **no duplicate prefixes**; first run applies 97, second run applies 0 |
 | 3 — CI on the PR head | `scripts/release-candidate-check.sh` run locally, plus the GitHub checks on the pushed head | **Was failing; two real causes found and fixed** (see below), then **all five checks green on two consecutive heads**: Node 22.12 (23m35s then 22m53s), Node 24.8 (16m19s then 15m42s), PHP 7.4 (3m9s then 2m33s), PHP 8.2 (2m28s then 2m53s), hygiene (13s then 15s) |
-| 4 — test suite | `tsc --noEmit` + `vitest run tests/unit` on the clean clone | **Clean typecheck; 157 files / 2,274 tests passed** |
+| 4 — test suite | `tsc --noEmit` + `vitest run tests/unit`, re-run in the working tree and on a clean clone of the pushed head | **Clean typecheck; 158 files / 2,298 tests passed** |
 | 5 — branding / hygiene | the release-candidate checker's retired-palette and generated-surface stages | **Pass after the two fixes below** |
 | 6 — merge recommendation | the evidence above, plus the tree comparison and trial merge in §13.3 | **Written up in §14a** — merge the code via a reviewed merge commit, after running the §12.1b checklist against that merged tree |
 
@@ -705,6 +722,9 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 | `2b1615c` | **Phase 28.** Regenerate site surfaces: the admin knowledge route and email-forensics page were never projected. |
 | `fa92626` | **Phase 28.** Replace retired-green hexes with design-system tokens in the knowledge console, support widget and forensics badge. |
 | `2ba7b86` / `ae1edf0` | **Phase 28.** Record the re-verification and the green pipeline in this report. |
+| `7379eca` | **Phase 28.** Commit the tenant-isolation matrix; add `scripts/measure-website-knowledge.ts`. |
+| `29f3cc5` | **Phase 28.** Assert every row of the isolation matrix; correct the table. |
+| this commit | **Phase 28.** Test the model layer for the first time; fix the `/month`-as-a-link and untrimmed-completion defects. Commit the prompt-injection probes. |
 
 Branch `arena/b55a0c26-cloudhost247`, based on `e9d29d4`, PR #114 against `main`.
 **Not merged. Not deployed. No production credentials activated. No customer settings changed.**
@@ -741,4 +761,4 @@ For the next integration phase, in the order that unblocks the most:
 
 **One caveat on that green, stated because it is easy to overread.** GitHub reports the PR as `CONFLICTING` (`mergeable: CONFLICTING`). The checks run against the branch head, not against a merge commit, so they say *this branch is sound*; they say nothing about the combination. The combination is the subject of §13.3, and it has been built and tested separately.
 
-And the standing caution, because it is the one most likely to be misread: **2,274 passing unit tests do not certify a production system.** They establish that the behaviours they assert still hold. Staging, provider and production certification are separate steps, and none of them has been done.
+And the standing caution, because it is the one most likely to be misread: **2,298 passing unit tests do not certify a production system.** They establish that the behaviours they assert still hold. Staging, provider and production certification are separate steps, and none of them has been done.

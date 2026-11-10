@@ -415,7 +415,11 @@ export function validateModelAnswer(
   resolveRoute: (candidate: string) => string | null
 ): { ok: boolean; reason: string | null } {
   const urls = new Set(evidence.map((entry) => entry.url));
-  const mentioned = text.match(/\/[a-z0-9][a-z0-9/_-]*/gi) ?? [];
+  // A path must start a word. Without the boundary, the "/month" inside the perfectly ordinary
+  // phrase "US$ 19/month" is read as a link to /month, which resolves to nothing, and the whole
+  // answer is discarded as containing an unknown link. The model is *invited* to write prices in
+  // that form, so the check has to tolerate it: the price check below already covers the amount.
+  const mentioned = text.match(/(?<![\w$.,])\/[a-z0-9][a-z0-9/_-]*/gi) ?? [];
   for (const candidate of mentioned) {
     const verified = resolveRoute(candidate);
     if (!verified) return { ok: false, reason: `Unknown link ${candidate}` };
