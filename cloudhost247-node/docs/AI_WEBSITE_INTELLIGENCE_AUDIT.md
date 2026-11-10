@@ -591,7 +591,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | Suite | Result | Note |
 | --- | --- | --- |
 | `tests/unit` | **158 files / 2,298 tests passed, 0 failed** | includes the 13 audit regressions and the 24 model-grounding tests |
-| `tests/integration` | **963 passed, 17 skipped, 0 failed** (99 files) | baseline on `e9d29d4`; AI subsets re-run after fixes: 37/37 and 19/19 |
+| `tests/integration` | **973 passed, 17 skipped, 0 failed** (99 files, 45 min) | full suite re-run in Phase 28 on the final head, not just the AI subsets. The earlier 963 was a `e9d29d4` baseline; the difference is this branch's added coverage |
 | `tests/integration/ai-website-knowledge.test.ts` | **24 passed** (Phase 28) | includes the tenant-isolation matrix (§8.1), the prompt-injection probes (§8.2) and the self-update tests (§7.5) |
 | `frontend/tests` | **80 files / 1,000 tests passed, 0 failed** | |
 
@@ -669,7 +669,7 @@ Until this is decided, the assistant's behaviour on such questions is: **no inve
 | Previous claim | Audit finding |
 | --- | --- |
 | "Embeddings: optional, configurable" | **Not implemented.** No embedding code path, no vector column, no cosine search, and no configuration key to enable one. `0097` states `pgvector` is unavailable. **Phase 28 correction:** the *source document itself* repeated this claim in §2 D2 ("an operator … can enable them"), as did a comment in `retrieval.ts`, even though §5.4 of the same document correctly says they are absent. Both have been corrected. The retriever's own comment now says plainly that no embedding stage exists. |
-| Suite counts "unit 2261 / frontend 1000 / integration 979" | Unit **2,269** at the time of that correction (**2,298** after the Phase 28 tests, §13.4), frontend **1,000**, integration **963 passed + 17 skipped**. The integration figure appears to have counted skipped tests as passed. |
+| Suite counts "unit 2261 / frontend 1000 / integration 979" | Unit **2,269** at the time of that correction (**2,298** after the Phase 28 tests, §13.4), frontend **1,000**, integration **973 passed + 17 skipped** (measured in full in Phase 28; the earlier 963 was a `e9d29d4` baseline). The original figure appears to have counted skipped tests as passed. |
 | "Completion" framing | Two customer-facing defects were shipping (defects 1 and 2). The guard documented as protecting against unsupported questions had never executed. |
 
 ---
@@ -686,7 +686,7 @@ The instruction to keep these separate is correct, and is the reason this sectio
 | --- | --- | --- |
 | Code implementation | Complete for the defect register | The logic exists and is readable |
 | Automated tests | 2,298 unit / 1,000 frontend green | The specific asserted behaviours hold |
-| Integration verification | 963 integration tests green; ~40 targeted re-runs | The pieces work together on a real (embedded) database |
+| Integration verification | 973 integration tests green (full suite, Phase 28) | The pieces work together on a real (embedded) database |
 | Database / migration | Real migrations on PGlite (PG 16.4) | The schema applies and is idempotent |
 | Staging verification | **Not performed** | — |
 | External provider certification | **Not performed** (§9) | — |
@@ -722,7 +722,7 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 | 1 — commits and diff | grep the committed source (not the working tree) for each of the five required actions; then **revert all seven fixed files to `e9d29d4` and re-run the regression suite** | **Pass.** All five actions present. Reverted tree: **10 of 13** regression tests fail. The 3 that pass are the deliberate counter-cases documented in §11.2 |
 | 2 — migration compatibility | run the migration runner on both histories: this branch, and `origin/main` with only `0097` copied in | **Pass on both.** 97 migrations; `0097` is the tail on the branch and follows `0096` on `main`; **no duplicate prefixes**; first run applies 97, second run applies 0 |
 | 3 — CI on the PR head | `scripts/release-candidate-check.sh` run locally, plus the GitHub checks on the pushed head | **Was failing; two real causes found and fixed** (see below), then **all five checks green on two consecutive heads**: Node 22.12 (23m35s then 22m53s), Node 24.8 (16m19s then 15m42s), PHP 7.4 (3m9s then 2m33s), PHP 8.2 (2m28s then 2m53s), hygiene (13s then 15s) |
-| 4 — test suite | `tsc --noEmit` + `vitest run tests/unit`, re-run in the working tree and on a clean clone of the pushed head | **Clean typecheck; 158 files / 2,298 tests passed** |
+| 4 — test suite | `tsc --noEmit`, then **all three** suites — `tests/unit`, `tests/integration`, `frontend/tests` | **Clean typecheck. Unit 158 files / 2,298 passed; integration 99 files / 973 passed + 17 skipped; frontend 80 files / 1,000 passed. Zero failures.** |
 | 5 — branding / hygiene | the release-candidate checker's retired-palette and generated-surface stages | **Pass after the two fixes below** |
 | 6 — merge recommendation | the evidence above, plus the tree comparison and trial merge in §13.3 | **Written up in §14a** — merge the code via a reviewed merge commit, after running the §12.1b checklist against that merged tree |
 
