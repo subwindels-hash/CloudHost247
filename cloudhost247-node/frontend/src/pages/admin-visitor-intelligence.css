@@ -72,7 +72,7 @@
 .vi-controls input { min-width: 145px; }
 .vi-live-indicator { display: inline-flex; align-items: center; gap: .45rem; margin-left: auto; font-size: .82rem; font-weight: 750; white-space: nowrap; }
 .vi-live-indicator i, .vi-map-legend i { width: .58rem; height: .58rem; display: inline-block; border-radius: 50%; background: #8b9295; }
-.vi-live-indicator--live i { background: #178451; box-shadow: 0 0 0 3px rgba(23,132,81,.12); }
+.vi-live-indicator--live i { background: var(--ch-green); box-shadow: 0 0 0 3px rgba(212,175,55,.18); }
 .vi-live-indicator--polling i { background: #ba7c05; }
 .vi-live-indicator--unavailable i { background: #b42318; }
 .vi-updated { color: #687078; font-size: .75rem; }
@@ -122,7 +122,7 @@
 .vi-map__marker { cursor: pointer; }
 .vi-map__pulse { fill: rgba(23,132,81,.13); stroke: none; }
 .vi-map__dot { fill: #c28e13; stroke: #fff; stroke-width: 2; vector-effect: non-scaling-stroke; }
-.vi-map__marker:hover .vi-map__dot, .vi-map__marker:focus .vi-map__dot { fill: #125e57; }
+.vi-map__marker:hover .vi-map__dot, .vi-map__marker:focus .vi-map__dot { fill: var(--ch-green-dark); }
 .vi-map__dot--selected { fill: #167e76; stroke: #1f514d; stroke-width: 2.8; }
 .vi-map__caption { margin: 0; padding: .62rem .85rem; border-top: 1px solid #dde2df; color: #576064; background: #fff; font-size: .76rem; }
 .vi-map-legend { display: inline-flex; align-items: center; gap: .4rem; }
@@ -153,7 +153,7 @@
 .vi-visitor-row summary code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vi-visitor-row summary small { color: #6b7276; text-align: right; }
 .vi-status-dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; background: #c0841a; }
-.vi-status-dot--online { background: #16844f; box-shadow: 0 0 0 3px rgba(22,132,79,.13); }
+.vi-status-dot--online { background: var(--ch-green); box-shadow: 0 0 0 3px rgba(212,175,55,.18); }
 .vi-visitor-details { padding: .85rem 1rem 1rem 2.2rem; border-top: 1px solid #e8e9e6; color: #454e53; font-size: .83rem; }
 .vi-visitor-details p { margin: .4rem 0; line-height: 1.45; }
 .vi-visitor-details ol { display: grid; gap: .4rem; margin: .35rem 0 0; padding-left: 1.35rem; }
@@ -171,7 +171,7 @@
 .vi-settings > button { margin-bottom: .7rem; }
 .vi-audit-note { display: block; color: #6c7478; font-size: .75rem; }
 .vi-error-text { color: #9e2a2a; }
-.vi-success-text { color: #176b46; }
+.vi-success-text { color: var(--ch-green); }
 
 @media (max-width: 960px) {
   .vi-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
