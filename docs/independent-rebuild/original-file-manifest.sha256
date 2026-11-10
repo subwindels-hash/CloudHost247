@@ -1,4 +1,8 @@
 # SHA-256 inventory of vendor-derived components after the CloudHost247 rebrand
+# Updated 2026-11-10: global brand positioning. templates/cloudhost247_legacy/fairusagepolicy.tpl
+# now says the Fair Usage Policy applies "worldwide" instead of "across Nigeria and globally"
+# (same scope, one phrase), matching the first-party rendering and the shared legal text.
+# This one vendor-derived hash was re-cut deliberately; see docs/BRANDING-COMPATIBILITY.md.
 # Updated 2026-11-08: legacy footer marketing runtime cache-buster for the GA4 integration.
 # Updated 2026-11-08: reconciled legacy footer and tracker templates with Google Ads and TikTok.
 # Original vendor baseline commit: 432989b8e20f65b1db3c2eeadc15cc4b5b736e82
@@ -636,7 +640,7 @@ a40ab3c4310fef6220435fa72d5cac7f7fb2360cb4488751ea5686c6cc5ec0a0  templates/clou
 16d7d4481d2a922218570184536f3bc6e09dece56599ef0c36dbd90e99db0245  templates/cloudhost247_legacy/error/internal-error.tpl
 a653118ef0e9975668913cc646972adf09eae4cb1a6efbf83ea5dd34bc345504  templates/cloudhost247_legacy/error/page-not-found.tpl
 765ae2be89b0708b2e25523239e1f6cb2c6096a412a319de622c44db17d6841a  templates/cloudhost247_legacy/error/unknown-routepath.tpl
-cca52079d870e53a227500ffc4357008ef42325b22d891a527581454850bae7e  templates/cloudhost247_legacy/fairusagepolicy.tpl
+6c9296e82fc193da5bd5d4c21f8baaf508d5edd095e4537955ea9c121b690285  templates/cloudhost247_legacy/fairusagepolicy.tpl
 3c58375d0aaf24f08f597c1964753f7a8e0b469b45edd065f7552fd9aa3843cd  templates/cloudhost247_legacy/faqs.tpl
 c09dcb6284f53b77aa7db63f0fe608a1ca719cf02dea3ae71a7dd66d015ca999  templates/cloudhost247_legacy/flags/LICENSE
 7bc953ff7c9120205221132a09a85b68c7722b1ad2a5031c6d7ef9846964cebe  templates/cloudhost247_legacy/flags/README.md

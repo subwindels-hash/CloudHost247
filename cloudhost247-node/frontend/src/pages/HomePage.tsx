@@ -354,7 +354,9 @@ export default function HomePage() {
   const showcase = SHOWCASE.find((item) => item.id === showcaseId) ?? SHOWCASE[0];
 
   usePageMeta(
-    'CloudHost247 — Hosting, Cloud, Domains & Developer Platform',
+    // The brand line and the description both come from shared/site/registry.json. "Global"
+    // says who CloudHost247 serves; it is not a claim about where offices or data centres are.
+    `${BRAND.name} — ${BRAND.descriptor}`,
     BRAND.description,
     {
       canonical: '/',
@@ -501,7 +503,7 @@ export default function HomePage() {
               id="hg-ai-input"
               value={aiPrompt}
               onChange={(event) => setAiPrompt(event.target.value)}
-              placeholder="A portfolio site for a design studio in Abuja…"
+              placeholder="A portfolio site for a design studio…"
               maxLength={300}
             />
             <button className="hg-btn" type="submit">Create with AI</button>

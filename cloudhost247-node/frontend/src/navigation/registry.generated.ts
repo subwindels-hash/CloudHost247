@@ -46,7 +46,8 @@ export const BRAND = {
   "legalName": "CloudHost247 Isc.",
   "shortName": "CH247",
   "tagline": "Build. Host. Deploy. Scale.",
-  "description": "CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms."
+  "descriptor": "Global Cloud Hosting & Digital Infrastructure",
+  "description": "CloudHost247 gives businesses, developers and organizations worldwide the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms."
 } as const;
 
 export const UTILITY = {

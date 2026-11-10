@@ -66,4 +66,9 @@ These are not style preferences — they are why several pages look shorter than
   "not monitored";
 * no uptime percentage, certification or customer count is published unless it is a fact;
 * where a capability does not exist (Kubernetes, a productised WAF, a CDN), the page says so
-  instead of implying it.
+  instead of implying it;
+* the company is positioned globally: copy that describes CloudHost247 or its services names no
+  country as its market. "Global" and "worldwide" say who the company serves — they are never a
+  claim about offices or data-centre locations, which still come from configuration. Governing
+  law, statutory references and the tools that implement one country's statutes keep their
+  country; `docs/BRANDING-COMPATIBILITY.md` ("Global positioning") lists which is which.
