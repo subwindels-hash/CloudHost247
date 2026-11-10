@@ -29,6 +29,7 @@ function summary(overrides: Record<string, unknown> = {}) {
     name: 'Despatch',
     summary: 'address-70x40',
     sourceTemplate: 'address-70x40',
+    revision: 3,
     createdAt: '2026-11-01T09:00:00.000Z',
     updatedAt: '2026-11-08T09:00:00.000Z',
     ...overrides,
@@ -123,7 +124,7 @@ describe('saved templates panel', () => {
     stubApi({});
     renderPanel();
     expect(screen.getByText(/needs an account/i)).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /save this template/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /save as new/i })).toBeNull();
   });
 
   it('lists only what the studio asked for and shows the saved date', async () => {
@@ -143,11 +144,11 @@ describe('saved templates panel', () => {
       'POST design-studio/templates': { template: { ...summary(), name: 'Ada despatch', document } },
     });
     renderPanel({ document });
-    await waitFor(() => expect(screen.getByRole('button', { name: /save this template/i })).toBeTruthy());
-    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Ada despatch' } });
-    fireEvent.click(screen.getByRole('button', { name: /save this template/i }));
+    await waitFor(() => expect(screen.getByRole('button', { name: /save as new/i })).toBeTruthy());
+    fireEvent.change(screen.getByLabelText(/name for a new template/i), { target: { value: 'Ada despatch' } });
+    fireEvent.click(screen.getByRole('button', { name: /save as new/i }));
 
-    await waitFor(() => expect(screen.getByText(/Saved “Ada despatch”/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/Saved as a new template “Ada despatch”/)).toBeTruthy());
     const post = calls.find((call) => call.method === 'POST');
     expect(post?.body).toMatchObject({ kind: 'label', name: 'Ada despatch', document });
   });
@@ -162,7 +163,7 @@ describe('saved templates panel', () => {
     });
     renderPanel();
     await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
-    fireEvent.click(screen.getByRole('button', { name: /save this template/i }));
+    fireEvent.click(screen.getByRole('button', { name: /save as new/i }));
 
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toContain('Rename this one or update the existing template');
@@ -239,8 +240,172 @@ describe('saved templates panel', () => {
   it('says there is nothing to save when the page has not generated a document', async () => {
     stubApi({ 'GET design-studio/templates?kind=label': { templates: [], count: 0 } });
     renderPanel({ document: null });
-    const save = await screen.findByRole('button', { name: /save this template/i });
+    const save = await screen.findByRole('button', { name: /save as new/i });
     expect((save as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText(/nothing to save yet/i)).toBeTruthy();
+  });
+});
+
+/**
+ * The template lifecycle: load → edit → save over, or branch with save-as-new.
+ *
+ * The assertions are about what reaches the wire, because the guarantees live there. An overwrite that
+ * forgets `expectedRevision` still "works" in a single tab and silently discards another tab's save;
+ * a rename that sends a document still "works" until the day it is called with a stale one. Both are
+ * invisible in a passing happy-path test, so both are asserted on the request body.
+ */
+describe('saved template lifecycle', () => {
+  const loadedDocument = { templateId: 'address-70x40', values: { recipient: 'Ada' } };
+  const currentDocument = { templateId: 'address-70x40', values: { recipient: 'Ada Obi' } };
+
+  it('does not offer to save over a template it has not loaded', async () => {
+    localStorage.setItem(TOKEN_KEY, 'test-token');
+    stubApi({ 'GET design-studio/templates?kind=label': { templates: [summary()], count: 1 } });
+    renderPanel();
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    expect(screen.queryByRole('button', { name: /save over/i })).toBeNull();
+    expect(screen.getByText(/will not\s+overwrite a template it has not shown you/i)).toBeTruthy();
+  });
+
+  it('asks before replacing, naming the template and the version it will become', async () => {
+    const calls = stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary()], count: 1 },
+      'GET design-studio/templates/tpl-1': { template: { ...summary(), document: loadedDocument } },
+    });
+    renderPanel();
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /^load$/i }));
+
+    const saveOver = await screen.findByRole('button', { name: /save over “Despatch”/i });
+    // Loading alone writes nothing.
+    expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(0);
+    fireEvent.click(saveOver);
+
+    expect(screen.getByText(/Replace the saved contents of/i)).toBeTruthy();
+    expect(document.body.textContent).toContain('version 4');
+    // Still nothing until the operator confirms.
+    expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(0);
+  });
+
+  it('sends the loaded revision so a stale tab cannot silently win', async () => {
+    const calls = stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary()], count: 1 },
+      'GET design-studio/templates/tpl-1': { template: { ...summary(), document: loadedDocument } },
+      'PUT design-studio/templates/tpl-1': { template: { ...summary(), revision: 4, document: currentDocument } },
+    });
+    renderPanel({ document: currentDocument });
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /^load$/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /save over “Despatch”/i }));
+    fireEvent.click(screen.getByRole('button', { name: /replace “Despatch”/i }));
+
+    await waitFor(() => expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(1));
+    const put = calls.find((call) => call.method === 'PUT');
+    // The id is the loaded one — an overwrite never creates a second template.
+    expect(put?.url).toContain('/tpl-1');
+    expect(put?.body).toMatchObject({ expectedRevision: 3, document: currentDocument });
+    // And the name is not part of an overwrite: renaming is a separate, non-destructive verb.
+    expect(put?.body).not.toHaveProperty('name');
+  });
+
+  it('says a conflicting overwrite changed nothing, and reloads the list', async () => {
+    stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary()], count: 1 },
+      'GET design-studio/templates/tpl-1': { template: { ...summary(), document: loadedDocument } },
+      'PUT design-studio/templates/tpl-1': {
+        status: 409,
+        body: { success: false, code: 'CONFLICT', message: '“Despatch” was changed in another tab or device after you loaded it (it is now revision 5; you had 3). Reload it and try again — nothing was overwritten.' },
+      },
+    });
+    renderPanel({ document: currentDocument });
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /^load$/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /save over “Despatch”/i }));
+    fireEvent.click(screen.getByRole('button', { name: /replace “Despatch”/i }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('nothing was overwritten');
+    // The panel is no longer editing the stale copy, so a second click cannot repeat the mistake.
+    expect(screen.queryByRole('button', { name: /save over/i })).toBeNull();
+  });
+
+  it('renames without sending a document, and says the layout was not changed', async () => {
+    const calls = stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary()], count: 1 },
+      'PATCH design-studio/templates/tpl-1': { template: { ...summary(), name: 'Despatch 2026' } },
+    });
+    renderPanel();
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /^rename$/i }));
+
+    const input = screen.getByLabelText(/new name for despatch/i);
+    fireEvent.change(input, { target: { value: 'Despatch 2026' } });
+    fireEvent.click(screen.getByRole('button', { name: /save name/i }));
+
+    await waitFor(() => expect(screen.getByText(/Renamed to “Despatch 2026”/)).toBeTruthy());
+    expect(screen.getByText(/Its layout was not changed/i)).toBeTruthy();
+    const patch = calls.find((call) => call.method === 'PATCH');
+    expect(patch?.url).toContain('/tpl-1');
+    // A rename that carried the document would be an overwrite wearing a different verb.
+    expect(patch?.body).toEqual({ name: 'Despatch 2026' });
+  });
+
+  it('reports a rename collision as advice and leaves the row in edit mode', async () => {
+    stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary(), summary({ id: 'tpl-2', name: 'Returns' })], count: 2 },
+      'PATCH design-studio/templates/tpl-1': {
+        status: 409,
+        body: { success: false, code: 'CONFLICT', message: 'You already have a label template called “Returns”. Rename this one or update the existing template.' },
+      },
+    });
+    renderPanel();
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getAllByRole('button', { name: /^rename$/i })[0] as HTMLElement);
+    fireEvent.change(screen.getByLabelText(/new name for despatch/i), { target: { value: 'Returns' } });
+    fireEvent.click(screen.getByRole('button', { name: /save name/i }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('Rename this one or update the existing template');
+    // The edit box is still open with the rejected name, so the operator can correct it rather than retype.
+    expect((screen.getByLabelText(/new name for despatch/i) as HTMLInputElement).value).toBe('Returns');
+  });
+
+  it('keeps saving a new copy available alongside an overwrite', async () => {
+    const calls = stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary()], count: 1 },
+      'GET design-studio/templates/tpl-1': { template: { ...summary(), document: loadedDocument } },
+      'POST design-studio/templates': { template: { ...summary({ id: 'tpl-9', name: 'Despatch variant' }), document: currentDocument } },
+    });
+    renderPanel({ document: currentDocument });
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /^load$/i }));
+    await screen.findByRole('button', { name: /save over “Despatch”/i });
+
+    fireEvent.change(screen.getByLabelText(/name for a new template/i), { target: { value: 'Despatch variant' } });
+    fireEvent.click(screen.getByRole('button', { name: /save as new/i }));
+
+    await waitFor(() => expect(screen.getByText(/Saved as a new template “Despatch variant”/)).toBeTruthy());
+    // A branch is a POST, not a PUT: the original keeps its contents and its id.
+    expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(0);
+    const post = calls.find((call) => call.method === 'POST');
+    expect(post?.body).toMatchObject({ kind: 'label', name: 'Despatch variant' });
+  });
+
+  it('stops offering an overwrite once the loaded template is deleted', async () => {
+    stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary()], count: 1 },
+      'GET design-studio/templates/tpl-1': { template: { ...summary(), document: loadedDocument } },
+      'DELETE design-studio/templates/tpl-1': { deleted: true },
+    });
+    renderPanel({ document: currentDocument });
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /^load$/i }));
+    await screen.findByRole('button', { name: /save over “Despatch”/i });
+
+    fireEvent.click(screen.getByRole('button', { name: /^delete$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /delete “Despatch”/i }));
+
+    await waitFor(() => expect(screen.getByText('Template deleted.')).toBeTruthy());
+    expect(screen.queryByRole('button', { name: /save over/i })).toBeNull();
   });
 });

@@ -140,7 +140,8 @@ A signed-in user's layouts persist in the existing template store —
 | `GET` | `/api/tools/design-studio/templates?kind=label` | List the caller's templates (**no** documents), newest first |
 | `POST` | `/api/tools/design-studio/templates` | Save one: `{ kind, name, summary?, document, sourceTemplate? }` |
 | `GET` | `/api/tools/design-studio/templates/:id` | Read one, document included |
-| `PUT` | `/api/tools/design-studio/templates/:id` | Update name, summary or document |
+| `PUT` | `/api/tools/design-studio/templates/:id` | **Overwrite** the document in place: `{ document, summary?, expectedRevision? }` |
+| `PATCH` | `/api/tools/design-studio/templates/:id` | **Rename** / change the description: `{ name?, summary? }` — cannot carry a document |
 | `POST` | `/api/tools/design-studio/templates/:id/duplicate` | Copy under a new name |
 | `DELETE` | `/api/tools/design-studio/templates/:id` | Delete |
 
@@ -154,8 +155,37 @@ A signed-in user's layouts persist in the existing template store —
   The same name in a *different* kind is allowed.
 * **`document` is an opaque layout object** (≤ 2 MB serialised). The list endpoint omits it; only the
   single-template read returns it.
-* **Audit rows record `{kind, name, sourceTemplate}`** on save and delete — never the document. A
+* **Audit rows record `{kind, name, sourceTemplate}`** on save, and `{kind, name, revision,
+  previousRevision}` / `{kind, name, previousName}` on overwrite and rename — never the document. A
   saved label can carry a customer's address in its values, and an audit log is not the place for it.
+
+### Overwrite, rename, and why they are different verbs
+
+A template's lifecycle is *create → load → save over → branch*, and two of those steps are
+destructive in different ways, so they are different calls:
+
+* **`PUT` replaces the document and keeps the id.** The response carries a `revision` that increments
+  on every overwrite. A client that sends back the `expectedRevision` it loaded is refused with a
+  **409** when the stored template has moved on — the second of two open tabs loses rather than
+  silently discarding the first. The check is `... WHERE revision = $expected` inside the `UPDATE`, so
+  two concurrent saves cannot both pass it; there is no read-then-write window. Zero rows matched is
+  disambiguated by re-reading: gone/not yours is 404, still yours but newer is 409.
+* **A failed overwrite changes nothing.** A rejected document, an unknown revision, an oversized
+  payload or a stale revision all leave the stored row byte-identical; the tests read the template
+  back after each kind of failure to prove it.
+* **`PUT` never changes the name.** A `name` in the body is ignored, because a rename is not a
+  version — it leaves `revision` alone and cannot overwrite a document by accident.
+* **`PATCH` renames and cannot touch the document.** A `document` in a `PATCH` body is a 400, so a
+  rename request that carries a stale layout (a retry, a buggy client) cannot become a silent
+  overwrite wearing a different verb.
+* **`expectedRevision` is optional**, so a client written before the column existed keeps working.
+  The version guarantee is stronger when a caller opts in, not a precondition for using the endpoint.
+  The SPA always sends it — its client type makes the field required.
+* **Save as new is a `POST`.** It is the non-destructive branch: a new row, the original untouched.
+
+Migration `0100_add_design_studio_template_revision.sql` adds the counter with `DEFAULT 1`, so every
+template saved by an earlier release is version 1 and keeps working without a re-save. Nothing about
+the stored document changes.
 
 In the SPA, `SavedTemplatesPanel` (one component, used by all four studio pages) lists, loads, saves
 and deletes. What a template *contains* is each studio's decision: the Label Designer
@@ -164,6 +194,13 @@ stores `{ templateId, values }`, the shipping page `{ templateId, code, shipment
 label page sends the whole stored object back with the next preview so a changed size or extra
 element survives the round trip. The panel says plainly what will be stored; a visitor who is not
 signed in sees why saving needs an account instead of a button that can only fail.
+
+The panel offers **Save as new** (a `POST`, leaving the loaded template alone) and, once a template
+is loaded, **Save over \"name\"**, which names the template and the version it will become before it
+does anything. A 409 clears the loaded template and refreshes the list, so the operator reloads the
+copy that won rather than retrying a losing write. Rename is a row action with its own input: it
+sends only `{ name }`, and on a collision it leaves the box open with the rejected text so the
+operator corrects it instead of retyping.
 
 Each page also supplies a `validateLoad` guard, because the document is stored across releases: a
 template saved against a layout this build no longer offers is refused with a message and the editor

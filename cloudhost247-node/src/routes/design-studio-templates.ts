@@ -33,8 +33,9 @@ import {
   duplicateTemplate,
   getTemplate,
   listTemplates,
+  overwriteTemplate,
   publicTemplate,
-  updateTemplate,
+  renameTemplate,
   type TemplateKind,
 } from '../tools/design-studio/templates/repository';
 
@@ -95,15 +96,61 @@ export async function registerDesignStudioTemplateRoutes(app: FastifyInstance, e
       return { success: true, template: publicTemplate(template) };
     });
 
+    /**
+     * Overwrite a saved template's document, keeping its id.
+     *
+     * `expectedRevision` is the version the client loaded. When it does not match, the answer is 409
+     * and the stored document is untouched — the alternative is one tab silently discarding another
+     * tab's work, with the customer holding a name they recognise and contents they did not choose.
+     */
     app.put(`${base}/:id`, async (request) => {
       const db = pool ?? getPool(env);
       const auth = await authenticate(request, env, db);
       const id = (request.params as { id?: string }).id ?? '';
       const body = (request.body ?? {}) as Record<string, unknown>;
-      const template = await updateTemplate(db, auth.userId, id, {
+      const { template, previousRevision } = await overwriteTemplate(db, auth.userId, id, {
+        document: body.document,
+        summary: body.summary,
+        expectedRevision: body.expectedRevision,
+      });
+      await auditRequest(db, request, auth.userId, {
+        action: 'DESIGN_STUDIO_TEMPLATE_UPDATED',
+        resourceType: 'design_studio_template',
+        resourceId: template.id,
+        // What changed, by number and name. The document is not quoted, for the same reason the save
+        // and delete rows do not quote it.
+        metadata: { kind: template.kind, name: template.name, revision: template.revision, previousRevision },
+      });
+      return { success: true, template: publicTemplate(template) };
+    });
+
+    /**
+     * Rename a template, or change its description. Never its document.
+     *
+     * A separate verb because it is a separate intention: renaming is not destructive and needs no
+     * confirmation, while overwriting replaces the layout. `PUT` requires a document precisely so a
+     * rename cannot be smuggled through a path that overwrites.
+     */
+    app.patch(`${base}/:id`, async (request) => {
+      const db = pool ?? getPool(env);
+      const auth = await authenticate(request, env, db);
+      const id = (request.params as { id?: string }).id ?? '';
+      const body = (request.body ?? {}) as Record<string, unknown>;
+      if (body.document !== undefined) {
+        throw new ValidationError('Renaming a template cannot change its document. Save the layout with PUT /templates/:id.');
+      }
+      if (body.name === undefined && body.summary === undefined) {
+        throw new ValidationError('Send a new "name" or "summary" to update.');
+      }
+      const { template, previousName } = await renameTemplate(db, auth.userId, id, {
         name: body.name,
         summary: body.summary,
-        document: body.document,
+      });
+      await auditRequest(db, request, auth.userId, {
+        action: 'DESIGN_STUDIO_TEMPLATE_RENAMED',
+        resourceType: 'design_studio_template',
+        resourceId: template.id,
+        metadata: { kind: template.kind, name: template.name, previousName },
       });
       return { success: true, template: publicTemplate(template) };
     });

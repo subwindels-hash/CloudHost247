@@ -23,6 +23,8 @@ export interface TemplateSummary {
   name: string;
   summary: string;
   sourceTemplate: string | null;
+  /** Increments on every overwrite; sent back so a stale save is refused instead of winning. */
+  revision: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +54,8 @@ export interface TemplateResult<T> {
   error?: string;
   /** Set when the caller needs to sign in rather than fix anything. */
   needsAuth?: boolean;
+  /** The HTTP status, so a caller can distinguish a 409 (recoverable) from a 400 (fix the input). */
+  status?: number;
 }
 
 async function call<T>(path: string, init?: { method?: string; body?: unknown }): Promise<TemplateResult<T>> {
@@ -66,6 +70,7 @@ async function call<T>(path: string, init?: { method?: string; body?: unknown })
     return {
       ok: false,
       needsAuth: error instanceof ApiRequestError && error.status === 401,
+      status: error instanceof ApiRequestError ? error.status : undefined,
       error: describe(error),
     };
   }
@@ -82,8 +87,20 @@ export const savedTemplates = {
   create: (input: { kind: TemplateKind; name: string; summary?: string; document: Record<string, unknown>; sourceTemplate?: string }) =>
     call<{ template: SavedTemplate }>(BASE, { method: 'POST', body: input }),
 
-  update: (id: string, input: { name?: string; summary?: string; document?: Record<string, unknown> }) =>
+  /**
+   * Replace a template's contents, keeping its id.
+   *
+   * `expectedRevision` is required on purpose: the type makes it impossible to call this without
+   * saying which version you believe you are replacing, so the "another tab saved first" check cannot
+   * be forgotten by a caller. Omitting it is possible at the API (the route accepts it for older
+   * clients) but not here, where we control every call site.
+   */
+  overwrite: (id: string, input: { document: Record<string, unknown>; summary?: string; expectedRevision: number }) =>
     call<{ template: SavedTemplate }>(`${BASE}/${encodeURIComponent(id)}`, { method: 'PUT', body: input }),
+
+  /** Change the name (and/or description) of a template. Cannot touch its document. */
+  rename: (id: string, input: { name?: string; summary?: string }) =>
+    call<{ template: SavedTemplate }>(`${BASE}/${encodeURIComponent(id)}`, { method: 'PATCH', body: input }),
 
   duplicate: (id: string, name?: string) =>
     call<{ template: SavedTemplate }>(`${BASE}/${encodeURIComponent(id)}/duplicate`, { method: 'POST', body: name ? { name } : {} }),
