@@ -115,5 +115,13 @@
     <li>The default server payload contains a SHA-256 hash of an opaque consent-session identifier and, where available, Meta <code>_fbp</code>/<code>_fbc</code> values. It does not include your name, email address, phone number, password or payment-card data. Any future advanced-matching change requires separate review and consent.</li>
     <li>Meta processes the data under its own terms and privacy policy. Marketing consent history is retained for up to 180 days, event activity for up to 90 days, and terminal delivery diagnostics for up to 30 days.</li>
   </ul>
+  <h2>First-party Visitor Intelligence</h2>
+  <p>When Analytics permission is explicitly granted and the feature is enabled by CloudHost247, the site may collect anonymous pageview and short-lived live-presence data for CloudHost247's own reporting. This is separate from GA4 and Meta, and neither service is used as its database or source of truth.</p>
+  <ul>
+    <li>Data may include a random visitor/session/tab identifier, a sanitized origin-relative page path with query strings and fragments removed, a coarse referrer domain with subdomains removed, coarse device/browser/operating-system family, UTC timestamps and approximate country/region/city.</li>
+    <li>A network address is processed transiently through a verified server boundary for local GeoIP lookup and is not stored in Visitor Intelligence records. Coordinates are rounded city-centre estimates; no precise location or browser GPS is collected.</li>
+    <li>Visitor Intelligence does not store names, emails, account identifiers, passwords, authentication tokens, raw User-Agent strings, form contents or full referrer URLs. Admin browsing, automated crawlers and common health/uptime probes are excluded.</li>
+    <li>Visitor pageviews and session records are retained for a configurable period (90 days by default, adjustable from 7 to 365 days). Withdrawing Analytics permission stops new tracking and deletes visitor sessions and their linked pageviews for that consent record.</li>
+  </ul>
   <p>Questions or rights requests can be sent to <a href="mailto:privacy@cloudhost247.com">privacy@cloudhost247.com</a>.</p>
 </section>

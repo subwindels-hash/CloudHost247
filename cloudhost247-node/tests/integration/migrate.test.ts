@@ -151,6 +151,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0097_refund_idempotency_key.sql',
     // Phase 16 hardening: refund idempotency keys become globally unique (one key = one operation).
     '0098_refund_idempotency_global_uniqueness.sql',
+    // Consent-gated, optional Visitor Intelligence collection and aggregate reporting.
+    '0099_create_visitor_intelligence.sql',
   ];
 
   it('finds the committed migration files in order', () => {
