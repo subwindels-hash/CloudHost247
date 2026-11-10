@@ -257,6 +257,23 @@ Concretely: `GET /templates/:id` and the re-read inside `PUT /templates/:id` mus
 replica. Read-only surfaces that never feed a version check (catalogue listings, invoice history) are
 unaffected. Today the application uses one pool from `DATABASE_URL`, so reads already go to the primary.
 
+### If the primary has to fail over
+
+Failover does **not** break the revision guarantee: the predicate is part of the statement, so it works
+unchanged on a promoted server (verified). Two operational facts matter more than the guarantee:
+
+1. **An interrupted save is unknowable from the error.** A connection error during a save is identical
+   whether the save committed or not — measured, not assumed. Version-checked retries are nevertheless
+   safe, because a retry after a committed save matches zero rows instead of double-applying. Never
+   resolve an interrupted save by forcing: the forced path skips the check and would overwrite a
+   revision it never read.
+2. **Asynchronous failover loses acknowledged saves.** A commit is durable on the primary, not on the
+   standby, so promoting a standby that is behind discards saves the user was told had succeeded — with
+   no error. This is a replication-mode decision (`synchronous_commit`), not something the application
+   can fix.
+
+Details and numbers: `docs/tools/DESIGN-STUDIO-PHASE31-EVIDENCE.md`.
+
 ### Outstanding limitations of saved templates
 
 Recorded here rather than discovered later:
@@ -273,6 +290,9 @@ Recorded here rather than discovered later:
 * **Replica behaviour is verified locally only** (Phase 30): asynchronous streaming, replay paused to
   create lag, no failover/promotion, no load, no synchronous replication. It establishes *why* reads
   must stay on the primary, not that any deployment is configured correctly.
+* **Failover is verified locally only** (Phase 31): manual `pg_ctl promote`, no failover manager, no
+  quorum/fencing, no rejoin, no load. It establishes what failover does to saves, not that any
+  deployment would fail over correctly.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.
