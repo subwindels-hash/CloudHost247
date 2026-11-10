@@ -60,6 +60,17 @@ export interface ToolCatalogEntry {
   seoTitle?: string;
   relatedTools?: string[];
   resultMode?: string;
+  /**
+   * Set when the tool's SPA route is a hand-built page rather than the generic form that
+   * `/tools/*` renders from `TOOL_FORMS`.
+   *
+   * This is not decoration: the generic-form tests assert that every runnable tool exposes
+   * structured form fields, and a tool with its own page has none by design — its form *is* the
+   * page. Naming the page here keeps that assertion meaningful (it still runs for every tool that
+   * does render the generic form) instead of forcing a dummy schema into `TOOL_FORMS` for a page
+   * that would never read it.
+   */
+  dedicatedPage?: 'design-studio';
   slug: string;
   name: string;
   category: ToolCategorySlug;
@@ -1029,6 +1040,8 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     icon: 'barcode',
     path: '/tools/barcode-generator',
     apiPath: '/api/tools/barcode-generator',
+    // Hand-built page (frontend/src/pages/tools/*) rather than the generic /tools/* form.
+    dedicatedPage: 'design-studio',
     methods: ['POST'],
     authRequired: false,
     visibility: 'public',
@@ -1051,6 +1064,8 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     icon: 'layout-template',
     path: '/tools/label-designer',
     apiPath: '/api/tools/label-designer',
+    // Hand-built page (frontend/src/pages/tools/*) rather than the generic /tools/* form.
+    dedicatedPage: 'design-studio',
     methods: ['POST'],
     authRequired: false,
     visibility: 'public',
@@ -1073,6 +1088,8 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     icon: 'package',
     path: '/tools/vda-4902-label-generator',
     apiPath: '/api/tools/vda-4902-label-generator',
+    // Hand-built page (frontend/src/pages/tools/*) rather than the generic /tools/* form.
+    dedicatedPage: 'design-studio',
     methods: ['POST'],
     authRequired: false,
     visibility: 'public',
@@ -1095,6 +1112,8 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     icon: 'truck',
     path: '/tools/shipping-label-generator',
     apiPath: '/api/tools/shipping-label-generator',
+    // Hand-built page (frontend/src/pages/tools/*) rather than the generic /tools/* form.
+    dedicatedPage: 'design-studio',
     methods: ['POST'],
     authRequired: false,
     visibility: 'public',
@@ -1117,6 +1136,8 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     icon: 'id-card',
     path: '/tools/qr-business-card-designer',
     apiPath: '/api/tools/qr-business-card-designer',
+    // Hand-built page (frontend/src/pages/tools/*) rather than the generic /tools/* form.
+    dedicatedPage: 'design-studio',
     methods: ['POST'],
     authRequired: false,
     visibility: 'public',

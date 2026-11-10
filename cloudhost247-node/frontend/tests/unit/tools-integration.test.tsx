@@ -140,13 +140,26 @@ describe('every production tools route', () => {
     expect(fetch.mock.calls[0]?.[1].headers.Authorization).toBeUndefined();
   });
 
-  it('verifies all 75 tools have complete handlers, form schemas, multi-mode inputs and image uploads', async () => {
-    expect(TOOL_CATALOG).toHaveLength(75);
+  it('verifies all 80 tools have complete handlers, form schemas, multi-mode inputs and image uploads', async () => {
+    expect(TOOL_CATALOG).toHaveLength(80);
     expect(missingHandlers()).toEqual([]);
-    expect(runnableSlugs()).toHaveLength(70);
+    expect(runnableSlugs()).toHaveLength(75);
+
+    /* Every runnable tool either renders the generic form or declares the page it renders instead.
+       A tool with `dedicatedPage` has no `TOOL_FORMS` entry by design — its form *is* the page — so
+       the structured-field assertion skips it, while the handler assertion above still applies to it.
+       Nothing is exempt by slug list: the catalogue entry itself has to say where its UI lives. */
+    expect(TOOL_CATALOG.filter((entry) => entry.dedicatedPage).map((entry) => entry.slug)).toEqual([
+      'barcode-generator',
+      'label-designer',
+      'vda-4902-label-generator',
+      'shipping-label-generator',
+      'qr-business-card-designer',
+    ]);
 
     for (const entry of TOOL_CATALOG) {
       if (NON_RUNNABLE_TOOL_SLUGS.has(entry.slug)) continue;
+      if (entry.dedicatedPage) continue;
       const form = toolForm(entry.slug);
       if (entry.slug === 'my-ip') {
         expect(form.fields).toHaveLength(0);

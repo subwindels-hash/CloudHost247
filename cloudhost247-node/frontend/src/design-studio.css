@@ -1,0 +1,549 @@
+/*
+ * Design Studio — the shared stylesheet for the five generation tools.
+ *
+ * Everything here is built from the existing CloudHost247 tokens (styles.css): the ochre primary, the
+ * sand accent, the ink text colour, the warm page background and the 1180px content width. Nothing
+ * introduces a new palette, a new font or a new radius scale, because these five pages sit inside the
+ * Tools Center and have to read as part of it.
+ *
+ * Layout: a two-column workbench — configuration on the left, the live preview on the right — that
+ * collapses to one column below 1024px. The preview column is `position: sticky` on wide screens so
+ * the artefact stays visible while the operator scrolls a long form.
+ */
+
+.ch247-studio {
+  width: 100%;
+  max-width: var(--ch247-width);
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+/* --- Page anatomy ---------------------------------------------------------------- */
+
+.ch247-studio__breadcrumb {
+  font-size: 0.82rem;
+  color: #5d6d7e;
+  margin: 0 0 0.6rem;
+}
+
+.ch247-studio__breadcrumb a {
+  color: var(--ch247-primary);
+  text-decoration: none;
+}
+
+.ch247-studio__breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.ch247-studio__title {
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+  color: var(--ch247-ink);
+}
+
+.ch247-studio__lede {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #37424d;
+  max-width: 68ch;
+  margin: 0 0 1.1rem;
+}
+
+.ch247-studio__workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.ch247-studio__column--preview {
+  position: sticky;
+  top: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .ch247-studio__workbench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ch247-studio__column--preview {
+    position: static;
+  }
+}
+
+/* --- Panels ---------------------------------------------------------------------- */
+
+.ch247-studio__panel {
+  background: #ffffff;
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ch247-studio__panel > h2,
+.ch247-studio__panel > h3 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5d6d7e;
+  margin: 0 0 0.75rem;
+}
+
+.ch247-studio__panel--flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* --- Fields ---------------------------------------------------------------------- */
+
+.ch247-studio__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.ch247-studio__fields--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ch247-studio__field {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.ch247-studio__field > label,
+.ch247-studio__label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #40506b;
+}
+
+.ch247-studio__field input[type='text'],
+.ch247-studio__field input[type='number'],
+.ch247-studio__field input[type='email'],
+.ch247-studio__field input[type='url'],
+.ch247-studio__field input[type='tel'],
+.ch247-studio__field input[type='date'],
+.ch247-studio__field select,
+.ch247-studio__field textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.35rem;
+  font: inherit;
+  font-size: 0.9rem;
+  background: #ffffff;
+  color: var(--ch247-ink);
+}
+
+.ch247-studio__field textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.ch247-studio__field input:focus-visible,
+.ch247-studio__field select:focus-visible,
+.ch247-studio__field textarea:focus-visible {
+  outline: 2px solid var(--ch247-accent);
+  outline-offset: 1px;
+  border-color: var(--ch247-primary);
+}
+
+.ch247-studio__field input[aria-invalid='true'],
+.ch247-studio__field textarea[aria-invalid='true'],
+.ch247-studio__field select[aria-invalid='true'] {
+  border-color: #b42318;
+}
+
+.ch247-studio__hint {
+  font-size: 0.76rem;
+  color: #5d6d7e;
+  line-height: 1.4;
+}
+
+.ch247-studio__check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  color: #37424d;
+}
+
+.ch247-studio__check input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--ch247-primary);
+}
+
+/* Range + numeric pair: the slider is the coarse control, the number box the exact one. */
+.ch247-studio__range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ch247-studio__range input[type='range'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  accent-color: var(--ch247-primary);
+}
+
+.ch247-studio__range input[type='number'] {
+  flex: 0 0 5.5rem;
+}
+
+/* --- Preview --------------------------------------------------------------------- */
+
+.ch247-studio__preview {
+  background:
+    linear-gradient(45deg, #f0eeea 25%, transparent 25%, transparent 75%, #f0eeea 75%),
+    linear-gradient(45deg, #f0eeea 25%, #faf9f7 25%, #faf9f7 75%, #f0eeea 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  overflow: auto;
+}
+
+/* The document is scaled to fit its column; the paper stays proportional, so what is on screen is
+   the same shape as what comes out of the printer. */
+.ch247-studio__paper {
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(16, 23, 29, 0.12), 0 8px 24px rgba(16, 23, 29, 0.08);
+  max-width: 100%;
+  line-height: 0;
+}
+
+.ch247-studio__paper svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ch247-studio__paper--actual {
+  max-width: none;
+}
+
+.ch247-studio__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  font-size: 0.8rem;
+  color: #5d6d7e;
+  padding: 0.5rem 0.25rem 0;
+}
+
+/* --- Actions -------------------------------------------------------------------- */
+
+.ch247-studio__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ch247-studio__actions .ch247-button {
+  min-height: 2.35rem;
+}
+
+/* --- Issues --------------------------------------------------------------------- */
+
+.ch247-studio__issues {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.ch247-studio__issue {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.35rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  border: 1px solid #dedfdd;
+  background: #faf9f7;
+}
+
+.ch247-studio__issue--error {
+  border-color: #f2b8b5;
+  background: #fef3f2;
+  color: #7a271a;
+}
+
+.ch247-studio__issue--warn {
+  border-color: #f5d9a8;
+  background: #fffaeb;
+  color: #7a4e10;
+}
+
+.ch247-studio__issue--info {
+  border-color: #cfe0f5;
+  background: #f3f7fd;
+  color: #1e3a5f;
+}
+
+.ch247-studio__issue strong {
+  font-weight: 600;
+}
+
+/* --- Tables (batch report, field list, spec) -------------------------------------- */
+
+.ch247-studio__table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.4rem;
+}
+
+.ch247-studio__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.ch247-studio__table th,
+.ch247-studio__table td {
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--ch247-border);
+  vertical-align: top;
+}
+
+.ch247-studio__table th {
+  background: #faf9f7;
+  font-weight: 600;
+  color: #40506b;
+  white-space: nowrap;
+}
+
+.ch247-studio__table tr:last-child td {
+  border-bottom: 0;
+}
+
+.ch247-studio__table--compact {
+  font-size: 0.8rem;
+}
+
+/* --- Tabs (label templates, card sides, card templates) -------------------------- */
+
+.ch247-studio__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.ch247-studio__tab {
+  border: 1px solid var(--ch247-border);
+  background: #ffffff;
+  color: #37424d;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.ch247-studio__tab[aria-selected='true'] {
+  background: var(--ch247-primary);
+  border-color: var(--ch247-primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.ch247-studio__tab:focus-visible {
+  outline: 2px solid var(--ch247-accent);
+  outline-offset: 1px;
+}
+
+/* A template picker: a grid of small, uniform cards. */
+.ch247-studio__templates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+}
+
+.ch247-studio__template {
+  text-align: left;
+  border: 1px solid var(--ch247-border);
+  background: #ffffff;
+  border-radius: 0.4rem;
+  padding: 0.55rem 0.6rem;
+  cursor: pointer;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.ch247-studio__template[aria-pressed='true'] {
+  border-color: var(--ch247-primary);
+  box-shadow: inset 0 0 0 1px var(--ch247-primary);
+}
+
+.ch247-studio__template strong {
+  font-size: 0.84rem;
+  color: var(--ch247-ink);
+}
+
+.ch247-studio__template span {
+  font-size: 0.76rem;
+  color: #5d6d7e;
+  line-height: 1.35;
+}
+
+/* --- Long-form content: explanation, usage, FAQ --------------------------------- */
+
+.ch247-studio__prose {
+  max-width: 78ch;
+  line-height: 1.65;
+  font-size: 0.94rem;
+  color: #37424d;
+}
+
+.ch247-studio__prose h2 {
+  font-size: 1.15rem;
+  color: var(--ch247-ink);
+  margin: 1.75rem 0 0.5rem;
+}
+
+.ch247-studio__prose h3 {
+  font-size: 1rem;
+  color: var(--ch247-ink);
+  margin: 1.25rem 0 0.35rem;
+}
+
+.ch247-studio__prose ul,
+.ch247-studio__prose ol {
+  padding-left: 1.2rem;
+}
+
+.ch247-studio__prose li {
+  margin: 0.25rem 0;
+}
+
+.ch247-studio__faq {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.ch247-studio__faq details {
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.4rem;
+  background: #ffffff;
+  padding: 0.6rem 0.75rem;
+}
+
+.ch247-studio__faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ch247-ink);
+  font-size: 0.9rem;
+}
+
+.ch247-studio__faq p {
+  margin: 0.5rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #37424d;
+}
+
+/* Related tools: the same card shape the Tools Center uses, so the section needs no new design. */
+.ch247-studio__related {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 0.6rem;
+}
+
+.ch247-studio__related a {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--ch247-border);
+  border-radius: 0.45rem;
+  background: #ffffff;
+  text-decoration: none;
+  color: inherit;
+}
+
+.ch247-studio__related a:hover,
+.ch247-studio__related a:focus-visible {
+  border-color: var(--ch247-primary);
+}
+
+.ch247-studio__related strong {
+  font-size: 0.88rem;
+  color: var(--ch247-ink);
+}
+
+.ch247-studio__related span {
+  font-size: 0.78rem;
+  color: #5d6d7e;
+  line-height: 1.4;
+}
+
+/* --- Notice --------------------------------------------------------------------- */
+
+.ch247-studio__notice {
+  border-left: 3px solid var(--ch247-accent);
+  background: #fffdf6;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0 0.35rem 0.35rem 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: #4a3a12;
+  margin: 0.75rem 0;
+}
+
+.ch247-studio__notice--strong {
+  border-left-color: #b42318;
+  background: #fef3f2;
+  color: #7a271a;
+}
+
+/* --- Batch map ------------------------------------------------------------------ */
+
+.ch247-studio__map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.4rem 0.6rem;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.ch247-studio__map code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  color: #40506b;
+}
+
+@media (max-width: 560px) {
+  .ch247-studio__map {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ch247-studio__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- Screen-reader only --------------------------------------------------------- */
+
+.ch247-studio__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

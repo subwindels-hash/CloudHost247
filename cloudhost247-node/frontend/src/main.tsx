@@ -14,6 +14,7 @@ import './infrastructure.css';
 import './tools-center.css';
 import './business-tools.css';
 import './id-card.css';
+import './design-studio.css';
 import './platform.css';
 import './published-site.css';
 import '../../../shared/site/design-system.css';

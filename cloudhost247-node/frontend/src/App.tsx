@@ -204,6 +204,13 @@ const ComplianceDocumentsPage = lazy(() => import('./pages/tools/ComplianceDocum
 const BusinessToolsPage = lazy(() => import('./pages/tools/BusinessToolsPage'));
 const IdCardGeneratorPage = lazy(() => import('./pages/tools/IdCardGeneratorPage'));
 const BusinessToolWorkspacePage = lazy(() => import('./pages/tools/BusinessToolWorkspacePage'));
+/* Design Studio — five generation tools that each own a page rather than a catalogue form. They are
+   lazy-loaded individually so opening a barcode does not download the card designer. */
+const BarcodeGeneratorPage = lazy(() => import('./pages/tools/BarcodeGeneratorPage'));
+const LabelDesignerPage = lazy(() => import('./pages/tools/LabelDesignerPage'));
+const Vda4902LabelPage = lazy(() => import('./pages/tools/Vda4902LabelPage'));
+const ShippingLabelGeneratorPage = lazy(() => import('./pages/tools/ShippingLabelGeneratorPage'));
+const QrBusinessCardPage = lazy(() => import('./pages/tools/QrBusinessCardPage'));
 const AdminMrzSettingsPage = lazy(() => import('./pages/AdminMrzSettingsPage'));
 export default function App() {
   return (
@@ -301,6 +308,17 @@ export default function App() {
             and a bulk importer. The other eleven generators render through the generic workspace. */}
         <Route path="/tools/business-tools/employee-id-card-generator" element={<IdCardGeneratorPage />} />
         <Route path="/tools/business-tools/:tool" element={<BusinessToolWorkspacePage />} />
+
+        {/* Design Studio. Five catalogue tools that are workspaces rather than form-and-table pages:
+            a live artefact, exports and long-form guidance. Declared above /tools/* so the Tools
+            Center's generic page never claims them — without these routes every catalogue link
+            would resolve through the catch-all and render the generic form for a tool whose form is
+            the page itself. The slugs are the catalogue slugs (config/tools.php + catalog.ts). */}
+        <Route path="/tools/barcode-generator" element={<BarcodeGeneratorPage />} />
+        <Route path="/tools/label-designer" element={<LabelDesignerPage />} />
+        <Route path="/tools/vda-4902-label-generator" element={<Vda4902LabelPage />} />
+        <Route path="/tools/shipping-label-generator" element={<ShippingLabelGeneratorPage />} />
+        <Route path="/tools/qr-business-card-designer" element={<QrBusinessCardPage />} />
 
         <Route path="/tools/document" element={<ToolsHubPage />} />
         <Route path="/tools/mrz-generator" element={<MrzToolPage defaultTab="calculator" />} />

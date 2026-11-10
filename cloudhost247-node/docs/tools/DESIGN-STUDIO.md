@@ -110,19 +110,37 @@ preview, the SVG and the PDF cannot disagree.
 
 ## 5. API
 
-All five slugs are runnable Tools Center tools (`POST /api/tools/<slug>`), plus:
+All five slugs are runnable Tools Center tools: `POST /api/tools/<slug>` through the single
+execution funnel, nothing else. Each answers with one envelope:
 
 ```
-GET    /api/tools/design-studio/templates?kind=label|shipping|vda|card
-POST   /api/tools/design-studio/templates          save (signed in, ownership enforced)
-PUT    /api/tools/design-studio/templates/:id      update own template
-DELETE /api/tools/design-studio/templates/:id      delete own template
-POST   /api/tools/design-studio/csv/preview        headers + first rows + detected delimiter
-POST   /api/tools/design-studio/csv/validate       mapped rows → accepted/rejected report
-POST   /api/tools/design-studio/export             document → PDF/SVG/PNG bytes (base64)
+{
+  document,        // the pages, their size in mm and the element list
+  svg, preview,    // the full document, and the first page for the in-page preview
+  issues: [{ level: 'error'|'warn'|'info', field?, message, hint? }],
+  blocked,         // true when any issue is an error — the UI disables export
+  summary: [ ... ], sizeMm, sizePx, meta,
+  pdf?,            // base64 PDF, opt-in with "pdf": true (the default for these five)
+  pngScale?, pngPx?
+}
 ```
 
-Body limits, rate limits, file-type and size validation follow the existing modules.
+Per-tool actions travel in the body, not in new routes:
+
+| Slug | `action` | Also accepts |
+| --- | --- | --- |
+| `barcode-generator` | — | `formatId, payload, moduleMm, barHeightMm, showText, foreground, background, errorCorrection, paddingMm` |
+| `label-designer` | `preview` (default), `templates`, `csv` | `templateId, values, document, rows, csv, mapping` |
+| `vda-4902-label-generator` | `preview` (default), `spec` | `data` (or the fields at the top level) |
+| `shipping-label-generator` | `preview` (default), `templates` | `templateId, code, shipment` |
+| `qr-business-card-designer` | `preview` (default), `templates`, `payload` | `templateId, side, payloadFormat, contact` |
+
+**Not yet exposed.** `src/tools/design-studio/templates/repository.ts` and migration
+`0099_create_design_studio_templates.sql` implement owner-scoped saved templates, but no route uses
+them and the SPA has no save/load control, so there is deliberately no endpoint here for it: a
+documented endpoint that 404s is worse than an absent one. The same applies to a standalone
+`/export` route — the envelope above already carries the PDF, which is the only export the pages
+need. Wiring the repository to routes is the next step if saved templates are wanted.
 
 ## 6. Verification status vocabulary
 

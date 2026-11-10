@@ -10,7 +10,16 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": true
+    "strict": true,
+    // `bwip-js` publishes no top-level `types` condition in its exports map — the declarations hang
+    // off the `node`/`browser`/`electron` branches, which the Bundler resolver does not take for a
+    // CommonJS-format source file. The frontend never bundles this package: the tool handlers are
+    // server code, and only `frontend/tests/unit/tools-integration.test.tsx` reaches them (to assert
+    // every catalogue slug has a handler). Mapping the declaration file keeps that typecheck honest
+    // without adding `moduleResolution: node16` to the whole frontend.
+    "paths": {
+      "bwip-js": ["../node_modules/bwip-js/dist/bwip-js-node.d.ts"]
+    }
   },
   "include": ["src", "tests"]
 }
