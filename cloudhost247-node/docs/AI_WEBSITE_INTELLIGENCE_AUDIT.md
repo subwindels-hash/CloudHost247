@@ -637,7 +637,7 @@ Until this is decided, the assistant's behaviour on such questions is: **no inve
 
 | Previous claim | Audit finding |
 | --- | --- |
-| "Embeddings: optional, configurable" | **Not implemented.** No embedding code path, no vector column, no cosine search. `retrieval.ts:32` says so itself: *"There is no embedding stage by default."* `0097` states `pgvector` is unavailable. |
+| "Embeddings: optional, configurable" | **Not implemented.** No embedding code path, no vector column, no cosine search, and no configuration key to enable one. `0097` states `pgvector` is unavailable. **Phase 28 correction:** the *source document itself* repeated this claim in §2 D2 ("an operator … can enable them"), as did a comment in `retrieval.ts`, even though §5.4 of the same document correctly says they are absent. Both have been corrected. The retriever's own comment now says plainly that no embedding stage exists. |
 | Suite counts "unit 2261 / frontend 1000 / integration 979" | Unit **2,269** at the time of that correction (**2,298** after the Phase 28 tests, §13.4), frontend **1,000**, integration **963 passed + 17 skipped**. The integration figure appears to have counted skipped tests as passed. |
 | "Completion" framing | Two customer-facing defects were shipping (defects 1 and 2). The guard documented as protecting against unsupported questions had never executed. |
 

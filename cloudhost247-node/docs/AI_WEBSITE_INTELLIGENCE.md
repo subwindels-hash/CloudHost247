@@ -104,10 +104,13 @@ here so the final counts are not inflated with invented "articles".
    extraction) that rewrites the customer's words into a weighted tsquery *and* a normalised
    keyword set.
 3. A reranker that combines lexical rank, entity overlap, page kind and section weight.
-Embeddings are an **optional additive layer** behind the existing `AI_LLM_*` configuration seam: an
-operator who points it at an embeddings-capable endpoint can enable them, and the retriever merges
-their scores with the lexical ranking. With no provider configured, nothing is silently degraded —
-it is simply the lexical engine, which is the supported default.
+**Embeddings are not implemented.** An earlier revision of this paragraph described them as an
+"optional additive layer" that an operator could enable through the `AI_LLM_*` seam. That was wrong:
+there is no embedding call, no vector column and no configuration key for one, so nothing could be
+enabled. The *seam* is real — `RetrievedChunk.score` is the only value the composer sees, so a hybrid
+scorer could be merged into `retrieveKnowledge` without touching the answer path — but a seam is a
+place to put something, not the thing itself. §5.4 records why embeddings are absent; that reasoning
+stands and this paragraph now agrees with it.
 
 **D3. Grounded answers, not canned ones.** The answer composer builds a response **from the retrieved
 chunks**: title, the relevant excerpt, the verified URL, related links taken from the chunk's page.
