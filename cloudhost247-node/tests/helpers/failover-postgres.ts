@@ -231,3 +231,105 @@ UPDATE design_studio_templates
  WHERE id = $1 AND user_id = $2 AND revision = $4
  RETURNING revision
 `;
+
+/** Controls passed to `initdb`, so a test can make a cluster eligible (or not) for `pg_rewind`. */
+export async function initPrimaryWith(
+  spec: { dataDir: string; port: number },
+  options: { walLogHints?: boolean; dataChecksums?: boolean } = {}
+): Promise<void> {
+  rmSync(spec.dataDir, { recursive: true, force: true });
+  mkdirSync(spec.dataDir, { recursive: true });
+  const args = ['-D', spec.dataDir, '-U', 'postgres', '--auth=trust'];
+  // `pg_rewind` requires the target to be able to find the last checkpoint: either data checksums or
+  // `wal_log_hints`. Both are OFF by default in PostgreSQL 16, so eligibility is a decision made at
+  // `initdb` time and cannot be added later without a base backup.
+  if (options.dataChecksums) args.push('--data-checksums');
+  const init = await run(bin('initdb'), args);
+  if (init.code !== 0) throw new Error(`initdb failed: ${init.stderr}`);
+
+  appendFileSync(
+    join(spec.dataDir, 'postgresql.conf'),
+    [
+      '',
+      `port = ${spec.port}`,
+      "listen_addresses = '127.0.0.1'",
+      'wal_level = replica',
+      'max_wal_senders = 10',
+      'max_replication_slots = 10',
+      'wal_keep_size = 256MB',
+      'hot_standby = on',
+      // Async replication on purpose: Phase 32 must not quietly change replication policy.
+      options.walLogHints ? 'wal_log_hints = on' : 'wal_log_hints = off',
+      '',
+    ].join('\n')
+  );
+  appendFileSync(
+    join(spec.dataDir, 'pg_hba.conf'),
+    'local replication all trust\nhost replication all 127.0.0.1/32 trust\nhost all all 127.0.0.1/32 trust\n'
+  );
+}
+
+/** `pg_controldata` summary: what this data directory would do if started. */
+export async function controldata(dataDir: string): Promise<{ state: string; timeline: number; latestCheckpoint: string }> {
+  const result = await run(bin('pg_controldata'), [dataDir]);
+  if (result.code !== 0) throw new Error(`pg_controldata failed: ${result.stderr}`);
+  const text = result.stdout;
+  const state = /Database cluster state:\s*(.+)/.exec(text)?.[1]?.trim() ?? 'unknown';
+  const timeline = Number(/Latest checkpoint's TimeLineID:\s*(\d+)/.exec(text)?.[1] ?? 0);
+  const latestCheckpoint = /Latest checkpoint location:\s*(.+)/.exec(text)?.[1]?.trim() ?? 'unknown';
+  return { state, timeline, latestCheckpoint };
+}
+
+/**
+ * Run `pg_rewind`. `dryRun` first, because rewinding is destructive: it discards divergent WAL.
+ * `-R` writes `standby.signal` and `primary_conninfo`, so the target starts as a standby and never
+ * appears as a second writable primary.
+ */
+export async function pgRewind(spec: {
+  targetDataDir: string;
+  sourcePort?: number;
+  sourceDataDir?: string;
+  writeRecoveryConf?: boolean;
+  dryRun?: boolean;
+}): Promise<{ code: number; stdout: string; stderr: string }> {
+  const args = ['-D', spec.targetDataDir];
+  if (spec.sourcePort !== undefined) args.push('--source-server', `host=127.0.0.1 port=${spec.sourcePort} user=postgres dbname=postgres`);
+  if (spec.sourceDataDir) args.push('--source-pgdata', spec.sourceDataDir);
+  if (spec.writeRecoveryConf) args.push('-R');
+  if (spec.dryRun) args.push('-n', '--no-ensure-shutdown');
+  return run(bin('pg_rewind'), args, 120_000);
+}
+
+/**
+ * The timeline a server is currently *writing* to.
+ *
+ * Deliberately read from the WAL file name, not from `pg_control_checkpoint()`. After promotion the
+ * control file's last checkpoint may still belong to the old timeline until a checkpoint completes,
+ * which makes `pg_control_checkpoint().timeline_id` report the previous timeline and makes a test look
+ * like promotion failed when it did not. The WAL file name is unambiguous: the first 8 hex digits are
+ * the timeline.
+ */
+export async function currentTimeline(port: number, database = 'postgres'): Promise<number> {
+  const { rows } = await queryOn(port, 'SELECT pg_walfile_name(pg_current_wal_lsn()) AS name', [], database);
+  return parseInt(String(rows[0].name).slice(0, 8), 16);
+}
+
+/** Read the timeline history file on disk (empty until the first promotion). */
+export function timelineHistoryFiles(dataDir: string): string[] {
+  const fs = require('node:fs') as typeof import('node:fs');
+  try {
+    return fs.readdirSync(join(dataDir, 'pg_wal')).filter((name) => name.endsWith('.history')).sort();
+  } catch {
+    return [];
+  }
+}
+
+/** Read `pg_waldump`-free timeline history via the server: which timelines exist on disk. */
+export function timelineHistory(dataDir: string): string[] {
+  const fs = require('node:fs') as typeof import('node:fs');
+  try {
+    return fs.readdirSync(join(dataDir, 'pg_wal')).filter((name) => name.endsWith('.history')).sort();
+  } catch {
+    return [];
+  }
+}

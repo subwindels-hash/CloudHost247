@@ -274,6 +274,23 @@ unchanged on a promoted server (verified). Two operational facts matter more tha
 
 Details and numbers: `docs/tools/DESIGN-STUDIO-PHASE31-EVIDENCE.md`.
 
+### After a failover: rejoining the old primary
+
+Two facts a failover *design* has to absorb, both verified on real clusters:
+
+- **PostgreSQL does not fence itself.** A crashed primary that is restarted still accepts writes, even
+  though another node was promoted. Preventing two writable primaries is the job of fencing, a VIP, a
+  quorum manager or an operator — none of which this application provides.
+- **Rejoin discards the isolated node's pushes.** `pg_rewind` rolls the old primary back to the last
+  common checkpoint, so anything it accepted while isolated is deleted. It returns as a **standby**
+  (writes refused), which is what makes the procedure safe.
+
+`pg_rewind` also requires `--data-checksums` or `wal_log_hints=on`, both **off by default** — a
+cluster created without them cannot be rewound and needs a new base backup. Decide this before the
+cluster holds data.
+
+Details: `docs/tools/DESIGN-STUDIO-PHASE32-EVIDENCE.md`.
+
 ### Outstanding limitations of saved templates
 
 Recorded here rather than discovered later:
@@ -293,6 +310,8 @@ Recorded here rather than discovered later:
 * **Failover is verified locally only** (Phase 31): manual `pg_ctl promote`, no failover manager, no
   quorum/fencing, no rejoin, no load. It establishes what failover does to saves, not that any
   deployment would fail over correctly.
+* **Rejoin is verified locally only** (Phase 32): `pg_rewind` on one host, no fencing product, no
+  quorum, no replication slots, no WAN. Policy is unchanged — still asynchronous replication.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.
