@@ -512,7 +512,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | `src/ai-website/website-discovery.ts` | **Fixed** — vocabulary now covers body and FAQ text. `routeServed`, `htmlToText`, `htmlHeadings`, `linkLabels` unused. |
 | `src/ai-website/chunking.ts` | Clean. Per-page/section/FAQ chunking is deterministic and stable. |
 | `src/ai-website/website-knowledge-repo.ts` | **Fixed** — null `category`/`section` guarded. `chunksForSource`, `findSourceByUrl`, `previewDocument` unused. |
-| `src/ai-website/knowledge-sync.ts` | **Fixed** — empty document now fails and is recorded; failure recording can no longer be swallowed. Concurrency unguarded (§7.3). |
+| `src/ai-website/knowledge-sync.ts` | **Fixed** — empty document now fails and is recorded; failure recording can no longer be swallowed; syncs serialised on the database lease (§7.3). |
 | `src/ai-website/live-facts.ts` | **Fixed** — instruction text removed; domain prices wired in. |
 | `src/ai-website/retrieval.ts` | **Fixed** — coverage guard now real. `relatedPages` removed (dead + broken). |
 | `src/ai-website/answer-composer.ts` | **Fixed** — pronoun clarification, word-boundary excerpts, domain price block, duplicate label. `gapSentence` unused. |
@@ -520,10 +520,10 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | `src/ai-website/unanswered.ts` | Clean. Records gaps for the admin view. |
 | `src/ai-website/knowledge-worker.ts` | Clean. Schedules sync; shares the concurrency caveat (§7.3). |
 | `src/services/ai-support-operator.ts` | Clean. Guard rails precede knowledge; provenance persisted. |
-| `src/routes/ai-support.ts` | Clean. Tenant scoping fail-closed; validation complete. No AI-specific throttle (§8.5). |
+| `src/routes/ai-support.ts` | Clean. Tenant scoping fail-closed; validation complete; AI-specific throttle added (§8.5). |
 | `src/routes/ai-knowledge-admin.ts` | Clean. All 11 routes role-guarded and audited. |
 | `database/migrations/0097_ai_website_knowledge.sql` | Clean. Additive, idempotent, no extension required — correctly extends the existing store. |
-| `frontend/src/pages/AdminAiKnowledgePage.tsx` | Clean. Follows existing admin conventions. |
+| `frontend/src/pages/AdminAiKnowledgePage.tsx` | Clean. Follows existing admin conventions; status colours use design-system tokens (§13.4). |
 | `frontend/src/components/AiSupportWidget.tsx` | Clean. |
 
 ---
@@ -572,6 +572,25 @@ The first test passes on both trees because `ungroundedTokens` was populated cor
 2. ~~Resolve sync concurrency~~ — **done** (§7.3): the existing database lease now serialises syncs; a blocked run reports `busy` rather than false failures.
 3. **Deploy-time smoke test — still required.** Every result in this report comes from PGlite with real migrations. A staging deployment against real PostgreSQL must reproduce: cold sync, warm sync, drift, pricing, the escalation set, and the rate-limit ceilings.
 4. **Decide the merge history** (§13.1). A trial merge has been built and verified; the decision is the maintainers'.
+
+### 12.1b The staging checklist, in executable order
+
+The point of writing this down is that "deploy to staging and check it" is not a test plan. These are the specific things that must be observed, and what failure looks like for each. Every one of them is a behaviour this branch asserts in PGlite and has **never** run on real PostgreSQL.
+
+| # | Step | Pass looks like | Failure looks like |
+| --- | --- | --- | --- |
+| 1 | Apply migrations to a **copy of staging**, not production | `0097` applies once; re-running the migration path applies nothing | duplicate-prefix error, or `0097` applied twice |
+| 2 | Trigger a cold sync (empty knowledge tables) | ~400 documents, ≈8 s, 0 failed; counts match the published site | a partial corpus, or failures silently recorded as success |
+| 3 | Trigger a warm sync immediately after | 0 rewritten, sub-second; drift reports empty on all three lists | everything rewritten each cycle (a hash instability) |
+| 4 | Publish a page edit, wait one cycle (15 min) | the edit is retrievable, with the new text quoted in the answer | the old text persists — the self-update claim is false |
+| 5 | Ask a question about a product not sold | no price, "I could not find that", no invented catalogue | a price for something else |
+| 6 | Ask for a plan price that *is* sold | the active plan's price, from the catalogue, with the page linked | a stale or wrong price |
+| 7 | Trigger two syncs concurrently | one runs, the other reports `busy`; no false failures | both run, or one reports failure |
+| 8 | Hammer conversation creation (11/min) and messages (31/min), anonymous **and** authenticated | 10 then 429; 30 then 429; separate buckets per IP and per account | no 429, or one IP exhausting the shared bucket |
+| 9 | Ask about something only support can resolve | an escalation is created and appears in the admin console | a confident answer is invented instead |
+| 10 | Try to make it repeat its instructions | refusal, no system-prompt text in the response | any instruction text rendered to a customer |
+
+**Nobody has run this list.** It is the deployment gate, and it is the difference between "the tests pass" and "the system works where it will run".
 
 ### 12.1a Semantic retrieval (open, needs a decision)
 
@@ -648,6 +667,7 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 | 3 — CI on the PR head | `scripts/release-candidate-check.sh` run locally, plus the GitHub checks on the pushed head | **Was failing; two real causes found and fixed** (see below), then **all five checks green on two consecutive heads**: Node 22.12 (23m35s then 22m53s), Node 24.8 (16m19s then 15m42s), PHP 7.4 (3m9s then 2m33s), PHP 8.2 (2m28s then 2m53s), hygiene (13s then 15s) |
 | 4 — test suite | `tsc --noEmit` + `vitest run tests/unit` on the clean clone | **Clean typecheck; 157 files / 2,274 tests passed** |
 | 5 — branding / hygiene | the release-candidate checker's retired-palette and generated-surface stages | **Pass after the two fixes below** |
+| 6 — merge recommendation | the evidence above, plus the tree comparison and trial merge in §13.3 | **Written up in §14a** — merge the code via a reviewed merge commit, after running the §12.1b checklist against that merged tree |
 
 **Two gate-3 failures, both genuine, neither caused by the AI work being wrong:**
 
@@ -680,11 +700,28 @@ Branch `arena/b55a0c26-cloudhost247`, based on `e9d29d4`, PR #114 against `main`
 
 ---
 
+## 14a. Gate 6 — the merge recommendation
+
+The instruction was to verify, fix what is genuinely broken, report honestly, and **not merge**. The evidence supports a clear recommendation:
+
+**Recommended: merge the branch's code, but only after the merge is built as a reviewed commit rather than a button-press, and after the staging checklist in §12.1b is run against that merged tree.** The reasons, in the order they matter:
+
+1. **The AI subsystem does not exist on `main`.** This is not a branch of small fixes to a shipped feature — it is the feature. Leaving it unmerged means the entire subsystem is absent from every release, including all seven fixes. The risk of merging is bounded and mostly mechanical (below); the cost of not merging is that nothing here reaches a customer.
+2. **The merge is not automatic and should not be forced.** GitHub reports `CONFLICTING`, the histories are unrelated, and 17 shared files differ. §13.3 records what a correct merge takes — including **deleting `0092b_create_email_forensics.sql`** so the email-forensics schema is not applied twice under two prefixes. That deletion is the one step where a careless merge produces a real defect, and the migration test catches it.
+3. **What green CI does and does not buy.** Five checks pass on the branch head. That is evidence the branch is sound on its own. It is not evidence about the merge: CI runs on the head, not on a merge commit, and the merged tree is the only tree that will ever be deployed.
+4. **What must not be read into a merge.** Merging does **not** enable the assistant in a provider-backed mode, does **not** validate retrieval against real customer questions, and does **not** constitute staging or production certification. `main` with this merged is a system whose knowledge engine works and whose LLM layer is unconfigured — `grounded-model.ts` fails closed, so it degrades to deterministic answers rather than breaking.
+
+**Suggested sequence:** build the merge commit per §13.3 → run the full suites on it → run §12.1b against that tree on staging → then merge to `main`. The first three are done for the *branch*; none is done for the *merged tree* apart from the already-recorded trial merge, which will need redoing if `main` has moved since.
+
+**Do not merge on the strength of this document alone.** It is an audit of code and tests. The maintainers hold the two facts it cannot: what `main` has become since, and what the staging environment will tolerate.
+
+---
+
 ## 15. What is still needed, in one list
 
 For the next integration phase, in the order that unblocks the most:
 
-1. **Merge decision** (§13.3) — the tree comparison and a verified trial merge are done; the choice of how to combine the histories is the maintainers'.
+1. **Merge decision** (§13.3, §14a) — the tree comparison and a verified trial merge are done, and §14a gives the recommendation and sequence; the choice of how to combine the histories is the maintainers'.
 2. **Staging deployment** (§12.1 item 3) — reproduce cold sync, warm sync, drift, pricing, escalations and the rate-limit ceilings on real PostgreSQL.
 3. **Semantic retrieval decision** (§12.1a) — needs embeddings and a vector store; `pgvector` is unavailable on the supported platform, so this is an infrastructure decision, not a code change.
 4. **Provider certification** (§9) — set the three `AI_LLM_*` values and smoke-test phrasing, validation fallback and timeout against a real endpoint. Until then, no claim of provider-backed operation is valid.
