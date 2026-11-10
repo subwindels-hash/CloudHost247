@@ -27,10 +27,21 @@ export type IconName =
   | 'list' | 'lock' | 'mail' | 'megaphone' | 'network' | 'news' | 'nodejs' | 'os' | 'pen' | 'php'
   | 'pulse' | 'python' | 'puzzle' | 'refresh' | 'rocket' | 'scale' | 'search' | 'server'
   | 'server-rack' | 'settings' | 'shield' | 'sparkle' | 'star' | 'tag' | 'terminal' | 'ticket'
-  | 'tools' | 'transfer' | 'user' | 'users' | 'windows' | 'wordpress' | 'wrench' | 'zap';
+  | 'tools' | 'transfer' | 'user' | 'users' | 'windows' | 'wordpress' | 'wrench' | 'zap'
+  // Design Studio: a barcode, a label sheet, a parcel tag, a delivery van and an ID card.
+  | 'barcode' | 'layout-template' | 'package' | 'truck' | 'id-card';
 
 /** Path data, drawn on a 24×24 grid with `fill="none"` and `stroke="currentColor"`. */
 const PATHS: Record<IconName, string> = {
+  // Four bars of varying width inside a frame: the universal barcode glyph, not a specific symbology.
+  barcode: 'M4 6v12M7 6v12M10.5 6v12M13 6v12M16.5 6v12M20 6v12',
+  // A sheet with a 2 x 2 label grid punched out of it.
+  'layout-template': 'M4 4h16v16H4zM4 12h16M12 4v16',
+  // A closed parcel: box outline plus the tape seam.
+  package: 'M4 8l8-4 8 4v9l-8 4-8-4V8Zm0 0l8 4m0 0l8-4m-8 4v9',
+  truck: 'M3 7h11v8H3zM14 10h4l3 3v2h-7zM7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
+  // A card with a portrait square and two text rules.
+  'id-card': 'M3 5h18v14H3zM7.5 10.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM5 16c0-1.3 1.1-2.4 2.5-2.4S10 14.7 10 16m3-7h6m-6 3h6m-6 3h4',
   activity: 'M3 12h4l2.5-7 4 14L16 12h5',
   alert: 'M12 4l9 16H3l9-16Zm0 5v5m0 3v.01',
   api: 'M8 4H5v16h3M16 4h3v16h-3M10 9l4 6m0-6l-4 6',

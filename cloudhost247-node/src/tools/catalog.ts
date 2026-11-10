@@ -1014,6 +1014,122 @@ const BASE_TOOL_CATALOG: readonly ToolCatalogEntry[] = [
     ],
   },
 
+  // ------------------------------------------------------------------ Design Studio
+  // Five generation tools sharing one engine (src/tools/design-studio). They are filed under
+  // `productivity` because their output is a document the user takes away, not a measurement of a
+  // remote system. All five are generated server-side from the same BWIPP/pdf-lib engine as the API,
+  // and none of them stores a submitted payload — see NON_PERSISTABLE_TOOL_SLUGS.
+  {
+    slug: 'barcode-generator',
+    name: 'Barcode Generator',
+    category: 'productivity',
+    summary: 'Create Code 128, Code 39, EAN, UPC, ITF-14, GS1, QR, Data Matrix, PDF417 and Aztec barcodes as PNG, SVG or print-ready PDF.',
+    description:
+      'Encodes fifteen symbologies with a real, standards-compliant encoder (BWIPP through bwip-js) and reports the exact printed geometry: the module width in millimetres, the quiet zone the symbology requires and the resulting symbol size. Payloads are validated against the chosen format before anything is drawn — a check digit is calculated when you omit it and rejected when you supply a wrong one — so the page never prints a symbol that encodes something other than what you typed. The rendered symbol is verified by decoding it back in the test suite. Supports Code 128, Code 39, Code 93, EAN-8, EAN-13, UPC-A, UPC-E, ITF-14, Interleaved 2 of 5, Codabar, GS1-128, GS1 DataBar, QR, Micro QR, Data Matrix, PDF417 and Aztec.',
+    icon: 'barcode',
+    path: '/tools/barcode-generator',
+    apiPath: '/api/tools/barcode-generator',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 15_000,
+    keywords: ['barcode', 'barcode generator', 'code 128', 'code 39', 'ean 13', 'ean 8', 'upc', 'upc-e', 'itf-14', 'gs1-128', 'gs1 databar', 'qr', 'micro qr', 'data matrix', 'pdf417', 'aztec', 'svg barcode', 'barcode png', 'barcode pdf', 'print barcode'],
+    notes: [
+      'Every symbol is generated locally by the platform\'s own encoder. No third-party barcode service is called and no payload leaves the server.',
+      'A narrow module below about 0.25 mm will not reliably scan from an office laser printer, whatever the image resolution — the page warns when your setting is below the practical minimum.',
+    ],
+  },
+  {
+    slug: 'label-designer',
+    name: 'Label Designer',
+    category: 'productivity',
+    summary: 'Design labels in millimetres with text, barcodes, QR codes, logos and images, then print a sheet or a CSV batch as PDF, SVG or PNG.',
+    description:
+      'A millimetre-accurate label editor: choose a stock size or type your own, place text, data fields, barcodes, 2D symbols and images, and see the print preview at the real size. Elements are positioned in millimetres from the label\'s top-left, so a template keeps its layout when it moves to a different sheet. Batch printing takes a CSV, maps its columns to the label\'s fields, and reports every row individually: rejected rows come back with the reason and can be exported as a corrected CSV, and duplicate rows are flagged rather than silently dropped. A barcode is never stretched to fill its box — the module width you set is the module width that prints.',
+    icon: 'layout-template',
+    path: '/tools/label-designer',
+    apiPath: '/api/tools/label-designer',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'heavy',
+    cacheSeconds: 0,
+    timeoutMs: 30_000,
+    keywords: ['label', 'label designer', 'label maker', 'address label', 'product label', 'barcode label', 'csv labels', 'mail merge', 'avery', 'thermal label', 'label template', '40x20', '70x40'],
+    notes: [
+      'Avery, Herma and similar die-cut sheets are offered as paper sizes with their published grid; the label size always comes from your document, never from the vendor\'s name.',
+      'Batches are capped at 2000 rows and 2 MB of CSV per request. Rows that fail validation are reported with their line number — none are skipped silently.',
+    ],
+  },
+  {
+    slug: 'vda-4902-label-generator',
+    name: 'VDA 4902 Label Generator',
+    category: 'productivity',
+    summary: 'Generate a VDA 4902 version 4 goods tag (master 210 × 148 mm or KLT 210 × 74 mm) with Code 39 and PDF417 symbols.',
+    description:
+      'Builds the VDA Recommendation 4902 goods tag — the German automotive delivery label — at the two published sizes: the master tag at 210 × 148 mm and the small load carrier (KLT) label at 210 × 74 mm. Fields 1–15 are laid out in the recommendation\'s order with the German captions available, and the delivery note is encoded as Code 39 alongside a PDF417 block carrying the shipment data. Every field is validated; if the data is unusable the label prints the field outlines and a red notice instead of a symbol that would scan to the wrong value. The page documents the supported version, the field list, the dimensions and the limitations, and states plainly that the output is an implementation of the published layout rather than a certification.',
+    icon: 'package',
+    path: '/tools/vda-4902-label-generator',
+    apiPath: '/api/tools/vda-4902-label-generator',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 20_000,
+    keywords: ['vda', 'vda 4902', 'vda4902', 'goods tag', 'warenanhänger', 'automotive label', 'klt', 'kleinladungsträger', 'odette', 'supplier label', 'pdf417', 'code 39'],
+    notes: [
+      'Implemented against the published version 4 field list and the two label sizes. Not certified by the VDA or by any vehicle manufacturer; customer-specific logistics manuals add requirements that this tool does not know about.',
+      'Version 3 and pre-1994 layouts are refused rather than approximated.',
+    ],
+  },
+  {
+    slug: 'shipping-label-generator',
+    name: 'Shipping Label Generator',
+    category: 'productivity',
+    summary: 'Build a carrier-neutral shipping label with sender, recipient, references and Code 128, GS1-128 or QR codes.',
+    description:
+      'Produces a shipping label from a shipment record: sender and recipient blocks, your reference, the carrier tracking number you supply, weight, dimensions, piece count and handling instructions. The reference is encoded as Code 128, or as a GS1-128 element string when you have an SSCC, or as a QR code — with the element string shown so you can check exactly what the scanner will read. Addresses, weights and dates are validated before printing. The output is deliberately carrier-neutral: it carries no carrier artwork and does not invent a tracking number, because only the carrier can issue one.',
+    icon: 'truck',
+    path: '/tools/shipping-label-generator',
+    apiPath: '/api/tools/shipping-label-generator',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'heavy',
+    cacheSeconds: 0,
+    timeoutMs: 30_000,
+    keywords: ['shipping label', 'parcel label', 'courier label', 'address label', 'gs1-128', 'sscc', 'packing slip', 'thermal label', 'dispatch', 'logistics'],
+    notes: [
+      'Carrier-neutral by design. This tool cannot issue a UPS, DHL, FedEx or any other carrier\'s label, and it never generates a tracking number.',
+      'A GS1-128 symbol needs an 18-digit SSCC; without one, choose plain Code 128 and the page uses your reference instead.',
+    ],
+  },
+  {
+    slug: 'qr-business-card-designer',
+    name: 'QR Business Card Designer',
+    category: 'productivity',
+    summary: 'Design a printable business card whose QR code is a real vCard or MeCard contact.',
+    description:
+      'Turns your contact details into a printable business card with a QR code that a phone imports as a contact — vCard 3.0 by default, or the more compact MeCard. Eight card layouts cover the international 85 × 55 mm card, the North American 3.5 × 2 inch card, portrait, square and dark-ground designs; the QR always sits on a white panel so it scans even on a dark card. Front and back are designed together and exported as a two-page PDF, PNG or SVG. The page lists which fields each payload format can carry, and the generated code is decoded back to a vCard in the test suite rather than assumed to work.',
+    icon: 'id-card',
+    path: '/tools/qr-business-card-designer',
+    apiPath: '/api/tools/qr-business-card-designer',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 20_000,
+    keywords: ['business card', 'qr business card', 'vcard', 'mecard', 'digital business card', 'contact qr', 'name card', 'card designer', 'networking'],
+    notes: [
+      'Extends the existing QR Code Generator rather than replacing it: the QR Code Generator still encodes arbitrary text, and this tool builds the structured contact payload and the card layout around it.',
+      'The logo upload accepts PNG, JPEG, WebP and GIF up to 512 kB. SVG logos are refused because an SVG can carry script.',
+      'Contact details are processed in memory and not stored. Do not enter data you would not put on a printed card.',
+    ],
+  },
   // ------------------------------------------------------------------ Domain
   {
     slug: 'punycode',
@@ -1544,7 +1660,17 @@ export const NON_RUNNABLE_TOOL_SLUGS = new Set([
  * forgotten; persisting a result because a button exists would quietly break that promise. The
  * caller keeps what they need with the page's copy/download actions.
  */
-export const NON_PERSISTABLE_TOOL_SLUGS = new Set(['mrz-generator']);
+export const NON_PERSISTABLE_TOOL_SLUGS = new Set([
+  'mrz-generator',
+  // The Design Studio tools take addresses, contact details and shipment records. Their results are
+  // a document the user downloads; writing one to the report store or a support ticket would keep
+  // PII the user never asked us to keep.
+  'barcode-generator',
+  'label-designer',
+  'vda-4902-label-generator',
+  'shipping-label-generator',
+  'qr-business-card-designer',
+]);
 
 /** Public marketing-safe tool list used by tests to assert the catalogue is coherent. */
 export const TOOL_SLUGS: readonly string[] = TOOL_CATALOG.map((entry) => entry.slug);

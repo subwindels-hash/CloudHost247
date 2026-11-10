@@ -13,6 +13,7 @@ import { securityDomainHandlers, securityDomainTargets } from './security-domain
 import { productivityHandlers, productivityTargets } from './productivity';
 import { documentHandlers, documentTargets } from './document';
 import { emailGapHandlers, gapHandlers, gapTargets } from './gap-tools';
+import { designStudioHandlers, designStudioTargets } from './design-studio';
 import type { ToolHandler } from './kit';
 
 export * from './kit';
@@ -26,6 +27,7 @@ export const TOOL_HANDLERS: Record<string, ToolHandler> = {
   ...documentHandlers,
   ...gapHandlers,
   ...emailGapHandlers,
+  ...designStudioHandlers,
 };
 
 /** Safe target labels for history/audit rows; tools without a natural target return null. */
@@ -37,6 +39,7 @@ export const TOOL_TARGETS: Record<string, (input: Record<string, unknown>) => st
   ...productivityTargets,
   ...documentTargets,
   ...gapTargets,
+  ...designStudioTargets,
 };
 
 /** Slugs that are executable (everything in the catalogue except the portal pages). */
