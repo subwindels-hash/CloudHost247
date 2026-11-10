@@ -139,6 +139,9 @@ export default function Header() {
               <NavLink to="/admin" end>Admin</NavLink>
             ) : null}
             {user && STAFF_ROLES.includes(user.role) ? (
+              <NavLink to="/admin/visitor-intelligence">Visitor Intelligence</NavLink>
+            ) : null}
+            {user && STAFF_ROLES.includes(user.role) ? (
               <NavLink to="/admin/domain-services">Domain Services</NavLink>
             ) : null}
             {user && STAFF_ROLES.includes(user.role) ? (

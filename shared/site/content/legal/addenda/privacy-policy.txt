@@ -8,4 +8,13 @@ Effective upon publication of the CloudHost247 platform implementation, CloudHos
 - The default server payload contains a SHA-256 hash of an opaque consent-session identifier and, where available, Meta _fbp/_fbc values. It does not include your name, email address, phone number, password or payment-card data. Any future advanced-matching change requires separate review and consent.
 - Meta processes the data under its own terms and privacy policy. Marketing consent history is retained for up to 180 days, event activity for up to 90 days, and terminal delivery diagnostics for up to 30 days.
 
+First-party Visitor Intelligence
+
+When Analytics permission is explicitly granted and the feature is enabled by CloudHost247, the site may collect anonymous pageview and short-lived live-presence data for CloudHost247's own reporting. This is separate from GA4 and Meta, and neither service is used as its database or source of truth.
+
+- Data may include a random visitor/session/tab identifier, a sanitized origin-relative page path with query strings and fragments removed, a coarse referrer domain with subdomains removed, coarse device/browser/operating-system family, UTC timestamps and approximate country/region/city.
+- A network address is processed transiently through a verified server boundary for local GeoIP lookup and is not stored in Visitor Intelligence records. Coordinates are rounded city-centre estimates; no precise location or browser GPS is collected.
+- Visitor Intelligence does not store names, emails, account identifiers, passwords, authentication tokens, raw User-Agent strings, form contents or full referrer URLs. Admin browsing, automated crawlers and common health/uptime probes are excluded.
+- Visitor pageviews and session records are retained for a configurable period (90 days by default, adjustable from 7 to 365 days). Withdrawing Analytics permission stops new tracking and deletes visitor sessions and their linked pageviews for that consent record.
+
 Questions or rights requests can be sent to privacy@cloudhost247.com.

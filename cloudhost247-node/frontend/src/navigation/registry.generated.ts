@@ -1628,6 +1628,7 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/admin/tools",
   "/admin/tools/mrz",
   "/admin/unified-inbox",
+  "/admin/visitor-intelligence",
   "/admin/website-builder",
   "/apps",
   "/apps/:slug",

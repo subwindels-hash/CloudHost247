@@ -81,7 +81,12 @@
 {include file="$template/cloudhost247_legacy_includes/cookie-offers.tpl"}
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247_legacy/css/marketing.css?v=20261108">
 <div class="container"><button type="button" class="ch247-cookie-settings" data-cookie-settings>Cookie settings</button></div>
-{if $ch247Site.platform}<script src="{$WEB_ROOT}/templates/cloudhost247_legacy/js/marketing.js?v=20261108.7" data-marketing-api="{$ch247Site.platform|escape}/api/v1/marketing" data-ga4-id="{$cloudhost247.settings.google_analytics_code|default:''|escape:'html'}" data-gtm-id="{$cloudhost247.settings.google_tag_manager_code|default:''|escape:'html'}" data-baidu-id="{$cloudhost247.settings.baidu_analytics_code|default:''|escape:'html'}" defer></script><script src="{$WEB_ROOT}/templates/cloudhost247_legacy/js/tiktok.js?v=20261108" data-marketing-api="{$ch247Site.platform|escape}/api/v1/marketing" defer></script>{/if}
+{if $ch247Site.platform}
+<script src="{$WEB_ROOT}/templates/cloudhost247_legacy/js/marketing.js?v=20261109" data-marketing-api="{$ch247Site.platform|escape}/api/v1/marketing" data-ga4-id="{$cloudhost247.settings.google_analytics_code|default:''|escape:'html'}" data-gtm-id="{$cloudhost247.settings.google_tag_manager_code|default:''|escape:'html'}" data-baidu-id="{$cloudhost247.settings.baidu_analytics_code|default:''|escape:'html'}" defer></script>
+{* Admin sessions, including masquerading-as-client sessions, are never counted. *}
+{if !$adminLoggedIn && !$adminMasqueradingAsClient}<script src="{$WEB_ROOT}/templates/cloudhost247_legacy/js/visitor-intelligence.js?v=20261109" data-visitor-intelligence-api="{$ch247Site.platform|escape}/api/v1/visitor-intelligence" defer></script>{/if}
+<script src="{$WEB_ROOT}/templates/cloudhost247_legacy/js/tiktok.js?v=20261108" data-marketing-api="{$ch247Site.platform|escape}/api/v1/marketing" defer></script>
+{/if}
 {include file="$template/cloudhost247_legacy_includes/livechatoptions.tpl"}
 </body>
 </html>

@@ -1,0 +1,408 @@
+/* CloudHost247 first-party visitor intelligence runtime.
+ * Shared by the Node SPA and the WHMCS Smarty themes. It creates no visitor/session/tab IDs and
+ * performs no collection until the existing preference runtime confirms valid analytics consent
+ * and the server confirms that first-party collection is enabled.
+ */
+(function (root) {
+  'use strict';
+  if (root.CloudHost247VisitorIntelligence) return;
+
+  var STORAGE_KEY = 'ch247.visitor-intelligence.v1';
+  var SESSION_MAX_AGE_MS = 30 * 60 * 1000;
+  var HEARTBEAT_MS = 30 * 1000;
+  var STATUS_REFRESH_MS = 60 * 1000;
+  var currentPath = null;
+  var apiBase = '/api/v1/visitor-intelligence';
+  var enabled = false;
+  var allowed = false;
+  var started = false;
+  var inFlightPageview = false;
+  var pendingPagePath = null;
+  var lastSentPage = null;
+  var lastActivityAt = Date.now();
+  var consentCsrf = null;
+  var consentExpiresAt = 0;
+  var lastConsentSnapshot = null;
+  var identity = null;
+  var tabId = null;
+  var identitySessionChanged = false;
+  var heartbeatTimer = null;
+  var statusTimer = null;
+  var unsubscribe = null;
+  var consentEpoch = 0;
+  var activityListeners = [];
+  var idleAfterSeconds = 120;
+
+  function createId() {
+    try {
+      if (root.crypto && typeof root.crypto.randomUUID === 'function') return root.crypto.randomUUID();
+      if (root.crypto && typeof root.crypto.getRandomValues === 'function') {
+        var bytes = new Uint8Array(16);
+        root.crypto.getRandomValues(bytes);
+        bytes[6] = (bytes[6] & 0x0f) | 0x40;
+        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        var hex = Array.from(bytes).map(function (value) { return value.toString(16).padStart(2, '0'); }).join('');
+        return hex.slice(0, 8) + '-' + hex.slice(8, 12) + '-' + hex.slice(12, 16) + '-' + hex.slice(16, 20) + '-' + hex.slice(20);
+      }
+    } catch (_) { /* secure randomness unavailable */ }
+    return null;
+  }
+
+  function validId(value) {
+    return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+  }
+  function currentUserIsStaff() {
+    try {
+      var user = JSON.parse(root.localStorage.getItem('ch247_user') || 'null');
+      return Boolean((user && ['staff', 'admin', 'super_admin'].indexOf(user.role) >= 0) ||
+        root.localStorage.getItem('ch247_support_origin'));
+    } catch (_) { return false; }
+  }
+  function csrfMarker(value) {
+    // Only a non-secret comparison marker is persisted; the consent CSRF value stays in memory.
+    var hash = 2166136261;
+    String(value || '').split('').forEach(function (character) { hash ^= character.charCodeAt(0); hash = Math.imul(hash, 16777619); });
+    return (hash >>> 0).toString(16);
+  }
+  function analyticsGranted(snapshot) {
+    var consent = snapshot && snapshot.consent;
+    return Boolean(consent && consent.decided === true && consent.policyVersion === 1 &&
+      consent.preferences && consent.preferences.analytics === true &&
+      typeof consent.expiresAt === 'string' && Date.parse(consent.expiresAt) > Date.now() &&
+      typeof consent.csrfToken === 'string' && consent.csrfToken.length > 0);
+  }
+  function excludedRouteRoot(path) {
+    var candidate = String(path || '/').split(/[?#]/, 1)[0] || '/';
+    for (var depth = 0; depth < 5; depth += 1) {
+      var next = candidate.replace(/%([0-9a-f]{2})/gi, function (encoded, hex) {
+        var byte = parseInt(hex, 16);
+        return byte < 0x80 ? String.fromCharCode(byte) : encoded;
+      });
+      if (next === candidate) break;
+      candidate = next;
+    }
+    candidate = candidate.replace(/\\/g, '/').replace(/\/{2,}/g, '/').toLowerCase();
+    var root = candidate.split('/')[1] || '';
+    if (/%[0-7][0-9a-f]/i.test(root)) return 'ambiguous';
+    return root.split(/[?#&=;%]/, 1)[0] || '';
+  }
+  function staffOrAdminPath(path) {
+    if (currentUserIsStaff()) return true;
+    return ['admin', 'api', 'health', 'ready', 'ambiguous'].indexOf(excludedRouteRoot(path)) >= 0;
+  }
+  function normalizedPath(value) {
+    var path = String(value || (root.location && root.location.pathname) || '/').split(/[?#]/)[0] || '/';
+    if (path.charAt(0) !== '/' || path.indexOf('//') === 0) return null;
+    return path.slice(0, 1024);
+  }
+  function readIdentity(marker) {
+    var now = Date.now();
+    try {
+      var stored = JSON.parse(root.localStorage.getItem(STORAGE_KEY) || 'null');
+      if (stored && stored.marker === marker && validId(stored.visitorId) && validId(stored.sessionId) &&
+          typeof stored.lastSeenAt === 'number' && now - stored.lastSeenAt < SESSION_MAX_AGE_MS) {
+        stored.lastSeenAt = now;
+        root.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+        return stored;
+      }
+      if (stored && stored.marker === marker && validId(stored.visitorId)) {
+        stored.sessionId = createId();
+        stored.lastSeenAt = now;
+        if (!validId(stored.sessionId)) return null;
+        root.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+        return stored;
+      }
+      var visitorId = createId();
+      var sessionId = createId();
+      if (!visitorId || !sessionId) return null;
+      stored = { marker: marker, visitorId: visitorId, sessionId: sessionId, lastSeenAt: now };
+      root.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+      return stored;
+    } catch (_) { return null; }
+  }
+  function clearIdentity() {
+    identity = null;
+    tabId = null;
+    identitySessionChanged = false;
+    pendingPagePath = null;
+    lastSentPage = null;
+    try { root.localStorage.removeItem(STORAGE_KEY); } catch (_) { /* private mode / storage disabled */ }
+  }
+  function stopCollection(invalidatePending) {
+    if (invalidatePending) consentEpoch += 1;
+    allowed = false;
+    enabled = false;
+    consentCsrf = null;
+    consentExpiresAt = 0;
+    if (heartbeatTimer !== null) { root.clearInterval(heartbeatTimer); heartbeatTimer = null; }
+    clearIdentity();
+  }
+  function collectionAllowed() {
+    if (!allowed) return false;
+    if (consentExpiresAt <= Date.now() || currentUserIsStaff()) {
+      stopCollection(true);
+      return false;
+    }
+    return true;
+  }
+  function requestHeaders() {
+    var headers = { 'Content-Type': 'application/json' };
+    if (consentCsrf) headers['X-Consent-CSRF'] = consentCsrf;
+    // Used only for the server's transient staff exclusion check. It is never in the JSON payload
+    // or stored in analytics tables; all API requests remain on the platform origin.
+    try {
+      var token = root.localStorage.getItem('ch247_token');
+      if (token && token.length < 8192) headers.Authorization = 'Bearer ' + token;
+    } catch (_) { /* anonymous visit */ }
+    return headers;
+  }
+  function fetchOptions(body) {
+    return {
+      method: 'POST', credentials: 'same-origin', cache: 'no-store', referrerPolicy: 'no-referrer',
+      headers: requestHeaders(), body: JSON.stringify(body)
+    };
+  }
+  function touchIdentity() {
+    if (!collectionAllowed() || !enabled || !consentCsrf) return null;
+    var previousSessionId = identity && identity.sessionId;
+    var refreshed = readIdentity(csrfMarker(consentCsrf));
+    if (!refreshed) return null;
+    if (previousSessionId && previousSessionId !== refreshed.sessionId) {
+      // A sibling tab may have renewed the shared session, or this tab may have slept beyond the
+      // inactivity window. Tab presence is keyed to sessionId, so issue a fresh tab ID as well.
+      tabId = null;
+      lastSentPage = null;
+      identitySessionChanged = true;
+    }
+    identity = refreshed;
+    if (!tabId) tabId = createId();
+    if (!validId(tabId)) return null;
+    identity.lastSeenAt = Date.now();
+    try { root.localStorage.setItem(STORAGE_KEY, JSON.stringify(identity)); } catch (_) { /* storage unavailable */ }
+    return identity;
+  }
+  function handleExpiredSession(sessionId) {
+    var clearCurrent = !identity || identity.sessionId === sessionId;
+    try {
+      var stored = JSON.parse(root.localStorage.getItem(STORAGE_KEY) || 'null');
+      if (stored && stored.sessionId === sessionId) {
+        // Force readIdentity to rotate the shared session before the one safe retry.
+        stored.lastSeenAt = 0;
+        root.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+      }
+    } catch (_) { /* storage unavailable; readIdentity will create a new identity if possible */ }
+    if (clearCurrent) {
+      identity = null;
+      tabId = null;
+      identitySessionChanged = false;
+      lastSentPage = null;
+    }
+  }
+  function referrerHostname() {
+    try {
+      if (!root.document || !root.document.referrer) return null;
+      var host = new URL(root.document.referrer).hostname.toLowerCase().replace(/\.$/, '');
+      var currentHost = root.location && root.location.hostname ? root.location.hostname.toLowerCase().replace(/^www\./, '') : '';
+      return host && host !== currentHost && host.replace(/^www\./, '') !== currentHost ? host.slice(0, 255) : null;
+    } catch (_) { return null; }
+  }
+  function payload(path) {
+    var id = touchIdentity();
+    if (!id) return null;
+    return {
+      visitorId: id.visitorId,
+      sessionId: id.sessionId,
+      tabId: tabId,
+      pagePath: path,
+      referrerHost: referrerHostname()
+    };
+  }
+  function sendPageview(path) {
+    var cleanPath = normalizedPath(path);
+    if (!collectionAllowed() || !enabled || !cleanPath) return false;
+    if (staffOrAdminPath(cleanPath)) { pendingPagePath = null; return false; }
+    // Refreshing status/consent must not inflate the pageview count for one unchanged route.
+    if (cleanPath === lastSentPage) return false;
+    if (inFlightPageview) { pendingPagePath = cleanPath; return false; }
+    var body = payload(cleanPath);
+    if (!body) return false;
+    currentPath = cleanPath;
+    lastSentPage = cleanPath;
+    lastActivityAt = Date.now();
+    inFlightPageview = true;
+    try {
+      if (identitySessionChanged) identitySessionChanged = false; // this pageview starts the renewed session
+      root.fetch(apiBase + '/pageview', fetchOptions(body))
+        .then(function (response) {
+          if (response.status === 409) {
+            handleExpiredSession(body.sessionId);
+            pendingPagePath = cleanPath;
+            return;
+          }
+          if (!response.ok && lastSentPage === cleanPath) lastSentPage = null;
+        })
+        .catch(function () { if (lastSentPage === cleanPath) lastSentPage = null; })
+        .finally(function () {
+          inFlightPageview = false;
+          var nextPath = pendingPagePath;
+          pendingPagePath = null;
+          if (nextPath && nextPath !== lastSentPage) sendPageview(nextPath);
+        });
+    } catch (_) {
+      inFlightPageview = false;
+      if (lastSentPage === cleanPath) lastSentPage = null;
+    }
+    return true;
+  }
+  function sendHeartbeat() {
+    if (!collectionAllowed() || !enabled || !currentPath || staffOrAdminPath(currentPath) || !root.document || root.document.visibilityState === 'hidden') return false;
+    var body = payload(currentPath);
+    if (!body) return false;
+    if (identitySessionChanged) {
+      // A heartbeat can be the first request after a sleeping tab wakes. Start the renewed session
+      // with a pageview so it has a current page and presence row, rather than only a heartbeat.
+      identitySessionChanged = false;
+      lastSentPage = null;
+      sendPageview(currentPath);
+      return true;
+    }
+    body.active = Date.now() - lastActivityAt <= idleAfterSeconds * 1000;
+    try {
+      root.fetch(apiBase + '/heartbeat', fetchOptions(body)).then(function (response) {
+        if (response.status === 409) {
+          handleExpiredSession(body.sessionId);
+          if (currentPath) sendPageview(currentPath);
+        }
+      }).catch(function () { /* heartbeat is best-effort */ });
+    } catch (_) { /* no effect on site interactions */ }
+    return true;
+  }
+  function stopHeartbeat() {
+    if (heartbeatTimer !== null) { root.clearInterval(heartbeatTimer); heartbeatTimer = null; }
+  }
+  function refreshStatus() {
+    if (!collectionAllowed()) return Promise.resolve(false);
+    var epoch = consentEpoch;
+    return root.fetch(apiBase + '/status', { method: 'GET', credentials: 'same-origin', cache: 'no-store', referrerPolicy: 'no-referrer' })
+      .then(function (response) { if (!response.ok) throw new Error('unavailable'); return response.json(); })
+      .then(function (status) {
+        if (!collectionAllowed() || epoch !== consentEpoch) return false;
+        enabled = Boolean(status && status.enabled === true);
+        idleAfterSeconds = Math.max(60, Math.min(3600, Number(status && status.idleAfterSeconds) || 120));
+        if (enabled) {
+          if (currentPath) sendPageview(currentPath);
+          if (heartbeatTimer === null) heartbeatTimer = root.setInterval(sendHeartbeat, HEARTBEAT_MS);
+        } else {
+          stopHeartbeat();
+          clearIdentity();
+        }
+        return enabled;
+      }).catch(function () {
+        if (epoch !== consentEpoch || !allowed) return false;
+        // A failed status check fails closed; the site keeps working and no visitor data is sent.
+        enabled = false;
+        stopHeartbeat();
+        clearIdentity();
+        return false;
+      });
+  }
+  function applyConsent(snapshot) {
+    var epoch = ++consentEpoch;
+    if (!analyticsGranted(snapshot)) {
+      lastConsentSnapshot = null;
+      stopCollection(false);
+      return;
+    }
+    lastConsentSnapshot = snapshot;
+    if (currentUserIsStaff()) {
+      stopCollection(false);
+      return;
+    }
+    var sameConsentSession = consentCsrf === snapshot.consent.csrfToken && allowed;
+    allowed = true;
+    consentCsrf = snapshot.consent.csrfToken;
+    consentExpiresAt = Date.parse(snapshot.consent.expiresAt);
+    // A consent/config refresh in the same choice must preserve anonymous cross-tab deduplication.
+    // A new consent session gets a fresh identity, and IDs are created only after tracking is enabled.
+    if (!sameConsentSession) clearIdentity();
+    void refreshStatus().then(function () { if (epoch !== consentEpoch) return; });
+  }
+  function recordActivity() { lastActivityAt = Date.now(); }
+  function listen(target, name, handler, options) {
+    target.addEventListener(name, handler, options);
+    activityListeners.push({ target: target, name: name, handler: handler, options: options });
+  }
+  function removeActivityListeners() {
+    activityListeners.forEach(function (entry) { entry.target.removeEventListener(entry.name, entry.handler, entry.options); });
+    activityListeners = [];
+  }
+  function attachActivityListeners() {
+    if (!root.document) return;
+    ['pointerdown', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function (name) {
+      listen(root.document, name, recordActivity, { passive: true });
+    });
+    listen(root.document, 'visibilitychange', function () {
+      if (root.document.visibilityState === 'visible') void refreshStatus().then(sendHeartbeat);
+    });
+    listen(root, 'focus', function () { void refreshStatus().then(sendHeartbeat); });
+    listen(root, 'ch247-auth-changed', handleAuthChange);
+    listen(root, 'storage', function (event) {
+      if (!event || event.key === null || ['ch247_user', 'ch247_token', 'ch247_support_origin'].indexOf(event.key) >= 0) handleAuthChange();
+    });
+  }
+  function handleAuthChange() {
+    if (currentUserIsStaff()) {
+      stopCollection(true);
+      return;
+    }
+    if (lastConsentSnapshot && analyticsGranted(lastConsentSnapshot)) applyConsent(lastConsentSnapshot);
+  }
+  function start(options) {
+    options = options || {};
+    if (typeof options.apiBase === 'string' && options.apiBase &&
+        (options.apiBase.charAt(0) === '/' && options.apiBase.charAt(1) !== '/' || /^https:\/\//i.test(options.apiBase))) {
+      apiBase = options.apiBase.replace(/\/$/, '');
+    }
+    if (started) return api;
+    started = true;
+    attachActivityListeners();
+    if (typeof options.autoPageView !== 'undefined') api.autoPageView = options.autoPageView === true;
+    var marketing = root.CloudHost247Marketing;
+    if (!marketing || typeof marketing.ready !== 'function' || typeof marketing.subscribe !== 'function') return api;
+    marketing.ready().then(function () {
+      if (!started) return;
+      unsubscribe = marketing.subscribe(applyConsent);
+      if (api.autoPageView) currentPath = normalizedPath(root.location && root.location.pathname);
+      if (statusTimer === null) statusTimer = root.setInterval(function () { if (allowed) void refreshStatus(); }, STATUS_REFRESH_MS);
+    }).catch(function () { /* consent unavailable means no visitor tracking */ });
+    return api;
+  }
+  function pageView(path) {
+    currentPath = normalizedPath(path);
+    if (!currentPath) return false;
+    lastActivityAt = Date.now();
+    return sendPageview(currentPath);
+  }
+  function stop() {
+    started = false;
+    stopCollection(true);
+    lastConsentSnapshot = null;
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    if (statusTimer !== null) { root.clearInterval(statusTimer); statusTimer = null; }
+    removeActivityListeners();
+  }
+  var api = {
+    start: start,
+    pageView: pageView,
+    stop: stop,
+    isEnabled: function () { return collectionAllowed() && enabled; },
+    autoPageView: true
+  };
+  root.CloudHost247VisitorIntelligence = api;
+
+  // The WHMCS themes load this script after the shared consent runtime. Its API base is a same-origin
+  // mount supplied by Smarty; without one, tracking remains off. React initializes it explicitly.
+  var currentScript = root.document && root.document.currentScript;
+  var configuredApi = currentScript && currentScript.getAttribute('data-visitor-intelligence-api');
+  if (configuredApi) start({ apiBase: configuredApi, autoPageView: true });
+})(typeof window !== 'undefined' ? window : globalThis);

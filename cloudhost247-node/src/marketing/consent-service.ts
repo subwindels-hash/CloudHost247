@@ -80,7 +80,7 @@ export function consentDTO(context: ConsentContext, policy: string) {
     expiresAt: row.expires_at, updatedAt: row.updated_at, analyticsRevision: row.ga4_consent_revision, csrfToken: context.csrfToken,
   };
 }
-export function assertConsentMutation(request: FastifyRequest, context: ConsentContext, env: Env) {
+export function assertConsentRequest(request: FastifyRequest, token: string, env: Env) {
   const origin = request.headers.origin;
   const fetchSite = request.headers['sec-fetch-site'];
   if (fetchSite === 'cross-site') throw new ForbiddenError('Cross-site consent changes are not allowed');
@@ -92,7 +92,10 @@ export function assertConsentMutation(request: FastifyRequest, context: ConsentC
     if (!['http:','https:'].includes(parsed.protocol) || (parsed.host !== request.headers.host && parsed.origin !== expected.origin)) throw new ForbiddenError('Consent must be changed from this website');
   } else if (env.NODE_ENV === 'production') throw new ForbiddenError('An Origin header is required to change consent');
   const csrf = request.headers['x-consent-csrf'];
-  if (typeof csrf !== 'string' || !safeEqual(csrf, context.csrfToken)) throw new ForbiddenError('Reload cookie preferences before saving');
+  if (typeof csrf !== 'string' || !safeEqual(csrf, consentCsrf(token, env))) throw new ForbiddenError('Reload cookie preferences before saving');
+}
+export function assertConsentMutation(request: FastifyRequest, context: ConsentContext, env: Env) {
+  assertConsentRequest(request, context.token, env);
 }
 const actionSchema = preferencesSchema;
 export async function saveConsent(pool: Queryable, token: string, action: string, input: unknown): Promise<ConsentRow> {
@@ -113,6 +116,19 @@ export async function saveConsent(pool: Queryable, token: string, action: string
     await tx.query(`INSERT INTO marketing_consent_history(id,session_id,action,preferences,jurisdiction,policy_version) VALUES($1,$2,$3,$4,$5,$6)`, [randomUUID(),row.id,action,JSON.stringify(preferences),row.jurisdiction,CONSENT_POLICY_VERSION]);
     // Withdrawn analytics cannot remain attributable, even if the visitor later re-consents.
     if (!preferences.analytics) {
+      // First-party visitor sessions are attached to the consent row and cascade to pageviews and
+      // tab-presence. Delete them on withdrawal as well as preventing future ingestion. The
+      // savepoint lets consent management continue to work during a rolling deploy where migration
+      // 0099 has not yet been applied; once the table exists, non-migration failures are surfaced.
+      await tx.query('SAVEPOINT visitor_intelligence_withdrawal');
+      try {
+        await tx.query('DELETE FROM visitor_sessions WHERE consent_session_id=$1', [row.id]);
+        await tx.query('RELEASE SAVEPOINT visitor_intelligence_withdrawal');
+      } catch (error) {
+        await tx.query('ROLLBACK TO SAVEPOINT visitor_intelligence_withdrawal');
+        await tx.query('RELEASE SAVEPOINT visitor_intelligence_withdrawal');
+        if ((error as { code?: string }).code !== '42P01') throw error;
+      }
       // A sending claim may already be in flight. Its outcome is unknown, not cancelled;
       // keep the claim token briefly so the same worker can record a response if one arrives.
       // The sender's final eligibility check requires status=sending, so withdrawal before

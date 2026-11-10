@@ -108,6 +108,8 @@ const MOTION_JS = join(ROOT, 'shared', 'site', 'motion.js');
 const MOTION_JS_COPY = join(ROOT, 'templates', 'cloudhost247', 'js', 'motion.js');
 const MARKETING_JS_COPY = join(ROOT, 'templates', 'cloudhost247', 'js', 'marketing.js');
 const LEGACY_MARKETING_JS_COPY = join(ROOT, 'templates', 'cloudhost247_legacy', 'js', 'marketing.js');
+const VISITOR_INTELLIGENCE_JS_COPY = join(ROOT, 'templates', 'cloudhost247', 'js', 'visitor-intelligence.js');
+const LEGACY_VISITOR_INTELLIGENCE_JS_COPY = join(ROOT, 'templates', 'cloudhost247_legacy', 'js', 'visitor-intelligence.js');
 const TIKTOK_JS_COPY = join(ROOT, 'templates', 'cloudhost247', 'js', 'tiktok.js');
 const LEGACY_TIKTOK_JS_COPY = join(ROOT, 'templates', 'cloudhost247_legacy', 'js', 'tiktok.js');
 const MARKETING_CSS_COPY = join(ROOT, 'templates', 'cloudhost247', 'css', 'marketing.css');
@@ -1694,8 +1696,10 @@ function main() {
     generatedHeader('shared/site/metals.css', '/*', '*/') + readFileSync(METALS_CSS, 'utf8'));
   writeFileSync(MOTION_JS_COPY,
     generatedHeader('shared/site/motion.js', '/*', '*/') + readFileSync(MOTION_JS, 'utf8'));
-  // Consent/Pixel has one owner across all three shells. Generated copies avoid a second snippet.
+  // Consent/Pixel and first-party visitor intelligence have one shared implementation across the
+  // React SPA and WHMCS shells. Generated theme copies keep the WHMCS document root self-contained.
   for (const target of [MARKETING_JS_COPY, LEGACY_MARKETING_JS_COPY]) writeFileSync(target, generatedHeader('shared/site/marketing.js','/*','*/') + readFileSync(join(ROOT,'shared/site/marketing.js'),'utf8'));
+  for (const target of [VISITOR_INTELLIGENCE_JS_COPY, LEGACY_VISITOR_INTELLIGENCE_JS_COPY]) writeFileSync(target, generatedHeader('shared/site/visitor-intelligence.js','/*','*/') + readFileSync(join(ROOT,'shared/site/visitor-intelligence.js'),'utf8'));
   for (const target of [TIKTOK_JS_COPY, LEGACY_TIKTOK_JS_COPY]) writeFileSync(target, generatedHeader('shared/site/tiktok.js','/*','*/') + readFileSync(join(ROOT,'shared/site/tiktok.js'),'utf8'));
   for (const target of [MARKETING_CSS_COPY, LEGACY_MARKETING_CSS_COPY]) writeFileSync(target, generatedHeader('shared/site/marketing.css','/*','*/') + readFileSync(join(ROOT,'shared/site/marketing.css'),'utf8'));
 

@@ -116,6 +116,15 @@
             <h3>Data Transfer</h3>
             <p>Your data may be processed or stored in the United States or other countries outside your location, with safeguards to ensure compliance with privacy laws.</p>
 
+            <h3>First-party Visitor Intelligence</h3>
+            <p>When Analytics permission is explicitly granted and the feature is enabled by CloudHost247, the site may collect anonymous pageview and short-lived live-presence data for CloudHost247’s own reporting. This is separate from GA4 and Meta, and neither service is used as its database or source of truth.</p>
+            <ul>
+                <li>Data may include a random visitor/session/tab identifier, a sanitized origin-relative page path with query strings and fragments removed, a coarse referrer domain with subdomains removed, coarse device/browser/operating-system family, UTC timestamps and approximate country/region/city.</li>
+                <li>A network address is processed transiently through a verified server boundary for local GeoIP lookup and is not stored in Visitor Intelligence records. Coordinates are rounded city-centre estimates; no precise location or browser GPS is collected.</li>
+                <li>Visitor Intelligence does not store names, emails, account identifiers, passwords, authentication tokens, raw User-Agent strings, form contents or full referrer URLs. Admin browsing, automated crawlers and common health/uptime probes are excluded.</li>
+                <li>Visitor pageviews and session records are retained for a configurable period (90 days by default, adjustable from 7 to 365 days). Withdrawing Analytics permission stops new tracking and deletes visitor sessions and their linked pageviews for that consent record.</li>
+            </ul>
+
             <h3>Notification of Changes</h3>
             <p>We may update this Privacy Policy and will notify you via our website or email before significant changes take effect. Continued use of our Services after changes constitutes acceptance.</p>
 
