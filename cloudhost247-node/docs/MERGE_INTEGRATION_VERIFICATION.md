@@ -4,7 +4,19 @@
 **Branch under test:** `arena/b55a0c26-cloudhost247`
 **Base integrated:** `main` at `033ab8b` — "Add consent-gated Visitor Intelligence" (PR #115)
 **Date:** 10 November 2026
-**Verdict:** **The merge is technically sound. It is not merged and not authorised.**
+**Verdict:** **The merge is technically sound and GitHub reports the PR `MERGEABLE`. It is not merged and not authorised.**
+
+Stage records, kept separate because the differences matter:
+
+| Stage | Status |
+| --- | --- |
+| Conflict resolution | **Done** — 60 files, 11 genuinely contested, all justified |
+| Migration compatibility | **Done** — zero duplicate prefixes; `0100` is the tail |
+| Local suites on the merged tree | **Done** — 4,360 passed, 0 failed |
+| CI on the merged tree | **Done** — five checks green, PHP linted for real |
+| Staging verification | **Not done** |
+| Production certification | **Not done** |
+| Merge to `main` | **Not done, not authorised** |
 
 This report is deliberately separate from `AI_WEBSITE_INTELLIGENCE_AUDIT.md`. That document audits the AI subsystem on its own branch. This one audits **the combination**, which is a different question with a different answer, and the distinction was the point of the instruction that commissioned both.
 
@@ -173,9 +185,9 @@ Counts rose across the board relative to this branch alone — unit 2,298 → **
 
 Stated because the numbers above are large and inviting to over-read.
 
-1. **No CI run exists for the merged tree.** Everything here ran locally. The merged commit has not been pushed to a branch that CI watches, so there is no independent signal on it at all.
-2. **PHP lint was not executed.** PHP is not installed in this environment; the release-candidate gate ran with a stub that exits 0. The gate's *logic* passed; no PHP was linted. If this merge is proposed for `main`, CI must lint it.
-3. **The merge is not proposed, not pushed, not merged.** It exists as a local commit in a scratch clone.
+1. ~~No CI run exists for the merged tree.~~ **Now resolved.** The merge was pushed to the PR branch (`c5264ee`) and CI ran on it: **all five checks green** — Node 22.12 (17m12s), Node 24.8 (23m51s), Release candidate PHP 7.4 (2m49s), PHP 8.2 (2m38s), content hygiene (17s). GitHub now reports the PR as **`MERGEABLE`**, down from `CONFLICTING`.
+2. ~~PHP lint was not executed.~~ **Now resolved by CI, not here.** PHP is not installed in this environment and the local gate ran with a stub. The two release-candidate jobs linted PHP for real against the *merged* tree — 7.4 and 8.2 — and passed. This is the first time any PHP has been checked in a merged state.
+3. **The merge is pushed but not merged.** It is on the PR branch, not in `main`. Nothing has been landed.
 4. **Nothing was deployed.** No staging, no production, no credentials, no scheduler.
 5. **The AI provider path remains unverified** (Phase 28 §9.2) and is unaffected by this merge. The merge does not bring provider certification any closer.
 6. **Semantic retrieval is still absent.** Two relevance failures remain as accepted limitations.
@@ -193,7 +205,11 @@ Concretely, to land this:
 3. Re-run the Phase 28 §12.1b staging checklist against the staging deployment of this merged tree.
 4. Then merge.
 
-**Do not merge on the strength of this document.** It reports one local verification of one merge. It does not certify CI, staging or production, and step 2 in particular is not optional — a merged tree that has never been through the pipeline is exactly the state this phase was commissioned to stop guesswork about.
+**Steps 1 and 2 are now done.** The merge is on the PR branch and CI has run the full matrix against it, green, with PHP linted for real for the first time in a merged state. GitHub reports the PR `MERGEABLE`.
+
+**Step 3 — staging — has not been done**, and it is the one that cannot be done from here. Nothing in this document speaks to how the merged tree behaves against real PostgreSQL, a real scheduler, or a real provider.
+
+**Do not merge on the strength of this document alone.** It reports a local suite run and a CI run of one merge. Neither is staging and neither is production certification.
 
 The conflict resolution itself is mechanical and reviewable: 49 of 60 conflicts resolved by an objective rule, 11 by hand, each justified above, with the one genuinely dangerous choice (the migration tail test) called out.
 
@@ -207,5 +223,6 @@ The conflict resolution itself is mechanical and reviewable: 49 of 60 conflicts 
 | Merge commit | `678ef6d` — merge + migration renumbering + projection regeneration |
 | Inherited-defect commit | `96370b7` — palette and integrity baseline |
 | Clean `main` comparison | `/tmp/mainonly` — proves §5 defects are pre-existing |
+| CI run on the merged tree | PR #114, head `c5264ee`, five checks green |
 | Gate log | `/tmp/rc-integ4.log` |
 | Suite logs | `/tmp/merged-unit.log`, `/tmp/merged-integ.log` |
