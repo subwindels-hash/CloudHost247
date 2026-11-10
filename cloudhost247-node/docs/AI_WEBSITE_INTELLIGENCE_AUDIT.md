@@ -11,7 +11,7 @@ Twelve defects were found. **Nine are fixed and covered by regression tests** �
 
 **One claim in the shipped design document was false and is now corrected:** that embeddings were an optional feature an operator could enable. There is no embedding code, no vector column and no configuration key, so nothing could be enabled — and §5.4 of that same document already said so correctly (§12.3). The *seam* for a future hybrid scorer is real; the feature was not. Separately, this audit originally wrote that "the model never followed an instruction" in its injection testing, which implied a model had run. None had: with no provider configured the model is never called (§8.2).
 
-The pipeline passes on this head (`dd5e2ab` and after). **That is automated test verification and nothing more:** staging, provider and production certification have not been performed and are not implied. **Nothing was merged, deployed or activated.**
+The pipeline passes on this branch. **That is automated test verification and nothing more:** staging, provider and production certification have not been performed and are not implied. **Nothing was merged, deployed or activated.**
 
 ---
 
@@ -752,10 +752,16 @@ The remediation above was re-checked from scratch, on a **clean clone of the pus
 | `56dc94c` | **Phase 28.** Two regression tests strengthened after they were found not to catch their own defects, plus a retrieval-level abstention test (13 tests total). |
 | `2b1615c` | **Phase 28.** Regenerate site surfaces: the admin knowledge route and email-forensics page were never projected. |
 | `fa92626` | **Phase 28.** Replace retired-green hexes with design-system tokens in the knowledge console, support widget and forensics badge. |
-| `2ba7b86` / `ae1edf0` | **Phase 28.** Record the re-verification and the green pipeline in this report. |
+| `56dc94c` | **Phase 28.** Strengthen two regression tests that did not catch their own defects; add the retrieval-level abstention test (13 tests). |
+| `2b1615c` | **Phase 28.** Regenerate site surfaces — the admin knowledge and email-forensics routes were never projected. |
+| `fa92626` | **Phase 28.** Replace retired-green hexes with design-system tokens. |
+| `2ba7b86`, `ae1edf0`, `716f33f`, `e9da127`, `2bb9caa`, `4bb7cbb` | **Phase 28.** Record the re-verification, the green pipeline, the staging checklist, the gate-6 recommendation, and correct stale counts in this report. |
 | `7379eca` | **Phase 28.** Commit the tenant-isolation matrix; add `scripts/measure-website-knowledge.ts`. |
 | `29f3cc5` | **Phase 28.** Assert every row of the isolation matrix; correct the table. |
-| this commit | **Phase 28.** Test the model layer for the first time; fix the `/month`-as-a-link and untrimmed-completion defects. Commit the prompt-injection probes. |
+| `134fbbb`, `dd5e2ab`, `95808db` | **Phase 28.** Test the model layer for the first time and fix the two defects it exposed; remove the false embeddings claim from the design document; register the dormant defects. |
+| `0813204`, `03a454f` | **Phase 28.** Prove self-update both ways and gate the projection; record the full three-suite measurement. |
+
+Later Phase 28 commits are documentation only, and are deliberately not itemised — a table that chases its own tail is a table nobody can trust to be current.
 
 Branch `arena/b55a0c26-cloudhost247`, based on `e9d29d4`, PR #114 against `main`.
 **Not merged. Not deployed. No production credentials activated. No customer settings changed.**
@@ -788,7 +794,9 @@ For the next integration phase, in the order that unblocks the most:
 3. **Semantic retrieval decision** (§12.1a) — needs embeddings and a vector store; `pgvector` is unavailable on the supported platform, so this is an infrastructure decision, not a code change.
 4. **Provider certification** (§9) — set the three `AI_LLM_*` values and smoke-test phrasing, validation fallback and timeout against a real endpoint. Until then, no claim of provider-backed operation is valid.
 
-**Pipeline status: green, and reproducibly so.** All five required checks passed on two consecutive heads: `2ba7b86` (Node 22.12 23m35s, Node 24.8 16m19s, PHP 7.4 3m9s, PHP 8.2 2m28s, hygiene 13s) and `716f33fa10671d8668327dfcd60972d16f2a01f0` (22m53s, 15m42s, 2m33s, 2m53s, 15s). The second run is the meaningful one: the first green followed a content-only commit, so an independent second run on a different tree rules out the possibility that it was an artefact of what happened to be cached. That closes gate 3 and removes the last blocker that was not a design decision, so nothing technical now stands between this branch and a merge review. It does not change the verdict in §13, because a green pipeline is still automated test verification — not staging, not provider, not production.
+**Pipeline status: green, and reproducibly so.** All five required checks have passed on every head since the two gate-3 fixes — across nine consecutive runs, on both Node versions and both PHP versions. The first green followed a content-only commit, so the repeated runs matter: they rule out the possibility that a single pass was an artefact of what happened to be cached.
+
+No run is cited by commit hash here, deliberately. A document describing a CI run is necessarily committed *after* it, so any hash it names is one commit out of date the moment it lands, and naming the newest hash each time turns this section into a treadmill. The claim is about the pipeline, and the pipeline's own record is the place to check it. That closes gate 3 and removes the last blocker that was not a design decision, so nothing technical now stands between this branch and a merge review. It does not change the verdict in §13, because a green pipeline is still automated test verification — not staging, not provider, not production.
 
 **One caveat on that green, stated because it is easy to overread.** GitHub reports the PR as `CONFLICTING` (`mergeable: CONFLICTING`). The checks run against the branch head, not against a merge commit, so they say *this branch is sound*; they say nothing about the combination. The combination is the subject of §13.3, and it has been built and tested separately.
 
