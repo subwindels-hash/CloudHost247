@@ -220,6 +220,26 @@ prevent.
 Not exposed: a standalone `/export` route — the envelope above already carries the PDF, which is the
 only export the pages need.
 
+### Outstanding limitations of saved templates
+
+Recorded here rather than discovered later:
+
+* **The concurrency tests run against PGlite**, which serialises requests within a single connection.
+  They therefore prove the *predicate* — that a write whose `WHERE revision = $n` does not match
+  returns 409 and changes nothing, verified by deleting that predicate and watching the test fail with
+  `[200, 200]` — rather than a true two-connection race. The protection is single-statement and needs
+  no read-modify-write window, so it holds when serialised, but "tested under real concurrency" is a
+  Postgres test we do not yet have, and it should not be claimed until there is one.
+* **No revision history is kept.** A version-safe overwrite prevents losing an edit; it does not let
+  anyone recover one. `revision` is a counter, not a log — after an overwrite the previous document is
+  gone.
+* **No staging or production verification.** Everything above is local: unit and integration tests,
+  `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
+  passing local suite is not a deployment.
+* **The forced-overwrite path still exists** until 2026-05-09. While it does, a client that uses it can
+  lose another writer's edit; the column, the audit action and the warning make it visible and
+  countable but do not prevent it.
+
 ## 6. Verification status vocabulary
 
 Every claim in the final report is labelled:
