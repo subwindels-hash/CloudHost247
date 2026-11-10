@@ -328,7 +328,32 @@ Two rules from it matter operationally:
 - **A failed replacement does not restore the old primary.** It was fenced because its state could not
   be trusted; bringing it back recreates two writers. The controller reports an outage.
 
-Nothing is wired into Patroni or any deployment — this makes the ordering testable, not automatic.
+**Patroni integration (Phase 36, still not deployed).** The ordering now runs inside the coordinator
+rather than in a harness, through Patroni's `pre_promote` hook
+(`docs/tools/DESIGN-STUDIO-PHASE36-EVIDENCE.md`).
+
+`pre_promote` is the only hook that can refuse a promotion. `on_start`/`on_stop`/`on_role_change` report
+what already happened; they cannot stop it. So the gate — not a callback — is what enforces the order:
+
+- A refused `pre_promote` prevents promotion **and** releases the leader key. The result is an outage
+  with no primary, which is the correct outcome when fencing cannot be confirmed.
+- The gate fences on **writable or unreachable**. An unreachable node is not a fenced node: it may be
+  paused, partitioned, or about to be restarted. Only revoking write access to `pg_wal` survives that.
+- With no recorded previous leader the gate fences nothing and exits 0. Guessing which node to kill is
+  how a healthy primary dies.
+
+Two limits are real and measured, not hypothetical:
+
+- **The gate protects promotions, not recoveries.** Patroni's `enforce_primary_role` calls `promote()`
+  only when a node is not already primary. A primary whose PostgreSQL dies is restarted by its own
+  coordinator and comes back writable **without the gate running at all**. What stops it becoming a
+  second writer is the WAL fence, not the coordinator.
+- **`pg_rewind` is not required before rejoin.** Divergent histories are still reconciled by hand.
+
+Nothing is deployed, and the Phase 33 split-brain blocker is **not** closed: it was reproduced through
+Patroni's own lifecycle during this phase, traced to a fence that skipped when the old primary was
+unreachable, and fixed. Requirement 7 (VIP on real interfaces) is unmet — the sandbox denies
+`ip addr add`.
 
 ### Outstanding limitations of saved templates
 
@@ -358,6 +383,15 @@ Recorded here rather than discovered later:
 * **Failover ordering is verified only as a harness** (Phase 35). The controller that enforces
   fence-before-promote is a test component: not wired to Patroni's callbacks or to any coordinator, with
   no quorum integration and no real VIP move. An unconfirmed fence is an outage, by design.
+* **Patroni integration covers promotions, not recoveries** (Phase 36). `pre_promote` now enforces
+  fence-before-promote inside a real 3-node Patroni cluster, with a real raft DCS and real streaming
+  replication, and a refused gate provably leaves no primary. But Patroni's recovery path never calls
+  `promote()`, so a restarted or duplicated coordinator can bring a primary back writable without the
+  gate running. Only the WAL fence prevents a second writer there. `pg_rewind` is not required before
+  rejoin, a lost fence acknowledgement was not staged, "new primary fails immediately after promotion"
+  is untested, and **VIP handling on real interfaces is untestable here** — `ip addr add` is denied, so
+  only a TCP listener could stand in, which is not a VIP. Details:
+  `docs/tools/DESIGN-STUDIO-PHASE36-EVIDENCE.md`.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.

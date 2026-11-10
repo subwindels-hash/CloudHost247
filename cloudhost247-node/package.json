@@ -62,7 +62,8 @@
     "test:rejoin": "vitest run tests/integration/design-studio-templates-rejoin.test.ts",
     "test:fencing": "vitest run tests/integration/design-studio-templates-fencing.test.ts",
     "test:fencing-mechanisms": "vitest run tests/integration/design-studio-templates-fencing-mechanisms.test.ts",
-    "test:orchestration": "vitest run tests/integration/design-studio-templates-orchestration.test.ts"
+    "test:orchestration": "vitest run tests/integration/design-studio-templates-orchestration.test.ts",
+    "test:patroni-integration": "vitest run tests/integration/design-studio-templates-patroni-gate.test.ts --testTimeout=600000 --hookTimeout=600000"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",
