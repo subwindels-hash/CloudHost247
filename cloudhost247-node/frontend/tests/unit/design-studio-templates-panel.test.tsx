@@ -409,3 +409,46 @@ describe('saved template lifecycle', () => {
     expect(screen.queryByRole('button', { name: /save over/i })).toBeNull();
   });
 });
+
+describe('the client cannot overwrite without naming a version', () => {
+  it('sends expectedRevision on every overwrite it makes', async () => {
+    // The API refuses this request without the revision, so a client that forgets cannot corrupt
+    // anything — but it would be broken for every customer. This asserts the wire format directly.
+    const calls = stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary({ revision: 7 })], count: 1 },
+      'GET design-studio/templates/tpl-1': { template: { ...summary({ revision: 7 }), document: { templateId: 'address-70x40', values: {} } } },
+      'PUT design-studio/templates/tpl-1': { template: summary({ revision: 8 }) },
+    });
+    renderPanel({ document: { templateId: 'address-70x40', values: { recipient: 'Bola' } } });
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /^load$/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /save over “Despatch”/i }));
+    fireEvent.click(screen.getByRole('button', { name: /replace “Despatch”/i }));
+
+    await waitFor(() => expect(calls.filter((call) => call.method === 'PUT')).toHaveLength(1));
+    const put = calls.find((call) => call.method === 'PUT');
+    // The version the list served is the version that goes back — not a guess, not 1.
+    expect(put?.body).toMatchObject({ expectedRevision: 7 });
+    expect(put?.body).not.toHaveProperty('force');
+    expect(screen.getByText(/now version 8/i)).toBeTruthy();
+  });
+
+  it('refuses to load a template that came back without a version number', async () => {
+    const onLoad = vi.fn();
+    stubApi({
+      'GET design-studio/templates?kind=label': { templates: [summary()], count: 1 },
+      // A mis-served response, a proxy rewriting the payload, a future schema change…
+      'GET design-studio/templates/tpl-1': { template: { ...summary({ revision: undefined }), document: { templateId: 'address-70x40' } } },
+    });
+    renderPanel({ onLoad });
+    await waitFor(() => expect(screen.getByText('Despatch')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /^load$/i }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toMatch(/version number/i);
+    // Nothing was applied and nothing can be saved over: the editor would otherwise look loaded while
+    // "save over" silently acted on nothing.
+    expect(onLoad).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: /save over/i })).toBeNull();
+  });
+});

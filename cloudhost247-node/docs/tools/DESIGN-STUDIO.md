@@ -140,7 +140,7 @@ A signed-in user's layouts persist in the existing template store —
 | `GET` | `/api/tools/design-studio/templates?kind=label` | List the caller's templates (**no** documents), newest first |
 | `POST` | `/api/tools/design-studio/templates` | Save one: `{ kind, name, summary?, document, sourceTemplate? }` |
 | `GET` | `/api/tools/design-studio/templates/:id` | Read one, document included |
-| `PUT` | `/api/tools/design-studio/templates/:id` | **Overwrite** the document in place: `{ document, summary?, expectedRevision? }` |
+| `PUT` | `/api/tools/design-studio/templates/:id` | **Overwrite** the document in place: `{ document, expectedRevision, summary? }` — or the deprecated `{ document, force: true }` |
 | `PATCH` | `/api/tools/design-studio/templates/:id` | **Rename** / change the description: `{ name?, summary? }` — cannot carry a document |
 | `POST` | `/api/tools/design-studio/templates/:id/duplicate` | Copy under a new name |
 | `DELETE` | `/api/tools/design-studio/templates/:id` | Delete |
@@ -178,11 +178,20 @@ destructive in different ways, so they are different calls:
 * **`PATCH` renames and cannot touch the document.** A `document` in a `PATCH` body is a 400, so a
   rename request that carries a stale layout (a retry, a buggy client) cannot become a silent
   overwrite wearing a different verb.
-* **`expectedRevision` is optional**, so a client written before the column existed keeps working.
-  The version guarantee is stronger when a caller opts in, not a precondition for using the endpoint.
-  The SPA always sends it — its client type makes the field required.
-* **Save as new is a `POST`.** It is the non-destructive branch: a new row, the original untouched.
-
+* **`expectedRevision` is required.** A request without it is a 400 that says where the number comes
+  from. An optional check would protect only the callers who opted in, and the last unconditional
+  writer would win — the same silent data loss, just rarer. There is no unconditional code path in the
+  repository at all.
+* **The compatibility path is explicit, audited and dated.** A client that genuinely cannot send a
+  revision sends `force: true` (or `X-Design-Studio-Allow-Unconditional: true`). That request:
+  writes with a different audit action (`DESIGN_STUDIO_TEMPLATE_FORCED`), stamps `last_forced_at` on
+  the row so the users of the escape hatch are a query rather than archaeology, returns a `warning`
+  stating that any edit since the last read has been replaced, and remains owner-scoped. Sending both
+  `force` and `expectedRevision` is a 400: a caller that knows the version can do the safe thing.
+  **Sunset `DESIGN_STUDIO_FORCED_OVERWRITE_SUNSET`: 2026-05-09**, after which the function, the route
+  branch and `last_forced_at` are removed. No second extension — each one re-opens the window.
+* **The SPA has no access to the compatibility path.** Its client type requires `expectedRevision`, and
+  it refuses to load a template that arrives without a version number rather than inventing one.
 Migration `0100_add_design_studio_template_revision.sql` adds the counter with `DEFAULT 1`, so every
 template saved by an earlier release is version 1 and keeps working without a re-save. Nothing about
 the stored document changes.

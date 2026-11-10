@@ -182,6 +182,67 @@ export async function createTemplate(
 }
 
 /**
+ * The compatibility path: overwrite without a version check, on purpose.
+ *
+ * It exists because the endpoint shipped without a required revision, and a client written against
+ * that contract — or a person holding a curl command from the docs — would otherwise get a 400 with no
+ * way forward except rewriting the integration. Rather than let those writers silently keep the old
+ * behaviour, the behaviour is made explicit and visible:
+ *
+ *   • the request must say so, in the body (`force: true`) or the header
+ *     (`X-Design-Studio-Allow-Unconditional: true`);
+ *   • the row is stamped `last_forced_at`, so "which templates were last saved without a version
+ *     check" is a query, not an archaeology exercise;
+ *   • the audit row uses a different action (`DESIGN_STUDIO_TEMPLATE_FORCED`), so the exception is
+ *     countable in the log;
+ *   • the response says plainly how many concurrent edits the write could have discarded.
+ *
+ * ## Deprecation
+ *
+ * Planned removal **2026-11-09 + 6 months = 2026-05-09**, tracked as
+ * `DESIGN_STUDIO_FORCED_OVERWRITE_SUNSET` in `docs/tools/DESIGN-STUDIO.md`. After that date this
+ * function is deleted along with `last_forced_at`; there is no second extension, because each
+ * extension re-opens the same window in which a stale writer wins.
+ */
+export async function overwriteTemplateForced(
+  db: Queryable,
+  userId: string,
+  id: string,
+  input: { document?: unknown; summary?: unknown }
+): Promise<{ template: SavedTemplate; previousRevision: number; previousName: string }> {
+  const existing = await getTemplate(db, userId, id);
+  if (input.document === undefined) {
+    throw new ValidationError('An update must include the document to save. To change only the name, rename the template.');
+  }
+  if (!input.document || typeof input.document !== 'object' || Array.isArray(input.document)) {
+    throw new ValidationError('The template document must be an object.');
+  }
+  const serialized = JSON.stringify(input.document);
+  if (serialized.length > MAX_DOCUMENT_BYTES) {
+    throw new ValidationError(
+      `This template is ${(serialized.length / 1024).toFixed(0)} kB; templates are limited to ${MAX_DOCUMENT_BYTES / 1024} kB. Reduce the size of any embedded images.`
+    );
+  }
+  const summary = input.summary === undefined ? existing.summary : String(input.summary).trim().slice(0, MAX_SUMMARY);
+
+  // Still one statement, still owner-scoped: "skip the version check" must not become "skip ownership".
+  const { rows } = await db.query<TemplateRow>(
+    `UPDATE design_studio_templates
+        SET document = $3::jsonb,
+            summary = $4,
+            revision = revision + 1,
+            last_forced_at = now(),
+            updated_at = now()
+      WHERE id = $1 AND user_id = $2
+      RETURNING id, user_id, kind, name, summary, document, source_template, revision, created_at, updated_at`,
+    [id, userId, serialized, summary]
+  );
+  const row = rows[0];
+  if (!row) throw new NotFoundError('No saved template exists with that id.');
+  return { template: toTemplate(row), previousRevision: existing.revision, previousName: existing.name };
+}
+
+/**
  * Rename a template and/or change its description. Never touches the document.
  *
  * Splitting this from `overwriteTemplate` is the point of the whole lifecycle: a rename is a
@@ -241,9 +302,17 @@ export async function renameTemplate(
  * rejected name, an oversized payload or a validation error all leave the stored template exactly as
  * it was. The tests assert this by reading the template back after each failure.
  *
- * `expectedRevision` is optional for compatibility with a client that only has an id. Omitting it
- * means "overwrite whatever is there" — the behaviour before this column existed — which is why the
- * SPA always sends it: the guarantee is only as good as the caller's version number.
+ * `expectedRevision` is **required**. An optional version check is not a safety property: it protects
+ * the clients that already opted in and lets every other writer — an old tab, a stale script, a
+ * retried request — overwrite blind. The last unconditional writer wins, quietly, which is exactly the
+ * failure the column was added to prevent. So the repository has no unconditional path at all: a
+ * caller that cannot name the version it is replacing must re-read the template first, and that
+ * re-read is the thing that makes its write correct rather than lucky.
+ *
+ * Clients that genuinely cannot supply a revision are not abandoned; they are given a *distinct,
+ * explicit* operation instead (`overwriteTemplateForced`), which is separately audited and documented
+ * as a compatibility path with a deprecation date. The difference between "I checked" and "I chose not
+ * to check" is visible in the code, in the API and in the audit log.
  */
 export async function overwriteTemplate(
   db: Queryable,
@@ -251,7 +320,17 @@ export async function overwriteTemplate(
   id: string,
   input: { document?: unknown; summary?: unknown; expectedRevision?: unknown }
 ): Promise<{ template: SavedTemplate; previousRevision: number; previousName: string }> {
-  const existing = await getTemplate(db, userId, id);
+  // All input validation before the ownership read, so a malformed request is always a 400 whatever the
+  // row is — and a well-formed one always reaches the 404/409 ownership and version checks.
+  if (input.expectedRevision === undefined || input.expectedRevision === null) {
+    throw new ValidationError(
+      'An update must include "expectedRevision" — the revision of the template you loaded (it comes back from GET /templates/:id and in the list). Re-read the template and try again.'
+    );
+  }
+  const expected = Number(input.expectedRevision);
+  if (!Number.isInteger(expected) || expected < 1) {
+    throw new ValidationError('"expectedRevision" must be a whole number of at least 1 — it comes from the template you loaded.');
+  }
   if (input.document === undefined) {
     throw new ValidationError('An update must include the document to save. To change only the name, rename the template.');
   }
@@ -264,16 +343,9 @@ export async function overwriteTemplate(
       `This template is ${(serialized.length / 1024).toFixed(0)} kB; templates are limited to ${MAX_DOCUMENT_BYTES / 1024} kB. Reduce the size of any embedded images.`
     );
   }
-  const summary = input.summary === undefined ? existing.summary : String(input.summary).trim().slice(0, MAX_SUMMARY);
 
-  let expected: number | null = null;
-  if (input.expectedRevision !== undefined && input.expectedRevision !== null) {
-    const parsed = Number(input.expectedRevision);
-    if (!Number.isInteger(parsed) || parsed < 1) {
-      throw new ValidationError('"expectedRevision" must be a whole number of at least 1 — it comes from the template you loaded.');
-    }
-    expected = parsed;
-  }
+  const existing = await getTemplate(db, userId, id);
+  const summary = input.summary === undefined ? existing.summary : String(input.summary).trim().slice(0, MAX_SUMMARY);
 
   const { rows } = await db.query<TemplateRow>(
     `UPDATE design_studio_templates
@@ -281,9 +353,9 @@ export async function overwriteTemplate(
             summary = $4,
             revision = revision + 1,
             updated_at = now()
-      WHERE id = $1 AND user_id = $2${expected === null ? '' : ' AND revision = $5'}
+      WHERE id = $1 AND user_id = $2 AND revision = $5
       RETURNING id, user_id, kind, name, summary, document, source_template, revision, created_at, updated_at`,
-    expected === null ? [id, userId, serialized, summary] : [id, userId, serialized, summary, expected]
+    [id, userId, serialized, summary, expected]
   );
   const row = rows[0];
   if (!row) {

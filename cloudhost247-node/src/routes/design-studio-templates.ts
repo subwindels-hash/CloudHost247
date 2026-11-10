@@ -34,6 +34,7 @@ import {
   getTemplate,
   listTemplates,
   overwriteTemplate,
+  overwriteTemplateForced,
   publicTemplate,
   renameTemplate,
   type TemplateKind,
@@ -99,15 +100,54 @@ export async function registerDesignStudioTemplateRoutes(app: FastifyInstance, e
     /**
      * Overwrite a saved template's document, keeping its id.
      *
-     * `expectedRevision` is the version the client loaded. When it does not match, the answer is 409
-     * and the stored document is untouched — the alternative is one tab silently discarding another
-     * tab's work, with the customer holding a name they recognise and contents they did not choose.
+     * `expectedRevision` is **required**. An optional version check only protects callers that already
+     * opted in, and the last unconditional writer wins — silently discarding whatever a careful client
+     * saved. A request without it is a 400 that says where the number comes from, not a best-effort
+     * write.
+     *
+     * ### Compatibility path (deprecated)
+     *
+     * A client that genuinely cannot supply a revision can send `force: true` (or
+     * `X-Design-Studio-Allow-Unconditional: true`) and the write proceeds without the check. That path
+     * is deliberately loud: a different audit action, `last_forced_at` on the row, and a response that
+     * states what it may have destroyed. Sunset **2026-05-09**; see `docs/tools/DESIGN-STUDIO.md`.
      */
     app.put(`${base}/:id`, async (request) => {
       const db = pool ?? getPool(env);
       const auth = await authenticate(request, env, db);
       const id = (request.params as { id?: string }).id ?? '';
       const body = (request.body ?? {}) as Record<string, unknown>;
+      const header = request.headers['x-design-studio-allow-unconditional'];
+      const forced = body.force === true || header === 'true' || header === '1';
+      if (forced && body.expectedRevision !== undefined) {
+        // Naming both is a contradiction, not a preference: a caller that knows the revision is telling
+        // us it can do the safe thing. Refusing removes the option of "force" quietly winning.
+        throw new ValidationError(
+          'Send either "expectedRevision" (a version-checked save) or "force": true — not both. If you know the revision, send it.'
+        );
+      }
+
+      if (forced) {
+        const { template, previousRevision } = await overwriteTemplateForced(db, auth.userId, id, {
+          document: body.document,
+          summary: body.summary,
+        });
+        await auditRequest(db, request, auth.userId, {
+          action: 'DESIGN_STUDIO_TEMPLATE_FORCED',
+          resourceType: 'design_studio_template',
+          resourceId: template.id,
+          // The exception is recorded as an exception: revision numbers, no document.
+          metadata: { kind: template.kind, name: template.name, revision: template.revision, previousRevision },
+        });
+        return {
+          success: true,
+          template: publicTemplate(template),
+          // Said out loud, because the caller chose not to check and cannot see what it replaced.
+          warning:
+            'This save skipped the version check you did not send, so any edit made since you last read this template has been replaced and cannot be recovered. Send "expectedRevision" to have this refused instead.',
+        };
+      }
+
       const { template, previousRevision } = await overwriteTemplate(db, auth.userId, id, {
         document: body.document,
         summary: body.summary,

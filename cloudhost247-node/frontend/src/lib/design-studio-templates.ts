@@ -90,13 +90,14 @@ export const savedTemplates = {
   /**
    * Replace a template's contents, keeping its id.
    *
-   * `expectedRevision` is required on purpose: the type makes it impossible to call this without
-   * saying which version you believe you are replacing, so the "another tab saved first" check cannot
-   * be forgotten by a caller. Omitting it is possible at the API (the route accepts it for older
-   * clients) but not here, where we control every call site.
+   * `expectedRevision` is required — by this type and by the API. The type exists so no call site can
+   * forget it; the API requiring it means a caller that *did* forget gets a 400 rather than a write
+   * that silently replaces whatever was there. There is no unconditional variant here on purpose: the
+   * compatibility path in the API (`force: true`) exists for integrations we cannot change, and a
+   * first-party client using it would be choosing the bug.
    */
   overwrite: (id: string, input: { document: Record<string, unknown>; summary?: string; expectedRevision: number }) =>
-    call<{ template: SavedTemplate }>(`${BASE}/${encodeURIComponent(id)}`, { method: 'PUT', body: input }),
+    call<{ template: SavedTemplate; warning?: string }>(`${BASE}/${encodeURIComponent(id)}`, { method: 'PUT', body: input }),
 
   /** Change the name (and/or description) of a template. Cannot touch its document. */
   rename: (id: string, input: { name?: string; summary?: string }) =>

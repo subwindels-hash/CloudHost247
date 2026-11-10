@@ -197,6 +197,13 @@ export default function SavedTemplatesPanel({ kind, document, defaultName, onLoa
       return;
     }
     const template = result.data.template;
+    // A template with no revision cannot be safely saved over: the overwrite needs one, and inventing
+    // a number here (1, say) would either fail every time or — worse, if the row really is at 1 —
+    // overwrite a change this page never saw. Refusing is the honest answer.
+    if (!Number.isInteger(template.revision) || template.revision < 1) {
+      setError('This template did not come back with a version number, so it cannot be edited safely. Try refreshing the list.');
+      return;
+    }
     const refusal = validateLoad?.(template.document) ?? null;
     if (refusal) {
       // Nothing was applied: the editor is exactly as the operator left it.
