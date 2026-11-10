@@ -316,6 +316,20 @@ start serving, so it cannot hand out stale data.
 **`chmod 500` on the data directory fences nothing** — the running server holds its files open and keeps
 committing. The fence only works on the files a server must *extend*.
 
+### Failover ordering (not deployed)
+
+The safe order is **detect → fence → verify → promote → expose**, and it is enforced by a test-harness
+controller with the invariant `promote ⇒ fencingVerified` (`docs/tools/DESIGN-STUDIO-PHASE35-EVIDENCE.md`).
+Two rules from it matter operationally:
+
+- **No promotion without confirmed fencing.** An unconfirmed fence is an outage, never an assumption. A
+  fence *command* succeeding is not evidence: verification needs either a database probe reporting the
+  node cannot write, or the node being unreachable **and** the fence command confirming.
+- **A failed replacement does not restore the old primary.** It was fenced because its state could not
+  be trusted; bringing it back recreates two writers. The controller reports an outage.
+
+Nothing is wired into Patroni or any deployment — this makes the ordering testable, not automatic.
+
 ### Outstanding limitations of saved templates
 
 Recorded here rather than discovered later:
@@ -341,6 +355,9 @@ Recorded here rather than discovered later:
   (WAL permissions), process-group STONITH, network namespaces, VIP removal, self-termination and
   rejoin gating all demonstrably block writes; none is wired into an automated failover flow. No
   hardware watchdog, IPMI/PDU power fencing, shared-storage LUN fencing or read-only *mount* was tested.
+* **Failover ordering is verified only as a harness** (Phase 35). The controller that enforces
+  fence-before-promote is a test component: not wired to Patroni's callbacks or to any coordinator, with
+  no quorum integration and no real VIP move. An unconfirmed fence is an outage, by design.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.
