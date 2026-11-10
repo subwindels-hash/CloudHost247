@@ -50,7 +50,7 @@ Nothing is claimed as tested that was not executed. In particular, **no live AI 
 | Is a live provider verified? | **No, and not claimed** | §9 |
 | Is the Unified Inbox implemented? | **No** | §9.3 — out of scope, unchanged |
 | Are admin knowledge operations correctly restricted? | **Yes** | §8.4 — staff read, admin mutate, verified by request |
-| Is tenant isolation correct? | **Yes** | §8.1 — 8/8 probes as expected |
+| Is tenant isolation correct? | **Yes** | §8.1 — 8/8 probes as expected, **all 8 now committed as a test** and verified to fail if the guard is removed |
 | Does the system refuse instead of inventing? | **Mostly — 3 accepted gaps** | §6.2, §6.3, §6.5 |
 | Is it production-certified? | **No** | §13 |
 
@@ -378,16 +378,16 @@ Fixing this exposed a **latent crash**: `upsertSource` called `.slice()` on a `c
 
 Probed against a live app instance with two signed-in customers and one anonymous visitor. **In Phase 28 this matrix was committed** as `holds the full tenant-isolation matrix` in `tests/integration/ai-website-knowledge.test.ts`, because only one of its rows had ever been reproducible by anyone but the person who ran it. That test was verified to fail when the ownership guard is disabled, so it is a real check rather than a decoration:
 
-| Probe | Expected | Observed |
-| --- | --- | --- |
-| A reads own conversation | 200 | 200 |
-| B reads A's conversation (B's token) | 404 | 404 |
-| B reads A's conversation (no token) | 404 | 404 |
-| B reads A's conversation (empty token) | 404 | 404 |
-| Visitor reads own | 200 | 200 |
-| Visitor reads A's conversation | 404 | 404 |
-| GET A's conversation as B | 404 | 404 |
-| GET A's conversation as A | 200 | 200 |
+| Probe | Expected | Observed | In the committed test |
+| --- | --- | --- | --- |
+| A reads own conversation (visitor token) | 200 | 200 | yes |
+| Stranger reads A's conversation (own valid token) | 404 | 404 | yes |
+| Stranger reads A's conversation (no token) | 404 | 404 | yes |
+| Stranger reads A's conversation (empty token) | 404 | 404 | yes |
+| Visitor reads own conversation | 200 | 200 | yes |
+| Visitor reads A's conversation | 404 | 404 | yes |
+| Signed-in B reads A's conversation | 404 | 404 | yes |
+| Signed-in A reads their own conversation | 200 | 200 | yes |
 
 Scoping is fail-closed (`src/routes/ai-support.ts:51-53`): the `NotFoundError` is thrown unless `ownsByAccount` **or** `ownsByVisitorToken` is true. Creation uses 32 random bytes, so an empty-token hash cannot match a stored hash. Access tokens are never returned in conversation reads.
 

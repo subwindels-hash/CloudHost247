@@ -329,6 +329,15 @@ describe('AI support endpoints', () => {
     const alice = await customerToken('alice');
     const bob = await customerToken('bob');
 
+    // "Visitor reads own": the stranger's token must work on the stranger's own conversation.
+    const strangerPath = `/api/v1/ai-support/conversations/${(stranger.json() as { conversationId: string }).conversationId}`;
+    const strangerReadsOwn = await app.inject({
+      method: 'GET',
+      url: strangerPath,
+      headers: { 'x-ai-conversation-token': strangerToken },
+    });
+    expect(strangerReadsOwn.statusCode, 'visitor reads own conversation').toBe(200);
+
     const probes: Array<[string, string | undefined, number]> = [
       ['owner reads own conversation', conversation.accessToken, 200],
       ['stranger reads it with their own valid token', strangerToken, 404],
