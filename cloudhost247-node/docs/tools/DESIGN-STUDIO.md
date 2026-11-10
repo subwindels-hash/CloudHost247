@@ -228,6 +228,23 @@ prevent.
 Not exposed: a standalone `/export` route — the envelope above already carries the PDF, which is the
 only export the pages need.
 
+### Pooled deployment (PgBouncer, transaction mode)
+
+The revision guarantee is a **statement-level predicate**, not `SELECT … FOR UPDATE` plus a second
+statement and not a session advisory lock. That choice is what makes it pooler-safe, and it is tested
+rather than asserted: `tests/integration/design-studio-templates-pgbouncer.test.ts`
+(`npm run test:pgbouncer`) runs the conflict, stale-revision, failed-write, ownership and closed-forced
+-path cases through a real PgBouncer 1.26.1 in `pool_mode=transaction`, and refuses to run if the
+pooler is not in that mode. Results and limitations: `docs/tools/DESIGN-STUDIO-PHASE29-EVIDENCE.md`.
+
+Two things that file settles for future readers:
+
+* **Session state does not leak between clients.** `server_reset_query=DISCARD ALL`
+  (`server_reset_query_always=1`) is verified deterministically against a `pool_size=1` pool, so the
+  test cannot pass by luck of connection assignment.
+* **A client re-seeing its own `SET` after `COMMIT` is not a leak.** With a multi-server pool the same
+  backend is usually handed back; the setting remains invisible to other clients.
+
 ### Outstanding limitations of saved templates
 
 Recorded here rather than discovered later:
@@ -241,6 +258,8 @@ Recorded here rather than discovered later:
 * **No revision history is kept.** A version-safe overwrite prevents losing an edit; it does not let
   anyone recover one. `revision` is a counter, not a log — after an overwrite the previous document is
   gone.
+* **No replica verification.** Pooled-primary concurrency is verified (see above); read-replica
+  behaviour is not, and pooled deploys often route reads separately.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.
