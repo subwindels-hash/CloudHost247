@@ -59,6 +59,100 @@ describe('AI website knowledge pipeline', () => {
     expect(second.removed).toBe(0);
   });
 
+  /**
+   * The central product claim: when the site changes, the assistant knows.
+   *
+   * The existing drift test only asserted the *empty* case — that an unchanged site reports no
+   * drift. That tests the quiet path, and would have passed just as happily if a changed page were
+   * never picked up at all. This one edits a page, re-syncs, and asserts the change is detected,
+   * stored, and reachable through the admin search.
+   *
+   * **A limit worth stating, because it is a real property of the design.** A word that appears
+   * nowhere in the committed projection is treated as ungrounded and the question is refused — even
+   * if that word arrived in the body handed to the sync. That is correct, not a bug: the retrieval
+   * vocabulary and the indexed text are both compiled from the same `website-knowledge.generated.json`,
+   * so in production a new word reaches them together. Handing the sync a body whose words the
+   * projection has never seen is not a site change; it is an inconsistency between two files that are
+   * always written by the same script. Testing that way would have produced a failure that cannot
+   * happen in production.
+   *
+   * Which makes the staleness of that projection a correctness requirement rather than a hygiene
+   * one — a projection that lags the site makes legitimate questions about a new page refusable.
+   * `scripts/release-candidate-check.sh` now enforces it.
+   */
+  it('detects a changed page, indexes the new text, and exposes it to the search', async () => {
+    await syncWebsiteKnowledge(db, { trigger: 'manual' });
+
+    const { discoverWebsiteDocuments } = await import('../../src/ai-website/website-discovery');
+    const baseline = discoverWebsiteDocuments();
+    const target = baseline.pages.find((page) => page.url === '/hosting/vps');
+    expect(target?.content).toBeDefined();
+
+    const marker = 'fails over to a standby server automatically';
+    const edited = {
+      ...baseline,
+      pages: baseline.pages.map((page) =>
+        page.url === '/hosting/vps' && page.content
+          ? {
+              ...page,
+              content: {
+                ...page.content,
+                body: `${page.content.body}\n\nEvery Cloud VPS node ${marker}.`,
+              },
+            }
+          : page,
+      ),
+    };
+
+    const resync = await syncWebsiteKnowledge(db, { trigger: 'event', discovery: edited as never });
+    expect(resync.failed).toBe(0);
+    expect(resync.indexed).toBeGreaterThan(0);
+
+    // The new sentence is in the index...
+    const stored = await db.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM ai_knowledge_chunks WHERE content ILIKE $1`,
+      [`%${marker}%`]
+    );
+    expect(Number(stored.rows[0]!.n)).toBeGreaterThan(0);
+
+    // ...reachable by a full-text search for a word that only the edit introduced, which is how an
+    // operator confirms the assistant knows about a change.
+    const found = await searchIndexedContent(db, 'standby');
+    expect(found.map((row) => row.url)).toContain('/hosting/vps');
+
+    // ...and the page's own established vocabulary still reaches it from the customer side.
+    const retrieved = await retrieveKnowledge(db, 'How does VPS hosting work?');
+    expect(retrieved.pages[0]?.url).toBe('/hosting/vps');
+  });
+
+  /**
+   * And the other direction: what happens when a page is withdrawn.
+   *
+   * A stale index is the failure mode that matters most for a support assistant, because it answers
+   * confidently from a page that no longer exists. The reconciler is supposed to remove it.
+   */
+  it('removes a page from the index when it is withdrawn from the site', async () => {
+    await syncWebsiteKnowledge(db, { trigger: 'manual' });
+
+    const { discoverWebsiteDocuments } = await import('../../src/ai-website/website-discovery');
+    const baseline = discoverWebsiteDocuments();
+    const removedUrl = '/hosting/vps';
+    const withdrawn = {
+      ...baseline,
+      pages: baseline.pages.filter((page) => page.url !== removedUrl),
+    };
+
+    const resync = await syncWebsiteKnowledge(db, { trigger: 'event', discovery: withdrawn as never });
+    expect(resync.failed).toBe(0);
+    expect(resync.removed).toBeGreaterThan(0);
+
+    const stored = await db.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM ai_knowledge_sources WHERE url = $1 AND status = 'active'`,
+      [removedUrl]
+    );
+    expect(Number(stored.rows[0]!.n)).toBe(0);
+  });
+
   it('reports drift against the live projection without touching the database', async () => {
     await syncWebsiteKnowledge(db, { trigger: 'manual' });
     const drift = await detectDrift(db);

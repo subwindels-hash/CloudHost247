@@ -5,7 +5,13 @@
 **Implementation milestone audited:** `e9d29d4` ("Website-aware AI knowledge + support assistant")
 **Audit branch:** `arena/b55a0c26-cloudhost247`
 **Date:** 9 November 2026
-**Verdict up front:** **NOT CERTIFIED FOR PRODUCTION.** The deterministic engine is real and works. Two customer-facing defects were shipping (internal instruction text leaking into answers, and a safety guard that provably could never fire), plus several integration gaps. Twelve defects were found: nine fixed and covered by regression tests (two of them dormant until a provider is configured), one dead helper removed rather than fixed, one partly fixed, and one recorded as an accepted limitation with the reason. Nothing was merged, deployed or activated.
+**Verdict up front:** **NOT CERTIFIED FOR PRODUCTION — but nothing found here is a fabrication.** The deterministic knowledge engine is real, answers from the compiled website, updates itself when the site changes, and refuses questions it cannot ground. It is not a provider-backed AI agent: no model has ever been contacted, and no embedding layer exists (§9, §12.3).
+
+Twelve defects were found. **Nine are fixed and covered by regression tests** — two of them (11, 12) dormant until a provider is configured, and found only by writing the first tests that layer had ever had. One dead helper was removed, one defect is partly fixed, one is an accepted limitation.
+
+**One claim in the shipped design document was false and is now corrected:** that embeddings were an optional feature an operator could enable. There is no embedding code, no vector column and no configuration key, so nothing could be enabled — and §5.4 of that same document already said so correctly (§12.3). The *seam* for a future hybrid scorer is real; the feature was not. Separately, this audit originally wrote that "the model never followed an instruction" in its injection testing, which implied a model had run. None had: with no provider configured the model is never called (§8.2).
+
+The pipeline passes on this head (`dd5e2ab` and after). **That is automated test verification and nothing more:** staging, provider and production certification have not been performed and are not implied. **Nothing was merged, deployed or activated.**
 
 ---
 
@@ -51,6 +57,7 @@ Nothing is claimed as tested that was not executed. In particular, **no live AI 
 | Is the Unified Inbox implemented? | **No** | §9.3 — out of scope, unchanged |
 | Are admin knowledge operations correctly restricted? | **Yes** | §8.4 — staff read, admin mutate, verified by request |
 | Is tenant isolation correct? | **Yes** | §8.1 — 8/8 probes as expected, **all 8 now committed as a test** and verified to fail if the guard is removed |
+| Does it update itself when the site changes? | **Yes — now proven both ways** | §7.5 — change detected and indexed; withdrawn page removed; projection gated against staleness |
 | Does the system refuse instead of inventing? | **Mostly — 3 accepted gaps** | §6.2, §6.3, §6.5 |
 | Is the optional model layer's output checked before it is shown? | **Yes, and now tested** | §9.2 — 24 tests; two defects found and fixed |
 | Would the assistant break if a provider were enabled? | **No — it fails closed** | §9.2 — every error path returns `null` and falls back |
@@ -380,6 +387,22 @@ Fixing this exposed a **latent crash**: `upsertSource` called `.slice()` on a `c
 
 ---
 
+### 7.5 Does it actually self-update? — **yes, and now proven**
+
+The user's second question was whether the assistant updates itself when the site changes. The answer is yes, but the evidence was thinner than the claim: the only committed test of the sync asserted that an **unchanged** site reports no drift. That is the quiet path. It would have passed identically if a changed page were never picked up at all.
+
+Three things were added in Phase 28:
+
+1. **A change is detected and indexed.** The test edits a page's body, re-syncs with the edited discovery result, and asserts that the sync reports work done, that the new sentence is in `ai_knowledge_chunks`, that a full-text search for a word only the edit introduced returns the page, and that the page's established vocabulary still reaches it. Sabotaging the fingerprint comparison makes it fail; restoring it makes it pass.
+2. **A withdrawn page is removed.** The inverse failure mode matters more here — a stale index means answering confidently from a page that no longer exists. The test withdraws a page, re-syncs, and asserts `removed > 0` and that the source is no longer active. Disabling `deleteSourcesNotIn` makes it fail.
+3. **The projection is now gated against staleness.** `scripts/release-candidate-check.sh` had no check for `content/website-knowledge.generated.json`, even though `generate-ai-knowledge.mjs` has a `--check` mode and every other generated surface in that script is gated. It is now gated, and the gate was verified to fail by dropping one document from the projection.
+
+**One property of the design that is easy to misread as a bug.** A word that appears nowhere in the committed projection is treated as ungrounded and the question is refused — even if that word arrived in a body handed to the sync. That is deliberate: the retrieval vocabulary and the indexed text are both compiled from the *same* generated file, so in production a new word reaches both at once. What makes this matter is the corollary: **if that projection ever lags the site, legitimate questions about a newly published page become refusable** — the assistant would refuse to answer about a page it has already indexed. That is why item 3 above is a correctness fix, not hygiene.
+
+**What is still not verified:** the fifteen-minute worker cadence against a real scheduler, and whether the projection is regenerated as part of the deployment pipeline rather than by hand. The repository now enforces that it *matches* even if it does not enforce *when it is rebuilt*.
+
+---
+
 ## 8. Security and safety (S5)
 
 ### 8.1 Tenant isolation — **verified, 8/8, now committed as a test**
@@ -569,7 +592,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | --- | --- | --- |
 | `tests/unit` | **158 files / 2,298 tests passed, 0 failed** | includes the 13 audit regressions and the 24 model-grounding tests |
 | `tests/integration` | **963 passed, 17 skipped, 0 failed** (99 files) | baseline on `e9d29d4`; AI subsets re-run after fixes: 37/37 and 19/19 |
-| `tests/integration/ai-website-knowledge.test.ts` | **15 passed** (Phase 28, on the final head) | includes the committed tenant-isolation matrix (§8.1) |
+| `tests/integration/ai-website-knowledge.test.ts` | **24 passed** (Phase 28) | includes the tenant-isolation matrix (§8.1), the prompt-injection probes (§8.2) and the self-update tests (§7.5) |
 | `frontend/tests` | **80 files / 1,000 tests passed, 0 failed** | |
 
 **A trap worth recording.** Running Vitest from inside `frontend/` instead of the repository root produces **2 spurious failures** (`footer-back-to-top`, `language-switcher`) plus an unhandled `window.matchMedia` error. The cause is that the root `vitest.config.ts` supplies `setupFiles: ['./frontend/tests/setup.ts']` and `environmentMatchGlobs`; invoking from a subdirectory skips both. These are **not product defects** and the prior "1000 green" claim was correct — but only when run canonically. Use `npm test` from `cloudhost247-node/`.
