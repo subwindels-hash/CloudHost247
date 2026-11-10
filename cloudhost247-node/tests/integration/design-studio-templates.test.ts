@@ -85,6 +85,43 @@ describe('Design Studio saved templates', () => {
   const save = (body: Record<string, unknown>, token = ownerToken, url = base) =>
     app.inject({ method: 'POST', url, headers: auth(token), payload: body });
 
+  describe('the round trip that matters', () => {
+    it('prints the same label after a save and a reload', async () => {
+      // The unit-level round trip above proves the JSON comes back. This proves the *label* does: the
+      // page saves { templateId, values }, and posting that back must lay out identical draw ops. A
+      // template store that returns the right bytes and prints a different label is the bug this
+      // test exists to catch, and only comparing rendered output catches it.
+      const values = { recipient: 'Ada Obi\n24 Zaria Road\nJos', tracking: 'CH247-88213' };
+      const preview = (body: Record<string, unknown>) =>
+        app.inject({ method: 'POST', url: '/api/tools/label-designer', headers: auth(ownerToken), payload: { action: 'preview', ...body } });
+
+      const before = await preview({ templateId: 'address-70x40', values });
+      expect(before.statusCode).toBe(200);
+      const saveResponse = await save({ kind: 'label', name: 'Ada despatch', document: { templateId: 'address-70x40', values } });
+      expect(saveResponse.statusCode).toBe(200);
+
+      const stored = await app.inject({ method: 'GET', url: `${base}/${saveResponse.json().template.id}`, headers: auth(ownerToken) });
+      const document = stored.json().template.document as { templateId: string; values: Record<string, string> };
+
+      const after = await preview({ templateId: document.templateId, values: document.values });
+      expect(after.statusCode).toBe(200);
+      expect(after.json().data.document).toEqual(before.json().data.document);
+      // And the values really are in the output, so the comparison above is not two identical fallbacks.
+      // A multi-line field is drawn as a `lines` op, not `text`: the recipient block is one op with
+      // several baselines, which is why both kinds are collected here.
+      // Three op kinds carry the data: `text` (one line), `lines` (a multi-line field — the recipient
+      // block is one op with several baselines) and `barcode` (whose payload is the encoded value).
+      const ops = after.json().data.document.pages[0].ops as Array<{ kind: string; text?: string; lines?: string[]; encoded?: { payload?: string } }>;
+      const texts = ops
+        .flatMap((op) =>
+          op.kind === 'text' ? [op.text ?? ''] : op.kind === 'lines' ? (op.lines ?? []) : op.kind === 'barcode' ? [op.encoded?.payload ?? ''] : []
+        )
+        .join('\n');
+      expect(texts).toContain('Ada Obi');
+      expect(texts).toContain('CH247-88213');
+    });
+  });
+
   describe('saving', () => {
     it('round-trips the layout and never echoes the owner id', async () => {
       const response = await save({ kind: 'label', name: 'Despatch label', summary: 'For small parcels', document: DOCUMENT, sourceTemplate: 'address-70x40' });
