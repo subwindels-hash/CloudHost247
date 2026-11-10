@@ -5,7 +5,7 @@
 **Implementation milestone audited:** `e9d29d4` ("Website-aware AI knowledge + support assistant")
 **Audit branch:** `arena/b55a0c26-cloudhost247`
 **Date:** 9 November 2026
-**Verdict up front:** **NOT CERTIFIED FOR PRODUCTION.** The deterministic engine is real and works. Two customer-facing defects were shipping (internal instruction text leaking into answers, and a safety guard that provably could never fire), plus several integration gaps. Six of the nine defects found are fixed and covered by regression tests; three are recorded here as accepted limitations with the reason. Nothing was merged, deployed or activated.
+**Verdict up front:** **NOT CERTIFIED FOR PRODUCTION.** The deterministic engine is real and works. Two customer-facing defects were shipping (internal instruction text leaking into answers, and a safety guard that provably could never fire), plus several integration gaps. Ten defects were found. Seven are fixed and covered by regression tests, one dead helper was removed rather than fixed, one is partly fixed, and one is recorded as an accepted limitation with the reason. Nothing was merged, deployed or activated.
 
 ---
 
@@ -62,7 +62,7 @@ The distinction the task asked for is real and should be kept in customer/intern
 
 ## 2. Defect register
 
-Nine defects were found. Six are fixed in this branch; three are accepted limitations.
+Ten defects were found. **Seven fixed** (1, 2, 3, 5, 6, 7, 10), **one removed** as dead code (4), **one partly fixed** (9), **one accepted** as a limitation (8). The count in an earlier revision of this document said nine; defect 10 was found late, while testing the fix for defect 9, and the summary was not updated with it.
 
 | # | Defect | Severity | Status | Where |
 | --- | --- | --- | --- | --- |
@@ -120,7 +120,7 @@ POST /api/v1/ai-support/conversations/:id/messages        routes/ai-support.ts
 
 **Corpus, measured:** 409 documents discovered, 396 indexed, 3 excluded, 10 skipped (non-retrievable pages), 0 failed. 409 documents / ~1001 chunks / 377 routes / 922 kB.
 
-**Indexing.** `chunking.ts` splits per document into page, section and FAQ chunks. `website-knowledge-repo.ts` writes them into the pre-existing `ai_knowledge_sources` / `ai_knowledge_chunks` tables (migration `0096`), extending the AI Control Plane store rather than creating a second one — this matches the standing "no second knowledge system" constraint.
+**Indexing.** `chunking.ts` splits per document into page, section and FAQ chunks. `website-knowledge-repo.ts` writes them into the pre-existing `ai_knowledge_sources` / `ai_knowledge_chunks` tables (originally `0096`; renumbered to `0097` after `main` took `0096` — see §13.3), extending the AI Control Plane store rather than creating a second one — this matches the standing "no second knowledge system" constraint.
 
 **Retrieval.** PostgreSQL `tsvector`/`ts_rank` GIN FTS (no extension required — correct, since `pgvector`/`pg_trgm` are unavailable on the supported platform) plus a deterministic application-side matcher for synonyms, abbreviations, typo correction and word-boundary matching. Page confidence is `0.42 + score/160`, floored by `MIN_USEFUL_SCORE = 9`.
 
@@ -592,7 +592,7 @@ Until this is decided, the assistant's behaviour on such questions is: **no inve
 
 | Previous claim | Audit finding |
 | --- | --- |
-| "Embeddings: optional, configurable" | **Not implemented.** No embedding code path, no vector column, no cosine search. `retrieval.ts:32` says so itself: *"There is no embedding stage by default."* `0096` states `pgvector` is unavailable. |
+| "Embeddings: optional, configurable" | **Not implemented.** No embedding code path, no vector column, no cosine search. `retrieval.ts:32` says so itself: *"There is no embedding stage by default."* `0097` states `pgvector` is unavailable. |
 | Suite counts "unit 2261 / frontend 1000 / integration 979" | Unit **2,269** at the time of that correction (**2,274** after the Phase 28 tests, §13.4), frontend **1,000**, integration **963 passed + 17 skipped**. The integration figure appears to have counted skipped tests as passed. |
 | "Completion" framing | Two customer-facing defects were shipping (defects 1 and 2). The guard documented as protecting against unsupported questions had never executed. |
 
