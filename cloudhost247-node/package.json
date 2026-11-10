@@ -60,7 +60,8 @@
     "test:replica": "vitest run tests/integration/design-studio-templates-replica.test.ts",
     "test:failover": "vitest run tests/integration/design-studio-templates-failover.test.ts",
     "test:rejoin": "vitest run tests/integration/design-studio-templates-rejoin.test.ts",
-    "test:fencing": "vitest run tests/integration/design-studio-templates-fencing.test.ts"
+    "test:fencing": "vitest run tests/integration/design-studio-templates-fencing.test.ts",
+    "test:fencing-mechanisms": "vitest run tests/integration/design-studio-templates-fencing-mechanisms.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",

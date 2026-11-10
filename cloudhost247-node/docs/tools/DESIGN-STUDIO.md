@@ -306,6 +306,16 @@ Implications for this feature: the revision predicate is a *single-database* gua
 if a second database believes it is the writer, and it cannot detect a replica serving tuples from an
 abandoned timeline. Details: `docs/tools/DESIGN-STUDIO-PHASE33-EVIDENCE.md`.
 
+### What actually fences a node
+
+Verified against a live PostgreSQL (`docs/tools/DESIGN-STUDIO-PHASE34-EVIDENCE.md`): revoking write access
+to **`pg_wal/*`** stops commits (the server PANICs; no `CAP_DAC_OVERRIDE` to bypass it), as does killing
+the postmaster's process group, and network/VIP fencing gates application traffic. A fenced node cannot
+start serving, so it cannot hand out stale data.
+
+**`chmod 500` on the data directory fences nothing** — the running server holds its files open and keeps
+committing. The fence only works on the files a server must *extend*.
+
 ### Outstanding limitations of saved templates
 
 Recorded here rather than discovered later:
@@ -327,9 +337,10 @@ Recorded here rather than discovered later:
   deployment would fail over correctly.
 * **Rejoin is verified locally only** (Phase 32): `pg_rewind` on one host, no fencing product, no
   quorum, no replication slots, no WAN. Policy is unchanged — still asynchronous replication.
-* **Fencing is not implemented, only shown to be required** (Phase 33). Election, promotion and
-  demotion were verified with Patroni + raft; no STONITH, watchdog, I/O fence or VIP was tested, and
-  the partition was modelled with an asymmetric `SIGSTOP`, not a real network cut.
+* **Fencing mechanisms are verified, but no failover uses them** (Phases 33–34). Storage fencing
+  (WAL permissions), process-group STONITH, network namespaces, VIP removal, self-termination and
+  rejoin gating all demonstrably block writes; none is wired into an automated failover flow. No
+  hardware watchdog, IPMI/PDU power fencing, shared-storage LUN fencing or read-only *mount* was tested.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.
