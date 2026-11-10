@@ -291,6 +291,21 @@ cluster holds data.
 
 Details: `docs/tools/DESIGN-STUDIO-PHASE32-EVIDENCE.md`.
 
+### Fencing is mandatory for automatic failover
+
+A HA coordinator (Patroni, verified with its raft DCS on three nodes) **does not by itself prevent two
+writable primaries**. A primary that loses quorum but keeps its PostgreSQL process running continues to
+accept writes while another node is elected — measured directly: two writable primaries, and a row
+committed on the isolated node that never reached the cluster.
+
+Patroni demotes such a node only when the partition heals (~3 s), and the writes made during the window
+are not removed: the node returns as a perfectly ordinary-looking read-only standby that still holds
+them. Real fencing (STONITH, an I/O or network fence, a watchdog) is what actually stops the old writer.
+
+Implications for this feature: the revision predicate is a *single-database* guarantee. It cannot help
+if a second database believes it is the writer, and it cannot detect a replica serving tuples from an
+abandoned timeline. Details: `docs/tools/DESIGN-STUDIO-PHASE33-EVIDENCE.md`.
+
 ### Outstanding limitations of saved templates
 
 Recorded here rather than discovered later:
@@ -312,6 +327,9 @@ Recorded here rather than discovered later:
   deployment would fail over correctly.
 * **Rejoin is verified locally only** (Phase 32): `pg_rewind` on one host, no fencing product, no
   quorum, no replication slots, no WAN. Policy is unchanged — still asynchronous replication.
+* **Fencing is not implemented, only shown to be required** (Phase 33). Election, promotion and
+  demotion were verified with Patroni + raft; no STONITH, watchdog, I/O fence or VIP was tested, and
+  the partition was modelled with an asymmetric `SIGSTOP`, not a real network cut.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.
