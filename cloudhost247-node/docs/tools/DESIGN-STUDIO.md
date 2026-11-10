@@ -245,6 +245,18 @@ Two things that file settles for future readers:
 * **A client re-seeing its own `SET` after `COMMIT` is not a leak.** With a multi-server pool the same
   backend is usually handed back; the setting remains invisible to other clients.
 
+### If reads are ever split onto a replica
+
+Revision-sensitive reads **must use the primary**. This is not about corruption — the primary refuses
+every stale write regardless of where the read came from — but about the conflict message. A 409 is
+built by re-reading the row, so a lagging replica produces a message naming a revision the user already
+has: "reload and try again" then leads straight back into the same 409, for as long as replication
+lags. Verified on a real streaming standby in `docs/tools/DESIGN-STUDIO-PHASE30-EVIDENCE.md`.
+
+Concretely: `GET /templates/:id` and the re-read inside `PUT /templates/:id` must not be routed to a
+replica. Read-only surfaces that never feed a version check (catalogue listings, invoice history) are
+unaffected. Today the application uses one pool from `DATABASE_URL`, so reads already go to the primary.
+
 ### Outstanding limitations of saved templates
 
 Recorded here rather than discovered later:
@@ -258,8 +270,9 @@ Recorded here rather than discovered later:
 * **No revision history is kept.** A version-safe overwrite prevents losing an edit; it does not let
   anyone recover one. `revision` is a counter, not a log — after an overwrite the previous document is
   gone.
-* **No replica verification.** Pooled-primary concurrency is verified (see above); read-replica
-  behaviour is not, and pooled deploys often route reads separately.
+* **Replica behaviour is verified locally only** (Phase 30): asynchronous streaming, replay paused to
+  create lag, no failover/promotion, no load, no synchronous replication. It establishes *why* reads
+  must stay on the primary, not that any deployment is configured correctly.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.

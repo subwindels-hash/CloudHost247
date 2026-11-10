@@ -56,7 +56,8 @@
     "whmcs:validate": "tsx scripts/whmcs/catalogue-map.ts validate",
     "typecheck:scripts": "tsc -p tsconfig.scripts.json --noEmit",
     "whmcs:evidence": "tsx scripts/whmcs/catalogue-map.ts evidence",
-    "whmcs:readiness": "tsx scripts/whmcs/catalogue-map.ts readiness"
+    "whmcs:readiness": "tsx scripts/whmcs/catalogue-map.ts readiness",
+    "test:replica": "vitest run tests/integration/design-studio-templates-replica.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",
