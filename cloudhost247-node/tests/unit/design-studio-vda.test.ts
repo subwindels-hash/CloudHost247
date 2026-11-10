@@ -24,6 +24,47 @@ const FILLED = {
   batch: 'LOT-8891',
 };
 
+describe('VDA 4902 captions', () => {
+  /**
+   * A caption that ends in an ellipsis is a caption a goods-in clerk cannot use, and it looks like a
+   * rendering fault rather than a deliberate abbreviation.
+   *
+   * The captions are measured in the *upper-case* form they print in, so capitals (which are wider)
+   * are counted; a caption that still does not fit at 85% of the caption size drops to one language
+   * instead of being cut. This test reads every caption op out of the rendered label and asserts none
+   * of them was ellipsized in either format, with German captions on and off.
+   */
+  function captionTexts(german: boolean, format: 'master' | 'klt'): string[] {
+    const result = buildVdaLabel({ ...FILLED, germanCaptions: german, format });
+    const texts: string[] = [];
+    for (const page of result.document.pages) {
+      for (const op of page.ops) {
+        if (op.kind === 'text' && /^\d+\s{2}/.test(op.text)) texts.push(op.text);
+      }
+    }
+    return texts;
+  }
+
+  it('never truncates a field caption in either language or either format', () => {
+    for (const german of [true, false]) {
+      for (const format of ['master', 'klt'] as const) {
+        const captions = captionTexts(german, format);
+        expect(captions.length, `${format}/german=${german} printed no captions`).toBeGreaterThan(8);
+        const truncated = captions.filter((caption) => caption.includes('…') || caption.endsWith('...'));
+        expect(truncated, `${format}/german=${german} truncated: ${truncated.join(' | ')}`).toEqual([]);
+      }
+    }
+  });
+
+  it('names each field in full when only one language fits', () => {
+    // Field 5's bilingual caption cannot fit its column; the fallback must be a whole field name.
+    const captions = captionTexts(true, 'master');
+    const delivery = captions.find((caption) => caption.startsWith('5  '));
+    expect(delivery).toBeTruthy();
+    expect(delivery).toMatch(/DELIVERY NOTE NUMBER|LIEFERSCHEIN-NR\.?/);
+  });
+});
+
 describe('VDA 4902 specification record', () => {
   it('pins the implemented version', () => {
     expect(VDA_SUPPORTED_VERSION).toBe('4');

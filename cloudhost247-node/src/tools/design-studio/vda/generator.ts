@@ -64,13 +64,46 @@ function fieldBox(
 ): DrawOp[] {
   const ops: DrawOp[] = [];
   ops.push({ kind: 'rect', x: box.x, y: box.y, w: box.w, h: box.h, stroke: INK, strokeWidth: RULE });
-  const caption = options.german ? `${field.no}  ${field.label} / ${field.german}` : `${field.no}  ${field.label}`;
-  const captionSize = fitTextSize(caption, options.captionSize, box.w - 2, 'sans').size;
+  /*
+   * Build the caption in whatever fits, from the longest form downwards.
+   *
+   * "4  SUPPLIER NUMBER / LIEFERANTENNUMMER" does not fit a 38 mm column, and `ellipsize` used to end
+   * it at "LIEFERANT…" — a truncated word reads as a different word, and on a goods tag the caption is
+   * what a human uses to check the field. So the caption degrades deliberately: both languages, then
+   * the English alone, then the German alone, and only then is it ellipsized. Losing a translation is
+   * honest; losing the end of a word is not.
+   */
+  const captionWidth = box.w - 2;
+  /*
+   * Measure the *upper-cased* caption, because that is what prints.
+   *
+   * Capitals are wider than lower-case in every font here, so measuring the mixed-case form and then
+   * rendering `.toLocaleUpperCase()` under-measures the string by roughly a tenth — which is exactly
+   * how "5  DELIVERY NOTE NUMBER / LIEFERSCH…" kept its ellipsis through two rounds of "fixing" the
+   * caption.
+   */
+  const upper = (text: string) => text.toLocaleUpperCase('en-US');
+  const candidates = (options.german
+    ? [`${field.no}  ${field.label} / ${field.german}`, `${field.no}  ${field.label}`, `${field.no}  ${field.german}`]
+    : [`${field.no}  ${field.label}`]
+  ).map(upper);
+  /*
+   * Prefer a full-size caption, then a caption shrunk by no more than 15% (a slightly small caption is
+   * still a legible caption), and only then a shorter caption. Below that the difference in size is
+   * visible as inconsistent captions across the row, which looks like a rendering fault.
+   */
+  const floor = options.captionSize * 0.85;
+  const fitted = candidates
+    .map((candidate) => ({ candidate, size: fitTextSize(candidate, options.captionSize, captionWidth, 'sans').size }))
+    .find((entry) => entry.size >= floor)
+    ?? { candidate: candidates[candidates.length - 1]!, size: fitTextSize(candidates[candidates.length - 1]!, options.captionSize, captionWidth, 'sans').size };
+  const caption = fitted.candidate;
+  const captionSize = fitted.size;
   ops.push({
     kind: 'text',
     x: box.x + 1,
     y: box.y + 0.9,
-    text: ellipsize(caption.toLocaleUpperCase('en-US'), captionSize, box.w - 2, 'sans'),
+    text: ellipsize(caption, captionSize, box.w - 2, 'sans'),
     size: captionSize,
     family: 'sans',
     color: INK,
