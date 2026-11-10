@@ -25,21 +25,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     await db.close();
   });
 
-  /**
- * Email forensics landed under two different prefixes depending on which line of work it followed:
- * `0092b_` on the AI branch, `0096_` on the release branch. The runner keys on the version prefix,
- * so either is valid as long as only one of them is present. Resolved from the directory rather
- * than assumed, so this test asserts ordering instead of a particular history.
- */
-const EMAIL_FORENSICS_MIGRATION = (() => {
-  const names = listMigrationFiles().map((file) => file.name);
-  const found = names.find((name) => name === '0096_create_email_forensics.sql')
-    ?? names.find((name) => name === '0092b_create_email_forensics.sql');
-  if (!found) throw new Error('email forensics migration is missing from database/migrations');
-  return found;
-})();
-
-const EXPECTED_MIGRATIONS = [
+  const EXPECTED_MIGRATIONS = [
     '0001_create_users.sql',
     '0002_create_auth_audit_log.sql',
     '0003_create_revoked_tokens.sql',
@@ -154,25 +140,24 @@ const EXPECTED_MIGRATIONS = [
     '0091_add_google_ads_integration.sql',
     // TikTok Pixel + Events API as another provider on the 0089 marketing tables.
     '0092_add_tiktok_pixel_integration.sql',
-    // Native Email Trace & Forensics Analyzer storage.
-    //
-    // Two independent lines of work hit the same collision: version 0092 was already owned by the
-    // TikTok integration, so this schema cannot use it. This branch (the AI Website Intelligence
-    // work, based on PR #110) parked it at 0092b; the release line moved it to 0096. The prefix is
-    // recorded in schema_migrations, but the *ordering* is what matters, so the expected tail
-    // accepts whichever of the two valid spellings is present rather than hard-coding one history
-    // and failing on the other. The AI knowledge migration is 0097 in both, because 0096 now
-    // belongs to email forensics on the release line.
-    // The email-forensics prefix sorts differently depending on which line it came from
-    // (`0092b_` lands before 0093, `0096_` lands after 0095), so the tail is sorted with the same
-    // collation the runner uses instead of being written in one hard-coded order.
-    ...[
-      EMAIL_FORENSICS_MIGRATION,
-      '0093_add_ga4_configuration.sql',
-      '0094_add_ga4_checkout_context.sql',
-      '0095_add_ga4_purchase_delivery.sql',
-      '0097_ai_website_knowledge.sql',
-    ].sort(),
+    '0093_add_ga4_configuration.sql',
+    '0094_add_ga4_checkout_context.sql',
+    '0095_add_ga4_purchase_delivery.sql',
+    // Native Email Trace & Forensics Analyzer (0096). Version 0092 was already owned by the
+    // TikTok integration, so this schema follows the GA4 migrations with its own unique version.
+    '0096_create_email_forensics.sql',
+    // Phase 14 (P14-02 remediation): idempotency key on billing_ledger refund entries.
+    // (Renumbered 0093->0097 during the PR merge: main had independently taken 0093-0096.)
+    '0097_refund_idempotency_key.sql',
+    // Phase 16 hardening: refund idempotency keys become globally unique (one key = one operation).
+    '0098_refund_idempotency_global_uniqueness.sql',
+    // Consent-gated, optional Visitor Intelligence collection and aggregate reporting.
+    '0099_create_visitor_intelligence.sql',
+    // AI Website Intelligence: the assistant's knowledge index. Renumbered 0097 -> 0100 when the
+    // AI line and the release line were combined, because the release line had independently taken
+    // 0097 for refund idempotency. Every earlier prefix is occupied on one history or the other, so
+    // 0100 is the first number that is free on both.
+    '0100_ai_website_knowledge.sql',
   ];
 
   it('finds the committed migration files in order', () => {

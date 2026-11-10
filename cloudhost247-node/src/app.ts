@@ -10,6 +10,7 @@ import { registerAuthRoutes } from './routes/auth';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
 import { registerVisitorIpRoute } from './routes/visitor-ip';
+import { registerVisitorIntelligenceRoutes } from './routes/visitor-intelligence';
 import { registerCatalogAdminRoutes } from './routes/catalog-admin';
 import { registerAccountRoutes } from './routes/account';
 import { registerAdminCustomerRoutes } from './routes/admin-customers';
@@ -197,6 +198,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerWhmcsPublicRoutes(instance, env, pool, whmcsPublic);
     await registerCurrencyRoutes(instance, env, pool);
     await registerVisitorIpRoute(instance, env);
+    await registerVisitorIntelligenceRoutes(instance, env, pool);
     await registerCatalogAdminRoutes(instance, env, pool);
     await registerAccountRoutes(instance, env, pool);
     await registerAccountIdentityRoutes(instance, env, pool);

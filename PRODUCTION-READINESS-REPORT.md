@@ -1,13 +1,105 @@
 # CloudHost247 Production Readiness Report
 
-**Date:** 2026-10-13  
-**Branch:** arena/e5e168c8-cloudhost247  
-**Platform Status:** ✅ Running (Port 3000)  
-**Verification Status:** ✅ All Checks Passing
+> ## ⏳ Certification status as of 2026-11-09 — supersedes the 2026-10-13 claim below
+>
+> **Source verification: PASSED. Production certification: NOT YET GRANTED. Deployment stays frozen.**
+>
+> Post-verification audit on branch `arena/fe9b2088-cloudhost247` (HEAD `c578ff2f`):
+>
+> **Passed (executed evidence):** release-candidate gate exit 0 (incl. rendered-site audit
+> with verified Smarty 4.5.6); 2,901/2,901 vitest tests (232 files); 18/18 PHP behavioural
+> suites; PHP lint clean on 7.4 and 8.2 legs (842 first-party targets); 678 Python
+> static/security tests; 20/20 server-agent protocol tests; TypeScript 0 errors; production
+> build OK; `npm audit --omit=dev` 0 vulnerabilities; vendor integrity baseline byte-verified;
+> 3 defects found by the audit and repaired (`c0582183`, `cca9e458`, `bae36080`), re-verified,
+> zero regressions. See `VERIFICATION-REPORT-2026-11-09.md`, `POST-VERIFICATION-AUDIT.md`,
+> `MODULE-INTEGRITY-REPORT.md`.
+>
+> **Not yet certified (blocked on infrastructure/credentials, not on code):**
+> B-1 Playwright browser e2e · B-2 licensed-WHMCS staging functional tests · B-3 production
+> PostgreSQL financial probes (`verify:financial`, `verify:authorization` CLI form) ·
+> B-4 payment/provider sandbox certification (owner credentials required) · B-5 quarantined
+> migrations 0023/0024/0025/0041 (explicit owner authorization required).
+>
+> **Phase 3 staging certification (2026-11-09, same-day supplement):** controlled staging
+> substitute executed — 33/33 live HTTP workflow checks PASS on the real stack (embedded
+> Postgres, 92 migrations, strong secrets, simulation mode; zero external providers), payment
+> integrity verified under adversarial webhook execution (signed-settles, tampered 401, stale
+> 401, replay dedup, wrong-amount 400, failed-non-settling, owner-only initiation,
+> reconciliation & append-only ledger consistency), provider layer code-certified across 12
+> adapters + fail-closed guarantees, and a live backup→destroy→restore exercise proved
+> byte-identical recovery of all 221 tables incl. the financial trail. Deliverables:
+> `STAGING-CERTIFICATION-REPORT.md`, `PAYMENT-INTEGRITY-REPORT.md`,
+> `PROVIDER-CERTIFICATION-MATRIX.md`, `DATABASE-RECOVERY-REPORT.md` +
+> `docs/staging/*.json` evidence. The five B-items above remain the sole open gates;
+> everything within host bounds is now executed and green.
+>
+> **Phase 4 independent audit (2026-11-09, post-certification):** a separate probe suite
+> (fresh code, fresh accounts, forged-token vectors — no Phase-3 reuse) re-derived the
+> security-critical claims **23/23 PASS** (role-forgery 403, expired/wrong-secret/wrong-sv 401,
+> logout revocation, TOTP replay/single-use refusals, cross-tenant read *and* payment-initiation
+> 404, admin boundaries, timestamp-omitted webhook replay bounded by idempotency). Source-level
+> payment audit: invariants enforced inside the settlement transaction and by DB triggers.
+> Recovery audit: PASS-criteria cannot be satisfied by omission (spine tables checksummed;
+> D4-F1 notes count-level verification for the other 215 tables). Phase 3 classified: 30/33
+> functional + 3 disclosed availability-limited steps. New deliverables:
+> `INDEPENDENT-STAGING-AUDIT.md`, `PAYMENT-SECURITY-AUDIT.md`, `DATABASE-RECOVERY-AUDIT.md`,
+> `AUTHENTICATION-SECURITY-AUDIT.md`, `FINAL-PRODUCTION-BLOCKERS.md` (L1–L4 verification
+> levels, Gates A–C). **Phase 3 stands validated. Production certification remains NOT GRANTED
+> on Gates A (credentials/licensing), B (infrastructure), C (five low-severity hardening/ops
+> items found by this audit — none blocking, all named).**
+>
+> **Phase 5 gate closure (2026-11-09):** all Phase-4 internally controllable findings CLOSED
+> with executable evidence — P4-F1/F2/F3/F4 payment hardening (mandatory webhook timestamps,
+> standardized amounts, webhook throttling, durable terminal-vs-transient rejection semantics;
+> plus one pre-existing FK-ordering defect found & fixed), D4-F1 byte-level full-database
+> recovery (221 tables + schema/constraints/indexes/sequences), browser-ceremony suite prepared
+> (execution still environment-blocked), operational readiness verified (logging + redaction,
+> queues, recovery, rotation, incident audit trail) and a deployment rollback procedure added.
+> Commits `9a65b269`, `8d30a9bd`, `50ef5af0`, `95973ffc`. See PHASE-5-HARDENING-REPORT.md,
+> PAYMENT-RECONCILIATION-REPORT.md, COMPLETE-DATABASE-RECOVERY-REPORT.md,
+> AUTHENTICATION-E2E-REPORT.md, EXTERNAL-INTEGRATION-READINESS.md, OPERATIONAL-READINESS-REPORT.md.
+> **Remaining blockers are exclusively external** (owner credentials/licensing, real hosting
+> infrastructure, owner authorizations, ops decisions) — itemized with L1–L4 levels in
+> FINAL-PRODUCTION-BLOCKERS.md. Production certification still NOT GRANTED.
+>
+> **Phase 6 external certification attempt (2026-11-09):** every gate inspected under explicit
+> authorization discipline and STOPPED with dated evidence — no browsers/CMS licenses/provider
+> credentials/email relay/external Postgres exist in this environment (sweep proof in
+> PHASE-6-CERTIFICATION-SUMMARY.md). Six certification reports (BROWSER, WHMCS-CPANEL,
+> PROVIDER-INTEGRATION, PAYMENT-PROVIDER, EMAIL-DELIVERY, POSTGRESQL) document each stop plus
+> ready-to-execute procedures; nothing external was simulated or claimed. Standing executed
+> evidence unchanged and green: suite 2,916/2,916; staging smoke 33/33; probes 23/23;
+> release-candidate gate exit 0 (HEAD `5ecd29d9` → `…6000500c` document-only deltas).
+> Full plans per item: `POST-VERIFICATION-AUDIT.md` §3.
+>
+> **Required owner decisions before certification:**
+> 1. Authorize and review each quarantined migration (0023/0024/0025/0041) individually.
+> 2. Provide staging environment: licensed WHMCS install + PostgreSQL + target cPanel account.
+> 3. Decide which payment providers to sandbox-certify first and supply test credentials.
+> 4. Approve production environment secrets issuance (JWT, encryption keys, PIN key, webhook secrets).
+> 5. Decide WHMCS integration mode (`read-only` vs `full`) for production — default stays `read-only`.
+>
+> **Prioritized remediation plan:**
+> P0 — B-2 staging stand-up (unblocks B-3 and parts of B-4/B-5). P0 — B-5 migration review
+> (blocks any production DB progress). P1 — B-1 browser e2e on a browser-capable host.
+> ~~P1 — G-1 marketplace-admin test gap~~ **CLOSED** (`marketplace-admin-categories.test.ts`,
+> 6/6 pass). P2 — B-4 sandbox certification per provider.
+> P3 — schedule recurring `npm audit` + dependency refresh in CI.
+>
+> The 2026-10-13 report below remains as historical evidence of the source-level state at
+> that date; its "production-ready" headline is superseded by the certification status above.
 
 ---
 
-## Executive Summary
+**Date:** 2026-10-13  
+**Branch:** arena/e5e168c8-cloudhost247  
+**Platform Status:** ✅ Running (Port 3000)  
+**Verification Status:** ✅ All Checks Passing (source-level, as of that date)
+
+---
+
+## Executive Summary (historical, 2026-10-13)
 
 **The CloudHost247 repository is production-ready.** After comprehensive audit and verification:
 

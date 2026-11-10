@@ -1,0 +1,121 @@
+{
+  "runAt": "2026-11-09T11:16:50.307Z",
+  "baseUrl": "http://localhost:3000",
+  "probes": [
+    {
+      "name": "register two fresh audit customers",
+      "pass": true,
+      "detail": "201/201"
+    },
+    {
+      "name": "password-reset uniformity: known vs unknown email byte-identical 202",
+      "pass": true,
+      "detail": "known 202, unknown 202, bodies equal: true"
+    },
+    {
+      "name": "login A",
+      "pass": true,
+      "detail": "status 200"
+    },
+    {
+      "name": "JWT with forged role=super_admin claim CANNOT reach admin routes (DB-fresh role wins)",
+      "pass": true,
+      "detail": "status 403"
+    },
+    {
+      "name": "already-expired JWT rejected",
+      "pass": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "JWT signed with a wrong secret rejected",
+      "pass": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "JWT with non-current session version (sv) rejected",
+      "pass": true,
+      "detail": "status 401 (Session invalidated by a password change — please log in again)"
+    },
+    {
+      "name": "logout revokes the exact token immediately",
+      "pass": true,
+      "detail": "before 200, logout 204, reuse 401 (This session has been logged out)"
+    },
+    {
+      "name": "TOTP enroll issues secret",
+      "pass": true,
+      "detail": "status 200"
+    },
+    {
+      "name": "TOTP confirm with real code",
+      "pass": true,
+      "detail": "status 200"
+    },
+    {
+      "name": "post-enrollment login demands second factor (202, no session)",
+      "pass": true,
+      "detail": "status 202"
+    },
+    {
+      "name": "TOTP REPLAY: the enrollment-confirmed code is refused for login-verify in the same window",
+      "pass": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "fresh-window TOTP code completes the login",
+      "pass": true,
+      "detail": "status 200"
+    },
+    {
+      "name": "TOTP single-use: a successfully used code cannot be reused on a new challenge",
+      "pass": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "out-of-window TOTP code refused",
+      "pass": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "passkey login options for an account with no passkeys fails honestly",
+      "pass": true,
+      "detail": "status 401 (No passkey is available for this account)"
+    },
+    {
+      "name": "passkey register-options without password confirmation refused",
+      "pass": true,
+      "detail": "status 400"
+    },
+    {
+      "name": "audit customer A checks out an unpaid invoice",
+      "pass": true,
+      "detail": "order 201, invoice list: 1 rows"
+    },
+    {
+      "name": "cross-tenant invoice read and payment initiation both indistinguishable from non-existence",
+      "pass": true,
+      "detail": "read 404, initiate 404"
+    },
+    {
+      "name": "customer token is 403 across three distinct admin routes",
+      "pass": true,
+      "detail": "[403,403,403]"
+    },
+    {
+      "name": "anonymous admin access is 401",
+      "pass": true,
+      "detail": "status 401"
+    },
+    {
+      "name": "P4-F1 closed live: UNSIGNED-timestamp webhook refused (401); stamped replay deduped; no second settlement",
+      "pass": true,
+      "detail": "settle1 200, no-ts 401 (expect 401), stamped replay 200 status=already_processed, ledger 2→2, invoice paid"
+    },
+    {
+      "name": "API issues no ambient session cookies (bearer tokens only → classic CSRF N/A on API routes)",
+      "pass": true,
+      "detail": "no set-cookie"
+    }
+  ]
+}

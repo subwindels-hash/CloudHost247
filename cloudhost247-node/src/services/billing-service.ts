@@ -17,7 +17,7 @@ import {
 } from '../db/billing-ledger';
 import { listOrderItemsForOrder, setOrderPaymentStatus, setOrderStatus, type OrderRow } from '../db/orders';
 import { cancelAllPendingPaymentsForInvoice, listPaymentsForInvoice } from '../db/payments';
-import { NotFoundError, ValidationError } from '../lib/errors';
+import { ConflictError, NotFoundError, ValidationError } from '../lib/errors';
 import { fromCents, toCents } from '../lib/money';
 import { recordAuthEvent } from '../db/users';
 import {
@@ -164,7 +164,8 @@ export async function adminIssueRefund(
   amountCents: number,
   reason: string,
   genId: () => string,
-  audit: AuditContext = {}
+  audit: AuditContext = {},
+  idempotencyKey: string | null = null
 ): Promise<AdminInvoiceDetailDTO> {
   if (!Number.isInteger(amountCents) || amountCents <= 0) {
     throw new ValidationError('Refund amount must be a positive integer in cents');
@@ -178,31 +179,73 @@ export async function adminIssueRefund(
     throw new NotFoundError('No invoice was found with that id');
   }
 
-  if (invoice.status !== 'paid' && invoice.status !== 'partially_refunded') {
-    throw new ValidationError(`Cannot refund an invoice in '${invoice.status}' status`);
-  }
-
-  const ledgerEntries = await listLedgerEntriesForInvoice(pool, invoiceId);
-  const totalPaidCents = ledgerEntries
-    .filter((e) => e.entry_type === 'payment')
-    .reduce((sum, e) => sum + toCents(e.amount), 0);
-  const totalRefundedCents = ledgerEntries
-    .filter((e) => e.entry_type === 'refund')
-    .reduce((sum, e) => sum + toCents(e.amount), 0);
-
-  const maxRefundableCents = totalPaidCents - totalRefundedCents;
-  if (amountCents > maxRefundableCents) {
-    throw new ValidationError(
-      `Refund amount of $${fromCents(amountCents)} exceeds refundable balance of $${fromCents(maxRefundableCents)}`
+  // Phase 13 remediation (P0 over-refund race): the refundable-cap validation MUST be evaluated
+  // against a locked snapshot. Reading the ledger outside a transaction let two concurrent staff
+  // refunds both observe the pre-refund balance and both pass validation (double-refund). All
+  // reads that the refund decision depends on now happen inside the transaction AFTER locking the
+  // invoice row with SELECT ... FOR UPDATE, so the second waiter re-evaluates against the first
+  // refund's committed ledger rows.
+  const isFullRefund = await withTransaction(pool, async (tx) => {
+    const { rows: locked } = await tx.query<{ status: string }>(
+      `SELECT status FROM invoices WHERE id = $1 FOR UPDATE`,
+      [invoiceId]
     );
-  }
+    const lockedInvoice = locked[0];
+    if (!lockedInvoice) throw new NotFoundError('No invoice was found with that id');
 
-  const isFullRefund = totalRefundedCents + amountCents === totalPaidCents;
-  const newInvoiceStatus = isFullRefund ? 'refunded' : 'partially_refunded';
-  const newOrderPaymentStatus = isFullRefund ? 'refunded' : 'partially_refunded';
+    // Phase 14 (P14-02): idempotent replay. If a caller retries with the same idempotency key
+    // (e.g. after an HTTP timeout during the first attempt), the refund must be recognized as
+    // already issued — no second ledger entry, no second refund — and return the current state.
+    //
+    // Phase 16 hardening: the key identifies ONE operation globally (unique index), and a replay
+    // is only honored when invoice, amount AND reason all match the original. Reusing a key for a
+    // different invoice or with altered parameters is a conflict, never a silent replay.
+    if (idempotencyKey) {
+      const { rows: existing } = await tx.query<{ invoice_id: string | null; amount: string; description: string }>(
+        `SELECT invoice_id, amount, description FROM billing_ledger WHERE entry_type = 'refund' AND idempotency_key = $1 LIMIT 1`,
+        [idempotencyKey]
+      );
+      const prior = existing[0];
+      if (prior) {
+        const sameOperation =
+          prior.invoice_id === invoiceId &&
+          toCents(prior.amount) === amountCents &&
+          prior.description === `Staff refund: ${reason.trim()}`;
+        if (!sameOperation) {
+          throw new ConflictError(
+            'This idempotency key belongs to a different refund operation — generate a new key instead of reusing one'
+          );
+        }
+        return 'idempotent-replay';
+      }
+    }
 
-  await withTransaction(pool, async (tx) => {
-    // 1. Append refund entry into immutable billing ledger
+    if (lockedInvoice.status !== 'paid' && lockedInvoice.status !== 'partially_refunded') {
+      throw new ValidationError(`Cannot refund an invoice in '${lockedInvoice.status}' status`);
+    }
+
+    const ledgerEntries = await listLedgerEntriesForInvoice(tx, invoiceId);
+    const totalPaidCents = ledgerEntries
+      .filter((e) => e.entry_type === 'payment')
+      .reduce((sum, e) => sum + toCents(e.amount), 0);
+    const totalRefundedCents = ledgerEntries
+      .filter((e) => e.entry_type === 'refund')
+      .reduce((sum, e) => sum + toCents(e.amount), 0);
+
+    const maxRefundableCents = totalPaidCents - totalRefundedCents;
+    if (amountCents > maxRefundableCents) {
+      throw new ValidationError(
+        `Refund amount of $${fromCents(amountCents)} exceeds refundable balance of $${fromCents(maxRefundableCents)}`
+      );
+    }
+
+    const fullRefund = totalRefundedCents + amountCents === totalPaidCents;
+    const newInvoiceStatus = fullRefund ? 'refunded' : 'partially_refunded';
+    const newOrderPaymentStatus = fullRefund ? 'refunded' : 'partially_refunded';
+
+    // 1. Append refund entry into immutable billing ledger (with the idempotency key, if supplied —
+    // the unique partial index is the last line of defense against a duplicated refund even if the
+    // caller's retry races the original).
     await recordLedgerEntry(tx, {
       id: genId(),
       userId: invoice.user_id,
@@ -211,6 +254,7 @@ export async function adminIssueRefund(
       amount: fromCents(amountCents),
       currency: invoice.currency,
       description: `Staff refund: ${reason.trim()}`,
+      idempotencyKey,
     });
 
     // 2. Update invoice status
@@ -237,6 +281,8 @@ export async function adminIssueRefund(
         reason: reason.trim(),
       },
     });
+
+    return fullRefund;
   });
 
   return adminGetInvoiceDetail(pool, invoiceId);

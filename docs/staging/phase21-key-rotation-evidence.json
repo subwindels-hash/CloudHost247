@@ -1,0 +1,50 @@
+{
+ "generatedAt": "2026-11-09T16:50:59.800Z",
+ "plaintexts": [
+  {
+   "probe": "secret-probe-alpha",
+   "sha256OfPlaintext": "b07f859f852fe097",
+   "envelopeSha256": "c9e8307939a3ac17",
+   "decryptedUnderRing": [
+    2
+   ],
+   "decryptAfterFinal": true,
+   "recoverStepDocumented": true
+  },
+  {
+   "probe": "secret-probe-beta",
+   "sha256OfPlaintext": "6369e70896535adb",
+   "envelopeSha256": "46d80da0097e49f4",
+   "decryptedUnderRing": [
+    2
+   ],
+   "decryptAfterFinal": true,
+   "recoverStepDocumented": true
+  },
+  {
+   "probe": "credential-probe-gamma",
+   "sha256OfPlaintext": "3a201e711ac1e3a6",
+   "envelopeSha256": "156dcaf93a344567",
+   "decryptedUnderRing": [
+    2
+   ],
+   "decryptAfterFinal": true,
+   "recoverStepDocumented": true
+  }
+ ],
+ "rotations": [
+  {
+   "from": [
+    1
+   ],
+   "to": [
+    1,
+    2
+   ],
+   "allEnvelopesDecrypt": true,
+   "writtenWithNewest": 2
+  }
+ ],
+ "finalRingHasOldVersion": false,
+ "passed": true
+}

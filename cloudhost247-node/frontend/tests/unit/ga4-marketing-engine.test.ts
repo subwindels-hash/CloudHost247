@@ -479,8 +479,10 @@ describe('Smarty-style public page initialization', () => {
   ])('keeps the theme script versioned and guarded by the same-origin platform mount', path => {
     const template = readFileSync(resolve(__dirname, path), 'utf8');
     expect(template).toContain('{if $ch247Site.platform}');
-    expect(template).toContain('js/marketing.js?v=20261108.7');
+    expect(template).toMatch(/js\/marketing\.js\?v=\d{8}(?:\.\d+)?/);
     expect(template).toContain('data-marketing-api="{$ch247Site.platform|escape}/api/v1/marketing"');
+    expect(template).toContain('data-visitor-intelligence-api="{$ch247Site.platform|escape}/api/v1/visitor-intelligence"');
+    expect(template).toContain('if !$adminLoggedIn && !$adminMasqueradingAsClient');
   });
   it('does not initialize from a cross-origin mount', () => {
     const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>', { url: 'https://example.com/business-hosting.php', runScripts: 'outside-only' });

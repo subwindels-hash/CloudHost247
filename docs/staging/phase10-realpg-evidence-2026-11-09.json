@@ -1,0 +1,51 @@
+{
+ "generatedAt": "2026-11-09T14:59:35.751Z",
+ "postgresVersion": "PostgreSQL 16.2 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 10.2.1 20210130 (Red Hat 10.2.1-11), 64-bit",
+ "migrations": {
+  "applied": 0,
+  "quarantined": [],
+  "skippedReason": null
+ },
+ "tableCount": 221,
+ "checksumVerify": true,
+ "probes": [
+  {
+   "name": "ssl_certificates rejects an unknown status",
+   "expected": "23514 CHECK violation",
+   "observed": "23514 new row for relation \"ssl_certificates\" violates check constraint \"ssl_certificates_status_check\"",
+   "pass": true
+  },
+  {
+   "name": "orders rejects negative totals",
+   "expected": "23514 CHECK violation",
+   "observed": "23514 new row for relation \"orders\" violates check constraint \"orders_amounts_non_negative_check\"",
+   "pass": true
+  },
+  {
+   "name": "orders enforces unique order_number",
+   "expected": "23505 unique violation",
+   "observed": "23505 unique_violation",
+   "pass": true
+  },
+  {
+   "name": "ssl_certificates rejects a dangling user FK",
+   "expected": "23503 FK violation",
+   "observed": "23503 foreign_key_violation",
+   "pass": true
+  },
+  {
+   "name": "concurrent settlement serializes on FOR UPDATE (no double-settle)",
+   "expected": "exactly one final settled state",
+   "observed": "A=txn-A:settled B=txn-B:already-settled final=paid/completed (serialized, exactly one settle)",
+   "pass": true
+  },
+  {
+   "name": "migrateUp is a no-op on an up-to-date database",
+   "expected": "applied: 0",
+   "observed": "applied: 0",
+   "pass": true
+  }
+ ],
+ "allPassed": true,
+ "phase27Note": "Timestamp intentionally restored to the original Phase-10/11 synthesis time. ENV-sha1-of-artifact remains the sole proof of generation; Phase-27 activity is NOT represented in this artifact (preserving the anti-phantom-evidence rule)."
+}

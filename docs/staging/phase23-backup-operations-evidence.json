@@ -1,0 +1,25 @@
+{
+ "generatedAt": "2026-11-09T17:02:00Z",
+ "phase": "Phase 23 \u2014 production backup operations, monitoring & recovery automation",
+ "implementation": {
+  "worker": "src/backups/backup-worker.ts (unit-tested, staged pipeline: dump\u2192encrypt\u2192manifest\u2192upload\u2192verify\u2192retention)",
+  "storagePort": "src/backups/storage-adapter.ts (provider-neutral Fs + credentials-gated S3 interface)",
+  "inventory": "InMemoryBackupInventory (full field set per spec); DB-sourced inventory migration deliberately deferred to avoid inventing production schema without authorization",
+  "scheduling": "interval-driven from app entry (documented); no cron injection without owner consent"
+ },
+ "unitTests": "tests/unit/backup-worker.test.ts \u2014 8/8 green",
+ "casesCovered": [
+  "happy encrypted backup",
+  "upload retry resumes",
+  "permanent-FAIL closed",
+  "digest-mismatch rejected",
+  "resume abandoned run (no duplicate)",
+  "retention floor safeguard",
+  "restore-by-version from storage",
+  "rotation compatibility"
+ ],
+ "localVsProvider": "FsAdapter (local) exercised with artifacts; S3 adapter unexercised (credentials absent) \u2014 no provider claim",
+ "monitoring": "structured redacted logs emitted per stage (backup.complete/failed/verify.failed/retention.sweep); live alert delivery remains CT-02",
+ "releaseGate": "no change \u2014 internal assurance up; external provider gates outstanding; NO-GO",
+ "phase22ChainInherited": "pg_dump(custom) -> AES-256-GCM envelope (same format as src/lib/crypto.ts) -> decrypt -> pg_restore -> verify"
+}

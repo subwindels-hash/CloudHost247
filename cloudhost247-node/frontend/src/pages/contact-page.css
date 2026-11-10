@@ -1,16 +1,351 @@
-.ch247-contact-hero {
-  background: linear-gradient(90deg, rgba(9, 15, 23, .92) 0%, rgba(9, 15, 23, .76) 45%, rgba(9, 15, 23, .35) 100%),
+/* =============================================================================
+   Contact Us — homepage AssistantShowcase silver-band background.
+
+   The fine diagonal brushed-silver finish is copied from the homepage section
+   headed "More confidence at every step." It uses the same #c0c0c0 base,
+   115deg hairline stripe layer and 160deg silver ramp — no separate bitmap,
+   no gold/bronze gradient, no moving star field and no wordmark. The form card
+   gets a translucent silver veil over the same finish so its controls stay
+   readable. The hero keeps its neutral ink overlay. Slow metallic sheen and
+   the hero title shine remain, with reduced-motion/print guards.
+   ========================================================================== */
+
+.ch247-contact-page {
+  --contact-assistant-silver-bg:
+    repeating-linear-gradient(115deg, #ffffff2e 0 2px, #0000000d 2px 4px),
+    linear-gradient(135deg, #ffffff99 0%, #ffffff00 32%),
+    linear-gradient(160deg, #e9ecef 0%, #d3d7db 16%, #c2c7cd 40%, #b2b7be 56%, #c9cdd2 74%, #e3e6e9 100%);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  overflow: clip;
+  color: #17202a;
+  background-color: #c0c0c0;
+  background-image: var(--contact-assistant-silver-bg);
+}
+
+/* A slow metallic sheen above the striped surface (z-index 2) but below
+   readable content (z-index 3). No star field is layered here. */
+.ch247-contact-page::after {
+  content: '';
+  position: absolute;
+  inset: -20% -60%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(104deg, transparent 42%, rgba(255, 255, 255, .30) 49%, rgba(255, 255, 255, .10) 54%, transparent 61%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: translate3d(-120%, 0, 0);
+  animation: ch247-contact-specular 16s ease-in-out infinite;
+}
+
+/* Neutral ink scrim only: the photograph's own colours stay intact. Below the
+   hero, the uncluttered fine silver-stripe field holds the form. */
+.ch247-contact-page .ch247-contact-hero {
+  position: relative;
+  z-index: auto;
+  color: #fff;
+  background:
+    linear-gradient(90deg, rgba(9, 15, 23, .92) 0%, rgba(9, 15, 23, .76) 45%, rgba(9, 15, 23, .35) 100%),
     url('/media/cloudhost247/contact-hero.jpg') center / cover no-repeat;
   background-color: #10171d;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .14);
 }
-.ch247-contact { max-width: 720px; border: 1px solid #d7c591; box-shadow: 0 8px 28px rgba(13, 17, 22, .08); }
-.ch247-contact__form { display: grid; gap: 8px; margin-top: 24px; }
-.ch247-contact__form label { font-weight: 650; margin-top: 10px; }
-.ch247-contact__form input,
-.ch247-contact__form select,
-.ch247-contact__form textarea { width: 100%; padding: 12px; border: 1px solid #aeb8c3; border-radius: 6px; background: #fff; color: #17202a; font: inherit; }
-.ch247-contact__form textarea { resize: vertical; }
-.ch247-contact__form :is(input, select, textarea):focus-visible { outline: 3px solid #b8860b; outline-offset: 2px; }
-.ch247-contact__form button { justify-self: start; margin-top: 14px; }
-.ch247-contact__form button:disabled { opacity: .65; cursor: wait; }
-.ch247-contact__form [role='alert'] { color: #a12727; }
+
+.ch247-contact-page .ch247-contact-hero .ch247-hero__inner {
+  position: relative;
+  z-index: 3;
+}
+
+.ch247-contact-page .ch247-contact-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 1.15rem;
+  padding: .42rem .85rem;
+  border: 1px solid rgba(255, 255, 255, .36);
+  border-radius: 999px;
+  background: rgba(9, 15, 23, .64);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 8px 24px rgba(9, 15, 23, .28);
+  color: #f4f6f8;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+.ch247-contact-page .ch247-contact-hero__eyebrow span,
+.ch247-contact-page .ch247-contact__eyebrow span {
+  font-size: .95em;
+  line-height: 1;
+}
+
+.ch247-contact-page .ch247-contact-hero__eyebrow span { color: #e5e4e2; }
+.ch247-contact-page .ch247-contact__eyebrow span { color: #858585; }
+
+.ch247-contact-page .ch247-contact-hero h1 {
+  width: fit-content;
+  max-width: 100%;
+  color: #fff;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, .42));
+}
+
+.ch247-contact-page .ch247-contact-hero p:not(.ch247-contact-hero__eyebrow) {
+  color: #eef2f5;
+  opacity: .96;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .ch247-contact-page .ch247-contact-hero h1 {
+    background: linear-gradient(100deg, #c9cdd1 0%, #e5e4e2 22%, #ffffff 40%, #c0c0c0 62%, #ffffff 82%, #e5e4e2 100%);
+    background-size: 180% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: ch247-contact-title-shine 12s ease-in-out infinite alternate;
+  }
+}
+
+/* The section inherits the homepage-style silver band; no repeating wordmark
+   or star field is layered between the metal and the form. */
+.ch247-contact-page .ch247-contact-section {
+  position: relative;
+  z-index: auto;
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+  background: transparent;
+  border-top: 1px solid #a7acb3;
+  border-bottom: 1px solid #a7acb3;
+}
+
+/* The form uses the same homepage silver finish behind a translucent veil,
+   with a graphite-silver edge and shadow to keep it raised above the band. */
+.ch247-contact-page .ch247-contact {
+  position: relative;
+  z-index: 3;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  overflow: hidden;
+  border: 2px solid rgba(98, 103, 109, .62);
+  border-radius: 24px;
+  background-color: #c0c0c0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .78), rgba(255, 255, 255, .78)),
+    var(--contact-assistant-silver-bg);
+  box-shadow:
+    0 30px 80px rgba(13, 17, 22, .32),
+    0 8px 22px rgba(23, 29, 36, .18),
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    inset 0 -1px 0 rgba(74, 79, 84, .28);
+  color: #17202a;
+}
+
+.ch247-contact-page .ch247-contact::before,
+.ch247-contact-page .ch247-contact::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.ch247-contact-page .ch247-contact::before {
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 6% 0%, rgba(255, 255, 255, .62), transparent 46%),
+    radial-gradient(ellipse at 100% 100%, rgba(98, 103, 109, .08), transparent 50%);
+  opacity: .7;
+}
+
+.ch247-contact-page .ch247-contact::after {
+  z-index: 1;
+  inset-block: -30%;
+  inset-inline: -80%;
+  border-radius: 0;
+  background: linear-gradient(104deg, transparent 40%, rgba(255, 255, 255, .52) 49%, rgba(255, 255, 255, .16) 56%, transparent 66%);
+  opacity: 0;
+  transform: translate3d(-120%, 0, 0);
+  animation: ch247-contact-specular 11s ease-in-out infinite;
+}
+
+.ch247-contact-page .ch247-contact__content {
+  position: relative;
+  z-index: 2;
+}
+
+.ch247-contact-page .ch247-contact__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0 0 .7rem;
+  color: #4d5257;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.ch247-contact-page .ch247-contact__eyebrow span {
+  color: #858585;
+}
+
+.ch247-contact-page .ch247-contact h2 {
+  margin: 0 0 .55rem;
+  color: #17202a;
+  font-size: clamp(1.65rem, 3vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -.03em;
+}
+
+.ch247-contact-page .ch247-contact__lede {
+  margin: 0;
+  max-width: 58ch;
+  color: #4d5257;
+  line-height: 1.6;
+}
+
+.ch247-contact-page .ch247-contact__form {
+  display: grid;
+  gap: .55rem;
+  margin-top: 1.75rem;
+}
+
+.ch247-contact-page .ch247-contact__form label {
+  margin-top: .7rem;
+  color: #2f353c;
+  font-weight: 700;
+}
+
+.ch247-contact-page .ch247-contact__form input,
+.ch247-contact-page .ch247-contact__form select,
+.ch247-contact-page .ch247-contact__form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: .9rem 1rem;
+  border: 1px solid rgba(74, 79, 84, .42);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 2px 8px rgba(23, 29, 36, .06);
+  color: #17202a;
+  font: inherit;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ch247-contact-page .ch247-contact__form textarea {
+  resize: vertical;
+}
+
+.ch247-contact-page .ch247-contact__form :is(input, select, textarea):hover {
+  border-color: rgba(98, 103, 109, .72);
+}
+
+.ch247-contact-page .ch247-contact__form :is(input, select, textarea):focus-visible {
+  outline: 3px solid rgba(98, 103, 109, .68);
+  outline-offset: 2px;
+  border-color: #858585;
+  box-shadow: 0 0 0 5px rgba(192, 192, 192, .35);
+}
+
+.ch247-contact-page .ch247-contact__form .ch247-button {
+  justify-self: start;
+  margin-top: 1.35rem;
+  padding: .85rem 1.65rem;
+  border: 1px solid rgba(74, 79, 84, .7);
+  border-radius: 999px;
+  background: var(--metal-ramp-silver, linear-gradient(115deg, #62676d, #c0c0c0, #ffffff, #858585, #a8adb3, #62676d));
+  background-size: 200% 100%;
+  color: #17202a !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 12px 26px rgba(23, 29, 36, .22);
+  font-weight: 800;
+  transition: background-position 720ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.ch247-contact-page .ch247-contact__form .ch247-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background-position: 100% 50%;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 18px 34px rgba(23, 29, 36, .3);
+}
+
+.ch247-contact-page .ch247-contact__form .ch247-button:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+.ch247-contact-page .ch247-contact__form [role='status'],
+.ch247-contact-page .ch247-contact__form [role='alert'] {
+  margin: .35rem 0 0;
+  padding: .75rem 1rem;
+  border-radius: 10px;
+  font-weight: 650;
+}
+
+.ch247-contact-page .ch247-contact__form [role='status'] {
+  border: 1px solid rgba(95, 69, 10, .28);
+  background: rgba(251, 245, 228, .92);
+  color: #5f450a;
+}
+
+.ch247-contact-page .ch247-contact__form [role='alert'] {
+  border: 1px solid rgba(122, 23, 23, .28);
+  background: rgba(255, 240, 240, .94);
+  color: #7a1717;
+}
+
+@keyframes ch247-contact-specular {
+  0%, 10% {
+    opacity: 0;
+    transform: translate3d(-120%, 0, 0);
+  }
+  28% {
+    opacity: .34;
+  }
+  58% {
+    opacity: .22;
+    transform: translate3d(120%, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(120%, 0, 0);
+  }
+}
+
+@keyframes ch247-contact-title-shine {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+@media (max-width: 640px) {
+  .ch247-contact-page .ch247-contact-section {
+    padding-inline: 1rem;
+  }
+
+  .ch247-contact-page .ch247-contact {
+    border-radius: 18px;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch247-contact-page .ch247-contact-hero h1,
+  .ch247-contact-page::after,
+  .ch247-contact-page .ch247-contact::after {
+    animation: none !important;
+  }
+
+  .ch247-contact-page::after,
+  .ch247-contact-page .ch247-contact::after {
+    display: none !important;
+  }
+}
+
+@media print {
+  .ch247-contact-page::after,
+  .ch247-contact-page .ch247-contact::after {
+    display: none !important;
+  }
+}

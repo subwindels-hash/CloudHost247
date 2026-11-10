@@ -98,6 +98,15 @@
                     <p>If you have questions about our Cookie Policy, please contact:</p>
                     <p><a href="mailto:privacy@cloudhost247.com">privacy@cloudhost247.com</a></p>
                     <p><a href="https://www.cloudhost247.com" target="_blank" rel="noopener noreferrer">www.cloudhost247.com</a></p>
+
+                    <h2>7. CloudHost247 Preference Centre and First-party Analytics</h2>
+                    <p>The Cookie Settings control opens a preference centre backed by the CloudHost247 platform. Optional analytics and marketing remain off until you choose them; you may reject or withdraw either choice at any time.</p>
+                    <ul>
+                        <li>Optional first-party Visitor Intelligence is included in the Analytics choice, not the Marketing choice. It starts only after you allow Analytics and only while the site operator has enabled the feature.</li>
+                        <li>It uses a random anonymous visitor/session identifier in browser storage to measure sanitized page paths and a short-lived live tab heartbeat. Declining or withdrawing Analytics stops collection and deletes visitor records linked to that consent.</li>
+                        <li>Visitor Intelligence does not use browser GPS and does not persist raw IP addresses, full referrer URLs, query strings, form contents, customer email addresses or authentication data. A verified network address is resolved locally for approximate country/city reporting; only coarse city-level location fields are retained.</li>
+                        <li>Visitor pageviews and session records are retained for a configurable period (90 days by default, adjustable from 7 to 365 days). GA4 and marketing pixels remain separate integrations and are not the source of truth for first-party reports.</li>
+                    </ul>
                 </div>
             </div>
         </div>

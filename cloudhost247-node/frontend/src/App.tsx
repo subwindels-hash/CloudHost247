@@ -61,6 +61,7 @@ const InvoiceDetailPage = lazy(() => import('./pages/InvoiceDetailPage'));
 const SupportPage = lazy(() => import('./pages/SupportPage'));
 const SupportTicketPage = lazy(() => import('./pages/SupportTicketPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const AdminVisitorIntelligencePage = lazy(() => import('./pages/AdminVisitorIntelligencePage'));
 const AdminCustomerDetailPage = lazy(() => import('./pages/AdminCustomerDetailPage'));
 const AdminTicketsPage = lazy(() => import('./pages/AdminTicketsPage'));
 const AdminTicketDetailPage = lazy(() => import('./pages/AdminTicketDetailPage'));
@@ -415,6 +416,7 @@ export default function App() {
               caller's role server-side (see components/RequireRole.tsx). */}
           <Route element={<RequireRole roles={['admin', 'super_admin']} />}>
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/visitor-intelligence" element={<AdminVisitorIntelligencePage />} />
             <Route path="/admin/customers/:id" element={<AdminCustomerDetailPage />} />
             <Route path="/admin/tickets" element={<AdminTicketsPage />} />
             <Route path="/admin/tickets/:id" element={<AdminTicketDetailPage />} />

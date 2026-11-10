@@ -122,8 +122,8 @@ export async function setDomainSslStatus(
   const { rows } = await pool.query<CustomerDomainRow>(
     `UPDATE customer_domains
      SET ssl_status = $2,
-         ssl_issued_at = CASE WHEN $2 IN ('issued') THEN COALESCE($3, now()) ELSE ssl_issued_at END,
-         ssl_expires_at = CASE WHEN $2 IN ('issued', 'renewing') THEN $4 ELSE ssl_expires_at END,
+         ssl_issued_at = CASE WHEN $2::varchar IN ('issued') THEN COALESCE($3::timestamptz, now()) ELSE ssl_issued_at END,
+         ssl_expires_at = CASE WHEN $2::varchar IN ('issued', 'renewing') THEN $4::timestamptz ELSE ssl_expires_at END,
          updated_at = now()
      WHERE id = $1
      RETURNING *`,

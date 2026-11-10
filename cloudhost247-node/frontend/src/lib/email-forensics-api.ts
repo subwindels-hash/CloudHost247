@@ -23,6 +23,8 @@ export interface AnalyzeFileInput {
 }
 
 export interface HistoryParams {
+  /** index signature permits passing whole param objects into the shared query serializer. */
+  [key: string]: string | number | undefined;
   status?: 'pending' | 'complete' | 'failed';
   limit?: number;
   offset?: number;
@@ -218,6 +220,7 @@ export function analyzeFile(input: AnalyzeFileInput) {
 
 export function fetchHistory(params: HistoryParams = {}) {
   return apiFetch<HistoryResponse>(`/api/v1/email-forensics/history${query({ ...params })}`);
+  return apiFetch<HistoryResponse>(`/api/v1/email-forensics/history${query(params)}`);
 }
 
 export interface AnalysisDetail {

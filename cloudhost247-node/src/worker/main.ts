@@ -1,4 +1,5 @@
 import { drainGa4Purchases } from '../marketing/ga4-purchase-delivery';
+import { runVisitorIntelligenceRetentionCycle } from '../visitor-intelligence/retention-worker';
 import 'dotenv/config';
 import { loadEnv } from '../config/env';
 import { getPool, closePool } from '../db/pool';
@@ -81,6 +82,7 @@ interface WorkerSchedule {
   lastNotificationDrain: number;
   lastMarketingDrain: number;
   lastMarketingRetention: number;
+  lastVisitorIntelligenceRetention: number;
   lastReconciliation: number;
   lastImageRevalidation: number;
   lastSecurityNumberSweep: number;
@@ -105,6 +107,7 @@ function createWorkerSchedule(): WorkerSchedule {
     lastNotificationDrain: 0,
     lastMarketingDrain: 0,
     lastMarketingRetention: 0,
+    lastVisitorIntelligenceRetention: 0,
     lastReconciliation: 0,
     lastImageRevalidation: 0,
     lastSecurityNumberSweep: 0,
@@ -231,6 +234,11 @@ async function runWorkerCycle(
       }
     } catch (error) { logger.error(`[worker:${ctx.workerId}] marketing retention failed: ${error instanceof Error ? error.message : String(error)}`); }
   }
+  const retention = await runVisitorIntelligenceRetentionCycle(ctx.db, schedule, {
+    log: (message) => logger.log(`[worker:${ctx.workerId}] ${message}`),
+    error: (message) => logger.error(`[worker:${ctx.workerId}] ${message}`),
+  }, now);
+  didWork ||= retention.didWork;
   if (now - schedule.lastReconciliation >= RECONCILIATION_INTERVAL_MS) {
     schedule.lastReconciliation = now;
     for (const drift of await reconcileServerState(ctx.db)) {

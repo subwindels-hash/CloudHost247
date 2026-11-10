@@ -1,0 +1,360 @@
+{
+  "runAt": "2026-11-09T09:24:17.241Z",
+  "baseUrl": "http://localhost:3000",
+  "environment": "embedded Postgres (PGlite) @ 92 migrations; sandbox payment gateway; deployment simulation mode; no external providers contacted",
+  "results": [
+    {
+      "name": "register customer account",
+      "status": 201,
+      "expect": [
+        200,
+        201
+      ],
+      "pass": true,
+      "note": {
+        "queued": true
+      },
+      "startedAt": "2026-11-09T09:24:13.489Z"
+    },
+    {
+      "name": "duplicate registration refused",
+      "status": 409,
+      "expect": [
+        400,
+        409
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:14.221Z"
+    },
+    {
+      "name": "login with wrong password → 401",
+      "status": 401,
+      "expect": [
+        401
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:14.227Z"
+    },
+    {
+      "name": "login with correct password → session token",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:14.544Z"
+    },
+    {
+      "name": "password-reset request: uniform 202 (anti-enumeration)",
+      "status": 202,
+      "expect": [
+        202
+      ],
+      "pass": true,
+      "note": "known and unknown email receive byte-identical answers",
+      "startedAt": "2026-11-09T09:24:14.849Z"
+    },
+    {
+      "name": "TOTP enroll issues a secret (password-confirmed)",
+      "status": 200,
+      "expect": [
+        200,
+        201
+      ],
+      "pass": true,
+      "note": "otpauth URL issued",
+      "startedAt": "2026-11-09T09:24:14.870Z"
+    },
+    {
+      "name": "TOTP confirm with a real code enables MFA",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:15.186Z"
+    },
+    {
+      "name": "MFA status reports enabled",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": "{\"enabled\":true,\"recoveryCodesRemaining\":10}",
+      "startedAt": "2026-11-09T09:24:15.212Z"
+    },
+    {
+      "name": "login after MFA: second factor required (202 challenge, no session)",
+      "status": 202,
+      "expect": [
+        202
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:15.219Z"
+    },
+    {
+      "name": "MFA login verify with a fresh-window TOTP code completes",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": "full session issued",
+      "startedAt": "2026-11-09T09:24:15.530Z"
+    },
+    {
+      "name": "passkeys: registration options ceremony starts (password-confirmed; attestation needs a browser authenticator)",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": "{\"challengeId\":\"16fa554e-1210-4212-8ba5-46350d75704d\",\"options\":{\"challenge\":\"ckl3ZXIxS24tME5jODh1TH",
+      "startedAt": "2026-11-09T09:24:15.554Z"
+    },
+    {
+      "name": "customer dashboard: PATCH /api/v1/account/profile updates the customer record",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:15.856Z"
+    },
+    {
+      "name": "customer dashboard: GET /api/v1/account/services",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:15.867Z"
+    },
+    {
+      "name": "customer dashboard: GET /api/v1/account/domains",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:15.882Z"
+    },
+    {
+      "name": "customer dashboard: GET /api/v1/account/tickets",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:15.891Z"
+    },
+    {
+      "name": "open a support ticket, then post a message",
+      "status": 201,
+      "expect": [
+        200,
+        201
+      ],
+      "pass": true,
+      "note": "ticket created 201, message 201",
+      "startedAt": "2026-11-09T09:24:15.897Z"
+    },
+    {
+      "name": "public catalog browsing (anonymous allowed)",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": "products visible: 2",
+      "startedAt": "2026-11-09T09:24:15.919Z"
+    },
+    {
+      "name": "plans for the seeded dev product resolve with server-side prices",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": "plan=dev-example-plan price=(see pricing)",
+      "startedAt": "2026-11-09T09:24:15.923Z"
+    },
+    {
+      "name": "add catalog item to cart (authenticated, server-priced)",
+      "status": 201,
+      "expect": [
+        200,
+        201
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:15.934Z"
+    },
+    {
+      "name": "checkout: cart becomes an order with an unpaid invoice",
+      "status": 201,
+      "expect": [
+        200,
+        201
+      ],
+      "pass": true,
+      "note": "order=3f9261fc… invoice=a4201d3e…",
+      "startedAt": "2026-11-09T09:24:15.957Z"
+    },
+    {
+      "name": "invoice list shows the unpaid invoice",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": "invoice status=unpaid total=undefined",
+      "startedAt": "2026-11-09T09:24:15.986Z"
+    },
+    {
+      "name": "initiate sandbox-gateway payment (pending, honest instructions)",
+      "status": 201,
+      "expect": [
+        200,
+        201
+      ],
+      "pass": true,
+      "note": "ref=sandbox_c24173be2011abe8783ad0d8 status=pending",
+      "startedAt": "2026-11-09T09:24:15.998Z"
+    },
+    {
+      "name": "webhook: SIGNED successful outcome settles the payment and pays the invoice",
+      "status": 200,
+      "expect": [
+        200,
+        202
+      ],
+      "pass": true,
+      "note": "webhook=200 invoice=paid",
+      "startedAt": "2026-11-09T09:24:16.012Z"
+    },
+    {
+      "name": "webhook REPLAY: exact same payload is de-duplicated — no double settlement",
+      "status": 200,
+      "expect": [
+        200,
+        202,
+        400,
+        409
+      ],
+      "pass": true,
+      "note": "replay statuses=200/200; ledger entries before=2 after=2",
+      "startedAt": "2026-11-09T09:24:16.083Z"
+    },
+    {
+      "name": "webhook with a TAMPERED signature is refused",
+      "status": 401,
+      "expect": [
+        400,
+        401,
+        403
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:16.108Z"
+    },
+    {
+      "name": "webhook with a STALE timestamp (>5 min) is refused",
+      "status": 401,
+      "expect": [
+        400,
+        401,
+        403
+      ],
+      "pass": true,
+      "note": null,
+      "startedAt": "2026-11-09T09:24:16.110Z"
+    },
+    {
+      "name": "webhook with a WRONG AMOUNT is refused (ambiguous outcome must not settle)",
+      "status": 400,
+      "expect": [
+        200,
+        202,
+        400,
+        409,
+        422
+      ],
+      "pass": true,
+      "note": "invoice after wrong-amount webhook: unpaid",
+      "startedAt": "2026-11-09T09:24:16.111Z"
+    },
+    {
+      "name": "webhook: FAILED outcome leaves the payment failed and the invoice unpaid",
+      "status": 200,
+      "expect": [
+        200,
+        202
+      ],
+      "pass": true,
+      "note": "invoice=unpaid",
+      "startedAt": "2026-11-09T09:24:16.183Z"
+    },
+    {
+      "name": "billing ledger: append-only rows = 2 charges + exactly 1 payment, 0 for the failed invoice",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": "rows=3 charges=2 payments=1 (one settlement after replays; none for the failed invoice)",
+      "startedAt": "2026-11-09T09:24:16.216Z"
+    },
+    {
+      "name": "tenant isolation: second customer cannot read the first customer's invoice",
+      "status": 404,
+      "expect": [
+        403,
+        404
+      ],
+      "pass": true,
+      "note": "cross-tenant read refused",
+      "startedAt": "2026-11-09T09:24:16.222Z"
+    },
+    {
+      "name": "admin boundary: customer token → admin route is 403; anonymous → 401",
+      "status": 403,
+      "expect": [
+        403
+      ],
+      "pass": true,
+      "note": "customer=403 anonymous=401",
+      "startedAt": "2026-11-09T09:24:17.176Z"
+    },
+    {
+      "name": "rate limiting on login (10/min): 11th attempt is 429",
+      "status": 429,
+      "expect": [
+        429
+      ],
+      "pass": true,
+      "note": "final attempt status=429",
+      "startedAt": "2026-11-09T09:24:17.183Z"
+    },
+    {
+      "name": "public surfaces: /health, /ready, tools catalog, domain extensions",
+      "status": 200,
+      "expect": [
+        200
+      ],
+      "pass": true,
+      "note": "tools=75, extensions=0",
+      "startedAt": "2026-11-09T09:24:17.226Z"
+    }
+  ]
+}

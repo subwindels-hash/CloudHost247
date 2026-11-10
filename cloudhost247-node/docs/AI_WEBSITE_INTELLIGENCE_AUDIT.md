@@ -139,7 +139,7 @@ POST /api/v1/ai-support/conversations/:id/messages        routes/ai-support.ts
 
 *One thing that script surfaces, worth stating because it looks alarming and is not: **10 sources have no chunks.** They are the documents the sync recorded as `skipped`, with `sync_status = 'skipped'` — pages with too little retrievable body text to be worth indexing. That is the intended behaviour of defect 7's fix: an unretrievable page is **recorded** rather than silently dropped, so an operator can see what the assistant cannot answer from.*
 
-**Indexing.** `chunking.ts` splits per document into page, section and FAQ chunks. `website-knowledge-repo.ts` writes them into the pre-existing `ai_knowledge_sources` / `ai_knowledge_chunks` tables (originally `0096`; renumbered to `0097` after `main` took `0096` — see §13.3), extending the AI Control Plane store rather than creating a second one — this matches the standing "no second knowledge system" constraint.
+**Indexing.** `chunking.ts` splits per document into page, section and FAQ chunks. `website-knowledge-repo.ts` writes them into the pre-existing `ai_knowledge_sources` / `ai_knowledge_chunks` tables (originally `0096`, then `0097`, and **`0100` after the Phase 29 merge** — see §16), extending the AI Control Plane store rather than creating a second one — this matches the standing "no second knowledge system" constraint.
 
 **Retrieval.** PostgreSQL `tsvector`/`ts_rank` GIN FTS (no extension required — correct, since `pgvector`/`pg_trgm` are unavailable on the supported platform) plus a deterministic application-side matcher for synonyms, abbreviations, typo correction and word-boundary matching. Page confidence is `0.42 + score/160`, floored by `MIN_USEFUL_SCORE = 9`.
 
@@ -578,7 +578,7 @@ To enable, a deployment must set `AI_LLM_BASE_URL`, `AI_LLM_API_KEY`, `AI_LLM_MO
 | `src/services/ai-support-operator.ts` | Clean. Guard rails precede knowledge; provenance persisted. |
 | `src/routes/ai-support.ts` | Clean. Tenant scoping fail-closed; validation complete; AI-specific throttle added (§8.5). |
 | `src/routes/ai-knowledge-admin.ts` | Clean. All 11 routes role-guarded and audited. |
-| `database/migrations/0097_ai_website_knowledge.sql` | Clean. Additive, idempotent, no extension required — correctly extends the existing store. |
+| `database/migrations/0100_ai_website_knowledge.sql` | Clean. Additive, idempotent, no extension required — correctly extends the existing store. |
 | `frontend/src/pages/AdminAiKnowledgePage.tsx` | Clean. Follows existing admin conventions; status colours use design-system tokens (§13.4). |
 | `frontend/src/components/AiSupportWidget.tsx` | Clean. |
 
@@ -636,7 +636,7 @@ The point of writing this down is that "deploy to staging and check it" is not a
 
 | # | Step | Pass looks like | Failure looks like |
 | --- | --- | --- | --- |
-| 1 | Apply migrations to a **copy of staging**, not production | `0097` applies once; re-running the migration path applies nothing | duplicate-prefix error, or `0097` applied twice |
+| 1 | Apply migrations to a **copy of staging**, not production | `0100` applies once; re-running the migration path applies nothing | duplicate-prefix error, or `0100` applied twice |
 | 2 | Trigger a cold sync (empty knowledge tables) | ~400 documents, ≈8 s, 0 failed; counts match the published site | a partial corpus, or failures silently recorded as success |
 | 3 | Trigger a warm sync immediately after | 0 rewritten, sub-second; drift reports empty on all three lists | everything rewritten each cycle (a hash instability) |
 | 4 | Publish a page edit, wait one cycle (15 min) | the edit is retrievable, with the new text quoted in the answer | the old text persists — the self-update claim is false |
@@ -654,7 +654,7 @@ The point of writing this down is that "deploy to staging and check it" is not a
 Recorded as a design decision rather than a task, because it is a new subsystem and not a tweak:
 
 - **What is missing:** matching a question's product concept to a catalogue product's meaning. Both remaining relevance failures (mobile plan → Email Hosting; `mobile phone plan` excerpting the wrong page) come from this.
-- **What it would need:** an embedding provider, a vector column, and a backfill/refresh path. `0097` records why it is currently absent: `pgvector` is not available on the supported cPanel PostgreSQL, and the embedded engine used by the test suite does not provide it either. So this is not a code-only change — it depends on infrastructure.
+- **What it would need:** an embedding provider, a vector column, and a backfill/refresh path. `0100` records why it is currently absent: `pgvector` is not available on the supported cPanel PostgreSQL, and the embedded engine used by the test suite does not provide it either. So this is not a code-only change — it depends on infrastructure.
 - **What was rejected and why:** word-level heuristics. Measured in §6.7; single-chunk coverage is *inverted* between the false and legitimate cases, phrase bigrams do not separate them, and the top page genuinely contains the words. Tuning a heuristic until the six known examples pass would be fitting to the test set.
 
 Until this is decided, the assistant's behaviour on such questions is: **no invented price** (defect 10 fixed), an honest "I could not find that", and the retrieved page shown with its links so the customer can see what was matched.
@@ -668,7 +668,7 @@ Until this is decided, the assistant's behaviour on such questions is: **no inve
 
 | Previous claim | Audit finding |
 | --- | --- |
-| "Embeddings: optional, configurable" | **Not implemented.** No embedding code path, no vector column, no cosine search, and no configuration key to enable one. `0097` states `pgvector` is unavailable. **Phase 28 correction:** the *source document itself* repeated this claim in §2 D2 ("an operator … can enable them"), as did a comment in `retrieval.ts`, even though §5.4 of the same document correctly says they are absent. Both have been corrected. The retriever's own comment now says plainly that no embedding stage exists. |
+| "Embeddings: optional, configurable" | **Not implemented.** No embedding code path, no vector column, no cosine search, and no configuration key to enable one. `0100` states `pgvector` is unavailable. **Phase 28 correction:** the *source document itself* repeated this claim in §2 D2 ("an operator … can enable them"), as did a comment in `retrieval.ts`, even though §5.4 of the same document correctly says they are absent. Both have been corrected. The retriever's own comment now says plainly that no embedding stage exists. |
 | Suite counts "unit 2261 / frontend 1000 / integration 979" | Unit **2,269** at the time of that correction (**2,298** after the Phase 28 tests, §13.4), frontend **1,000**, integration **973 passed + 17 skipped** (measured in full in Phase 28; the earlier 963 was a `e9d29d4` baseline). The original figure appears to have counted skipped tests as passed. |
 | "Completion" framing | Two customer-facing defects were shipping (defects 1 and 2). The guard documented as protecting against unsupported questions had never executed. |
 

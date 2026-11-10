@@ -1,10 +1,11 @@
+import { X509Certificate } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { Env } from '../config/env';
 import type { Queryable } from '../db/types';
 import { getPool } from '../db/pool';
 import { authenticate } from '../lib/require-auth';
-import { NotFoundError, ValidationError } from '../lib/errors';
+import { NotFoundError, ValidationError, ConflictError } from '../lib/errors';
 import { auditRequest } from '../lib/audit';
 import {
   listSslCertificatesForUser,
@@ -55,15 +56,29 @@ export async function registerSslRoutes(
       const auth = await authenticate(request, env, pool);
       const input = parseOrThrow(createSslSchema, request.body);
 
+      // Phase 8 honesty fix (F8-SSL-1): a pasted certificate is REAL material — parse it with the
+      // platform X.509 parser so a malformed blob fails validation, and take the expiry from the
+      // certificate itself instead of fabricating +90 days. A pasted cert is also provenance-CUSTOM
+      // (it came from the customer, not from the default issuer) unless explicitly stated otherwise.
+      let parsedExpiry: string | null = null;
+      if (input.certificatePem) {
+        try {
+          const x509 = new X509Certificate(input.certificatePem);
+          parsedExpiry = new Date(x509.validTo).toISOString();
+        } catch {
+          throw new ValidationError('certificatePem is not a parseable PEM-encoded X.509 certificate');
+        }
+      }
+
       const certificate = await createSslCertificate(pool, {
         userId: auth.userId,
         domainName: input.domainName,
         sans: input.sans,
-        issuer: input.issuer ?? 'LETS_ENCRYPT',
+        issuer: input.issuer ?? (input.certificatePem ? 'CUSTOM' : 'LETS_ENCRYPT'),
         challengeType: input.challengeType ?? 'HTTP_01',
         certificatePem: input.certificatePem,
         status: input.certificatePem ? 'ISSUED' : 'PENDING',
-        expiresAt: input.certificatePem ? new Date(Date.now() + 90 * 86400 * 1000).toISOString() : null,
+        expiresAt: parsedExpiry,
         autoRenew: input.autoRenew ?? true,
         serverId: input.serverId,
         domainId: input.domainId,
@@ -94,19 +109,25 @@ export async function registerSslRoutes(
       const cert = await findSslCertificateById(pool, id);
       if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
 
-      // Update expiry and mark valid
-      const newExpiry = new Date(Date.now() + 90 * 86400 * 1000).toISOString();
+      // Phase 8 honesty fix (F8-SSL-1): renewal cannot be FABRICATED. There is no CA/ACME
+      // adapter wired yet, so this endpoint may only REQUEST a renewal — the truthful state is
+      // VALIDATING (re-validation is now due), never ISSUED with a synthetic +90-day expiry.
+      // An actual issuance job (once a CA adapter exists) moves the row PENDING→VALIDATING→ISSUED
+      // with the certificate's own notAfter.
+      if (!cert.certificate_pem || (cert.status !== 'ISSUED' && cert.status !== 'EXPIRED')) {
+        throw new ConflictError('Only a certificate with issued material can be renewed; request issuance first');
+      }
       await pool.query(
-        `UPDATE ssl_certificates SET status = 'ISSUED', expires_at = $1, updated_at = now() WHERE id = $2`,
-        [newExpiry, id]
+        `UPDATE ssl_certificates SET status = 'VALIDATING', updated_at = now() WHERE id = $1`,
+        [id]
       );
       const updated = await findSslCertificateById(pool, id);
 
       await auditRequest(pool, request, auth.userId, {
-        action: 'SSL_CERTIFICATE_RENEWED',
+        action: 'SSL_CERTIFICATE_RENEWAL_REQUESTED',
         resourceType: 'ssl_certificate',
         resourceId: id,
-        metadata: { domain: cert.domain_name, newExpiry },
+        metadata: { domain: cert.domain_name, expiresAt: cert.expires_at, note: 'CA/ACME adapter not yet connected; renewal marked VALIDATING until issuance completes' },
       });
 
       return { certificate: updated };
