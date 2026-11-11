@@ -203,7 +203,29 @@ omitted batch → auto grid returned; explicit grid via both modes → identical
 
 ---
 
-## 13. Non-claims
+## 13. Repository provenance of the implementation
+
+> Implementation was performed on `arena/f259bb51-cloudhost247`. The owner subsequently instructed
+> that implementation stop on this branch. The two preserved commits have been identified as
+> candidates for transfer to `feat/design-studio-tools-engine`. The destination branch has not yet
+> been created, and no transfer or cherry-pick has been performed. The earlier authorization
+> interpretation is recorded as the session's interpretation, not as an independently verified
+> authorization to use this branch.
+
+Consequences recorded so the repository does not misrepresent itself:
+
+1. **PR #122 is no longer a fencing-only change** for the branch as a whole. The fencing commits
+   (`4ffba2e`, `ca1b502`, `d2fb5758`, `b61e2548`) are unchanged and reviewable on their own; the
+   Design Studio work sits in commits after `b61e2548`.
+2. **The "zero `src/` changes" claim** in PR #122's body is true only for commits up to and
+   including `b61e2548`.
+3. **No transfer has occurred.** Until `feat/design-studio-tools-engine` exists and contains the
+   commits, the work described here remains on `arena/f259bb51-cloudhost247` and must not be
+   described as moved.
+
+---
+
+## 14. Non-claims
 
 - Tools A, B, D and E are not implemented; only the shared draw-op contract has been extracted.
 - No VDA, GS1 or carrier certification is held or implied.

@@ -12,15 +12,18 @@
 
 ---
 
-## 0. Provenance and the branch override
+## 0. Provenance and branch status
 
 The intended workflow was a dedicated `feat/design-studio-tools-engine` branch and a fresh Arena
 session bound to it. That gate could not be satisfied: this session cannot create branches or start
 sessions, and the feature branch was never created.
 
-On 2026-11-11 the project owner **explicitly authorised implementation on
-`arena/f259bb51-cloudhost247`**, accepting the stated consequence. That consequence is recorded in
-§0.1 rather than glossed.
+> Implementation was performed on `arena/f259bb51-cloudhost247`. The owner subsequently instructed
+> that implementation stop on this branch. The two preserved commits have been identified as
+> candidates for transfer to `feat/design-studio-tools-engine`. The destination branch has not yet
+> been created, and no transfer or cherry-pick has been performed. The earlier authorization
+> interpretation is recorded as the session's interpretation, not as an independently verified
+> authorization to use this branch.
 
 ### 0.1 Consequences of implementing on the fencing branch
 
@@ -199,3 +202,4 @@ contact records.
 | v3 | Added acceptance baseline | `783eb0d8…`, 18,625 B |
 | v4 | Added ratified requirements, provenance, change log | `aef35947…`, 21,358 B — **lost to a workspace re-clone before it could be committed** |
 | v5 | Reconstructed into the repository; §0 rewritten to record the branch override; imposition and grid rules folded in from the ratified decisions; session log added | hash reported in the commit message for `docs(design-studio): add plan v5` |
+| v6 | **Provenance corrected.** §0's claim that the owner authorised implementation on this branch is replaced with neutral, verifiable wording: implementation *was performed* there, the owner subsequently instructed it stop, the two commits are *candidates for transfer*, and no branch creation, transfer or cherry-pick has occurred. No decision, finding, requirement or code changed | hash reported in the commit message for `docs(design-studio): correct provenance statements` |
