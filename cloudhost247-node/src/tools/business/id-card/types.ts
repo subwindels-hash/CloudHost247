@@ -132,128 +132,24 @@ export interface CardSpec {
   options: CardOptions;
 }
 
-/* ------------------------------------------------------------------ */
-/* Draw operations                                                     */
-/* ------------------------------------------------------------------ */
-
-export interface DrawRect {
-  kind: 'rect';
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  radius?: number;
-  opacity?: number;
-}
-
-export interface DrawCircle {
-  kind: 'circle';
-  cx: number;
-  cy: number;
-  r: number;
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  opacity?: number;
-}
-
-export interface DrawPolygon {
-  kind: 'polygon';
-  points: Array<{ x: number; y: number }>;
-  fill?: string;
-  opacity?: number;
-}
-
-export interface DrawLine {
-  kind: 'line';
-  opacity?: number;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  color: string;
-  width: number;
-  dash?: number[];
-}
-
-export interface DrawText {
-  kind: 'text';
-  x: number;
-  y: number;
-  text: string;
-  /** Font size in card pixels (the card is rendered at 300 dpi). */
-  size: number;
-  color: string;
-  weight?: '400' | '600' | '700' | '800';
-  family?: 'sans' | 'mono';
-  anchor?: 'start' | 'middle' | 'end';
-  /** When set, the renderer shrinks the text until it fits instead of letting it run off the card. */
-  maxWidth?: number;
-  letterSpacing?: number;
-  opacity?: number;
-  /** Uppercase label with wide tracking, the convention for badge field names. */
-  tracking?: boolean;
-}
-
-export interface DrawImage {
-  kind: 'image';
-  opacity?: number;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  /** Data URL, or empty for a drawn placeholder. */
-  href?: string;
-  fit: 'cover' | 'contain';
-  radius?: number;
-  /** Drawn when `href` is missing so a card never shows a hole. */
-  placeholder?: { label: string; fill: string; color: string };
-  stroke?: string;
-  strokeWidth?: number;
-}
-
-export interface DrawQr {
-  kind: 'qr';
-  x: number;
-  y: number;
-  size: number;
-  payload: string;
-  dark: string;
-  light: string;
-}
-
-export interface DrawBarcode {
-  kind: 'barcode';
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  value: string;
-  dark: string;
-  light: string;
-  /** Drawn under the bars; the human-readable line of a Code 128 symbol. */
-  caption?: boolean;
-}
-
-export type DrawOp =
-  | DrawRect
-  | DrawCircle
-  | DrawPolygon
-  | DrawLine
-  | DrawText
-  | DrawImage
-  | DrawQr
-  | DrawBarcode;
-
+// The draw-operation contract now lives in the shared render module. Re-exported here so every
+// existing importer (`colors`, `expand`, `model`, `pdf`, `raster`, `svg`, `templates`, `tool`) keeps
+// working unchanged: this move is a relocation, not a rewrite.
+export type {
+  DrawRect,
+  DrawCircle,
+  DrawPolygon,
+  DrawLine,
+  DrawText,
+  DrawImage,
+  DrawQr,
+  DrawBarcode,
+  DrawOp,
+} from '../../design-studio/render/draw-ops';
+import type { DrawOp, Surface } from '../../design-studio/render/draw-ops';
 /** A rendered badge face. */
-export interface CardFace {
+export interface CardFace extends Surface {
   side: 'front' | 'back';
-  width: number;
-  height: number;
-  ops: DrawOp[];
 }
 
 export interface CardLayout {
