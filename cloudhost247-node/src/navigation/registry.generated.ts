@@ -163,6 +163,36 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "icon": "mail"
           },
           {
+            "label": "SMTP Hosting",
+            "to": "/smtp-hosting",
+            "description": "SMTP services for your email workflows.",
+            "icon": "mail"
+          },
+          {
+            "label": "Google Workspace",
+            "to": "/google-workspace",
+            "description": "Business email and collaboration for your team.",
+            "icon": "mail"
+          },
+          {
+            "label": "Microsoft 365 (Office 365)",
+            "to": "/office-365",
+            "description": "Business email and productivity tools for your team.",
+            "icon": "mail"
+          },
+          {
+            "label": "SMM Services",
+            "to": "/smm-services",
+            "description": "Explore social media marketing services for your next campaign.",
+            "icon": "activity"
+          },
+          {
+            "label": "Number Services",
+            "to": "/number-services",
+            "description": "Explore virtual number services for your business.",
+            "icon": "phone"
+          },
+          {
             "label": "Developer Hosting",
             "to": "/hosting/developer",
             "description": "Git, staging and application tooling alongside the runtime.",
@@ -290,6 +320,12 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "icon": "server"
           },
           {
+            "label": "Remote Desktop (RDP)",
+            "to": "/hosting/rdp",
+            "description": "Find a remote desktop server for your workspace.",
+            "icon": "server"
+          },
+          {
             "label": "VPS Hosting",
             "to": "/hosting/vps",
             "description": "Virtual servers with a choice of operating system and panel.",
@@ -360,6 +396,12 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "to": "/cloud/game-servers",
             "description": "Low-latency game hosting with a choice of control panel.",
             "icon": "gamepad"
+          },
+          {
+            "label": "LTE Proxy Services",
+            "to": "/proxy-services",
+            "description": "Explore configurable LTE proxy connections.",
+            "icon": "network"
           }
         ]
       }
@@ -379,8 +421,14 @@ export const NAV_SECTIONS: RegistrySection[] = [
     },
     "groups": [
       {
-        "title": "Domains",
+        "title": "Find & manage",
         "links": [
+          {
+            "label": "Domain Search",
+            "to": "/domains",
+            "description": "Search for a domain and check its availability.",
+            "icon": "search"
+          },
           {
             "label": "Domain Registration",
             "to": "/domains/search",
@@ -389,10 +437,22 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "badge": "POPULAR"
           },
           {
-            "label": "Domain Search",
+            "label": "Bulk Domain Search",
             "to": "/domains/bulk-search",
-            "description": "Check availability for one name or a whole list at once.",
+            "description": "Check multiple domain names in one search.",
             "icon": "search"
+          },
+          {
+            "label": "Domain Extensions",
+            "to": "/domains/extensions",
+            "description": "Browse the extensions this platform can register and renew.",
+            "icon": "globe"
+          },
+          {
+            "label": "Domain Transfer",
+            "to": "/domains/transfer",
+            "description": "Transfer an existing domain using its authorization code.",
+            "icon": "globe"
           },
           {
             "label": "Domain Management",
@@ -401,23 +461,45 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "icon": "settings"
           },
           {
-            "label": "DNS Management",
-            "to": "/dashboard/dns",
-            "description": "Edit zone records, TTLs and DNSSEC from one screen.",
-            "icon": "dns"
-          },
-          {
             "label": "Domain Renewal",
             "to": "/legal/domain-renewal-policy",
             "description": "How renewal, auto-renew and deletion windows work.",
             "icon": "refresh"
-          },
+          }
+        ]
+      },
+      {
+        "title": "Domain investing",
+        "links": [
           {
-            "label": "Domain Transfer",
-            "to": "/domains/transfer",
-            "description": "Transfer an existing domain with the auth code and no downtime.",
+            "label": "Domain Auctions",
+            "to": "/domains/auctions",
+            "description": "Explore listed domain auctions and bidding.",
             "icon": "globe"
           },
+          {
+            "label": "Domain Appraisal",
+            "to": "/domains/appraisal",
+            "description": "Request a domain valuation from the configured provider.",
+            "icon": "activity"
+          },
+          {
+            "label": "Discount Domain Club",
+            "to": "/domains/club",
+            "description": "Explore available domain club membership and pricing.",
+            "icon": "tag"
+          },
+          {
+            "label": "Domain Brokerage",
+            "to": "/domains/broker",
+            "description": "Request help acquiring a domain that is already registered.",
+            "icon": "globe"
+          }
+        ]
+      },
+      {
+        "title": "DNS & tools",
+        "links": [
           {
             "label": "WHOIS Lookup",
             "to": "/domains/whois",
@@ -425,16 +507,11 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "icon": "search"
           },
           {
-            "label": "Domain Extensions",
-            "to": "/domains/extensions",
-            "description": "Browse the extensions this platform can register and renew.",
-            "icon": "globe"
-          }
-        ]
-      },
-      {
-        "title": "DNS",
-        "links": [
+            "label": "DNS Management",
+            "to": "/dashboard/dns",
+            "description": "Edit zone records, TTLs and DNSSEC from one screen.",
+            "icon": "dns"
+          },
           {
             "label": "DNS Lookup",
             "to": "/tools/dns-lookup",
@@ -454,16 +531,16 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "icon": "activity"
           },
           {
-            "label": "All DNS Tools",
-            "to": "/tools/category/dns-domains",
-            "description": "Every DNS and domain tool: lookups, propagation, zone diagnostics and DNSSEC.",
-            "icon": "shield"
-          },
-          {
             "label": "DNSSEC",
             "to": "/tools/dnskey-lookup",
             "description": "Inspect DNSKEY and DS records for a signed zone.",
             "icon": "key"
+          },
+          {
+            "label": "All DNS Tools",
+            "to": "/tools/category/dns-domains",
+            "description": "Every DNS and domain tool: lookups, propagation, zone diagnostics and DNSSEC.",
+            "icon": "shield"
           }
         ]
       }
@@ -574,6 +651,12 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "to": "/developers/environments",
             "description": "Staging and production environments with recorded releases.",
             "icon": "layers"
+          },
+          {
+            "label": "Digital Products",
+            "to": "/digital-products",
+            "description": "Discover downloadable products for your next project.",
+            "icon": "download"
           }
         ]
       },
@@ -856,6 +939,10 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/hosting/vps"
       },
       {
+        "label": "Remote Desktop (RDP)",
+        "to": "/hosting/rdp"
+      },
+      {
         "label": "Dedicated Servers",
         "to": "/hosting/dedicated"
       },
@@ -902,6 +989,34 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "Hosting Security",
         "to": "/hosting/security"
+      },
+      {
+        "label": "SMM Services",
+        "to": "/smm-services"
+      },
+      {
+        "label": "Number Services",
+        "to": "/number-services"
+      },
+      {
+        "label": "Google Workspace",
+        "to": "/google-workspace"
+      },
+      {
+        "label": "Microsoft 365 (Office 365)",
+        "to": "/office-365"
+      },
+      {
+        "label": "Digital Products",
+        "to": "/digital-products"
+      },
+      {
+        "label": "LTE Proxy Services",
+        "to": "/proxy-services"
+      },
+      {
+        "label": "SMTP Hosting",
+        "to": "/smtp-hosting"
       }
     ]
   },
@@ -981,23 +1096,75 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
     "links": [
       {
         "label": "Domain Search",
-        "to": "/domains/bulk-search"
+        "to": "/domains"
       },
       {
         "label": "Domain Registration",
         "to": "/domains/search"
       },
       {
-        "label": "DNS Management",
-        "to": "/dashboard/dns"
+        "label": "Bulk Domain Search",
+        "to": "/domains/bulk-search"
+      },
+      {
+        "label": "Domain Extensions",
+        "to": "/domains/extensions"
+      },
+      {
+        "label": "Domain Transfer",
+        "to": "/domains/transfer"
+      },
+      {
+        "label": "Domain Management",
+        "to": "/dashboard/domains"
       },
       {
         "label": "Domain Renewal",
         "to": "/legal/domain-renewal-policy"
       },
       {
-        "label": "Domain Transfer",
-        "to": "/domains/transfer"
+        "label": "Domain Auctions",
+        "to": "/domains/auctions"
+      },
+      {
+        "label": "Domain Appraisal",
+        "to": "/domains/appraisal"
+      },
+      {
+        "label": "Discount Domain Club",
+        "to": "/domains/club"
+      },
+      {
+        "label": "Domain Brokerage",
+        "to": "/domains/broker"
+      },
+      {
+        "label": "WHOIS Lookup",
+        "to": "/domains/whois"
+      },
+      {
+        "label": "DNS Management",
+        "to": "/dashboard/dns"
+      },
+      {
+        "label": "DNS Lookup",
+        "to": "/tools/dns-lookup"
+      },
+      {
+        "label": "DNS Propagation",
+        "to": "/tools/dns-propagation"
+      },
+      {
+        "label": "DNS Health",
+        "to": "/tools/domain-dns-health"
+      },
+      {
+        "label": "DNSSEC",
+        "to": "/tools/dnskey-lookup"
+      },
+      {
+        "label": "All DNS Tools",
+        "to": "/tools/category/dns-domains"
       }
     ]
   },
@@ -1652,6 +1819,7 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/dashboard/servers/:id",
   "/dashboard/servers/:id/logs",
   "/dashboard/ssl",
+  "/digital-products",
   "/docs",
   "/docs/:slug",
   "/domains",
@@ -1668,8 +1836,10 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/domains/whois",
   "/faq",
   "/forgot-password",
+  "/google-workspace",
   "/hosting/control-panels",
   "/hosting/control-panels/:slug",
+  "/hosting/rdp",
   "/invoices",
   "/invoices/:id",
   "/legal",
@@ -1683,6 +1853,9 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/marketing/logo-maker",
   "/marketing/logo-maker/:projectId",
   "/marketing/seo",
+  "/number-services",
+  "/office-365",
+  "/proxy-services",
   "/register",
   "/reset-password",
   "/servers/new",
@@ -1695,6 +1868,8 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/services/cloudflare/:id/:tab",
   "/sitemap",
   "/sites/:slug/*",
+  "/smm-services",
+  "/smtp-hosting",
   "/store/:slug",
   "/support",
   "/support/:id",
@@ -1890,6 +2065,11 @@ export const REGISTRY_ROUTES: string[] = [
   "/hosting/windows",
   "/hosting/reseller",
   "/hosting/email",
+  "/smtp-hosting",
+  "/google-workspace",
+  "/office-365",
+  "/smm-services",
+  "/number-services",
   "/hosting/developer",
   "/developers/docker",
   "/cloud/game-servers",
@@ -1907,6 +2087,7 @@ export const REGISTRY_ROUTES: string[] = [
   "/cloud/infrastructure",
   "/cloud/operating-systems",
   "/hosting/dedicated",
+  "/hosting/rdp",
   "/hosting/vps",
   "/cloud/server-management",
   "/cloud/data-centers",
@@ -1916,19 +2097,25 @@ export const REGISTRY_ROUTES: string[] = [
   "/cloud/backups",
   "/cloud/ip-management",
   "/cloud/security",
+  "/proxy-services",
+  "/domains",
   "/domains/search",
   "/domains/bulk-search",
-  "/dashboard/domains",
-  "/dashboard/dns",
-  "/legal/domain-renewal-policy",
-  "/domains/transfer",
-  "/domains/whois",
   "/domains/extensions",
+  "/domains/transfer",
+  "/dashboard/domains",
+  "/legal/domain-renewal-policy",
+  "/domains/auctions",
+  "/domains/appraisal",
+  "/domains/club",
+  "/domains/broker",
+  "/domains/whois",
+  "/dashboard/dns",
   "/tools/dns-lookup",
   "/tools/dns-propagation",
   "/tools/domain-dns-health",
-  "/tools/category/dns-domains",
   "/tools/dnskey-lookup",
+  "/tools/category/dns-domains",
   "/apps",
   "/developers/deployment",
   "/platforms/paas",
@@ -1938,6 +2125,7 @@ export const REGISTRY_ROUTES: string[] = [
   "/platforms/containers",
   "/developers",
   "/developers/environments",
+  "/digital-products",
   "/hosting/control-panels",
   "/docs",
   "/help",
