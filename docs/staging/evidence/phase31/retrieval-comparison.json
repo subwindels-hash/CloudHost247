@@ -1,0 +1,50 @@
+{
+  "queries": 76,
+  "identical": 71,
+  "changes": [
+    {
+      "query": "mobile phone plan",
+      "before": [
+        "/hosting/email",
+        "/help",
+        "/cloud/managed-services"
+      ],
+      "after": []
+    },
+    {
+      "query": "do you sell mobile phone plans",
+      "before": [
+        "/hosting/email",
+        "/help",
+        "/docs/platform-services-architecture"
+      ],
+      "after": []
+    },
+    {
+      "query": "cell phone plans",
+      "before": [
+        "/help",
+        "/cloud/managed-services",
+        "/legal/trademark"
+      ],
+      "after": []
+    },
+    {
+      "query": "sim card",
+      "before": [
+        "/legal/privacy-policy",
+        "/docs/api-billing",
+        "/docs/mrz-developer-tool"
+      ],
+      "after": []
+    },
+    {
+      "query": "do you accept paypal",
+      "before": [
+        "/legal/refund-policy"
+      ],
+      "after": []
+    }
+  ],
+  "scope": "Live local PostgreSQL, fixed 76-query corpus, not a semantic accuracy certificate"
+}

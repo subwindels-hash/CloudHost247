@@ -19,6 +19,7 @@
  *   - Timeouts and rate limits are classified, not swallowed, so the ledger shows what happened and
  *     the admin console can report it.
  */
+import { providerEndpoint } from './provider-endpoint';
 import { sanitizeText, validateSeo, validateSections, type StoredSection } from '../sections';
 import {
   AiProviderError,
@@ -62,12 +63,21 @@ const OUTPUT_SHAPE = `{
   "imageSuggestions": [ { "sectionKey": string, "description": string, "searchTerms": [string] } ]
 }`;
 
-function classifyHttpStatus(status: number, body: string): AiProviderError {
-  if (status === 429) return new AiProviderError('RATE_LIMITED', `Provider rate limited (${status})`, true);
-  if (status === 401 || status === 403) {
-    return new AiProviderError('CONFIGURATION_REQUIRED', `Provider rejected the stored credentials (${status})`);
-  }
-  return new AiProviderError('PROVIDER_ERROR', `Provider returned ${status}: ${body.slice(0, 200)}`, status >= 500);
+/** Provider bodies may echo prompts or secrets. Never persist them in generation errors. */
+function classifyHttpStatus(status: number): AiProviderError {
+  const error = status === 429
+    ? new AiProviderError('RATE_LIMITED', 'Provider rate limited the request', true)
+    : status === 401 || status === 403
+      ? new AiProviderError('CONFIGURATION_REQUIRED', 'Provider authentication or permissions need attention')
+      : status === 413
+        ? new AiProviderError('REQUEST_TOO_LARGE', 'Provider input limit exceeded')
+        : status === 400 || status === 422
+          ? new AiProviderError('INVALID_REQUEST', 'Provider did not accept the request contract')
+          : status === 404
+            ? new AiProviderError('CONFIGURATION_REQUIRED', 'Provider endpoint or model was not found')
+            : new AiProviderError('PROVIDER_ERROR', 'Provider request failed', status >= 500 && status <= 599);
+  error.httpStatus = status;
+  return error;
 }
 
 export function createLlmProvider(config: LlmProviderConfig): SiteGenerationProvider {
@@ -85,6 +95,11 @@ export function createLlmProvider(config: LlmProviderConfig): SiteGenerationProv
       }
       if (!config.model) {
         return { configured: false, reason: 'No model name is configured (AI_LLM_MODEL).' };
+      }
+      try {
+        providerEndpoint(config.baseUrl, config.apiStyle);
+      } catch {
+        return { configured: false, reason: 'The model endpoint must be a valid HTTP(S) API root without credentials, query or fragment.' };
       }
       return { configured: true, reason: null };
     },
@@ -115,10 +130,7 @@ export function createLlmProvider(config: LlmProviderConfig): SiteGenerationProv
       const timeout = setTimeout(() => controller.abort(), config.timeoutMs ?? 60_000);
 
       try {
-        const url =
-          config.apiStyle === 'anthropic'
-            ? `${config.baseUrl!.replace(/\/$/, '')}/v1/messages`
-            : `${config.baseUrl!.replace(/\/$/, '')}/chat/completions`;
+        const url = providerEndpoint(config.baseUrl!, config.apiStyle);
         const headers: Record<string, string> = { 'content-type': 'application/json' };
         if (config.apiStyle === 'anthropic') {
           headers['x-api-key'] = config.apiKey!;
@@ -152,15 +164,28 @@ export function createLlmProvider(config: LlmProviderConfig): SiteGenerationProv
         });
 
         if (!response.ok) {
-          const body = await response.text().catch(() => '');
-          throw classifyHttpStatus(response.status, body);
+          // Discard, rather than retain, an untrusted error body that may contain private input.
+          await response.body?.cancel().catch(() => undefined);
+          throw classifyHttpStatus(response.status);
         }
 
-        const json = (await response.json()) as Record<string, unknown>;
-        const text =
-          config.apiStyle === 'anthropic'
-            ? ((json.content as Array<{ type: string; text?: string }> | undefined)?.find((part) => part.type === 'text')?.text ?? '')
-            : ((json.choices as Array<{ message?: { content?: string } }> | undefined)?.[0]?.message?.content ?? '');
+        let json: Record<string, unknown>;
+        let text: string;
+        try {
+          const parsed: unknown = await response.json();
+          if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Invalid envelope');
+          json = parsed as Record<string, unknown>;
+          const content = config.apiStyle === 'anthropic'
+            ? (Array.isArray(json.content)
+              ? json.content.find((part) => part && typeof part === 'object' && part.type === 'text')?.text
+              : undefined)
+            : (Array.isArray(json.choices) ? json.choices[0]?.message?.content : undefined);
+          if (typeof content !== 'string') throw new Error('Invalid content');
+          text = content;
+        } catch (error) {
+          if (controller.signal.aborted) throw error;
+          throw new AiProviderError('INVALID_RESPONSE', 'Provider returned invalid JSON or an unsupported response envelope');
+        }
 
         if (!text.trim()) {
           throw new AiProviderError('INVALID_RESPONSE', 'The model returned an empty response');
@@ -172,12 +197,12 @@ export function createLlmProvider(config: LlmProviderConfig): SiteGenerationProv
         return parseModelPlan(text);
       } catch (error) {
         if (error instanceof AiProviderError) throw error;
-        if (error instanceof Error && error.name === 'AbortError') {
+        if (controller.signal.aborted || (error instanceof Error && error.name === 'AbortError')) {
           throw new AiProviderError('TIMEOUT', 'The model provider did not respond in time', true);
         }
         throw new AiProviderError(
           'PROVIDER_ERROR',
-          error instanceof Error ? error.message : 'Unknown provider failure',
+          'Provider transport failed',
           true
         );
       } finally {
@@ -240,7 +265,7 @@ export function parseModelPlan(raw: string): GeneratedSitePlan {
     } catch (error) {
       throw new AiProviderError(
         'INVALID_RESPONSE',
-        `The model returned content this platform cannot store: ${error instanceof Error ? error.message : 'invalid section'}`
+        'The model returned content that failed section validation'
       );
     }
     if (sections.length === 0) {

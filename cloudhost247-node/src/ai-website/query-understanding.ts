@@ -231,6 +231,13 @@ const PROTECTED_QUERY_WORDS = new Set([
   // nonsense before it was ever searched.
   'voip', 'smtp', 'imap', 'pop3', 'ssd', 'nvme', 'http', 'https', 'ipv4', 'ipv6', 'ssh', 'ftp',
   'cpanel', 'whm', 'letsencrypt', 'mysql', 'mariadb', 'postgres', 'redis', 'node', 'laravel',
+  // Words that are spelled correctly, look like one edit from a word the corpus happens to contain,
+  // and are destroyed by "correction". `cell` → `call` and `sim` → `sit` both happened, so a customer
+  // asking about cell phone plans had their question rewritten to "call phone plans" before it was
+  // ever searched. The corpus's absence of the word is the honest signal here — not a typo.
+  'cell', 'sim', 'webmail', 'voicemail', 'fax', 'mms', 'sms', 'imap', 'pop', 'mailbox',
+  'outlook', 'thunderbird', 'android', 'ios', 'iphone', 'mac', 'linux', 'mysql', 'whmcs',
+  'stripe', 'paypal', 'crypto', 'bitcoin', 'ninja', 'start', 'stop', 'swap', 'ram', 'cpu',
 ]);
 
 export function correctToken(token: string, vocabulary: ReadonlySet<string>): { token: string; corrected: boolean } {
@@ -282,6 +289,21 @@ export function normaliseQuery(raw: string): { normalised: string; tokens: strin
     .filter((token) => token.length > 0);
   return { normalised: tokens.join(' '), tokens };
 }
+
+// Exported so retrieval can exclude the same filler when judging whether a page is about the
+// question; duplicating this list would let the two definitions drift apart.
+export const QUESTION_SCAFFOLDING = new Set([
+  'cost', 'costs', 'cheap', 'cheapest', 'cheaper', 'afford', 'affordable', 'budget', 'lowest',
+  'price', 'priced', 'quote', 'fee', 'fees', 'charge', 'charged', 'charges', 'exact', 'exactly',
+  'accept', 'accepted', 'available', 'offer', 'offers', 'provide', 'provides', 'sell', 'sells',
+  'support', 'supported', 'help', 'fast', 'slow', 'quick', 'quickly', 'good', 'best', 'better',
+  'speak', 'talk', 'chat', 'human', 'person', 'agent', 'someone', 'anyone', 'team', 'staff',
+  'recommend', 'suggest', 'need', 'want', 'looking', 'prefer', 'option', 'options', 'include',
+  'included', 'allow', 'allowed', 'possible', 'kind', 'kinds', 'type', 'types', 'sort', 'way',
+  'time', 'times', 'long', 'much', 'many', 'year', 'years', 'month', 'months', 'day', 'days',
+  'free', 'paid', 'work', 'works', 'working', 'broken', 'stuck', 'wrong', 'issue', 'issues',
+  'problem', 'problems', 'error', 'errors', 'fix', 'fixed', 'else', 'other', 'another', 'anything',
+]);
 
 /**
  * Understands a question without touching the database.
@@ -409,26 +431,7 @@ export function understandQuery(
     if (account && !entities.some((entity) => entity.id === 'account')) entities.unshift(account);
   }
 
-  /**
-   * Words that ask *how* to answer rather than *what* about: "cost", "cheapest", "accept", "speak",
-   * "human". They carry no subject matter of their own, so their absence from the corpus is not a
-   * coverage gap — "cheapest vps" is about VPS even though the site never writes the word "cheapest".
-   * Treating them as gaps would refuse exactly the pricing and escalation questions the assistant
-   * must still handle. Subject words like "interstellar" and "travel" are deliberately not here.
-   */
-  const QUESTION_SCAFFOLDING = new Set([
-    'cost', 'costs', 'cheap', 'cheapest', 'cheaper', 'afford', 'affordable', 'budget', 'lowest',
-    'price', 'priced', 'quote', 'fee', 'fees', 'charge', 'charged', 'charges', 'exact', 'exactly',
-    'accept', 'accepted', 'available', 'offer', 'offers', 'provide', 'provides', 'sell', 'sells',
-    'support', 'supported', 'help', 'fast', 'slow', 'quick', 'quickly', 'good', 'best', 'better',
-    'speak', 'talk', 'chat', 'human', 'person', 'agent', 'someone', 'anyone', 'team', 'staff',
-    'recommend', 'suggest', 'need', 'want', 'looking', 'prefer', 'option', 'options', 'include',
-    'included', 'allow', 'allowed', 'possible', 'kind', 'kinds', 'type', 'types', 'sort', 'way',
-    'time', 'times', 'long', 'much', 'many', 'year', 'years', 'month', 'months', 'day', 'days',
-    'free', 'paid', 'work', 'works', 'working', 'broken', 'stuck', 'wrong', 'issue', 'issues',
-    'problem', 'problems', 'error', 'errors', 'fix', 'fixed', 'else', 'other', 'another', 'anything',
-  ]);
-
+  // Question scaffolding is shared with retrieval; it is not an unknown subject.
   const expansionList = [...expansions];
   const ungroundedTokens = content.filter((token) => {
     if (vocabulary.has(token)) return false;

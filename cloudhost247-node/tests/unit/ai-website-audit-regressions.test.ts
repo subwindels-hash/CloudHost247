@@ -338,3 +338,115 @@ describe('audit: retrieval refuses questions whose subject is not on the site', 
     }
   }, 180_000);
 });
+
+describe('audit: a question naming an offering the site does not sell', () => {
+  /**
+   * The Phase 31 defect. "mobile phone plan" was answered with Email Hosting (25.7), /help (20.6) and
+   * Managed Services (18.3) — a confident answer built entirely from incidental word overlap.
+   *
+   * Both matches were individually real: /hosting/email says "mobile clients", /help says "phone
+   * support". Scoring is additive, so two rare words on two unrelated pages beat the one page about the
+   * question. What no page does is mention "mobile" and "phone" in the same *passage*, because the site
+   * sells no mobile phone product. The `mobile` test below is the end-to-end assertion; the chunk test
+   * is the mechanism, kept separate so a future scoring change cannot quietly reintroduce the overlap.
+   */
+  it('measures coverage of the question on the page that won, not across all candidates', async () => {
+    const { subjectCoverage, titleDeclaresTerm } = await import('../../src/ai-website/retrieval');
+
+    // The real corpus, compressed: /hosting/email mentions "mobile clients" and /help mentions
+    // "phone support". Neither page is about a mobile phone plan, and the winning page contains one
+    // of the two words — half the question, which is not most of it.
+    const emailPage = [
+      {
+        url: '/hosting/email',
+        pageTitle: 'Email Hosting',
+        title: 'Email Hosting',
+        content: 'Standard IMAP, POP and SMTP, so Outlook, Apple Mail and mobile clients all work.',
+        keywords: ['email', 'webmail', 'dns'],
+      },
+    ] as never;
+    expect(subjectCoverage(emailPage, ['mobile', 'phone'])).toBe(0.5);
+    expect(titleDeclaresTerm(emailPage, ['mobile', 'phone'])).toBe(false);
+
+    // A page that names the subject in its title is about it, even when it never writes the modifier:
+    // "free ssl" must keep working against a page titled "SSL Certificates".
+    const sslPage = [
+      {
+        url: '/hosting/ssl',
+        pageTitle: 'SSL Certificates',
+        title: 'SSL Certificates',
+        content: 'Every certificate is issued and renewed automatically.',
+        keywords: ['ssl', 'certificate'],
+      },
+    ] as never;
+    expect(subjectCoverage(sslPage, ['free', 'ssl'])).toBe(0.5);
+    expect(titleDeclaresTerm(sslPage, ['free', 'ssl'])).toBe(true);
+  });
+
+  it('does not treat a generic alias as the customer naming an offering', async () => {
+    const { namesSpecificOffering } = await import('../../src/ai-website/retrieval');
+    const { SERVICE_ENTITIES } = await import('../../src/ai-website/query-understanding');
+    const billing = SERVICE_ENTITIES.filter((entity) => entity.id === 'billing');
+
+    // "card" is an alias of the billing offering. Naming it is not naming the offering: a question about a
+    // SIM card is not a question about billing, and "sim card" must not inherit billing's blessing.
+    expect(namesSpecificOffering(billing, ['sim', 'card'], 'sim card')).toBe(false);
+    // A real offering name in the question does explain a two-word question.
+    const cpanel = SERVICE_ENTITIES.filter((entity) => entity.id === 'cpanel');
+    expect(namesSpecificOffering(cpanel, ['cpanel', 'license'], 'cpanel license')).toBe(true);
+  });
+
+  it('does not "correct" a real English word into an unrelated one', async () => {
+    // `cell` → `call` and `sim` → `sit` both happened: the question was rewritten before it was
+    // searched, so no ranking change could ever have fixed it.
+    for (const word of ['cell', 'sim']) {
+      const { token, corrected } = (await import('../../src/ai-website/query-understanding')).correctToken(
+        word,
+        vocabulary
+      );
+      expect({ word, token, corrected }).toEqual({ word, token: word, corrected: false });
+    }
+  });
+
+  it('returns no evidence for a mobile phone plan, and keeps real questions working', async () => {
+    const { PGlite } = await import('@electric-sql/pglite');
+    const { PgliteClient } = await import('../../database/db-client');
+    const { migrateUp } = await import('../../database/migrate');
+    const { syncWebsiteKnowledge } = await import('../../src/ai-website/knowledge-sync');
+    const { retrieveKnowledge } = await import('../../src/ai-website/retrieval');
+
+    const db = new PGlite();
+    await migrateUp(new PgliteClient(db), { isProduction: false });
+    try {
+      await syncWebsiteKnowledge(db, { trigger: 'manual' });
+
+      for (const question of ['mobile phone plan', 'cell phone plans', 'sim card', 'do you accept paypal']) {
+        const result = await retrieveKnowledge(db, question, {});
+        expect(result.pages, `${question} must not retrieve evidence`).toEqual([]);
+        expect(result.empty, `${question} must be reported empty`).toBe(true);
+      }
+
+      /**
+       * The counter-cases, and the reason the rule is shaped the way it is. Each of these names a
+       * real subject whose two words are never adjacent, so a proximity rule would have broken them:
+       * "cPanel license" has no license page, "GDPR" and "compliance" sit thirteen words apart, and
+       * "uptime SLA" is the site's own phrasing with the words reversed.
+       */
+      const expected: Array<[string, string]> = [
+        ['cpanel license', '/hosting/cpanel'],
+        ['uptime sla', '/cloud/monitoring'],
+        ['gdpr compliance', '/legal/data-deletion'],
+        ['email migration', '/hosting/email'],
+        ['ssl certificate', '/hosting/ssl'],
+        ['how do i reset my password', '/docs/passkey'],
+      ];
+      for (const [question, url] of expected) {
+        const result = await retrieveKnowledge(db, question, {});
+        expect(result.empty, `${question} must still retrieve`).toBe(false);
+        expect(result.pages[0]?.url, `${question} must still reach ${url}`).toBe(url);
+      }
+    } finally {
+      await db.close();
+    }
+  }, 180_000);
+});

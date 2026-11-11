@@ -1,3 +1,4 @@
+import { providerEndpoint } from '../builders/ai/provider-endpoint';
 import type { Env } from '../config/env';
 
 /**
@@ -97,9 +98,8 @@ export async function openAnswerWithModel(request: GroundedModelRequest, env: En
   const timeoutMs = request.timeoutMs ?? env.AI_LLM_TIMEOUT_MS ?? 30_000;
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const base = env.AI_LLM_BASE_URL!.replace(/\/$/, '');
     const anthropic = env.AI_LLM_API_STYLE === 'anthropic';
-    const url = anthropic ? `${base}/v1/messages` : `${base}/chat/completions`;
+    const url = providerEndpoint(env.AI_LLM_BASE_URL!, anthropic ? 'anthropic' : 'openai');
     const body = anthropic
       ? {
           model: env.AI_LLM_MODEL,

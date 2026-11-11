@@ -78,11 +78,15 @@ export type AiProviderErrorCode =
   | 'CONFIGURATION_REQUIRED'
   | 'RATE_LIMITED'
   | 'TIMEOUT'
+  | 'INVALID_REQUEST'
+  | 'REQUEST_TOO_LARGE'
   | 'INVALID_RESPONSE'
   | 'PROVIDER_ERROR'
   | 'ALLOWANCE_EXCEEDED';
 
 export class AiProviderError extends Error {
+  /** HTTP status only; never raw provider bodies or prompts. */
+  public httpStatus?: number;
   constructor(
     public readonly code: AiProviderErrorCode,
     message: string,
@@ -104,6 +108,10 @@ export function safeAiMessage(error: AiProviderError): string {
       return 'The model provider is rate limiting requests right now. Please try again in a few minutes.';
     case 'TIMEOUT':
       return 'The model provider took too long to respond. Please try again.';
+    case 'INVALID_REQUEST':
+      return 'The AI service could not accept this request format. Please contact support so the configuration can be checked.';
+    case 'REQUEST_TOO_LARGE':
+      return 'This request exceeds the model provider’s input limit. Please shorten it before sending again.';
     case 'INVALID_RESPONSE':
       return 'The model provider returned a response this platform could not use. The attempt was recorded and no site content was changed.';
     default:

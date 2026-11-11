@@ -2,6 +2,7 @@ import type { Queryable } from '../db/types';
 import type { RetrievalRow } from './website-knowledge-repo';
 import { findChunksByTitle, searchChunks } from './website-knowledge-repo';
 import {
+  QUESTION_SCAFFOLDING,
   retrievalQueryFor,
   toTsQueryBody,
   understandQuery,
@@ -114,6 +115,82 @@ export interface RetrieveOptions {
   kinds?: WebsiteSourceKind[];
   /** Skip the followup merge (used when a question stands alone mid-conversation). */
   standalone?: boolean;
+  /**
+   * The subject words a page must declare to be usable as evidence. Defaults to the question's own
+   * `strictTokens`; tests override it to exercise the anchoring rule without a database.
+   */
+  subjectTerms?: readonly string[];
+}
+
+/**
+ * The share of a question's subject words that must appear on the page offered as evidence.
+ *
+ * A question built from several subject words is making a claim that those words belong together. If
+ * the page that won does not even contain most of them, the words matched *different* things and the
+ * page is unrelated: "mobile phone plan" won Email Hosting by matching "mobile" alone, because the
+ * site says "mobile clients" in a paragraph about webmail and "phone support" on another page
+ * entirely. Half of the question was never covered, and the answer was still delivered confidently.
+ *
+ * Require more than half the non-scaffolding subject words unless the page title or a specifically
+ * named offering anchors the question. This lexical guard is not a semantic relevance certificate;
+ * regression queries must cover both unsupported subjects and real page-specific questions.
+ */
+export const MIN_SUBJECT_COVERAGE = 0.5;
+
+/**
+ * How much of `terms` a set of chunks covers, by whole-word membership, as a fraction.
+ * Whole words only: `foldText` output is space-separated, so substring tests would let "sit" match
+ * "site" and "call" match "callback", which is the class of accidental overlap this guards against.
+ */
+export function subjectCoverage(chunks: RetrievedChunk[], terms: readonly string[]): number {
+  if (terms.length === 0) return 1;
+  const words = new Set(
+    foldText(chunks.map((chunk) => `${chunk.pageTitle} ${chunk.title} ${chunk.content} ${chunk.keywords.join(' ')}`).join(' '))
+      .split(' ')
+      .filter(Boolean)
+  );
+  return terms.filter((term) => words.has(term)).length / terms.length;
+}
+
+/**
+ * Does the winning page's own *title* use one of these words? A page titled "SSL Certificates" is
+ * about SSL even when it never writes the word "free", so a modifier the page does not use must not
+ * count as missing coverage.
+ */
+export function titleDeclaresTerm(chunks: RetrievedChunk[], terms: readonly string[]): boolean {
+  const words = new Set(
+    foldText(chunks.map((chunk) => `${chunk.pageTitle} ${chunk.title}`).join(' ')).split(' ').filter(Boolean)
+  );
+  return terms.some((term) => words.has(term));
+}
+
+/**
+ * Did the customer *name* an offering, specifically enough for it to explain their question?
+ *
+ * The coherence check above is skipped for such questions, because the offering supplies the
+ * relationship between the words. The override has to be narrow, though: every offering carries short
+ * generic aliases, and matching one is not naming the offering. The `billing` entity lists `card` as an
+ * alias, so "sim card" resolved an offering and slipped through the check — a customer asking about a
+ * SIM card was answered from billing pages. A name counts as specific when it is a multi-word phrase
+ * present in the question, or a single word of five characters or more. `cpanel`, `uptime` and
+ * `firewall` qualify; `card` does not.
+ */
+export function namesSpecificOffering(
+  entities: readonly ServiceEntity[],
+  subjectTerms: readonly string[],
+  rawQuestion: string
+): boolean {
+  const foldedQuestion = ` ${foldText(rawQuestion)} `;
+  const terms = new Set(subjectTerms.map((term) => foldText(term)));
+  return entities.some((entity) => {
+    if (!entity.route) return false;
+    return entity.aliases.some((alias) => {
+      const folded = foldText(alias);
+      if (!folded) return false;
+      if (folded.includes(' ')) return foldedQuestion.includes(` ${folded} `);
+      return folded.length >= 5 && terms.has(folded);
+    });
+  });
 }
 
 /** Deterministic reranker. Exported so the arithmetic can be unit-tested directly. */
@@ -329,7 +406,7 @@ function similarity(a: string, b: string): number {
   return (2 * intersection) / (wordsA.size + wordsB.size);
 }
 
-/** Groups chunks by page, keeping the two strongest per page. */
+/** Groups chunks by page, keeping the three strongest per page. */
 export function groupByPage(chunks: RetrievedChunk[], pageLimit = 4): RetrievalResult['pages'] {
   const pages = new Map<string, RetrievalResult['pages'][number]>();
   for (const chunk of chunks) {
@@ -453,6 +530,45 @@ export async function retrieveKnowledge(
   const useful = reranked.filter((chunk) => chunk.score >= MIN_USEFUL_SCORE);
   const chunks = (useful.length > 0 ? useful : []).slice(0, options.limit ?? 24);
   const pages = groupByPage(chunks, options.pageLimit ?? 4);
+
+  // Subject coverage (see `subjectCoverage`). When the page that won does not even contain most of
+  // what the customer asked about, the question's words matched unrelated pages and nothing on the
+  // site answers it. Measured on the *winning page*, not on the whole candidate set: across twenty
+  // chunks every word appears somewhere, which is exactly the accident that produced the bad answer.
+  //
+  // Skipped when the question names a specific offering: there the offering supplies the relationship
+  // between the words and the customer is legitimately combining it with a modifier ("cPanel license",
+  // "uptime SLA" — real questions whose second word the page never uses).
+  const namedOffering = namesSpecificOffering(
+    understanding.entities,
+    options.subjectTerms ?? understanding.strictTokens ?? [],
+    understanding.raw
+  );
+  if (!namedOffering && pages.length > 0) {
+    // Acceptance is an intent-bearing relationship (accepting a payment method), not just filler.
+    const subjectTerms = [...new Set(
+      (options.subjectTerms ?? understanding.strictTokens ?? [])
+        .map((term) => foldText(term))
+        .filter((term) => term.length >= 3 && !GENERIC_TERMS.has(term) && (!QUESTION_SCAFFOLDING.has(term) || term === 'accept' || term === 'accepted'))
+    )];
+    const best = pages[0]!.chunks;
+    const covered = subjectCoverage(best, subjectTerms);
+    // Two ways to be *about* the question. Either the page covers most of the words, or its own title
+    // names one of them — which is what separates "free ssl" (page titled SSL Certificates, and no page
+    // needs to say "free") from "mobile phone plan" (Email Hosting, whose title names neither word).
+    const titled = titleDeclaresTerm(best, subjectTerms);
+    if (subjectTerms.length > 0 && (covered === 0 || (subjectTerms.length >= 2 && covered <= MIN_SUBJECT_COVERAGE)) && !titled) {
+      return {
+        understanding,
+        effectiveQuery,
+        chunks: [],
+        pages: [],
+        entities: understanding.entities,
+        empty: true,
+        ungroundedTerms: subjectTerms,
+      };
+    }
+  }
 
   return {
     understanding,

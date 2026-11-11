@@ -36,7 +36,7 @@ function externalProviders(env: Env): SiteGenerationProvider[] {
 /** The configured state of every engine, for the customer-facing engine picker. */
 export function resolveProvider(env: Env, engine: string): SiteGenerationProvider {
   if (engine === 'rules') return rulesProvider;
-  const provider = externalProviders(env).find((candidate) => candidate.engine === engine || candidate.engine === 'llm');
+  const provider = externalProviders(env).find((candidate) => candidate.engine === engine);
   if (!provider) {
     throw new AiProviderError('CONFIGURATION_REQUIRED', `No generator is registered for engine "${engine}"`);
   }
