@@ -221,6 +221,60 @@ Read `docs/independent-rebuild/WEBSITE-BUILDER.md` for the page schema, the
 widget library, the publishing model, the security controls and the test
 inventory.
 
+## Local development (Node platform)
+
+`cloudhost247-node/` is the canonical backend (see `docs/CANONICAL-BACKEND-COMPARISON.md`).
+It needs **no PostgreSQL server on the machine**: `npm run dev:stack` mounts the same
+Fastify app on an embedded [PGlite](https://pglite.dev) database — a real Postgres engine
+compiled to WASM — after running the committed migrations. Nothing in `src/` is
+substituted; `buildApp` already accepts an injected queryable.
+
+```bash
+cd cloudhost247-node
+npm ci
+cp .env.example .env          # then fill in the two required values below
+npm run dev:stack
+```
+
+Two variables are required at boot and have no fallback (`src/config/env.ts`):
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"   # → JWT_SECRET
+```
+`DATABASE_URL=` may stay at the placeholder in `.env.example` — the embedded database
+ignores it — but it must be present and `postgres://`/`postgresql://`-shaped.
+
+| What | Where | Notes |
+|---|---|---|
+| API | http://localhost:3000 | `/health`, `/ready` |
+| Frontend (Vite) | http://localhost:5173 | proxies `/api`, `/health`, `/ready` to :3000 |
+
+The embedded database persists to `cloudhost247-node/.dev-db-pg` (git-ignored). Delete that
+directory to start from a clean schema. On an empty catalogue the dev server loads
+`database/seed/dev-catalog-seed.sql` so the plans UI has something to render; those rows are
+explicitly marked as fixtures, not real prices.
+
+Other useful commands (run from `cloudhost247-node/`):
+
+| Command | Purpose |
+|---|---|
+| `npm test` | full Vitest suite (backend + frontend). **Run from the app root**, not `frontend/` — see the note below |
+| `npm run typecheck` | `tsc --noEmit` over `src/` and `database/` |
+| `npm run build` | typecheck scripts → server → frontend → tools bundle |
+| `npm run migrate:status` | applied/pending migrations against a real `DATABASE_URL` |
+| `npm run env:check` | validate environment shape before deploying |
+
+> **Trap:** running Vitest from inside `frontend/` skips the root config's `setupFiles` and
+> produces spurious failures. Always use `npm test` from `cloudhost247-node/`.
+
+Migrations `0023`, `0024`, `0025` and `0041` are **quarantined**: `database/migrate.ts`
+refuses to apply them without an explicit per-run `AUTHORIZED_MIGRATIONS=<versions>` and a
+recorded reason. A local `dev:stack` run applies all of them because it is not a production
+run; never assume that license extends to a real database. See `PHASE-20-GATE-ASSESSMENT.md` §4.
+
+The WHMCS/PHP side of this repository cannot be run here — WHMCS core (`init.php`,
+`includes/`, `vendor/`) is licensed and deliberately not vendored.
+
 ## Runtime requirements (deployment target)
 
 - WHMCS 8.x (order form `templates/orderforms/cloudhost247_legacy` requires WHMCS 8.1+,
