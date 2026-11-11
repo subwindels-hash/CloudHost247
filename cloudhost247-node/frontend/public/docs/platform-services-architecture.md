@@ -1,4 +1,4 @@
-# CLOUDHOST247 Platform Services — Architecture & Operations
+# CLOUDHOST247 Platform Services - Architecture & Operations
 
 The CLOUDHOST247 platform (the Node/TypeScript application in `cloudhost247-node/`) runs the domain,
 hosting, website-building, AI-website, store, expert, marketing, logo, inbox and commerce services.
@@ -20,7 +20,7 @@ this document and is unchanged apart from the extensions listed below).
 | Logo Maker | `src/logo-maker/*` | Deterministic vector engine + optional AI palette suggestion. |
 | Unified Inbox | `src/inbox/*`, `src/routes/inbox.ts` | Channel adapters as data, labels, assignment, internal notes, per-message delivery status. |
 | Shared commerce bridge | `src/commerce/*`, `src/services/provisioning-service.ts`, `src/services/commerce-service.ts` | One cart, one checkout, one fulfilment dispatch. |
-| Transactional email | `src/lib/transactional-email.ts` | Single transport; statuses are `sent`, `manual` or `failed` — never upgraded. |
+| Transactional email | `src/lib/transactional-email.ts` | Single transport; statuses are `sent`, `manual` or `failed` - never upgraded. |
 | Public SEO surface | `src/routes/seo.ts` | `sitemap.xml` + `robots.txt` generated from the live definition and published content. |
 
 ## 2. Commerce: one path for every service
@@ -63,7 +63,7 @@ image uploads are each reached through an adapter interface. Two rules hold thro
 | `CREDENTIAL_ENCRYPTION_KEY` | Registrar credentials cannot be stored or read |
 | Registrar credentials (Admin → Domain Services) | Domain search, registration, transfer and auction settlement refuse with the missing provider named |
 | `AI_LLM_BASE_URL`, `AI_LLM_MODEL`, `AI_LLM_API_KEY` | Built-in website generator and logo catalogue still work; AI requests are refused naming these |
-| `NOTIFICATION_EMAIL_WEBHOOK_URL`, `NOTIFICATION_EMAIL_WEBHOOK_TOKEN` | Email queue stays visibly pending — delivery is never claimed |
+| `NOTIFICATION_EMAIL_WEBHOOK_URL`, `NOTIFICATION_EMAIL_WEBHOOK_TOKEN` | Email queue stays visibly pending - delivery is never claimed |
 | `INBOX_INBOUND_WEBHOOK_SECRET` | Inbound inbox endpoint answers 503 naming the variable |
 | `STRIPE_WEBHOOK_SECRET`, `PAYPAL_WEBHOOK_ID`, `PAYSTACK_SECRET_KEY`, `SANDBOX_GATEWAY_WEBHOOK_SECRET` | Online settlement unavailable; orders use the manual/invoice flow and stores stay in `order_intake` |
 | `MANUAL_PAYMENT_INSTRUCTIONS` | Manual-payment instructions are omitted from checkout |
@@ -76,7 +76,7 @@ image uploads are each reached through an adapter interface. Two rules hold thro
   `npm run migrate:verify` report drift; `scripts/validate-migrations.py` validates the PHP tree's
   migrations too.
 * **Worker**: background sweeps (transfer polling, auction deadlines, notification queue, inbox
-  housekeeping, availability watches) run in the existing worker under the platform's lease system —
+  housekeeping, availability watches) run in the existing worker under the platform's lease system -
   schedule it on the deployment host (see `docs/CPANEL_DEPLOYMENT.md`).
 * **Readiness**: `GET /health` is dependency-free liveness; `GET /ready` checks PostgreSQL and
   answers 503 when it cannot reach it.

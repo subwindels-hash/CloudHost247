@@ -2,7 +2,7 @@
 
 This document is the API contract for the catalog/application-façade layer added in Phase 3. It
 covers everything under `/api/v1/catalog/*` (public) and `/api/v1/admin/catalog/*` (authenticated
-admin). Keep this in sync with the code — the source of truth is
+admin). Keep this in sync with the code - the source of truth is
 `cloudhost247-node/src/routes/catalog-public.ts` and `cloudhost247-node/src/routes/catalog-admin.ts`;
 this document should never describe behavior the code doesn't actually have.
 
@@ -29,35 +29,35 @@ an independent, currently order-less product/plan/pricing model for this new Nod
 
 ## Data model summary
 
-- `products` — a sellable category (`slug`, `name`, `description`, `product_type` ∈
+- `products` - a sellable category (`slug`, `name`, `description`, `product_type` ∈
   `hosting | domain | service`, `status` ∈ `draft | active | disabled`, `visibility` ∈
   `public | private`, `display_order`).
-- `product_plans` — a plan/tier under a product (`slug` unique per product, `name`, `description`,
+- `product_plans` - a plan/tier under a product (`slug` unique per product, `name`, `description`,
   `status` ∈ `draft | active | disabled`, `billing_model` ∈ `one_time | recurring`,
   `display_order`).
-- `plan_pricing` — one row per billing period for a plan (`billing_period` ∈
+- `plan_pricing` - one row per billing period for a plan (`billing_period` ∈
   `one_time | monthly | quarterly | semi_annually | annually`, `currency`, `amount`, `setup_fee`,
-  `effective_status` ∈ `draft | published`). A row can exist with `amount = NULL` — this is the
+  `effective_status` ∈ `draft | published`). A row can exist with `amount = NULL` - this is the
   honest "price not configured yet" state. A DB `CHECK` constraint
   (`plan_pricing_published_requires_amount_check`, migration `0006`) makes it structurally
   impossible to mark a price `published` without a real `amount`; the admin API also validates
   this before hitting the database, to return a clean `400` instead of a raw constraint error.
-- `plan_features` — normalized feature rows per plan (`name`, `value`, `display_order`,
+- `plan_features` - normalized feature rows per plan (`name`, `value`, `display_order`,
   `visibility` ∈ `public | private`). Only `public` features are ever returned by the public API.
 
-"Available" in every public DTO always means: `product.status = 'active'` (for a product) — never
+"Available" in every public DTO always means: `product.status = 'active'` (for a product) - never
 inferred from plan/pricing contents. A product can be publicly *listed* while still `draft`
-(`available: false`, "coming soon") — see below — but its plans/pricing are never exposed while
+(`available: false`, "coming soon") - see below - but its plans/pricing are never exposed while
 draft.
 
-## Public API — `/api/v1/catalog/*`
+## Public API - `/api/v1/catalog/*`
 
 No authentication. No internal fields (ids, `status`, `visibility`, unpublished pricing, private
 features) are ever present in these responses.
 
 ### `GET /api/v1/catalog`
 
-Full public catalog — every publicly-visible product (`visibility = 'public'`), regardless of
+Full public catalog - every publicly-visible product (`visibility = 'public'`), regardless of
 `status`, ordered by `display_order`.
 
 **Response `200`:**
@@ -78,14 +78,14 @@ Same as above, optionally filtered by product type.
 
 ### `GET /api/v1/catalog/products/:slug`
 
-Detail for one product, plus its plan summaries (no pricing/features — use the `/plans` endpoint
+Detail for one product, plus its plan summaries (no pricing/features - use the `/plans` endpoint
 for that).
 
 - `slug` must match `^[a-z0-9]+(-[a-z0-9]+)*$` (lowercase, digits, single hyphens) or `400
   VALIDATION_ERROR`.
 - Slug well-formed but no matching *public* product (doesn't exist, or is `visibility = 'private'`)
   → `404 NOT_FOUND`. A private product and a genuinely missing slug are **intentionally
-  indistinguishable** from the outside — the public API never reveals that a private product
+  indistinguishable** from the outside - the public API never reveals that a private product
   exists.
 - Product exists and is public but `status != 'active'` (`draft`) → `200`, `available: false`,
   `plans: []`. A draft-but-public product is listed as "coming soon", never as an error and never
@@ -105,7 +105,7 @@ Full plan detail (pricing + features) for one product.
   product. Each plan's `pricing` array contains only rows with `effective_status = 'published'`
   (never a `draft`/no-amount row); each plan's `features` array contains only
   `visibility = 'public'` features. A plan can legitimately have `pricing: []` if nothing has been
-  published for it yet — this is shown as-is, never substituted with an invented price.
+  published for it yet - this is shown as-is, never substituted with an invented price.
 
 **Response `200`:** `{ "product": PublicProductSummary, "plans": [ PublicPlan, ... ] }`
 
@@ -168,19 +168,19 @@ interface PublicFeature {
 | 429 | `RATE_LIMITED` | Rate limit exceeded (global Fastify rate-limit plugin, unchanged from Phase 2) |
 | 500 | `INTERNAL_ERROR` | Unexpected server error |
 
-## Admin API — `/api/v1/admin/catalog/*`
+## Admin API - `/api/v1/admin/catalog/*`
 
 **Authentication:** `Authorization: Bearer <JWT>`, required on every route. Uses the same
-JWT/`jti`-revocation model as Phase 2 (`src/lib/require-auth.ts`) — a token that has been logged
+JWT/`jti`-revocation model as Phase 2 (`src/lib/require-auth.ts`) - a token that has been logged
 out via `/api/auth/logout` is rejected here too.
 
 **Authorization:** `requireRole('super_admin')` (`src/lib/require-role.ts`). Catalog
-administration is restricted to `super_admin` only — a plain `admin` role is **not** sufficient
+administration is restricted to `super_admin` only - a plain `admin` role is **not** sufficient
 (defense in depth: catalog mutation is treated as a highly sensitive operation). The role is
 always read from the server-verified JWT claims, never trusted from any client-supplied value.
 
 All mutations are persisted to PostgreSQL through the repository layer
-(`src/db/catalog-products.ts`, `catalog-plans.ts`, `catalog-pricing.ts`, `catalog-features.ts`) —
+(`src/db/catalog-products.ts`, `catalog-plans.ts`, `catalog-pricing.ts`, `catalog-features.ts`) -
 there is no React-state-only "fake" admin UI; every create/update call here is a real `INSERT`/
 `UPDATE` and is asserted to have happened via a follow-up read in
 `tests/integration/catalog-admin-api.test.ts`.
@@ -189,11 +189,11 @@ there is no React-state-only "fake" admin UI; every create/update call here is a
 
 | Method & path | Body | Notes |
 |---|---|---|
-| `GET /api/v1/admin/catalog/products` | – | Full admin product list — includes `draft`/`disabled`/`private` products, unlike the public list. |
+| `GET /api/v1/admin/catalog/products` | – | Full admin product list - includes `draft`/`disabled`/`private` products, unlike the public list. |
 | `POST /api/v1/admin/catalog/products` | `{ slug, name, description?, productType, status?, visibility?, displayOrder? }` | Creates a product. `slug` must be unique. |
-| `GET /api/v1/admin/catalog/products/:id` | – | Full detail for one product **by UUID**, including its draft plans, unpublished pricing, and private features — i.e. everything the public API deliberately hides. `:id` must be a valid UUID (`400` otherwise); unknown id → `404`. |
+| `GET /api/v1/admin/catalog/products/:id` | – | Full detail for one product **by UUID**, including its draft plans, unpublished pricing, and private features - i.e. everything the public API deliberately hides. `:id` must be a valid UUID (`400` otherwise); unknown id → `404`. |
 | `PATCH /api/v1/admin/catalog/products/:id` | Any subset of `{ name, description, productType, visibility, displayOrder }` | Partial update; only supplied fields change; `updated_at` always bumps. |
-| `POST /api/v1/admin/catalog/products/:id/status` | `{ status: 'draft' \| 'active' \| 'disabled' }` | Enable/disable a product. Setting `disabled` (or leaving `draft`) removes it from the public catalog **immediately** — verified in `catalog-admin-api.test.ts` by reading the public endpoint right after. |
+| `POST /api/v1/admin/catalog/products/:id/status` | `{ status: 'draft' \| 'active' \| 'disabled' }` | Enable/disable a product. Setting `disabled` (or leaving `draft`) removes it from the public catalog **immediately** - verified in `catalog-admin-api.test.ts` by reading the public endpoint right after. |
 
 ### Plans
 
@@ -224,12 +224,12 @@ from `404` for a well-formed-but-nonexistent id).
 
 - Public endpoints are read-only and return no internal identifiers, no `draft`/`disabled`/
   `private` rows, and no unpublished pricing/private features, under any query parameter
-  combination — enforced by the repository-level filtering in `src/services/catalog-service.ts`,
+  combination - enforced by the repository-level filtering in `src/services/catalog-service.ts`,
   not by route-level post-filtering.
 - Admin endpoints require both authentication (`require-auth.ts`) and authorization
   (`requireRole('super_admin')`) independently; either failing returns the appropriate `401`/`403`
   and takes no action. Every admin mutation test in `tests/integration/catalog-admin-api.test.ts`
-  is proven by reading the row back from the database or from the public API afterward — not just
+  is proven by reading the row back from the database or from the public API afterward - not just
   asserting a `200`.
 - No endpoint here performs a WHMCS table passthrough; there is no direct WHMCS DB
   connection/credential anywhere in this code path.

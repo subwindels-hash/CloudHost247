@@ -1,9 +1,10 @@
 import path from 'node:path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { editorialPunctuationPlugin } from './editorial-punctuation-plugin';
 export default defineConfig({
   root: __dirname,
-  plugins: [react()],
+  plugins: [editorialPunctuationPlugin(), react()],
   define: { 'process.env.NODE_ENV': JSON.stringify('production') },
   build: {
     outDir: path.resolve(__dirname, '../../assets/cloudhost247-tools'),
