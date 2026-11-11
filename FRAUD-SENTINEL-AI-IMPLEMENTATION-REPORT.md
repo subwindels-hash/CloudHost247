@@ -171,7 +171,7 @@ All commands run from `cloudhost247-node/` unless stated. `node_modules` was ins
 | --- | --- | --- |
 | 1 | `npm run typecheck` (`tsc -p tsconfig.json --noEmit`) | **exit 0**, no output |
 | 2 | `npm run typecheck:scripts` (`tsc -p tsconfig.scripts.json --noEmit`) | **exit 0**, no output |
-| 3 | `tsc -p frontend/tsconfig.json --noEmit` | 1 error, **pre-existing and unrelated**: `frontend/src/lib/markdown.tsx(32,15)` uses `String.replaceAll` under `lib: ES2020`. That file is untouched by this work (`git status` does not list it). Every Fraud Sentinel file compiles clean |
+| 3 | `tsc -p frontend/tsconfig.json --noEmit` | **exit 0**. Earlier on this branch it reported 1 error — `frontend/src/lib/markdown.tsx(32,15)` using `String.replaceAll` under `lib: ES2020` — which was pre-existing on the branch's base commit and already fixed on `main` by PR #122, in a file this work never touches. Merging `origin/main` brought that fix in; CI's `Typecheck frontend` step is green on both Node versions |
 | 4 | `./node_modules/.bin/vitest run tests/unit/fraud-sentinel-rules.test.ts` | **53 passed** |
 | 5 | `./node_modules/.bin/vitest run tests/integration/fraud-sentinel-migration.test.ts` | **10 passed** |
 | 6 | `./node_modules/.bin/vitest run tests/integration/fraud-sentinel-detection.test.ts` | **22 passed** |
@@ -182,8 +182,9 @@ All commands run from `cloudhost247-node/` unless stated. `node_modules` was ins
 | 11 | `git diff --check` (repo root) | **exit 0**, no whitespace errors |
 | 12 | `node scripts/site/generate.mjs --check` (repo root) | **✓ registry valid — 255 links (244 app, 243 PHP)** |
 | 13 | Payment/customer regression (the suites Phase 5 names): `fraud-sentinel-migration`, `payments-api`, `payments-schema`, `payment-authorization-matrix`, `billing-api`, `billing-lifecycle-e2e`, `billing-schema`, `admin-billing-api`, `admin-customers-api`, `account-api`, `customer-identity-api`, `customer-security`, `auth-flow`, `customer-app-schema`, `commerce-schema`, `unit/money` | **240 passed (16 files), 0 failed**, 559 s, exit 0 |
-| 14 | Full suite: `./node_modules/.bin/vitest run` (277 test files) | **Started, not completed — see the note below.** 29 files had reported when it was stopped: **1015 tests passed, 0 failed**, including all four backend Fraud Sentinel suites and the frontend one |
+| 14 | Full suite locally: `./node_modules/.bin/vitest run` (277 test files) | **Started, not completed here — see the note below.** 29 files had reported when it was stopped: **1015 tests passed, 0 failed**, including all four backend Fraud Sentinel suites and the frontend one. It was run to completion in CI instead (row 16) |
 | 15 | `npm run build` (`typecheck:scripts` → `tools:catalog:check` → `build:server` → `build:frontend` → `build:tools`) | **exit 0**, all five steps, no errors and no warnings. The Fraud Sentinel screens are code-split into their own lazy chunks (`AlertDetailPage-*.js` 13.79 kB / 4.33 kB gzip, `OperationsPage-*.js` 22.74 kB / 6.40 kB gzip), so the module adds nothing to the application shell's cold start |
+| 16 | CI on PR #124, workflow `CloudHost247 Node platform`, jobs `Build, typecheck, test (Node 22.12.0)` and `(Node 24.8.0)`: install from lockfile → production dependency audit → `Typecheck server` → `Typecheck frontend` → whole-suite `npm test` (277 files) → production build → `server.js` boot check | `Typecheck server` and `Typecheck frontend` green on both Node versions. The whole suite ran to completion and reported **exactly two failing tests**, both in `tests/integration/migrate.test.ts` (lines 171 and 303), and both caused by this branch: that test hardcodes the ordered list of committed migration files, and `0101_create_fraud_sentinel.sql` had not been appended to it. No other test in the 277-file suite failed. Fixed by appending the file to `EXPECTED_MIGRATIONS` — the 10-test suite then passes locally, exit 0 (see §8). The PR's two other red checks, `Release candidate (PHP 7.4)` and `(PHP 8.2)`, fail at the `Rendered-site audit` step on `main` as well (run 43044837939, the same two jobs, the same step): it renders the 229 published PHP/Smarty pages and reads none of the files this branch changes |
 
 **Why the full suite is recorded as incomplete rather than passed.** This sandbox has 2 vCPUs
 (`nproc` = 2) and Vitest spawns 4 workers, so the PGlite-backed integration suites — which dominate
@@ -311,7 +312,7 @@ Listed as skipped with the reason, never as passed:
 | Live payment-provider webhook traffic | No provider credentials. Webhook rules were tested against real `webhook_events` rows written by the fixture, including a replay and a reject burst |
 | Real SMTP delivery of reviewer notifications | Notifications ride the existing `user_notifications` + `notification_outbox` pipeline; delivery is that pipeline's concern and is covered by its own suites. This module's tests assert the notification rows it creates |
 | Browser/E2E (Playwright) pass over the new screens | No browser infrastructure in this workspace. The SPA screens are instead covered by jsdom + Testing Library render tests (28), and the whole frontend compiles under `tsc` |
-| Whole-repository `npm test` to completion | 2 vCPUs; 29 of 277 files reported (1015 tests, 0 failures) before the projected multi-hour runtime made it impractical here. Stopped deliberately and recorded as incomplete — the payment/customer regression the plan names was run to completion instead (§4 rows 13–14) |
+| Whole-repository `npm test` to completion **in this workspace** | 2 vCPUs; 29 of 277 files reported (1015 tests, 0 failures) before the projected multi-hour runtime made it impractical here. Stopped deliberately rather than report a number never observed, and the payment/customer regression the plan names was run to completion instead (§4 row 13). The whole 277-file suite **was** subsequently run to completion by CI on two Node versions, which is where the two `migrate.test.ts` failures in §4 row 16 came from (§4 row 16) |
 | `php -l` | No PHP file was modified. `scripts/site/generate.mjs` rewrites the PHP theme's `site.json` resource; that output was byte-identical to what is committed (it does not appear in `git status`), and the generator's own validation passed |
 
 ---
@@ -352,6 +353,18 @@ wrong, the code was fixed. These are the real defects that surfaced:
 | `?unassigned=false` returned exactly the rows the caller asked to exclude — a `boolean` filter built as `if (filters.x)` cannot express `false` | Three-state filter in `alerts-repo.ts`: `true` → `IS NULL`, `false` → `IS NOT NULL`, absent → no filter |
 | The CSV export applied a default 30-day window the list screen had not applied, so the download disagreed with the table it claimed to export | The window is applied only when the caller passed `since`/`until`/`days`, and the audit row records `window: null` when none was |
 | The export's audit row did not say what was exported | Audit metadata now carries `{rows, total, filters, window}` |
+
+One further failure was found only by the whole-suite CI run, and it is the mirror image of the table
+above: the **test** was right and this branch had not updated it. `tests/integration/migrate.test.ts`
+asserts the exact ordered list of committed migration files, so that a migration cannot be added,
+renumbered or silently dropped without someone stating the intent in that list. Adding
+`0101_create_fraud_sentinel.sql` to `database/migrations/` without appending it there broke two
+assertions — the list comparison at line 171, and `expect(result.applied.length).toBe(EXPECTED_MIGRATIONS.length)`
+at line 303, which compares against the same list. The fix is the one-line append (plus the comment
+the file's convention asks for); `migrate.test.ts` then passes all 10 tests locally, exit 0. This is
+recorded here rather than quietly fixed because it is exactly the kind of omission a partial local
+suite run cannot catch: the file is not a Fraud Sentinel suite, so none of the runs in §4 rows 4–13
+execute it.
 
 ---
 
