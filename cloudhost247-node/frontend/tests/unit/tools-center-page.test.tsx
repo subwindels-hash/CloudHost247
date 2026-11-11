@@ -100,7 +100,8 @@ describe('Tools Center', () => {
     );
 
     // The same tool appears in the catalogue grid and in the "popular" strip, so both are expected.
-    await waitFor(() => expect(screen.getAllByText('DNS Lookup').length).toBeGreaterThan(0));
+    // Navigation also contains DNS Lookup now. Wait for the actual catalogue card, not the header.
+    await screen.findByRole('link', { name: /Open tool.*DNS Lookup/ });
     expect(screen.queryByText('BIN Checker')).toBeNull();
     fireEvent.click(screen.getByLabelText('Show unavailable tools'));
     expect(screen.getAllByText('BIN Checker').length).toBeGreaterThan(0);
@@ -113,7 +114,7 @@ describe('Tools Center', () => {
   it('filters and clears the catalogue search', async () => {
     vi.stubGlobal('fetch', mockApi([['/api/tools/catalog', CATALOG], ['/api/tools/dashboard', DASHBOARD]]));
     render(<MemoryRouter initialEntries={['/tools']}><App /></MemoryRouter>);
-    await screen.findAllByText('DNS Lookup');
+    await screen.findByRole('link', { name: /Open tool.*DNS Lookup/ });
     const input = screen.getByRole('searchbox', { name: 'Search tools' }) as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'no-such-tool' } });
     expect(screen.getByText(/No tool matches/)).toBeTruthy();

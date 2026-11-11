@@ -309,6 +309,9 @@
     '/vps-hosting.php', '/vps-privatecloud.php', '/vps-publiccloud.php', '/web-hosting',
     '/web-hosting.php', '/website-design.php', '/websites', '/windows-hosting.php',
     '/wordpress-hosting.php',
+    // Fixed public storefront routes introduced by the merged registry; no account or input paths.
+    '/rdp-hosting.php', '/smm-services.php', '/number-services.php', '/google-workspace.php',
+    '/office-365.php', '/digital-products.php', '/proxy-services.php', '/smtp-hosting.php',
     '/service-plans', '/service-plans/catalog/web-hosting', '/service-plans/catalog/vps-hosting',
     '/service-plans/catalog/dedicated-server', '/service-plans/catalog/cpanel-hosting',
     '/service-plans/catalog/business-hosting', '/service-plans/catalog/wordpress-hosting',

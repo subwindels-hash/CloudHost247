@@ -390,6 +390,20 @@ describe('GA4 page view privacy', () => {
     w.location.pathname = path; response = bootstrap(true); await init();
     expect(commands()).toHaveLength(0); expect(dom.window.document.getElementById('ch247-ga4-sdk')).toBeNull();
   });
+  it.each([
+    '/rdp-hosting.php', '/smm-services.php', '/number-services.php', '/google-workspace.php',
+    '/office-365.php', '/digital-products.php', '/proxy-services.php', '/smtp-hosting.php',
+  ])('keeps query and fragment privacy on new public storefront %s', async path => {
+    w.location.pathname = path;
+    response = bootstrap(true); await init();
+    expect(commands().filter((entry: any[]) => entry[1] === 'page_view')).toHaveLength(1);
+    w.location.search = '?email=private@example.com';
+    expect(engine().pageView(path)).toBe(false);
+    w.location.search = ''; w.location.hash = '#private-token';
+    expect(engine().pageView(path)).toBe(false);
+    expect(commands().filter((entry: any[]) => entry[1] === 'page_view')).toHaveLength(1);
+    expect(JSON.stringify(commands())).not.toMatch(/private@example.com|private-token/);
+  });
   it('covers the reviewed public SPA, legal and WHMCS registry routes without sending private parameters', async () => {
     const root = resolve(__dirname, '../../../..');
     const readJson = (path: string) => JSON.parse(readFileSync(resolve(root, path), 'utf8'));
