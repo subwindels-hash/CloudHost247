@@ -25,6 +25,7 @@ import { pinKeyOrNull } from '../lib/pin-key';
 import { reconcileServerState } from '../services/infrastructure-reconciliation-service';
 import { revalidateProviderImages } from '../services/os-image-revalidation-service';
 import { runRevenueGuardianCycle } from '../revenue-guardian/jobs/scheduler';
+import { runFraudSentinelCycle } from '../fraud-sentinel/jobs/scheduler';
 import { sweepCloudflareJobs } from './cloudflare-sweep';
 import { syncDisplayRates, FxFeedError } from '../services/fx-service';
 import { sweepDomainServices, DOMAIN_SERVICES_SWEEP_INTERVAL_MS } from './domain-services-sweep';
@@ -60,6 +61,10 @@ const IMAGE_REVALIDATION_INTERVAL_MS = 6 * 60 * 60_000;
 // src/revenue-guardian/jobs/scheduler.ts. Frequent sweeping just means a due bucket is picked up
 // promptly; it never causes double execution.
 const REVENUE_GUARDIAN_SWEEP_INTERVAL_MS = 5 * 60_000;
+// Fraud Sentinel detection cycle: the sweep runs every 5 minutes, but each job executes at most once
+// per admin-configured schedule bucket (unique run_key lock) — see
+// src/fraud-sentinel/jobs/scheduler.ts. Sweeping often only means a due bucket is picked up promptly.
+const FRAUD_SENTINEL_SWEEP_INTERVAL_MS = 5 * 60_000;
 // Cloudflare durable job queue: claim-lease with per-job backoff, so sweeping often is cheap.
 const CLOUDFLARE_SWEEP_INTERVAL_MS = 60_000;
 // Tools Center: provider/resolver probes are external API/DNS calls, so they run on a slower
@@ -88,6 +93,7 @@ interface WorkerSchedule {
   lastSecurityNumberSweep: number;
   lastSecurityPinSweep: number;
   lastRevenueGuardianSweep: number;
+  lastFraudSentinelSweep: number;
   lastCloudflareSweep: number;
   lastDomainServicesSweep: number;
   lastAiControlPlaneSweep: number;
@@ -113,6 +119,7 @@ function createWorkerSchedule(): WorkerSchedule {
     lastSecurityNumberSweep: 0,
     lastSecurityPinSweep: 0,
     lastRevenueGuardianSweep: 0,
+    lastFraudSentinelSweep: 0,
     lastCloudflareSweep: 0,
     lastDomainServicesSweep: 0,
     lastAiControlPlaneSweep: 0,
@@ -359,6 +366,18 @@ async function runWorkerCycle(
     if (revenueGuardian.ran.length > 0 || revenueGuardian.failed.length > 0) {
       logger.log(
         `[worker:${ctx.workerId}] revenue guardian: ran [${revenueGuardian.ran.join(', ')}]${revenueGuardian.failed.length ? `; failed [${revenueGuardian.failed.join(', ')}]` : ''}`
+      );
+    }
+  }
+  if (now - schedule.lastFraudSentinelSweep >= FRAUD_SENTINEL_SWEEP_INTERVAL_MS) {
+    schedule.lastFraudSentinelSweep = now;
+    // Never throws: a failing fraud job is reported in the pass result, and one module's failure must
+    // not take the rest of the worker cycle down with it.
+    const fraudSentinel = await runFraudSentinelCycle(ctx.db);
+    didWork ||= fraudSentinel.ran.length > 0 || fraudSentinel.failed.length > 0;
+    if (fraudSentinel.ran.length > 0 || fraudSentinel.failed.length > 0) {
+      logger.log(
+        `[worker:${ctx.workerId}] fraud sentinel: ran [${fraudSentinel.ran.join(', ')}]${fraudSentinel.failed.length ? `; failed [${fraudSentinel.failed.join(', ')}]` : ''}`
       );
     }
   }

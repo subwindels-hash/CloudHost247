@@ -29,7 +29,7 @@ No migration or sync automatically sets human approval. Existing unreviewed publ
 
 ### Freshness and revisions
 
-Existing source ID, source type/kind, fingerprint (content revision), sync status and last successful sync are retained. Migration 0101 adds source modification time when supplied by extraction, content-observation time, explicit approval status, approved revision/reviewer/time, optional validity expiry, historical marker and reviewed claims.
+Existing source ID, source type/kind, fingerprint (content revision), sync status and last successful sync are retained. Migration 0102 adds source modification time when supplied by extraction, content-observation time, explicit approval status, approved revision/reviewer/time, optional validity expiry, historical marker and reviewed claims.
 
 - Missing successful sync, inactive/excluded/not-indexed state or chunk-count mismatch: unsynchronized, not eligible.
 - Last successful sync older than seven days, implausibly future sync, or expired explicit validity: stale, not eligible.
@@ -72,7 +72,7 @@ The existing knowledge overview gains real database trust inventory, healthy syn
 
 Under `cloudhost247-node/`:
 
-- `database/migrations/0101_ai_source_trust.sql` — additive source trust metadata and claim index; no automatic approval.
+- `database/migrations/0102_ai_source_trust.sql` — additive source trust metadata and claim index; no automatic approval.
 - `src/ai-website/knowledge-trust.ts` — safe failure taxonomy/customer wording (Phase 1 plus Phase 2 categories).
 - `src/ai-website/source-trust.ts` — deterministic authority/freshness/conflict assessment, peer lookup and live inventory.
 - `src/ai-website/website-knowledge-repo.ts` — source timestamps and strengthened index readiness guard.
@@ -109,7 +109,7 @@ Commands run locally, not against deployed infrastructure:
 | `python3 scripts/validate-migrations.py` | exit 0 (repository module migration validator; not a substitute for PostgreSQL migration testing) |
 | `PATH="$PWD/scripts/php-wasm:$PATH" PHP_LINT_JOBS=4 bash scripts/release-candidate-check.sh` | **exit 1 — BLOCKED** |
 
-SQL migration 0101 was actually applied in throwaway PGlite databases through the full normal migration runner in the integration tests. It has not been applied to staging/production PostgreSQL.
+SQL migration 0102 was actually applied in throwaway PGlite databases through the full normal migration runner in the integration tests. It has not been applied to staging/production PostgreSQL.
 
 The AI suite includes authority versus outdated FAQ; current versus historical pricing; stale, modified-after-sync and revision-unapproved records; current conflicting approved peers outside search results; real route human handoff and audit privacy; unavailable/failed sync; zero/missing sources' passages and loss of one passage; historical-price nonfallback; dashboard read RBAC; staff review denial; stale-fingerprint review rejection; existing tenant isolation, prompt injection, model grounding and AI control-plane regressions.
 
@@ -138,3 +138,5 @@ Branch: `arena/f2942a04-cloudhost247`; base HEAD `5a15e0c187ddc6a8c8f90f791a5a90
 **Initial attempt:** no new commit or push because the repository-wide release gate failed.
 
 **Subsequent repair:** source verification, broad Node regressions, typechecks, build and local rendered-template checks pass. The exact commit identity, if committed after final acceptance, is recorded by Git and the session completion message. No push/deployment or external certification is implied; trust coverage limitations above remain unchanged. No dashboard analytics or weekly automated reporting was started.
+
+Migration numbering update: AI trust was renumbered from 0101 to 0102 before merge because main already owns 0101 for Fraud Sentinel. No published main migration or checksum was changed. Prior verification reports retain their historical names.

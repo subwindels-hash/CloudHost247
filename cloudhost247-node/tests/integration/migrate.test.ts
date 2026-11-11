@@ -158,8 +158,10 @@ describe('migration runner against the real database/migrations SQL files', () =
     // 0097 for refund idempotency. Every earlier prefix is occupied on one history or the other, so
     // 0100 is the first number that is free on both.
     '0100_ai_website_knowledge.sql',
-    // Reviewed source authority, revision-bound approvals and source freshness metadata.
-    '0101_ai_source_trust.sql',
+    // Preserve main's published Fraud Sentinel migration version.
+    '0101_create_fraud_sentinel.sql',
+    // AI trust is renumbered to avoid a duplicate schema_migrations primary key.
+    '0102_ai_source_trust.sql',
   ];
 
   it('finds the committed migration files in order', () => {

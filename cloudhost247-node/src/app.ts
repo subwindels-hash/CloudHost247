@@ -56,6 +56,7 @@ import type { DnsPropagationOptions } from './dns/propagation';
 import { registerSslRoutes } from './routes/ssl';
 import { registerFirewallRoutes } from './routes/firewall';
 import { registerRevenueGuardianRoutes } from './revenue-guardian/controllers/routes';
+import { registerFraudSentinelRoutes } from './fraud-sentinel/controllers/routes';
 import { registerCloudflareRoutes } from './routes/cloudflare';
 import { registerAdminCloudflareRoutes } from './routes/admin-cloudflare';
 import { registerAiSupportRoutes } from './routes/ai-support';
@@ -250,6 +251,11 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
 
     // Revenue Guardian — revenue recovery management layer over the existing billing engine.
     await registerRevenueGuardianRoutes(instance, env, pool);
+
+    // WindeLS Fraud Sentinel AI — advisory fraud detection and risk intelligence over the platform's
+    // own recorded activity. Read-only with respect to every financial table: it raises alerts for
+    // human investigators and never approves, rejects, refunds, suspends or changes an entitlement.
+    await registerFraudSentinelRoutes(instance, env, pool);
 
     // Cloudflare reseller & management subsystem.
     await registerCloudflareRoutes(instance, env, pool);
