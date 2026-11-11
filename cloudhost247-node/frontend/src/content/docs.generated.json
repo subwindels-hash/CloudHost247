@@ -15,7 +15,7 @@
       "href": "/docs/api-commerce",
       "section": "APIs",
       "title": "Commerce API",
-      "summary": "This document is the API contract for Phase 5A, \"Commerce foundation\": a customer's cart and the orders it becomes when checked out. Keep this in sync with the code — the source of truth is cloudhost2",
+      "summary": "This document is the API contract for Phase 5A, \"Commerce foundation\": a customer's cart and the orders it becomes when checked out. Keep this in sync with the code - the source of truth is cloudhost2",
       "source": "docs/API_COMMERCE.md",
       "bytes": 11717
     },

@@ -3813,7 +3813,7 @@
     "/docs/API_COMMERCE.md"
    ],
    "title": "Commerce API",
-   "description": "This document is the API contract for Phase 5A, \"Commerce foundation\": a customer's cart and the orders it becomes when checked out. Keep this in sync with the code — the source of truth is cloudhost2",
+   "description": "This document is the API contract for Phase 5A, \"Commerce foundation\": a customer's cart and the orders it becomes when checked out. Keep this in sync with the code - the source of truth is cloudhost2",
    "kind": "website_doc",
    "surface": "spa",
    "section": "APIs",

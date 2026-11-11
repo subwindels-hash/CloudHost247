@@ -158,6 +158,8 @@ describe('migration runner against the real database/migrations SQL files', () =
     // 0097 for refund idempotency. Every earlier prefix is occupied on one history or the other, so
     // 0100 is the first number that is free on both.
     '0100_ai_website_knowledge.sql',
+    // Reviewed source authority, revision-bound approvals and source freshness metadata.
+    '0101_ai_source_trust.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -1296,7 +1296,9 @@ function buildDocsIndex() {
       if (!entry.optional) warn(`documentation file docs/${entry.file} is listed for publication but does not exist.`);
       continue;
     }
-    const markdown = readFileSync(source, 'utf8');
+    // Published prose follows the frontend editorial rule; authoritative source docs stay intact.
+    // Normalize at generation too, so rebuilding cannot undo the public copy committed by main.
+    const markdown = readFileSync(source, 'utf8').replace(/—/g, '-');
     const slug = entry.file.replace(/\.md$/, '').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase();
     index.push({
       slug,

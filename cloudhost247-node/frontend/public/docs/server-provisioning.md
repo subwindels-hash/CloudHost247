@@ -63,8 +63,8 @@ require an HTTPS `api_base_url` on the provider row; plain HTTP is rejected exce
 in development.
 
 **Admin → Infrastructure → Providers & regions → Configuration** renders exactly these
-requirements per provider and shows which variables are set — names and booleans only, never a
-value — via `GET /api/v1/admin/providers/:id/configuration`. The catalogue of all adapters is
+requirements per provider and shows which variables are set - names and booleans only, never a
+value - via `GET /api/v1/admin/providers/:id/configuration`. The catalogue of all adapters is
 available at `GET /api/v1/admin/provider-adapters`. Both endpoints are admin-only.
 
 ### Hetzner Cloud (`hetzner`)
@@ -100,12 +100,12 @@ and the out-of-band Recovery Console are Control Panel features and API v2 has n
 so `getConsole` refuses with a non-retryable `UNSUPPORTED_OPERATION` and the customer never sees the
 button. Metrics read the Monitoring API (`GET /v2/monitoring/metrics/droplet/{metric}` with the
 documented `host_id`, `start` and `end` UNIX seconds, one-hour window): CPU utilisation is derived
-from the per-mode counters as `(Δtotal − Δidle) / Δtotal` — a counter that went backwards means the
+from the per-mode counters as `(Δtotal − Δidle) / Δtotal` - a counter that went backwards means the
 droplet rebooted inside the window, so CPU is reported missing rather than clamped; load 1/5/15 and
 memory are read as gauges; `filesystem_size`/`filesystem_free` are merged per provider mountpoint
 label. Bandwidth is not read (it needs `interface` + `direction` and is a billing counter, not host
 telemetry). A droplet whose monitoring agent is not reporting answers `200` with an empty result set,
-which lands in `missing` with a reason — never as a zero.
+which lands in `missing` with a reason - never as a zero.
 
 ### Vultr (`vultr`)
 
@@ -120,11 +120,11 @@ Plan/availability metadata: `providerServerType`, `cpuCores`, `memoryMb`, `stora
 
 Capabilities: reinstall, snapshot, resize, console, metrics, rescue.
 
-Native instance API. **Console:** every API v2 instance object carries `kvm` — "the server's current
-KVM URL. This URL will change periodically. It is not advised to cache this value" — so `getConsole`
+Native instance API. **Console:** every API v2 instance object carries `kvm` - "the server's current
+KVM URL. This URL will change periodically. It is not advised to cache this value" - so `getConsole`
 reads `GET /v2/instances/{id}` and returns that URL as a `{ url, type: 'novnc' }` session, fresh on
 every call and never cached, stored or audited (a console URL is a link to a root console; bare metal
-has its own `GET /v2/bare-metals/{id}/vnc`). An instance that has no `kvm` yet — still provisioning —
+has its own `GET /v2/bare-metals/{id}/vnc`). An instance that has no `kvm` yet - still provisioning -
 fails as a retryable `SERVICE_UNAVAILABLE` naming the provider's `power_status`, not as
 `UNSUPPORTED_OPERATION`: the console exists, the instance just has no URL to hand out. **Amended
 2026-10-03:** this section previously read "No console: the web console is a customer-portal
@@ -137,8 +137,8 @@ metric", and host telemetry for a Vultr server comes from the CloudHost247 serve
 (`server_metrics`), which is what the customer Monitoring panel reads. An empty bandwidth history
 reports `null` totals, not `0` bytes.
 
-**Rescue (added 2026-10-03):** Vultr has no operation *named* rescue — rescue mode is a bare-metal
-portal feature — but its documented recovery path for a cloud instance is booting **SystemRescue**
+**Rescue (added 2026-10-03):** Vultr has no operation *named* rescue - rescue mode is a bare-metal
+portal feature - but its documented recovery path for a cloud instance is booting **SystemRescue**
 from the public ISO library, and API v2 exposes the whole path. `enableRescue` reads
 `GET /v2/iso-public`, picks the SystemRescue entry matching the server's architecture (an arm64
 server needs an entry naming arm64/aarch64; the x86 image is the entry that names no arm
@@ -150,7 +150,7 @@ operator there. A library listing no SystemRescue image fails non-retryably with
 library listing none for the requested architecture fails non-retryably with
 `UNSUPPORTED_OPERATION`, and neither path attaches anything. Exit is
 `POST /v2/instances/{id}/iso/detach`, which Vultr documents as detaching the ISO **and rebooting the
-instance** — the adapter therefore adds no second reboot call. **Amended 2026-10-03:** this section
+instance** - the adapter therefore adds no second reboot call. **Amended 2026-10-03:** this section
 previously said only that Vultr exposes no rescue endpoint, which withheld a capability the provider
 really offers (the A23 lesson: check the documented recovery procedure, not the endpoint's name).
 
@@ -168,8 +168,8 @@ terminated) and root-volume restore runs in place from a completed snapshot, kee
 root volume. Both are opt-in: they refuse with `UNSUPPORTED_OPERATION` unless the deployment sets
 `AWS_ALLOW_ROOT_VOLUME_REPLACEMENT=true` (or the provider-prefix equivalent), and the profile keeps
 advertising `reinstall: false` until it is enabled. CloudWatch metrics **are** implemented
-(`GetMetricStatistics`, namespace `AWS/EC2`, `InstanceId` dimension, 300s period — basic-monitoring
-granularity — over a one-hour window, requesting `CPUUtilization`, `NetworkIn`, `NetworkOut`,
+(`GetMetricStatistics`, namespace `AWS/EC2`, `InstanceId` dimension, 300s period - basic-monitoring
+granularity - over a one-hour window, requesting `CPUUtilization`, `NetworkIn`, `NetworkOut`,
 `DiskReadOps`, `DiskWriteOps` and `StatusCheckFailed`); they need separately scoped IAM permissions,
 a metric with no datapoints is reported in `missing` rather than zero-filled, and an unset region
 fails closed with `PROVIDER_NOT_CONFIGURED` before any call. **Console (rewritten 2026-10-03):** EC2 has no console URL and no console session token, but the serial console is
@@ -228,14 +228,14 @@ Rescue **is** implemented: `POST /v1/compute/instances/{id}/actions/rescue`. Bec
 key secrets when present and otherwise stores a freshly generated one-time password as a Contabo
 secret; leaving rescue is Contabo's next restart, so `disableRescue` is a documented no-op. Three
 operations remain unsupported, each verified against Contabo's own API rather than assumed: **resize**
-(the only upgrade endpoint, `POST /v1/compute/instances/{id}/upgrade`, purchases add-ons — "currently
-only firewalling and private network addon is allowed" — and Contabo documents plan upgrades as an
+(the only upgrade endpoint, `POST /v1/compute/instances/{id}/upgrade`, purchases add-ons - "currently
+only firewalling and private network addon is allowed" - and Contabo documents plan upgrades as an
 in-place Control Panel action), **console** (the generated client's `InstanceActionsApi` lists exactly
 `rescue`, `resetPassword`, `restart`, `shutdown`, `start`, `stop`; the VNC console is a Control Panel
-feature — **re-verified against the live `api.contabo.com` reference on 2026-10-03**, closing the
-A23(i) follow-up: the current documented surface — Instances, Instance Actions, Snapshots, Images,
+feature - **re-verified against the live `api.contabo.com` reference on 2026-10-03**, closing the
+A23(i) follow-up: the current documented surface - Instances, Instance Actions, Snapshots, Images,
 Object Storages, Private Networks, Tags, Users, Roles, Secrets, VIP, Domains, DNS, Firewalls and
-Troubleshooting — contains no VNC or console operation, and Contabo's own product documentation
+Troubleshooting - contains no VNC or console operation, and Contabo's own product documentation
 describes console access as VNC credentials used with an external client, not an API call. Older
 generated clients from ~2022 ship `FindVncResponse`/`PatchVncRequest` models, i.e. a VNC endpoint
 existed in an earlier API version; it is absent from the current reference and an undocumented
@@ -317,7 +317,7 @@ refuses. Rescue **is** exposed and implemented: `action=vserver-rescue` with `re
 (1 = 4.x 64-bit, 2 = 3.x 64-bit, 3 = 3.x 32-bit) or `rescuedisable` on the same admin endpoint,
 returning `{status, statusmsg, password, user, port, ip}`; enabling rescue reboots the VPS (SolusVM
 states this explicitly) so the session reports `rebooted: true`, the returned ip/port are carried into
-`notes`, and an arm64 server is refused rather than booted into an x86 rescue kernel — SolusVM offers
+`notes`, and an arm64 server is refused rather than booted into an x86 rescue kernel - SolusVM offers
 no arm64 rescue system.
 
 ### OpenStack (`openstack`)
@@ -392,7 +392,7 @@ The `mock` adapter exists so the provisioning pipeline can be exercised without 
 account. It is deliberately isolated:
 
 - it requires `NODE_ENV` other than `production` **and** `ALLOW_MOCK_PROVIDER=true`; otherwise
-  every call — including `validateConfiguration` — fails with `SERVICE_UNAVAILABLE` or
+  every call - including `validateConfiguration` - fails with `SERVICE_UNAVAILABLE` or
   `CONFIGURATION_REQUIRED`;
 - the admin API refuses to create or activate a mock provider unless both conditions hold, and
   the database enforces that `adapter='mock'` is paired with `provider_type='MOCK'`
@@ -409,7 +409,7 @@ account. It is deliberately isolated:
 ### Unsupported adapters
 
 If a provider row names an adapter that has no implementation, the registry returns a
-fail-closed adapter that rejects every operation — all 26 interface methods — with a non-retryable
+fail-closed adapter that rejects every operation - all 26 interface methods - with a non-retryable
 `UNSUPPORTED_OPERATION` naming the adapter kind. It used to reject with `SERVICE_UNAVAILABLE`, which
 the error mapper renders as "temporarily unavailable, please try again shortly": a retry that can
 never succeed. A mock or partially working implementation is never substituted, and the admin API's
@@ -448,7 +448,7 @@ atomically.
 | `POST /api/v1/admin/server-terminations/sweep` | Destroys servers whose scheduled cancellation is due; the worker runs the same sweep every 15 minutes. |
 | `GET /api/v1/admin/infrastructure-logs` | Append-only audit trail filtered to infrastructure resources (`provider`, `region`, `datacenter`, `os_image`, `operating_system`, `operating_system_version`, `server_product_configuration`, `provisioning_job`, `server`), with `action`, `resourceId`, `limit` and `offset` filters. |
 
-Infrastructure logs are a read-only projection of the existing `audit_logs` table — there is no
+Infrastructure logs are a read-only projection of the existing `audit_logs` table - there is no
 second logging system and no UI can edit or delete an entry. Failure classification is visible
 in both places: configuration-class errors (`PROVIDER_NOT_CONFIGURED`, `CONFIGURATION_REQUIRED`,
 `INVALID_CONFIGURATION`, `IMAGE_UNAVAILABLE`) are terminal and never retried automatically,
@@ -459,7 +459,7 @@ while transient errors (`RATE_LIMITED`, `PROVIDER_TIMEOUT`, `NETWORK_TEMPORARY_F
 
 The server page carries a **Monitoring** panel fed by `GET /api/v1/servers/:id/health`: CPU, one
 minute load, memory, disk, uptime and the moment the figures were measured. Every number comes
-from an HMAC-authenticated agent report — nothing is inferred from the plan the customer bought.
+from an HMAC-authenticated agent report - nothing is inferred from the plan the customer bought.
 A server that has never reported says so instead of rendering zeroes, and figures older than five
 minutes are labelled as the last report received rather than the current state, because a silent
 agent and an idle server look identical in a gauge.
@@ -467,7 +467,7 @@ agent and an idle server look identical in a gauge.
 ## Image verification freshness
 
 An image mapping used to be proven exactly once, when an operator pressed **Test** before
-enabling it. The catalog then claimed it was deployable forever — including after the provider
+enabling it. The catalog then claimed it was deployable forever - including after the provider
 deleted the snapshot, renamed the template or withdrew it from a region. The lie surfaced at the
 worst possible moment: after a customer had paid, as a failed provisioning job.
 
@@ -479,31 +479,31 @@ stalest enabled mappings, oldest first.
 | --- | --- |
 | Provider still offers the image | `verified_at` refreshed, mapping stays `ACTIVE` |
 | Provider no longer offers it, or reports a different architecture | mapping set to `INVALID` with the reason, audited as `OS_IMAGE_INVALIDATED` |
-| Provider unreachable, unconfigured, rate limited or timing out | **nothing changes** — an outage is not evidence that an image is gone, and emptying the catalog over it would be worse than the outage |
+| Provider unreachable, unconfigured, rate limited or timing out | **nothing changes** - an outage is not evidence that an image is gone, and emptying the catalog over it would be worse than the outage |
 
 Because ordering and reinstall join through `ACTIVE` images with a non-null `verified_at`, an
 invalidated mapping disappears from the customer flow immediately. Servers already running that
-image are never touched — only the ability to sell it again is withdrawn. Only mappings an
+image are never touched - only the ability to sell it again is withdrawn. Only mappings an
 operator enabled are re-checked: `DRAFT`, `DISABLED` and `INVALID` rows are left alone, and the
 sweep never promotes anything to `ACTIVE` by itself.
 
 ## Provider state reconciliation
 
 Health checks used to run exactly once, at provisioning time. After that the platform only
-learned about a server's state when it changed that state itself — so a machine powered off from
+learned about a server's state when it changed that state itself - so a machine powered off from
 the provider's own console, given a new IP, or destroyed outside CloudHost247 kept showing the
 old state on the customer's dashboard indefinitely.
 
 `reconcileServerState` (worker, every 10 minutes; also
 `POST /api/v1/admin/server-reconciliation/sweep`) walks a bounded batch of servers oldest-checked
-first — `servers.last_reconciled_at`, added by migration `0050_server_state_reconciliation.sql` —
+first - `servers.last_reconciled_at`, added by migration `0050_server_state_reconciliation.sql` -
 and asks the provider what it actually has.
 
 | Finding | Action | Applied? |
 | --- | --- | --- |
 | Provider reports a different power state | server set to `active`/`stopped` (`maintenance` is an operator decision and is never overwritten) | Yes |
 | Provider reports a different IP | `servers.ip_address` updated | Yes |
-| Provider reports a different image | recorded and audited only | **No** — rewriting the OS from a provider string would be guesswork, and the catalog is what we sold |
+| Provider reports a different image | recorded and audited only | **No** - rewriting the OS from a provider string would be guesswork, and the catalog is what we sold |
 | Provider has no such resource | flagged `MISSING_AT_PROVIDER`; the row is **kept** for investigation | No |
 | …and the platform was already `deleting` it | `TERMINATION_CONFIRMED`, server set to `retired` | Yes |
 | Provider unreachable or unconfigured | `PROVIDER_UNREACHABLE`; the server record is untouched | No |
@@ -580,10 +580,10 @@ that fails is retried instead of being lost after one attempt.
 
 | Outcome | State | Retried? |
 | --- | --- | --- |
-| Webhook not configured | `CONFIGURATION_REQUIRED` | Yes, every 15 minutes, and **without** consuming the attempt budget — configuring the variables later delivers the backlog |
-| `401`/`403` from the webhook | `CONFIGURATION_REQUIRED` | Yes, on the same free schedule — a rejected credential is the operator's to fix |
+| Webhook not configured | `CONFIGURATION_REQUIRED` | Yes, every 15 minutes, and **without** consuming the attempt budget - configuring the variables later delivers the backlog |
+| `401`/`403` from the webhook | `CONFIGURATION_REQUIRED` | Yes, on the same free schedule - a rejected credential is the operator's to fix |
 | `408`, `429`, `5xx`, network error | `PENDING` | Yes, backoff 1 → 5 → 15 → 60 → 240 minutes, up to `max_attempts` (default 6), then `FAILED` |
-| Any other `4xx` | `FAILED` | No — a rejected payload will not become valid by repeating it |
+| Any other `4xx` | `FAILED` | No - a rejected payload will not become valid by repeating it |
 | `2xx` | `DELIVERED` | Never re-sent |
 
 Claiming pushes a row's `next_attempt_at` forward before the HTTP call, so two workers never send
@@ -603,14 +603,14 @@ credentials, tokens or provider responses.
 
 `server_product_configurations` **is** the server-template registry: one row per
 plan × provider × region × datacenter × OS version × architecture × server type. There is no
-second template table — a duplicate registry would let ordering and reinstall disagree about
+second template table - a duplicate registry would let ordering and reinstall disagree about
 what is deployable. Operators manage the rows at
 **Admin → Infrastructure → Server templates** (`/admin/infrastructure/availability`).
 
 Each row carries, in `metadata`:
 
 - the adapter's own plan identifier (`providerServerType`, `providerFlavorId`, `providerVirtType`,
-  … — see the per-adapter tables above) — without it, provisioning fails closed;
+  … - see the per-adapter tables above) - without it, provisioning fails closed;
 - the resources the customer is sold (`cpuCores`, `memoryMb`, `storageMb`, `bandwidthGb`);
 - `capabilities`, the provider-supported action set used to gate the server detail page and API
   (`start`, `stop`, `reboot`, `shutdown`, `reinstall`, `snapshot`, `resize`, `rescue`, `console`),
@@ -648,12 +648,12 @@ never appears rather than producing a broken order.
 ## Cancellation and termination
 
 Provisioning has a counterpart: `POST /api/v1/servers/:id/cancel`. It is deliberately **not**
-gated on a `capabilities.delete` flag — a customer must always be able to stop paying for a
+gated on a `capabilities.delete` flag - a customer must always be able to stop paying for a
 service, whatever the product template allows.
 
 | Mode | Effect | Reversible |
 | --- | --- | --- |
-| `AT_PERIOD_END` (default) | Subscriptions on the server's order are flagged `cancel_at_period_end`; the server keeps running until the term the customer already paid for ends. | Yes — `DELETE /api/v1/servers/:id/cancel` until the sweep fires |
+| `AT_PERIOD_END` (default) | Subscriptions on the server's order are flagged `cancel_at_period_end`; the server keeps running until the term the customer already paid for ends. | Yes - `DELETE /api/v1/servers/:id/cancel` until the sweep fires |
 | `IMMEDIATE` | Requires the typed confirmation `"DELETE"`. Subscriptions are cancelled and a `DELETE` provisioning job is enqueued at once. | No |
 
 Both modes record the request under `servers.metadata.cancellation`
@@ -667,7 +667,7 @@ The destruction itself never happens in the request:
   passes, skipping servers already `deleting` or `retired` and deriving the idempotency key from
   the effective date so a re-run reuses the existing job;
 - the worker calls the provider adapter's `deleteServer`, sets the server to `retired`, and
-  raises a `SERVER_TERMINATED` notification — once, even if the queue redelivers the job;
+  raises a `SERVER_TERMINATED` notification - once, even if the queue redelivers the job;
 - a server that never reached the provider (an abandoned unpaid order) is retired directly with
   the audit action `SERVER_RETIRED_WITHOUT_PROVIDER_RESOURCE`. No provider call is faked.
 
@@ -683,8 +683,8 @@ repair a broken filesystem, bootloader or configuration.
 `POST /api/v1/servers/:id/rescue` (confirmation `RESCUE`) enters it; `DELETE` on the same path
 leaves it and reboots back into the installed operating system. Both are owner-only, capability
 gated, and audited as `SERVER_RESCUE_ENTERED` / `SERVER_RESCUE_EXITED`. While rescue is active the
-server is `maintenance`, which is the honest state — it is up, but it is not running the
-customer's OS — and `servers.metadata.rescue` records when it was entered and which rescue system
+server is `maintenance`, which is the honest state - it is up, but it is not running the
+customer's OS - and `servers.metadata.rescue` records when it was entered and which rescue system
 was booted.
 
 Two deliberate constraints:
@@ -695,24 +695,24 @@ Two deliberate constraints:
   `disable_rescue` + `reset`), OpenStack (Nova `rescue` / `unrescue`), OVH Public Cloud
   (`POST /cloud/project/{id}/instance/{id}/rescueMode` with `{"rescue": true|false}`, the password read
   from the instance resource's `rescuePassword`), Contabo
-  (`POST /v1/compute/instances/{id}/actions/rescue`, which takes Contabo *secret ids* — the adapter
+  (`POST /v1/compute/instances/{id}/actions/rescue`, which takes Contabo *secret ids* - the adapter
   reuses the template SSH-key secrets when present, otherwise it stores a freshly generated one-time
   password as a Contabo secret; leaving rescue is Contabo's next restart), SolusVM
   (`action=vserver-rescue` with `rescueenable`/`rescuedisable` on the Admin API; arm64 is refused
-  because SolusVM ships no arm64 rescue kernel), Vultr (which has no rescue endpoint at all — the
+  because SolusVM ships no arm64 rescue kernel), Vultr (which has no rescue endpoint at all - the
   documented cloud recovery is the SystemRescue image from the public ISO library: resolve it with
   `GET /v2/iso-public`, attach it with `POST /v2/instances/{id}/iso/attach`, reboot, and leave by
   detaching, which reboots back into the installed system; SystemRescue logs in at the console as
   `root` with no password, so the session carries none), the operator bridge
   (`POST /v1/servers/{id}/rescue` and `/unrescue`, delegated on the same action contract as
-  reboot/shutdown/resize/reinstall — the bridge supplies the rescue system, login user and one-time
+  reboot/shutdown/resize/reinstall - the bridge supplies the rescue system, login user and one-time
   password, and `rebooted` defaults to false so the adapter never claims a reboot it was not told
   about), and the development-only mock adapter, which simulates the state machine so the whole flow
-  can be exercised without a provider. The remaining four — AWS (no native rescue; the API's repair
-  paths are the serial console — a real session since 2026-10-03 — and restoring the root volume from a
+  can be exercised without a provider. The remaining four - AWS (no native rescue; the API's repair
+  paths are the serial console - a real session since 2026-10-03 - and restoring the root volume from a
   completed snapshot, neither of which is a rescue boot), DigitalOcean (the Recovery ISO is Control-Panel only), Proxmox VE (no API endpoint) and
   Virtualizor (rescue exists only in the *enduser* API on port 4083, while this adapter
-  authenticates against the Admin API on 4085) — have no rescue action in the API surface their
+  authenticates against the Admin API on 4085) - have no rescue action in the API surface their
   adapter implements; they refuse with a non-retryable `UNSUPPORTED_OPERATION` and keep the capability
   `false` so a template cannot offer the button in the first place. A rescue that silently did nothing
   would strand a customer who believes they are about to repair a disk.
@@ -720,7 +720,7 @@ Two deliberate constraints:
   `tests/unit/adapter-capability-matrix.test.ts` pins every capability flag of every adapter in both
   directions.
 - **The one-time root password is never stored.** Like the console session, it runs in request
-  scope and is returned only to the browser that asked for it — never a job payload, a log line,
+  scope and is returned only to the browser that asked for it - never a job payload, a log line,
   an audit row or a database column. Reloading the page does not show it again; leaving and
   re-entering rescue asks the provider for a new one. This is asserted by
   `tests/integration/server-rescue.test.ts`, which greps our own storage for the credential.
@@ -739,7 +739,7 @@ Guarantees:
 - the template must declare `capabilities.console` (`400` otherwise) and the server must already
   exist at the provider (`409` while it is still queued);
 - an unconfigured, unauthenticated or unreachable provider returns `503`
-  (`SERVICE_UNAVAILABLE`) with a neutral message — never a fabricated console URL. The mapping
+  (`SERVICE_UNAVAILABLE`) with a neutral message - never a fabricated console URL. The mapping
   lives in `src/infrastructure/providers/error-mapping.ts`; the provider's own wording is logged
   server-side only, because it can name internal endpoints;
 - the session URL, password and token are returned to the owner's browser and are never written
@@ -760,13 +760,13 @@ The required acceptance run cannot be simulated:
 Record provider request IDs and job/audit IDs outside customer-visible logs. Real credentials and
 this live acceptance are intentionally not part of repository tests.
 
-The same sequence — order, payment, queued job, provider create, health gates, `READY`,
+The same sequence - order, payment, queued job, provider create, health gates, `READY`,
 notification, then a confirmed reinstall onto Debian 13 that moves the catalog OS recorded against
-the server — runs against a stub adapter on every test run in
+the server - runs against a stub adapter on every test run in
 `tests/integration/server-reinstall-acceptance.test.ts`. It also asserts the two ways the flow must
 refuse: an unconfirmed or non-owner reinstall never creates a job, and a reinstall that fails at
 the provider leaves the previously installed OS recorded rather than advertising one the server is
-not running. What that test cannot prove is that a real provider behaves as the stub does — which
+not running. What that test cannot prove is that a real provider behaves as the stub does - which
 is what the live run above is for.
 
 ## Control Panel & Application Platform Catalog (Phase 3)
@@ -782,20 +782,20 @@ The centralized platform supports all 18 hosting control panels and PaaS platfor
 - **Catalog & Plans Schema**: Migration `0043_create_control_panels_and_plans.sql` stores normalized platform capabilities, hardware requirements (min CPU, RAM, disk), compatible operating systems, and commercial licensing tiers (`control_panel_plans`).
 - **Brand Assets**: Official SVG vectors located in `/panel-logos/`.
 - **Public Endpoints**:
-  - `GET /api/v1/control-panels` — Filterable marketplace catalog with starting prices and supported OSes.
-  - `GET /api/v1/control-panels/:slug` — Platform detail specification with native capabilities checklist and commercial licensing tiers.
-  - `GET /api/v1/control-panel-plans` — Available commercial plans per platform.
+  - `GET /api/v1/control-panels` - Filterable marketplace catalog with starting prices and supported OSes.
+  - `GET /api/v1/control-panels/:slug` - Platform detail specification with native capabilities checklist and commercial licensing tiers.
+  - `GET /api/v1/control-panel-plans` - Available commercial plans per platform.
 - **Admin Endpoints**:
-  - `GET /api/v1/admin/control-panels` — Staff directory of all platforms and license tiers.
-  - `POST /api/v1/admin/control-panels` — Add new platform with audit logging.
-  - `PATCH /api/v1/admin/control-panels/:id` — Update platform metadata and system requirements.
-  - `DELETE /api/v1/admin/control-panels/:id` — Safely remove platform.
-  - `POST /api/v1/admin/control-panel-plans` — Add license plan / tier.
-  - `PATCH /api/v1/admin/control-panel-plans/:id` — Update plan pricing and limits.
-  - `DELETE /api/v1/admin/control-panel-plans/:id` — Delete plan.
+  - `GET /api/v1/admin/control-panels` - Staff directory of all platforms and license tiers.
+  - `POST /api/v1/admin/control-panels` - Add new platform with audit logging.
+  - `PATCH /api/v1/admin/control-panels/:id` - Update platform metadata and system requirements.
+  - `DELETE /api/v1/admin/control-panels/:id` - Safely remove platform.
+  - `POST /api/v1/admin/control-panel-plans` - Add license plan / tier.
+  - `PATCH /api/v1/admin/control-panel-plans/:id` - Update plan pricing and limits.
+  - `DELETE /api/v1/admin/control-panel-plans/:id` - Delete plan.
 - **Customer UI**:
-  - `/hosting/control-panels` — Responsive marketplace with category filters (`SERVER_PANEL`, `APPLICATION_DEPLOYMENT_PLATFORM`, `SERVER_MANAGEMENT`), search, license filters, and pricing cards.
-  - `/hosting/control-panels/:slug` — Deep-dive specification page detailing system requirements, compatible operating systems, capabilities, and software license plans.
+  - `/hosting/control-panels` - Responsive marketplace with category filters (`SERVER_PANEL`, `APPLICATION_DEPLOYMENT_PLATFORM`, `SERVER_MANAGEMENT`), search, license filters, and pricing cards.
+  - `/hosting/control-panels/:slug` - Deep-dive specification page detailing system requirements, compatible operating systems, capabilities, and software license plans.
 - **Admin UI**:
-  - `/admin/control-panels` & `/admin/infrastructure/control-panels` — Administration console for managing platforms, toggling active states, editing hardware requirements, and configuring software license tiers.
+  - `/admin/control-panels` & `/admin/infrastructure/control-panels` - Administration console for managing platforms, toggling active states, editing hardware requirements, and configuring software license tiers.
 

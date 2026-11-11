@@ -8,7 +8,8 @@ import { usePageMeta } from '../lib/usePageMeta';
  * reference now points to /register, "cancel from the Client Area" links to /dashboard, and the
  * policy index link points to /legal); links to features this app doesn't have yet (submitting a
  * support ticket) are left as descriptive text rather than a link to a page that doesn't exist
- * here. Mailto links and the external cloudhost247.com reference are unchanged.
+ * here. Public contact requests are routed through the site contact form rather than exposing
+ * mailbox addresses.
  */
 const faqItems: { id: string; question: string; answer: JSX.Element }[] = [
   {
@@ -87,7 +88,7 @@ const faqItems: { id: string; question: string; answer: JSX.Element }[] = [
             cancellation request
           </li>
           <li>
-            Contacting our support team via email at <a href="mailto:support@cloudhost247.com">support@cloudhost247.com</a>
+            Contacting our support team through the <NavLink to="/contact">Contact us</NavLink>
           </li>
         </ul>
       </>
@@ -98,9 +99,9 @@ const faqItems: { id: string; question: string; answer: JSX.Element }[] = [
     question: 'How do I request data deletion?',
     answer: (
       <p>
-        Refer to our Data Deletion Instructions. You'll need to email{' '}
-        <a href="mailto:privacy@cloudhost247.com">privacy@cloudhost247.com</a> with your account
-        details, and we'll process your request in accordance with our Data Protection Standards.
+        Refer to our Data Deletion Instructions. Send your account details through the{' '}
+        <NavLink to="/contact">Contact us</NavLink>, and we'll process your request in
+        accordance with our Data Protection Standards.
       </p>
     ),
   },
@@ -123,7 +124,7 @@ const faqItems: { id: string; question: string; answer: JSX.Element }[] = [
         <p>Yes, our support team is available 24/7/365 via:</p>
         <ul>
           <li>
-            Email: <a href="mailto:support@cloudhost247.com">support@cloudhost247.com</a>
+            <NavLink to="/contact">Contact us</NavLink>
           </li>
           <li>Live Chat (on our website)</li>
           <li>Support Tickets in the Client Area</li>
@@ -137,7 +138,7 @@ const faqItems: { id: string; question: string; answer: JSX.Element }[] = [
     answer: (
       <p>
         We offer free migration assistance for most hosting plans. Simply{' '}
-        <a href="mailto:support@cloudhost247.com">contact our support team</a> with your current
+        <NavLink to="/contact">contact our support team</NavLink> with your current
         hosting details, and we'll handle the transfer for you.
       </p>
     ),

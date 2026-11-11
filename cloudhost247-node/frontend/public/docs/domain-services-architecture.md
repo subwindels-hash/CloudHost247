@@ -1,4 +1,4 @@
-# Domain Services Platform — Architecture Audit and Delivery Plan
+# Domain Services Platform - Architecture Audit and Delivery Plan
 
 ## Scope and safety boundary
 
@@ -137,7 +137,7 @@ Phases 1–12 are implemented and verified. Summary of what shipped, where:
   helpers, and four adapters: `namecheap` (search/register/transfer/TLD catalogue/balance test),
   `godaddy` (search/register/transfer/shopper test), `rdap` (IANA-bootstrapped lookup, classic
   WHOIS fallback, privacy-aware), `godaddy-govalue` (appraisal). Credentials are encrypted with
-  the platform key ring and are **write-only** — no API returns them.
+  the platform key ring and are **write-only** - no API returns them.
 - **Services:** search (single public + rate-limited, bulk authenticated with DB throttles and a
   hard 200-domain cap), registration (server-side quote incl. club discount → order →
   payment-verified sweep → registrar confirm → `customer_domains` link), transfer (EPP code
@@ -172,7 +172,7 @@ Phases 1–12 are implemented and verified. Summary of what shipped, where:
 - `/admin/domain-services`: overview readiness + activity, providers (create, credentials,
   Test Connection), extensions (sync, trending), auctions (create/pause/resume/cancel/complete),
   transfers (refresh), club plans (draft → published → disabled).
-- Every unconfigured service renders the honest **“Service Provider Not Configured”** state —
+- Every unconfigured service renders the honest **“Service Provider Not Configured”** state -
   no placeholder availability, prices, valuations or listings, ever.
 
 ### Verification
@@ -188,11 +188,11 @@ Phases 1–12 are implemented and verified. Summary of what shipped, where:
 
 ### Simulated providers for tests and preview
 
-`tests/helpers/mock-registrar.ts` runs local HTTP servers that speak the **real wire protocols** —
+`tests/helpers/mock-registrar.ts` runs local HTTP servers that speak the **real wire protocols** -
 MockNamecheap (Namecheap XML API: balance, check, TLD list, create, transfer, getInfo) and
 MockRdap (IANA-style bootstrap + RFC 9083 responses). These are external test doubles at the
 transport boundary only: the production adapters, services, payments and admin APIs run unchanged
-against them. The registry itself still contains no mock adapter — an unconfigured production
+against them. The registry itself still contains no mock adapter - an unconfigured production
 system keeps returning `Service Provider Not Configured`.
 
 Three integration tests use them to prove the provider-backed flows end to end: catalogue sync +
@@ -205,7 +205,7 @@ registry 404 mapped to a genuine `not_found` rather than an error).
 
 `scripts/domain-services-demo-preview.ts` boots the real app (PGlite, built frontend on
 `0.0.0.0:3000`) with the simulated providers and seeds all demo state **through the production
-admin APIs** — provider creation, encrypted credential write, real Test Connection, and catalogue
+admin APIs** - provider creation, encrypted credential write, real Test Connection, and catalogue
 sync. Booting this preview exposed and led to fixes for two catalogue-sync defects:
 
 1. Sync stored dotted labels (`.com`) while `domain_extensions.shape_check` requires bare labels
@@ -218,6 +218,6 @@ sync. Booting this preview exposed and led to fixes for two catalogue-sync defec
 
 1. Super Admin → Domain Services → Providers: add provider (e.g. Namecheap production), write
    credentials, **Test Connection** until it succeeds.
-2. Sync the extension catalogue (Extensions tab) — search and bulk search become live.
+2. Sync the extension catalogue (Extensions tab) - search and bulk search become live.
 3. Optionally connect the RDAP and GoValue appraisal providers the same way.
 4. Publish a Domain Club plan and schedule auctions as commercially appropriate.
