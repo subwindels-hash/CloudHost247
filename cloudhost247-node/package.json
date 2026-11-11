@@ -54,7 +54,10 @@
     "whmcs:validate": "tsx scripts/whmcs/catalogue-map.ts validate",
     "typecheck:scripts": "tsc -p tsconfig.scripts.json --noEmit",
     "whmcs:evidence": "tsx scripts/whmcs/catalogue-map.ts evidence",
-    "whmcs:readiness": "tsx scripts/whmcs/catalogue-map.ts readiness"
+    "whmcs:readiness": "tsx scripts/whmcs/catalogue-map.ts readiness",
+    "test:patroni-integration": "vitest run tests/integration/design-studio-templates-patroni-gate.test.ts --testTimeout=600000 --hookTimeout=600000",
+    "test:recovery-integration": "vitest run tests/integration/design-studio-templates-recovery-fencing.test.ts --testTimeout=900000 --hookTimeout=900000",
+    "test:boundary-integration": "vitest run tests/integration/design-studio-templates-startup-boundary.test.ts --testTimeout=900000 --hookTimeout=900000"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1144.0",
@@ -103,6 +106,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "concurrently": "^8.2.2",
+    "esbuild": "0.28.2",
     "jsdom": "^30.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
