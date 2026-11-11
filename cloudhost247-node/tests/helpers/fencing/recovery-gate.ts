@@ -202,6 +202,8 @@ export function decideStart(options: RecoveryGateOptions): StartDecision {
 export function renderStartGateScript(spec: {
   realBinary: string;
   storeRoot: string;
+  /** Phase 38: seal directory. When absent the shim keeps Phase 37 behaviour. */
+  sealRoot?: string;
   node: string;
   decisionLog: string;
 }): string {
@@ -211,28 +213,51 @@ import json, os, sys, time
 
 REAL = ${JSON.stringify(spec.realBinary)}
 STORE = ${JSON.stringify(spec.storeRoot)}
+SEAL_ROOT = ${JSON.stringify(spec.sealRoot ?? '')}
 NODE = ${JSON.stringify(spec.node)}
 DECISION_LOG = ${JSON.stringify(spec.decisionLog)}
 
 def state_of(node):
+    """Read the Phase 37 fence log, then cross-check it against the Phase 38 seal.
+
+    The log alone treats a missing or empty file as CLEAN, which is the defect Phase 38 exists to close:
+    deleting one file would un-fence a node. When a seal exists it is authoritative about how many
+    records there should be, so a log shorter than its seal is UNKNOWN rather than CLEAN.
+    """
     path = os.path.join(STORE, node + '.fence.jsonl')
+    seal_path = os.path.join(SEAL_ROOT, node + '.seal')
+    seal = None
+    if seal_path and os.path.exists(seal_path):
+        try:
+            with open(seal_path) as handle:
+                seal = json.load(handle)
+        except Exception:
+            return 'UNKNOWN'
+
     if not os.path.exists(path):
-        return 'CLEAN'
+        return 'UNKNOWN' if seal else 'CLEAN'
+
     try:
         with open(path) as handle:
-            lines = [line for line in handle.read().split('\\n') if line.strip()]
+            lines = [line for line in handle.read().split(chr(10)) if line.strip()]
         if not lines:
-            return 'CLEAN'
+            return 'UNKNOWN' if seal else 'CLEAN'
+        if seal is not None:
+            if len(lines) < seal.get('seq', 0):
+                return 'UNKNOWN'
+            if json.loads(lines[seal['seq'] - 1]).get('hash') != seal.get('hash'):
+                return 'UNKNOWN'
         return json.loads(lines[-1])['to']
     except Exception:
         return 'UNKNOWN'
+
 
 def record(decision):
     try:
         os.makedirs(os.path.dirname(DECISION_LOG), exist_ok=True)
         with open(DECISION_LOG, 'a') as handle:
             handle.write(json.dumps(dict(decision, at=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-                                         pid=os.getpid())) + '\\n')
+                                         pid=os.getpid())) + chr(10))
     except Exception:
         pass
 
