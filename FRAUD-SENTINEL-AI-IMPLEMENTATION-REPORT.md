@@ -4,6 +4,7 @@
 **Design record:** `cloudhost247-node/docs/FRAUD_SENTINEL_PLAN.md`
 **Operator documentation:** `cloudhost247-node/docs/FRAUD_SENTINEL.md`
 **Branch:** `arena/178c36bc-cloudhost247`, branched from `main` at `71dd71971f6cbdfc195ec293ef78076e42271d87`
+**Pull request:** [#124](https://github.com/subwindels-hash/CloudHost247/pull/124) — **draft**, into `main`, left in draft
 **Report date:** 2026-11-11
 
 Every number in this report was produced by a command that was actually executed in this working
@@ -363,7 +364,7 @@ wrong, the code was fixed. These are the real defects that surfaced:
 | 3 Backend services | Ingestion/assessment/alert/investigation APIs + RBAC + audit + jobs integration-tested against real migrations | ✅ 22 + 24 tests |
 | 4 Frontend | SPA routes/pages build, nav link added, frontend unit test passes | ✅ 12 routes + 1 nav link; 28 tests; frontend `tsc` clean for every new file |
 | 5 Verification | typecheck, typecheck:scripts, test, build, `git diff --check`, PHP lint, payment/customer regression | ✅ typecheck + typecheck:scripts exit 0; 240-test payment/customer regression green; all 5 Fraud Sentinel suites green (137 tests); `git diff --check` clean; no PHP touched; `npm run build` exit 0 across all five steps (§4 row 15). ⚠️ the whole-repository `npm test` was started but not completed — 1015 tests green across 29 files, 0 failures, stopped on a 2-vCPU sandbox where a full run projects to hours. Recorded as incomplete, never as passed (§4) |
-| 6 Reporting | This report + draft PR into `main`, left in draft | ✅ this file; PR: **PR** |
+| 6 Reporting | This report + draft PR into `main`, left in draft | ✅ this file; **draft PR [#124](https://github.com/subwindels-hash/CloudHost247/pull/124)** — `arena/178c36bc-cloudhost247` → `main`, state OPEN, `isDraft: true`, left in draft |
 
 ---
 
