@@ -173,6 +173,17 @@ const RGActivityLogPage = lazy(() => import('./pages/revenue-guardian/LogsPages'
 const RGEmailLogsPage = lazy(() => import('./pages/revenue-guardian/LogsPages').then((m) => ({ default: m.EmailLogsPage })));
 const RGSettingsPage = lazy(() => import('./pages/revenue-guardian/SettingsPages').then((m) => ({ default: m.RGSettingsPage })));
 const RGModuleHealthPage = lazy(() => import('./pages/revenue-guardian/SettingsPages').then((m) => ({ default: m.ModuleHealthPage })));
+/* Fraud Sentinel — read-only detection & investigation. Admin + super_admin only: staff and
+   customers hold no fraud_sentinel.* permission, so the API refuses them before any handler runs. */
+const FSDashboardPage = lazy(() => import('./pages/fraud-sentinel/DashboardPage'));
+const FSAlertsPage = lazy(() => import('./pages/fraud-sentinel/AlertsPage'));
+const FSAlertDetailPage = lazy(() => import('./pages/fraud-sentinel/AlertDetailPage'));
+const FSAssessmentsPage = lazy(() => import('./pages/fraud-sentinel/AssessmentsPage'));
+const FSCustomerRiskPage = lazy(() => import('./pages/fraud-sentinel/CustomerRiskPage'));
+const FSTransactionsPage = lazy(() => import('./pages/fraud-sentinel/TransactionsPage'));
+const FSRulesPage = lazy(() => import('./pages/fraud-sentinel/RulesPage'));
+const FSInvestigationsPage = lazy(() => import('./pages/fraud-sentinel/InvestigationsPage'));
+const FSOperationsPage = lazy(() => import('./pages/fraud-sentinel/OperationsPage'));
 const CloudflareServicesPage = lazy(() => import('./pages/cloudflare/CloudflareServicesPage'));
 const CloudflareServicePage = lazy(() => import('./pages/cloudflare/CloudflareServicePage'));
 const AdminCloudflarePage = lazy(() => import('./pages/AdminCloudflarePage'));
@@ -483,6 +494,23 @@ export default function App() {
             {/* Pricing authority for the packaged platform plans — admin only, because it changes
                 what the public can buy. */}
             <Route path="/admin/platform-plans" element={<AdminPlatformPlansPage />} />
+
+            {/* Fraud Sentinel — detection, investigation and rule tuning. Every screen reads
+                /api/admin/fraud-sentinel/*, which re-verifies the role and the specific module
+                permission on each request; this guard only keeps the routes out of reach of a
+                customer or staff session in the first place. */}
+            <Route path="/admin/fraud-sentinel" element={<FSDashboardPage />} />
+            <Route path="/admin/fraud-sentinel/alerts" element={<FSAlertsPage />} />
+            <Route path="/admin/fraud-sentinel/alerts/:id" element={<FSAlertDetailPage />} />
+            <Route path="/admin/fraud-sentinel/assessments" element={<FSAssessmentsPage />} />
+            <Route path="/admin/fraud-sentinel/assessments/:id" element={<FSAssessmentsPage />} />
+            <Route path="/admin/fraud-sentinel/customers" element={<FSCustomerRiskPage />} />
+            <Route path="/admin/fraud-sentinel/customers/:id" element={<FSCustomerRiskPage />} />
+            <Route path="/admin/fraud-sentinel/transactions" element={<FSTransactionsPage />} />
+            <Route path="/admin/fraud-sentinel/transactions/:id" element={<FSTransactionsPage />} />
+            <Route path="/admin/fraud-sentinel/rules" element={<FSRulesPage />} />
+            <Route path="/admin/fraud-sentinel/investigations" element={<FSInvestigationsPage />} />
+            <Route path="/admin/fraud-sentinel/operations" element={<FSOperationsPage />} />
           </Route>
 
           {/* Revenue Guardian — staff accounts also participate (with a server-enforced,
