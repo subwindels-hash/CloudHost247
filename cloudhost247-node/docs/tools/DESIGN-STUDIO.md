@@ -355,6 +355,29 @@ Patroni's own lifecycle during this phase, traced to a fence that skipped when t
 unreachable, and fixed. Requirement 7 (VIP on real interfaces) is unmet — the sandbox denies
 `ip addr add`.
 
+**Recovery fencing (Phase 37, still not deployed).** Phase 36 left the recovery path ungated. That is now
+closed for this local cluster (`docs/tools/DESIGN-STUDIO-PHASE37-EVIDENCE.md`):
+
+- **The gate cannot be a callback.** `on_start`/`on_restart`/`on_role_change` are dispatched through
+  `Postgresql.call_nowait()` — fire-and-forget, after the fact, exit code ignored. They cannot refuse a
+  start. The gate goes in the path that starts the server instead: `bin_name['postgres']` is
+  configurable, so every start can be routed through a shim that reads the node's fence state. `CLEAN`
+  and `REJOINED` start; `FENCED`, `REJOIN_PENDING` and `UNKNOWN` are refused. Every decision is logged.
+- **Fence state is an append-only record**, not a flag. A mutable boolean is cleared by the next process
+  start, which is exactly the failure mode being closed. Only a recorded recovery decision moves a node
+  forward, and the chain `CLEAN → FENCED → REJOIN_PENDING → REJOINED` is auditable.
+- **Rejoin requires** `pg_rewind` or a clean rebuild, recovery mode, and a matching timeline read from
+  the node itself. Role labels are not evidence: a node can be labelled `replica` while replaying an
+  abandoned timeline.
+- **Timeline has to be read differently per role.** `pg_current_wal_lsn()` *and*
+  `pg_walfile_name(pg_last_wal_replay_lsn())` both fail on a standby with `recovery is in progress`;
+  only `pg_control_checkpoint().timeline_id` works there. Each reading records which route produced it.
+
+Two limits worth stating plainly. The fence is still **local** — a WAL permission on one directory, not a
+power or storage-device fence. And a node rewound past the WAL the primary still retains cannot catch up
+without a replication slot or a WAL archive; that is an operational prerequisite this phase does not
+solve. The blocker stays open.
+
 ### Outstanding limitations of saved templates
 
 Recorded here rather than discovered later:
@@ -392,6 +415,13 @@ Recorded here rather than discovered later:
   is untested, and **VIP handling on real interfaces is untestable here** — `ip addr add` is denied, so
   only a TCP listener could stand in, which is not a VIP. Details:
   `docs/tools/DESIGN-STUDIO-PHASE36-EVIDENCE.md`.
+* **Recovery is gated locally, but the fence is still local** (Phase 37). A start gate on
+  `bin_name['postgres']` refuses every startup of a fenced node — including restarts by its own
+  coordinator, duplicate coordinators and supervisor scripts — and rejoin requires rewind-or-rebuild,
+  recovery mode and a matching timeline. What this does **not** show: that a real host, storage device or
+  VM can be fenced independently. WAL permissions are a property of one directory. It also does not
+  solve WAL availability: a node rewound past the retained WAL stalls in recovery without a replication
+  slot or WAL archive. Details: `docs/tools/DESIGN-STUDIO-PHASE37-EVIDENCE.md`.
 * **No staging or production verification.** Everything above is local: unit and integration tests,
   `tsc`, and a migration applied to a throwaway PGlite instance. Nothing has been deployed, and a
   passing local suite is not a deployment.
