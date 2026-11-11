@@ -21,6 +21,8 @@ import '../ai-support.css';
  */
 
 type Overview = {
+  trust?: { healthy: number; unavailable: number; stale: number; conflicting: number; sources: Array<{ id: string; authority: number; approval: string; freshness: string }>; conflicts: Array<{ sourceIds: string[]; status: string }> };
+  humanEscalations?: number;
   overview: {
     totals: Record<string, number>;
     byKind: Array<{ source_kind: string; total: number; indexed: number; failed: number; skipped: number }>;
@@ -222,6 +224,16 @@ export default function AdminAiKnowledgePage() {
       {error && <p className="ch247-status-error" role="alert">{error}</p>}
       {notice && <p className="ch247-status-success" role="status">{notice}</p>}
 
+      {overview?.trust && <section aria-label="Source trust health">
+        <h2>Source trust health</h2>
+        <p>Healthy synchronization: {overview.trust.healthy} · Unavailable: {overview.trust.unavailable} · Stale / historical / changed revision: {overview.trust.stale} · Conflicting: {overview.trust.conflicting} · Human escalations (all-time events): {overview.humanEscalations ?? 0}</p>
+        <p className="ch247-muted">Healthy synchronization is not human approval. Conflict checks cover reviewer-normalized claims, not arbitrary prose.</p>
+        <details><summary>Source authority and freshness inventory</summary>
+          <table><thead><tr><th>Source ID</th><th>Authority tier</th><th>Approval</th><th>Freshness</th></tr></thead>
+            <tbody>{overview.trust.sources.map(source => <tr key={source.id}><td>{source.id}</td><td>{source.authority}</td><td>{source.approval}</td><td>{source.freshness}</td></tr>)}</tbody></table>
+        </details>
+        {overview.trust.conflicts.map((conflict, index) => <p key={index}>{conflict.status}: {conflict.sourceIds.join(', ')}</p>)}
+      </section>}
       {overview && (
         <section className="ch247-kb-tiles" aria-label="Index totals">
           {Object.entries(CATEGORY_LABELS).map(([key, label]) => {
@@ -296,7 +308,7 @@ export default function AdminAiKnowledgePage() {
             A gap is recorded when no published page answered the question — publishing that page and reindexing closes it.
           </p>
           {gaps.unanswered.length === 0 ? (
-            <p className="ch247-muted">No open gaps. Every question asked so far was answered from published content.</p>
+            <p className="ch247-muted">No open documentation gaps recorded. This does not imply every question was answered; outages and human escalations are recorded separately.</p>
           ) : (
             <table className="ch247-table">
               <thead>

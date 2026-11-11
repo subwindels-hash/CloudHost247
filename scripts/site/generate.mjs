@@ -733,8 +733,10 @@ function decoratePhpPages(previous, contentPages, registry) {
       group = content ? [{ pair: { spa: content.route, file, fragment: '' }, content }] : [];
     }
     if (!content) {
-      const visual3d = resolveVisual3d(existing.visual);
-      pages[file] = visual3d ? { ...existing, visual3d } : existing;
+      // Explicit SVG artwork must not inherit a previous shared raster fallback.
+      const { visual3d: previousScene, ...flatArtwork } = existing;
+      const visual3d = existing.visualFormat === 'svg' ? '' : resolveVisual3d(existing.visual);
+      pages[file] = existing.visualFormat === 'svg' ? flatArtwork : visual3d ? { ...existing, visual3d } : existing;
       continue;
     }
     matched.add(file);
@@ -823,7 +825,7 @@ function decoratePhpPages(previous, contentPages, registry) {
 
     pages[file] = {
       ...existing,
-      visual3d: resolveVisual3d(existing.visual) || existing.visual3d,
+      visual3d: existing.visualFormat === 'svg' ? undefined : resolveVisual3d(existing.visual) || existing.visual3d,
       headline: content.hero.heading,
       seo_description: content.description,
       features: features.length ? features : existing.features,

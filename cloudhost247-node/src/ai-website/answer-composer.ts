@@ -1,3 +1,4 @@
+import { knowledgeFailureMessage } from './knowledge-trust';
 import { openAnswerWithModel, type ModelEvidence } from './grounded-model';
 import { cheapestPrice, formatMoney, formatPrice, selectRelevantPrices, type LiveFacts, type LivePrice } from './live-facts';
 import type { RetrievalResult, RetrievedChunk } from './retrieval';
@@ -294,10 +295,12 @@ function composeDeterministic(
   // Opening: name the page and quote its own summary. The title is used, never invented copy.
   const intro = primary.kind === 'faq' ? '' : `From ${kindPhrase(primary.kind)} — ${primaryPageTitle(primary)}:`;
   const excerpt = extractExcerpt(primaryChunk.content, terms, 520);
-  sections.push(intro ? `${intro}\n${excerpt}` : excerpt);
+  // Monetary answers must not mix indexed/historical amounts with the live catalogue.
+  // A pricing question gets verified page destinations plus live facts, never page prose.
+  if (understanding.intent !== 'pricing') sections.push(intro ? `${intro}\n${excerpt}` : excerpt);
 
   // A second page is worth quoting when it adds a different angle (comparison questions need it).
-  if (pages[1] && (understanding.isComparison || pages[1].score > primary.score * 0.55)) {
+  if (understanding.intent !== 'pricing' && pages[1] && (understanding.isComparison || pages[1].score > primary.score * 0.55)) {
     const second = pages[1];
     const secondChunk = second.chunks[0]!;
     const secondExcerpt = extractExcerpt(secondChunk.content, terms, 320);
@@ -451,6 +454,14 @@ export async function composeAnswer(
   options: ComposeOptions
 ): Promise<ComposedAnswer> {
   const retrieval = options.retrieval ?? null;
+  // This precedes clarification and model phrasing: an unavailable index proves no content gap.
+  if (retrieval?.verificationFailure) {
+    return {
+      kind: 'ESCALATE', body: knowledgeFailureMessage(retrieval.verificationFailure), links: [], evidence: [],
+      intent: 'knowledge_unavailable', confidence: 0, engine: 'retrieval', grounded: false,
+      escalateReason: 'TECHNICAL_SUPPORT_REQUIRED',
+    };
+  }
 
   // One-word or bare-noun questions with no resolved offering are genuinely ambiguous.
   if (understanding.tokens.length <= 1 && understanding.entities.length === 0 && retrieval?.empty) {
@@ -477,6 +488,7 @@ export async function composeAnswer(
   };
 
   if (
+    understanding.intent === 'pricing' ||
     options.allowModel === false ||
     !retrieval ||
     retrieval.pages.length === 0 ||

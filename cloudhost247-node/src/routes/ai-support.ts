@@ -356,7 +356,7 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
       [row.id]
     );
     await addMessage(db, row.id, 'CUSTOMER', input.message, auth?.userId ?? null);
-    const decision = await decideSupportResponse(db, input.message, {
+    const { trustTrace, ...decision } = await decideSupportResponse(db, input.message, {
       previousMessages: previous.rows,
       currentPath: typeof request.headers['x-cloudhost-page'] === 'string' ? request.headers['x-cloudhost-page'] : null,
     });
@@ -365,7 +365,7 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
       action: decision.kind === 'ESCALATE' ? 'AI_ESCALATION_TRIGGERED' : decision.kind === 'NEWSLETTER' ? 'NEWSLETTER_SUBSCRIPTION_REQUESTED' : 'AI_RESPONSE_GENERATED',
       resourceType: 'ai_support_conversation',
       resourceId: row.id,
-      metadata: { intent: decision.intent, confidence: decision.confidence, reason: decision.reason ?? null },
+      metadata: { intent: decision.intent, confidence: decision.confidence, reason: decision.reason ?? null, knowledgeFailure: decision.knowledgeFailure ?? null, retrieval: trustTrace ?? null },
     });
     if (decision.reason === 'USER_REQUESTED_HUMAN') {
       await auditRequest(db, request, auth?.userId ?? null, {
@@ -675,8 +675,8 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
     );
     const messageId = parse(id, request.params.messageId);
     const { row, auth } = await getCustomerConversation(db, request, env, request.params.id);
-    const message = await db.query<{ id: string; author_type: string }>(
-      `SELECT id, author_type FROM ai_support_messages WHERE id = $1 AND conversation_id = $2`,
+    const message = await db.query<{ id: string; author_type: string; intent: string | null }>(
+      `SELECT id, author_type, intent FROM ai_support_messages WHERE id = $1 AND conversation_id = $2`,
       [messageId, row.id]
     );
     if (!message.rows[0]) throw new NotFoundError('Message not found');
@@ -697,7 +697,8 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
     });
     // A negative rating on an answer with no grounded evidence is a coverage gap as well as a
     // quality signal; record it so the content team sees the question, not just the complaint.
-    if (input.rating === 'down') {
+    // Outage feedback is retained, but it is not evidence of missing published documentation.
+    if (input.rating === 'down' && message.rows[0].intent !== 'knowledge_unavailable') {
       const question = await db.query<{ body: string }>(
         `SELECT body FROM ai_support_messages
           WHERE conversation_id = $1 AND author_type = 'CUSTOMER' AND created_at <= (SELECT created_at FROM ai_support_messages WHERE id = $2)

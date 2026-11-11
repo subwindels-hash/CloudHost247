@@ -15,3 +15,23 @@ class ManifestVisuals(unittest.TestCase):
   self.assertIn("'.avif'",(ROOT/'tests/website/preview.py').read_text())
  def test_menu_landing_uses_registry(self):
   self.assertIn('{$menu.url|escape}',(ROOT/'templates/cloudhost247/includes/site-nav.tpl').read_text())
+
+
+class StorefrontHeroParity(unittest.TestCase):
+ def test_custom_storefronts_render_their_own_distinct_svg_on_both_surfaces(self):
+  import hashlib
+  pages=json.loads((ROOT/'modules/addons/cloudhost247_theme/resources/site.json').read_text())['pages']
+  mapping={'rdp-hosting':'RdpHostingPage','smm-services':'SmmServicesPage','number-services':'NumberServicesPage','google-workspace':'GoogleWorkspacePage','office-365':'Office365Page','digital-products':'DigitalProductsPage','proxy-services':'ProxyServicesPage','smtp-hosting':'SmtpHostingPage'}
+  digests=set()
+  for slug,component in mapping.items():
+   with self.subTest(slug=slug):
+    page=pages[slug+'.php'];key=page['visual']+'.svg'
+    self.assertEqual(page['visualFormat'],'svg')
+    self.assertFalse(page.get('visual3d'),'SVG-only storefront must not inherit a shared raster hero')
+    source=ROOT/'assets/images/cloudhost247'/key
+    public=ROOT/'cloudhost247-node/frontend/public/media/cloudhost247'/key
+    self.assertEqual(source.read_bytes(),public.read_bytes())
+    digests.add(hashlib.sha256(source.read_bytes()).hexdigest())
+    self.assertIn('/assets/images/cloudhost247/'+key,(ROOT/'templates/cloudhost247'/(slug+'.tpl')).read_text())
+    self.assertIn('/media/cloudhost247/'+key,(ROOT/'cloudhost247-node/frontend/src/pages'/(component+'.tsx')).read_text())
+  self.assertEqual(len(digests),len(mapping),'different filenames must not hide duplicate artwork')

@@ -69,6 +69,7 @@ export interface UpsertSourceInput {
   category: string | null;
   fingerprint: string;
   wordCount: number;
+  sourceModifiedAt?: string | null;
 }
 
 export async function findSourceByKey(db: Queryable, sourceKey: string): Promise<SourceRow | null> {
@@ -108,6 +109,7 @@ export async function upsertSource(
         input.wordCount,
       ]
     );
+    await db.query('UPDATE ai_knowledge_sources SET source_modified_at = $2, content_observed_at = now() WHERE id = $1', [rows[0]!.id, input.sourceModifiedAt ?? null]);
     return { id: rows[0]!.id, created: true, changed: true };
   }
 
@@ -137,6 +139,7 @@ export async function upsertSource(
       input.wordCount,
     ]
   );
+  if (changed) await db.query('UPDATE ai_knowledge_sources SET source_modified_at = $2, content_observed_at = now() WHERE id = $1', [existing.id, input.sourceModifiedAt ?? null]);
   return { id: existing.id, created: false, changed };
 }
 
@@ -432,4 +435,24 @@ export async function searchIndexedContent(
     [tsQuery, Math.min(Math.max(limit, 1), 200)]
   );
   return rows.map((row) => ({ ...row, rank: Number(row.rank) })).sort((a, b) => b.rank - a.rank);
+}
+
+/**
+ * A missing result is meaningful only after a successful complete website sync. Deliberately
+ * excluded/skipped pages are not index failures. No question, prompt or source body is returned.
+ * Counts and the latest sync state are read in one statement for a consistent DB snapshot.
+ */
+export async function knowledgeIndexReady(db: Queryable): Promise<boolean> {
+  const { rows } = await db.query<{ indexed: string | number; incomplete: string | number; latest_status: string | null }>(
+    `SELECT count(*) FILTER (WHERE s.sync_status = 'indexed' AND EXISTS (
+              SELECT 1 FROM ai_knowledge_chunks c WHERE c.source_id = s.id))::text AS indexed,
+            count(*) FILTER (WHERE s.sync_status IN ('pending', 'failed')
+              OR (s.sync_status = 'indexed' AND (s.chunk_count = 0 OR s.chunk_count <> (
+                SELECT count(*) FROM ai_knowledge_chunks c WHERE c.source_id = s.id))))::text AS incomplete,
+            (SELECT status FROM ai_knowledge_sync_runs ORDER BY started_at DESC, id DESC LIMIT 1) AS latest_status
+       FROM ai_knowledge_sources s
+      WHERE s.source_key IS NOT NULL AND s.status = 'active' AND s.excluded = false`
+  );
+  const row = rows[0];
+  return Boolean(row && Number(row.indexed) > 0 && Number(row.incomplete) === 0 && row.latest_status === 'succeeded');
 }

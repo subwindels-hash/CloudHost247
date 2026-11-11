@@ -1,3 +1,4 @@
+import { trustInventory } from '../ai-website/source-trust';
 import { randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
@@ -51,7 +52,7 @@ export async function registerAiKnowledgeRoutes(app: FastifyInstance, env: Env, 
   /** Dashboard: counts, health, exclusions, model availability, last runs. */
   app.get('/api/v1/admin/ai-support/knowledge/overview', async (request) => {
     await requireRole(request, env, db, [...ROLES]);
-    const [overview, drift, groups, exclusions, failures, runs] = await Promise.all([
+    const [overview, drift, groups, exclusions, failures, runs, trust, escalations] = await Promise.all([
       knowledgeOverview(db),
       detectDrift(db),
       (async () => {
@@ -85,10 +86,14 @@ export async function registerAiKnowledgeRoutes(app: FastifyInstance, env: Env, 
                 duration_ms, started_at, finished_at, notes, triggered_by
            FROM ai_knowledge_sync_runs ORDER BY started_at DESC LIMIT 10`
       ),
+      trustInventory(db),
+      db.query<{ count: string }>("SELECT count(*)::text AS count FROM audit_logs WHERE action = 'AI_ESCALATION_TRIGGERED'"),
     ]);
     const model = modelAvailability(env);
     return {
       overview,
+      trust,
+      humanEscalations: Number(escalations.rows[0]?.count ?? 0),
       drift,
       groups,
       exclusions: exclusions.rows,
@@ -152,7 +157,8 @@ export async function registerAiKnowledgeRoutes(app: FastifyInstance, env: Env, 
     params.push(query.limit ?? 200);
     const rows = await db.query(
       `SELECT id, source_key, url, title, source_kind, surface, section, category, sync_status,
-              sync_note, failure_count, last_error_at, last_synced_at, chunk_count, word_count, fingerprint
+              sync_note, failure_count, last_error_at, last_synced_at, chunk_count, word_count, fingerprint,
+              approval_status, authority_tier, source_modified_at, content_observed_at, valid_until, historical
          FROM ai_knowledge_sources
         WHERE ${where.join(' AND ')}
         ORDER BY sync_status, title
@@ -160,6 +166,42 @@ export async function registerAiKnowledgeRoutes(app: FastifyInstance, env: Env, 
       params
     );
     return { sources: rows.rows, count: rows.rows.length };
+  });
+
+  /** Human review of an exact revision, never a policy publishing or content-writing endpoint. */
+  app.patch<{ Params: { id: string } }>('/api/v1/admin/ai-support/knowledge/sources/:id/trust', async (request) => {
+    const auth = await requireRole(request, env, db, [...MUTATE]);
+    const sourceId = parse(id, request.params.id);
+    const input = parse(z.object({
+      fingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+      approval: z.enum(['approved', 'rejected', 'unreviewed']),
+      authority: z.number().int().min(1).max(6),
+      historical: z.boolean(),
+      validUntil: z.string().datetime().nullable(),
+      claims: z.record(z.string().regex(/^[a-z0-9_.:-]{3,160}$/), z.string().trim().min(1).max(300))
+        .refine(value => Object.keys(value).length <= 20, 'At most 20 scoped claims'),
+    }).strict(), request.body);
+    if (input.validUntil && new Date(input.validUntil).getTime() <= Date.now()) throw new ValidationError('Review expiry must be in the future');
+    const source = await db.query<{ source_kind: string }>('SELECT source_kind FROM ai_knowledge_sources WHERE id = $1', [sourceId]);
+    if (!source.rows[0]) throw new NotFoundError('Source not found');
+    const permitted: Record<number, string[]> = {
+      1: ['legal_document', 'website_doc'], 2: ['product', 'service', 'catalog_page'],
+      3: ['website_doc'], 4: ['faq', 'website_doc'],
+    };
+    if (permitted[input.authority] && !permitted[input.authority]!.includes(source.rows[0].source_kind)) throw new ValidationError('Authority tier is incompatible with source type');
+    if (input.authority === 5 && !input.historical) throw new ValidationError('Tier 5 requires historical status');
+    const result = await db.query<{ id: string }>(`UPDATE ai_knowledge_sources SET
+      approval_status = $3, authority_tier = $4, historical = $5, valid_until = $6,
+      verified_claims = $7::jsonb, approved_fingerprint = CASE WHEN $3 = 'approved' THEN fingerprint ELSE NULL END,
+      approved_by = $8, approved_at = now()
+      WHERE id = $1 AND fingerprint = $2 AND sync_status = 'indexed' RETURNING id`,
+      [sourceId, input.fingerprint, input.approval, input.authority, input.historical, input.validUntil,
+        JSON.stringify(input.claims), auth.userId]);
+    if (!result.rows.length) throw new ValidationError('Revision changed or is not indexed; reload before reviewing');
+    await auditRequest(db, request, auth.userId ?? null, { action: 'AI_KNOWLEDGE_TRUST_REVIEWED',
+      resourceType: 'ai_knowledge', resourceId: sourceId,
+      metadata: { approval: input.approval, authority: input.authority, historical: input.historical, claimCount: Object.keys(input.claims).length } });
+    return { reviewed: true };
   });
 
   /** Full reindex. Synchronous by request: the operator gets the real counters, not a promise. */

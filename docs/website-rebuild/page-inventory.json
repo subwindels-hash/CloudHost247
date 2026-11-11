@@ -935,12 +935,12 @@
         "description": "Explore downloadable digital products from CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/digital-products.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/digital-products.svg",
+      "visual": "storefronts/digital-products",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "platforms / Application platforms",
       "navigation_location": "platforms / Application platforms",
@@ -1445,12 +1445,12 @@
         "description": "Explore Google Workspace plans and collaboration options with CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/google-workspace.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/google-workspace.svg",
+      "visual": "storefronts/google-workspace",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
@@ -1835,12 +1835,12 @@
         "description": "Explore CloudHost247 virtual number services for your business."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/number-services.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/number-services.svg",
+      "visual": "storefronts/number-services",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
@@ -1895,12 +1895,12 @@
         "description": "Explore Microsoft 365 plans and productivity options with CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/office-365.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/office-365.svg",
+      "visual": "storefronts/office-365",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
@@ -2075,12 +2075,12 @@
         "description": "Explore LTE proxy plans and connection options with CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/proxy-services.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/proxy-services.svg",
+      "visual": "storefronts/proxy-services",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "cloud / Servers",
       "navigation_location": "cloud / Servers",
@@ -2135,12 +2135,12 @@
         "description": "Explore CloudHost247 remote desktop server plans and find the resources for your remote workspace."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/rdp-hosting.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/rdp-hosting.svg",
+      "visual": "storefronts/rdp-hosting",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "cloud / Servers",
       "navigation_location": "cloud / Servers",
@@ -2405,12 +2405,12 @@
         "description": "Explore CloudHost247 social media marketing services and find the right fit for your goals."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/smm-services.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/smm-services.svg",
+      "visual": "storefronts/smm-services",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
@@ -2435,12 +2435,12 @@
         "description": "Explore SMTP hosting plans and email sending options with CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/smtp-hosting.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/smtp-hosting.svg",
+      "visual": "storefronts/smtp-hosting",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
