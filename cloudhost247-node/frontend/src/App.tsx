@@ -205,6 +205,14 @@ const BusinessToolsPage = lazy(() => import('./pages/tools/BusinessToolsPage'));
 const IdCardGeneratorPage = lazy(() => import('./pages/tools/IdCardGeneratorPage'));
 const BusinessToolWorkspacePage = lazy(() => import('./pages/tools/BusinessToolWorkspacePage'));
 const AdminMrzSettingsPage = lazy(() => import('./pages/AdminMrzSettingsPage'));
+const RdpHostingPage = lazy(() => import('./pages/RdpHostingPage'));
+const SmmServicesPage = lazy(() => import('./pages/SmmServicesPage'));
+const NumberServicesPage = lazy(() => import('./pages/NumberServicesPage'));
+const GoogleWorkspacePage = lazy(() => import('./pages/GoogleWorkspacePage'));
+const Office365Page = lazy(() => import('./pages/Office365Page'));
+const DigitalProductsPage = lazy(() => import('./pages/DigitalProductsPage'));
+const ProxyServicesPage = lazy(() => import('./pages/ProxyServicesPage'));
+const SmtpHostingPage = lazy(() => import('./pages/SmtpHostingPage'));
 export default function App() {
   return (
     <Routes>
@@ -215,6 +223,14 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/sitemap" element={<SitemapPage />} />
         <Route path="/service-plans" element={<ServicePlansIndex />} />
+        <Route path="/hosting/rdp" element={<RdpHostingPage />} />
+        <Route path="/smm-services" element={<SmmServicesPage />} />
+        <Route path="/number-services" element={<NumberServicesPage />} />
+        <Route path="/google-workspace" element={<GoogleWorkspacePage />} />
+        <Route path="/office-365" element={<Office365Page />} />
+        <Route path="/digital-products" element={<DigitalProductsPage />} />
+        <Route path="/proxy-services" element={<ProxyServicesPage />} />
+        <Route path="/smtp-hosting" element={<SmtpHostingPage />} />
         <Route path="/service-plans/catalog/:slug" element={<CatalogServicePlansPage />} />
         <Route path="/service-plans/platform/:kind" element={<PlatformServicePlansPage />} />
         {MARKETING_ROUTES.map((route) => (

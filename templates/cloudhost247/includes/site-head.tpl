@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/auth.css?v=20261107">
 {* Generated copy of shared/site/metals.css. Must load last among the shared sheets: it restyles
    the metallic finish, depth and motion primitives on top of site.css and design-system.css. *}
-<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/metals.css?v=2026110801">
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/metals.css?v=2026111002">
 {* First-party chrome benchmark: GoDaddy-style menu + Amazon-style footer. Loaded after metals.css
    so its `.ch-site` overrides win with equal specificity. Only the visual anatomy is borrowed. *}
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/chrome-benchmark.css?v=2026110801">
@@ -34,4 +34,4 @@
 {/if}
 <script src="{$WEB_ROOT}/templates/cloudhost247/js/site.js?v=20261016" defer></script>
 {* Generated copy of shared/site/motion.js — identical behaviour to the SPA controller. *}
-<script src="{$WEB_ROOT}/templates/cloudhost247/js/motion.js?v=20261107" defer></script>
+<script src="{$WEB_ROOT}/templates/cloudhost247/js/motion.js?v=2026111002" defer></script>

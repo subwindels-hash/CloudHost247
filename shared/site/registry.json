@@ -185,6 +185,51 @@
               }
             },
             {
+              "label": "SMTP Hosting",
+              "icon": "mail",
+              "desc": "SMTP services for your email workflows.",
+              "href": {
+                "spa": "/smtp-hosting",
+                "php": "smtp-hosting.php"
+              }
+            },
+            {
+              "label": "Google Workspace",
+              "icon": "mail",
+              "desc": "Business email and collaboration for your team.",
+              "href": {
+                "spa": "/google-workspace",
+                "php": "google-workspace.php"
+              }
+            },
+            {
+              "label": "Microsoft 365 (Office 365)",
+              "icon": "mail",
+              "desc": "Business email and productivity tools for your team.",
+              "href": {
+                "spa": "/office-365",
+                "php": "office-365.php"
+              }
+            },
+            {
+              "label": "SMM Services",
+              "icon": "activity",
+              "desc": "Explore social media marketing services for your next campaign.",
+              "href": {
+                "spa": "/smm-services",
+                "php": "smm-services.php"
+              }
+            },
+            {
+              "label": "Number Services",
+              "icon": "phone",
+              "desc": "Explore virtual number services for your business.",
+              "href": {
+                "spa": "/number-services",
+                "php": "number-services.php"
+              }
+            },
+            {
               "label": "Developer Hosting",
               "icon": "code",
               "desc": "Git, staging and application tooling alongside the runtime.",
@@ -368,6 +413,15 @@
               }
             },
             {
+              "label": "Remote Desktop (RDP)",
+              "icon": "server",
+              "desc": "Find a remote desktop server for your workspace.",
+              "href": {
+                "php": "rdp-hosting.php",
+                "spa": "/hosting/rdp"
+              }
+            },
+            {
               "label": "VPS Hosting",
               "icon": "server",
               "desc": "Virtual servers with a choice of operating system and panel.",
@@ -474,6 +528,15 @@
                 "spa": "/cloud/game-servers",
                 "php": "game-servers.php"
               }
+            },
+            {
+              "label": "LTE Proxy Services",
+              "icon": "network",
+              "desc": "Explore configurable LTE proxy connections.",
+              "href": {
+                "spa": "/proxy-services",
+                "php": "proxy-services.php"
+              }
             }
           ]
         }
@@ -498,8 +561,17 @@
       },
       "columns": [
         {
-          "title": "Domains",
+          "title": "Find & manage",
           "items": [
+            {
+              "label": "Domain Search",
+              "icon": "search",
+              "desc": "Search for a domain and check its availability.",
+              "href": {
+                "spa": "/domains",
+                "php": "domain.php"
+              }
+            },
             {
               "label": "Domain Registration",
               "icon": "search",
@@ -511,12 +583,29 @@
               "badge": "POPULAR"
             },
             {
-              "label": "Domain Search",
+              "label": "Bulk Domain Search",
               "icon": "search",
-              "desc": "Check availability for one name or a whole list at once.",
+              "desc": "Check multiple domain names in one search.",
               "href": {
-                "spa": "/domains/bulk-search",
+                "spa": "/domains/bulk-search"
+              }
+            },
+            {
+              "label": "Domain Extensions",
+              "icon": "globe",
+              "desc": "Browse the extensions this platform can register and renew.",
+              "href": {
+                "spa": "/domains/extensions",
                 "php": "domain.php"
+              }
+            },
+            {
+              "label": "Domain Transfer",
+              "icon": "globe",
+              "desc": "Transfer an existing domain using its authorization code.",
+              "href": {
+                "spa": "/domains/transfer",
+                "php": "cart.php?a=add&domain=transfer"
               }
             },
             {
@@ -526,6 +615,67 @@
               "href": {
                 "spa": "/dashboard/domains",
                 "php": "clientarea.php?action=domains"
+              }
+            },
+            {
+              "label": "Domain Renewal",
+              "icon": "refresh",
+              "desc": "How renewal, auto-renew and deletion windows work.",
+              "href": {
+                "spa": "/legal/domain-renewal-policy",
+                "php": "domain-renewal-policy.php"
+              }
+            }
+          ]
+        },
+        {
+          "title": "Domain investing",
+          "items": [
+            {
+              "label": "Domain Auctions",
+              "icon": "globe",
+              "desc": "Explore listed domain auctions and bidding.",
+              "href": {
+                "spa": "/domains/auctions"
+              }
+            },
+            {
+              "label": "Domain Appraisal",
+              "icon": "activity",
+              "desc": "Request a domain valuation from the configured provider.",
+              "href": {
+                "spa": "/domains/appraisal"
+              }
+            },
+            {
+              "label": "Discount Domain Club",
+              "icon": "tag",
+              "desc": "Explore available domain club membership and pricing.",
+              "href": {
+                "spa": "/domains/club"
+              }
+            },
+            {
+              "label": "Domain Brokerage",
+              "icon": "globe",
+              "desc": "Request help acquiring a domain that is already registered.",
+              "href": {
+                "spa": "/domains/broker",
+                "php": "index.php?m=cloudhost247_broker"
+              }
+            }
+          ]
+        },
+        {
+          "title": "DNS & tools",
+          "items": [
+            {
+              "label": "WHOIS Lookup",
+              "icon": "search",
+              "desc": "Check registration details and availability before you buy.",
+              "href": {
+                "spa": "/domains/whois",
+                "php": "tools/domain-whois"
               }
             },
             {
@@ -545,47 +695,6 @@
                 "php": "dns-management.php"
               }
             },
-            {
-              "label": "Domain Renewal",
-              "icon": "refresh",
-              "desc": "How renewal, auto-renew and deletion windows work.",
-              "href": {
-                "spa": "/legal/domain-renewal-policy",
-                "php": "domain-renewal-policy.php"
-              }
-            },
-            {
-              "label": "Domain Transfer",
-              "icon": "globe",
-              "desc": "Transfer an existing domain with the auth code and no downtime.",
-              "href": {
-                "spa": "/domains/transfer",
-                "php": "cart.php?a=add&domain=transfer"
-              }
-            },
-            {
-              "label": "WHOIS Lookup",
-              "icon": "search",
-              "desc": "Check registration details and availability before you buy.",
-              "href": {
-                "spa": "/domains/whois",
-                "php": "domain.php"
-              }
-            },
-            {
-              "label": "Domain Extensions",
-              "icon": "globe",
-              "desc": "Browse the extensions this platform can register and renew.",
-              "href": {
-                "spa": "/domains/extensions",
-                "php": "domain.php"
-              }
-            }
-          ]
-        },
-        {
-          "title": "DNS",
-          "items": [
             {
               "label": "DNS Lookup",
               "icon": "search",
@@ -614,21 +723,21 @@
               }
             },
             {
-              "label": "All DNS Tools",
-              "icon": "shield",
-              "desc": "Every DNS and domain tool: lookups, propagation, zone diagnostics and DNSSEC.",
-              "href": {
-                "spa": "/tools/category/dns-domains",
-                "php": "tools/category/dns-domains"
-              }
-            },
-            {
               "label": "DNSSEC",
               "icon": "key",
               "desc": "Inspect DNSKEY and DS records for a signed zone.",
               "href": {
                 "spa": "/tools/dnskey-lookup",
                 "php": "tools/dnskey-lookup"
+              }
+            },
+            {
+              "label": "All DNS Tools",
+              "icon": "shield",
+              "desc": "Every DNS and domain tool: lookups, propagation, zone diagnostics and DNSSEC.",
+              "href": {
+                "spa": "/tools/category/dns-domains",
+                "php": "tools/category/dns-domains"
               }
             }
           ]
@@ -788,6 +897,15 @@
               "href": {
                 "spa": "/developers/environments",
                 "php": "deployments.php"
+              }
+            },
+            {
+              "label": "Digital Products",
+              "icon": "download",
+              "desc": "Discover downloadable products for your next project.",
+              "href": {
+                "spa": "/digital-products",
+                "php": "digital-products.php"
               }
             }
           ]
@@ -1237,6 +1355,13 @@
           }
         },
         {
+          "label": "Remote Desktop (RDP)",
+          "href": {
+            "spa": "/hosting/rdp",
+            "php": "rdp-hosting.php"
+          }
+        },
+        {
           "label": "Dedicated Servers",
           "href": {
             "spa": "/hosting/dedicated",
@@ -1318,6 +1443,55 @@
           "href": {
             "spa": "/hosting/security",
             "php": "security.php"
+          }
+        },
+        {
+          "label": "SMM Services",
+          "href": {
+            "spa": "/smm-services",
+            "php": "smm-services.php"
+          }
+        },
+        {
+          "label": "Number Services",
+          "href": {
+            "spa": "/number-services",
+            "php": "number-services.php"
+          }
+        },
+        {
+          "label": "Google Workspace",
+          "href": {
+            "spa": "/google-workspace",
+            "php": "google-workspace.php"
+          }
+        },
+        {
+          "label": "Microsoft 365 (Office 365)",
+          "href": {
+            "spa": "/office-365",
+            "php": "office-365.php"
+          }
+        },
+        {
+          "label": "Digital Products",
+          "href": {
+            "spa": "/digital-products",
+            "php": "digital-products.php"
+          }
+        },
+        {
+          "label": "LTE Proxy Services",
+          "href": {
+            "spa": "/proxy-services",
+            "php": "proxy-services.php"
+          }
+        },
+        {
+          "label": "SMTP Hosting",
+          "href": {
+            "spa": "/smtp-hosting",
+            "php": "smtp-hosting.php"
           }
         }
       ]
@@ -1445,7 +1619,7 @@
         {
           "label": "Domain Search",
           "href": {
-            "spa": "/domains/bulk-search",
+            "spa": "/domains",
             "php": "domain.php"
           }
         },
@@ -1457,16 +1631,30 @@
           }
         },
         {
-          "label": "DNS Management",
+          "label": "Bulk Domain Search",
           "href": {
-            "spa": "/dashboard/dns",
-            "php": "dns-management.php"
+            "spa": "/domains/bulk-search"
           }
         },
         {
-          "label": "Domain DNS",
+          "label": "Domain Extensions",
           "href": {
-            "php": "domain-dns.php"
+            "spa": "/domains/extensions",
+            "php": "domain.php"
+          }
+        },
+        {
+          "label": "Domain Transfer",
+          "href": {
+            "spa": "/domains/transfer",
+            "php": "cart.php?a=add&domain=transfer"
+          }
+        },
+        {
+          "label": "Domain Management",
+          "href": {
+            "spa": "/dashboard/domains",
+            "php": "clientarea.php?action=domains"
           }
         },
         {
@@ -1477,10 +1665,83 @@
           }
         },
         {
-          "label": "Domain Transfer",
+          "label": "Domain Auctions",
           "href": {
-            "spa": "/domains/transfer",
-            "php": "cart.php?a=add&domain=transfer"
+            "spa": "/domains/auctions"
+          }
+        },
+        {
+          "label": "Domain Appraisal",
+          "href": {
+            "spa": "/domains/appraisal"
+          }
+        },
+        {
+          "label": "Discount Domain Club",
+          "href": {
+            "spa": "/domains/club"
+          }
+        },
+        {
+          "label": "Domain Brokerage",
+          "href": {
+            "spa": "/domains/broker",
+            "php": "index.php?m=cloudhost247_broker"
+          }
+        },
+        {
+          "label": "WHOIS Lookup",
+          "href": {
+            "spa": "/domains/whois",
+            "php": "tools/domain-whois"
+          }
+        },
+        {
+          "label": "Domain DNS",
+          "href": {
+            "php": "domain-dns.php"
+          }
+        },
+        {
+          "label": "DNS Management",
+          "href": {
+            "spa": "/dashboard/dns",
+            "php": "dns-management.php"
+          }
+        },
+        {
+          "label": "DNS Lookup",
+          "href": {
+            "spa": "/tools/dns-lookup",
+            "php": "tools/dns-lookup"
+          }
+        },
+        {
+          "label": "DNS Propagation",
+          "href": {
+            "spa": "/tools/dns-propagation",
+            "php": "tools/dns-propagation"
+          }
+        },
+        {
+          "label": "DNS Health",
+          "href": {
+            "spa": "/tools/domain-dns-health",
+            "php": "tools/domain-dns-health"
+          }
+        },
+        {
+          "label": "DNSSEC",
+          "href": {
+            "spa": "/tools/dnskey-lookup",
+            "php": "tools/dnskey-lookup"
+          }
+        },
+        {
+          "label": "All DNS Tools",
+          "href": {
+            "spa": "/tools/category/dns-domains",
+            "php": "tools/category/dns-domains"
           }
         }
       ]

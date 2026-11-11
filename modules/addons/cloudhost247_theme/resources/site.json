@@ -5686,6 +5686,70 @@
         }
       ],
       "sections": []
+    },
+    "rdp-hosting.php": {
+      "title": "Remote Desktop Servers",
+      "category": "Servers",
+      "headline": "Your desktop, wherever work takes you",
+      "summary": "Explore remote desktop server plans for a workspace you can access remotely.",
+      "slug": "rdp-hosting",
+      "seo_description": "Explore CloudHost247 remote desktop server plans and find the resources for your remote workspace."
+    },
+    "smm-services.php": {
+      "title": "Social Media Marketing Services",
+      "category": "Services",
+      "headline": "Make your next move",
+      "summary": "Explore social media marketing services for your next campaign.",
+      "slug": "smm-services",
+      "seo_description": "Explore CloudHost247 social media marketing services and find the right fit for your goals."
+    },
+    "number-services.php": {
+      "title": "Virtual Number Services",
+      "category": "Services",
+      "headline": "Be there, where it matters",
+      "summary": "Explore virtual number plans and find a connection that fits your needs.",
+      "slug": "number-services",
+      "seo_description": "Explore CloudHost247 virtual number services for your business."
+    },
+    "google-workspace.php": {
+      "title": "Google Workspace",
+      "category": "Services",
+      "headline": "Good work happens together",
+      "summary": "Explore Google Workspace options for a more connected way to work.",
+      "slug": "google-workspace",
+      "seo_description": "Explore Google Workspace plans and collaboration options with CloudHost247."
+    },
+    "office-365.php": {
+      "title": "Microsoft 365 (Office 365)",
+      "category": "Services",
+      "headline": "More room to do great work",
+      "summary": "Explore Microsoft 365, formerly Office 365, for a more connected workday.",
+      "slug": "office-365",
+      "seo_description": "Explore Microsoft 365 plans and productivity options with CloudHost247."
+    },
+    "digital-products.php": {
+      "title": "Digital Products",
+      "category": "Services",
+      "headline": "Ideas made ready to use",
+      "summary": "Discover downloadable digital products for your next project.",
+      "slug": "digital-products",
+      "seo_description": "Explore downloadable digital products from CloudHost247."
+    },
+    "proxy-services.php": {
+      "title": "LTE Proxy Services",
+      "category": "Services",
+      "headline": "A smarter route to the web",
+      "summary": "Explore LTE proxy services for your connection and workflow.",
+      "slug": "proxy-services",
+      "seo_description": "Explore LTE proxy plans and connection options with CloudHost247."
+    },
+    "smtp-hosting.php": {
+      "title": "SMTP Hosting",
+      "category": "Services",
+      "headline": "Make every message count",
+      "summary": "Explore SMTP hosting plans for your email needs.",
+      "slug": "smtp-hosting",
+      "seo_description": "Explore SMTP hosting plans and email sending options with CloudHost247."
     }
   },
   "navigation": [
@@ -5750,6 +5814,26 @@
             {
               "label": "Email Hosting",
               "url": "email-hosting.php"
+            },
+            {
+              "label": "SMTP Hosting",
+              "url": "smtp-hosting.php"
+            },
+            {
+              "label": "Google Workspace",
+              "url": "google-workspace.php"
+            },
+            {
+              "label": "Microsoft 365 (Office 365)",
+              "url": "office-365.php"
+            },
+            {
+              "label": "SMM Services",
+              "url": "smm-services.php"
+            },
+            {
+              "label": "Number Services",
+              "url": "number-services.php"
             },
             {
               "label": "Developer Hosting",
@@ -5838,6 +5922,10 @@
               "url": "dedicated-server.php"
             },
             {
+              "label": "Remote Desktop (RDP)",
+              "url": "rdp-hosting.php"
+            },
+            {
               "label": "VPS Hosting",
               "url": "vps-hosting.php"
             },
@@ -5884,6 +5972,10 @@
             {
               "label": "Game Servers",
               "url": "game-servers.php"
+            },
+            {
+              "label": "LTE Proxy Services",
+              "url": "proxy-services.php"
             }
           ]
         }
@@ -5896,19 +5988,49 @@
       "url": "domain.php",
       "groups": [
         {
-          "title": "Domains",
+          "title": "Find & manage",
           "links": [
-            {
-              "label": "Domain Registration",
-              "url": "cart.php?a=add&domain=register"
-            },
             {
               "label": "Domain Search",
               "url": "domain.php"
             },
             {
+              "label": "Domain Registration",
+              "url": "cart.php?a=add&domain=register"
+            },
+            {
+              "label": "Domain Extensions",
+              "url": "domain.php"
+            },
+            {
+              "label": "Domain Transfer",
+              "url": "cart.php?a=add&domain=transfer"
+            },
+            {
               "label": "Domain Management",
               "url": "clientarea.php?action=domains"
+            },
+            {
+              "label": "Domain Renewal",
+              "url": "domain-renewal-policy.php"
+            }
+          ]
+        },
+        {
+          "title": "Domain investing",
+          "links": [
+            {
+              "label": "Domain Brokerage",
+              "url": "index.php?m=cloudhost247_broker"
+            }
+          ]
+        },
+        {
+          "title": "DNS & tools",
+          "links": [
+            {
+              "label": "WHOIS Lookup",
+              "url": "tools/domain-whois"
             },
             {
               "label": "Domain DNS",
@@ -5918,27 +6040,6 @@
               "label": "DNS Management",
               "url": "dns-management.php"
             },
-            {
-              "label": "Domain Renewal",
-              "url": "domain-renewal-policy.php"
-            },
-            {
-              "label": "Domain Transfer",
-              "url": "cart.php?a=add&domain=transfer"
-            },
-            {
-              "label": "WHOIS Lookup",
-              "url": "domain.php"
-            },
-            {
-              "label": "Domain Extensions",
-              "url": "domain.php"
-            }
-          ]
-        },
-        {
-          "title": "DNS",
-          "links": [
             {
               "label": "DNS Lookup",
               "url": "tools/dns-lookup"
@@ -5952,12 +6053,12 @@
               "url": "tools/domain-dns-health"
             },
             {
-              "label": "All DNS Tools",
-              "url": "tools/category/dns-domains"
-            },
-            {
               "label": "DNSSEC",
               "url": "tools/dnskey-lookup"
+            },
+            {
+              "label": "All DNS Tools",
+              "url": "tools/category/dns-domains"
             }
           ]
         }
@@ -6027,6 +6128,10 @@
             {
               "label": "Application Environments",
               "url": "deployments.php"
+            },
+            {
+              "label": "Digital Products",
+              "url": "digital-products.php"
             }
           ]
         },
@@ -6258,6 +6363,10 @@
           "url": "vps-hosting.php"
         },
         {
+          "label": "Remote Desktop (RDP)",
+          "url": "rdp-hosting.php"
+        },
+        {
           "label": "Dedicated Servers",
           "url": "dedicated-server.php"
         },
@@ -6304,6 +6413,34 @@
         {
           "label": "Hosting Security",
           "url": "security.php"
+        },
+        {
+          "label": "SMM Services",
+          "url": "smm-services.php"
+        },
+        {
+          "label": "Number Services",
+          "url": "number-services.php"
+        },
+        {
+          "label": "Google Workspace",
+          "url": "google-workspace.php"
+        },
+        {
+          "label": "Microsoft 365 (Office 365)",
+          "url": "office-365.php"
+        },
+        {
+          "label": "Digital Products",
+          "url": "digital-products.php"
+        },
+        {
+          "label": "LTE Proxy Services",
+          "url": "proxy-services.php"
+        },
+        {
+          "label": "SMTP Hosting",
+          "url": "smtp-hosting.php"
         }
       ]
     },
@@ -6388,20 +6525,56 @@
           "url": "cart.php?a=add&domain=register"
         },
         {
-          "label": "DNS Management",
-          "url": "dns-management.php"
+          "label": "Domain Extensions",
+          "url": "domain.php"
         },
         {
-          "label": "Domain DNS",
-          "url": "domain-dns.php"
+          "label": "Domain Transfer",
+          "url": "cart.php?a=add&domain=transfer"
+        },
+        {
+          "label": "Domain Management",
+          "url": "clientarea.php?action=domains"
         },
         {
           "label": "Domain Renewal",
           "url": "domain-renewal-policy.php"
         },
         {
-          "label": "Domain Transfer",
-          "url": "cart.php?a=add&domain=transfer"
+          "label": "Domain Brokerage",
+          "url": "index.php?m=cloudhost247_broker"
+        },
+        {
+          "label": "WHOIS Lookup",
+          "url": "tools/domain-whois"
+        },
+        {
+          "label": "Domain DNS",
+          "url": "domain-dns.php"
+        },
+        {
+          "label": "DNS Management",
+          "url": "dns-management.php"
+        },
+        {
+          "label": "DNS Lookup",
+          "url": "tools/dns-lookup"
+        },
+        {
+          "label": "DNS Propagation",
+          "url": "tools/dns-propagation"
+        },
+        {
+          "label": "DNS Health",
+          "url": "tools/domain-dns-health"
+        },
+        {
+          "label": "DNSSEC",
+          "url": "tools/dnskey-lookup"
+        },
+        {
+          "label": "All DNS Tools",
+          "url": "tools/category/dns-domains"
         }
       ]
     },
