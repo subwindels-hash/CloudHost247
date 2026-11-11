@@ -124,6 +124,19 @@ export default function ToolsCenterPage() {
       }),
     [tools, category, search, showUnavailable]
   );
+  // These are authenticated account services, not Tools API runners. Do not create
+  // fake execution or favorites endpoints for them.
+  const accountServices = [
+    { slug: 'email-trace', name: 'Email Trace', path: '/account/email-trace',
+      summary: 'Trace your outgoing mail and review delivery events, queue snapshots and domain diagnostics for your account.',
+      search: 'email trace mail delivery message diagnostics exim', availability: 'Mail-server setup required' },
+    { slug: 'email-forensics', name: 'Email Trace & Forensics Analyzer', path: '/account/email-forensics',
+      summary: 'Analyze email headers or uploaded files to review routes, source IP candidates and authentication findings.',
+      search: 'email trace forensics analyzer header eml source ip route spf dkim dmarc', availability: 'Availability depends on configuration' },
+  ];
+  const visibleServices = !toolsHost().embedded && (!category || category === 'email')
+    ? accountServices.filter((service) => [service.name, service.summary, service.search].join(' ').toLowerCase().includes(search.trim().toLowerCase())) : [];
+  const matchingCount = filtered.length + visibleServices.length;
   const popular = (dashboard?.popular ?? []).filter((tool) =>
     available.some((entry) => entry.slug === tool.slug)
   );
@@ -318,16 +331,25 @@ export default function ToolsCenterPage() {
         )}
         {!loading && !failure && (
           <p role="status" className="tools-muted">
-            {filtered.length} matching{' '}
-            {filtered.length === 1 ? 'tool' : 'tools'}
+            {matchingCount} matching{' '}
+            {matchingCount === 1 ? 'tool' : 'tools'}
           </p>
         )}
-        {!loading && !failure && filtered.length === 0 && (
+        {!loading && !failure && matchingCount === 0 && (
           <p className="tools-empty">
             No tool matches “{search}”. Try a different word or category.
           </p>
         )}
         <div className="tools-grid">
+          {visibleServices.map((service) => (
+            <article key={service.slug} className="tools-card" data-service={service.slug}>
+              <span className="tools-card-icon" aria-hidden="true">✉</span>
+              <div className="tools-card__head"><h3><Link to={service.path}>{service.name}</Link></h3></div>
+              <p>{service.summary}</p>
+              <div className="tools-card__meta"><span className="tools-badge">Sign-in required</span><span className="tools-badge">{service.availability}</span></div>
+              <Link className="tools-card-link" to={service.path}>Open {service.name} <span aria-hidden="true">↗</span></Link>
+            </article>
+          ))}
           {!loading &&
             !failure &&
             filtered.map((tool) => (
