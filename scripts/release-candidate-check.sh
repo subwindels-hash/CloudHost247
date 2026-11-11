@@ -32,6 +32,24 @@ if ! git diff --exit-code --quiet -- \
   exit 1
 fi
 
+# --- AI website-knowledge projection --------------------------------------------------------------
+# The assistant answers from cloudhost247-node/src/ai-website/content/website-knowledge.generated.json,
+# compiled from the site source by scripts/site/generate-ai-knowledge.mjs. That script has its own
+# --check mode, but nothing ran it: the projection could go stale — a page added to the site and never
+# reflected in what the assistant knows — while every other gate stayed green. A stale projection is
+# not a cosmetic diff here, it is the difference between the assistant answering from the current
+# website and answering from an older one.
+#
+# This matters for the self-update claim: the vocabulary used for typo correction and for deciding
+# whether a question is groundable is built from the same projection. If the projection lags the site,
+# a legitimate question about a newly published page can be refused as unsupported.
+node scripts/site/generate-ai-knowledge.mjs --check > /tmp/ch247-ai-knowledge.log 2>&1 || {
+  cat /tmp/ch247-ai-knowledge.log >&2
+  echo 'Release-candidate FAILED: the AI website-knowledge projection is stale (run node scripts/site/generate-ai-knowledge.mjs and commit).' >&2
+  exit 1
+}
+cat /tmp/ch247-ai-knowledge.log
+
 # The reviewed page inventory is an artefact, not a snapshot: `page-inventory.json` is the table the
 # rebuild is assessed against (route, canonical URL, navigation and footer placement, hero artwork, SEO
 # status). It had drifted from the registry it is generated from before this gate existed — the committed

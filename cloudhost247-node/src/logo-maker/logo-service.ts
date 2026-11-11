@@ -1,3 +1,4 @@
+import { providerEndpoint } from '../builders/ai/provider-endpoint';
 /**
  * CloudHost247 Logo Maker service — projects, concepts, revisions, exports and (optional) AI
  * palette suggestions.
@@ -477,7 +478,7 @@ export async function suggestPalette(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), env.AI_LLM_TIMEOUT_MS);
   try {
-    const response = await fetch(`${env.AI_LLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
+    const response = await fetch(providerEndpoint(env.AI_LLM_BASE_URL, 'openai'), {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${env.AI_LLM_API_KEY}` },
       signal: controller.signal,

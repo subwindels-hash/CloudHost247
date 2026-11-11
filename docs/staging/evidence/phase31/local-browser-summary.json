@@ -1,0 +1,40 @@
+{
+  "scope": "Historical local production-mode browser run, NOT deployed staging certification",
+  "checks": [
+    {
+      "name": "register+login",
+      "passed": true
+    },
+    {
+      "name": "customer reaches authenticated account view",
+      "passed": true
+    },
+    {
+      "name": "customer does NOT see admin nav",
+      "passed": true
+    },
+    {
+      "name": "admin refused to plain customer",
+      "passed": true
+    },
+    {
+      "name": "admin API refuses customer token",
+      "passed": true
+    },
+    {
+      "name": "authenticated /me returns the same customer",
+      "passed": true
+    },
+    {
+      "name": "session persists across a navigation",
+      "passed": true
+    }
+  ],
+  "console_error_count": 2,
+  "limitations": [
+    "No successful admin workflow",
+    "No external integrations",
+    "Auth established via API in browser, not login-form interaction",
+    "Historical code tree predates final Phase 31 commit"
+  ]
+}

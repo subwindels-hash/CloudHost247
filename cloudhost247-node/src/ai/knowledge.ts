@@ -15,6 +15,13 @@ export interface SupportKnowledgeEntry {
   source: string;
   /** A more specific entry wins over a broad entry when both match. */
   weight?: number;
+  /**
+   * Verified internal routes this entry's answer points at. Resolved through the site registry at
+   * answer time (`resolveRoute`), so an entry can never emit a link the platform does not serve —
+   * and a reviewed procedure can offer the same clickable destinations the website-knowledge layer
+   * does, instead of describing a page the customer has to hunt for.
+   */
+  links?: readonly string[];
 }
 
 export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
@@ -27,6 +34,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'You can manage domains and DNS from the CloudHost247 dashboard. Open Domains, select the domain, then use DNS Management to add or update records. DNS changes can take time to propagate. Use only the record values supplied by the service you are connecting.',
     source: 'CloudHost247 domain and DNS management',
     weight: 20,
+    links: ['/account/dns', '/domains/dns'],
   },
   {
     id: 'domain-registration',
@@ -37,6 +45,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'CloudHost247 has a domain service area. Current domain products, availability, and published pricing must come from the live CloudHost247 catalog; I will not invent a registrar result or price. Human support can help with a domain-specific request.',
     source: 'CloudHost247 domain service catalog and domain marketing page',
     weight: 24,
+    links: ['/domains', '/domains/search', '/domains/transfer'],
   },
   {
     id: 'hosting-catalog',
@@ -47,6 +56,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'CloudHost247 provides hosting products through its live service catalog, including web hosting, WordPress hosting, and control-panel based hosting where configured. Current plans, published prices, and features are shown on the relevant CloudHost247 product page; I will not quote an unpublished or unavailable plan.',
     source: 'CloudHost247 hosting catalog and hosting pages',
     weight: 18,
+    links: ['/hosting', '/hosting/web-hosting', '/hosting/wordpress'],
   },
   {
     id: 'cloud-vps-dedicated',
@@ -57,6 +67,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'CloudHost247 server products are managed from the server dashboard. The provider, region, operating system, control panel, and available actions depend on the exact configured product. I can explain the dashboard workflow, but I cannot claim a server is available, healthy, restored, or provisioned without verified account or provider data.',
     source: 'CloudHost247 server catalog and server management workflow',
     weight: 20,
+    links: ['/hosting/vps', '/hosting/dedicated', '/cloud'],
   },
   {
     id: 'server-management',
@@ -87,6 +98,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'CloudHost247 email and SMTP services are listed in the CloudHost247 service catalog. For mailbox access, delivery, credentials, or account-specific sending problems, I should transfer you to support rather than guess.',
     source: 'CloudHost247 email hosting and SMTP service modules',
     weight: 22,
+    links: ['/hosting/email'],
   },
   {
     id: 'ssl',
@@ -97,6 +109,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'SSL certificates and their status are managed from the SSL area of the CloudHost247 dashboard. Certificate availability and validation depend on the selected service and domain configuration. I cannot confirm a certificate has been issued without verified account data.',
     source: 'CloudHost247 SSL management workflow',
     weight: 20,
+    links: ['/hosting/ssl', '/account/ssl'],
   },
   {
     id: 'billing-renewals',
@@ -107,6 +120,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'Invoices, payments, and renewal details are available in the authenticated CloudHost247 Billing area. I cannot infer an individual payment, balance, renewal, refund, or suspension status from chat; account-specific billing questions require support.',
     source: 'CloudHost247 billing and invoice workflow',
     weight: 18,
+    links: ['/billing', '/account'],
   },
   {
     id: 'support-tickets',
@@ -117,6 +131,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'Authenticated customers can open and track support tickets from the CloudHost247 Support area. I can also transfer this conversation to the support queue while preserving the conversation history.',
     source: 'CloudHost247 support ticket workflow',
     weight: 16,
+    links: ['/help', '/contact'],
   },
   {
     id: 'backup-troubleshooting',
@@ -127,6 +142,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'CloudHost247 backup coverage depends on the service and plan. The Backup Policy is the source of truth. For a restoration request, submit a CloudHost247 support ticket with the affected service and the approximate date of the data needed; I cannot promise a restoration time or outcome.',
     source: 'CloudHost247 Backup Policy and support workflow',
     weight: 20,
+    links: ['/legal/backup-policy', '/cloud/backups'],
   },
   {
     id: 'contact-information',
@@ -137,6 +153,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'You can contact CloudHost247 through the Support area and support ticket workflow. For an account-specific issue, this conversation can be transferred so the support team receives the full transcript instead of asking you to repeat it.',
     source: 'CloudHost247 contact and support pages',
     weight: 18,
+    links: ['/contact', '/help'],
   },
   {
     id: 'proxy-services',
@@ -177,6 +194,7 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
       'You can manage your CloudHost247 profile from Account and use the authenticated dashboard for services, domains, DNS, SSL, billing, and support. I cannot expose credentials, tokens, passwords, or another customer’s information.',
     source: 'CloudHost247 account and authorization workflow',
     weight: 12,
+    links: ['/account', '/login'],
   },
   {
     id: 'mrz-developer-tool',
@@ -192,13 +210,28 @@ export const CLOUDHOST247_KNOWLEDGE: readonly SupportKnowledgeEntry[] = [
 
 const normalized = (value: string): string => value.toLocaleLowerCase().replace(/\s+/g, ' ').trim();
 
+/**
+ * True when `needle` occurs in `haystack` as a whole word or phrase.
+ *
+ * This uses token boundaries rather than `String.includes`. Substring matching here is not a style
+ * preference: "can i host wordpress" contains "rdp" inside "wo*rdp*ress", which used to hand a
+ * WordPress question to the RDP entry with maximum confidence. A reviewed knowledge base that
+ * confidently answers the wrong question is worse than one that answers nothing.
+ */
+function containsTerm(haystack: string, needle: string): boolean {
+  const term = normalized(needle);
+  if (!term) return false;
+  if (/[^a-z0-9 ]/.test(term)) return haystack.includes(term);
+  return ` ${haystack.replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()} `.includes(` ${term} `);
+}
+
 /** Deterministic retrieval: all terms in an entry are plain, inspectable application data. */
 export function retrieveKnowledge(message: string): SupportKnowledgeEntry | null {
   const text = normalized(message);
   const matches = CLOUDHOST247_KNOWLEDGE
     .map((entry) => ({
       entry,
-      score: entry.keywords.reduce((score, keyword) => score + (text.includes(normalized(keyword)) ? 1 : 0), 0),
+      score: entry.keywords.reduce((score, keyword) => score + (containsTerm(text, keyword) ? 1 : 0), 0),
     }))
     .filter(({ score }) => score > 0)
     .sort((left, right) => {

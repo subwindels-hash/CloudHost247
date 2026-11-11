@@ -1,0 +1,5 @@
+[worker:phase31-cron] starting (one-shot Cron cycle, poll=2000ms, concurrency=4, simulation=false)
+[worker:phase31-cron] tools center: 4 provider(s) probed (4 failing), 6 resolver(s) probed (6 down, 0 degraded)
+[worker:phase31-cron] revenue guardian: ran [process_overdue_invoices, process_upcoming_invoices, process_payment_promises, process_renewals, process_pre_suspension, process_pre_termination, recalculate_revenue_risk, reconcile_recovery_state, run_assignment_rules]
+[worker:phase31-cron] ai control plane: detected {"invoiceOverdue":0,"sslExpiring":0,"domainExpiring":0,"deploymentStuck":0,"serverUnhealthy":0,"paymentFailed":0}, events processed 0, workflows dispatched 0, scans launched [provisioning.stuck, infrastructure.health], approvals expired 0, briefing already_final
+[worker:phase31-cron] stopped cleanly

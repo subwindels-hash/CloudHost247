@@ -59,6 +59,7 @@ import { registerRevenueGuardianRoutes } from './revenue-guardian/controllers/ro
 import { registerCloudflareRoutes } from './routes/cloudflare';
 import { registerAdminCloudflareRoutes } from './routes/admin-cloudflare';
 import { registerAiSupportRoutes } from './routes/ai-support';
+import { registerAiKnowledgeRoutes } from './routes/ai-knowledge-admin';
 import { registerAiControlPlaneRoutes } from './ai-os/controllers/routes';
 import { registerToolsRoutes } from './tools/routes';
 import { registerMrzToolRoutes } from './routes/mrz-tools';
@@ -254,6 +255,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerCloudflareRoutes(instance, env, pool);
     await registerAdminCloudflareRoutes(instance, env, pool);
     await registerAiSupportRoutes(instance, env, pool);
+    await registerAiKnowledgeRoutes(instance, env, pool);
 
     // AI Control Plane — the shared AI operating system (agent registry, gated tool executor,
     // approvals, events/workflows, executive board, copilots, customer AI transparency).

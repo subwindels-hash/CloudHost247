@@ -153,6 +153,11 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0098_refund_idempotency_global_uniqueness.sql',
     // Consent-gated, optional Visitor Intelligence collection and aggregate reporting.
     '0099_create_visitor_intelligence.sql',
+    // AI Website Intelligence: the assistant's knowledge index. Renumbered 0097 -> 0100 when the
+    // AI line and the release line were combined, because the release line had independently taken
+    // 0097 for refund idempotency. Every earlier prefix is occupied on one history or the other, so
+    // 0100 is the first number that is free on both.
+    '0100_ai_website_knowledge.sql',
   ];
 
   it('finds the committed migration files in order', () => {

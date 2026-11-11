@@ -30,6 +30,7 @@ import { syncDisplayRates, FxFeedError } from '../services/fx-service';
 import { sweepDomainServices, DOMAIN_SERVICES_SWEEP_INTERVAL_MS } from './domain-services-sweep';
 import { sweepEmailTrace, EMAIL_TRACE_SWEEP_INTERVAL_MS } from './email-trace-sweep';
 import { runAiSweep, AI_SWEEP_INTERVAL_MS } from '../ai-os/jobs/sweep';
+import { sweepWebsiteKnowledge, WEBSITE_KNOWLEDGE_INTERVAL_MS } from '../ai-website/knowledge-worker';
 import { monitorSweep, providerHealthSweep, resolverHealthSweep } from '../tools/worker/sweep';
 import { getSetting } from '../db/ops-tables';
 import type { EngineOptions } from '../deployments/engine';
@@ -94,6 +95,7 @@ interface WorkerSchedule {
   lastToolsMonitorSweep: number;
   lastFxSync: number;
   lastEmailTraceSweep: number;
+  lastWebsiteKnowledgeSweep: number;
 }
 
 function createWorkerSchedule(): WorkerSchedule {
@@ -118,6 +120,7 @@ function createWorkerSchedule(): WorkerSchedule {
     lastToolsMonitorSweep: 0,
     lastFxSync: 0,
     lastEmailTraceSweep: 0,
+    lastWebsiteKnowledgeSweep: 0,
   };
 }
 
@@ -379,6 +382,23 @@ async function runWorkerCycle(
       logger.log(
         `[worker:${ctx.workerId}] security pins rotated: ${pinsRotated}; rotation notices: ${pinsNotified}`
       );
+    }
+  }
+  if (now - schedule.lastWebsiteKnowledgeSweep >= WEBSITE_KNOWLEDGE_INTERVAL_MS) {
+    schedule.lastWebsiteKnowledgeSweep = now;
+    try {
+      const knowledge = await sweepWebsiteKnowledge(ctx.db);
+      didWork ||= knowledge.indexed > 0 || knowledge.removed > 0;
+      if (knowledge.indexed > 0 || knowledge.failed > 0 || knowledge.removed > 0) {
+        logger.log(
+          `[worker:${ctx.workerId}] ai website knowledge: ${knowledge.discovered} discovered, ${knowledge.indexed} indexed, `
+          + `${knowledge.unchanged} unchanged, ${knowledge.excluded} excluded, ${knowledge.removed} removed, ${knowledge.failed} failed`
+        );
+      }
+    } catch (error) {
+      // The assistant degrades to the last good index. A failing reindex must never stop billing,
+      // provisioning or notifications from being swept.
+      logger.error(`[worker:${ctx.workerId}] ai website knowledge sweep failed: ${(error as Error).message}`);
     }
   }
   if (now - schedule.lastAiControlPlaneSweep >= AI_SWEEP_INTERVAL_MS) {

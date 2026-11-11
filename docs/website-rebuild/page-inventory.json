@@ -23,20 +23,20 @@
     "staging-functional": "licensed WHMCS staging installation"
   },
   "totals": {
-    "root_php_pages": 84,
-    "registered_public_pages": 67,
-    "navigation_destinations": 112,
-    "footer_destinations": 97,
+    "root_php_pages": 92,
+    "registered_public_pages": 75,
+    "navigation_destinations": 125,
+    "footer_destinations": 118,
     "mega_menus": 7,
     "footer_columns": 8,
     "hero_scenes_exact": 67,
     "hero_scenes_from_family_fallback": 0,
     "distinct_hero_scenes": 49,
     "pages_by_route_owner": {
-      "cloudhost247-theme": 67,
+      "cloudhost247-theme": 75,
       "internal": 17,
       "tools-front-controller": 265,
-      "whmcs-core": 7
+      "whmcs-core": 8
     }
   },
   "defects": {
@@ -919,6 +919,36 @@
       "reachable": true
     },
     {
+      "php_page": "digital-products.php",
+      "path": "/digital-products.php",
+      "canonical_url": "/digital-products.php",
+      "title": "Digital Products",
+      "page_title": "Digital Products",
+      "category": "Services",
+      "route_owner": "cloudhost247-theme",
+      "status": "published",
+      "implementation_status": "published",
+      "template": "digital-products",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Digital Products",
+        "description": "Explore downloadable digital products from CloudHost247."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "",
+      "image_status": "n/a",
+      "seo_status": "ok",
+      "navigation_placement": "platforms / Application platforms",
+      "navigation_location": "platforms / Application platforms",
+      "footer_placement": "Products",
+      "footer_location": "Products",
+      "reachable": true
+    },
+    {
       "php_page": "dns-management.php",
       "path": "/dns-management.php",
       "canonical_url": "/dns-management.php",
@@ -942,8 +972,8 @@
       "visual": "domains/dns-management",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "domains / Domains",
-      "navigation_location": "domains / Domains",
+      "navigation_placement": "domains / DNS & tools",
+      "navigation_location": "domains / DNS & tools",
       "footer_placement": "Domains",
       "footer_location": "Domains",
       "reachable": true
@@ -1092,8 +1122,8 @@
       "visual": "domains/domain-dns",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "domains / Domains",
-      "navigation_location": "domains / Domains",
+      "navigation_placement": "domains / DNS & tools",
+      "navigation_location": "domains / DNS & tools",
       "footer_placement": "Domains",
       "footer_location": "Domains",
       "reachable": true
@@ -1122,8 +1152,8 @@
       "visual": "security/security",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "domains / Domains | legal / Legal & Policy Center",
-      "navigation_location": "domains / Domains | legal / Legal & Policy Center",
+      "navigation_placement": "domains / Find & manage | legal / Legal & Policy Center",
+      "navigation_location": "domains / Find & manage | legal / Legal & Policy Center",
       "footer_placement": "Domains | Legal",
       "footer_location": "Domains | Legal",
       "reachable": true
@@ -1152,8 +1182,8 @@
       "visual": "domains/domain-network",
       "image_status": "present",
       "seo_status": "ok",
-      "navigation_placement": "domains / Domains | domains / menu root",
-      "navigation_location": "domains / Domains | domains / menu root",
+      "navigation_placement": "domains / Find & manage | domains / menu root",
+      "navigation_location": "domains / Find & manage | domains / menu root",
       "footer_placement": "Domains",
       "footer_location": "Domains",
       "reachable": true
@@ -1396,6 +1426,36 @@
       "navigation_location": "cloud / Servers | hosting / Specialized hosting",
       "footer_placement": "Cloud & Servers",
       "footer_location": "Cloud & Servers",
+      "reachable": true
+    },
+    {
+      "php_page": "google-workspace.php",
+      "path": "/google-workspace.php",
+      "canonical_url": "/google-workspace.php",
+      "title": "Google Workspace",
+      "page_title": "Google Workspace",
+      "category": "Services",
+      "route_owner": "cloudhost247-theme",
+      "status": "published",
+      "implementation_status": "published",
+      "template": "google-workspace",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Google Workspace",
+        "description": "Explore Google Workspace plans and collaboration options with CloudHost247."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "",
+      "image_status": "n/a",
+      "seo_status": "ok",
+      "navigation_placement": "hosting / Specialized hosting",
+      "navigation_location": "hosting / Specialized hosting",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {
@@ -1759,6 +1819,36 @@
       "reachable": false
     },
     {
+      "php_page": "number-services.php",
+      "path": "/number-services.php",
+      "canonical_url": "/number-services.php",
+      "title": "Virtual Number Services",
+      "page_title": "Virtual Number Services",
+      "category": "Services",
+      "route_owner": "cloudhost247-theme",
+      "status": "published",
+      "implementation_status": "published",
+      "template": "number-services",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Virtual Number Services",
+        "description": "Explore CloudHost247 virtual number services for your business."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "",
+      "image_status": "n/a",
+      "seo_status": "ok",
+      "navigation_placement": "hosting / Specialized hosting",
+      "navigation_location": "hosting / Specialized hosting",
+      "footer_placement": "Products",
+      "footer_location": "Products",
+      "reachable": true
+    },
+    {
       "php_page": "offers.php",
       "path": "/offers.php",
       "canonical_url": "/offers.php",
@@ -1784,6 +1874,36 @@
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting | resources / Stay informed",
       "navigation_location": "hosting / Specialized hosting | resources / Stay informed",
+      "footer_placement": "Products",
+      "footer_location": "Products",
+      "reachable": true
+    },
+    {
+      "php_page": "office-365.php",
+      "path": "/office-365.php",
+      "canonical_url": "/office-365.php",
+      "title": "Microsoft 365 (Office 365)",
+      "page_title": "Microsoft 365 (Office 365)",
+      "category": "Services",
+      "route_owner": "cloudhost247-theme",
+      "status": "published",
+      "implementation_status": "published",
+      "template": "office-365",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Microsoft 365 (Office 365)",
+        "description": "Explore Microsoft 365 plans and productivity options with CloudHost247."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "",
+      "image_status": "n/a",
+      "seo_status": "ok",
+      "navigation_placement": "hosting / Specialized hosting",
+      "navigation_location": "hosting / Specialized hosting",
       "footer_placement": "Products",
       "footer_location": "Products",
       "reachable": true
@@ -1939,6 +2059,36 @@
       "reachable": true
     },
     {
+      "php_page": "proxy-services.php",
+      "path": "/proxy-services.php",
+      "canonical_url": "/proxy-services.php",
+      "title": "LTE Proxy Services",
+      "page_title": "LTE Proxy Services",
+      "category": "Services",
+      "route_owner": "cloudhost247-theme",
+      "status": "published",
+      "implementation_status": "published",
+      "template": "proxy-services",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "LTE Proxy Services",
+        "description": "Explore LTE proxy plans and connection options with CloudHost247."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "",
+      "image_status": "n/a",
+      "seo_status": "ok",
+      "navigation_placement": "cloud / Servers",
+      "navigation_location": "cloud / Servers",
+      "footer_placement": "Products",
+      "footer_location": "Products",
+      "reachable": true
+    },
+    {
       "php_page": "python-hosting.php",
       "path": "/python-hosting.php",
       "canonical_url": "/python-hosting.php",
@@ -1966,6 +2116,36 @@
       "navigation_location": "hosting / Web hosting | platforms / Application platforms",
       "footer_placement": "Developers",
       "footer_location": "Developers",
+      "reachable": true
+    },
+    {
+      "php_page": "rdp-hosting.php",
+      "path": "/rdp-hosting.php",
+      "canonical_url": "/rdp-hosting.php",
+      "title": "Remote Desktop Servers",
+      "page_title": "Remote Desktop Servers",
+      "category": "Servers",
+      "route_owner": "cloudhost247-theme",
+      "status": "published",
+      "implementation_status": "published",
+      "template": "rdp-hosting",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Remote Desktop Servers",
+        "description": "Explore CloudHost247 remote desktop server plans and find the resources for your remote workspace."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "",
+      "image_status": "n/a",
+      "seo_status": "ok",
+      "navigation_placement": "cloud / Servers",
+      "navigation_location": "cloud / Servers",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {
@@ -2206,6 +2386,66 @@
       "navigation_location": "resources / Documentation & help",
       "footer_placement": "Resources",
       "footer_location": "Resources",
+      "reachable": true
+    },
+    {
+      "php_page": "smm-services.php",
+      "path": "/smm-services.php",
+      "canonical_url": "/smm-services.php",
+      "title": "Social Media Marketing Services",
+      "page_title": "Social Media Marketing Services",
+      "category": "Services",
+      "route_owner": "cloudhost247-theme",
+      "status": "published",
+      "implementation_status": "published",
+      "template": "smm-services",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Social Media Marketing Services",
+        "description": "Explore CloudHost247 social media marketing services and find the right fit for your goals."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "",
+      "image_status": "n/a",
+      "seo_status": "ok",
+      "navigation_placement": "hosting / Specialized hosting",
+      "navigation_location": "hosting / Specialized hosting",
+      "footer_placement": "Products",
+      "footer_location": "Products",
+      "reachable": true
+    },
+    {
+      "php_page": "smtp-hosting.php",
+      "path": "/smtp-hosting.php",
+      "canonical_url": "/smtp-hosting.php",
+      "title": "SMTP Hosting",
+      "page_title": "SMTP Hosting",
+      "category": "Services",
+      "route_owner": "cloudhost247-theme",
+      "status": "published",
+      "implementation_status": "published",
+      "template": "smtp-hosting",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "SMTP Hosting",
+        "description": "Explore SMTP hosting plans and email sending options with CloudHost247."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "",
+      "image_status": "n/a",
+      "seo_status": "ok",
+      "navigation_placement": "hosting / Specialized hosting",
+      "navigation_location": "hosting / Specialized hosting",
+      "footer_placement": "Products",
+      "footer_location": "Products",
       "reachable": true
     },
     {
@@ -2622,8 +2862,8 @@
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
-      "navigation_placement": "domains / Domains",
-      "navigation_location": "domains / Domains",
+      "navigation_placement": "domains / Find & manage",
+      "navigation_location": "domains / Find & manage",
       "footer_placement": "Domains | Products",
       "footer_location": "Domains | Products",
       "reachable": true
@@ -2652,10 +2892,10 @@
       "visual": "",
       "image_status": "n/a",
       "seo_status": "n/a",
-      "navigation_placement": "domains / Domains",
-      "navigation_location": "domains / Domains",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "domains / Find & manage",
+      "navigation_location": "domains / Find & manage",
+      "footer_placement": "Domains",
+      "footer_location": "Domains",
       "reachable": true
     },
     {
@@ -2686,6 +2926,36 @@
       "navigation_location": "company / Company",
       "footer_placement": "Company",
       "footer_location": "Company",
+      "reachable": true
+    },
+    {
+      "php_page": "index.php",
+      "path": "",
+      "canonical_url": "",
+      "title": "",
+      "page_title": "",
+      "category": "Platform",
+      "route_owner": "whmcs-core",
+      "status": "platform entry point",
+      "implementation_status": "platform entry point",
+      "template": "",
+      "test_status": "staging-functional; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "",
+        "description": ""
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "",
+      "image_status": "n/a",
+      "seo_status": "n/a",
+      "navigation_placement": "domains / Domain investing",
+      "navigation_location": "domains / Domain investing",
+      "footer_placement": "Domains",
+      "footer_location": "Domains",
       "reachable": true
     },
     {
@@ -2862,10 +3132,10 @@
       "visual": "dns",
       "image_status": "n/a",
       "seo_status": "ok",
-      "navigation_placement": "domains / DNS",
-      "navigation_location": "domains / DNS",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "domains / DNS & tools",
+      "navigation_location": "domains / DNS & tools",
+      "footer_placement": "Domains",
+      "footer_location": "Domains",
       "reachable": true
     },
     {
@@ -2952,10 +3222,10 @@
       "visual": "dns",
       "image_status": "n/a",
       "seo_status": "ok",
-      "navigation_placement": "domains / DNS",
-      "navigation_location": "domains / DNS",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "domains / DNS & tools",
+      "navigation_location": "domains / DNS & tools",
+      "footer_placement": "Domains",
+      "footer_location": "Domains",
       "reachable": true
     },
     {
@@ -3132,10 +3402,10 @@
       "visual": "dns",
       "image_status": "n/a",
       "seo_status": "ok",
-      "navigation_placement": "domains / DNS",
-      "navigation_location": "domains / DNS",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "domains / DNS & tools",
+      "navigation_location": "domains / DNS & tools",
+      "footer_placement": "Domains",
+      "footer_location": "Domains",
       "reachable": true
     },
     {
@@ -3192,10 +3462,10 @@
       "visual": "dns",
       "image_status": "n/a",
       "seo_status": "ok",
-      "navigation_placement": "domains / DNS",
-      "navigation_location": "domains / DNS",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "domains / DNS & tools",
+      "navigation_location": "domains / DNS & tools",
+      "footer_placement": "Domains",
+      "footer_location": "Domains",
       "reachable": true
     },
     {
@@ -6252,10 +6522,10 @@
       "visual": "dns",
       "image_status": "n/a",
       "seo_status": "ok",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
+      "navigation_placement": "domains / DNS & tools",
+      "navigation_location": "domains / DNS & tools",
+      "footer_placement": "Domains",
+      "footer_location": "Domains",
       "reachable": true
     },
     {
@@ -6612,10 +6882,10 @@
       "visual": "dns-domains",
       "image_status": "n/a",
       "seo_status": "ok",
-      "navigation_placement": "domains / DNS",
-      "navigation_location": "domains / DNS",
-      "footer_placement": "Tools",
-      "footer_location": "Tools",
+      "navigation_placement": "domains / DNS & tools",
+      "navigation_location": "domains / DNS & tools",
+      "footer_placement": "Domains | Tools",
+      "footer_location": "Domains | Tools",
       "reachable": true
     },
     {

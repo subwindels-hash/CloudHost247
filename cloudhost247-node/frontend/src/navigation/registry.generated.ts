@@ -1717,6 +1717,7 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/admin",
   "/admin/ai-command",
   "/admin/ai-support",
+  "/admin/ai-support/knowledge",
   "/admin/applications/:id",
   "/admin/apps",
   "/admin/apps/:id",

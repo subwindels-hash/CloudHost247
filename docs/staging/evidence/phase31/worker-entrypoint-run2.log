@@ -1,0 +1,3 @@
+[worker:phase31-cron] starting (one-shot Cron cycle, poll=2000ms, concurrency=4, simulation=false)
+[worker:phase31-cron] tools center: 4 provider(s) probed (4 failing), 6 resolver(s) probed (3 down, 3 degraded)
+[worker:phase31-cron] stopped cleanly

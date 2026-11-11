@@ -142,6 +142,7 @@ const AdminControlPanelsPage = lazy(() => import('./pages/AdminControlPanelsPage
 const AdminLicensesPage = lazy(() => import('./pages/AdminLicensesPage'));
 const AdminMonitoringPage = lazy(() => import('./pages/AdminMonitoringPage'));
 const AdminAiSupportPage = lazy(() => import('./pages/AdminAiSupportPage'));
+const AdminAiKnowledgePage = lazy(() => import('./pages/AdminAiKnowledgePage'));
 const AdminAiCommandPage = lazy(() => import('./pages/ai-os/AdminAiCommandPage'));
 const AiAssistantPage = lazy(() => import('./pages/ai-os/AiAssistantPage'));
 const RGDashboardPage = lazy(() => import('./pages/revenue-guardian/DashboardPage'));
@@ -412,6 +413,7 @@ export default function App() {
               backend independently re-verifies the role on every request. */}
           <Route element={<RequireRole roles={['staff', 'admin', 'super_admin']} />}>
             <Route path="/admin/ai-support" element={<AdminAiSupportPage />} />
+            <Route path="/admin/ai-support/knowledge" element={<AdminAiKnowledgePage />} />
             {/* AI Command Center: the full control plane (staff can view; gate-keeping actions
                 like approvals/model-config are re-verified server-side per permission). */}
             <Route path="/admin/ai-command" element={<AdminAiCommandPage />} />

@@ -219,6 +219,7 @@ export function analyzeFile(input: AnalyzeFileInput) {
 }
 
 export function fetchHistory(params: HistoryParams = {}) {
+  return apiFetch<HistoryResponse>(`/api/v1/email-forensics/history${query({ ...params })}`);
   return apiFetch<HistoryResponse>(`/api/v1/email-forensics/history${query(params)}`);
 }
 
