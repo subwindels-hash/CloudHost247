@@ -35,7 +35,7 @@ final class Site
          * the generator projects them into the theme registry, so the fallback is only a safety net.
          */
         $description = $home
-            ? 'CloudHost247 gives businesses, developers and organizations the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms.'
+            ? 'CloudHost247 gives businesses, developers and organizations worldwide the infrastructure they need to build and operate online — from domains and websites to cloud servers, applications and deployment platforms.'
             : ($page
                 ? (isset($page['seo_description']) && trim((string) $page['seo_description']) !== '' ? $page['seo_description'] : $page['summary'])
                 : 'Access your CloudHost247 account, services, billing and support.');

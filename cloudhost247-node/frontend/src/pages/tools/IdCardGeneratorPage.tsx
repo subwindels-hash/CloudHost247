@@ -59,7 +59,7 @@ export default function IdCardGeneratorPage() {
         operatingSystem: 'Any browser',
         description:
           'Free employee ID badge maker with twelve templates, live front-and-back preview, scannable QR and Code 128 codes, high-resolution PDF/PNG/JPG export and bulk generation from CSV or Excel. All processing happens in the browser.',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'NGN' },
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
       },
     }
   );
@@ -253,7 +253,7 @@ export default function IdCardGeneratorPage() {
                     <input id="idc-field-email" type="email" value={state.email} maxLength={80} placeholder="amara.okafor@example.com" onChange={(event) => set('email', event.target.value)} {...fieldProps('email')} />
                   </Field>
                   <Field id="phone" label="Phone number" error={errorFor('phone')}>
-                    <input id="idc-field-phone" type="tel" value={state.phone} maxLength={30} placeholder="+234 801 234 5678" onChange={(event) => set('phone', event.target.value)} {...fieldProps('phone')} />
+                    <input id="idc-field-phone" type="tel" value={state.phone} maxLength={30} placeholder="Phone number with country code" onChange={(event) => set('phone', event.target.value)} {...fieldProps('phone')} />
                   </Field>
                   <Field id="bloodGroup" label="Blood group" error={errorFor('bloodGroup')} help="Optional. Printed on the back, where a first-aider looks for it.">
                     <select id="idc-field-bloodGroup" value={state.bloodGroup} onChange={(event) => set('bloodGroup', event.target.value)} {...fieldProps('bloodGroup')}>
@@ -269,7 +269,7 @@ export default function IdCardGeneratorPage() {
                     <input id="idc-field-dateOfJoining" type="date" value={state.dateOfJoining} onChange={(event) => set('dateOfJoining', event.target.value)} {...fieldProps('dateOfJoining')} />
                   </Field>
                   <Field id="emergencyContact" label="Emergency contact" error={errorFor('emergencyContact')}>
-                    <input id="idc-field-emergencyContact" type="text" value={state.emergencyContact} maxLength={120} placeholder="Chidi Okafor +234 802 111 2222" onChange={(event) => set('emergencyContact', event.target.value)} />
+                    <input id="idc-field-emergencyContact" type="text" value={state.emergencyContact} maxLength={120} placeholder="Contact name and phone number" onChange={(event) => set('emergencyContact', event.target.value)} />
                   </Field>
                   <Field id="validFrom" label="Card issue date" error={errorFor('validFrom')}>
                     <input id="idc-field-validFrom" type="date" value={state.validFrom} onChange={(event) => set('validFrom', event.target.value)} {...fieldProps('validFrom')} />
@@ -287,7 +287,7 @@ export default function IdCardGeneratorPage() {
                     <input id="idc-field-companyName" type="text" value={state.companyName} maxLength={60} placeholder="Northstar Technologies" onChange={(event) => set('companyName', event.target.value)} {...fieldProps('companyName')} />
                   </Field>
                   <Field id="companyAddress" label="Company address" error={errorFor('companyAddress')}>
-                    <input id="idc-field-companyAddress" type="text" value={state.companyAddress} maxLength={160} placeholder="12 Adeola Odeku Street, Victoria Island, Lagos" onChange={(event) => set('companyAddress', event.target.value)} />
+                    <input id="idc-field-companyAddress" type="text" value={state.companyAddress} maxLength={160} placeholder="Street address, city and country" onChange={(event) => set('companyAddress', event.target.value)} />
                   </Field>
                   <Field id="companyWebsite" label="Website" error={errorFor('companyWebsite')}>
                     <input id="idc-field-companyWebsite" type="text" value={state.companyWebsite} maxLength={120} placeholder="https://example.com" onChange={(event) => set('companyWebsite', event.target.value)} {...fieldProps('companyWebsite')} />

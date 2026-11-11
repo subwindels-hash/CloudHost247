@@ -4,7 +4,7 @@ namespace CloudHost247\Tools;
 /** Escaped HTML for the tools hub and each tool page. */
 final class View
 {
-    public static function fragment(array $page, $query, $base)
+    public static function fragment(array $page, $query, $base, $platform = '')
     {
         $base = rtrim((string) $base, '/');
         $kind = isset($page['kind']) ? $page['kind'] : 'tool';
@@ -12,7 +12,7 @@ final class View
             return self::collection($page, $query, $base);
         }
         if ($kind === 'hub' || $kind === 'category') {
-            return self::hub($page, $query, $base);
+            return self::hub($page, $query, $base, $platform);
         }
         return self::tool($page, $base);
     }
@@ -120,7 +120,7 @@ final class View
         return $json === false ? '' : '<script type="application/ld+json">' . $json . '</script>';
     }
 
-    private static function hub(array $page, $query, $base)
+    private static function hub(array $page, $query, $base, $platform)
     {
         $category = isset($page['slug']) ? $page['slug'] : '';
         $published = Catalog::toolsInDiscovery($category);
@@ -161,11 +161,37 @@ final class View
             $listLabel = (isset($labels[$category]) ? $labels[$category] : $page['name']) . ' tools';
         }
         $html .= '<h2 class="ch-visually-hidden">' . self::e($listLabel) . '</h2>';
-        $html .= '<p class="ch-kicker" role="status">' . count($tools) . ' tools</p>';
-        if (!$tools) {
+        // These account services run in Node, not in the PHP tool runner.
+        // Only advertise a same-origin, operator-configured platform mount.
+        $platform = rtrim((string) $platform, '/');
+        $services = array(
+            array('slug' => 'email-trace', 'name' => 'Email Trace', 'path' => '/account/email-trace',
+                'summary' => 'Trace your outgoing mail and review delivery events, queue snapshots and domain diagnostics for your account.',
+                'search' => 'email trace mail delivery message diagnostics exim', 'availability' => 'Mail-server setup required.'),
+            array('slug' => 'email-forensics', 'name' => 'Email Trace & Forensics Analyzer', 'path' => '/account/email-forensics',
+                'summary' => 'Analyze email headers or uploaded files to review routes, source IP candidates and authentication findings.',
+                'search' => 'email trace forensics analyzer header eml source ip route spf dkim dmarc', 'availability' => 'Availability depends on configuration.'),
+        );
+        $accountServices = array();
+        if ($platform !== '' && preg_match('~^/(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-]+$~D', $platform)
+            && ($category === '' || $category === 'email')) {
+            foreach ($services as $service) {
+                if ($query === '' || stripos($service['name'] . ' ' . $service['summary'] . ' ' . $service['search'], $query) !== false) { $accountServices[] = $service; }
+            }
+        }
+        $html .= '<p class="ch-kicker" role="status">' . (count($tools) + count($accountServices)) . ' tools</p>';
+        if (!$tools && !$accountServices) {
             $html .= '<div class="ch-notice"><h2>No tools match that search.</h2><p>Try a category, or search for dns, ip or json.</p></div>';
         }
         $html .= '<div class="ch-tool-grid">';
+        foreach ($accountServices as $service) {
+            $url = self::e($base . $platform . $service['path']);
+            $name = self::e($service['name']);
+            $html .= '<article class="ch-tool-card" data-tool-slug="' . self::e($service['slug']) . '"><span class="ch-tool-icon" aria-hidden="true">✉</span>'
+                . '<h3><a href="' . $url . '">' . $name . '</a></h3>'
+                . '<p>' . self::e($service['summary']) . '</p><p>Sign-in required. ' . self::e($service['availability']) . '</p>'
+                . '<a href="' . $url . '">Open ' . $name . ' →</a></article>';
+        }
         foreach ($tools as $tool) {
             $html .= self::card($tool, $base);
         }

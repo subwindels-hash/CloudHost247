@@ -42,6 +42,8 @@
   var pending = null;
 
   function resetTilt() {
+    pending = null;
+    if (tiltFrame) { window.cancelAnimationFrame(tiltFrame); tiltFrame = 0; }
     if (!active) return;
     active.classList.remove('is-tilting');
     active.style.setProperty('--tilt-x', '0deg');

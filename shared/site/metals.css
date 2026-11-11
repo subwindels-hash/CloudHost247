@@ -408,3 +408,16 @@ body { overflow-x: clip; }
   .ch-metal::before, .ch-metal::after, .ch-photo-frame::after { display: none; }
   [data-tilt], [data-parallax] { transform: none !important; }
 }
+
+/* Depth for the flat service illustrations. Decorative only; no 3D image assets.
+   Pointer tilt is handled by motion.js; the inner layer drifts independently. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-showcase-depth] { animation: ch-showcase-drift 9s ease-in-out infinite; transform-origin: center; }
+  @keyframes ch-showcase-drift {
+    0%, 100% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg); }
+    50% { transform: translate3d(0, -5px, 8px) rotateX(1deg) rotateY(-1deg); }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-showcase-depth] { animation: none !important; transform: none !important; }
+}

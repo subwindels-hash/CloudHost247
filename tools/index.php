@@ -55,7 +55,14 @@ if ($whmcs && $page) {
     ));
     $ca->assign('chToolsReady', true);
     $ca->assign('chToolsBase', $base);
-    $ca->assign('chToolsHtml', View::fragment($page, $query, $base));
+    $platform = '';
+    try {
+        require_once $root . '/modules/addons/cloudhost247_core/bootstrap.php';
+        require_once $root . '/modules/addons/cloudhost247_theme/lib/ThemeRepository.php';
+        $settings = (new \CloudHost247\Theme\ThemeRepository())->settings();
+        $platform = \CloudHost247\Theme\Site::platformPath(isset($settings['platform_base_path']) ? $settings['platform_base_path'] : '');
+    } catch (\Throwable $ignored) { /* No configured platform: do not advertise an unreachable account route. */ }
+    $ca->assign('chToolsHtml', View::fragment($page, $query, $base, $platform));
     $ca->setTemplate('cloudhost247-tools');
     $ca->output();
     return;

@@ -19,6 +19,12 @@ import { LEGAL_INDEX } from '../../navigation/registry.generated';
  * and off-site links. No user input ever reaches it.
  */
 
+// The extracted policy HTML contains plain-text email addresses. Route contact requests through
+// the site's contact form without altering the authoritative source documents.
+function linkPolicyContacts(html: string): string {
+  return html.replace(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi, '<a href="/contact">Contact us</a>');
+}
+
 export function LegalIndexPage() {
   usePageMeta(
     'Legal & Policy Center',
@@ -57,7 +63,7 @@ export function LegalIndexPage() {
   const bySlug = new Map(LEGAL_DOCUMENTS.map((document) => [document.slug, document]));
 
   return (
-    <div className="ch-ds">
+    <div className="ch-ds ch-legal-page">
       <section className="ch-hero ch-hero--compact">
         <div className="ch-wrap">
           <p className="ch-kicker">Legal</p>
@@ -160,7 +166,7 @@ export function LegalDocumentPage() {
   }
 
   return (
-    <div className="ch-ds">
+    <div className="ch-ds ch-legal-page">
       <div className="ch-wrap--wide">
         <nav className="ch-breadcrumbs" aria-label="Breadcrumb">
           <ol>
@@ -173,16 +179,17 @@ export function LegalDocumentPage() {
 
       <section className="ch-section ch-section--tight" style={{ paddingTop: '20px' }}>
         <div className="ch-wrap--wide">
-          <div className="ch-doc-layout">
-            <nav className="ch-doc-nav" aria-label="Policies">
+          <div className="ch-doc-layout ch-legal-layout">
+            <nav className="ch-doc-nav ch-legal-nav" aria-label="Policies">
               <h2>Policies</h2>
               <ul>
                 {LEGAL_DOCUMENTS.filter((entry) => entry.slug !== 'policy-center').map((entry) => (
                   <li key={entry.slug}>
                     <Link
-                      to={entry.spa}
+                      to={`${entry.spa}#policy-content`}
                       aria-current={entry.slug === document.slug ? 'page' : undefined}
                     >
+                      <span aria-hidden="true">⚖️</span>
                       {entry.title}
                     </Link>
                   </li>
@@ -190,14 +197,13 @@ export function LegalDocumentPage() {
               </ul>
             </nav>
 
-            <article className="ch-prose-doc">
+            <article className="ch-prose-doc" id="policy-content">
               <h1>{document.title}</h1>
               <p className="ch-muted" style={{ fontSize: '0.85rem' }}>
-                {document.meta.words.toLocaleString()} words · source:{' '}
-                <code>{document.source}</code>
+                {document.meta.words.toLocaleString()} words
               </p>
               {/* First-party build-time HTML, sanitised by the extractor — see the module comment. */}
-              <div dangerouslySetInnerHTML={{ __html: document.html }} />
+              <div dangerouslySetInnerHTML={{ __html: linkPolicyContacts(document.html) }} />
               <div className="ch-note" style={{ marginTop: '40px' }}>
                 <h3>Questions about this policy</h3>
                 <p style={{ marginBottom: 0 }}>

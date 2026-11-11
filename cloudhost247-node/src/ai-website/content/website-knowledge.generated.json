@@ -3525,7 +3525,7 @@
    "category": "Legal",
    "related": [],
    "faqs": [],
-   "body": "Fair Usage Policy The use of CloudHost247 Isc products and services is governed by this Fair Usage Policy. It applies to all hosting plans, including shared hosting, reseller hosting, and WordPress hosting, whether they are advertised with limited or \"unlimited\" resources such as disk space, bandwidth/data transfer, email accounts, databases, and related server resources across Nigeria and globally. Our hosting services are designed to remain affordable by allowing multiple customers to share the same server infrastructure. To maintain performance and reliability for all users, each customer must ensure that their usage does not negatively impact other users on the same server. Acceptable Use of Resources All hosting plans are subject to reasonable usage limits. Customers may use allocated resources for legitimate website operations, provided such use remains within normal fair usage standards and complies with our Acceptable Use Policy. Excessive usage of resources such as CPU, RAM, disk I/O, inodes, bandwidth, or email storage that impacts server performance or other customers may result in a warning or requirement to upgrade to a higher plan or a dedicated/cloud hosting solution. Prohibited Activities The following activities are not permitted under this policy:\n\nUsing hosting services primarily as a file storage platform (e.g., Google Drive, Dropbox, OneDrive equivalents)\n\nLarge-scale file archiving unrelated to website functionality\n\nVideo or audio streaming services (e.g., YouTube-like platforms)\n\nCustomers are encouraged to use third-party storage services for such purposes and embed or link content on their websites where appropriate.\n\nFiles uploaded to CloudHost247 Isc hosting must be directly related to and actively used by the website.\n\nResource Monitoring and Enforcement If a website consumes excessive server resources due to poor optimization, security issues, or unusual traffic, the account owner will be notified once usage approaches or exceeds fair usage thresholds. Customers will be given a reasonable opportunity to resolve the issue, optimize their website, or upgrade their plan. Continued excessive usage that affects server stability or other users may require immediate migration to a virtual or cloud server.\n\nIn cases where system stability or security is at risk, CloudHost247 Isc reserves the right to temporarily suspend an account without prior notice. Shared Infrastructure Notice Shared, reseller, and WordPress hosting customers operate on a shared infrastructure where server resources are distributed among multiple users. To ensure consistent performance, any account that negatively impacts server or network stability must either resolve the issue or upgrade to a more suitable hosting environment. This transition is considered a positive step, as it typically indicates growth in website traffic and resource needs, and allows for greater performance, flexibility, and control. Policy Updates CloudHost247 Isc reserves the right to modify or update this Fair Usage Policy at any time. Where significant changes occur, customers will be notified via email or through the client dashboard before the changes take effect. For clarity, the terms \"bandwidth\" and \"data transfer\" are used interchangeably within this policy.",
+   "body": "Fair Usage Policy The use of CloudHost247 Isc products and services is governed by this Fair Usage Policy. It applies to all hosting plans, including shared hosting, reseller hosting, and WordPress hosting, whether they are advertised with limited or \"unlimited\" resources such as disk space, bandwidth/data transfer, email accounts, databases, and related server resources worldwide. Our hosting services are designed to remain affordable by allowing multiple customers to share the same server infrastructure. To maintain performance and reliability for all users, each customer must ensure that their usage does not negatively impact other users on the same server. Acceptable Use of Resources All hosting plans are subject to reasonable usage limits. Customers may use allocated resources for legitimate website operations, provided such use remains within normal fair usage standards and complies with our Acceptable Use Policy. Excessive usage of resources such as CPU, RAM, disk I/O, inodes, bandwidth, or email storage that impacts server performance or other customers may result in a warning or requirement to upgrade to a higher plan or a dedicated/cloud hosting solution. Prohibited Activities The following activities are not permitted under this policy:\n\nUsing hosting services primarily as a file storage platform (e.g., Google Drive, Dropbox, OneDrive equivalents)\n\nLarge-scale file archiving unrelated to website functionality\n\nVideo or audio streaming services (e.g., YouTube-like platforms)\n\nCustomers are encouraged to use third-party storage services for such purposes and embed or link content on their websites where appropriate.\n\nFiles uploaded to CloudHost247 Isc hosting must be directly related to and actively used by the website.\n\nResource Monitoring and Enforcement If a website consumes excessive server resources due to poor optimization, security issues, or unusual traffic, the account owner will be notified once usage approaches or exceeds fair usage thresholds. Customers will be given a reasonable opportunity to resolve the issue, optimize their website, or upgrade their plan. Continued excessive usage that affects server stability or other users may require immediate migration to a virtual or cloud server.\n\nIn cases where system stability or security is at risk, CloudHost247 Isc reserves the right to temporarily suspend an account without prior notice. Shared Infrastructure Notice Shared, reseller, and WordPress hosting customers operate on a shared infrastructure where server resources are distributed among multiple users. To ensure consistent performance, any account that negatively impacts server or network stability must either resolve the issue or upgrade to a more suitable hosting environment. This transition is considered a positive step, as it typically indicates growth in website traffic and resource needs, and allows for greater performance, flexibility, and control. Policy Updates CloudHost247 Isc reserves the right to modify or update this Fair Usage Policy at any time. Where significant changes occur, customers will be notified via email or through the client dashboard before the changes take effect. For clarity, the terms \"bandwidth\" and \"data transfer\" are used interchangeably within this policy.",
    "headings": []
   },
   {
@@ -5258,6 +5258,25 @@
    ]
   },
   {
+   "sourceKey": "nav:/digital-products",
+   "url": "/digital-products",
+   "aliases": [
+    "/digital-products.php"
+   ],
+   "title": "Digital Products",
+   "description": "Discover downloadable products for your next project.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Platforms",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Digital Products\nDiscover downloadable products for your next project.",
+   "headings": [
+    "Digital Products"
+   ]
+  },
+  {
    "sourceKey": "nav:/domains",
    "url": "/domains",
    "aliases": [
@@ -5277,22 +5296,90 @@
    ]
   },
   {
-   "sourceKey": "nav:/domains/bulk-search",
-   "url": "/domains/bulk-search",
-   "aliases": [
-    "/domain.php"
-   ],
-   "title": "Domain Search",
-   "description": "Check availability for one name or a whole list at once.",
+   "sourceKey": "nav:/domains/appraisal",
+   "url": "/domains/appraisal",
+   "aliases": [],
+   "title": "Domain Appraisal",
+   "description": "Request a domain valuation from the configured provider.",
    "kind": "website_page",
    "surface": "registry",
    "section": "Domains",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "Domain Search\nCheck availability for one name or a whole list at once.",
+   "body": "Domain Appraisal\nRequest a domain valuation from the configured provider.",
    "headings": [
-    "Domain Search"
+    "Domain Appraisal"
+   ]
+  },
+  {
+   "sourceKey": "nav:/domains/auctions",
+   "url": "/domains/auctions",
+   "aliases": [],
+   "title": "Domain Auctions",
+   "description": "Explore listed domain auctions and bidding.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Domains",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Domain Auctions\nExplore listed domain auctions and bidding.",
+   "headings": [
+    "Domain Auctions"
+   ]
+  },
+  {
+   "sourceKey": "nav:/domains/broker",
+   "url": "/domains/broker",
+   "aliases": [
+    "/index.php?m=cloudhost247_broker"
+   ],
+   "title": "Domain Brokerage",
+   "description": "Request help acquiring a domain that is already registered.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Domains",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Domain Brokerage\nRequest help acquiring a domain that is already registered.",
+   "headings": [
+    "Domain Brokerage"
+   ]
+  },
+  {
+   "sourceKey": "nav:/domains/bulk-search",
+   "url": "/domains/bulk-search",
+   "aliases": [],
+   "title": "Bulk Domain Search",
+   "description": "Check multiple domain names in one search.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Domains",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Bulk Domain Search\nCheck multiple domain names in one search.",
+   "headings": [
+    "Bulk Domain Search"
+   ]
+  },
+  {
+   "sourceKey": "nav:/domains/club",
+   "url": "/domains/club",
+   "aliases": [],
+   "title": "Discount Domain Club",
+   "description": "Explore available domain club membership and pricing.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Domains",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Discount Domain Club\nExplore available domain club membership and pricing.",
+   "headings": [
+    "Discount Domain Club"
    ]
   },
   {
@@ -5340,14 +5427,14 @@
     "/cart.php?a=add&domain=transfer"
    ],
    "title": "Domain Transfer",
-   "description": "Transfer an existing domain with the auth code and no downtime.",
+   "description": "Transfer an existing domain using its authorization code.",
    "kind": "website_page",
    "surface": "registry",
    "section": "Domains",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "Domain Transfer\nTransfer an existing domain with the auth code and no downtime.",
+   "body": "Domain Transfer\nTransfer an existing domain using its authorization code.",
    "headings": [
     "Domain Transfer"
    ]
@@ -5356,7 +5443,7 @@
    "sourceKey": "nav:/domains/whois",
    "url": "/domains/whois",
    "aliases": [
-    "/domain.php"
+    "/tools/domain-whois"
    ],
    "title": "WHOIS Lookup",
    "description": "Check registration details and availability before you buy.",
@@ -5391,6 +5478,25 @@
    ]
   },
   {
+   "sourceKey": "nav:/google-workspace",
+   "url": "/google-workspace",
+   "aliases": [
+    "/google-workspace.php"
+   ],
+   "title": "Google Workspace",
+   "description": "Business email and collaboration for your team.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Hosting",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Google Workspace\nBusiness email and collaboration for your team.",
+   "headings": [
+    "Google Workspace"
+   ]
+  },
+  {
    "sourceKey": "nav:/hosting/control-panels",
    "url": "/hosting/control-panels",
    "aliases": [
@@ -5410,6 +5516,82 @@
    ]
   },
   {
+   "sourceKey": "nav:/hosting/rdp",
+   "url": "/hosting/rdp",
+   "aliases": [
+    "/rdp-hosting.php"
+   ],
+   "title": "Remote Desktop (RDP)",
+   "description": "Find a remote desktop server for your workspace.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Cloud & Servers",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Remote Desktop (RDP)\nFind a remote desktop server for your workspace.",
+   "headings": [
+    "Remote Desktop (RDP)"
+   ]
+  },
+  {
+   "sourceKey": "nav:/number-services",
+   "url": "/number-services",
+   "aliases": [
+    "/number-services.php"
+   ],
+   "title": "Number Services",
+   "description": "Explore virtual number services for your business.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Hosting",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Number Services\nExplore virtual number services for your business.",
+   "headings": [
+    "Number Services"
+   ]
+  },
+  {
+   "sourceKey": "nav:/office-365",
+   "url": "/office-365",
+   "aliases": [
+    "/office-365.php"
+   ],
+   "title": "Microsoft 365 (Office 365)",
+   "description": "Business email and productivity tools for your team.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Hosting",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Microsoft 365 (Office 365)\nBusiness email and productivity tools for your team.",
+   "headings": [
+    "Microsoft 365 (Office 365)"
+   ]
+  },
+  {
+   "sourceKey": "nav:/proxy-services",
+   "url": "/proxy-services",
+   "aliases": [
+    "/proxy-services.php"
+   ],
+   "title": "LTE Proxy Services",
+   "description": "Explore configurable LTE proxy connections.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Cloud & Servers",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "LTE Proxy Services\nExplore configurable LTE proxy connections.",
+   "headings": [
+    "LTE Proxy Services"
+   ]
+  },
+  {
    "sourceKey": "nav:/sitemap",
    "url": "/sitemap",
    "aliases": [
@@ -5426,6 +5608,44 @@
    "body": "Sitemap\nEvery published page, policy and tool in one index.",
    "headings": [
     "Sitemap"
+   ]
+  },
+  {
+   "sourceKey": "nav:/smm-services",
+   "url": "/smm-services",
+   "aliases": [
+    "/smm-services.php"
+   ],
+   "title": "SMM Services",
+   "description": "Explore social media marketing services for your next campaign.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Hosting",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "SMM Services\nExplore social media marketing services for your next campaign.",
+   "headings": [
+    "SMM Services"
+   ]
+  },
+  {
+   "sourceKey": "nav:/smtp-hosting",
+   "url": "/smtp-hosting",
+   "aliases": [
+    "/smtp-hosting.php"
+   ],
+   "title": "SMTP Hosting",
+   "description": "SMTP services for your email workflows.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Hosting",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "SMTP Hosting\nSMTP services for your email workflows.",
+   "headings": [
+    "SMTP Hosting"
    ]
   },
   {
@@ -8506,6 +8726,158 @@
    "body": "Documentation for the platform as it is\nSearch published articles, then open a ticket if the article does not cover your service.\nConfirm the plan — Published specifications are the source of truth for resources and software.\nKeep ownership — Bring a domain you already control, or register one in the same account.\nAsk before you migrate — The team can scope a move when you share the source and the target plan.\nIs there a public API reference?\nYes — the API documentation covers authentication, catalog, commerce, domains, deployments, infrastructure and billing endpoints.\nDoes the documentation describe unfinished work?\nYes, deliberately. Documents that describe incomplete or frozen work exist so that nobody builds against a feature believing it is finished.\nCan I contribute a fix to the documentation?\nDocumentation lives with the platform source. Raise it through support and it goes to the team that owns the relevant area.",
    "headings": [
     "Documentation for the platform as it is"
+   ]
+  },
+  {
+   "sourceKey": "php:rdp-hosting.php",
+   "url": "/hosting/rdp",
+   "aliases": [
+    "/rdp-hosting.php"
+   ],
+   "title": "Remote Desktop Servers",
+   "description": "Explore remote desktop server plans for a workspace you can access remotely.",
+   "kind": "website_page",
+   "surface": "php",
+   "section": "Servers",
+   "category": "Servers",
+   "related": [],
+   "faqs": [],
+   "body": "Your desktop, wherever work takes you\nExplore remote desktop server plans for a workspace you can access remotely.",
+   "headings": [
+    "Your desktop, wherever work takes you"
+   ]
+  },
+  {
+   "sourceKey": "php:smm-services.php",
+   "url": "/smm-services",
+   "aliases": [
+    "/smm-services.php"
+   ],
+   "title": "Social Media Marketing Services",
+   "description": "Explore social media marketing services for your next campaign.",
+   "kind": "website_page",
+   "surface": "php",
+   "section": "Services",
+   "category": "Services",
+   "related": [],
+   "faqs": [],
+   "body": "Make your next move\nExplore social media marketing services for your next campaign.",
+   "headings": [
+    "Make your next move"
+   ]
+  },
+  {
+   "sourceKey": "php:number-services.php",
+   "url": "/number-services",
+   "aliases": [
+    "/number-services.php"
+   ],
+   "title": "Virtual Number Services",
+   "description": "Explore virtual number plans and find a connection that fits your needs.",
+   "kind": "website_page",
+   "surface": "php",
+   "section": "Services",
+   "category": "Services",
+   "related": [],
+   "faqs": [],
+   "body": "Be there, where it matters\nExplore virtual number plans and find a connection that fits your needs.",
+   "headings": [
+    "Be there, where it matters"
+   ]
+  },
+  {
+   "sourceKey": "php:google-workspace.php",
+   "url": "/google-workspace",
+   "aliases": [
+    "/google-workspace.php"
+   ],
+   "title": "Google Workspace",
+   "description": "Explore Google Workspace options for a more connected way to work.",
+   "kind": "website_page",
+   "surface": "php",
+   "section": "Services",
+   "category": "Services",
+   "related": [],
+   "faqs": [],
+   "body": "Good work happens together\nExplore Google Workspace options for a more connected way to work.",
+   "headings": [
+    "Good work happens together"
+   ]
+  },
+  {
+   "sourceKey": "php:office-365.php",
+   "url": "/office-365",
+   "aliases": [
+    "/office-365.php"
+   ],
+   "title": "Microsoft 365 (Office 365)",
+   "description": "Explore Microsoft 365, formerly Office 365, for a more connected workday.",
+   "kind": "website_page",
+   "surface": "php",
+   "section": "Services",
+   "category": "Services",
+   "related": [],
+   "faqs": [],
+   "body": "More room to do great work\nExplore Microsoft 365, formerly Office 365, for a more connected workday.",
+   "headings": [
+    "More room to do great work"
+   ]
+  },
+  {
+   "sourceKey": "php:digital-products.php",
+   "url": "/digital-products",
+   "aliases": [
+    "/digital-products.php"
+   ],
+   "title": "Digital Products",
+   "description": "Discover downloadable digital products for your next project.",
+   "kind": "website_page",
+   "surface": "php",
+   "section": "Services",
+   "category": "Services",
+   "related": [],
+   "faqs": [],
+   "body": "Ideas made ready to use\nDiscover downloadable digital products for your next project.",
+   "headings": [
+    "Ideas made ready to use"
+   ]
+  },
+  {
+   "sourceKey": "php:proxy-services.php",
+   "url": "/proxy-services",
+   "aliases": [
+    "/proxy-services.php"
+   ],
+   "title": "LTE Proxy Services",
+   "description": "Explore LTE proxy services for your connection and workflow.",
+   "kind": "website_page",
+   "surface": "php",
+   "section": "Services",
+   "category": "Services",
+   "related": [],
+   "faqs": [],
+   "body": "A smarter route to the web\nExplore LTE proxy services for your connection and workflow.",
+   "headings": [
+    "A smarter route to the web"
+   ]
+  },
+  {
+   "sourceKey": "php:smtp-hosting.php",
+   "url": "/smtp-hosting",
+   "aliases": [
+    "/smtp-hosting.php"
+   ],
+   "title": "SMTP Hosting",
+   "description": "Explore SMTP hosting plans for your email needs.",
+   "kind": "website_page",
+   "surface": "php",
+   "section": "Services",
+   "category": "Services",
+   "related": [],
+   "faqs": [],
+   "body": "Make every message count\nExplore SMTP hosting plans for your email needs.",
+   "headings": [
+    "Make every message count"
    ]
   },
   {
@@ -13105,6 +13477,8 @@
   "/developers/nodejs",
   "/developers/php",
   "/developers/python",
+  "/digital-products",
+  "/digital-products.php",
   "/dns-management.php",
   "/docker-hosting.php",
   "/docs",
@@ -13161,6 +13535,8 @@
   "/firewall.php",
   "/forgot-password",
   "/game-servers.php",
+  "/google-workspace",
+  "/google-workspace.php",
   "/help",
   "/help-center.php",
   "/hosting",
@@ -13173,6 +13549,7 @@
   "/hosting/developer",
   "/hosting/email",
   "/hosting/migration",
+  "/hosting/rdp",
   "/hosting/reseller",
   "/hosting/security",
   "/hosting/ssl",
@@ -13217,8 +13594,12 @@
   "/monitoring.php",
   "/network.php",
   "/nodejs-hosting.php",
+  "/number-services",
+  "/number-services.php",
   "/offers",
   "/offers.php",
+  "/office-365",
+  "/office-365.php",
   "/operating-systems.php",
   "/paas.php",
   "/php-hosting.php",
@@ -13230,7 +13611,10 @@
   "/plesk-hosting.php",
   "/pricing",
   "/privacy-policy.php",
+  "/proxy-services",
+  "/proxy-services.php",
   "/python-hosting.php",
+  "/rdp-hosting.php",
   "/refund-and-cancellation-policy.php",
   "/refund-policy.php",
   "/register",
@@ -13246,6 +13630,10 @@
   "/services",
   "/services/cloudflare",
   "/sitemap",
+  "/smm-services",
+  "/smm-services.php",
+  "/smtp-hosting",
+  "/smtp-hosting.php",
   "/ssl-certificate.php",
   "/status",
   "/support",
@@ -13291,6 +13679,7 @@
   "/tools/document/mrz",
   "/tools/document/mrz-parser",
   "/tools/domain-dns-health",
+  "/tools/domain-whois",
   "/tools/domain/punycode",
   "/tools/domain/search",
   "/tools/favorites",
@@ -13353,8 +13742,8 @@
    "legalDocuments": 18,
    "documentation": 14,
    "tools": 65,
-   "navigationRoutes": 102,
-   "phpPages": 67,
+   "navigationRoutes": 114,
+   "phpPages": 75,
    "phpPolicies": 4,
    "faqs": 174,
    "announcements": 2
