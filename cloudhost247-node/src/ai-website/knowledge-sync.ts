@@ -173,6 +173,7 @@ async function syncDocument(
   try {
     const existing = await findSourceByKey(db, page.sourceKey);
     if (existing && existing.sync_status === 'indexed' && existing.fingerprint === fingerprint) {
+      await db.query('UPDATE ai_knowledge_sources SET last_synced_at = now() WHERE id = $1', [existing.id]);
       return 'unchanged';
     }
     if (existing && existing.failure_count >= MAX_CONSECUTIVE_FAILURES && existing.fingerprint === fingerprint) {
@@ -204,6 +205,7 @@ async function syncDocument(
       category: page.category,
       fingerprint,
       wordCount: words,
+      sourceModifiedAt: content?.updatedAt ?? null,
     });
 
     if (!upserted.changed && existing?.sync_status === 'indexed') return 'unchanged';

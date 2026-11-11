@@ -421,3 +421,6 @@ body { overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) {
   [data-showcase-depth] { animation: none !important; transform: none !important; }
 }
+
+/* Flat, service-specific hero artwork shared by the SPA and WHMCS storefronts. */
+.ch-service-art { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; border-radius: 12px; }

@@ -332,7 +332,7 @@ export function DataQualityFlags({ flags }: { flags: DataQualityFlag[] }) {
 /** A 0–100 score bar. Pure CSS: the module ships no charting dependency. */
 export function ScoreMeter({ score, level }: { score: number; level: string }) {
   const pct = Math.max(0, Math.min(100, Math.round(score)));
-  const colour = pct >= 75 ? '#c0392b' : pct >= 50 ? '#d35400' : pct >= 25 ? '#b58900' : '#2e7d32';
+  const colour = pct >= 75 ? '#c0392b' : pct >= 50 ? '#d35400' : pct >= 25 ? '#b58900' : 'var(--ch-silver-ink)';
   return (
     <div style={{ minWidth: '12rem' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>

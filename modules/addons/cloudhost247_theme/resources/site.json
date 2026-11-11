@@ -5693,7 +5693,9 @@
       "headline": "Your desktop, wherever work takes you",
       "summary": "Explore remote desktop server plans for a workspace you can access remotely.",
       "slug": "rdp-hosting",
-      "seo_description": "Explore CloudHost247 remote desktop server plans and find the resources for your remote workspace."
+      "seo_description": "Explore CloudHost247 remote desktop server plans and find the resources for your remote workspace.",
+      "visual": "storefronts/rdp-hosting",
+      "visualFormat": "svg"
     },
     "smm-services.php": {
       "title": "Social Media Marketing Services",
@@ -5701,7 +5703,9 @@
       "headline": "Make your next move",
       "summary": "Explore social media marketing services for your next campaign.",
       "slug": "smm-services",
-      "seo_description": "Explore CloudHost247 social media marketing services and find the right fit for your goals."
+      "seo_description": "Explore CloudHost247 social media marketing services and find the right fit for your goals.",
+      "visual": "storefronts/smm-services",
+      "visualFormat": "svg"
     },
     "number-services.php": {
       "title": "Virtual Number Services",
@@ -5709,7 +5713,9 @@
       "headline": "Be there, where it matters",
       "summary": "Explore virtual number plans and find a connection that fits your needs.",
       "slug": "number-services",
-      "seo_description": "Explore CloudHost247 virtual number services for your business."
+      "seo_description": "Explore CloudHost247 virtual number services for your business.",
+      "visual": "storefronts/number-services",
+      "visualFormat": "svg"
     },
     "google-workspace.php": {
       "title": "Google Workspace",
@@ -5717,7 +5723,9 @@
       "headline": "Good work happens together",
       "summary": "Explore Google Workspace options for a more connected way to work.",
       "slug": "google-workspace",
-      "seo_description": "Explore Google Workspace plans and collaboration options with CloudHost247."
+      "seo_description": "Explore Google Workspace plans and collaboration options with CloudHost247.",
+      "visual": "storefronts/google-workspace",
+      "visualFormat": "svg"
     },
     "office-365.php": {
       "title": "Microsoft 365 (Office 365)",
@@ -5725,7 +5733,9 @@
       "headline": "More room to do great work",
       "summary": "Explore Microsoft 365, formerly Office 365, for a more connected workday.",
       "slug": "office-365",
-      "seo_description": "Explore Microsoft 365 plans and productivity options with CloudHost247."
+      "seo_description": "Explore Microsoft 365 plans and productivity options with CloudHost247.",
+      "visual": "storefronts/office-365",
+      "visualFormat": "svg"
     },
     "digital-products.php": {
       "title": "Digital Products",
@@ -5733,7 +5743,9 @@
       "headline": "Ideas made ready to use",
       "summary": "Discover downloadable digital products for your next project.",
       "slug": "digital-products",
-      "seo_description": "Explore downloadable digital products from CloudHost247."
+      "seo_description": "Explore downloadable digital products from CloudHost247.",
+      "visual": "storefronts/digital-products",
+      "visualFormat": "svg"
     },
     "proxy-services.php": {
       "title": "LTE Proxy Services",
@@ -5741,7 +5753,9 @@
       "headline": "A smarter route to the web",
       "summary": "Explore LTE proxy services for your connection and workflow.",
       "slug": "proxy-services",
-      "seo_description": "Explore LTE proxy plans and connection options with CloudHost247."
+      "seo_description": "Explore LTE proxy plans and connection options with CloudHost247.",
+      "visual": "storefronts/proxy-services",
+      "visualFormat": "svg"
     },
     "smtp-hosting.php": {
       "title": "SMTP Hosting",
@@ -5749,7 +5763,9 @@
       "headline": "Make every message count",
       "summary": "Explore SMTP hosting plans for your email needs.",
       "slug": "smtp-hosting",
-      "seo_description": "Explore SMTP hosting plans and email sending options with CloudHost247."
+      "seo_description": "Explore SMTP hosting plans and email sending options with CloudHost247.",
+      "visual": "storefronts/smtp-hosting",
+      "visualFormat": "svg"
     }
   },
   "navigation": [
