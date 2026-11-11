@@ -29,6 +29,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, appendFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { Client } from 'pg';
 
 const PATRONI = process.env.TEST_PATRONI_BIN?.trim() || '/tmp/pgenv/bin/patroni';
@@ -38,6 +39,12 @@ const ROOT = process.env.TEST_PATRONI_INTEGRATION_ROOT?.trim() || '/tmp/ch247-p3
 const JOURNAL = `${ROOT}/fence-journal.jsonl`;
 const LAST_LEADER = `${ROOT}/last-leader`;
 const GATE = `${ROOT}/gate.js`;
+
+// The gate is compiled with the project's own esbuild, which is a declared devDependency. It is
+// deliberately never fetched at test time: a suite that downloads a compiler is not reproducible,
+// needs the network to pass, and can silently test a different binary from the one the lockfile
+// pins. If this path is missing the fix is `npm install`, not a fallback.
+const ESBUILD = join(process.cwd(), 'node_modules', '.bin', 'esbuild');
 
 const NODES = [
   { name: 'node1', api: 9111, raft: 7211, pg: 6701 },
@@ -223,18 +230,31 @@ describe.skipIf(!ENABLED)('Patroni pre_promote gate', () => {
     mkdirSync(ROOT, { recursive: true });
 
     // The gate is compiled from the TypeScript helper so the test exercises the real implementation.
+    // Fail closed: no esbuild means no gate, and no gate means this suite cannot make a claim.
+    if (!existsSync(ESBUILD)) {
+      throw new Error(
+        `missing esbuild binary at ${ESBUILD}. ` +
+          `The gate cannot be compiled, so the pre_promote contract cannot be exercised. ` +
+          `Run "npm install" in cloudhost247-node/ and retry. ` +
+          `This suite never downloads esbuild at test time by design.`
+      );
+    }
     const build = spawnSync(
-      'bash',
+      ESBUILD,
       [
-        '-c',
-        `cd ${process.cwd()} && ./node_modules/.bin/esbuild tests/helpers/fencing/pre-promote.ts ` +
-          `--bundle --platform=node --format=cjs --outfile=${GATE} 2>&1 || ` +
-          `npx --yes esbuild tests/helpers/fencing/pre-promote.ts --bundle --platform=node --format=cjs --outfile=${GATE}`,
+        'tests/helpers/fencing/pre-promote.ts',
+        '--bundle',
+        '--platform=node',
+        '--format=cjs',
+        `--outfile=${GATE}`,
       ],
       { encoding: 'utf8', timeout: 180_000 }
     );
-    if (!existsSync(GATE)) {
-      throw new Error(`could not build the gate: ${build.stdout}\n${build.stderr}`);
+    if (build.status !== 0 || !existsSync(GATE)) {
+      throw new Error(
+        `could not build the gate (esbuild exit ${String(build.status)}, signal ${String(build.signal)}): ` +
+          `${build.stdout ?? ''}\n${build.stderr ?? ''}`
+      );
     }
 
     // A wrapper, so the gate can be made to refuse at runtime. Patroni reads its configuration

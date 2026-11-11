@@ -1,5 +1,8 @@
 import type { Plugin } from 'vite';
 
+/** Em dash (U+2014), the character this transform rewrites. */
+const EM_DASH = '\u2014';
+
 /**
  * Keep the long em dash out of customer-facing page copy.
  *
@@ -8,7 +11,10 @@ import type { Plugin } from 'vite';
  * the presentation rule consistent without changing the meaning of authoritative source material.
  */
 export function editorialPunctuationPlugin(): Plugin {
-  const replaceEmDashes = (value: string) => value.replaceAll('—', '-');
+  // Split/join rather than String.prototype.replaceAll: the frontend tsconfig pins lib to ES2020,
+  // where replaceAll does not exist (TS2550). Raising the lib would change the target for the
+  // whole frontend, so the ES2020-compatible form is used instead.
+  const replaceEmDashes = (value: string) => value.split(EM_DASH).join('-');
 
   return {
     name: 'cloudhost247-editorial-punctuation',

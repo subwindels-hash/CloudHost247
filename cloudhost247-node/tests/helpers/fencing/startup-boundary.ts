@@ -129,8 +129,14 @@ export const START_ROUTES: RouteDescriptor[] = [
 /**
  * Attempt to start a node through a route, and report what happened.
  *
- * Uses `-W` so a refused start returns immediately instead of blocking, and a short timeout so an
- * accepted start is killed rather than left running.
+ * The spawn is bounded by `timeoutMs`, so an accepted start is killed rather than left running and a
+ * route that blocks cannot hang the suite. `-W` is deliberately *not* passed to `postgres`: the flag
+ * belongs to `pg_ctl` waiting for a server to accept connections, not to the postmaster itself, and
+ * adding it here would change what this probe measures.
+ *
+ * "Started" is decided closed: only a clean exit (0) or a process still running at the timeout counts.
+ * A non-zero exit is a failed start, whatever the exit code — an unrelated crash (exit 3) is not
+ * evidence that a fenced node served traffic.
  */
 export interface RouteAttempt {
   route: StartRoute;
@@ -154,13 +160,18 @@ export function attemptDirectStart(spec: {
     { encoding: 'utf8', timeout: spec.timeoutMs ?? 20_000, env: { ...process.env, ...(spec.env ?? {}) } }
   );
   const stderr = `${result.stderr ?? ''}${result.stdout ?? ''}`;
+  // Fail closed. A process that ran until the timeout was serving; a process that exited 0 behaved as
+  // the route intends. Anything else -- including an unexpected exit code such as 3 -- is not a start,
+  // and a refusal wins over both signals unconditionally.
+  const timedOut = result.error?.code === 'ETIMEDOUT';
+  const refused = /refusing to start/i.test(String(result.stderr ?? ''));
+  const started = !refused && (timedOut || result.status === 0);
   return {
     route: spec.route,
     command: spec.binary,
     exitCode: result.status,
     stderr,
-    // A start "succeeded" in the sense that matters here if the process did not refuse.
-    started: result.status !== 1 && !/refusing to start|refus/i.test(stderr),
+    started,
   };
 }
 
