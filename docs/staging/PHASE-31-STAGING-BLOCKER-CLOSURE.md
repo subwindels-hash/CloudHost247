@@ -89,8 +89,11 @@ All paths/commands are from repository root unless stated. Sensitive values and 
 | `npm run typecheck` (application cwd) | exit 0 |
 | AI provider contract + model-grounding unit tests (previous slice) | exit 0; 59 tests passed, mocked HTTP only |
 | `npm run build:server` (previous slice) | exit 0 |
-| Complete Node `npm test` supplemental run | in progress at initial report creation; no pass claimed |
-| `PATH=/tmp/staging/scripts/php-wasm:$PATH bash scripts/release-candidate-check.sh` against final committed tree | pending execution at initial report creation; no pass claimed yet |
+| Complete Node `npm test` supplemental run | stopped before completion after partial integration execution; NOT a passing full-suite run; `/tmp/phase31-full-node.log` |
+| `npx vitest run tests/unit` (application cwd) | exit 0; **165 files / 2,371 tests passed**; `/tmp/phase31-unit.log` |
+| `npm run build` (application cwd) | exit 0; server/frontend/tools build plus script typecheck and catalog check; `/tmp/phase31-node-build.log` |
+| `PATH=/tmp/staging/scripts/php-wasm:$PATH bash scripts/release-candidate-check.sh` | first pass **exit 0** on `7f9e59fd58c7412894926b37c01014900b47f559`; rendered-site audit explicitly skipped due to absent Smarty; `/tmp/phase31-release-gate.log` |
+| `PATH=/tmp/staging/scripts/php-wasm:$PATH bash scripts/verify-rendered-site.sh --fetch` | exit 0; pinned/hash-verified Smarty 4.5.6 fetched; **235 rendered pages**, 935 images, 56,882 links, canonical/hero/tool resolution passed; deprecation notices recorded; `/tmp/phase31-rendered-site.log` |
 
 ## Remaining dependencies and release decision
 
@@ -98,6 +101,14 @@ All paths/commands are from repository root unless stated. Sensitive values and 
 2. Real WHMCS/cPanel staging host and API permissions; sandbox payment credentials, callback paths and external connectivity.
 3. Installed scheduler and observed trigger against the deployed staging build.
 4. Staging URL, permitted admin/customer test accounts, successful authorized admin/customer workflows and integration persistence evidence.
-5. Complete final verification results and independent review of this evidence. Passing mocked tests does not satisfy any external dependency.
+5. Independent review of this evidence and completion of the supplemental full Node suite (not completed here). Passing mocked tests does not satisfy any external dependency.
 
-**NOT MERGED · NOT FULLY STAGING CERTIFIED · NOT PRODUCTION CERTIFIED · PRODUCTION NO-GO.** Phase 30 remains historical partial local staging evidence, not automatically transferred certification of this changed tree. PR #114 mergeability must be read from GitHub after final changes; it is not established by source tests. No merge, production deploy, live payment or production infrastructure change is authorized or performed in this phase.
+**NOT MERGED · NOT FULLY STAGING CERTIFIED · NOT PRODUCTION CERTIFIED · PRODUCTION NO-GO.** Phase 30 remains historical partial local staging evidence, not automatically transferred certification of this changed tree. PR #114 was **CONFLICTING** on the final pre-push GitHub query, so the branch is **NOT MERGEABLE as observed**, independent of passing source tests. The final report-only commit is rechecked with the complete source gate; its exact hash and exit status are emitted by the execution wrapper and reported in the final response without changing that tested tree. No merge, production deploy, live payment or production infrastructure change is authorized or performed in this phase.
+
+## Verification scope and cleanup
+
+The repository source release gate is `scripts/release-candidate-check.sh`. It is not the same as the separate Node CI job's full `npm test`. The former completed; the latter was stopped and remains incomplete. The full unit suite and both affected integration suites are passing. No full CI-green claim is made. The report-only final commit is subjected to the source gate again with `PHP_LINT_JOBS=4` (same target list/checks, parallel lint only); the final outcome must be taken from the actual execution result, not inferred from the first pass.
+
+Pinned Smarty was subsequently installed in the ignored local cache, so the final gate can execute the previously skipped render audit. PHP emitted template-plugin deprecation notices; these were not suppressed and are not interpreted as failures or as production compatibility certification. This continuation uses the existing PHP-WASM CLI, not a repeat of Phase 30's two-version certification.
+
+Scratch probes were moved to `/tmp/phase31-scratch/`, outside Git. Durable evidence contains sanitized outcomes only. The local API preview was stopped; the PostgreSQL throwaway cluster remains available. Production build output is ignored and is not committed. No existing historical certification report was overwritten.

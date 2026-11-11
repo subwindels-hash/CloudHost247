@@ -93,3 +93,8 @@ Actual verification:
 No automatic retries were added. No provider/model fallback, credentials, authentication/authorization changes, frontend changes, health dashboard, or production deployment were introduced. HTTP status metadata is available on adapter errors but is not yet persisted end-to-end with feature/correlation telemetry. Numeric statuses do not establish provider error codes: a 404 may mean endpoint or model, and 400 may mean several contract/content errors; no guessed provider cause is recorded.
 
 Remaining work: actual incident capture, protected correlation telemetry across adapters, logo error normalization and input preservation, frontend/idempotency/cancellation verification, supported-input capability decisions, full requested regression matrix, unresolved Phase 31 retrieval tests, final release gate, PR conflicts and independent review. **The reported recurring rejection is not yet certified fixed.**
+
+
+## Phase 31 verification follow-up
+
+The previously unresolved retrieval/injection failures discussed above are now resolved in the affected suites: 47 tests passed across 3 files. The complete unit suite passed 2,371 tests across 165 files; the full Node build and server/frontend typechecks passed. The supplemental complete Node test run was stopped before completion, so it is not a full-suite pass. See `PHASE-31-STAGING-BLOCKER-CLOSURE.md` for current evidence categories and remaining external prerequisites. These results still do not identify or certify a fix for the reported deployed rejection incident.
