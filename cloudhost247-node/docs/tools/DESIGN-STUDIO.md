@@ -378,6 +378,38 @@ power or storage-device fence. And a node rewound past the WAL the primary still
 without a replication slot or a WAL archive; that is an operational prerequisite this phase does not
 solve. The blocker stays open.
 
+**Startup boundary and the ledger (Phase 38, verification only).** Phase 37 was reviewed against two
+objections and measured, and the measurement found a third problem
+(`docs/tools/DESIGN-STUDIO-PHASE38-EVIDENCE.md`):
+
+- **The fence record could be reset by deleting a file.** Phase 37 derived state from the last line of a
+  log and read a missing or empty log as `CLEAN`. `rm` was enough to un-fence a node; no coordinator
+  restart was needed. State is now a **sealed hash-chained ledger** — each record carries `seq` and a hash
+  over its predecessor, and a separate seal file records the high-water mark in a different directory.
+  Deletion, truncation, rollback, single-record forgery and seal removal all resolve to `UNKNOWN`, which
+  the gate refuses. Appending to a ledger that does not verify throws, so a tampered history cannot be
+  blessed by the next write. Only a node with neither log nor seal is `CLEAN`, because it has never been
+  fenced.
+- **Eight startup routes, five mediated.** `patroni-start`, `patroni-promote`, `patroni-recovery`,
+  `pgrewind-single-user` and a direct call of the shim itself go through `bin_name['postgres']`.
+  `pg_ctl start`, a direct invocation of the real binary, and a systemd/init `ExecStart` do **not**. Test
+  04 starts a fenced node with the real binary, gets a writable node, and confirms detection — which is
+  the honest result: the shim covers what Patroni spawns, not what a supervisor or operator spawns.
+- **Detection is a second control, not a substitute for prevention.** A sentinel compares the ledger
+  against what each node is actually doing and reports any node writable while forbidden. It cannot stop
+  the start. Prevention where we own the path, detection everywhere else.
+- **Rejoin no longer rests on timeline equality.** `assessRejoin()` requires timeline history files,
+  recovery mode with replay unpaused, replay position within tolerance of the primary's current LSN, and
+  refuses a candidate replayed *beyond* the primary. Timeline equality is checked and is explicitly not
+  sufficient.
+- **Missing WAL is now a stated condition.** `assessWalAvailability()` names the prerequisite: segments
+  from the fork point must exist on the primary, in a replication slot or in an archive, or the node waits
+  in recovery forever.
+
+Criteria 7 and 8 stay **open**: the shim and the ledger are on the same device (`65024` for both), and
+`ip addr add` is still denied, so the VIP requirement remains unmet with no TCP listener substituted. The
+HA verdict is unchanged: **NO-GO**.
+
 ### Outstanding limitations of saved templates
 
 Recorded here rather than discovered later:
@@ -416,6 +448,25 @@ Recorded here rather than discovered later:
   only a TCP listener could stand in, which is not a VIP. Details:
   `docs/tools/DESIGN-STUDIO-PHASE36-EVIDENCE.md`.
 * **Recovery is gated locally, but the fence is still local** (Phase 37). A start gate on
+  `bin_name['postgres']` refuses every startup of a fenced node — including restarts by its own
+  coordinator, duplicate coordinators and supervisor scripts — and rejoin requires rewind-or-rebuild,
+  recovery mode and a matching timeline. What this does **not** show: that a real host, storage device or
+  VM can be fenced independently. WAL permissions are a property of one directory. It also does not
+  solve WAL availability: a node rewound past the retained WAL stalls in recovery without a replication
+  slot or WAL archive. Details: `docs/tools/DESIGN-STUDIO-PHASE37-EVIDENCE.md`.
+* **The shim is not a universal startup boundary, and the fence log was resettable** (Phase 38). Two
+  corrections to Phase 37. First, `bin_name['postgres']` mediates what Patroni spawns and nothing else:
+  of eight enumerated startup routes, `pg_ctl start`, a direct invocation of the real binary, and a
+  systemd/init `ExecStart` are **not** mediated, and a fenced node started that way becomes writable. A
+  detection control reports such a node but cannot prevent the start. Second, Phase 37's store treated a
+  missing or empty log as `CLEAN` — **deleting one file un-fenced a node**. Fence state is now a sealed
+  hash-chained ledger: deletion, truncation, rollback, single-record forgery and seal removal all fail
+  closed as `UNKNOWN`, which the gate refuses. That raises the bar from "delete one file" to "forge a
+  consistent hash chain", and it is still the same host and the same filesystem, so it is not an
+  independent failure domain. Rejoin is now judged on timeline history, recovery state, replay progress
+  and divergence from the authoritative primary, not on timeline equality. Details:
+  `docs/tools/DESIGN-STUDIO-PHASE38-EVIDENCE.md`.
+ A start gate on
   `bin_name['postgres']` refuses every startup of a fenced node — including restarts by its own
   coordinator, duplicate coordinators and supervisor scripts — and rejoin requires rewind-or-rebuild,
   recovery mode and a matching timeline. What this does **not** show: that a real host, storage device or
