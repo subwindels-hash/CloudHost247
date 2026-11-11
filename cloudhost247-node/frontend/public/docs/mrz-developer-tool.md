@@ -1,4 +1,4 @@
-# CloudHost247 — ePassport MRZ Calculator, Validator & Parser
+# CloudHost247 - ePassport MRZ Calculator, Validator & Parser
 
 ## 1. Overview & Intended Use
 
@@ -52,8 +52,8 @@ URL.
 
 The tool implements the **TD3 (Machine Readable Passport)** specification defined in:
 
-- **ICAO Doc 9303, Part 3**: *Specifications Common to all Machine Readable Travel Documents* (Eighth Edition) — Character set, transliteration of Latin diacritics, and modulo-10 check-digit algorithm.
-- **ICAO Doc 9303, Part 4**: *Specifications for Machine Readable Passports (MRPs) and other TD3 Size MRTDs* — Two-line × 44-character (88 characters total) data layout.
+- **ICAO Doc 9303, Part 3**: *Specifications Common to all Machine Readable Travel Documents* (Eighth Edition) - Character set, transliteration of Latin diacritics, and modulo-10 check-digit algorithm.
+- **ICAO Doc 9303, Part 4**: *Specifications for Machine Readable Passports (MRPs) and other TD3 Size MRTDs* - Two-line × 44-character (88 characters total) data layout.
 
 ### Line 1 Layout (Positions 1–44)
 
@@ -149,9 +149,9 @@ Evaluates:
 ### Parser (`/tools/document/mrz-parser` & `POST /api/tools/mrz/parse`)
 
 Extracts structured fields and **explicitly distinguishes** between:
-- **`parsedStatus: "Successfully parsed"`** — The two-line TD3 string was decomposed into fields.
-- **`structureValid: true | false`** — Whether all ICAO Doc 9303 format and check-digit rules passed.
-- **`authenticityVerified: false`** — Always `false`. Mathematical MRZ validation never verifies physical or cryptographic passport authenticity.
+- **`parsedStatus: "Successfully parsed"`** - The two-line TD3 string was decomposed into fields.
+- **`structureValid: true | false`** - Whether all ICAO Doc 9303 format and check-digit rules passed.
+- **`authenticityVerified: false`** - Always `false`. Mathematical MRZ validation never verifies physical or cryptographic passport authenticity.
 
 ---
 
@@ -161,7 +161,7 @@ By default, the CloudHost247 MRZ tool is **stateless and privacy-first**:
 
 - **Client-side execution first**: Calculation, validation, parsing, synthetic test generation, and AI explanations execute directly in the browser without requiring external third-party APIs.
 - **Zero PII persistence**: Submitted MRZ lines, passport numbers, dates of birth, expiry dates, nationalities, surnames, given names, and optional data are **never** stored in the database or browser storage (`localStorage` / `sessionStorage`).
-- **Nothing durable, by construction**: the catalogue entry sets `cacheSeconds: 0` (no result cache), the executor records **no target** for this tool (the only candidate labels would be a passport number or a name), and the executor's persisted `status`/`summary` fields are fixed verdict strings that never contain the zone. `NON_PERSISTABLE_TOOL_SLUGS` additionally makes `POST /api/tools/mrz-generator/report` and `/ticket` refuse outright — an MRZ result cannot be saved as a report or attached to a support ticket. The page's copy/download actions are the only way to keep a value.
+- **Nothing durable, by construction**: the catalogue entry sets `cacheSeconds: 0` (no result cache), the executor records **no target** for this tool (the only candidate labels would be a passport number or a name), and the executor's persisted `status`/`summary` fields are fixed verdict strings that never contain the zone. `NON_PERSISTABLE_TOOL_SLUGS` additionally makes `POST /api/tools/mrz-generator/report` and `/ticket` refuse outright - an MRZ result cannot be saved as a report or attached to a support ticket. The page's copy/download actions are the only way to keep a value.
 - **No personal data in URLs, the footer, the sitemap or the catalogue**: every published link is the clean `/tools/mrz-generator` route.
 - **Placeholders are shape hints, never a filled-in specimen**: the shipped form fields (`config/tools.php`, the theme resources and the React bundle) carry values like `AB1234567`, `YYMMDD` and `SURNAME` only. The ready-made ICAO specimen is produced inside the visitor's browser by the page's own *Generate test data* button, so no specimen document number, date of birth or name is baked into a public file. `tests/tools/test_static.py` and `tests/integration/mrz-tools-catalogue.test.ts` fail if the specimen persona returns to any of those surfaces.
 - **Response minimization**: `POST /api/tools/mrz/generate` returns only the generated MRZ lines, check digits, and validation flags without echoing personal input fields.

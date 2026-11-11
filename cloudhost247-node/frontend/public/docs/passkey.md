@@ -14,7 +14,7 @@ want to check.
    could persist a private key, a biometric template or a device PIN.
 2. **Fail closed, never fail open.** If the relying party is unconfigured, if
    OpenSSL is missing, or if any structural check fails, the ceremony is
-   refused. The fallback is the existing WHMCS password login — never a
+   refused. The fallback is the existing WHMCS password login - never a
    weakened passkey path.
 3. **Nobody gets locked out by our bugs.** Enforcement is suspended for
    accounts with no enrolled passkey, suspended when configuration is broken,
@@ -28,7 +28,7 @@ want to check.
 ## 2. Table naming
 
 The functional specification names the credential store `cloudhost247_passkeys`.
-The repository convention — enforced by `scripts/validate-migrations.py` — is
+The repository convention - enforced by `scripts/validate-migrations.py` - is
 that every module table begins with `mod_cloudhost247_`. The mapping is:
 
 | Specification | Actual table |
@@ -50,7 +50,7 @@ Application code always refers to these through the constants in
 
 * a **32-byte CSPRNG challenge** (`random_bytes`), stored server-side,
   single-use, bound to the user, the ceremony type and the browser session;
-* `attestation: "none"` — the recommended setting for passkeys;
+* `attestation: "none"` - the recommended setting for passkeys;
 * `excludeCredentials` for everything already enrolled;
 * an opaque **user handle**: `base64url(SHA-256("…user:" ‖ type ‖ id))`. It is
   stable, non-reversible and carries no PII, because WebAuthn user handles
@@ -71,7 +71,7 @@ then `CredentialVerifier::verifyRegistration()` checks:
 
 The public key is taken **only** from authenticator data, never from the
 attestation statement. Because attestation is `none`, no certificate chain is
-validated — the credential is trusted on the strength of the signature it
+validated - the credential is trusted on the strength of the signature it
 produces, which is the standard passkey posture.
 
 ### Unsupported algorithms
@@ -85,9 +85,9 @@ are rejected outright.
 
 Both flows are supported:
 
-* **Discoverable (usernameless)** — no `allowCredentials`; the authenticator
+* **Discoverable (usernameless)** - no `allowCredentials`; the authenticator
   returns a user handle, which must match the stored credential's owner.
-* **Identifier-first** — the caller names an account and receives its
+* **Identifier-first** - the caller names an account and receives its
   credential list.
 
 `AuthenticationService::verify()` additionally enforces:
@@ -100,7 +100,7 @@ Both flows are supported:
   treated as a possible cloned authenticator: the credential is disabled and
   the user is notified. Authenticators that do not implement a counter always
   report `0`, so the check is skipped when both the stored and reported
-  counters are `0` — otherwise every such authenticator would be permanently
+  counters are `0` - otherwise every such authenticator would be permanently
   rejected.
 
 ### Enumeration resistance
@@ -129,7 +129,7 @@ A confirmation is a full assertion bound to one named action from a fixed
 allow-list (`ActionConfirmationService::actions()`). On success it mints a
 single-use, short-lived, session-bound authorization token. `consume()`
 returns `true` exactly once, and only for the same user **and** the same
-action — a confirmation obtained for "add a contact" cannot authorise "change
+action - a confirmation obtained for "add a contact" cannot authorise "change
 the account email".
 
 ## 7. Password reset
@@ -144,7 +144,7 @@ Three steps: `options()` → `verify()` → `complete()`.
   classes. WHMCS may apply stricter rules on top; this is a floor.
 * The write goes through the supported `UpdateClient` API so hashing, history
   and hooks behave exactly as in a normal password change.
-* Administrator passwords are **not** resettable this way — WHMCS exposes no
+* Administrator passwords are **not** resettable this way - WHMCS exposes no
   supported API, and a direct write could not be guaranteed to hash
   identically.
 
@@ -172,7 +172,7 @@ counter immediately. Subjects (emails, IPs, user ids) are stored hashed.
 
 Two layers:
 
-* `mod_cloudhost247_passkey_events` — the append-only security activity log
+* `mod_cloudhost247_passkey_events` - the append-only security activity log
   shown in the admin UI and used for retention.
 * The Foundation `Logger` via `lib/Log.php`.
 
@@ -187,7 +187,7 @@ asserts that no ceremony payload field name ever reaches the log.
 The only secret this addon stores is the optional Entra ID client secret. It
 is encrypted with WHMCS's own encryption helper when available, otherwise with
 AES-256-GCM keyed from the installation's encryption hash. **There is no
-plaintext fallback** — if no encryption facility exists, saving the secret
+plaintext fallback** - if no encryption facility exists, saving the secret
 fails with `CONFIGURATION_REQUIRED`. `SettingsRepository::all()` masks it as
 `********`; only `secret()` decrypts it, for the one service that needs it.
 
@@ -195,8 +195,8 @@ fails with `CONFIGURATION_REQUIRED`. `SettingsRepository::all()` masks it as
 
 Authorization-code flow with PKCE (S256). State and nonce are single-use and
 session-bound. The `id_token` is received over a TLS-verified back channel
-directly from Microsoft's token endpoint — the OIDC-sanctioned reason
-signature validation is not mandatory — and its issuer, audience, expiry,
+directly from Microsoft's token endpoint - the OIDC-sanctioned reason
+signature validation is not mandatory - and its issuer, audience, expiry,
 issued-at and nonce are all checked. The account link is keyed on the
 immutable `oid` claim, never on the email address or UPN, both of which are
 mutable and re-assignable. Auto-linking only ever matches an **existing**

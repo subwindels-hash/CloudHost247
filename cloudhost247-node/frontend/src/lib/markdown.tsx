@@ -27,6 +27,9 @@ interface Block {
 }
 
 function parseInline(text: string, keyPrefix: string): ReactNode[] {
+  // Documentation is fetched from public Markdown at runtime, outside Vite's module transform.
+  // Apply the same customer-facing punctuation rule to prose while leaving fenced code untouched.
+  text = text.replaceAll('—', '-');
   const nodes: ReactNode[] = [];
   // Links first, then code, then emphasis — order matters, because a link label may contain code.
   const pattern = /(\[[^\]]+\]\([^)\s]+\)|`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g;

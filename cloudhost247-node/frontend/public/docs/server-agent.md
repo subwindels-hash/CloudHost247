@@ -1,4 +1,4 @@
-# Server Agent — operations and security model
+# Server Agent - operations and security model
 
 The agent source lives in `/server-agent/` (its own package, zero npm dependencies, Node ≥ 20).
 See `/server-agent/README.md` for install instructions and the request-authentication spec.
@@ -9,7 +9,7 @@ run it safely.
 
 The control plane authenticates every request with HMAC-SHA256 over
 `agentId\ntimestamp\nnonce\nMETHOD\npath\nsha256(body)` with a ±60s window and nonce replay
-protection (`src/deployments/agent-protocol.ts` ⇄ `server-agent/src/auth.js` — one protocol,
+protection (`src/deployments/agent-protocol.ts` ⇄ `server-agent/src/auth.js` - one protocol,
 two files, change them together). A leaked URL, a replayed capture, or a stale request all
 fail closed.
 
@@ -25,12 +25,12 @@ Two test suites hold that boundary, and both run in the release candidate:
   rather than a version mismatch.
 
 **Nonce generation (fixed 2026-10-03).** The agent's outbound `signOutbound()` derived its nonce
-from `Math.random()` — a predictable PRNG, while this document and the control-plane mirror both
+from `Math.random()` - a predictable PRNG, while this document and the control-plane mirror both
 specify "random 16-byte hex per request". It now uses `randomBytes(16)` from `node:crypto`, and a
 static regression guard fails the suite if `Math.random()` reappears anywhere in the agent.
 
 What an attacker who fully compromises the control plane's agent secret can do is **exactly**
-the fixed operation set below, on that one server, while that credential is current — and
+the fixed operation set below, on that one server, while that credential is current - and
 nothing else:
 
 | Can | Cannot |
@@ -57,7 +57,7 @@ old secret stops working the moment the agent is restarted with the new value.
 └── backups/          # tar.gz archives with sha256 checksums
 ```
 
-`<project>` is the platform-assigned `container_project` (e.g. `c1a2b3c4-inst9f8e7`) —
+`<project>` is the platform-assigned `container_project` (e.g. `c1a2b3c4-inst9f8e7`) -
 per-customer isolation (spec §32): each project gets its own compose project name, network,
 and volumes; Traefik routes only its `app` service, only when a domain is attached.
 
@@ -70,8 +70,8 @@ and volumes; Traefik routes only its `app` service, only when a domain is attach
 - **`monitoringRunning` is evidence, not a constant.** The provisioning health gate refuses to hand a
   server to a customer until a fresh report says `securityConfigured === true` **and**
   `monitoringRunning === true`, so that field has to mean something. It reports whether the agent
-  could actually produce the readings above on this host — Docker reachable (container counts) and
-  `/proc/stat` readable (CPU %) — and a host where either is unavailable reports `false` and stays
+  could actually produce the readings above on this host - Docker reachable (container counts) and
+  `/proc/stat` readable (CPU %) - and a host where either is unavailable reports `false` and stays
   unprovisioned. It was previously the literal `true` on every host, including hosts with no
   monitoring of any kind; nothing in this repository installs a monitoring agent, so the gate's
   monitoring condition was satisfied by a constant. If a host fails this gate, the fix is to make its
@@ -83,7 +83,7 @@ and volumes; Traefik routes only its `app` service, only when a domain is attach
 
 On-server: `POST /v1/apps/:project/backup` (agent) archives the project tree plus a logical database
 dump when a database service exists. Off-server: the control plane's backup job uploads archives to
-S3/R2 (`BACKUP_S3_*`) and records the object path — the agent never sees those credentials. Retention
+S3/R2 (`BACKUP_S3_*`) and records the object path - the agent never sees those credentials. Retention
 comes from `platform_settings.backup.retention_days`. Restores run through the deployment pipeline
 like any other action (audited, cancelable while queued, rollback on failure).
 
@@ -92,7 +92,7 @@ like any other action (audited, cancelable while queued, rollback on failure).
 `mongodump --archive`, taking the first that produces output. It identifies the engine by what runs,
 not by the service's name: service names are free-form slugs in the manifest schema, so assuming a
 service called `db` meant a database whose service was named anything else was dumped by nobody.
-`mongodump` output is BSON and is captured as a buffer — decoding it as text would corrupt it.
+`mongodump` output is BSON and is captured as a buffer - decoding it as text would corrupt it.
 
 **The reply says what the archive holds**, and a requested dump that produced nothing is reported
 rather than implied:
@@ -109,13 +109,13 @@ into the deployment log naming the reason and every engine/service it tried. Tha
 warning and not a failure: the platform cannot know whether a service runs an engine with a logical
 dump at all (`redis` is allowed by the manifest schema and persists in the volume tar, which is always
 part of the archive). An agent older than this contract omits `databaseDump` entirely, and the adapter
-treats *absent* as *unknown* — never as a missing dump.
+treats *absent* as *unknown* - never as a missing dump.
 
 **The report is recorded, not just logged** (migration 0068). The adapter returns `databaseDump`
 verbatim on its `BackupResult` and the worker stores it on the backup row (`backups.database_dump`),
 so the difference between an archive that holds a database dump and one that does not survives the
 deployment log and is visible in the customer's backup list. Three states are distinguishable and
-must stay that way: `NULL` (the agent reported nothing — an older agent, or a backup that never asked
+must stay that way: `NULL` (the agent reported nothing - an older agent, or a backup that never asked
 for a database), `{ "engine": "postgres", … }` (a dump is inside) and `{ "engine": null, "reason": … }`
 (a dump was requested and none was produced, with the reason and every attempt recorded).
 
@@ -131,14 +131,14 @@ the post-run `chmod` is defence in depth.
 
 **Restore** (`POST /v1/apps/:project/restore`) verifies the archive against **the checksum the platform
 recorded when the backup was taken** (`checksum`, optional) and refuses on a mismatch *before reading
-or writing anything*, so an archive damaged in storage — a partial write, a full disk at backup time,
-bit rot, a truncated copy — is not extracted over the live project. The tar integrity pass below cannot
+or writing anything*, so an archive damaged in storage - a partial write, a full disk at backup time,
+bit rot, a truncated copy - is not extracted over the live project. The tar integrity pass below cannot
 catch that on its own: damage that still decompresses passes `tar -t` and only surfaces as silently
-wrong data. It is an **integrity** check, not authentication — the same agent computes the digest at
+wrong data. It is an **integrity** check, not authentication - the same agent computes the digest at
 backup time, so what it rules out is corruption, not a hostile agent. No `checksum` means nothing was
 available to verify against; the reply then reports `checksumVerified: false` rather than implying the
 archive was checked. It refuses an archive that is not a readable gzip tar,
-refuses an archive with no members, and refuses absolute or `..` member paths — all before anything is
+refuses an archive with no members, and refuses absolute or `..` member paths - all before anything is
 written. It lists the archive first and returns the member count it applied. Without that pass,
 `tar -xzf` on a truncated archive extracted what it could and exited 0, so the control plane recorded a
 successful restore of a project that had been only partly replaced; on an empty archive it wrote
@@ -146,14 +146,14 @@ nothing and still reported success.
 
 **Restores are quiesced by the control plane.** The agent untars into the project directory of
 whatever is running there, so the deployment pipeline stops the application first and starts it again
-afterwards — for engines that declare
+afterwards - for engines that declare
 `restoreRequiresStoppedApplication` (docker-compose does; cPanel restores through its own UAPI live,
 and Kubernetes refuses restores outright). An installation that was already `stopped` is restored
 without being started. If the restore fails the application is still started again, because a failed
 restore must never leave a customer's app down, and the volume data may be partially replaced.
 **Before any such destructive restore the pipeline also takes a safety snapshot of the current state
 through this same backup path** (`backup_kind = 'safety_snapshot'`, migration 0069) and refuses the
-restore when that snapshot fails — the agent does nothing different for it; restoring that row is the
+restore when that snapshot fails - the agent does nothing different for it; restoring that row is the
 undo.
 
 ## Failure modes and recovery
@@ -162,7 +162,7 @@ undo.
   backoff to `max_attempts`, and surface in the customer console and admin deployment list.
 - **Worker dies mid-job**: the lease expires; `recoverOrphanedJobs` reassigns it and the
   customer sees a "recovered after lease expiry" event.
-- **Server retires**: admin sets the server to `retired` — the registry keeps history; deletion
+- **Server retires**: admin sets the server to `retired` - the registry keeps history; deletion
   is refused while installations reference it.
 - **Bad manifest**: the engine re-validates the stored manifest before executing; invalid
   manifests fail the job with `MANIFEST_INVALID` before touching infrastructure.

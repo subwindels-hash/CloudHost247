@@ -18,14 +18,15 @@ import { DOCUMENTS, documentsBySection, findDocument } from '../../content/regis
  */
 function DocsSidebar({ currentSlug }: { currentSlug?: string }) {
   return (
-    <nav className="ch-doc-nav" aria-label="Documentation">
+    <nav className="ch-doc-nav ch-docs-nav" aria-label="Documentation">
       {documentsBySection().map((group) => (
         <div key={group.section}>
           <h2>{group.section}</h2>
           <ul>
             {group.documents.map((document) => (
               <li key={document.slug}>
-                <NavLink to={document.href} aria-current={document.slug === currentSlug ? 'page' : undefined}>
+                <NavLink to={`${document.href}#document-content`} aria-current={document.slug === currentSlug ? 'page' : undefined}>
+                  <span aria-hidden="true">📖</span>
                   {document.title}
                 </NavLink>
               </li>
@@ -34,7 +35,7 @@ function DocsSidebar({ currentSlug }: { currentSlug?: string }) {
         </div>
       ))}
       <p style={{ marginBottom: 0 }}>
-        <Link className="ch-link" to="/docs">Documentation index</Link>
+        <Link to="/docs"><span aria-hidden="true">📚</span>Documentation index</Link>
       </p>
     </nav>
   );
@@ -145,9 +146,9 @@ export function DocPage() {
     <div className="ch-ds">
       <section className="ch-section ch-section--tight" style={{ paddingTop: '28px' }}>
         <div className="ch-wrap--wide">
-          <div className="ch-doc-layout">
+          <div className="ch-doc-layout ch-docs-layout">
             <DocsSidebar currentSlug={entry.slug} />
-            <article className="ch-prose-doc">
+            <article className="ch-prose-doc" id="document-content">
               <nav className="ch-breadcrumbs" aria-label="Breadcrumb" style={{ padding: 0 }}>
                 <ol>
                   <li><Link to="/">Home</Link><span aria-hidden>/</span></li>

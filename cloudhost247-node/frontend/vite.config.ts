@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { editorialPunctuationPlugin } from './editorial-punctuation-plugin';
 
 /**
  * Builds the production React/TypeScript SPA into ../public, which the Fastify server
@@ -70,7 +71,7 @@ const proxy = {
 export default defineConfig({
   root: __dirname,
   base: process.env.VITE_BASE_PATH || '/',
-  plugins: [react()],
+  plugins: [editorialPunctuationPlugin(), react()],
   build: {
     outDir: path.resolve(__dirname, '../public'),
     emptyOutDir: true,

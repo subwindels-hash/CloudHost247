@@ -23,3 +23,12 @@ test('policy contact addresses link to the contact page', async ({ page }) => {
   await article.getByRole('link', { name: 'Contact us' }).first().click();
   await expect(page).toHaveURL(/\/contact$/);
 });
+
+test('FAQ contact options use the contact page without exposing mailbox addresses', async ({ page }) => {
+  await page.goto('/faq');
+  const main = page.locator('main');
+  await expect(main).not.toContainText(/\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b/i);
+  await expect(main.locator('a[href^="mailto:"]')).toHaveCount(0);
+  await expect(main.getByRole('link', { name: 'Contact us' })).toHaveCount(3);
+  await expect(main.getByRole('link', { name: 'contact our support team' })).toHaveAttribute('href', '/contact');
+});
