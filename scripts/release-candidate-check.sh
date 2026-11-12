@@ -122,6 +122,7 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 node --test server-agent/tests/*.test.js
+node --test tests/site/*.test.mjs
 
 # --- Static verification (runs without PHP or WHMCS) -------------------------------------------
 python3 -m unittest -v tests/foundation/test_static.py tests/theme/test_static.py tests/currency/test_static.py tests/marketing/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/passkey/test_static.py tests/digitalproducts/test_static.py tests/payments/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py tests/security/test_release_workflow_docs.py tests/security/test_release_gate_static.py tests/security/test_domain_data_provenance.py

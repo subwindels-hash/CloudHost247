@@ -5,7 +5,10 @@
   "cloudhost247-node/frontend/src/content/*.generated.json",
   "modules/addons/cloudhost247_theme/resources/site.json",
   "docs/*.md",
-  "cloudhost247-node/frontend/src/content/announcements.ts"
+  "cloudhost247-node/frontend/src/content/announcements.ts",
+  "cloudhost247-node/src/tools/catalog.ts (public entries only)",
+  "templates/cloudhost247/*.tpl (registered custom storefronts, static prose only)",
+  "cloudhost247-node/frontend/src/pages/*Page.tsx (registered custom storefronts, static prose only)"
  ],
  "documents": [
   {
@@ -4292,7 +4295,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "DNS Propagation Checker\nQuery the same record against multiple public resolvers worldwide.",
+   "body": "DNS Propagation Checker\nQuery the same record against multiple public resolvers worldwide.\nSends the same DNS question to each enabled resolver in the CloudHost247 resolver registry and reports, per resolver, the answer, response time and status. Results describe exactly the resolvers queried — CloudHost247 does not claim that these answers represent global propagation.",
    "headings": [
     "DNS Propagation Checker"
    ]
@@ -4309,7 +4312,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "DNS Lookup\nLook up A, AAAA, CNAME, MX, NS, TXT, SOA, SRV, CAA, PTR, DS and DNSKEY records.",
+   "body": "DNS Lookup\nLook up A, AAAA, CNAME, MX, NS, TXT, SOA, SRV, CAA, PTR, DS and DNSKEY records.\nQueries a selected CloudHost247 resolver for one record type and shows every answer with TTL, priority (MX/SRV) and the resolver that answered. DS and DNSKEY come from the DNSSEC zone.",
    "headings": [
     "DNS Lookup"
    ]
@@ -4326,7 +4329,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "DNS Health Checker\nRun every DNS, delegation, email-authentication and DNSSEC check for a domain.",
+   "body": "DNS Health Checker\nRun every DNS, delegation, email-authentication and DNSSEC check for a domain.\nRuns a battery of independent checks against the domain's authoritative servers and public resolvers: NS delegation consistency, A/AAAA/CNAME, MX, SPF, DKIM, DMARC, BIMI, CAA, SOA, TTL consistency, DNSSEC and resolution failures. Each check reports PASS, WARNING, ERROR, NOT_CHECKED or UNKNOWN with its own explanation.",
    "headings": [
     "DNS Health Checker"
    ]
@@ -4343,7 +4346,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "MX Lookup\nResolve MX hosts, their addresses, reverse DNS and mail provider.",
+   "body": "MX Lookup\nResolve MX hosts, their addresses, reverse DNS and mail provider.\nResolves the domain's MX records, then resolves each mail host to IPv4/IPv6 and performs a reverse lookup. The provider is identified only when the MX hostname matches a known CloudHost247 mapping; otherwise it is reported as Unknown rather than guessed.",
    "headings": [
     "MX Lookup"
    ]
@@ -4353,14 +4356,14 @@
    "url": "/tools/dns/spf",
    "aliases": [],
    "title": "SPF Checker",
-   "description": "Parse and validate the domain\\",
+   "description": "Parse and validate the domain's SPF policy, including DNS lookup count.",
    "kind": "website_tool",
    "surface": "spa",
    "section": "Tools — dns",
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "SPF Checker\nParse and validate the domain\\",
+   "body": "SPF Checker\nParse and validate the domain's SPF policy, including DNS lookup count.\nFetches the SPF TXT record, parses every mechanism and modifier, checks the RFC 7208 syntax, counts the DNS lookups the record requires (limit 10) and flags common misconfigurations: multiple SPF records, deprecated ptr, missing terminal all, lookups beyond 10, and include loops.",
    "headings": [
     "SPF Checker"
    ]
@@ -4377,7 +4380,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "DMARC Checker\nInspect and validate a _dmarc policy, tag by tag.",
+   "body": "DMARC Checker\nInspect and validate a _dmarc policy, tag by tag.\nFetches _dmarc. and validates every tag (v, p, sp, pct, rua, ruf, adkim, aspf, fo, rf, ri), explains what the policy means for receiving mail servers, and warns about combinations that are syntactically valid but operationally risky.",
    "headings": [
     "DMARC Checker"
    ]
@@ -4394,7 +4397,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "DMARC Record Generator\nBuild a correctly formatted _dmarc record interactively.",
+   "body": "DMARC Record Generator\nBuild a correctly formatted _dmarc record interactively.\nGenerates the TXT value for a _dmarc record from a guided form and shows exactly where to publish it. Generation is deterministic and validated server-side, so the value can be pasted into CloudHost247 DNS management, cPanel or any DNS host.",
    "headings": [
     "DMARC Record Generator"
    ]
@@ -4411,7 +4414,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "DKIM Checker\nCheck selector._domainkey records for one or more selectors.",
+   "body": "DKIM Checker\nCheck selector._domainkey records for one or more selectors.\nQueries the DKIM public-key records for the selectors you supply, parses the key, reports the key type and flags syntax problems. CloudHost247 cannot confirm a signature actually validates from the public key alone — when an external DKIM verifier provider is configured, that extra verification is offered explicitly.",
    "headings": [
     "DKIM Checker"
    ]
@@ -4428,7 +4431,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "BIMI Checker\nInspect the BIMI record, logo URL and VMC certificate URL.",
+   "body": "BIMI Checker\nInspect the BIMI record, logo URL and VMC certificate URL.\nFetches default._bimi. , parses the l= and a= tags, validates the URL shape, and reports whether the DMARC policy satisfies BIMI's enforcement prerequisite. It reports what the DNS says; it does not claim a mailbox provider will display the logo.",
    "headings": [
     "BIMI Checker"
    ]
@@ -4438,14 +4441,14 @@
    "url": "/tools/dns/dnskey",
    "aliases": [],
    "title": "DNSKEY Lookup",
-   "description": "Show the zone\\",
+   "description": "Show the zone's DNSKEY records with key tag, algorithm, flags and public key.",
    "kind": "website_tool",
    "surface": "spa",
    "section": "Tools — dns",
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "DNSKEY Lookup\nShow the zone\\",
+   "body": "DNSKEY Lookup\nShow the zone's DNSKEY records with key tag, algorithm, flags and public key.\nQueries DNSKEY at the zone apex, computes the RFC 4034 §5.1.4 key tag for each key and reports SEP/Zone flags, protocol and algorithm. Presence of DNSKEY records does not by itself prove DNSSEC validation; the DNS Health Checker reports delegation evidence separately.",
    "headings": [
     "DNSKEY Lookup"
    ]
@@ -4462,7 +4465,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "DS Lookup\nShow the DS records published by the parent zone and the DNSSEC chain state.",
+   "body": "DS Lookup\nShow the DS records published by the parent zone and the DNSSEC chain state.\nQueries DS at the parent zone (or at the zone itself when it is a TLD), lists key tag, algorithm, digest type and digest, and reports whether a matching DNSKEY exists at the child so the delegation chain can be described factually.",
    "headings": [
     "DS Lookup"
    ]
@@ -4479,7 +4482,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Reverse DNS / PTR Lookup\nPTR lookup for IPv4/IPv6 with forward-confirmed reverse DNS.",
+   "body": "Reverse DNS / PTR Lookup\nPTR lookup for IPv4/IPv6 with forward-confirmed reverse DNS.\nBuilds the in-addr.arpa / ip6.arpa name, resolves its PTR records and then resolves each returned hostname forward to confirm the address appears in its A/AAAA records (forward-confirmed reverse DNS).",
    "headings": [
     "Reverse DNS / PTR Lookup"
    ]
@@ -4496,7 +4499,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "IP Address Lookup\nASN, organisation, country, reverse DNS and network range for an IP.",
+   "body": "IP Address Lookup\nASN, organisation, country, reverse DNS and network range for an IP.\nCombines the free, keyless Team Cymru DNS origin lookup (ASN, prefix, registry, country) with reverse DNS and, when a geolocation provider is configured, city/region/timezone enrichment. Address version, class (public/private/reserved) and prefix are always reported.",
    "headings": [
     "IP Address Lookup"
    ]
@@ -4513,7 +4516,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "What Is My IP\nShow the public IP verified for this connection, or say plainly why none is claimed.",
+   "body": "What Is My IP\nShow the public IP verified for this connection, or say plainly why none is claimed.\nReports the address CloudHost247's configured network boundary verified for your request (and the IPv6 address separately when the connection used IPv6), or states the reason nothing is claimed when it cannot verify one — a forwarding header is never substituted for a verified address. Adds user-agent and, when detectable, the negotiated TLS protocol/cipher, and the non-credential headers your browser sent. No attempt is made to fingerprint the device beyond what the browser sends.",
    "headings": [
     "What Is My IP"
    ]
@@ -4530,7 +4533,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "IP WHOIS\nRegistry data for an IPv4/IPv6 address over RDAP.",
+   "body": "IP WHOIS\nRegistry data for an IPv4/IPv6 address over RDAP.\nQueries RDAP (the structured, standards-based successor to port-43 WHOIS) for the address: network handle, name, range, CIDR blocks, registrant organisation, abuse contact, events and remarks. The RDAP bootstrap endpoint is operator-configurable.",
    "headings": [
     "IP WHOIS"
    ]
@@ -4547,7 +4550,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Domain → IP\nResolve a hostname to IPv4/IPv6 with the full CNAME chain.",
+   "body": "Domain → IP\nResolve a hostname to IPv4/IPv6 with the full CNAME chain.\nResolves A and AAAA through a chosen CloudHost247 resolver, showing the CNAME chain, TTLs and response time for each answer.",
    "headings": [
     "Domain → IP"
    ]
@@ -4564,7 +4567,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "IP → Hostname\nReverse DNS for an address, with FCRDNS confirmation.",
+   "body": "IP → Hostname\nReverse DNS for an address, with FCRDNS confirmation.\nPerforms the PTR lookup for an address and confirms each hostname resolves back to it.",
    "headings": [
     "IP → Hostname"
    ]
@@ -4581,7 +4584,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "ISP Lookup\nNetwork operator, ASN and country for an IP address.",
+   "body": "ISP Lookup\nNetwork operator, ASN and country for an IP address.\nUses the keyless Team Cymru DNS origin service for ASN/prefix/registry/country and the reverse-DNS operator name, and adds ISP/carrier names from a geolocation provider when one is configured.",
    "headings": [
     "ISP Lookup"
    ]
@@ -4598,7 +4601,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "IP Converters\nDecimal ↔ IP, IPv4 ↔ IPv6, IPv6 compression/expansion, CIDR ↔ range.",
+   "body": "IP Converters\nDecimal ↔ IP, IPv4 ↔ IPv6, IPv6 compression/expansion, CIDR ↔ range.\nDeterministic conversions with the intermediate steps shown: IPv4/IPv6 to decimal and back, IPv4-mapped IPv6 and NAT64 forms, IPv6 compression and expansion, and IPv6 CIDR ↔ address range.",
    "headings": [
     "IP Converters"
    ]
@@ -4615,7 +4618,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Subnet Calculator\nIPv4/IPv6 network, broadcast, host range, masks and splitting.",
+   "body": "Subnet Calculator\nIPv4/IPv6 network, broadcast, host range, masks and splitting.\nComputes network address, broadcast, first/last usable host, address count, CIDR notation, subnet mask, wildcard mask and binary forms for IPv4 and IPv6, and can split a network into equal subnets.",
    "headings": [
     "Subnet Calculator"
    ]
@@ -4632,7 +4635,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "MAC Address Lookup\nInspect MAC address bits and query a configured IEEE OUI reference.",
+   "body": "MAC Address Lookup\nInspect MAC address bits and query a configured IEEE OUI reference.\nInspects unicast/multicast and global/local bits. Vendor information comes from a configured IEEE OUI source, cached with its load time; unavailable source data is explicitly reported, never invented.",
    "headings": [
     "MAC Address Lookup"
    ]
@@ -4649,7 +4652,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "MAC Address Generator\nGenerate valid random, locally-administered or globally-administered MACs.",
+   "body": "MAC Address Generator\nGenerate valid random, locally-administered or globally-administered MACs.\nGenerates cryptographically random MAC addresses with the correct unicast/multicast and U/L bits for the requested mode.",
    "headings": [
     "MAC Address Generator"
    ]
@@ -4666,7 +4669,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "ASN WHOIS\nAutonomous system details, announced prefixes and registry.",
+   "body": "ASN WHOIS\nAutonomous system details, announced prefixes and registry.\nQueries RDAP for the AS number and the DNS-based Team Cymru origin service for announced prefixes, then resolves the AS name from RDAP. Results are attributable: every field lists the source that produced it.",
    "headings": [
     "ASN WHOIS"
    ]
@@ -4683,7 +4686,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Internet Speed Test\nBrowser-based download, upload and latency measurement with hard limits.",
+   "body": "Internet Speed Test\nBrowser-based download, upload and latency measurement with hard limits.\nMeasures throughput between your browser and CloudHost247 using bounded transfers: the server caps each measurement by size and duration, and rate limits each client. Latency is measured with small request/response timing and jitter is reported when at least three samples are collected.",
    "headings": [
     "Internet Speed Test"
    ]
@@ -4700,7 +4703,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "HTTP Headers Checker\nStatus, headers, redirect chain, cache and security-header analysis.",
+   "body": "HTTP Headers Checker\nStatus, headers, redirect chain, cache and security-header analysis.\nFetches a URL through the SSRF-protected client, follows redirects with a hop limit, and reports the status code, every response header, the redirect chain, and an assessment of security headers (HSTS, CSP, X-Content-Type-Options, X-Frame-Options/frame-ancestors, Referrer-Policy, Permissions-Policy) and cache directives.",
    "headings": [
     "HTTP Headers Checker"
    ]
@@ -4717,7 +4720,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Website OS Checker\nInfer server software with an explicit confidence level.",
+   "body": "Website OS Checker\nInfer server software with an explicit confidence level.\nReads Server, X-Powered-By, Via and proxy-identifying headers and reports each technology with a confidence level — Confirmed when the server states it, Likely when derived from several weak signals, Unknown when nothing reliable is present. No probing of the server beyond the single HTTP request.",
    "headings": [
     "Website OS Checker"
    ]
@@ -4734,7 +4737,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Email Header Analyzer\nParse a raw message header: Received chain, auth results, sending IP.",
+   "body": "Email Header Analyzer\nParse a raw message header: Received chain, auth results, sending IP.\nParses a pasted header, reconstructs the Received chain with per-hop delays, extracts SPF/DKIM/DMARC results from Authentication-Results, identifies the sending IP and mail servers, and flags alignment mismatches between From, Return-Path and the authenticated domain.",
    "headings": [
     "Email Header Analyzer"
    ]
@@ -4751,7 +4754,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "JSON Tools\nViewer, formatter, beautifier, minifier and validator.",
+   "body": "JSON Tools\nViewer, formatter, beautifier, minifier and validator.\nValidates JSON with precise error positions, formats it with the indentation you choose, minifies it, and can sort keys. All processing happens in the browser; the API endpoint exists so the same behaviour is available to integrations and is covered by tests.",
    "headings": [
     "JSON Tools"
    ]
@@ -4768,7 +4771,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Encoding Tools\nBase64, MD5, binary ↔ text, ROT13 and Morse code.",
+   "body": "Encoding Tools\nBase64, MD5, binary ↔ text, ROT13 and Morse code.\nEncodes and decodes Base64 (UTF-8 safe), computes MD5, converts between text and binary, applies ROT13 and translates to/from Morse code. MD5 is provided for checksum/interoperability work only and the UI states plainly that it is unsuitable for password storage.",
    "headings": [
     "Encoding Tools"
    ]
@@ -4785,7 +4788,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "URL Tools\nMulti-URL opener, rewrite-rule and .htaccess generators.",
+   "body": "URL Tools\nMulti-URL opener, rewrite-rule and .htaccess generators.\nOpens several URLs in browser tabs (client-side only — no server-side fetching merely to open a link), parses and explains URL components, and generates common Apache rewrite/redirect rules and .htaccess blocks with safe defaults.",
    "headings": [
     "URL Tools"
    ]
@@ -4802,7 +4805,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "User Agent Tool\nShow the user-agent and headers your browser actually sent.",
+   "body": "User Agent Tool\nShow the user-agent and headers your browser actually sent.\nDisplays the exact User-Agent string and request headers CloudHost247 received, so a support conversation can start from the same facts.",
    "headings": [
     "User Agent Tool"
    ]
@@ -4819,7 +4822,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Open Graph Checker\nInspect og: and Twitter card metadata and preview the link.",
+   "body": "Open Graph Checker\nInspect og: and Twitter card metadata and preview the link.\nParses Open Graph and Twitter/X card tags, warns about missing or malformed required properties, resolves relative image URLs and renders a preview of how the link is likely to appear.",
    "headings": [
     "Open Graph Checker"
    ]
@@ -4836,7 +4839,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "robots.txt Generator\nBuild a valid robots.txt with sitemaps and crawl delay.",
+   "body": "robots.txt Generator\nBuild a valid robots.txt with sitemaps and crawl delay.\nGenerates robots.txt from a guided form (user-agent groups, allow/disallow rules, sitemaps, crawl-delay, common presets), validating directives so the file cannot be emitted in a malformed state.",
    "headings": [
     "robots.txt Generator"
    ]
@@ -4853,7 +4856,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "SERP Simulator\nPreview a search result snippet for title, URL and description length.",
+   "body": "SERP Simulator\nPreview a search result snippet for title, URL and description length.\nRenders a desktop and mobile search-result preview and reports pixel-width and character guidance for the title and description. It is explicitly a simulator for appearance only; it shows no ranking data.",
    "headings": [
     "SERP Simulator"
    ]
@@ -4870,7 +4873,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "SSL Certificate Checker\nCertificate chain, validity, SANs, protocol and expiry for a host.",
+   "body": "SSL Certificate Checker\nCertificate chain, validity, SANs, protocol and expiry for a host.\nOpens a real TLS connection, reports the leaf and chain certificates (subject, issuer, SANs, validity, signature algorithm, key parameters), the negotiated protocol and cipher, hostname match, and days remaining. Private keys are never requested or displayed.",
    "headings": [
     "SSL Certificate Checker"
    ]
@@ -4887,7 +4890,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "IP Blacklist Checker\nCheck an IP against the DNS blocklists the operator has enabled.",
+   "body": "IP Blacklist Checker\nCheck an IP against the DNS blocklists the operator has enabled.\nQueries each enabled DNS-based blocklist for the address and reports listed / not listed / error per provider, with the listing code or text the provider returned and delisting guidance. Providers are managed by a Super Admin — nothing is hard-coded.",
    "headings": [
     "IP Blacklist Checker"
    ]
@@ -4904,7 +4907,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Password Tools\nGenerate strong passwords and evaluate strength locally.",
+   "body": "Password Tools\nGenerate strong passwords and evaluate strength locally.\nGenerates random passwords with the character classes and length you choose, evaluates the strength of a password using client-side entropy estimation against common patterns, and explains the difference between a one-way password hash and reversible encryption.",
    "headings": [
     "Password Tools"
    ]
@@ -4921,7 +4924,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Business Tools\nTwenty-one payroll, tax, document and provider-comparison tools that run entirely in your browser.",
+   "body": "Business Tools\nTwenty-one payroll, tax, document and provider-comparison tools that run entirely in your browser.\nThe Business Tools directory: 5 calculators (PAYE and net salary under the Nigeria Tax Act 2025, PenCom pension, VAT at 7.5%, total employer cost, and Earned Wage Access ROI), 12 generators (job descriptions, offer letters, payslips, NDAs, employment contracts, CVs, invoices, business cards, employee identifiers, ID badges, organization charts and LinkedIn comment drafts) and 4 comparisons (accounting systems, expense platforms, NHIA-accredited HMOs and PenCom-licensed PFAs). Every calculation runs client-side: salary figures, employee names, contract terms and client details are never uploaded, logged or stored. Each tool that applies a statutory rate names its jurisdiction, source and effective date, and each planning estimate is labelled as one. These tools produce figures and drafts for you to check — they are not tax, legal or financial advice.",
    "headings": [
     "Business Tools"
    ]
@@ -4938,7 +4941,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "MRZ Generator\nGenerate, validate and parse ICAO Doc 9303 machine-readable zones, with per-layout field-width and check-digit validation.",
+   "body": "MRZ Generator\nGenerate, validate and parse ICAO Doc 9303 machine-readable zones, with per-layout field-width and check-digit validation.\nBuilds ICAO Doc 9303 machine-readable zones from the document fields you enter, validates the structure and the 7-3-1 check digits of an existing zone, and parses a supplied zone back into labelled fields. The page states which layout it is producing and enforces that layout\\u2019s field widths: a value that cannot fit is rejected with a message naming the field and its limit rather than being truncated. Names are transliterated to the ICAO Latin character set and an unsupported character is reported instead of being silently removed. Validation is syntactic — structure, widths, character set and check digits — and a zone that passes it is still not evidence that a physical or electronic document is genuine. Generation and validation run in your browser; the documented API path exists for integration testing and never caches, logs or persists the values you submit. This tool works on machine-readable text only and does not produce passport artwork.",
    "headings": [
     "MRZ Generator"
    ]
@@ -4955,7 +4958,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Punycode / IDN Converter\nConvert between Unicode domain names and their ASCII (punycode) form.",
+   "body": "Punycode / IDN Converter\nConvert between Unicode domain names and their ASCII (punycode) form.\nUses standards-compliant IDNA processing (Node's URL hostname parser, which implements UTS#46-style mapping) to convert between a Unicode domain and its punycode form, validating the result and reporting the label-by-label conversion.",
    "headings": [
     "Punycode / IDN Converter"
    ]
@@ -4965,14 +4968,14 @@
    "url": "/tools/domain/search",
    "aliases": [],
    "title": "Domain Availability",
-   "description": "Check whether a domain is available, using CloudHost247\\",
+   "description": "Check whether a domain is available, using CloudHost247's registrar integration.",
    "kind": "website_tool",
    "surface": "spa",
    "section": "Tools — domain",
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Domain Availability\nCheck whether a domain is available, using CloudHost247\\",
+   "body": "Domain Availability\nCheck whether a domain is available, using CloudHost247's registrar integration.\nUses the existing CloudHost247 Domain Services providers (registrar APIs and RDAP) to check availability, and returns the same states the domain search does: available, registered, premium, unsupported, unknown. Signed-in customers can add a result straight to the cart.",
    "headings": [
     "Domain Availability"
    ]
@@ -4989,7 +4992,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Word & Text Counter\nWords, characters, sentences, paragraphs and reading time.",
+   "body": "Word & Text Counter\nWords, characters, sentences, paragraphs and reading time.\nCounts words, characters (with and without spaces), sentences and paragraphs, and estimates reading time from word count.",
    "headings": [
     "Word & Text Counter"
    ]
@@ -5006,7 +5009,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Lorem Ipsum Generator\nGenerate placeholder text by words, sentences or paragraphs.",
+   "body": "Lorem Ipsum Generator\nGenerate placeholder text by words, sentences or paragraphs.\nGenerates classical Lorem Ipsum placeholder text in the quantity you request, with a choice of starting with \"Lorem ipsum dolor sit amet…\".",
    "headings": [
     "Lorem Ipsum Generator"
    ]
@@ -5023,7 +5026,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Online Notepad\nA scratch pad that stays in your browser.",
+   "body": "Online Notepad\nA scratch pad that stays in your browser.\nA distraction-free text area with local persistence in your browser only. Nothing typed into the notepad is sent to CloudHost247 unless you explicitly save it as a report.",
    "headings": [
     "Online Notepad"
    ]
@@ -5040,7 +5043,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Small Text Generator\nConvert text to small caps, superscript and subscript Unicode.",
+   "body": "Small Text Generator\nConvert text to small caps, superscript and subscript Unicode.\nMaps letters to Unicode small-cap, superscript and subscript equivalents. Characters without a mapping are left unchanged and reported, so the output never silently loses content.",
    "headings": [
     "Small Text Generator"
    ]
@@ -5057,7 +5060,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Invisible Character Generator\nCopy zero-width and invisible Unicode characters.",
+   "body": "Invisible Character Generator\nCopy zero-width and invisible Unicode characters.\nProvides the standard invisible Unicode characters with their code points and names, ready to copy. Each entry is labelled with its code point so the output is auditable.",
    "headings": [
     "Invisible Character Generator"
    ]
@@ -5074,7 +5077,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Runic Translator\nTransliterate Latin text to Elder Futhark runes and back.",
+   "body": "Runic Translator\nTransliterate Latin text to Elder Futhark runes and back.\nTransliterates Latin letters to Elder Futhark runes using a documented, deterministic mapping (digraphs first), and transliterates back. Characters with no runic equivalent are reported rather than dropped.",
    "headings": [
     "Runic Translator"
    ]
@@ -5091,7 +5094,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "QR Code Generator\nCreate QR codes for URLs, text, email, phone, WiFi and vCards.",
+   "body": "QR Code Generator\nCreate QR codes for URLs, text, email, phone, WiFi and vCards.\nGenerates QR codes server-side (so the same PNG/SVG is reproducible from the API) for URLs, plain text, email, phone numbers, WiFi credentials and vCards. Nothing you enter is stored; the response contains the image and nothing else.",
    "headings": [
     "QR Code Generator"
    ]
@@ -5108,7 +5111,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "QR Scanner\nScan a QR code from your camera or an image file.",
+   "body": "QR Scanner\nScan a QR code from your camera or an image file.\nDecodes QR codes in the browser using the device camera or an uploaded image, using the platform's QR reader support. Decoded content is shown for review and is never uploaded unless you explicitly save it.",
    "headings": [
     "QR Scanner"
    ]
@@ -5125,7 +5128,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "WiFi QR Tool\nShare a WiFi network as a QR code, without storing the password.",
+   "body": "WiFi QR Tool\nShare a WiFi network as a QR code, without storing the password.\nBuilds the standard WIFI: QR payload from SSID, password, encryption type and hidden flag, then renders it as PNG or SVG. The password is used to render the image and is never written to the database; saving the result as a report stores only the SSID and encryption type.",
    "headings": [
     "WiFi QR Tool"
    ]
@@ -5142,7 +5145,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Time Card Calculator\nClock-in/clock-out totals with breaks and overtime.",
+   "body": "Time Card Calculator\nClock-in/clock-out totals with breaks and overtime.\nCalculates worked time from clock-in/clock-out pairs and breaks, in either 12- or 24-hour format, and applies the overtime rule you specify (daily or weekly thresholds).",
    "headings": [
     "Time Card Calculator"
    ]
@@ -5159,7 +5162,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Designer Colour Tools\nConvert between HEX, RGB, HSL, HSV/HSB and CMYK.",
+   "body": "Designer Colour Tools\nConvert between HEX, RGB, HSL, HSV/HSB and CMYK.\nConverts a colour between HEX, RGB, HSL, HSV/HSB and CMYK, shows the preview, contrast ratio against black and white, and provides copy-ready values for each notation.",
    "headings": [
     "Designer Colour Tools"
    ]
@@ -5176,7 +5179,7 @@
    "category": "Tools",
    "related": [],
    "faqs": [],
-   "body": "Reverse Image Search\nLaunch an image search with the engines you choose.",
+   "body": "Reverse Image Search\nLaunch an image search with the engines you choose.\nOpens the reverse-image-search service you pick (Google Lens, TinEye, Bing Visual Search, Yandex Images) in a new tab. This tool performs no crawling or scraping of third-party engines: the search itself happens in your browser, under those services' own terms.",
    "headings": [
     "Reverse Image Search"
    ]
@@ -5266,12 +5269,12 @@
    "title": "Digital Products",
    "description": "Discover downloadable products for your next project.",
    "kind": "website_page",
-   "surface": "registry",
+   "surface": "spa",
    "section": "Platforms",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "Digital Products\nDiscover downloadable products for your next project.",
+   "body": "Digital Products\nDiscover downloadable products for your next project.\nDIGITAL PRODUCTS / CLOUDHOST247\nIdeas made ready to use.\nDiscover downloadable products for the work you want to do. Find the right fit, order with confidence, and access your purchases from your account.\nCURATED FOR YOUR NEXT PROJECT / CLOUDHOST247\n01 / EXPLORE THE COLLECTION\nFind something for your next project.\nBrowse published digital products and review their details before ordering.\nProducts appear here when published in this platform's catalog. For availability and ordering, contact sales .\n02 / HOW IT WORKS\nFrom discovery to doing.\nGet from the right product to your next project in a few simple steps.\n03 / GET STARTED\nReady for what’s next?\nExplore the collection or speak to our team about what you need.",
    "headings": [
     "Digital Products"
    ]
@@ -5486,12 +5489,12 @@
    "title": "Google Workspace",
    "description": "Business email and collaboration for your team.",
    "kind": "website_page",
-   "surface": "registry",
+   "surface": "spa",
    "section": "Hosting",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "Google Workspace\nBusiness email and collaboration for your team.",
+   "body": "Google Workspace\nBusiness email and collaboration for your team.\nGOOGLE WORKSPACE / CLOUDHOST247\nGood work happens together.\nBring your team’s email and everyday collaboration tools together. Explore Google Workspace options for a more connected way to work.\nA MORE CONNECTED WORKDAY / CLOUDHOST247\n01 / EXPLORE YOUR OPTIONS\nFind your fit for better teamwork.\nCompare published Google Workspace plans and review their details before ordering.\nPlans appear here when published in this platform's catalog. For availability and ordering, contact sales . Our existing WHMCS integration manages users and license assignments in an existing, authorized Google Workspace tenant with available licenses; it does not purchase subscriptions or seats. Contact us to confirm your setup before ordering.\n02 / MADE FOR WORKING TOGETHER\nMake space for your best work.\nBring conversations, ideas and schedules closer together. Features depend on your Google Workspace edition and configuration.\n03 / GET STARTED\nReady to work better together?\nExplore available plans or speak to our team about your existing Google Workspace setup.",
    "headings": [
     "Google Workspace"
    ]
@@ -5524,12 +5527,12 @@
    "title": "Remote Desktop (RDP)",
    "description": "Find a remote desktop server for your workspace.",
    "kind": "website_page",
-   "surface": "registry",
+   "surface": "spa",
    "section": "Cloud & Servers",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "Remote Desktop (RDP)\nFind a remote desktop server for your workspace.",
+   "body": "Remote Desktop (RDP)\nFind a remote desktop server for your workspace.\n● REMOTE DESKTOP SERVERS\nYour desktop. Wherever work takes you.\nA remote workspace that moves with you. Explore RDP server plans and find the resources for the way you work.\nA REMOTE WORKSPACE / BUILT FOR YOUR DAY\n01 / FIND YOUR WORKSPACE\nChoose your RDP plan.\nCompare available configurations and find the right fit for your remote workspace.\nRDP plans on this platform are listed when published in its catalog. For availability and ordering, contact sales .\n02 / THE REMOTE ADVANTAGE\nMake space for better work.\nKeep your workspace within reach, whether you're at your desk or on the move.\n03 / GET STARTED\nReady to work remotely?\nFind a server that fits your needs, or get in touch if you have questions.",
    "headings": [
     "Remote Desktop (RDP)"
    ]
@@ -5543,12 +5546,12 @@
    "title": "Number Services",
    "description": "Explore virtual number services for your business.",
    "kind": "website_page",
-   "surface": "registry",
+   "surface": "spa",
    "section": "Hosting",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "Number Services\nExplore virtual number services for your business.",
+   "body": "Number Services\nExplore virtual number services for your business.\nNUMBER SERVICES / CLOUDHOST247\nBe there, where it matters.\nA number can bring your business closer to the people you serve. Explore virtual number plans and find a connection that fits your needs.\nA BETTER WAY TO CONNECT / CLOUDHOST247\n01 / FIND YOUR FIT\nA number for your next step.\nCompare published number plans. Availability, number types, and capabilities depend on the country and provider.\nPlans appear here when published in this platform's catalog. For availability and ordering, contact sales .\n02 / THE CONNECTION\nStay close to what matters.\nChoose a service around the people you want to reach and the way you work.\n03 / GET STARTED\nLet's get you connected.\nExplore available plans or speak to our team about your requirements.",
    "headings": [
     "Number Services"
    ]
@@ -5562,12 +5565,12 @@
    "title": "Microsoft 365 (Office 365)",
    "description": "Business email and productivity tools for your team.",
    "kind": "website_page",
-   "surface": "registry",
+   "surface": "spa",
    "section": "Hosting",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "Microsoft 365 (Office 365)\nBusiness email and productivity tools for your team.",
+   "body": "Microsoft 365 (Office 365)\nBusiness email and productivity tools for your team.\nMICROSOFT 365 / CLOUDHOST247\nMore room to do great work.\nBring your team’s email and productivity tools together. Explore Microsoft 365, formerly Office 365, for a more connected workday.\nYOUR WORK, WORKING TOGETHER / CLOUDHOST247\n01 / EXPLORE YOUR OPTIONS\nFind a plan for the way you work.\nCompare published Microsoft 365 plans and review their details before ordering.\nPlans appear here when published in this platform's catalog. For availability and ordering, contact sales . Our existing WHMCS integration manages users and license assignments in an existing, authorized Microsoft 365 tenant with available licenses; it does not purchase or renew subscriptions or seats. Contact us to confirm your setup before ordering.\n02 / MADE FOR YOUR WORKDAY\nDo more with your day.\nKeep your team connected and your work moving. Available apps and features depend on your Microsoft 365 edition and configuration.\n03 / GET STARTED\nReady for a better workday?\nExplore available plans or speak to our team about your existing Microsoft 365 setup.",
    "headings": [
     "Microsoft 365 (Office 365)"
    ]
@@ -5581,12 +5584,12 @@
    "title": "LTE Proxy Services",
    "description": "Explore configurable LTE proxy connections.",
    "kind": "website_page",
-   "surface": "registry",
+   "surface": "spa",
    "section": "Cloud & Servers",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "LTE Proxy Services\nExplore configurable LTE proxy connections.",
+   "body": "LTE Proxy Services\nExplore configurable LTE proxy connections.\n● LTE PROXY SERVICES / CLOUDHOST247\nA smarter route to the web.\nExplore LTE proxy services built around how you connect. Find a plan that fits your workflow and manage your service from your account.\nYOUR CONNECTION / YOUR CONTROL\n01 / EXPLORE YOUR OPTIONS\nFind the right route for your workflow.\nRegions, protocols and rotation options depend on the plan and provider configuration.\nProxy services are coming soon.\nOrdering is not yet available on this platform. Contact our team to discuss availability and your requirements.\nAvailability and provisioning depend on the configured provider.\n02 / BUILT AROUND YOUR WORKFLOW\nConnection, with more control.\nChoose the options that suit your use case. Features and availability vary by plan and provider.\n03 / GET STARTED\nReady to find your route?\nSpeak to our team about your requirements.",
    "headings": [
     "LTE Proxy Services"
    ]
@@ -5619,12 +5622,12 @@
    "title": "SMM Services",
    "description": "Explore social media marketing services for your next campaign.",
    "kind": "website_page",
-   "surface": "registry",
+   "surface": "spa",
    "section": "Hosting",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "SMM Services\nExplore social media marketing services for your next campaign.",
+   "body": "SMM Services\nExplore social media marketing services for your next campaign.\nSOCIAL MEDIA MARKETING / CLOUDHOST247\nMake your next move.\nBring more intention to your social media strategy. Explore available services, choose what fits your goals, and manage your orders in one place.\nYOUR BRAND / YOUR NEXT CHAPTER\n01 / EXPLORE THE CATALOG\nServices for your social strategy.\nBrowse published services and find the right fit for your goals.\nServices appear here when published in this platform's catalog. For availability and ordering, contact sales .\n02 / HOW IT WORKS\nSimple steps. Clear direction.\nFrom finding a service to checking your order, keep your next move straightforward.\n03 / LET’S GET STARTED\nReady for your next move?\nExplore the catalog or reach out to our team with your questions.",
    "headings": [
     "SMM Services"
    ]
@@ -5638,12 +5641,12 @@
    "title": "SMTP Hosting",
    "description": "SMTP services for your email workflows.",
    "kind": "website_page",
-   "surface": "registry",
+   "surface": "spa",
    "section": "Hosting",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "SMTP Hosting\nSMTP services for your email workflows.",
+   "body": "SMTP Hosting\nSMTP services for your email workflows.\n● SMTP HOSTING / CLOUDHOST247\nMake every message count.\nGive your applications and workflows a place to send from. Explore SMTP hosting plans and find the right fit for your email needs.\nYOUR MESSAGES / YOUR CONNECTION\n01 / EXPLORE YOUR OPTIONS\nFind a plan for your messages.\nCompare published SMTP hosting plans and review their limits and features before ordering.\nPlans appear here when published in this platform's catalog. For availability and ordering, contact sales . Sending limits, configuration and availability depend on the selected plan and provider.\n02 / MADE FOR YOUR WORKFLOW\nGet your messages moving.\nChoose a service that fits the way you send. Features and availability vary by plan and provider.\n03 / GET STARTED\nReady to get connected?\nExplore available plans or speak to our team about your email requirements.",
    "headings": [
     "SMTP Hosting"
    ]
@@ -8742,7 +8745,7 @@
    "category": "Servers",
    "related": [],
    "faqs": [],
-   "body": "Your desktop, wherever work takes you\nExplore remote desktop server plans for a workspace you can access remotely.",
+   "body": "Your desktop, wherever work takes you\nExplore remote desktop server plans for a workspace you can access remotely.\nREMOTE DESKTOP SERVERS\nYour desktop. Wherever work takes you.\nA remote workspace that moves with you. Explore RDP server plans and find the resources for the way you work.\n02 / THE REMOTE ADVANTAGE\nMake space for better work.\nKeep your workspace within reach, whether you're at your desk or on the move.\nWork from more places\nConnect to your remote desktop from a compatible device when you need your workspace.\nA familiar environment\nUse a desktop interface to work with your applications and files remotely.\nPick your resources\nCompare the specifications and terms of each available plan before you order.\n03 / GET STARTED\nReady to work remotely?\nFind a server that fits your needs, or get in touch if you have questions.",
    "headings": [
     "Your desktop, wherever work takes you"
    ]
@@ -8761,7 +8764,7 @@
    "category": "Services",
    "related": [],
    "faqs": [],
-   "body": "Make your next move\nExplore social media marketing services for your next campaign.",
+   "body": "Make your next move\nExplore social media marketing services for your next campaign.\nSOCIAL MEDIA MARKETING / CLOUDHOST247\nMake your next move.\nBring more intention to your social media strategy. Explore available services, choose what fits your goals, and manage your orders in one place.\nYOUR BRAND / YOUR NEXT CHAPTER\n02 / HOW IT WORKS\nSimple steps. Clear direction.\nFrom finding a service to checking your order, keep your next move straightforward.\nFind your fit\nExplore the published services and choose one that aligns with your goals.\nConfigure your order\nReview the details and provide the requested target and quantity at checkout.\nFollow your order\nVisit your client area to view your SMM orders and their status.\n03 / LET'S GET STARTED\nReady for your next move?\nExplore the catalog or reach out to our team with your questions.",
    "headings": [
     "Make your next move"
    ]
@@ -8780,7 +8783,7 @@
    "category": "Services",
    "related": [],
    "faqs": [],
-   "body": "Be there, where it matters\nExplore virtual number plans and find a connection that fits your needs.",
+   "body": "Be there, where it matters\nExplore virtual number plans and find a connection that fits your needs.\nNUMBER SERVICES / CLOUDHOST247\nBe there, where it matters.\nA number can bring your business closer to the people you serve. Explore virtual number plans and find a connection that fits your needs.\nA BETTER WAY TO CONNECT / CLOUDHOST247\n02 / THE CONNECTION\nStay close to what matters.\nChoose a service around the people you want to reach and the way you work.\nFind the right number\nExplore number types and locations offered by the configured provider.\nBuild your presence\nUse a virtual number to give customers another way to connect with your business.\nKeep things together\nManage your numbers through the phone services client area.\n03 / GET STARTED\nLet's get you connected.\nExplore available plans or speak to our team about your requirements.",
    "headings": [
     "Be there, where it matters"
    ]
@@ -8799,7 +8802,7 @@
    "category": "Services",
    "related": [],
    "faqs": [],
-   "body": "Good work happens together\nExplore Google Workspace options for a more connected way to work.",
+   "body": "Good work happens together\nExplore Google Workspace options for a more connected way to work.\nGOOGLE WORKSPACE / CLOUDHOST247\nGood work happens together.\nBring your team’s email and everyday collaboration tools together. Explore Google Workspace options for a more connected way to work.\nA MORE CONNECTED WORKDAY / CLOUDHOST247\n02 / MADE FOR WORKING TOGETHER\nMake space for your best work.\nBring conversations, ideas and schedules closer together. Features depend on your Google Workspace edition and configuration.\nEmail with your domain\nGive your team a professional identity with business email on your domain.\nWork on ideas together\nUse familiar tools to create, share and collaborate with your team.\nKeep your day moving\nBring the conversations and schedules that matter into your working day.\n03 / GET STARTED\nReady to work better together?\nExplore available plans or speak to our team about your existing Google Workspace setup.",
    "headings": [
     "Good work happens together"
    ]
@@ -8818,7 +8821,7 @@
    "category": "Services",
    "related": [],
    "faqs": [],
-   "body": "More room to do great work\nExplore Microsoft 365, formerly Office 365, for a more connected workday.",
+   "body": "More room to do great work\nExplore Microsoft 365, formerly Office 365, for a more connected workday.\nMICROSOFT 365 / CLOUDHOST247\nMore room to do great work.\nBring your team’s email and productivity tools together. Explore Microsoft 365, formerly Office 365, for a more connected workday.\nYOUR WORK, WORKING TOGETHER / CLOUDHOST247\n02 / MADE FOR YOUR WORKDAY\nDo more with your day.\nKeep your team connected and your work moving. Available apps and features depend on your Microsoft 365 edition and configuration.\nA professional inbox\nConnect with customers and colleagues using business email on your domain.\nBring ideas to life\nWork with documents, spreadsheets and presentations using familiar productivity tools.\nWork better together\nKeep your team in sync and make space for shared work.\n03 / GET STARTED\nReady for a better workday?\nExplore available plans or speak to our team about your existing Microsoft 365 setup.",
    "headings": [
     "More room to do great work"
    ]
@@ -8837,7 +8840,7 @@
    "category": "Services",
    "related": [],
    "faqs": [],
-   "body": "Ideas made ready to use\nDiscover downloadable digital products for your next project.",
+   "body": "Ideas made ready to use\nDiscover downloadable digital products for your next project.\nDIGITAL PRODUCTS / CLOUDHOST247\nIdeas made ready to use.\nDiscover downloadable products for the work you want to do. Find the right fit, order with confidence, and access your purchases from your account.\nCURATED FOR YOUR NEXT PROJECT / CLOUDHOST247\n02 / HOW IT WORKS\nFrom discovery to doing.\nGet from the right product to your next project in a few simple steps.\nFind your fit\nExplore the collection and review the product details before you choose.\nMake it yours\nComplete your order through the familiar CloudHost247 checkout.\nGet to work\nAccess eligible downloads in your client area after payment and activation.\n03 / GET STARTED\nReady for what’s next?\nExplore the collection or speak to our team about what you need.",
    "headings": [
     "Ideas made ready to use"
    ]
@@ -8856,7 +8859,7 @@
    "category": "Services",
    "related": [],
    "faqs": [],
-   "body": "A smarter route to the web\nExplore LTE proxy services for your connection and workflow.",
+   "body": "A smarter route to the web\nExplore LTE proxy services for your connection and workflow.\n● LTE PROXY SERVICES / CLOUDHOST247\nA smarter route to the web.\nExplore LTE proxy services built around how you connect. Find a plan that fits your workflow and manage your service from your account.\nYOUR CONNECTION / YOUR CONTROL\n02 / BUILT AROUND YOUR WORKFLOW\nConnection, with more control.\nChoose the options that suit your use case. Features and availability vary by plan and provider.\nChoose your protocol\nExplore plans with available HTTP, HTTPS or SOCKS5 options where supported.\nSet your rotation\nReview the available IP rotation settings for your selected service.\nKeep control in one place\nManage your proxy service through your client account when provisioned.\n03 / GET STARTED\nReady to find your route?\nExplore published plans or speak to our team about your requirements.",
    "headings": [
     "A smarter route to the web"
    ]
@@ -8875,7 +8878,7 @@
    "category": "Services",
    "related": [],
    "faqs": [],
-   "body": "Make every message count\nExplore SMTP hosting plans for your email needs.",
+   "body": "Make every message count\nExplore SMTP hosting plans for your email needs.\n● SMTP HOSTING / CLOUDHOST247\nMake every message count.\nGive your applications and workflows a place to send from. Explore SMTP hosting plans and find the right fit for your email needs.\nYOUR MESSAGES / YOUR CONNECTION\n02 / MADE FOR YOUR WORKFLOW\nGet your messages moving.\nChoose a service that fits the way you send. Features and availability vary by plan and provider.\nConnect your application\nUse SMTP settings provided with your service to configure compatible applications.\nSupport your workflow\nChoose a plan based on your email needs and the sending limits it provides.\nKeep things together\nManage your service through your client account once it is provisioned.\n03 / GET STARTED\nReady to get connected?\nExplore available plans or speak to our team about your email requirements.",
    "headings": [
     "Make every message count"
    ]

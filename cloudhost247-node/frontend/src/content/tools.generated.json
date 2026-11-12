@@ -7,6 +7,7 @@
       "path": "/tools/dns/propagation",
       "category": "dns",
       "description": "Query the same record against multiple public resolvers worldwide.",
+      "detail": "Sends the same DNS question to each enabled resolver in the CloudHost247 resolver registry and reports, per resolver, the answer, response time and status. Results describe exactly the resolvers queried — CloudHost247 does not claim that these answers represent global propagation.",
       "visibility": "public"
     },
     {
@@ -15,6 +16,7 @@
       "path": "/tools/dns/lookup",
       "category": "dns",
       "description": "Look up A, AAAA, CNAME, MX, NS, TXT, SOA, SRV, CAA, PTR, DS and DNSKEY records.",
+      "detail": "Queries a selected CloudHost247 resolver for one record type and shows every answer with TTL, priority (MX/SRV) and the resolver that answered. DS and DNSKEY come from the DNSSEC zone.",
       "visibility": "public"
     },
     {
@@ -23,6 +25,7 @@
       "path": "/tools/dns/health",
       "category": "dns",
       "description": "Run every DNS, delegation, email-authentication and DNSSEC check for a domain.",
+      "detail": "Runs a battery of independent checks against the domain's authoritative servers and public resolvers: NS delegation consistency, A/AAAA/CNAME, MX, SPF, DKIM, DMARC, BIMI, CAA, SOA, TTL consistency, DNSSEC and resolution failures. Each check reports PASS, WARNING, ERROR, NOT_CHECKED or UNKNOWN with its own explanation.",
       "visibility": "public"
     },
     {
@@ -31,6 +34,7 @@
       "path": "/tools/dns/mx",
       "category": "dns",
       "description": "Resolve MX hosts, their addresses, reverse DNS and mail provider.",
+      "detail": "Resolves the domain's MX records, then resolves each mail host to IPv4/IPv6 and performs a reverse lookup. The provider is identified only when the MX hostname matches a known CloudHost247 mapping; otherwise it is reported as Unknown rather than guessed.",
       "visibility": "public"
     },
     {
@@ -38,7 +42,8 @@
       "name": "SPF Checker",
       "path": "/tools/dns/spf",
       "category": "dns",
-      "description": "Parse and validate the domain\\",
+      "description": "Parse and validate the domain's SPF policy, including DNS lookup count.",
+      "detail": "Fetches the SPF TXT record, parses every mechanism and modifier, checks the RFC 7208 syntax, counts the DNS lookups the record requires (limit 10) and flags common misconfigurations: multiple SPF records, deprecated ptr, missing terminal all, lookups beyond 10, and include loops.",
       "visibility": "public"
     },
     {
@@ -47,6 +52,7 @@
       "path": "/tools/dns/dmarc",
       "category": "dns",
       "description": "Inspect and validate a _dmarc policy, tag by tag.",
+      "detail": "Fetches _dmarc.<domain> and validates every tag (v, p, sp, pct, rua, ruf, adkim, aspf, fo, rf, ri), explains what the policy means for receiving mail servers, and warns about combinations that are syntactically valid but operationally risky.",
       "visibility": "public"
     },
     {
@@ -55,6 +61,7 @@
       "path": "/tools/dns/dmarc-generator",
       "category": "dns",
       "description": "Build a correctly formatted _dmarc record interactively.",
+      "detail": "Generates the TXT value for a _dmarc record from a guided form and shows exactly where to publish it. Generation is deterministic and validated server-side, so the value can be pasted into CloudHost247 DNS management, cPanel or any DNS host.",
       "visibility": "public"
     },
     {
@@ -63,6 +70,7 @@
       "path": "/tools/dns/dkim",
       "category": "dns",
       "description": "Check selector._domainkey records for one or more selectors.",
+      "detail": "Queries the DKIM public-key records for the selectors you supply, parses the key, reports the key type and flags syntax problems. CloudHost247 cannot confirm a signature actually validates from the public key alone — when an external DKIM verifier provider is configured, that extra verification is offered explicitly.",
       "visibility": "public"
     },
     {
@@ -71,6 +79,7 @@
       "path": "/tools/dns/bimi",
       "category": "dns",
       "description": "Inspect the BIMI record, logo URL and VMC certificate URL.",
+      "detail": "Fetches default._bimi.<domain>, parses the l= and a= tags, validates the URL shape, and reports whether the DMARC policy satisfies BIMI's enforcement prerequisite. It reports what the DNS says; it does not claim a mailbox provider will display the logo.",
       "visibility": "public"
     },
     {
@@ -78,7 +87,8 @@
       "name": "DNSKEY Lookup",
       "path": "/tools/dns/dnskey",
       "category": "dns",
-      "description": "Show the zone\\",
+      "description": "Show the zone's DNSKEY records with key tag, algorithm, flags and public key.",
+      "detail": "Queries DNSKEY at the zone apex, computes the RFC 4034 §5.1.4 key tag for each key and reports SEP/Zone flags, protocol and algorithm. Presence of DNSKEY records does not by itself prove DNSSEC validation; the DNS Health Checker reports delegation evidence separately.",
       "visibility": "public"
     },
     {
@@ -87,6 +97,7 @@
       "path": "/tools/dns/ds",
       "category": "dns",
       "description": "Show the DS records published by the parent zone and the DNSSEC chain state.",
+      "detail": "Queries DS at the parent zone (or at the zone itself when it is a TLD), lists key tag, algorithm, digest type and digest, and reports whether a matching DNSKEY exists at the child so the delegation chain can be described factually.",
       "visibility": "public"
     },
     {
@@ -95,6 +106,7 @@
       "path": "/tools/dns/reverse",
       "category": "dns",
       "description": "PTR lookup for IPv4/IPv6 with forward-confirmed reverse DNS.",
+      "detail": "Builds the in-addr.arpa / ip6.arpa name, resolves its PTR records and then resolves each returned hostname forward to confirm the address appears in its A/AAAA records (forward-confirmed reverse DNS).",
       "visibility": "public"
     },
     {
@@ -103,6 +115,7 @@
       "path": "/tools/dns/reverse-ip",
       "category": "dns",
       "description": "Find hostnames hosted on an IP address, when a data provider is configured.",
+      "detail": "There is no public DNS mechanism that lists the domains behind an IP address. This tool therefore requires an administrator-configured reverse-IP data provider and returns CONFIGURATION_REQUIRED until one exists. It never claims to discover every domain on an address.",
       "visibility": "customer"
     },
     {
@@ -111,6 +124,7 @@
       "path": "/tools/ip/lookup",
       "category": "ip",
       "description": "ASN, organisation, country, reverse DNS and network range for an IP.",
+      "detail": "Combines the free, keyless Team Cymru DNS origin lookup (ASN, prefix, registry, country) with reverse DNS and, when a geolocation provider is configured, city/region/timezone enrichment. Address version, class (public/private/reserved) and prefix are always reported.",
       "visibility": "public"
     },
     {
@@ -119,6 +133,7 @@
       "path": "/tools/ip/my-ip",
       "category": "ip",
       "description": "Show the public IP verified for this connection, or say plainly why none is claimed.",
+      "detail": "Reports the address CloudHost247's configured network boundary verified for your request (and the IPv6 address separately when the connection used IPv6), or states the reason nothing is claimed when it cannot verify one — a forwarding header is never substituted for a verified address. Adds user-agent and, when detectable, the negotiated TLS protocol/cipher, and the non-credential headers your browser sent. No attempt is made to fingerprint the device beyond what the browser sends.",
       "visibility": "public"
     },
     {
@@ -127,6 +142,7 @@
       "path": "/tools/ip/whois",
       "category": "ip",
       "description": "Registry data for an IPv4/IPv6 address over RDAP.",
+      "detail": "Queries RDAP (the structured, standards-based successor to port-43 WHOIS) for the address: network handle, name, range, CIDR blocks, registrant organisation, abuse contact, events and remarks. The RDAP bootstrap endpoint is operator-configurable.",
       "visibility": "public"
     },
     {
@@ -135,6 +151,7 @@
       "path": "/tools/ip/domain-to-ip",
       "category": "ip",
       "description": "Resolve a hostname to IPv4/IPv6 with the full CNAME chain.",
+      "detail": "Resolves A and AAAA through a chosen CloudHost247 resolver, showing the CNAME chain, TTLs and response time for each answer.",
       "visibility": "public"
     },
     {
@@ -143,6 +160,7 @@
       "path": "/tools/ip/ip-to-hostname",
       "category": "ip",
       "description": "Reverse DNS for an address, with FCRDNS confirmation.",
+      "detail": "Performs the PTR lookup for an address and confirms each hostname resolves back to it.",
       "visibility": "public"
     },
     {
@@ -151,6 +169,7 @@
       "path": "/tools/ip/isp",
       "category": "ip",
       "description": "Network operator, ASN and country for an IP address.",
+      "detail": "Uses the keyless Team Cymru DNS origin service for ASN/prefix/registry/country and the reverse-DNS operator name, and adds ISP/carrier names from a geolocation provider when one is configured.",
       "visibility": "public"
     },
     {
@@ -159,6 +178,7 @@
       "path": "/tools/ip/converters",
       "category": "ip",
       "description": "Decimal ↔ IP, IPv4 ↔ IPv6, IPv6 compression/expansion, CIDR ↔ range.",
+      "detail": "Deterministic conversions with the intermediate steps shown: IPv4/IPv6 to decimal and back, IPv4-mapped IPv6 and NAT64 forms, IPv6 compression and expansion, and IPv6 CIDR ↔ address range.",
       "visibility": "public"
     },
     {
@@ -167,6 +187,7 @@
       "path": "/tools/network/subnet-calculator",
       "category": "network",
       "description": "IPv4/IPv6 network, broadcast, host range, masks and splitting.",
+      "detail": "Computes network address, broadcast, first/last usable host, address count, CIDR notation, subnet mask, wildcard mask and binary forms for IPv4 and IPv6, and can split a network into equal subnets.",
       "visibility": "public"
     },
     {
@@ -175,6 +196,7 @@
       "path": "/tools/network/ping",
       "category": "network",
       "description": "Measure reachability and latency from the CloudHost247 server.",
+      "detail": "Uses the ICMP ping utility when the deployment allows it, and otherwise falls back to TCP connect timing against the port you choose — clearly labelled as TCP latency, never presented as ICMP. Targets are validated, private ranges are refused and results are rate limited.",
       "visibility": "customer"
     },
     {
@@ -183,6 +205,7 @@
       "path": "/tools/network/traceroute",
       "category": "network",
       "description": "Hop-by-hop path to a target, where the environment permits.",
+      "detail": "Runs the system traceroute utility with a bounded hop count and timeout when the binary exists and the environment allows it. When it does not, the tool reports UNAVAILABLE_IN_THIS_ENVIRONMENT and explains why rather than returning fabricated hops.",
       "visibility": "customer"
     },
     {
@@ -191,6 +214,7 @@
       "path": "/tools/network/port-checker",
       "category": "network",
       "description": "Check whether a TCP port on a public host accepts connections.",
+      "detail": "Opens a TCP connection to a validated public host and port with a short timeout, reporting open, closed, filtered/timeout or unreachable. Single ports and short ranges only, with strict per-account limits; private and reserved address ranges are refused.",
       "visibility": "customer"
     },
     {
@@ -199,6 +223,7 @@
       "path": "/tools/network/mac-lookup",
       "category": "network",
       "description": "Inspect MAC address bits and query a configured IEEE OUI reference.",
+      "detail": "Inspects unicast/multicast and global/local bits. Vendor information comes from a configured IEEE OUI source, cached with its load time; unavailable source data is explicitly reported, never invented.",
       "visibility": "public"
     },
     {
@@ -207,6 +232,7 @@
       "path": "/tools/network/mac-generator",
       "category": "network",
       "description": "Generate valid random, locally-administered or globally-administered MACs.",
+      "detail": "Generates cryptographically random MAC addresses with the correct unicast/multicast and U/L bits for the requested mode.",
       "visibility": "public"
     },
     {
@@ -215,6 +241,7 @@
       "path": "/tools/network/asn",
       "category": "network",
       "description": "Autonomous system details, announced prefixes and registry.",
+      "detail": "Queries RDAP for the AS number and the DNS-based Team Cymru origin service for announced prefixes, then resolves the AS name from RDAP. Results are attributable: every field lists the source that produced it.",
       "visibility": "public"
     },
     {
@@ -223,6 +250,7 @@
       "path": "/tools/network/speed-test",
       "category": "network",
       "description": "Browser-based download, upload and latency measurement with hard limits.",
+      "detail": "Measures throughput between your browser and CloudHost247 using bounded transfers: the server caps each measurement by size and duration, and rate limits each client. Latency is measured with small request/response timing and jitter is reported when at least three samples are collected.",
       "visibility": "public"
     },
     {
@@ -231,6 +259,7 @@
       "path": "/tools/developer/http-headers",
       "category": "developer",
       "description": "Status, headers, redirect chain, cache and security-header analysis.",
+      "detail": "Fetches a URL through the SSRF-protected client, follows redirects with a hop limit, and reports the status code, every response header, the redirect chain, and an assessment of security headers (HSTS, CSP, X-Content-Type-Options, X-Frame-Options/frame-ancestors, Referrer-Policy, Permissions-Policy) and cache directives.",
       "visibility": "public"
     },
     {
@@ -239,6 +268,7 @@
       "path": "/tools/developer/server-os",
       "category": "developer",
       "description": "Infer server software with an explicit confidence level.",
+      "detail": "Reads Server, X-Powered-By, Via and proxy-identifying headers and reports each technology with a confidence level — Confirmed when the server states it, Likely when derived from several weak signals, Unknown when nothing reliable is present. No probing of the server beyond the single HTTP request.",
       "visibility": "public"
     },
     {
@@ -246,7 +276,8 @@
       "name": "SMTP Tester",
       "path": "/tools/developer/smtp-test",
       "category": "developer",
-      "description": "Test an SMTP server\\",
+      "description": "Test an SMTP server's reachability, TLS and (optionally) authentication.",
+      "detail": "Connects to the SMTP host, reads the banner, negotiates STARTTLS or implicit TLS, and reports the server capabilities, certificate summary and whether AUTH is offered. When you supply credentials they are used for that single test only: never logged, never stored, and never echoed back.",
       "visibility": "customer"
     },
     {
@@ -255,6 +286,7 @@
       "path": "/tools/developer/email-header",
       "category": "developer",
       "description": "Parse a raw message header: Received chain, auth results, sending IP.",
+      "detail": "Parses a pasted header, reconstructs the Received chain with per-hop delays, extracts SPF/DKIM/DMARC results from Authentication-Results, identifies the sending IP and mail servers, and flags alignment mismatches between From, Return-Path and the authenticated domain.",
       "visibility": "public"
     },
     {
@@ -263,6 +295,7 @@
       "path": "/tools/developer/json",
       "category": "developer",
       "description": "Viewer, formatter, beautifier, minifier and validator.",
+      "detail": "Validates JSON with precise error positions, formats it with the indentation you choose, minifies it, and can sort keys. All processing happens in the browser; the API endpoint exists so the same behaviour is available to integrations and is covered by tests.",
       "visibility": "public"
     },
     {
@@ -271,6 +304,7 @@
       "path": "/tools/developer/encoding",
       "category": "developer",
       "description": "Base64, MD5, binary ↔ text, ROT13 and Morse code.",
+      "detail": "Encodes and decodes Base64 (UTF-8 safe), computes MD5, converts between text and binary, applies ROT13 and translates to/from Morse code. MD5 is provided for checksum/interoperability work only and the UI states plainly that it is unsuitable for password storage.",
       "visibility": "public"
     },
     {
@@ -279,6 +313,7 @@
       "path": "/tools/developer/url",
       "category": "developer",
       "description": "Multi-URL opener, rewrite-rule and .htaccess generators.",
+      "detail": "Opens several URLs in browser tabs (client-side only — no server-side fetching merely to open a link), parses and explains URL components, and generates common Apache rewrite/redirect rules and .htaccess blocks with safe defaults.",
       "visibility": "public"
     },
     {
@@ -287,6 +322,7 @@
       "path": "/tools/developer/user-agent",
       "category": "developer",
       "description": "Show the user-agent and headers your browser actually sent.",
+      "detail": "Displays the exact User-Agent string and request headers CloudHost247 received, so a support conversation can start from the same facts.",
       "visibility": "public"
     },
     {
@@ -295,6 +331,7 @@
       "path": "/tools/webmaster/broken-links",
       "category": "webmaster",
       "description": "Crawl a site within strict limits and report failing links.",
+      "detail": "Crawls the same host starting from the URL you provide, within hard limits on pages, links, runtime and response size, and reports each link with its status, type (internal/external), redirect chain, error and the page it was found on. Private and reserved destinations are refused.",
       "visibility": "customer"
     },
     {
@@ -303,6 +340,7 @@
       "path": "/tools/webmaster/open-graph",
       "category": "webmaster",
       "description": "Inspect og: and Twitter card metadata and preview the link.",
+      "detail": "Parses Open Graph and Twitter/X card tags, warns about missing or malformed required properties, resolves relative image URLs and renders a preview of how the link is likely to appear.",
       "visibility": "public"
     },
     {
@@ -311,6 +349,7 @@
       "path": "/tools/webmaster/robots-generator",
       "category": "webmaster",
       "description": "Build a valid robots.txt with sitemaps and crawl delay.",
+      "detail": "Generates robots.txt from a guided form (user-agent groups, allow/disallow rules, sitemaps, crawl-delay, common presets), validating directives so the file cannot be emitted in a malformed state.",
       "visibility": "public"
     },
     {
@@ -319,6 +358,7 @@
       "path": "/tools/webmaster/serp-simulator",
       "category": "webmaster",
       "description": "Preview a search result snippet for title, URL and description length.",
+      "detail": "Renders a desktop and mobile search-result preview and reports pixel-width and character guidance for the title and description. It is explicitly a simulator for appearance only; it shows no ranking data.",
       "visibility": "public"
     },
     {
@@ -327,6 +367,7 @@
       "path": "/tools/security/ssl",
       "category": "security",
       "description": "Certificate chain, validity, SANs, protocol and expiry for a host.",
+      "detail": "Opens a real TLS connection, reports the leaf and chain certificates (subject, issuer, SANs, validity, signature algorithm, key parameters), the negotiated protocol and cipher, hostname match, and days remaining. Private keys are never requested or displayed.",
       "visibility": "public"
     },
     {
@@ -335,6 +376,7 @@
       "path": "/tools/security/ip-blacklist",
       "category": "security",
       "description": "Check an IP against the DNS blocklists the operator has enabled.",
+      "detail": "Queries each enabled DNS-based blocklist for the address and reports listed / not listed / error per provider, with the listing code or text the provider returned and delisting guidance. Providers are managed by a Super Admin — nothing is hard-coded.",
       "visibility": "public"
     },
     {
@@ -343,6 +385,7 @@
       "path": "/tools/security/password",
       "category": "security",
       "description": "Generate strong passwords and evaluate strength locally.",
+      "detail": "Generates random passwords with the character classes and length you choose, evaluates the strength of a password using client-side entropy estimation against common patterns, and explains the difference between a one-way password hash and reversible encryption.",
       "visibility": "public"
     },
     {
@@ -351,6 +394,7 @@
       "path": "/tools/security/bin-checker",
       "category": "security",
       "description": "Issuer information for a card BIN/IIN from a configured provider.",
+      "detail": "Accepts only the first 6–8 digits (the BIN/IIN) and returns the issuer data the configured provider supplies. CloudHost247 never accepts, transmits or stores a full card number, and this is not a card-validation or testing service.",
       "visibility": "customer"
     },
     {
@@ -359,6 +403,7 @@
       "path": "/tools/business-tools",
       "category": "productivity",
       "description": "Twenty-one payroll, tax, document and provider-comparison tools that run entirely in your browser.",
+      "detail": "The Business Tools directory: 5 calculators (PAYE and net salary under the Nigeria Tax Act 2025, PenCom pension, VAT at 7.5%, total employer cost, and Earned Wage Access ROI), 12 generators (job descriptions, offer letters, payslips, NDAs, employment contracts, CVs, invoices, business cards, employee identifiers, ID badges, organization charts and LinkedIn comment drafts) and 4 comparisons (accounting systems, expense platforms, NHIA-accredited HMOs and PenCom-licensed PFAs). Every calculation runs client-side: salary figures, employee names, contract terms and client details are never uploaded, logged or stored. Each tool that applies a statutory rate names its jurisdiction, source and effective date, and each planning estimate is labelled as one. These tools produce figures and drafts for you to check — they are not tax, legal or financial advice.",
       "visibility": "public"
     },
     {
@@ -367,6 +412,7 @@
       "path": "/tools/mrz-generator",
       "category": "developer",
       "description": "Generate, validate and parse ICAO Doc 9303 machine-readable zones, with per-layout field-width and check-digit validation.",
+      "detail": "Builds ICAO Doc 9303 machine-readable zones from the document fields you enter, validates the structure and the 7-3-1 check digits of an existing zone, and parses a supplied zone back into labelled fields. The page states which layout it is producing and enforces that layout\\u2019s field widths: a value that cannot fit is rejected with a message naming the field and its limit rather than being truncated. Names are transliterated to the ICAO Latin character set and an unsupported character is reported instead of being silently removed. Validation is syntactic — structure, widths, character set and check digits — and a zone that passes it is still not evidence that a physical or electronic document is genuine. Generation and validation run in your browser; the documented API path exists for integration testing and never caches, logs or persists the values you submit. This tool works on machine-readable text only and does not produce passport artwork.",
       "visibility": "public"
     },
     {
@@ -375,6 +421,7 @@
       "path": "/tools/domain/punycode",
       "category": "domain",
       "description": "Convert between Unicode domain names and their ASCII (punycode) form.",
+      "detail": "Uses standards-compliant IDNA processing (Node's URL hostname parser, which implements UTS#46-style mapping) to convert between a Unicode domain and its punycode form, validating the result and reporting the label-by-label conversion.",
       "visibility": "public"
     },
     {
@@ -382,7 +429,8 @@
       "name": "Domain Availability",
       "path": "/tools/domain/search",
       "category": "domain",
-      "description": "Check whether a domain is available, using CloudHost247\\",
+      "description": "Check whether a domain is available, using CloudHost247's registrar integration.",
+      "detail": "Uses the existing CloudHost247 Domain Services providers (registrar APIs and RDAP) to check availability, and returns the same states the domain search does: available, registered, premium, unsupported, unknown. Signed-in customers can add a result straight to the cart.",
       "visibility": "public"
     },
     {
@@ -391,6 +439,7 @@
       "path": "/tools/productivity/word-counter",
       "category": "productivity",
       "description": "Words, characters, sentences, paragraphs and reading time.",
+      "detail": "Counts words, characters (with and without spaces), sentences and paragraphs, and estimates reading time from word count.",
       "visibility": "public"
     },
     {
@@ -399,6 +448,7 @@
       "path": "/tools/productivity/lorem-ipsum",
       "category": "productivity",
       "description": "Generate placeholder text by words, sentences or paragraphs.",
+      "detail": "Generates classical Lorem Ipsum placeholder text in the quantity you request, with a choice of starting with \"Lorem ipsum dolor sit amet…\".",
       "visibility": "public"
     },
     {
@@ -407,6 +457,7 @@
       "path": "/tools/productivity/notepad",
       "category": "productivity",
       "description": "A scratch pad that stays in your browser.",
+      "detail": "A distraction-free text area with local persistence in your browser only. Nothing typed into the notepad is sent to CloudHost247 unless you explicitly save it as a report.",
       "visibility": "public"
     },
     {
@@ -415,6 +466,7 @@
       "path": "/tools/productivity/small-text",
       "category": "productivity",
       "description": "Convert text to small caps, superscript and subscript Unicode.",
+      "detail": "Maps letters to Unicode small-cap, superscript and subscript equivalents. Characters without a mapping are left unchanged and reported, so the output never silently loses content.",
       "visibility": "public"
     },
     {
@@ -423,6 +475,7 @@
       "path": "/tools/productivity/invisible-character",
       "category": "productivity",
       "description": "Copy zero-width and invisible Unicode characters.",
+      "detail": "Provides the standard invisible Unicode characters with their code points and names, ready to copy. Each entry is labelled with its code point so the output is auditable.",
       "visibility": "public"
     },
     {
@@ -431,6 +484,7 @@
       "path": "/tools/productivity/runic",
       "category": "productivity",
       "description": "Transliterate Latin text to Elder Futhark runes and back.",
+      "detail": "Transliterates Latin letters to Elder Futhark runes using a documented, deterministic mapping (digraphs first), and transliterates back. Characters with no runic equivalent are reported rather than dropped.",
       "visibility": "public"
     },
     {
@@ -439,6 +493,7 @@
       "path": "/tools/productivity/qr",
       "category": "productivity",
       "description": "Create QR codes for URLs, text, email, phone, WiFi and vCards.",
+      "detail": "Generates QR codes server-side (so the same PNG/SVG is reproducible from the API) for URLs, plain text, email, phone numbers, WiFi credentials and vCards. Nothing you enter is stored; the response contains the image and nothing else.",
       "visibility": "public"
     },
     {
@@ -447,6 +502,7 @@
       "path": "/tools/productivity/qr-scanner",
       "category": "productivity",
       "description": "Scan a QR code from your camera or an image file.",
+      "detail": "Decodes QR codes in the browser using the device camera or an uploaded image, using the platform's QR reader support. Decoded content is shown for review and is never uploaded unless you explicitly save it.",
       "visibility": "public"
     },
     {
@@ -455,6 +511,7 @@
       "path": "/tools/productivity/wifi-qr",
       "category": "productivity",
       "description": "Share a WiFi network as a QR code, without storing the password.",
+      "detail": "Builds the standard WIFI: QR payload from SSID, password, encryption type and hidden flag, then renders it as PNG or SVG. The password is used to render the image and is never written to the database; saving the result as a report stores only the SSID and encryption type.",
       "visibility": "public"
     },
     {
@@ -463,6 +520,7 @@
       "path": "/tools/productivity/time-card",
       "category": "productivity",
       "description": "Clock-in/clock-out totals with breaks and overtime.",
+      "detail": "Calculates worked time from clock-in/clock-out pairs and breaks, in either 12- or 24-hour format, and applies the overtime rule you specify (daily or weekly thresholds).",
       "visibility": "public"
     },
     {
@@ -471,6 +529,7 @@
       "path": "/tools/productivity/colors",
       "category": "productivity",
       "description": "Convert between HEX, RGB, HSL, HSV/HSB and CMYK.",
+      "detail": "Converts a colour between HEX, RGB, HSL, HSV/HSB and CMYK, shows the preview, contrast ratio against black and white, and provides copy-ready values for each notation.",
       "visibility": "public"
     },
     {
@@ -479,6 +538,7 @@
       "path": "/tools/productivity/reverse-image",
       "category": "productivity",
       "description": "Launch an image search with the engines you choose.",
+      "detail": "Opens the reverse-image-search service you pick (Google Lens, TinEye, Bing Visual Search, Yandex Images) in a new tab. This tool performs no crawling or scraping of third-party engines: the search itself happens in your browser, under those services' own terms.",
       "visibility": "public"
     },
     {
@@ -487,6 +547,7 @@
       "path": "/tools/productivity/image-ocr",
       "category": "productivity",
       "description": "Extract text from an image using a configured OCR provider.",
+      "detail": "Uploads an image to the administrator-configured OCR provider and returns the extracted text with a confidence estimate where the provider supplies one. No OCR provider configured means CONFIGURATION_REQUIRED — the platform does not guess at text.",
       "visibility": "customer"
     },
     {
@@ -495,6 +556,7 @@
       "path": "/tools/history",
       "category": "diagnostics",
       "description": "Your recent tool runs, with the metadata that was stored.",
+      "detail": "Lists your own tool runs (tool, target, time, status) and lets you clear them. Credentials, SMTP passwords, API keys, private keys, full card numbers and email contents are never stored in history.",
       "visibility": "customer"
     },
     {
@@ -503,6 +565,7 @@
       "path": "/tools/favorites",
       "category": "diagnostics",
       "description": "The tools you have starred.",
+      "detail": "Shows your starred tools and lets you remove them. Favorites are per account.",
       "visibility": "customer"
     },
     {
@@ -511,6 +574,7 @@
       "path": "/tools/reports",
       "category": "diagnostics",
       "description": "Diagnostic results you chose to save, downloadable and deletable.",
+      "detail": "Saves the exact result you saw (with credential-shaped fields stripped) so it can be downloaded, attached to a support ticket or compared later.",
       "visibility": "customer"
     },
     {
@@ -519,6 +583,7 @@
       "path": "/tools/monitors",
       "category": "diagnostics",
       "description": "Scheduled SSL-expiry, DNS-record and email-configuration monitoring.",
+      "detail": "Registers a monitor that the CloudHost247 worker evaluates on a schedule: SSL certificate expiry thresholds, specific DNS records whose value must not change, and the email authentication configuration (MX/SPF/DKIM/DMARC/BIMI). Notifications are delivered through the existing CloudHost247 notification system.",
       "visibility": "customer"
     }
   ]

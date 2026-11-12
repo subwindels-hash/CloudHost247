@@ -5,6 +5,12 @@ order the work was done: what already existed (§1), what was decided and why (�
 (§3–§10), and how it is verified (§11). Anything that could not be verified in this environment is
 called out explicitly rather than claimed.
 
+**Current scope clarification:** website coverage is evidence-backed retrieval, not a guarantee of
+answering every possible question. It is not model fine-tuning. The storefront/tool coverage
+follow-up is described in [`../../docs/AI-WEBSITE-COVERAGE-EXPANSION.md`](../../docs/AI-WEBSITE-COVERAGE-EXPANSION.md).
+The trust/readiness gates, private-source exclusions, current pricing rules and human handoff remain
+mandatory. Repository projection generation does not prove a deployed database is synchronized.
+
 Status key: **IMPLEMENTED** = code + automated test in this repository.
 **REQUIRES DEPLOYMENT CONFIGURATION** = code is complete and fails closed, but a human must supply
 credentials or run a command on a real deployment before it does anything.
@@ -149,8 +155,8 @@ without an automated test in §11 that exercises it.
 
 | File | Status | Purpose |
 | --- | --- | --- |
-| `scripts/site/generate-ai-knowledge.mjs` | new | Projects every website source (content JSON, docs markdown, PHP page registry + authored PHP policy text, tool catalogue, navigation registry, announcements) into one knowledge projection. `--check` mode for CI. |
-| `src/ai-website/content/website-knowledge.generated.json` | generated | The projection itself: 409 documents, 377 verified routes, 921 kB. Committed, because it is build output that the server imports. |
+| `scripts/site/generate-ai-knowledge.mjs` | new | Projects the supported website sources (content JSON, published docs markdown, PHP registry/policy prose, registered custom storefront static prose, public tool catalogue, navigation registry, announcements) into one knowledge projection. `--check` mode for CI. |
+| `src/ai-website/content/website-knowledge.generated.json` | generated | The current projection: 430 documents and 406 registry-derived destinations (see §4.1 for eligibility limits). Committed, because it is build output that the server imports. |
 | `src/ai-website/types.ts` | new | Shared types plus pure text utilities: `htmlToText`, `sanitizeForIndex`, `foldText`, `contentFingerprint`, `extractPrices`, `isSafeInternalPath`, `canonicalPath`. |
 | `src/ai-website/query-understanding.ts` | new | Intent classification, ~40 curated service entities with routes and aliases, abbreviation expansion, typo correction (OSA distance), compound splitting, synonym expansion, follow-up inheritance, coverage-gap detection. |
 | `src/ai-website/website-discovery.ts` | new | Pure discovery over the projection + crawl policy + admin exclusions: 409 discovered, 394 publishable, 3 private paths excluded, 377-route registry, corpus vocabulary, `resolveRoute`. |
@@ -164,7 +170,7 @@ without an automated test in §11 that exercises it.
 | `src/ai-website/grounded-model.ts` | new | Optional model *phrasing* over the same evidence. Fails closed (`null`) when unconfigured; prompt-injection framing; strict system contract. |
 | `src/ai-website/unanswered.ts` | new | Coverage-gap queue: normalise + upsert a question, resolve it when content lands. |
 | `src/routes/ai-knowledge-admin.ts` | new | Admin knowledge centre API: overview, search, sources, single source + chunks, reindex (full/selected), retry, exclusions CRUD, gaps, coverage. RBAC + audit on every mutation. |
-| `src/services/ai-support-operator.ts` | modified | Reviewed procedures now answer *procedures* and the website layer answers everything else; adds account-recovery path, follow-ups, links, evidence, honest engine reporting. |
+| `src/services/ai-support-operator.ts` | modified | Reviewed procedures answer supported *procedures* and the website layer attempts other questions against indexed evidence; adds account-recovery path, follow-ups, links, evidence, honest engine reporting. |
 | `src/ai/knowledge.ts` | modified | Reviewed entries carry verified `links`, resolved through the route registry at answer time. Word-boundary keyword matching (a substring match had handed "wordpress" to the RDP entry). |
 | `src/routes/ai-support.ts` | modified | Persists `links`/`evidence`/`grounded` on each message; records unanswered questions; answer-feedback endpoint; gap triage endpoint; passes the customer's current page. |
 | `src/routes/catalog-admin.ts` | modified | Catalogue create/update/status publish an event that reindexes that product immediately. |
@@ -222,22 +228,27 @@ the live site (§2, D5) — and writes one projection. Measured on this revision
 
 | Source | Documents |
 | --- | ---: |
-| SPA marketing pages (sections, hero, CTAs, FAQs rendered to text) | 145 |
-| SPA tools | 53 |
+| Website pages (marketing, PHP and navigation documents) | 165 |
+| Public tools | 53 |
 | Legal documents (SPA JSON + authored PHP policy prose) | 22 |
-| Documentation articles | 13 |
+| Published documentation articles | 14 |
 | FAQs (from page content) | 174 |
 | Announcements and release notes | 2 |
-| **Total** | **409** |
+| **Total** | **430** |
 
-Surfaces: SPA 314, PHP 67, navigation registry 28. Thirteen sources are skipped by the site's own
-crawl policy and recorded with a reason in `report.skipped`. The projection also emits the **377
-verified routes** the site actually serves; §7 depends on this.
+Current surfaces: SPA 323, PHP 75, navigation registry 32. Thirteen sources are skipped during
+projection by crawl/visibility policy and recorded with reasons in `report.skipped`. There are 406
+registry-derived destinations; registration is not a deployed reachability or content certificate.
 
-Discovery then applies the same policy at runtime: **409 discovered → 394 publishable → 3 excluded**
-(`/dashboard/dns`, `/dashboard/domains`, `php:dns-management.php` — private, authenticated
-destinations). Twelve thin link-only pages are retained but carry their navigation blurb as their
-body rather than being dropped, so "where do I find X" still resolves.
+Discovery applies runtime policy: **430 discovered → 418 publishable, 9 thin/link-only, 3 private
+excluded** (`/dashboard/dns`, `/dashboard/domains`, `php:dns-management.php`). These counts describe
+local extraction eligibility, not human approval, successful deployed synchronization, answer
+accuracy for every question or production availability. Thin sources are not answer evidence.
+
+The eight registered custom storefronts are read from static paragraphs/headings in their PHP and
+SPA sources. Conditional sections, variables and runtime catalogues are not flattened into facts.
+Dynamic JavaScript arrays are not evaluated; some feature text is available only via the matching
+PHP template. This is a bounded extractor, not a universal PHP/JSX renderer or a web crawler.
 
 ### 4.2 Chunking
 

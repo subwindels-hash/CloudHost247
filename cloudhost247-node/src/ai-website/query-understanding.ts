@@ -35,6 +35,9 @@ export interface ServiceEntity {
  * anything and the assistant says it cannot verify the offering.
  */
 export const SERVICE_ENTITIES: readonly ServiceEntity[] = [
+  { id: 'rdp', route: '/hosting/rdp', label: 'Remote Desktop Servers', aliases: ['rdp', 'remote desktop', 'remote desktop server', 'rdp hosting'] },
+  { id: 'smm', route: '/smm-services', label: 'Social Media Marketing Services', aliases: ['smm', 'smm services', 'social media marketing services'] },
+  { id: 'smtp-hosting', route: '/smtp-hosting', label: 'SMTP Hosting', aliases: ['smtp hosting', 'smtp service', 'smtp services'] },
   { id: 'shared-hosting', route: '/hosting/web-hosting', label: 'Web hosting', aliases: ['web hosting', 'shared hosting', 'hosting', 'website hosting', 'webbosting', 'webhost', 'hosting plan', 'hosting plans', 'host'] },
   { id: 'wordpress-hosting', route: '/hosting/wordpress', label: 'WordPress hosting', aliases: ['wordpress', 'wp', 'wordpress hosting', 'woocommerce', 'woocommerce hosting'] },
   { id: 'business-hosting', route: '/hosting/business', label: 'Business hosting', aliases: ['business hosting', 'business host', 'small business hosting', 'company hosting'] },
