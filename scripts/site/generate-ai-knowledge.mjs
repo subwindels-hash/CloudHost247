@@ -2,9 +2,9 @@
 /**
  * Website knowledge projection for the AI assistant.
  *
- * The AI has to know everything the public website publishes — every marketing page, tool,
- * documentation page, legal policy, announcement, product and service — and it has to learn about a
- * new one the moment it is published, with no manual prompt editing.
+ * Projects supported public marketing pages, tools, documentation, legal policies, announcements
+ * and registered storefront prose. This is retrieval input, not a guarantee that every question
+ * is answerable or that the deployed database has already synchronized the latest build.
  *
  * Rather than crawling the live site (which on cPanel shares a domain with the Node application,
  * would re-render 300+ pages on every sync and would need network access from the worker), this
@@ -21,8 +21,8 @@
  *   • `modules/addons/cloudhost247_theme/resources/site.json` is the PHP/WHMCS page registry,
  *     including pages that exist in PHP but not in the SPA.
  *
- * So "a page was published" and "the AI can see it" are the same event as "the site generator ran",
- * which is a build step that already exists in this repository. No new scheduler, no crawl loop.
+ * Regenerating this projection makes supported content available to the existing sync worker.
+ * Publication alone does not prove runtime synchronization. No new scheduler or crawl loop.
  *
  * The one thing this script must never do is invent content. It copies text it finds and records
  * where it came from; a page with no extractable text becomes a title + description entry marked
@@ -35,6 +35,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT } from './generate.mjs';
+import { CUSTOM_STOREFRONTS, staticStorefrontText } from './knowledge-extractors.mjs';
 
 const OUT = join(ROOT, 'cloudhost247-node', 'src', 'ai-website', 'content', 'website-knowledge.generated.json');
 const REGISTRY = join(ROOT, 'shared', 'site', 'registry.json');
@@ -512,7 +513,7 @@ function build() {
       category: 'Tools',
       related: [],
       faqs: [],
-      body: [clean(tool.name), clean(tool.description ?? ''), clean(tool.summary ?? '')].filter(Boolean).join('\n'),
+      body: [clean(tool.name), clean(tool.description ?? ''), clean(tool.summary ?? ''), clean(tool.detail ?? '')].filter(Boolean).join('\n'),
       headings: [clean(tool.name)],
     });
   }
@@ -529,6 +530,10 @@ function build() {
   for (const route of [...extraRoutes].sort()) {
     if (documents.some((document) => document.url === route)) continue;
     const link = navLinks.find((candidate) => candidate.to === route);
+    const component = CUSTOM_STOREFRONTS[link?.php ?? phpByRoute.get(route)];
+    const componentPath = component ? join(ROOT, 'cloudhost247-node', 'frontend', 'src', 'pages', `${component}.tsx`) : null;
+    if (componentPath && !existsSync(componentPath)) throw new Error(`Missing public storefront component: ${component}`);
+    const storefront = componentPath ? clean(staticStorefrontText(read(componentPath))) : '';
     add({
       sourceKey: `nav:${route}`,
       url: route,
@@ -536,12 +541,12 @@ function build() {
       title: link?.label ?? route,
       description: link?.description || `CloudHost247 ${link?.label ?? route} — navigation destination.`,
       kind: 'website_page',
-      surface: 'registry',
+      surface: storefront ? 'spa' : 'registry',
       section: link?.section ? clean(link.section) : 'Navigation',
       category: 'Navigation',
       related: [],
       faqs: [],
-      body: [link?.label, link?.description].filter(Boolean).map(clean).join('\n'),
+      body: [link?.label, link?.description, storefront].filter(Boolean).map(clean).join('\n'),
       headings: link?.label ? [clean(link.label)] : [],
     });
   }
@@ -573,6 +578,9 @@ function build() {
 
   /* 6 — PHP/WHMCS editorial pages registered in the theme content store. */
   const phpPages = phpSite.pages ?? {};
+  // These hand-authored storefronts render prose outside the generated site.json content map.
+  // Read only registered templates, never recursively crawl files or ingest runtime catalogues.
+
   const phpExcluded = (file) => excludePhp.some((rule) => (rule.endsWith('/') ? file.startsWith(rule) : file === rule));
   for (const [file, page] of Object.entries(phpPages)) {
     if (phpExcluded(file)) {
@@ -581,9 +589,13 @@ function build() {
     }
     const features = Array.isArray(page.features) ? page.features : [];
     const faqs = Array.isArray(page.faqs) ? page.faqs : [];
+    const templatePath = join(ROOT, 'templates', 'cloudhost247', file.replace(/\.php$/, '.tpl'));
+    if (CUSTOM_STOREFRONTS[file] && !existsSync(templatePath)) throw new Error(`Missing public storefront template: ${file}`);
+    const storefront = CUSTOM_STOREFRONTS[file] ? clean(staticStorefrontText(read(templatePath))) : '';
     const body = [
       clean(page.headline ?? ''),
       clean(page.summary ?? ''),
+      storefront,
       ...features.map((feature) => (Array.isArray(feature) ? feature.map(clean).filter(Boolean).join(' — ') : clean(feature))),
       ...faqs.map((faq) => `${clean(faq.q ?? faq.question ?? '')}\n${clean(faq.a ?? faq.answer ?? '')}`),
     ].filter(Boolean).join('\n');
@@ -701,6 +713,9 @@ function build() {
       'modules/addons/cloudhost247_theme/resources/site.json',
       'docs/*.md',
       'cloudhost247-node/frontend/src/content/announcements.ts',
+      'cloudhost247-node/src/tools/catalog.ts (public entries only)',
+      'templates/cloudhost247/*.tpl (registered custom storefronts, static prose only)',
+      'cloudhost247-node/frontend/src/pages/*Page.tsx (registered custom storefronts, static prose only)',
     ],
     documents,
     routes: [...routes].sort(),

@@ -24,6 +24,7 @@
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, copyFileSync, rmSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { catalogueString } from './knowledge-extractors.mjs';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -222,20 +223,16 @@ export function publicTools() {
   const entries = [];
   const blocks = source.split(/\n  \{\n/).slice(1);
   for (const block of blocks) {
-    const slug = /^\s*slug:\s*'([^']+)'/m.exec(block);
-    const name = /^\s*name:\s*'([^']+)'/m.exec(block);
-    const path = /^\s*path:\s*'(\/tools\/[^']+)'/m.exec(block);
-    const category = /^\s*category:\s*'([^']+)'/m.exec(block);
-    const summary = /^\s*summary:\s*'([^']+)'/m.exec(block);
-    const visibility = /^\s*visibility:\s*'([^']+)'/m.exec(block);
-    if (!slug || !name || !path) continue;
+    const slug = catalogueString(block, 'slug');
+    const name = catalogueString(block, 'name');
+    const path = catalogueString(block, 'path');
+    if (!slug || !name || !path?.startsWith('/tools/')) continue;
     entries.push({
-      slug: slug[1],
-      name: name[1],
-      path: path[1],
-      category: category ? category[1] : 'general',
-      description: summary ? summary[1] : '',
-      visibility: visibility ? visibility[1] : 'public',
+      slug, name, path,
+      category: catalogueString(block, 'category') ?? 'general',
+      description: catalogueString(block, 'summary') ?? '',
+      detail: catalogueString(block, 'description') ?? '',
+      visibility: catalogueString(block, 'visibility') ?? 'public',
     });
   }
   return entries;
