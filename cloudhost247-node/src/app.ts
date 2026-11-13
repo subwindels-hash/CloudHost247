@@ -79,6 +79,8 @@ import { registerMarketingRoutes } from './routes/marketing';
 import { registerAdminTikTokRoutes } from './routes/admin-tiktok';
 import { registerTikTokRoutes } from './routes/tiktok';
 import { registerInboxRoutes } from './routes/inbox';
+import { registerCommunityRoutes } from './routes/community';
+import { registerAdminCommunityRoutes } from './routes/admin-community';
 import { registerAdminPlatformServiceRoutes } from './routes/admin-platform-services';
 import { HttpError, ValidationError } from './lib/errors';
 import { createLogger } from './lib/logger';
@@ -308,6 +310,12 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerAdminTikTokRoutes(instance, env, pool);
     await registerTikTokRoutes(instance, env, pool);
     await registerInboxRoutes(instance, env, pool);
+
+    // Community Forum — the twelve discussion categories, developer corner, member profiles and
+    // moderation. It reuses this platform's accounts (users), roles (users.role), audit log,
+    // notification pipeline and AI knowledge corpus, and introduces no parallel identity.
+    await registerCommunityRoutes(instance, env, pool);
+    await registerAdminCommunityRoutes(instance, env, pool);
     await registerAdminPlatformServiceRoutes(instance, env, pool);
 
     // The frontend (static assets + SPA fallback) MUST be registered inside this same

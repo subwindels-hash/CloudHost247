@@ -96,6 +96,10 @@ const KIND_PRIOR: Record<string, number> = {
   website_doc: 1.0,
   website_tool: 0.98,
   announcement: 0.92,
+  // A moderator-verified community answer may fill a gap the official pages do not cover, but it is
+  // never allowed to outrank a page that documents the product itself. See
+  // src/community/community-knowledge.ts for how (and how narrowly) these sources are created.
+  community_solution: 0.94,
 };
 
 /** Words too generic to prove a chunk is about what the customer asked. */

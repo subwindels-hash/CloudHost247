@@ -32,6 +32,7 @@ import { sweepDomainServices, DOMAIN_SERVICES_SWEEP_INTERVAL_MS } from './domain
 import { sweepEmailTrace, EMAIL_TRACE_SWEEP_INTERVAL_MS } from './email-trace-sweep';
 import { runAiSweep, AI_SWEEP_INTERVAL_MS } from '../ai-os/jobs/sweep';
 import { sweepWebsiteKnowledge, WEBSITE_KNOWLEDGE_INTERVAL_MS } from '../ai-website/knowledge-worker';
+import { refreshCommunitySolutions, COMMUNITY_SOLUTION_REFRESH_INTERVAL_MS } from '../community/community-knowledge';
 import { monitorSweep, providerHealthSweep, resolverHealthSweep } from '../tools/worker/sweep';
 import { getSetting } from '../db/ops-tables';
 import type { EngineOptions } from '../deployments/engine';
@@ -102,6 +103,7 @@ interface WorkerSchedule {
   lastFxSync: number;
   lastEmailTraceSweep: number;
   lastWebsiteKnowledgeSweep: number;
+  lastCommunitySolutionRefresh: number;
 }
 
 function createWorkerSchedule(): WorkerSchedule {
@@ -128,6 +130,7 @@ function createWorkerSchedule(): WorkerSchedule {
     lastFxSync: 0,
     lastEmailTraceSweep: 0,
     lastWebsiteKnowledgeSweep: 0,
+    lastCommunitySolutionRefresh: 0,
   };
 }
 
@@ -418,6 +421,22 @@ async function runWorkerCycle(
       // The assistant degrades to the last good index. A failing reindex must never stop billing,
       // provisioning or notifications from being swept.
       logger.error(`[worker:${ctx.workerId}] ai website knowledge sweep failed: ${(error as Error).message}`);
+    }
+  }
+  if (now - schedule.lastCommunitySolutionRefresh >= COMMUNITY_SOLUTION_REFRESH_INTERVAL_MS) {
+    schedule.lastCommunitySolutionRefresh = now;
+    try {
+      const solutions = await refreshCommunitySolutions(ctx.db);
+      didWork ||= solutions.refreshed > 0 || solutions.revoked > 0;
+      if (solutions.refreshed > 0 || solutions.revoked > 0) {
+        logger.log(
+          `[worker:${ctx.workerId}] community solutions: ${solutions.refreshed} refreshed, ${solutions.revoked} withdrawn`
+        );
+      }
+    } catch (error) {
+      // A stale verification stamp only shortens how long an answer is trusted; it must never stop
+      // the billing, provisioning or notification sweeps that share this cycle.
+      logger.error(`[worker:${ctx.workerId}] community solution refresh failed: ${(error as Error).message}`);
     }
   }
   if (now - schedule.lastAiControlPlaneSweep >= AI_SWEEP_INTERVAL_MS) {

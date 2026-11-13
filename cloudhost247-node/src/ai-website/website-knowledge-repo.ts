@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../db/types';
+import { WEBSITE_SOURCE_KINDS } from './types';
 import type { WebsiteSourceKind } from './types';
 
 /**
@@ -225,14 +226,29 @@ export async function markSourceFailed(db: Queryable, sourceId: string, message:
  * `source_key`) are eligible — manually authored Control Plane knowledge is never deleted by a
  * website sync.
  */
-export async function deleteSourcesNotIn(db: Queryable, keepKeys: readonly string[]): Promise<number> {
+export async function deleteSourcesNotIn(
+  db: Queryable,
+  keepKeys: readonly string[],
+  /**
+   * Source kinds this reconciliation owns. Defaults to the website kinds, which is what the
+   * discovery-driven sync produces.
+   *
+   * The filter exists because the knowledge base now also holds `community_solution` sources
+   * (migration 0105), written by src/community/community-knowledge.ts. A full website sync must not
+   * delete a corpus row it never discovered: without this guard, the first reconcile sweep after a
+   * moderator verified a community answer would silently erase it, and the assistant would go back
+   * to saying it has no verified information — with nothing in the logs to explain why.
+   */
+  kinds: readonly string[] = WEBSITE_SOURCE_KINDS
+): Promise<number> {
   if (keepKeys.length === 0) return 0;
   const { rows } = await db.query<{ id: string; source_key: string }>(
     `DELETE FROM ai_knowledge_sources
       WHERE source_key IS NOT NULL
+        AND (source_kind IS NULL OR source_kind = ANY($2::text[]))
         AND NOT (source_key = ANY($1::text[]))
       RETURNING id, source_key`,
-    [keepKeys]
+    [keepKeys, kinds]
   );
   return rows.length;
 }
