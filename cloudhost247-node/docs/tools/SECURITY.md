@@ -101,9 +101,80 @@ Several rules exist because a plausible-but-wrong answer is a security problem o
 * Domain availability is never asserted without an authoritative registry answer.
 * The SMTP tester has no `DATA`/send mode at all — it can never deliver mail.
 * ICMP-only tools degrade to a labelled TCP fallback or refuse outright; they never invent a route.
+* The Barcode Scanner reports that no barcode was read rather than a text it cannot vouch for: a
+  symbol that fails its own check, one in a character set the runtime cannot convert, and one whose
+  character set the basic decoder's library would mis-parse are all "not read", never a guess.
 * Result explanations in `core/explain.ts` are generated from the result that was actually returned.
 
-## 8. Reporting a problem
+## 8. WebAssembly in the browser
+
+The Content-Security-Policy that `src/plugins/security.ts` sends with every page has one word in
+`script-src` that exists for a single tool:
+
+```
+script-src 'self' 'wasm-unsafe-eval' https://connect.facebook.net https://www.googletagmanager.com https://analytics.tiktok.com
+```
+
+**What it is for.** The Barcode Scanner page decodes in the visitor's browser. Its full decoder is
+zxing-cpp compiled to WebAssembly (`zxing-wasm`, pinned to an exact version in `package.json`). It
+reads twenty-one barcode types where the JavaScript decoder reads thirteen, and searches a picture
+many times faster (measurements in [DESIGN-STUDIO-PLAN.md](./DESIGN-STUDIO-PLAN.md), §13). A browser
+compiles WebAssembly only if the policy says it may.
+
+**What it allows, and what it does not.** `'wasm-unsafe-eval'` lets script that is already running
+on the page compile and start a WebAssembly module. It does not allow `eval()`, `new Function()` or a
+string handed to `setTimeout`: those need `'unsafe-eval'`, which is not granted.
+`tests/unit/spa-security-headers.test.ts` holds both halves (the word is present, `'unsafe-eval'` is
+not), and `e2e/barcode-scanner.spec.ts` runs the page in Chromium under the policy the application
+really sends and checks that the decoder runs, that nothing is refused, and that `new Function`
+still throws. Only Chromium was used; Firefox and Safari were not tried.
+
+**It covers every page, not only the scanner.** The site is one document that changes its own
+address, so there is one policy. Any page's script may therefore compile WebAssembly. What that
+costs: a WebAssembly module can do nothing the script that loaded it could not do. It has no access
+to the page of its own, and where it may fetch from is still `connect-src`. Someone who cannot run
+script on the page gains nothing from the word. Someone who already can (which `script-src` without
+`'unsafe-inline'` and `script-src-attr 'none'` are there to prevent) gains a faster way to compute,
+and no new reach.
+
+**Where the binary comes from.** This origin, and nowhere else. The library's default is to fetch
+its `.wasm` file from a public CDN; `frontend/src/lib/scan-engine.ts` overrides that with the copy
+Vite puts in `/assets/` under a content-hashed name, fetched under `connect-src 'self'`. The e2e
+spec fails if the page asks any other host for anything. For `zxing-wasm` 3.1.6 the file is 946,860
+bytes, SHA-256 `5003fb4b88c4fbd1fd518a2fd8c8ad365c519e183a08c03a322dddfea3cea84e`; the built file in
+`public/assets/` is byte-identical to the one in the package. The server never loads the library:
+the API decodes with the JavaScript decoder, and a test
+(`tests/unit/design-studio-barcodes.test.ts`) fails if any module other than the scanner page's two
+imports it.
+
+**Without it.** A browser that will not run WebAssembly (switched off, blocked by a proxy that
+will not pass `.wasm` files, or too old to know the word) gets the JavaScript decoder instead. The page says so in a notice, marks the eight types it cannot
+read there, and reads the other thirteen with the same results. Nothing else on the site uses
+WebAssembly.
+
+**To withdraw it.** Delete the word from `scriptSrc` in `src/plugins/security.ts`. The scanner page
+itself needs no change: it finds out whether WebAssembly is allowed and uses the JavaScript decoder
+when it is not, which is how the e2e test "where WebAssembly is refused" runs it. What must follow,
+because it checks or states that the word is there:
+
+- `tests/unit/spa-security-headers.test.ts` expects the word. CI runs this test, so it fails first.
+- `e2e/barcode-scanner.spec.ts`, two tests: "runs the full decoder under the security policy the
+  application sends" expects the word and the full decoder, and "where WebAssembly is refused"
+  expects that taking the word out changes the policy. CI does not run the browser tests, so
+  nothing reports these until someone runs them.
+- The `barcode-scanner` entry in `src/tools/catalog.ts`. Its description and first two notes say
+  the page reads twenty-one types; on this site it would then read thirteen. Two tests hold those
+  sentences word for word (`tests/unit/barcode-scanner.test.ts`,
+  `frontend/tests/unit/barcode-scanner-page.test.tsx`), and the files derived from the catalogue
+  are regenerated as in [OPERATIONS.md](./OPERATIONS.md), "Adding a tool".
+- This section, the scanner's paragraph in [README.md](./README.md) and §14 of
+  [DESIGN-STUDIO-PLAN.md](./DESIGN-STUDIO-PLAN.md).
+
+**What is not covered.** The WHMCS side of the site sets its own headers
+(`platform/src/core/security.js`) and is unchanged. The tools bundle embedded there
+(`assets/cloudhost247-tools/`) does not contain the scanner page or either decoder.
+
+## 9. Reporting a problem
 
 If you find a bypass (an SSRF vector, an unauthenticated admin action, a credential leak), treat it as
 a platform incident: the central chokepoints to check first are `core/ssrf.ts`, `core/rate-limit.ts`,

@@ -6,8 +6,8 @@
   "linksChecked": 255,
   "spaLinks": 244,
   "phpLinks": 243,
-  "spaRoutesKnown": 165,
-  "toolPathsKnown": 75,
+  "spaRoutesKnown": 172,
+  "toolPathsKnown": 82,
   "phpPagesKnown": 92,
   "legalDocuments": 17,
   "toolsCategories": 9,
@@ -30,7 +30,7 @@
     "website": 6,
     "security": 4,
     "ssl": 1,
-    "utilities": 23
+    "utilities": 30
   },
   "errors": [],
   "warnings": [],

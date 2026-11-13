@@ -57,6 +57,53 @@ site search, the sitemap and the related-tools lists. Both shells read the same
 `/api/tools/navigation` and the same generated projection, so the link cannot exist in one shell and
 be missing in the other.
 
+### Barcodes, labels and cards
+
+Six tools make print artwork instead of answering a question: **Barcode Generator**
+(`/tools/barcode-generator`), **Online Label Printing** (`/tools/label-designer`), **VDA 4902 Label
+Generator** (`/tools/vda-4902-label-generator`), **Shipping Label Generator**
+(`/tools/shipping-label-generator`), **QR Code Business Cards**
+(`/tools/qr-business-card-designer`) and **QR Code Maker** (`/tools/qr-code-maker`). They are
+ordinary catalogue entries, run through the same executor (`POST /api/tools/<slug>`), and differ
+from the other tools in three ways:
+
+* **The result is files, not fields.** `data` is `{ studio: true, title, previews, files, facts,
+  notices, count }`: SVG previews at true physical size, the print files as base64 (PDF always; SVG,
+  PNG, ZIP or `.vcf` depending on the tool), the facts worth checking (what each barcode carries, its
+  module width, the stock) and the notices to read before printing. The SPA shows this with
+  `StudioResult`; the raw response is never rendered.
+* **What is entered is not stored or cached.** All six have `cacheSeconds: 0` and are in
+  `NON_PERSISTABLE_TOOL_SLUGS` (no saved report, no ticket attachment), because a shipping label or
+  a business card is an address and a phone number. History and the execution log record that the
+  tool ran and the kind of artwork made (a barcode type, a template, a label size), and a refusal's
+  message names the field at fault without repeating its value.
+* **They refuse instead of adjusting.** Artwork is never scaled, rotated or clipped to fit a sheet,
+  and a barcode is never drawn finer than its floor. A request that cannot be met is a
+  `400 INVALID_INPUT` whose message gives the sizes involved, with `detail.reason` one of
+  `LABEL_EXCEEDS_CELL`, `LABEL_EXCEEDS_PAGE`, `GRID_EXCEEDS_PAGE`, `INVALID_GEOMETRY`,
+  `TOO_MANY_PAGES`, `LABEL_TOO_SMALL`, `CODE_TOO_DENSE`, `size` or `data`.
+
+They share one page component (`DesignStudioPage`, one route per slug) whose form comes from
+`src/tools/design-studio/forms.ts`, the same description the general tool page and the embedded
+build use. What was built, how it is tested and what has not been verified is recorded in
+[DESIGN-STUDIO-PLAN.md](./DESIGN-STUDIO-PLAN.md) §12 and §13.
+
+A seventh tool reads what they make. **Barcode Scanner** (`/tools/barcode-scanner`) decodes
+twenty-one barcode types with a camera or from a picture. Its page decodes in the browser and
+uploads nothing. It has two decoders:
+
+* the full one, zxing-cpp compiled to WebAssembly (`frontend/src/lib/scan-engine.ts` loads it,
+  `scan-cpp.ts` says what it is asked and how its answers are worded), which reads all twenty-one;
+* the basic one, ZXing in plain JavaScript (`src/tools/scanner/decode.ts`), which reads thirteen.
+  The page falls back to it in a browser that will not run WebAssembly, and says so.
+
+`POST /api/tools/barcode-scanner` reads a barcode from an uploaded PNG with the basic decoder, so
+the server loads no WebAssembly. The page may, because the Content-Security-Policy carries one word
+for it, `'wasm-unsafe-eval'`: what that allows, what it does not, and how to withdraw it are in
+[SECURITY.md](./SECURITY.md) §8. Both decoders report a barcode they both read in the same words:
+the same type and the same text, including text beyond ASCII. What a barcode contains is reported
+as text and never opened or followed. Scan results are in `NON_PERSISTABLE_TOOL_SLUGS` too.
+
 ## Architecture
 
 ```
@@ -160,6 +207,12 @@ different actions.
 | SPA API client + per-tool form schemas | `frontend/src/lib/tools-api.ts` |
 | Styles | `frontend/src/tools-center.css` |
 | Tests | `tests/integration/tools-api.test.ts`, `tests/unit/tools-dns-wire.test.ts`, `frontend/tests/unit/tools-center-page.test.tsx` |
+| Barcode, label and card tools (engines, tools, forms) | `src/tools/design-studio/`, `src/tools/handlers/design-studio.ts` |
+| Their page and result panel | `frontend/src/pages/tools/DesignStudioPage.tsx`, `frontend/src/components/tools/StudioResult.tsx` |
+| Their tests | `tests/unit/design-studio-tools.test.ts`, `tests/unit/design-studio-barcodes.test.ts`, `tests/unit/design-studio-qr.test.ts`, `frontend/tests/unit/design-studio-page.test.tsx`, `e2e/design-studio.spec.ts` |
+| Barcode Scanner (types, basic decoder, API) | `src/tools/scanner/{formats,decode,scan-image}.ts`, `src/tools/handlers/scanner.ts` |
+| Barcode Scanner (page, full decoder) | `frontend/src/pages/tools/BarcodeScannerPage.tsx`, `frontend/src/lib/{scan-engine,scan-cpp,scan-session}.ts` |
+| Its tests | `tests/unit/barcode-scanner.test.ts`, `tests/unit/barcode-scanner-engine.test.ts`, `frontend/tests/unit/barcode-scanner-page.test.tsx`, `e2e/barcode-scanner.spec.ts` |
 | Local preview (no PostgreSQL needed) | `scripts/tools-preview-server.ts` |
 | Generated catalogue doc | `scripts/generate-tools-catalog-doc.ts` → `docs/tools/TOOLS_CATALOG.md` |
 

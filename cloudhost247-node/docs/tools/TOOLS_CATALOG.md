@@ -1,6 +1,6 @@
 # Tools Center — full catalogue
 
-Generated from `src/tools/catalog.ts` (77 tools). This table is the authoritative list: if a tool is not here it does not exist, and if a tool is here it has a page at its route.
+Generated from `src/tools/catalog.ts` (84 tools). This table is the authoritative list: if a tool is not here it does not exist, and if a tool is here it has a page at its route.
 
 Columns:
 
@@ -98,10 +98,12 @@ Columns:
 | **Domain WHOIS** | `/tools/domain-whois` | `/api/tools/whois` | no | — | Inspect public domain registration information through the connected RDAP provider. |
 | **Punycode / IDN Converter** | `/tools/punycode` | `/api/tools/punycode` | no | — | Convert between Unicode domain names and their ASCII (punycode) form. |
 
-## Productivity Tools (18)
+## Productivity Tools (25)
 
 | Tool | Route | API | Auth | Provider | What it does |
 | --- | --- | --- | --- | --- | --- |
+| **Barcode Generator** | `/tools/barcode-generator` | `/api/tools/barcode-generator` | no | — | Create 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF. |
+| **Barcode Scanner** | `/tools/barcode-scanner` | `/api/tools/barcode-scanner` | no | — | Scan barcodes and QR codes with your camera or from an image, and export what you scanned. |
 | **Business Tools** | `/tools/business-tools` | `/api/tools/business-tools` | no | — | Twenty-one payroll, tax, document and provider-comparison tools that run entirely in your browser. |
 | **Designer Colour Tools** | `/tools/color-tools` | `/api/tools/color-tools` | no | — | Convert between HEX, RGB, HSL, HSV/HSB and CMYK. |
 | **Email & Link Extractor** | `/tools/email-extractor` | `/api/tools/email-extractor` | no | — | Pull every email address or web link out of pasted text. |
@@ -110,14 +112,19 @@ Columns:
 | **Invisible Character Generator** | `/tools/invisible-character-generator` | `/api/tools/invisible-character` | no | — | Copy zero-width and invisible Unicode characters. |
 | **Lorem Ipsum Generator** | `/tools/lorem-ipsum-generator` | `/api/tools/lorem-ipsum` | no | — | Generate placeholder text by words, sentences or paragraphs. |
 | **Minecraft Color Codes** | `/tools/minecraft-color-codes` | `/api/tools/minecraft-color-codes` | no | — | Minecraft colour and format code reference, with &-to-§ conversion. |
+| **Online Label Printing** | `/tools/label-designer` | `/api/tools/label-designer` | no | — | Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer. |
 | **Online Notepad** | `/tools/online-notepad` | `/api/tools/notepad` | no | — | A scratch pad that stays in your browser. |
+| **QR Code Business Cards** | `/tools/qr-business-card-designer` | `/api/tools/qr-business-card-designer` | no | — | Design a business card with a QR Code or Data Matrix that saves your contact to a phone. |
 | **QR Code Generator** | `/tools/qr-code-generator` | `/api/tools/qr-generator` | no | — | Create QR codes for URLs, text, email, phone, WiFi and vCards. |
+| **QR Code Maker** | `/tools/qr-code-maker` | `/api/tools/qr-code-maker` | no | — | Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment. |
 | **QR Scanner** | `/tools/qr-scanner` | `/api/tools/qr-scanner` | no | — | Scan a QR code from your camera or an image file. |
 | **RAID Calculator** | `/tools/raid-calculator` | `/api/tools/raid-calculator` | no | — | Usable capacity and fault tolerance for RAID 0, 1, 5, 6 and 10. |
 | **Reverse Image Search** | `/tools/reverse-image-search` | `/api/tools/reverse-image-search` | no | — | Launch an image search with the engines you choose. |
 | **Runic Translator** | `/tools/runic-translator` | `/api/tools/runic-translator` | no | — | Transliterate Latin text to Elder Futhark runes and back. |
+| **Shipping Label Generator** | `/tools/shipping-label-generator` | `/api/tools/shipping-label-generator` | no | — | Make carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode. |
 | **Small Text Generator** | `/tools/small-text-generator` | `/api/tools/small-text` | no | — | Convert text to small caps, superscript and subscript Unicode. |
 | **Time Card Calculator** | `/tools/time-card-calculator` | `/api/tools/time-card` | no | — | Clock-in/clock-out totals with breaks and overtime. |
+| **VDA 4902 Label Generator** | `/tools/vda-4902-label-generator` | `/api/tools/vda-4902-label-generator` | no | — | Fill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes. |
 | **WiFi QR Tool** | `/tools/wifi-qr` | `/api/tools/wifi-qr` | no | — | Share a WiFi network as a QR code, without storing the password. |
 | **Word & Text Counter** | `/tools/word-counter` | `/api/tools/word-counter` | no | — | Words, characters, sentences, paragraphs and reading time. |
 

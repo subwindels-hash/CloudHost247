@@ -143,10 +143,10 @@ describe('every production tools route', () => {
     expect(fetch.mock.calls[0]?.[1].headers.Authorization).toBeUndefined();
   });
 
-  it('verifies all 77 tools have complete handlers, form schemas, multi-mode inputs and image uploads', async () => {
-    expect(TOOL_CATALOG).toHaveLength(77);
+  it('verifies all 84 tools have complete handlers, form schemas, multi-mode inputs and image uploads', async () => {
+    expect(TOOL_CATALOG).toHaveLength(84);
     expect(missingHandlers()).toEqual([]);
-    expect(runnableSlugs()).toHaveLength(72);
+    expect(runnableSlugs()).toHaveLength(79);
 
     for (const entry of TOOL_CATALOG) {
       if (NON_RUNNABLE_TOOL_SLUGS.has(entry.slug)) continue;

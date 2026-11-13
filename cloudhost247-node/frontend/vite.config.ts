@@ -72,6 +72,11 @@ export default defineConfig({
   root: __dirname,
   base: process.env.VITE_BASE_PATH || '/',
   plugins: [editorialPunctuationPlugin(), react()],
+  // The Barcode Scanner loads its decoder only when someone starts to scan. Left to discover that
+  // import by itself, the dev server would prepare the library at that moment and reload the page,
+  // throwing away the first scan. Naming both decoders here prepares them at start-up. Production
+  // builds are unaffected: they bundle each as a chunk of the scanner page either way.
+  optimizeDeps: { include: ['@zxing/library', 'zxing-wasm/reader'] },
   build: {
     outDir: path.resolve(__dirname, '../public'),
     emptyOutDir: true,

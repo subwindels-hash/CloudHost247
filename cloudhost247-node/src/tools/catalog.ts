@@ -1461,6 +1461,176 @@ const newTools: ToolCatalogEntry[] = [
     methods: ['POST'], authRequired: false, visibility: 'public', rateLimitProfile: 'standard', cacheSeconds: 0, timeoutMs: 15_000,
     keywords: ['ipv6', 'aaaa', 'compatibility', 'dual stack', 'ipv4', 'dns'],
   },
+  // ------------------------------------------------------------------ Design Studio
+  // Barcodes, labels and cards: artwork generators rather than diagnostics. Engines live in
+  // src/tools/design-studio/, handlers in src/tools/handlers/design-studio.ts. The numbers quoted in
+  // the barcode entry are asserted against the symbology registry in
+  // tests/unit/design-studio-tools.test.ts, so the copy cannot drift from what the encoder offers.
+  //
+  // These entries are written one property per line, like the base catalogue above, because
+  // scripts/site/generate.mjs reads this file as text to build the site search index and only
+  // recognises that layout. The same test asserts that all five reach the index.
+  {
+    slug: 'barcode-generator',
+    name: 'Barcode Generator',
+    category: 'productivity',
+    summary: 'Create 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF.',
+    description: 'Encodes your data in any of 83 linear, 2D, GS1, postal and healthcare barcode types and returns vector SVG and PDF at the exact bar width you set, plus a PNG whose modules are whole pixels at the resolution you choose. A batch makes one barcode per line, a numbered series counts for you, and either can be laid out on label sheets. Nothing you enter is stored.',
+    icon: 'barcode',
+    path: '/tools/barcode-generator',
+    apiPath: '/api/tools/barcode-generator',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 15_000,
+    notes: [
+      'Fifty-one of the barcode types are read back by an independent decoder in the automated tests. Thirteen more are read back in part: the linear part of a composite symbol, or the main symbol beside an add-on. The other nineteen are produced by the encoder only. Each of these says so with its result.',
+      'A barcode that encodes correctly can still fail to scan if it is printed too small, rescaled or in low-contrast colours. Print at 100% and test with the scanner that will read it.',
+      'GS1, postal and pharmaceutical codes are drawn to their published structure. This tool does not assign company prefixes or check that a number is registered to you.',
+    ],
+    keywords: ['barcode', 'barcode generator', 'code 128', 'code 39', 'ean-13', 'upc', 'qr code', 'data matrix', 'pdf417', 'aztec', 'gs1-128', 'itf-14', 'svg', 'png', 'pdf'],
+  },
+  {
+    slug: 'label-designer',
+    name: 'Online Label Printing',
+    category: 'productivity',
+    summary: 'Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer.',
+    description: 'Choose a label template, fill in its fields and download a print-ready PDF: labels placed at true size on common A4 and US Letter label sheets, or one label per page for a label printer. A barcode keeps a bar width a scanner can read, or the label is refused with the reason. Nothing you enter is stored.',
+    icon: 'tags',
+    path: '/tools/label-designer',
+    apiPath: '/api/tools/label-designer',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 15_000,
+    notes: [
+      'Sheet layouts are defined by their measurements, not by a manufacturer code. Check the label size, margins and spacing against your pack, and run a test on plain paper first.',
+      'Print at 100% with page scaling off. A browser or printer that shrinks the page to fit moves every label and changes the barcode width.',
+      'Text is set in the standard PDF fonts, which cover Western European characters. Other letters are printed in the nearest available form or as “?”, and the result says which.',
+    ],
+    keywords: ['label', 'label printing', 'label maker', 'asset tag', 'inventory label', 'product label', 'shelf label', 'address label', 'qr label', 'label sheet', 'a4 labels', 'serial number'],
+  },
+  {
+    slug: 'vda-4902-label-generator',
+    name: 'VDA 4902 Label Generator',
+    category: 'productivity',
+    summary: 'Fill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes.',
+    description: 'Draws the goods label used between automotive suppliers and plants: receiver, unloading point, delivery note, supplier, part number, quantity, package number, batch and the rest of the sixteen fields, with Code 39 barcodes that begin with each field’s data identifier (N, P, Q, 30S, V, S/M/G, H). Captions are available in English, German, French, Spanish and Portuguese.',
+    icon: 'package-check',
+    path: '/tools/vda-4902-label-generator',
+    apiPath: '/api/tools/vda-4902-label-generator',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 15_000,
+    notes: [
+      'The label follows the published VDA 4902 field set and data identifiers in CloudHost247’s own cell arrangement. It is not certified by the VDA, and CloudHost247 is not affiliated with it.',
+      'Check sizes, field lengths, wording and barcode dimensions against the receiving plant’s packaging guideline before using the label in production.',
+      'On the KLT format the delivery note number and the supplier part number are printed as text only.',
+    ],
+    keywords: ['vda 4902', 'vda label', 'klt label', 'automotive label', 'transport label', 'warenanhänger', 'code 39', 'supplier label', 'goods tag'],
+  },
+  {
+    slug: 'shipping-label-generator',
+    name: 'Shipping Label Generator',
+    category: 'productivity',
+    summary: 'Make carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode.',
+    description: 'Lays out sender, recipient, service, weight and package count on a 4 × 6 inch, A6 or 100 × 150 mm label and adds a Code 128 reference barcode or a GS1-128 SSCC, with one numbered label for each package. The result is a print-ready PDF for label printers or plain sheets. Addresses are processed in memory and never stored.',
+    icon: 'package',
+    path: '/tools/shipping-label-generator',
+    apiPath: '/api/tools/shipping-label-generator',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 15_000,
+    notes: [
+      'This is not a carrier label. It carries no carrier name, logo, service code or routing barcode, and it does not replace the label a carrier issues for a booked shipment.',
+      'SSCC check digits are calculated for you, but the numbers must come from a serial range under your own GS1 company prefix.',
+      'Results are never written to saved reports or support tickets.',
+    ],
+    keywords: ['shipping label', 'parcel label', 'address label', '4x6 label', 'a6 label', 'sscc', 'gs1-128', 'logistics label', 'package label', 'thermal label'],
+  },
+  {
+    slug: 'qr-business-card-designer',
+    name: 'QR Code Business Cards',
+    category: 'productivity',
+    summary: 'Design a business card with a QR Code or Data Matrix that saves your contact to a phone.',
+    description: 'Builds a business card from your name, role and contact details and encodes the same details as a vCard or MeCard in a QR Code or Data Matrix. Download a print-ready PDF as a single card or a sheet with cut marks, SVG artwork and a .vcf contact file. Contact details are processed in memory and never stored.',
+    icon: 'contact',
+    path: '/tools/qr-business-card-designer',
+    apiPath: '/api/tools/qr-business-card-designer',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 15_000,
+    notes: [
+      'The code is always printed black on white and never finer than 0.3 mm per module. Details too long to fit at that size are refused with advice instead of being printed too small to scan.',
+      'Cards are drawn without bleed. For professional printing, ask your printer whether they need it added.',
+      'Results are never written to saved reports or support tickets.',
+    ],
+    keywords: ['business card', 'qr code business card', 'vcard', 'mecard', 'contact qr', 'data matrix', 'visiting card', 'card maker', 'print business cards'],
+  },
+  {
+    slug: 'qr-code-maker',
+    name: 'QR Code Maker',
+    category: 'productivity',
+    summary: 'Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment.',
+    description: 'Choose what the code should do when a phone scans it and fill in ordinary fields: a web address, a Wi-Fi network, a contact, an email, a call, a text or WhatsApp message, a calendar event, a map location, a social media profile or a SEPA bank transfer. The tool writes the format phones recognise and returns the code as PNG, SVG and PDF, as a QR Code, Data Matrix or Aztec Code. The code holds the content itself, so it never expires and scans are not tracked. Nothing you enter is stored.',
+    icon: 'qr-code',
+    path: '/tools/qr-code-maker',
+    apiPath: '/api/tools/qr-code-maker',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 15_000,
+    notes: [
+      'Each kind of code is read back by an independent decoder in the automated tests and compared with the format it should carry. What a phone then does with it is up to the phone and its apps: scan the code before you print or publish it.',
+      'A Wi-Fi code contains the network password, and anyone who scans it can read it.',
+      'A SEPA payment code follows the EPC QR code format for euro transfers. Banking apps decide whether they accept it; this tool does not check that an account exists.',
+      'Results are never written to saved reports or support tickets.',
+    ],
+    keywords: ['qr code', 'qr code maker', 'qr code generator', 'wifi qr code', 'vcard qr code', 'whatsapp qr code', 'url qr code', 'email qr code', 'sms qr code', 'event qr code', 'location qr code', 'epc qr code', 'sepa qr code', 'data matrix', 'aztec'],
+  },
+  {
+    slug: 'barcode-scanner',
+    name: 'Barcode Scanner',
+    category: 'productivity',
+    summary: 'Scan barcodes and QR codes with your camera or from an image, and export what you scanned.',
+    description: 'Reads twenty-one barcode types, including QR Code, Data Matrix, Code 128, Code 39, EAN-13, UPC-A and UPC-E, with a phone or laptop camera or from a picture. Each scan is added to a list you can copy or download as a CSV file. On the scanner page the decoding happens in your browser: the camera picture and your images are not uploaded. The API reads a barcode from an uploaded PNG, in thirteen of those types.',
+    icon: 'scan-barcode',
+    path: '/tools/barcode-scanner',
+    apiPath: '/api/tools/barcode-scanner',
+    methods: ['POST'],
+    authRequired: false,
+    visibility: 'public',
+    rateLimitProfile: 'standard',
+    cacheSeconds: 0,
+    timeoutMs: 15_000,
+    notes: [
+      'The scanner page reads twenty-one barcode types: QR Code, Data Matrix, Aztec Code, PDF417, Code 128, Code 39, Code 93, Interleaved 2 of 5, Codabar, EAN-13, EAN-8, UPC-A, GS1 DataBar, UPC-E, GS1 DataBar Limited, GS1 DataBar Expanded, Micro QR Code, rMQR Code, MicroPDF417, Telepen and MaxiCode.',
+      'The last eight of those types, from UPC-E on, need WebAssembly in the browser. Where a browser has it switched off, the page reads the first thirteen and says so. The API reads the same thirteen from an uploaded PNG.',
+      'MaxiCode is read only from a clean, upright image of the code alone, such as a saved label image. It is not read from a camera or a photograph.',
+      'Postal barcodes, Code 11, MSI, Pharmacode, DotCode and Han Xin are not read. Nor is Codablock F: it is built from rows of Code 128, and the scanner reports one row of it as a Code 128 barcode, which is a fragment and not the content.',
+      'Of a GS1 composite symbol the bars are read and the two-dimensional part printed above them is not. The two- or five-digit add-on beside an EAN or ISBN barcode is not read either.',
+      'A barcode’s content is shown as text. The scanner never opens a web address, dials a number or joins a network it finds in a code.',
+      'Text is read as UTF-8, Latin-1 or Shift JIS, whichever the bytes fit, or in the character set the barcode itself names. A character that cannot be printed, such as the separator between the fields of a GS1 barcode, is shown as a small picture of it (␝). A barcode that holds data and not text is shown one character to each byte.',
+      'A camera needs light and focus: a small or glossy barcode may need a steadier hand or a closer shot. This is a software reader, not a replacement for a hardware scanner on a production line.',
+      'Results are never written to saved reports or support tickets.',
+    ],
+    keywords: ['barcode scanner', 'barcode reader', 'qr code scanner', 'scan barcode online', 'camera scanner', 'data matrix reader', 'code 128 reader', 'ean scanner', 'upc scanner', 'scan to csv', 'inventory scanner'],
+  },
 ];
 export const DISCOVERY_CATEGORIES: Record<string, string> = {
   'dns-domains': 'DNS & Domains', 'ip-network': 'IP & Network', security: 'Security', ssl: 'SSL',
@@ -1506,6 +1676,14 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
     // Retained MRZ URLs from the Document Tools section. They keep working and forward to the
     // canonical /tools/mrz-generator route registered in the Tools Center catalogue.
     'mrz-generator': ['/tools/document/mrz', '/tools/document/mrz-parser', '/tools/mrz-parser'],
+    // The Design Studio tools answer the names people type as well as their registry slugs.
+    'barcode-generator': ['/tools/barcode'],
+    'label-designer': ['/tools/label-printing', '/tools/online-label-printing'],
+    'vda-4902-label-generator': ['/tools/vda-4902'],
+    'shipping-label-generator': ['/tools/shipping-labels'],
+    'qr-business-card-designer': ['/tools/qr-code-business-cards'],
+    'qr-code-maker': ['/tools/qr-maker', '/tools/qr-codes'],
+    'barcode-scanner': ['/tools/barcode-reader', '/tools/scan-barcode'],
   };
   const categories = [({ dns: 'dns-domains', domain: 'dns-domains', ip: 'ip-network', network: 'ip-network', webmaster: 'website', productivity: 'utilities', diagnostics: 'utilities' } as Record<string,string>)[tool.category] ?? tool.category];
   if (['mx-lookup','spf-checker','dkim-checker','dmarc-checker','dmarc-generator','bimi-checker','smtp-tester','email-header','email-verifier'].includes(tool.slug)) categories.push('email');
@@ -1518,6 +1696,13 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
   // Curated cross-links where the category sibling list would not be the most useful next step.
   const relatedOverride: Record<string, string[]> = {
     'mrz-generator': ['encoding-tools', 'json-tools', 'password-tools'],
+    'barcode-generator': ['label-designer', 'qr-generator', 'shipping-label-generator'],
+    'label-designer': ['barcode-generator', 'shipping-label-generator', 'vda-4902-label-generator'],
+    'vda-4902-label-generator': ['label-designer', 'shipping-label-generator', 'barcode-generator'],
+    'shipping-label-generator': ['label-designer', 'vda-4902-label-generator', 'barcode-generator'],
+    'qr-business-card-designer': ['qr-code-maker', 'barcode-generator', 'label-designer'],
+    'qr-code-maker': ['qr-business-card-designer', 'barcode-generator', 'barcode-scanner'],
+    'barcode-scanner': ['barcode-generator', 'qr-code-maker', 'qr-scanner'],
     // The two extractors are separate tools that point at each other.
     'email-extractor': ['email-extractor-pro', 'word-counter', 'notepad'],
     'email-extractor-pro': ['email-extractor', 'word-counter', 'notepad'],
@@ -1568,7 +1753,23 @@ export const NON_RUNNABLE_TOOL_SLUGS = new Set([
  * forgotten; persisting a result because a button exists would quietly break that promise. The
  * caller keeps what they need with the page's copy/download actions.
  */
-export const NON_PERSISTABLE_TOOL_SLUGS = new Set(['mrz-generator']);
+export const NON_PERSISTABLE_TOOL_SLUGS = new Set([
+  'mrz-generator',
+  // The Design Studio tools return artwork files, and what is on that artwork is the caller's own
+  // data: postal addresses on shipping and address labels, a full contact record on a business card,
+  // shipment and part data on a VDA label, and whatever a barcode was asked to encode. None of it is
+  // a diagnostic worth keeping, and a megabyte of base64 PDF does not belong in a report row or a
+  // ticket body. The caller keeps the file they download.
+  'barcode-generator',
+  'label-designer',
+  'vda-4902-label-generator',
+  'shipping-label-generator',
+  'qr-business-card-designer',
+  // A Wi-Fi password, a contact record or an IBAN, as an image of a code.
+  'qr-code-maker',
+  // Whatever the scanned barcode held: the same kinds of content, read back out.
+  'barcode-scanner',
+]);
 
 /** Public marketing-safe tool list used by tests to assert the catalogue is coherent. */
 export const TOOL_SLUGS: readonly string[] = TOOL_CATALOG.map((entry) => entry.slug);

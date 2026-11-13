@@ -19,7 +19,13 @@ export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
         imgSrc: ["'self'", 'data:', 'https://www.facebook.com', 'https://www.google.com', 'https://www.googleadservices.com', 'https://googleads.g.doubleclick.net', 'https://www.googletagmanager.com', 'https://www.google-analytics.com', 'https://region1.google-analytics.com', 'https://analytics.tiktok.com'],
         styleSrc: ["'self'", "'unsafe-inline'"],
         // Only explicitly used Meta, Google and TikTok origins; no script wildcards.
-        scriptSrc: ["'self'", 'https://connect.facebook.net', 'https://www.googletagmanager.com', 'https://analytics.tiktok.com'],
+        //
+        // 'wasm-unsafe-eval' lets a page compile WebAssembly, which the Barcode Scanner's decoder
+        // is. It does not allow eval(), new Function() or a string passed to a timer: those stay
+        // refused, because 'unsafe-eval' is not granted. The policy covers every page and not the
+        // scanner alone, since the site is one document that changes its own address. See
+        // docs/tools/SECURITY.md, "WebAssembly".
+        scriptSrc: ["'self'", "'wasm-unsafe-eval'", 'https://connect.facebook.net', 'https://www.googletagmanager.com', 'https://analytics.tiktok.com'],
         connectSrc: ["'self'", 'https://connect.facebook.net', 'https://www.facebook.com', 'https://www.google.com', 'https://www.googleadservices.com', 'https://googleads.g.doubleclick.net', 'https://www.googletagmanager.com', 'https://www.google-analytics.com', 'https://region1.google-analytics.com', 'https://analytics.tiktok.com'],
       },
     },
