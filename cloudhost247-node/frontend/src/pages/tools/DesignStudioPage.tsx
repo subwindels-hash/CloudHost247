@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import StudioChooser from '../../components/tools/StudioChooser';
 import StudioResult, { isStudioResult, type StudioResultView } from '../../components/tools/StudioResult';
 import ToolSeo from '../../components/tools/ToolSeo';
 import { toolsApi, type ToolSummary } from '../../lib/tools-api';
@@ -33,6 +34,16 @@ import './design-studio.css';
  */
 
 const SWITCHER: ReadonlyArray<{ slug: StudioSlug; path: string }> = STUDIO_TOOL_SLUGS.map((slug) => ({ slug, path: `/tools/${slug}` }));
+
+/** What a tool's picker lists, for the search box: "Search 93 barcode types". */
+const CHOOSER_NOUN: Record<StudioSlug, string> = {
+  'barcode-generator': 'barcode types',
+  'label-designer': 'label templates',
+  'vda-4902-label-generator': 'label formats',
+  'shipping-label-generator': 'label sizes',
+  'qr-business-card-designer': 'card designs',
+  'qr-code-maker': 'options',
+};
 
 const RESULT_NOUN: Record<StudioSlug, string> = {
   'barcode-generator': 'barcode',
@@ -337,6 +348,14 @@ export default function DesignStudioPage({ slug }: { slug: StudioSlug }) {
 
   const related = tool ? tools.filter((entry) => entry.status === 'ACTIVE' && tool.relatedTools?.includes(entry.slug) && !STUDIO_TOOL_SLUGS.includes(entry.slug as StudioSlug)) : [];
 
+  // One numbered step per section that has something to show. The steps are what makes the page
+  // readable as a sequence: choose the type, enter the data, set the options, then print.
+  const steps = form.sections
+    .map((section) => ({ section, fields: visibleStudioFields(form, section, values) }))
+    .filter((entry) => entry.fields.length > 0);
+  const formId = `studio-form-${slug}`;
+  const generateLabel = busy ? 'Generating…' : form.submitLabel;
+
   return (
     <div ref={rootNode} className="tools-center studio">
       <ToolSeo title={tool?.seoTitle ?? `${name} | CloudHost247`} description={tool?.summary ?? form.intro} path={`/tools/${slug}`} />
@@ -372,9 +391,9 @@ export default function DesignStudioPage({ slug }: { slug: StudioSlug }) {
       ) : null}
 
       <div className="studio-grid">
-        <form ref={formNode} className="studio-form" aria-label={`${name} input`} onSubmit={onSubmit}>
+        <form id={formId} ref={formNode} className="studio-form" aria-label={`${name} input`} onSubmit={onSubmit}>
           <div className="studio-form__top">
-            <h2>Enter your details</h2>
+            <h2>Make your {RESULT_NOUN[slug]}</h2>
             <div className="studio-form__tools">
               <button type="button" className="studio-link" onClick={showExample} disabled={busy}>
                 Fill with an example
@@ -385,39 +404,65 @@ export default function DesignStudioPage({ slug }: { slug: StudioSlug }) {
             </div>
           </div>
 
-          {form.sections.map((section) => {
-            const fields = visibleStudioFields(form, section, values);
-            if (fields.length === 0) return null;
+          {steps.map(({ section, fields }, index) => {
+            // A field marked as a chooser is the one that decides what the rest of the form asks
+            // for. It gets a picker instead of a dropdown, and goes first whatever its position.
+            const chooser = fields.find((field) => field.chooser === true) ?? null;
+            const rest = chooser ? fields.filter((field) => field !== chooser) : fields;
             return (
-              <fieldset key={section.id} className="studio-section">
-                <legend>{section.title}</legend>
+              <fieldset key={section.id} className="studio-step">
+                <legend>
+                  <span className="studio-step__num" aria-hidden="true">
+                    {index + 1}
+                  </span>
+                  <span className="studio-step__name">{section.stepTitle ?? section.title}</span>
+                </legend>
                 {section.description ? <p className="studio-section__note">{section.description}</p> : null}
-                <div className="studio-fields">
-                  {fields.map((field) => (
-                    <div key={field.name} className={`studio-fields__cell${field.half ? ' studio-fields__cell--half' : ''}`}>
-                      <FieldControl
-                        id={`studio-${slug}-${field.name}`}
-                        field={field}
-                        value={values[field.name] ?? (field.type === 'checkbox' ? false : '')}
-                        onChange={(next) => setValues((current) => applyStudioChange(form, current, field.name, next))}
-                      />
-                    </div>
-                  ))}
-                </div>
+
+                {chooser ? (
+                  <StudioChooser
+                    field={chooser}
+                    value={String(values[chooser.name] ?? chooser.defaultValue ?? '')}
+                    popularLabel={slug === 'barcode-generator' ? 'Popular types' : 'Common choices'}
+                    searchNoun={CHOOSER_NOUN[slug]}
+                    onChange={(next) => setValues((current) => applyStudioChange(form, current, chooser.name, next))}
+                  />
+                ) : null}
+
+                {rest.length > 0 ? (
+                  <div className={`studio-fields${chooser ? ' studio-fields--after-chooser' : ''}`}>
+                    {rest.map((field) => (
+                      <div key={field.name} className={`studio-fields__cell${field.half ? ' studio-fields__cell--half' : ''}`}>
+                        <FieldControl
+                          id={`studio-${slug}-${field.name}`}
+                          field={field}
+                          value={values[field.name] ?? (field.type === 'checkbox' ? false : '')}
+                          onChange={(next) => setValues((current) => applyStudioChange(form, current, field.name, next))}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </fieldset>
             );
           })}
 
           <div className="studio-form__actions">
             <button type="submit" className="ch247-button studio-submit" disabled={busy || unavailable}>
-              {busy ? 'Generating…' : form.submitLabel}
+              {generateLabel}
             </button>
             <p className="studio-form__privacy">Processed on our server to draw the artwork, then discarded. Nothing you enter is stored.</p>
           </div>
         </form>
 
         <section ref={resultNode} className="studio-output" aria-labelledby="studio-output-title" aria-busy={busy}>
-          <h2 id="studio-output-title">Preview and downloads</h2>
+          <div className="studio-output__head">
+            <h2 id="studio-output-title">Preview and downloads</h2>
+            {/* The form can be long; this repeats the one action that matters next to the artwork. */}
+            <button type="submit" form={formId} className="ch247-button studio-output__generate" disabled={busy || unavailable}>
+              {generateLabel}
+            </button>
+          </div>
           <div aria-live="polite">
             {error ? (
               <div className="tools-notice tools-notice--error studio-error" role="alert">

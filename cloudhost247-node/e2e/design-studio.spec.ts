@@ -85,6 +85,11 @@ async function bytesOf(download: Download): Promise<Buffer> {
   return readFile(path);
 }
 
+/** The form's own action button. The preview panel repeats it, so the form is the scope. */
+function formSubmit(page: Page, name: string): Locator {
+  return page.locator('.studio-form').getByRole('button', { name, exact: true });
+}
+
 async function drawExample(page: Page, slug: string): Promise<void> {
   await page.goto(`/tools/${slug}`);
   await page.getByRole('button', { name: 'Show me an example' }).click();
@@ -108,7 +113,7 @@ test.describe('Design Studio tools', () => {
       const served = await serveStudio(page);
       await page.goto(`/tools/${tool.slug}`);
       await expect(page.getByRole('heading', { level: 1, name: tool.name })).toBeVisible();
-      await expect(page.getByRole('button', { name: tool.submit, exact: true })).toBeEnabled();
+      await expect(formSubmit(page, tool.submit)).toBeEnabled();
       // Opening the page draws nothing.
       expect(served).toHaveLength(0);
 
@@ -200,16 +205,17 @@ test.describe('Design Studio tools', () => {
   test('QR Code Maker: the fields follow the kind of code, and the PNG saved carries the format a phone expects', async ({ page }) => {
     const served = await serveStudio(page);
     await page.goto('/tools/qr-code-maker');
-    const kind = page.getByLabel('When someone scans it');
-    await expect(kind).toHaveValue('url');
+    // The kind of code is a picker, not a dropdown: each choice is a card carrying its value.
+    const kind = page.getByRole('group', { name: 'When someone scans it' });
+    await expect(page.locator('.studio-choice[data-value="url"]')).toHaveClass(/is-selected/);
     await expect(page.getByLabel('Web address')).toBeVisible();
 
     // Choosing Wi-Fi replaces the address field with the network's fields.
-    await kind.selectOption('wifi');
+    await kind.locator('.studio-choice[data-value="wifi"]').click();
     await expect(page.getByLabel('Web address')).toHaveCount(0);
     await page.getByLabel('Network name').fill('Guest; Lounge');
     await page.getByLabel('Password', { exact: true }).fill('welcome-2026');
-    await page.getByRole('button', { name: 'Make QR code', exact: true }).click();
+    await formSubmit(page, 'Make QR code').click();
     await expect(page.locator('.studio-preview img').first()).toBeVisible();
 
     const { request, data } = latest(served);
@@ -225,13 +231,13 @@ test.describe('Design Studio tools', () => {
     expect((await decodePng(bytes)).map((symbol) => `${symbol.format}:${symbol.text}`)).toEqual(['QRCode:WIFI:T:WPA;S:Guest\\; Lounge;P:welcome-2026;;']);
 
     // A date and a time are entered with the browser's own pickers and arrive as plain text.
-    await kind.selectOption('event');
+    await page.getByRole('group', { name: 'When someone scans it' }).locator('.studio-choice[data-value="event"]').click();
     await page.getByLabel('Event name').fill('Open day');
     await page.getByLabel('Start date').fill('2026-12-12');
     await page.getByLabel('Start time').fill('10:00');
     await expect(page.getByLabel('Start date')).toHaveAttribute('type', 'date');
     await expect(page.getByLabel('Start time')).toHaveAttribute('type', 'time');
-    await page.getByRole('button', { name: 'Make QR code', exact: true }).click();
+    await formSubmit(page, 'Make QR code').click();
     await expect(page.locator('.studio-facts > div', { hasText: 'When scanned' }).locator('dd')).toHaveText('Add a calendar event');
     expect(latest(served).request).toMatchObject({ kind: 'event', eventTitle: 'Open day', eventStart: '2026-12-12', eventStartTime: '10:00' });
     await expect(page.locator('.studio-facts > div', { hasText: 'The code carries' }).locator('dd')).toHaveText('BEGIN:VEVENT ↵ SUMMARY:Open day ↵ DTSTART:20261212T100000 ↵ DTEND:20261212T110000 ↵ END:VEVENT');
@@ -240,8 +246,8 @@ test.describe('Design Studio tools', () => {
   test('artwork on screen is current, marked as older than the form, or gone', async ({ page }) => {
     const served = await serveStudio(page);
     await page.goto('/tools/barcode-generator');
-    const data = page.getByLabel('Data', { exact: false }).first();
-    const generate = page.getByRole('button', { name: 'Generate barcode', exact: true });
+    const data = page.locator('#studio-barcode-generator-data');
+    const generate = page.locator('.studio-form').getByRole('button', { name: 'Generate barcode', exact: true });
     const drawn = page.locator('.studio-facts > div', { hasText: 'Your data' }).locator('dd');
     const changed = page.locator('.studio-changed');
 
@@ -261,7 +267,7 @@ test.describe('Design Studio tools', () => {
     await expect(changed).toHaveCount(0);
 
     // A request the server refuses leaves no earlier artwork or files under its message.
-    await page.getByLabel('Barcode type').selectOption('ean13');
+    await page.getByRole('group', { name: 'Barcode type' }).locator('.studio-choice[data-value="ean13"]').click();
     await generate.click();
     await expect(page.getByRole('alert')).toContainText('That is not valid EAN-13 data. Expected: 12 digits (the check digit is added) or 13 digits including it.');
     await expect(page.locator('.studio-preview')).toHaveCount(0);
@@ -277,7 +283,7 @@ test.describe('Design Studio tools', () => {
   test('a product label follows its template: retail barcode, name and price', async ({ page }) => {
     const served = await serveStudio(page);
     await page.goto('/tools/label-designer');
-    await page.getByLabel('Template').selectOption('product-label');
+    await page.getByRole('group', { name: 'Template' }).locator('.studio-choice[data-value="product-label"]').click();
     await expect(page.getByLabel('Barcode type')).toHaveValue('ean13');
     await page.getByRole('button', { name: 'Fill with an example' }).click();
     await expect(page.locator('.studio-preview img').first()).toBeVisible();
@@ -353,7 +359,7 @@ test.describe('Design Studio tools', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await serveStudio(page);
     await drawExample(page, 'label-designer');
-    const submit = page.getByRole('button', { name: 'Generate labels', exact: true });
+    const submit = formSubmit(page, 'Generate labels');
 
     // Edit a field and go to the button, as someone working down the form does. The panel is
     // taller than the screen here, so its top has scrolled away.
@@ -433,9 +439,9 @@ test.describe('Design Studio accessibility', () => {
   test('a refusal is announced and passes the same scan', async ({ page }, testInfo) => {
     await serveStudio(page);
     await page.goto('/tools/barcode-generator');
-    await page.getByLabel('Barcode type').selectOption('ean13');
-    await page.getByLabel('Data', { exact: false }).first().fill('NOT-A-NUMBER');
-    await page.getByRole('button', { name: 'Generate barcode', exact: true }).click();
+    await page.getByRole('group', { name: 'Barcode type' }).locator('.studio-choice[data-value="ean13"]').click();
+    await page.locator('#studio-barcode-generator-data').fill('NOT-A-NUMBER');
+    await formSubmit(page, 'Generate barcode').click();
     await expect(page.getByRole('alert')).toContainText('That could not be generated.');
     expect(await blocking(page, 'refusal', testInfo)).toEqual([]);
   });

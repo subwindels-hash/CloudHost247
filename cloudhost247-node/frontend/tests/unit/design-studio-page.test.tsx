@@ -69,6 +69,33 @@ function renderStudio(slug: StudioSlug) {
 
 const nameOf = (slug: string): string => TOOL_CATALOG.find((tool) => tool.slug === slug)?.name ?? slug;
 
+/**
+ * The picker a chooser field renders: a radio group named by the field, holding every choice the
+ * shared form offers. These helpers are how a visitor changes the barcode type or the template.
+ */
+function picker(label: string, root: HTMLElement = document.body): HTMLElement {
+  return within(root).getByRole('group', { name: label });
+}
+
+function chooseType(label: string, value: string): void {
+  const input = picker(label).querySelector<HTMLInputElement>(`input[value="${value}"]`);
+  if (!input) throw new Error(`${label} has no ${value} choice.`);
+  fireEvent.click(input);
+}
+
+/** The one action that produces the artwork, in the form itself. */
+function submitButton(slug: StudioSlug): HTMLElement {
+  const form = document.querySelector('.studio-form');
+  if (!form) throw new Error('The form is not on screen.');
+  return within(form as HTMLElement).getByRole('button', { name: STUDIO_FORMS[slug].submitLabel });
+}
+
+/** The value the picker currently holds, read from the checked radio. */
+function pickedType(label: string): string | null {
+  const checked = within(picker(label)).getAllByRole('radio', { checked: true })[0] as HTMLInputElement | undefined;
+  return checked?.value ?? null;
+}
+
 /** What a browser would have saved: the anchor's file name and the Blob behind its address. */
 const saved: Array<{ name: string; target: string; blob: Blob | undefined }> = [];
 const blobs = new Map<string, Blob>();
@@ -125,6 +152,12 @@ describe.each(STUDIO_TOOL_SLUGS.map((slug) => ({ slug })))('$slug page', ({ slug
     const visible = form.sections.flatMap((section) => visibleStudioFields(form, section, start));
     expect(visible.length).toBeGreaterThan(3);
     for (const field of visible) {
+      if (field.chooser) {
+        // A picker, not a dropdown: every choice the shared form offers is a radio button.
+        const group = picker(field.label, container);
+        expect(within(group).getAllByRole('radio'), field.name).toHaveLength(field.options?.length ?? 0);
+        continue;
+      }
       const control = container.querySelector(`#studio-${slug}-${field.name}`);
       expect(control, field.name).not.toBeNull();
       expect(container.querySelector(`label[for="studio-${slug}-${field.name}"]`)?.textContent, field.name).toContain(field.label);
@@ -175,6 +208,10 @@ describe.each(STUDIO_TOOL_SLUGS.map((slug) => ({ slug })))('$slug page', ({ slug
     // The form now holds the example, so what is on screen is what was drawn.
     const example = studioExample(form, start);
     for (const field of form.sections.flatMap((section) => visibleStudioFields(form, section, example))) {
+      if (field.chooser) {
+        expect(pickedType(field.label), field.name).toBe(String(example[field.name] ?? ''));
+        continue;
+      }
       const control = container.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(`#studio-${slug}-${field.name}`);
       if (!control) throw new Error(`${field.name} is not on screen.`);
       if (field.type === 'checkbox') expect((control as HTMLInputElement).checked, field.name).toBe(example[field.name] === true);
@@ -229,10 +266,10 @@ describe('Design Studio form behaviour', () => {
     renderStudio('barcode-generator');
     await screen.findByRole('heading', { level: 1, name: 'Barcode Generator' });
 
-    fireEvent.change(screen.getByLabelText(/^Barcode type/), { target: { value: 'ean13' } });
-    const data = screen.getByLabelText(/^Data/) as HTMLTextAreaElement;
+    chooseType('Barcode type', 'ean13');
+    const data = screen.getByLabelText(/^Data to encode/) as HTMLTextAreaElement;
     fireEvent.change(data, { target: { value: 'NOT-A-NUMBER' } });
-    fireEvent.click(screen.getByRole('button', { name: STUDIO_FORMS['barcode-generator'].submitLabel }));
+    fireEvent.click(submitButton('barcode-generator'));
 
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toContain('That could not be generated.');
@@ -249,7 +286,7 @@ describe('Design Studio form behaviour', () => {
 
     // Correcting the entry replaces the refusal with the artwork.
     fireEvent.change(data, { target: { value: '952012345678' } });
-    fireEvent.click(screen.getByRole('button', { name: STUDIO_FORMS['barcode-generator'].submitLabel }));
+    fireEvent.click(submitButton('barcode-generator'));
     await waitFor(() => expect(document.querySelector('.studio-preview img')).not.toBeNull());
     expect(screen.queryByRole('alert')).toBeNull();
     expect(screen.getByText('9520123456788 (check digit 8 added)')).toBeTruthy();
@@ -264,9 +301,9 @@ describe('Design Studio form behaviour', () => {
     const changed = (): string | null => document.querySelector('.studio-changed')?.textContent ?? null;
     const drawnData = (): string | null | undefined => Array.from(document.querySelectorAll('.studio-facts > div')).find((row) => row.querySelector('dt')?.textContent === 'Your data')?.querySelector('dd')?.textContent;
 
-    const data = screen.getByLabelText(/^Data/) as HTMLTextAreaElement;
+    const data = screen.getByLabelText(/^Data to encode/) as HTMLTextAreaElement;
     fireEvent.change(data, { target: { value: 'FIRST-0001' } });
-    fireEvent.click(screen.getByRole('button', { name: submit }));
+    fireEvent.click(submitButton('barcode-generator'));
     await waitFor(() => expect(drawnData()).toBe('FIRST-0001'));
     // Freshly drawn: the artwork is what the form says.
     expect(changed()).toBeNull();
@@ -283,15 +320,15 @@ describe('Design Studio form behaviour', () => {
 
     // Sending the edit replaces the artwork and removes the mark.
     fireEvent.change(data, { target: { value: 'SECOND-0002' } });
-    fireEvent.click(screen.getByRole('button', { name: submit }));
+    fireEvent.click(submitButton('barcode-generator'));
     await waitFor(() => expect(drawnData()).toBe('SECOND-0002'));
     expect(changed()).toBeNull();
 
     // An edit the server refuses: the earlier artwork and its files go, so the PDF of
     // SECOND-0002 cannot be saved under a message about a different entry.
-    fireEvent.change(screen.getByLabelText(/^Barcode type/), { target: { value: 'ean13' } });
+    chooseType('Barcode type', 'ean13');
     expect(changed()).not.toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: submit }));
+    fireEvent.click(submitButton('barcode-generator'));
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toContain('That is not valid EAN-13 data.');
     expect(document.querySelector('.studio-preview')).toBeNull();
@@ -315,7 +352,7 @@ describe('Design Studio form behaviour', () => {
 
     online = false;
     fireEvent.change(document.querySelector('#studio-label-designer-code') as HTMLInputElement, { target: { value: 'CH-000999' } });
-    fireEvent.click(screen.getByRole('button', { name: STUDIO_FORMS['label-designer'].submitLabel }));
+    fireEvent.click(submitButton('label-designer'));
     const alert = await screen.findByRole('alert');
     // In plain words, not the browser's "Failed to fetch".
     expect(alert.textContent).toBe('That could not be generated.The request did not reach our server. Check your connection and try again.');
@@ -324,7 +361,7 @@ describe('Design Studio form behaviour', () => {
     // What was typed is kept, and the button works again once the connection is back.
     expect((document.querySelector('#studio-label-designer-code') as HTMLInputElement).value).toBe('CH-000999');
     online = true;
-    fireEvent.click(screen.getByRole('button', { name: STUDIO_FORMS['label-designer'].submitLabel }));
+    fireEvent.click(submitButton('label-designer'));
     await waitFor(() => expect(document.querySelector('.studio-preview img')).not.toBeNull());
     expect(screen.queryByRole('alert')).toBeNull();
     expect(api.runs().map((call) => call.body?.code)).toEqual(['CH-000123', 'CH-000999']);
@@ -341,13 +378,13 @@ describe('Design Studio form behaviour', () => {
     expect(has('barHeightMm')).toBe(true);
     expect(has('eclevel')).toBe(false);
 
-    fireEvent.change(screen.getByLabelText(/^Barcode type/), { target: { value: 'qrcode' } });
+    chooseType('Barcode type', 'qrcode');
     expect(has('barHeightMm')).toBe(false);
     expect(has('eclevel')).toBe(true);
 
-    fireEvent.change(screen.getByLabelText(/^Data/), { target: { value: 'https://cloudhost247.com' } });
+    fireEvent.change(screen.getByLabelText(/^Data to encode/), { target: { value: 'https://cloudhost247.com' } });
     fireEvent.change(container.querySelector('#studio-barcode-generator-eclevel') as HTMLSelectElement, { target: { value: 'H' } });
-    fireEvent.click(screen.getByRole('button', { name: STUDIO_FORMS['barcode-generator'].submitLabel }));
+    fireEvent.click(submitButton('barcode-generator'));
     await waitFor(() => expect(api.results).toHaveLength(1));
     const sent = api.runs()[0]?.body ?? {};
     expect(sent).toMatchObject({ symbology: 'qrcode', data: 'https://cloudhost247.com', eclevel: 'H' });
@@ -371,7 +408,7 @@ describe('Design Studio form behaviour', () => {
     expect(field('name')).toBeNull();
 
     // The product label has a name and a price, takes a retail barcode, and brings its own example.
-    fireEvent.change(field('template') as HTMLSelectElement, { target: { value: 'product-label' } });
+    chooseType('Template', 'product-label');
     expect(field('name')?.value).toBe('Arabica Coffee Beans');
     expect(field('price')?.value).toBe('NGN 4,500');
     expect(field('code')?.value).toBe('9520123456788');
@@ -382,13 +419,13 @@ describe('Design Studio form behaviour', () => {
 
     // Once the visitor has typed something, a further change of template leaves it alone.
     fireEvent.change(field('code') as HTMLInputElement, { target: { value: 'MY-OWN-7' } });
-    fireEvent.change(field('template') as HTMLSelectElement, { target: { value: 'shelf-label' } });
+    chooseType('Template', 'shelf-label');
     expect(field('code')?.value).toBe('MY-OWN-7');
 
     // "Clear" empties what was typed and keeps the choices that shape the form.
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
     expect(field('code')?.value).toBe('');
-    expect(field('template')?.value).toBe('shelf-label');
+    expect(pickedType('Template')).toBe('shelf-label');
     expect(container.querySelector('.studio-preview')).toBeNull();
   });
 
@@ -419,7 +456,7 @@ describe('Design Studio form behaviour', () => {
     vi.stubGlobal('fetch', fetch);
     renderStudio('shipping-label-generator');
     await screen.findByText('Shipping labels are switched off for maintenance.');
-    expect((screen.getByRole('button', { name: STUDIO_FORMS['shipping-label-generator'].submitLabel }) as HTMLButtonElement).disabled).toBe(true);
+    expect((submitButton('shipping-label-generator') as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Show me an example' }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole('button', { name: 'Fill with an example' }));
     expect(api.runs()).toEqual([]);
@@ -581,7 +618,7 @@ describe('the general tool page, as the embedded build uses it', () => {
     const { container } = renderGeneral('barcode-generator');
     await screen.findByRole('heading', { level: 1, name: 'Barcode Generator' });
 
-    fireEvent.change(screen.getByLabelText(/^Data/), { target: { value: 'CH247-000123' } });
+    fireEvent.change(screen.getByLabelText(/^Data to encode/), { target: { value: 'CH247-000123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Run tool' }));
     await waitFor(() => expect(api.results).toHaveLength(1));
     expect(api.runs()[0]?.body).toMatchObject({ symbology: 'code128', data: 'CH247-000123' });

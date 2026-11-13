@@ -814,3 +814,72 @@ Everything in §12.6 and §13.7 still holds, and in addition:
 - **Kanji mode with other bytes.** A QR Code in Kanji mode is read (drawn for the test by
   zxing-cpp's own encoder, since BWIPP does not use the mode). One that mixes Kanji mode with bytes
   in a different character set was not available to test.
+
+---
+
+## 15. Fourth round (2026-11-13): presented the way TEC-IT presents them
+
+### 15.1 What was wrong
+
+After §13 the five tools did what TEC-IT's do — 83 barcode types, six label templates, VDA 4902,
+shipping labels, QR business cards and the QR Code Maker — but the page did not read like theirs.
+Everything was one long form: the barcode type was a dropdown of eighty-three names with no hint of
+what any of them is for, the template and the kind of code were dropdowns too, and the sections were
+headed "Barcode", "Size and appearance", "PDF layout". TEC-IT's pages are browse-first: a numbered
+sequence, a described list of types to choose from, then the data, then the options, with the artwork
+and its downloads beside them the whole time.
+
+### 15.2 What changed
+
+- **The picker.** `StudioField` gained `chooser` and `popular`; `StudioOption` gained `help`; and
+  `StudioSection` gained `stepTitle`. A field marked `chooser` is rendered by the new
+  `frontend/src/components/tools/StudioChooser.tsx` as a grid of described radio cards, with a
+  search box, group filters that count their options, and shortcut chips for the handful of types
+  most people want (EAN-13, UPC-A, Code 128, Code 39, QR Code, Data Matrix, PDF417). Five tools use
+  it: barcode type, label template, VDA format, shipping label size, card layout and what a QR code
+  does. The dropdowns remain for every field whose options are few or not a catalogue.
+- **Descriptions from the registries, not from the page.** Each card's second line is the
+  symbology's own `summary`, the template's `summary`, or a one-line statement added beside the VDA
+  formats, shipping sizes, card layouts and QR kinds. Nothing describes a choice the tool cannot
+  draw.
+- **Numbered steps.** The barcode form was split so that choosing the type is its own step, as it is
+  on TEC-IT's page: *1 Choose a barcode type*, *2 Enter the data*, *3 Size and appearance*,
+  *4 Printing and PDF layout*. Every other tool gets the same treatment from its own section list,
+  and each step's heading is a sentence rather than a noun.
+- **The action next to the artwork.** The preview panel now carries a compact copy of the form's
+  submit button, so a visitor working down a long form does not have to scroll back to the end of it.
+  It is deliberately small: the panel is sized so that the preview and its first download stay on
+  screen together on a 1280×720 laptop, and the laptop test in `e2e/design-studio.spec.ts` holds it
+  to that.
+- **An empty data field adopts the example of the choice just made.** Picking EAN-13 on an untouched
+  form now shows thirteen digits that EAN-13 accepts, instead of an empty box with a hint in it.
+  Anything typed is left alone.
+
+### 15.3 How it was tested
+
+- `npx vitest run tests/unit` — 190 files, 3,200 tests, all passing, including the 96 Design Studio
+  backend tests (which build requests from the same `forms.ts` this round changed).
+- `npx vitest run frontend/tests` — 96 files, 1,499 tests, all passing, including a new
+  `frontend/tests/unit/studio-chooser.test.tsx` (5 tests: every option rendered as a radio, search
+  and group filters narrow without losing an option, the empty state offers the way back, a short
+  list gets no search box) and the existing `design-studio-page.test.tsx`, updated where the page's
+  controls changed rather than weakened.
+- `npx playwright test e2e/design-studio.spec.ts` — 35 tests, all passing in headless Chromium
+  against the production build: every tool draws and saves its PDF, the QR fields follow the kind,
+  the panel layout holds on a laptop and on a phone, the long-form button brings the result into
+  view, and the axe WCAG 2.1 AA scan finds nothing serious or critical. That scan caught two
+  contrast faults in the new CSS (the group-count chips and the small group caption in each card);
+  both were darkened until they pass.
+- `npx tsc -p tsconfig.json --noEmit` and `-p tsconfig.scripts.json --noEmit` — clean.
+
+### 15.4 Still not verified
+
+- **Chromium only.** The picker was exercised in headless Chromium. Firefox and Safari were not
+  tried; the layout uses ordinary grid, flexbox and a native radio group, but that is an argument,
+  not an observation.
+- **No phone and no touch.** The phone layout was measured at 390×900 with no sideways scrolling;
+  it was not used on a device.
+- **The scrolled rack.** With more than twelve options the picker scrolls inside a 430 px panel
+  rather than lengthening the page. It was checked at desktop and phone widths; a keyboard-only pass
+  through all 83 cards with a screen reader was not done.
+- **PHP and the rest of the gate** stand as in §14.6.

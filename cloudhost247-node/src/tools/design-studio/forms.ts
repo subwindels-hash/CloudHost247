@@ -50,8 +50,12 @@ import { LABEL_SHEETS } from './shared/sheets';
 export interface StudioOption {
   value: string;
   label: string;
-  /** Options sharing a group are shown under one heading. */
+  /** Options sharing a group are shown under one heading, and are filterable by it. */
   group?: string;
+  /** One line under the label in the picker: what this choice is for. */
+  help?: string;
+  /** A short name for the chip that filters to this option's group. */
+  groupShort?: string;
 }
 
 /** What changes about a field when another field (the template, the barcode type) changes. */
@@ -96,11 +100,22 @@ export interface StudioField {
   variants?: { field: string; by: Record<string, StudioFieldVariant> };
   /** Takes half a row where the form is wide enough. */
   half?: boolean;
+  /**
+   * Rendered as a visual picker (a grid of described choices) rather than a dropdown. Set on the
+   * one field that decides what the rest of the form is: the barcode type, the label template, the
+   * label format, the card layout or what a QR code does. A dropdown of ninety barcode types is a
+   * list nobody reads; the picker shows what each one is for.
+   */
+  chooser?: boolean;
+  /** Options offered as one-click shortcuts above the picker. */
+  popular?: string[];
 }
 
 export interface StudioSection {
   id: string;
   title: string;
+  /** The heading the page shows for this step. Falls back to `title`. */
+  stepTitle?: string;
   description?: string;
   fields: StudioField[];
 }
@@ -117,7 +132,12 @@ export interface StudioForm {
 
 export type StudioValues = Record<string, string | boolean>;
 
-const option = (value: string, label: string, group?: string): StudioOption => ({ value, label, ...(group ? { group } : {}) });
+const option = (value: string, label: string, group?: string, help?: string): StudioOption => ({
+  value,
+  label,
+  ...(group ? { group } : {}),
+  ...(help ? { help } : {}),
+});
 
 /* ------------------------------------------------------------------ */
 /* Barcode Generator                                                   */
@@ -158,16 +178,26 @@ const barcodeForm: StudioForm = {
   sections: [
     {
       id: 'barcode',
-      title: 'Barcode',
+      title: 'Barcode type',
+      stepTitle: 'Choose a barcode type',
       fields: [
         {
           name: 'symbology',
           label: 'Barcode type',
           type: 'select',
           defaultValue: 'code128',
-          options: SYMBOLOGIES.map((symbology) => option(symbology.id, symbology.name, groupLabel(symbology.group))),
+          chooser: true,
+          popular: ['ean13', 'upca', 'code128', 'code39', 'qrcode', 'datamatrix', 'pdf417'],
+          options: SYMBOLOGIES.map((symbology) => option(symbology.id, symbology.name, groupLabel(symbology.group), symbology.summary)),
           variants: { field: 'symbology', by: Object.fromEntries(SYMBOLOGIES.map((symbology) => [symbology.id, { help: symbology.summary }])) },
         },
+      ],
+    },
+    {
+      id: 'data',
+      title: 'Data',
+      stepTitle: 'Enter the data',
+      fields: [
         { name: 'series', label: 'Numbered series: count up instead of typing each value', type: 'checkbox', defaultValue: false },
         { name: 'seriesPrefix', label: 'Text before the number', type: 'text', maxLength: 40, half: true, placeholder: 'CH-', showWhen: { field: 'series', equals: ['true'] } },
         { name: 'seriesSuffix', label: 'Text after the number', type: 'text', maxLength: 40, half: true, showWhen: { field: 'series', equals: ['true'] } },
@@ -195,6 +225,7 @@ const barcodeForm: StudioForm = {
     {
       id: 'appearance',
       title: 'Size and appearance',
+      stepTitle: 'Size and appearance',
       fields: [
         {
           name: 'moduleMm',
@@ -238,6 +269,7 @@ const barcodeForm: StudioForm = {
     {
       id: 'print',
       title: 'PDF layout',
+      stepTitle: 'Printing and PDF layout',
       fields: [
         { name: 'sheet', label: 'Paper', type: 'select', defaultValue: 'none', options: [option('none', 'One barcode per page, at its exact size'), ...SHEET_OPTIONS] },
         { name: 'copies', label: 'Copies of each barcode', type: 'number', min: 1, max: 500, defaultValue: 1, half: true, showWhen: { field: 'sheet', equals: LABEL_SHEETS.map((sheet) => sheet.id) } },
@@ -323,13 +355,15 @@ const labelForm: StudioForm = {
     {
       id: 'template',
       title: 'Template and labels',
+      stepTitle: 'Choose a label template',
       fields: [
         {
           name: 'template',
           label: 'Template',
           type: 'select',
           defaultValue: 'asset-tag',
-          options: LABEL_TEMPLATES.map((template) => option(template.id, template.name)),
+          chooser: true,
+          options: LABEL_TEMPLATES.map((template) => option(template.id, template.name, undefined, template.summary)),
           variants: { field: 'template', by: Object.fromEntries(LABEL_TEMPLATES.map((template) => [template.id, { help: template.summary }])) },
         },
         {
@@ -353,6 +387,7 @@ const labelForm: StudioForm = {
     {
       id: 'content',
       title: 'Label content',
+      stepTitle: 'Enter the label content',
       fields: [
         ...labelContentFields(),
         {
@@ -372,6 +407,7 @@ const labelForm: StudioForm = {
     {
       id: 'print',
       title: 'Quantity and printing',
+      stepTitle: 'Quantity and printing',
       fields: [
         { name: 'copies', label: 'Number of labels', type: 'number', min: 1, max: 300, defaultValue: 1, half: true },
         { name: 'startPosition', label: 'Start at position', type: 'number', min: 1, max: 65, defaultValue: 1, half: true, help: 'For a part-used sheet: 1 is the top-left label, counting across each row.', showWhen: { field: 'stock', equals: sheetStockIds } },
@@ -419,18 +455,34 @@ const vdaForm: StudioForm = {
     {
       id: 'label',
       title: 'Label',
+      stepTitle: 'Choose the label format',
       fields: [
-        { name: 'format', label: 'Format', type: 'select', defaultValue: 'a5', options: VDA_FORMATS.map((entry) => option(entry.id, entry.label)) },
+        {
+          name: 'format',
+          label: 'Format',
+          type: 'select',
+          defaultValue: 'a5',
+          chooser: true,
+          options: VDA_FORMATS.map((entry) =>
+            option(
+              entry.id,
+              entry.label,
+              undefined,
+              entry.id === 'a5' ? 'The standard transport label. Two fit on an A4 sheet.' : 'The small load carrier label. Four fit on an A4 sheet.',
+            ),
+          ),
+        },
         { name: 'labelType', label: 'Label type', type: 'select', defaultValue: 'S', options: VDA_LABEL_TYPES.map((entry) => option(entry.id, entry.label)) },
         { name: 'language', label: 'Caption language', type: 'select', defaultValue: 'en', half: true, options: VDA_LANGUAGES.map((entry) => option(entry.id, entry.label)) },
       ],
     },
-    { id: 'parties', title: 'Receiver and supplier', fields: [vdaField(1), vdaField(2), vdaField(4), vdaField(12, { half: true })] },
-    { id: 'delivery', title: 'Delivery', fields: [vdaField(3, { half: true }), vdaField(13, { half: true }), vdaField(5, { half: true }), vdaField(6, { half: true }), vdaField(7, { half: true })] },
-    { id: 'part', title: 'Part', fields: [vdaField(8), vdaField(9, { half: true }), vdaField(14, { half: true }), vdaField(10), vdaField(11, { half: true }), vdaField(16, { half: true })] },
+    { id: 'parties', title: 'Receiver and supplier', stepTitle: 'Receiver and supplier', fields: [vdaField(1), vdaField(2), vdaField(4), vdaField(12, { half: true })] },
+    { id: 'delivery', title: 'Delivery', stepTitle: 'Delivery details', fields: [vdaField(3, { half: true }), vdaField(13, { half: true }), vdaField(5, { half: true }), vdaField(6, { half: true }), vdaField(7, { half: true })] },
+    { id: 'part', title: 'Part', stepTitle: 'Part and quantity', fields: [vdaField(8), vdaField(9, { half: true }), vdaField(14, { half: true }), vdaField(10), vdaField(11, { half: true }), vdaField(16, { half: true })] },
     {
       id: 'package',
       title: 'Package and printing',
+      stepTitle: 'Package and printing',
       fields: [
         vdaField(15, { half: true }),
         { name: 'copies', label: 'Number of labels', type: 'number', min: 1, max: 100, defaultValue: 1, half: true },
@@ -469,8 +521,27 @@ const shippingForm: StudioForm = {
     {
       id: 'label',
       title: 'Label',
+      stepTitle: 'Choose the label size',
       fields: [
-        { name: 'size', label: 'Label size', type: 'select', defaultValue: '4x6', options: SHIPPING_SIZES.map((entry) => option(entry.id, entry.label)) },
+        {
+          name: 'size',
+          label: 'Label size',
+          type: 'select',
+          defaultValue: '4x6',
+          chooser: true,
+          options: SHIPPING_SIZES.map((entry) =>
+            option(
+              entry.id,
+              entry.label,
+              undefined,
+              entry.id === '4x6'
+                ? 'The common thermal label for couriers and parcel printers.'
+                : entry.id === 'a6'
+                  ? 'Fits most home and office printers on A6 paper.'
+                  : 'The metric equivalent of 4 x 6 in, for printers set in millimetres.',
+            ),
+          ),
+        },
         {
           name: 'sheet',
           label: 'Paper',
@@ -482,16 +553,18 @@ const shippingForm: StudioForm = {
         },
       ],
     },
-    { id: 'from', title: 'From', fields: shippingFields('from') },
-    { id: 'to', title: 'Ship to', fields: shippingFields('to') },
+    { id: 'from', title: 'From', stepTitle: 'Sender', fields: shippingFields('from') },
+    { id: 'to', title: 'Ship to', stepTitle: 'Recipient', fields: shippingFields('to') },
     {
       id: 'shipment',
       title: 'Shipment',
+      stepTitle: 'Shipment details',
       fields: [...shippingFields('shipment'), { name: 'packages', label: 'Number of packages', type: 'number', min: 1, max: SHIPPING_PACKAGE_LIMIT, defaultValue: 1, half: true, help: 'One label is made for each package.' }],
     },
     {
       id: 'barcode',
       title: 'Barcode',
+      stepTitle: 'Barcode and package numbers',
       fields: [
         { name: 'barcode', label: 'Main barcode', type: 'select', defaultValue: 'reference', options: SHIPPING_BARCODES.map((entry) => option(entry.id, entry.label)) },
         {
@@ -534,14 +607,22 @@ const cardForm: StudioForm = {
   submitLabel: 'Generate card',
   intro: 'Design a business card with a QR Code or Data Matrix that saves your contact details to a phone, and download it print-ready.',
   sections: [
-    { id: 'person', title: 'Name and role', fields: cardFields(['firstName', 'lastName', 'jobTitle', 'organization']) },
-    { id: 'contact', title: 'Contact', fields: cardFields(['email', 'phone', 'mobile', 'website']) },
-    { id: 'address', title: 'Address', fields: cardFields(['street', 'city', 'region', 'postalCode', 'country']) },
+    { id: 'person', title: 'Name and role', stepTitle: 'Name and role', fields: cardFields(['firstName', 'lastName', 'jobTitle', 'organization']) },
+    { id: 'contact', title: 'Contact', stepTitle: 'Contact details', fields: cardFields(['email', 'phone', 'mobile', 'website']) },
+    { id: 'address', title: 'Address', stepTitle: 'Address', fields: cardFields(['street', 'city', 'region', 'postalCode', 'country']) },
     {
       id: 'design',
       title: 'Design',
+      stepTitle: 'Choose the card design',
       fields: [
-        { name: 'layout', label: 'Layout', type: 'select', defaultValue: 'classic', options: CARD_LAYOUTS.map((entry) => option(entry.id, entry.label)) },
+        {
+          name: 'layout',
+          label: 'Layout',
+          type: 'select',
+          defaultValue: 'classic',
+          chooser: true,
+          options: CARD_LAYOUTS.map((entry) => option(entry.id, entry.label.split(':')[0] ?? entry.label, undefined, entry.label.split(': ')[1])),
+        },
         { name: 'size', label: 'Card size', type: 'select', defaultValue: 'eu', options: CARD_SIZES.map((entry) => option(entry.id, entry.label)) },
         { name: 'accent', label: 'Accent colour', type: 'color', defaultValue: '#0f4c81', half: true },
         { name: 'code', label: 'Code type', type: 'select', defaultValue: 'qrcode', half: true, options: CARD_CODES.map((entry) => option(entry.id, entry.label)) },
@@ -568,6 +649,22 @@ const cardForm: StudioForm = {
 /** A field of one kind of code: shown only while that kind is chosen. */
 const forKind = (kind: string, field: StudioField): StudioField => ({ ...field, showWhen: { field: 'kind', equals: [kind] } });
 
+/** One line under each kind in the QR Code Maker's picker: what a scan actually does. */
+const QR_KIND_HELP: Record<string, string> = {
+  url: 'A link that opens in the phone browser.',
+  text: 'Plain text the phone shows as a note.',
+  wifi: 'Joins a network without anyone typing the password.',
+  contact: 'Saves the name, phone and email to the address book.',
+  email: 'Opens a new message to an address you set.',
+  phone: 'Dials the number, without saving it first.',
+  sms: 'Opens a text message, ready to send.',
+  whatsapp: 'Opens a chat with that number.',
+  event: 'Adds the appointment to the calendar.',
+  location: 'Opens the place in a map app.',
+  social: 'Opens your profile on the chosen platform.',
+  payment: 'A SEPA transfer slip a banking app can read.',
+};
+
 const qrForm: StudioForm = {
   slug: STUDIO_SLUGS.qr,
   shortName: 'QR Code Maker',
@@ -577,11 +674,22 @@ const qrForm: StudioForm = {
     {
       id: 'kind',
       title: 'What the code does',
-      fields: [{ name: 'kind', label: 'When someone scans it', type: 'select', defaultValue: 'url', options: QR_KINDS.map((entry) => option(entry.id, entry.label)) }],
+      stepTitle: 'Choose what the code does',
+      fields: [
+        {
+          name: 'kind',
+          label: 'When someone scans it',
+          type: 'select',
+          defaultValue: 'url',
+          chooser: true,
+          options: QR_KINDS.map((entry) => option(entry.id, entry.label, undefined, QR_KIND_HELP[entry.id])),
+        },
+      ],
     },
     {
       id: 'content',
       title: 'Details',
+      stepTitle: 'Enter the details',
       fields: [
         forKind('url', { name: 'url', label: 'Web address', type: 'text', required: true, maxLength: QR_LIMITS.url, sample: 'https://cloudhost247.com', placeholder: 'https://example.com' }),
         forKind('text', { name: 'text', label: 'Text', type: 'textarea', rows: 4, required: true, maxLength: QR_LIMITS.text, sample: 'Thank you for visiting. Opening hours: Monday to Saturday, 8:00 to 18:00.' }),
@@ -632,6 +740,7 @@ const qrForm: StudioForm = {
     {
       id: 'code',
       title: 'Code',
+      stepTitle: 'Code and image settings',
       fields: [
         {
           name: 'codeType',
@@ -799,7 +908,14 @@ export function applyStudioChange(form: StudioForm, values: StudioValues, name: 
     if (Object.values(field.variants.by).some((variant) => variant.sampleBy?.field === name)) controls = true;
     if (field.variants.field !== name) continue;
     controls = true;
-    if (field.type !== 'select') continue;
+    if (field.type !== 'select') {
+      // A field left empty adopts the example of the choice just made, so picking a barcode type
+      // shows data that type actually accepts instead of an empty box with a hint in it. Anything
+      // already typed is left alone.
+      const offer = field.variants.by[String(value)]?.sample;
+      if (offer !== undefined && String(next[field.name] ?? '') === '') next[field.name] = offer;
+      continue;
+    }
     const before = field.variants.by[previous];
     const after = field.variants.by[String(value)];
     const current = String(next[field.name] ?? '');
