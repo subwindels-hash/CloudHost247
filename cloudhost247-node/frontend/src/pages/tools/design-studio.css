@@ -35,10 +35,26 @@
 
 .studio-section { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 12px; }
 .studio-section + .studio-section { padding-top: 20px; border-top: 1px solid #e8e9e6; }
-/* Floated so the legend takes part in the section's own layout instead of sitting on its top
-   border; every section then has the same space between its heading and its first field. */
-.studio-section legend { float: left; width: 100%; padding: 0; margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5f450a; }
 .studio-section__note { margin: 0; font-size: 13px; color: #52666d; }
+
+/* One numbered step per part of the form. The number is a quiet badge, the heading a sentence in
+   the visitor's language: "1 Choose a barcode type", "2 Enter the data". A fieldset, so the group
+   still announces itself; the legend is floated so it takes part in the step's own layout instead
+   of sitting on its top border. */
+.studio-step { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 14px; }
+.studio-step + .studio-step { padding-top: 22px; border-top: 1px solid #e8e9e6; }
+.studio-step > legend {
+  float: left; width: 100%; padding: 0; margin: 0 0 2px;
+  display: flex; align-items: center; gap: 10px;
+}
+.studio-step__num {
+  flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: #10171d; color: #fff; font-size: 12.5px; font-weight: 700; letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.studio-step__name { font-size: 15.5px; font-weight: 650; letter-spacing: -0.01em; color: #10171d; }
+/* The picker sits directly under the step heading, then the fields that follow the choice. */
+.studio-fields--after-chooser { padding-top: 4px; }
 
 .studio-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
 .studio-fields__cell { grid-column: 1 / -1; min-width: 0; }
@@ -63,7 +79,14 @@
 .tools-center .studio-colour input[type='color'] { flex: none; width: 46px; min-height: 44px; padding: 3px; border: 1px solid #858585; border-radius: 6px; background: #fff; cursor: pointer; }
 .tools-center .studio-colour input[type='text'] { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
-.studio-form__actions { display: grid; gap: 10px; padding-top: 4px; }
+.studio-form__actions { display: grid; gap: 10px; padding-top: 18px; border-top: 1px solid #e8e9e6; }
+
+/* The output panel's heading shares its row with the action that produces the artwork. */
+.studio-output__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+/* Compact enough to share the heading's row without pushing the preview and its first download
+   below the fold on a laptop: the large action lives at the end of the form. */
+.tools-center .studio-output__generate { min-height: 34px; padding: 5px 14px; font-size: 13px; }
+@media (max-width: 440px) { .studio-output__generate { width: 100%; } }
 .tools-center .studio-submit { width: 100%; min-height: 50px; font-size: 15px; font-weight: 650; }
 .studio-form__privacy { margin: 0; font-size: 12.5px; color: #52666d; }
 
