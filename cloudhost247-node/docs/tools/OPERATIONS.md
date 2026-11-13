@@ -148,3 +148,21 @@ npx tsx scripts/generate-tools-catalog-doc.ts > docs/tools/TOOLS_CATALOG.md
    without one fall back to the JSON editor).
 5. Add at least one integration test — the coverage test in `tools-api.test.ts` fails if a runnable
    catalogue entry has no handler.
+6. Regenerate what is derived from the catalogue, in this order, and commit the results. A tool that
+   is in the catalogue but not in these files is missing from the PHP theme, from site search, from
+   the sitemap and from what the website assistant can answer about.
+
+   ```bash
+   # in cloudhost247-node/
+   npm run tools:catalog                 # modules/addons/cloudhost247_theme/resources/tools.json
+   npx tsx scripts/generate-tools-catalog-doc.ts > docs/tools/TOOLS_CATALOG.md
+   # in the repository root
+   node scripts/site/generate.mjs        # search index, navigation registry, site.json, route report
+   node scripts/site/generate-ai-knowledge.mjs   # the assistant's knowledge of the site
+   python3 scripts/audit-navigation-inventory.py # docs/website-rebuild/page-inventory.{json,csv}
+   ```
+
+   `npm run tools:catalog:check`, `node scripts/site/generate-ai-knowledge.mjs --check` and
+   `scripts/release-candidate-check.sh` fail when one of these is stale. `generate.mjs` reads
+   `catalog.ts` as text: an entry is found only when it is laid out like the others, with `slug:`,
+   `name:` and `path:` each at the start of a line.

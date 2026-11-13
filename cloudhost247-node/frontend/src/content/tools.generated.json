@@ -585,6 +585,69 @@
       "description": "Scheduled SSL-expiry, DNS-record and email-configuration monitoring.",
       "detail": "Registers a monitor that the CloudHost247 worker evaluates on a schedule: SSL certificate expiry thresholds, specific DNS records whose value must not change, and the email authentication configuration (MX/SPF/DKIM/DMARC/BIMI). Notifications are delivered through the existing CloudHost247 notification system.",
       "visibility": "customer"
+    },
+    {
+      "slug": "barcode-generator",
+      "name": "Barcode Generator",
+      "path": "/tools/barcode-generator",
+      "category": "productivity",
+      "description": "Create 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF.",
+      "detail": "Encodes your data in any of 83 linear, 2D, GS1, postal and healthcare barcode types and returns vector SVG and PDF at the exact bar width you set, plus a PNG whose modules are whole pixels at the resolution you choose. A batch makes one barcode per line, a numbered series counts for you, and either can be laid out on label sheets. Nothing you enter is stored.",
+      "visibility": "public"
+    },
+    {
+      "slug": "label-designer",
+      "name": "Online Label Printing",
+      "path": "/tools/label-designer",
+      "category": "productivity",
+      "description": "Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer.",
+      "detail": "Choose a label template, fill in its fields and download a print-ready PDF: labels placed at true size on common A4 and US Letter label sheets, or one label per page for a label printer. A barcode keeps a bar width a scanner can read, or the label is refused with the reason. Nothing you enter is stored.",
+      "visibility": "public"
+    },
+    {
+      "slug": "vda-4902-label-generator",
+      "name": "VDA 4902 Label Generator",
+      "path": "/tools/vda-4902-label-generator",
+      "category": "productivity",
+      "description": "Fill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes.",
+      "detail": "Draws the goods label used between automotive suppliers and plants: receiver, unloading point, delivery note, supplier, part number, quantity, package number, batch and the rest of the sixteen fields, with Code 39 barcodes that begin with each field’s data identifier (N, P, Q, 30S, V, S/M/G, H). Captions are available in English, German, French, Spanish and Portuguese.",
+      "visibility": "public"
+    },
+    {
+      "slug": "shipping-label-generator",
+      "name": "Shipping Label Generator",
+      "path": "/tools/shipping-label-generator",
+      "category": "productivity",
+      "description": "Make carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode.",
+      "detail": "Lays out sender, recipient, service, weight and package count on a 4 × 6 inch, A6 or 100 × 150 mm label and adds a Code 128 reference barcode or a GS1-128 SSCC, with one numbered label for each package. The result is a print-ready PDF for label printers or plain sheets. Addresses are processed in memory and never stored.",
+      "visibility": "public"
+    },
+    {
+      "slug": "qr-business-card-designer",
+      "name": "QR Code Business Cards",
+      "path": "/tools/qr-business-card-designer",
+      "category": "productivity",
+      "description": "Design a business card with a QR Code or Data Matrix that saves your contact to a phone.",
+      "detail": "Builds a business card from your name, role and contact details and encodes the same details as a vCard or MeCard in a QR Code or Data Matrix. Download a print-ready PDF as a single card or a sheet with cut marks, SVG artwork and a .vcf contact file. Contact details are processed in memory and never stored.",
+      "visibility": "public"
+    },
+    {
+      "slug": "qr-code-maker",
+      "name": "QR Code Maker",
+      "path": "/tools/qr-code-maker",
+      "category": "productivity",
+      "description": "Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment.",
+      "detail": "Choose what the code should do when a phone scans it and fill in ordinary fields: a web address, a Wi-Fi network, a contact, an email, a call, a text or WhatsApp message, a calendar event, a map location, a social media profile or a SEPA bank transfer. The tool writes the format phones recognise and returns the code as PNG, SVG and PDF, as a QR Code, Data Matrix or Aztec Code. The code holds the content itself, so it never expires and scans are not tracked. Nothing you enter is stored.",
+      "visibility": "public"
+    },
+    {
+      "slug": "barcode-scanner",
+      "name": "Barcode Scanner",
+      "path": "/tools/barcode-scanner",
+      "category": "productivity",
+      "description": "Scan barcodes and QR codes with your camera or from an image, and export what you scanned.",
+      "detail": "Reads twenty-one barcode types, including QR Code, Data Matrix, Code 128, Code 39, EAN-13, UPC-A and UPC-E, with a phone or laptop camera or from a picture. Each scan is added to a list you can copy or download as a CSV file. On the scanner page the decoding happens in your browser: the camera picture and your images are not uploaded. The API reads a barcode from an uploaded PNG, in thirteen of those types.",
+      "visibility": "public"
     }
   ]
 }

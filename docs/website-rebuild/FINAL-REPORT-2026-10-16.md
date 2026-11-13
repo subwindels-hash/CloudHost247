@@ -69,7 +69,7 @@ Measured on the rendered tree: **194 canonical addresses, all unique, all resolv
 tools surface and the routes the licensed platform serves were in the navigation and in the sitemaps
 and in no row at all.
 
-**Fixed.** 365 rows carrying the fields the brief asks for, with `route_owner` and `test_status`
+**Fixed.** 386 rows carrying the fields the brief asks for, with `route_owner` and `test_status`
 recording which runtime serves each route and which check covers it. The rows are 67 published pages,
 135 published tool routes, 101 redirect aliases, 29 signpost routes, 17 internal files and 7 platform
 entry points:
@@ -159,7 +159,7 @@ Every rule has a negative case, and the suites were run in isolation as well as 
 | rendered site | 229 pages, 907 images, 3,063 asset references, 42,393 links, 45,510 controls, 194 indexable / 35 noindex, 194 canonical addresses, 0 problems |
 | hero artwork as rendered | 47 pages on a 3D scene, 1 flat, 19 legal documents text-only, 48 distinct artworks |
 | tool surface | 257 derivable / 265 published — both directions empty |
-| page inventory | 365 rows (75 pages · 135 tool routes · 101 aliases · 29 signposts · 17 internal · 8 entry points), 6 defect classes all 0 |
+| page inventory | 386 rows (75 pages · 135 tool routes · 113 aliases · 38 signposts · 17 internal · 8 entry points), 6 defect classes all 0 |
 | Python unit suites | 81 OK (website + security), plus `tests/website/run.php` 310 assertions / 0 failed |
 | PHP tools shell | 1,171 assertions passed (PHP CLI, no licensed WHMCS runtime) |
 | accessibility contract | viewport, lang, skip link, menu state, control names, image text, target sizes, focus, reduced motion, responsive ladder — all hold |
@@ -274,16 +274,16 @@ where the tree says `356` — a number no check could contradict. It now can.
 <!-- verified-figures -->
 ```json
 {
-  "inventory_rows": 365,
+  "inventory_rows": 386,
   "pages_published": 75,
   "root_php_pages": 92,
   "files_internal": 17,
   "routes_tool_native": 135,
-  "routes_tool_signpost": 29,
-  "routes_tool_redirect_alias": 101,
+  "routes_tool_signpost": 38,
+  "routes_tool_redirect_alias": 113,
   "routes_platform_entry_point": 8,
   "defect_classes_empty": 6,
-  "tools_served_projection": 265,
+  "tools_served_projection": 286,
   "registry_links": 255,
   "registry_spa_links": 244,
   "registry_php_links": 243,

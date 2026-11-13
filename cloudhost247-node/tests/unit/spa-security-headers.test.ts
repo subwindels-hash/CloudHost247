@@ -37,6 +37,11 @@ describe('security headers on frontend responses', () => {
     expect(script).toContain('https://www.googletagmanager.com');
     expect(script).not.toContain("'unsafe-inline'");
     expect(script).not.toContain('*');
+    // WebAssembly may be compiled, which the Barcode Scanner's decoder needs. Text may still not
+    // be run as code: the keyword that allows eval() and new Function() is a different one.
+    const sources = script.trim().split(/\s+/).slice(1);
+    expect(sources).toContain("'wasm-unsafe-eval'");
+    expect(sources).not.toContain("'unsafe-eval'");
     expect(connect).toContain('https://www.google-analytics.com');
     expect(connect).not.toContain('*');
     expect(headers['content-security-policy']).toEqual(expect.stringContaining('https://www.googleadservices.com'));

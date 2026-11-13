@@ -54,9 +54,12 @@ describe('every production tools route', () => {
         </MemoryRouter>
       );
       await screen.findByRole('heading', { level: 1, name: tool.name });
-      const button = screen.getByRole('button', { name: 'Run tool' });
+      // The two extractors have their own panels instead of the generated form, so each has its
+      // own run control and no JSON editor.
+      const dedicated = ({ 'email-extractor': ['Extract', 'Input Window'], 'email-extractor-pro': ['Extract From Clipboard', 'List to extract into'] } as Record<string, [string, string]>)[tool.slug];
+      const button = screen.getByRole('button', { name: dedicated ? dedicated[0] : 'Run tool' });
       expect((button as HTMLButtonElement).disabled).toBe(tool.authRequired);
-      expect(screen.getByLabelText('Advanced JSON input')).toBeTruthy();
+      expect(screen.getByLabelText(dedicated ? dedicated[1] : 'Advanced JSON input')).toBeTruthy();
       // Head metadata is installed in a passive effect after the heading commits.
       // Wait for that contract, not a scheduler-dependent immediate observation.
       await waitFor(() =>
@@ -140,10 +143,10 @@ describe('every production tools route', () => {
     expect(fetch.mock.calls[0]?.[1].headers.Authorization).toBeUndefined();
   });
 
-  it('verifies all 75 tools have complete handlers, form schemas, multi-mode inputs and image uploads', async () => {
-    expect(TOOL_CATALOG).toHaveLength(75);
+  it('verifies all 84 tools have complete handlers, form schemas, multi-mode inputs and image uploads', async () => {
+    expect(TOOL_CATALOG).toHaveLength(84);
     expect(missingHandlers()).toEqual([]);
-    expect(runnableSlugs()).toHaveLength(70);
+    expect(runnableSlugs()).toHaveLength(79);
 
     for (const entry of TOOL_CATALOG) {
       if (NON_RUNNABLE_TOOL_SLUGS.has(entry.slug)) continue;

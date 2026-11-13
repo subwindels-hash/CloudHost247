@@ -25,6 +25,21 @@ const CURATED = [
   'json-tools',
   'subnet-calculator',
 ];
+/**
+ * The barcode, label and card tools are listed in the directory like every other tool, and also
+ * together here: they are one family (make a code or a label, print it, scan it), and a visitor
+ * looking for a label tool should not have to find seven cards among eighty. Slugs only; names and
+ * paths come from the catalogue, and a tool that is not available is left out.
+ */
+const PRINT_TOOLS = [
+  'barcode-generator',
+  'label-designer',
+  'vda-4902-label-generator',
+  'shipping-label-generator',
+  'qr-business-card-designer',
+  'qr-code-maker',
+  'barcode-scanner',
+];
 export default function ToolsCenterPage() {
   const [params, setParams] = useSearchParams();
   const route = useParams();
@@ -145,6 +160,9 @@ export default function ToolsCenterPage() {
     : CURATED.map((slug) =>
         available.find((tool) => tool.slug === slug)
       ).filter((tool): tool is ToolSummary => Boolean(tool));
+  const printTools = PRINT_TOOLS.map((slug) =>
+    available.find((tool) => tool.slug === slug)
+  ).filter((tool): tool is ToolSummary => Boolean(tool));
   let recentSlugs: string[] = [];
   try {
     const stored = JSON.parse(
@@ -262,6 +280,28 @@ export default function ToolsCenterPage() {
           </div>
           <ul>
             {picks.map((tool) => (
+              <li key={tool.slug}>
+                <Link to={tool.path}>
+                  {tool.name} <span aria-hidden="true">↗</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {!category && !search && printTools.length > 0 && (
+        <section className="tools-highlights" aria-labelledby="tools-print">
+          <div>
+            <p className="tools-eyebrow">MAKE IT, PRINT IT, SCAN IT</p>
+            <h2 id="tools-print">Barcodes, labels and cards</h2>
+            <p>
+              Generate barcodes, QR codes, label sheets, shipping and VDA 4902
+              labels and business cards, download them print-ready, and scan
+              barcodes with your camera.
+            </p>
+          </div>
+          <ul>
+            {printTools.map((tool) => (
               <li key={tool.slug}>
                 <Link to={tool.path}>
                   {tool.name} <span aria-hidden="true">↗</span>

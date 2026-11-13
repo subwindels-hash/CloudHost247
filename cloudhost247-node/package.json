@@ -74,7 +74,9 @@
     "@napi-rs/canvas": "^0.1.100",
     "@simplewebauthn/browser": "14.0.0",
     "@simplewebauthn/server": "14.0.3",
+    "@zxing/library": "0.21.3",
     "bcryptjs": "^2.4.3",
+    "bwip-js": "4.11.4",
     "dotenv": "^16.4.5",
     "fastify": "^5.12.5",
     "fflate": "0.8.3",
@@ -95,7 +97,7 @@
     "pngjs": "^7.0.0",
     "qpdf-run": "0.2.1",
     "qrcode": "^1.5.4",
-    "sharp": "^0.34.3",
+    "sharp": "^0.35.5",
     "yaml": "^2.9.1",
     "zod": "^4.6.7"
   },
@@ -125,7 +127,8 @@
     "tsx": "^4.16.5",
     "typescript": "^5.5.4",
     "vite": "^6.4.2",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.2",
+    "zxing-wasm": "3.1.6"
   },
   "overrides": {
     "geoip-lite": {

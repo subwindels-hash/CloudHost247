@@ -1798,6 +1798,56 @@
       "resultMode": "calculated"
     },
     {
+      "slug": "email-extractor",
+      "name": "Email & Link Extractor",
+      "category": "productivity",
+      "summary": "Pull every email address or web link out of pasted text.",
+      "description": "Finds every email address, or every web address, in the text you paste, removes duplicates, and returns the list with the separator you choose. Optional grouping, alphabetical sorting and a contains / does-not-contain filter. Addresses are matched by format only: nothing is fetched, no mailbox is contacted or verified, and no link is visited.",
+      "icon": "mail",
+      "path": "/tools/email-extractor",
+      "apiPath": "/api/tools/email-extractor",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/email-extractor"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Email & Link Extractor | CloudHost247",
+      "relatedTools": [
+        "email-extractor-pro",
+        "word-counter",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "email-extractor-pro",
+      "name": "Email Extractor Pro",
+      "category": "productivity",
+      "summary": "Build subscription, unsubscription and exclusion lists from the clipboard, files or a folder.",
+      "description": "Extracts email addresses from the clipboard, from files you choose, or from a whole folder (optionally including sub-folders) into three managed lists: Subscription, UnSubscription and Excluding Email Address Pattern. Unsubscribed addresses and addresses matching an excluded pattern are kept out of the Subscription list. Files are read in your browser and only their text is sent for extraction; the lists stay in the open page and are not stored. Addresses are matched by format only: no mailbox is contacted or verified.",
+      "icon": "mail",
+      "path": "/tools/email-extractor-pro",
+      "apiPath": "/api/tools/email-extractor-pro",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/email-extractor-pro"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Email Extractor Pro | CloudHost247",
+      "relatedTools": [
+        "email-extractor",
+        "word-counter",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
       "slug": "minecraft-color-codes",
       "name": "Minecraft Color Codes",
       "category": "productivity",
@@ -1921,6 +1971,184 @@
         "dns-propagation",
         "dns-lookup",
         "dns-health"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "barcode-generator",
+      "name": "Barcode Generator",
+      "category": "productivity",
+      "summary": "Create 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF.",
+      "description": "Encodes your data in any of 83 linear, 2D, GS1, postal and healthcare barcode types and returns vector SVG and PDF at the exact bar width you set, plus a PNG whose modules are whole pixels at the resolution you choose. A batch makes one barcode per line, a numbered series counts for you, and either can be laid out on label sheets. Nothing you enter is stored.",
+      "icon": "barcode",
+      "path": "/tools/barcode-generator",
+      "apiPath": "/api/tools/barcode-generator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/barcode"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Barcode Generator | CloudHost247",
+      "relatedTools": [
+        "label-designer",
+        "qr-generator",
+        "shipping-label-generator"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "label-designer",
+      "name": "Online Label Printing",
+      "category": "productivity",
+      "summary": "Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer.",
+      "description": "Choose a label template, fill in its fields and download a print-ready PDF: labels placed at true size on common A4 and US Letter label sheets, or one label per page for a label printer. A barcode keeps a bar width a scanner can read, or the label is refused with the reason. Nothing you enter is stored.",
+      "icon": "tags",
+      "path": "/tools/label-designer",
+      "apiPath": "/api/tools/label-designer",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/label-printing",
+        "/tools/online-label-printing"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Online Label Printing | CloudHost247",
+      "relatedTools": [
+        "barcode-generator",
+        "shipping-label-generator",
+        "vda-4902-label-generator"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "vda-4902-label-generator",
+      "name": "VDA 4902 Label Generator",
+      "category": "productivity",
+      "summary": "Fill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes.",
+      "description": "Draws the goods label used between automotive suppliers and plants: receiver, unloading point, delivery note, supplier, part number, quantity, package number, batch and the rest of the sixteen fields, with Code 39 barcodes that begin with each field’s data identifier (N, P, Q, 30S, V, S/M/G, H). Captions are available in English, German, French, Spanish and Portuguese.",
+      "icon": "package-check",
+      "path": "/tools/vda-4902-label-generator",
+      "apiPath": "/api/tools/vda-4902-label-generator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/vda-4902"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "VDA 4902 Label Generator | CloudHost247",
+      "relatedTools": [
+        "label-designer",
+        "shipping-label-generator",
+        "barcode-generator"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "shipping-label-generator",
+      "name": "Shipping Label Generator",
+      "category": "productivity",
+      "summary": "Make carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode.",
+      "description": "Lays out sender, recipient, service, weight and package count on a 4 × 6 inch, A6 or 100 × 150 mm label and adds a Code 128 reference barcode or a GS1-128 SSCC, with one numbered label for each package. The result is a print-ready PDF for label printers or plain sheets. Addresses are processed in memory and never stored.",
+      "icon": "package",
+      "path": "/tools/shipping-label-generator",
+      "apiPath": "/api/tools/shipping-label-generator",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/shipping-labels"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Shipping Label Generator | CloudHost247",
+      "relatedTools": [
+        "label-designer",
+        "vda-4902-label-generator",
+        "barcode-generator"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "qr-business-card-designer",
+      "name": "QR Code Business Cards",
+      "category": "productivity",
+      "summary": "Design a business card with a QR Code or Data Matrix that saves your contact to a phone.",
+      "description": "Builds a business card from your name, role and contact details and encodes the same details as a vCard or MeCard in a QR Code or Data Matrix. Download a print-ready PDF as a single card or a sheet with cut marks, SVG artwork and a .vcf contact file. Contact details are processed in memory and never stored.",
+      "icon": "contact",
+      "path": "/tools/qr-business-card-designer",
+      "apiPath": "/api/tools/qr-business-card-designer",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/qr-code-business-cards"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "QR Code Business Cards | CloudHost247",
+      "relatedTools": [
+        "qr-code-maker",
+        "barcode-generator",
+        "label-designer"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "qr-code-maker",
+      "name": "QR Code Maker",
+      "category": "productivity",
+      "summary": "Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment.",
+      "description": "Choose what the code should do when a phone scans it and fill in ordinary fields: a web address, a Wi-Fi network, a contact, an email, a call, a text or WhatsApp message, a calendar event, a map location, a social media profile or a SEPA bank transfer. The tool writes the format phones recognise and returns the code as PNG, SVG and PDF, as a QR Code, Data Matrix or Aztec Code. The code holds the content itself, so it never expires and scans are not tracked. Nothing you enter is stored.",
+      "icon": "qr-code",
+      "path": "/tools/qr-code-maker",
+      "apiPath": "/api/tools/qr-code-maker",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/qr-maker",
+        "/tools/qr-codes"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "QR Code Maker | CloudHost247",
+      "relatedTools": [
+        "qr-business-card-designer",
+        "barcode-generator",
+        "barcode-scanner"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "barcode-scanner",
+      "name": "Barcode Scanner",
+      "category": "productivity",
+      "summary": "Scan barcodes and QR codes with your camera or from an image, and export what you scanned.",
+      "description": "Reads twenty-one barcode types, including QR Code, Data Matrix, Code 128, Code 39, EAN-13, UPC-A and UPC-E, with a phone or laptop camera or from a picture. Each scan is added to a list you can copy or download as a CSV file. On the scanner page the decoding happens in your browser: the camera picture and your images are not uploaded. The API reads a barcode from an uploaded PNG, in thirteen of those types.",
+      "icon": "scan-barcode",
+      "path": "/tools/barcode-scanner",
+      "apiPath": "/api/tools/barcode-scanner",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/barcode-reader",
+        "/tools/scan-barcode"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Barcode Scanner | CloudHost247",
+      "relatedTools": [
+        "barcode-generator",
+        "qr-code-maker",
+        "qr-scanner"
       ],
       "resultMode": "calculated"
     }

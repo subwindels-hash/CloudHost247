@@ -140,3 +140,55 @@ export interface Surface {
   height: number;
   ops: DrawOp[];
 }
+
+/* ------------------------------------------------------------------ */
+/* Design Studio additions                                             */
+/* ------------------------------------------------------------------ */
+
+/**
+ * One segment of a vector outline, in the surface's own units (millimetres), y pointing down.
+ *
+ * `Q` is a quadratic and `C` a cubic Bézier, with the same control-point order SVG uses. `Z` closes
+ * the current sub-path. Every coordinate is absolute, which is what lets one list be written as an
+ * SVG `d` attribute and as PDF path operators without a second interpretation step.
+ */
+export type PathSegment =
+  | { type: 'M'; x: number; y: number }
+  | { type: 'L'; x: number; y: number }
+  | { type: 'Q'; cx: number; cy: number; x: number; y: number }
+  | { type: 'C'; c1x: number; c1y: number; c2x: number; c2y: number; x: number; y: number }
+  | { type: 'Z' };
+
+/**
+ * A filled vector outline.
+ *
+ * Added for the Design Studio tools: a 2D symbol is a set of joined module regions and a symbol's
+ * human-readable line is a set of glyph outlines, and neither is expressible as rectangles without
+ * either losing the shape or emitting thousands of them. It is deliberately *not* a member of
+ * `DrawOp`: the ID-card renderers switch over that union, and widening it would change a shipped
+ * tool. The studio renderers accept `StudioOp`, which is the union below.
+ */
+export interface DrawPath {
+  kind: 'path';
+  segments: PathSegment[];
+  fill: string;
+  /** Module regions are drawn even-odd (holes are cut by containment); glyphs are non-zero. */
+  fillRule?: 'nonzero' | 'evenodd';
+  opacity?: number;
+}
+
+/** Everything a Design Studio surface may contain. QR and Code 128 ops are expanded before this. */
+export type StudioOp = DrawRect | DrawCircle | DrawPolygon | DrawLine | DrawText | DrawImage | DrawPath;
+
+/**
+ * A Design Studio surface: physical size in millimetres, operations in millimetres.
+ *
+ * Text sizes on a studio surface are the font size (the em square) in millimetres, not card pixels.
+ */
+export interface StudioSurface {
+  width: number;
+  height: number;
+  ops: StudioOp[];
+  /** Painted behind the operations. Omitted means transparent in SVG and white on a PDF page. */
+  background?: string;
+}

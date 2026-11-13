@@ -5185,6 +5185,125 @@
    ]
   },
   {
+   "sourceKey": "tool:/tools/barcode-generator",
+   "url": "/tools/barcode-generator",
+   "aliases": [],
+   "title": "Barcode Generator",
+   "description": "Create 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "Barcode Generator\nCreate 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF.\nEncodes your data in any of 83 linear, 2D, GS1, postal and healthcare barcode types and returns vector SVG and PDF at the exact bar width you set, plus a PNG whose modules are whole pixels at the resolution you choose. A batch makes one barcode per line, a numbered series counts for you, and either can be laid out on label sheets. Nothing you enter is stored.",
+   "headings": [
+    "Barcode Generator"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/label-designer",
+   "url": "/tools/label-designer",
+   "aliases": [],
+   "title": "Online Label Printing",
+   "description": "Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "Online Label Printing\nPrint asset tags, product, shelf, QR code and address labels on label sheets or a label printer.\nChoose a label template, fill in its fields and download a print-ready PDF: labels placed at true size on common A4 and US Letter label sheets, or one label per page for a label printer. A barcode keeps a bar width a scanner can read, or the label is refused with the reason. Nothing you enter is stored.",
+   "headings": [
+    "Online Label Printing"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/vda-4902-label-generator",
+   "url": "/tools/vda-4902-label-generator",
+   "aliases": [],
+   "title": "VDA 4902 Label Generator",
+   "description": "Fill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "VDA 4902 Label Generator\nFill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes.\nDraws the goods label used between automotive suppliers and plants: receiver, unloading point, delivery note, supplier, part number, quantity, package number, batch and the rest of the sixteen fields, with Code 39 barcodes that begin with each field’s data identifier (N, P, Q, 30S, V, S/M/G, H). Captions are available in English, German, French, Spanish and Portuguese.",
+   "headings": [
+    "VDA 4902 Label Generator"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/shipping-label-generator",
+   "url": "/tools/shipping-label-generator",
+   "aliases": [],
+   "title": "Shipping Label Generator",
+   "description": "Make carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "Shipping Label Generator\nMake carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode.\nLays out sender, recipient, service, weight and package count on a 4 × 6 inch, A6 or 100 × 150 mm label and adds a Code 128 reference barcode or a GS1-128 SSCC, with one numbered label for each package. The result is a print-ready PDF for label printers or plain sheets. Addresses are processed in memory and never stored.",
+   "headings": [
+    "Shipping Label Generator"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/qr-business-card-designer",
+   "url": "/tools/qr-business-card-designer",
+   "aliases": [],
+   "title": "QR Code Business Cards",
+   "description": "Design a business card with a QR Code or Data Matrix that saves your contact to a phone.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "QR Code Business Cards\nDesign a business card with a QR Code or Data Matrix that saves your contact to a phone.\nBuilds a business card from your name, role and contact details and encodes the same details as a vCard or MeCard in a QR Code or Data Matrix. Download a print-ready PDF as a single card or a sheet with cut marks, SVG artwork and a .vcf contact file. Contact details are processed in memory and never stored.",
+   "headings": [
+    "QR Code Business Cards"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/qr-code-maker",
+   "url": "/tools/qr-code-maker",
+   "aliases": [],
+   "title": "QR Code Maker",
+   "description": "Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "QR Code Maker\nMake QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment.\nChoose what the code should do when a phone scans it and fill in ordinary fields: a web address, a Wi-Fi network, a contact, an email, a call, a text or WhatsApp message, a calendar event, a map location, a social media profile or a SEPA bank transfer. The tool writes the format phones recognise and returns the code as PNG, SVG and PDF, as a QR Code, Data Matrix or Aztec Code. The code holds the content itself, so it never expires and scans are not tracked. Nothing you enter is stored.",
+   "headings": [
+    "QR Code Maker"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/barcode-scanner",
+   "url": "/tools/barcode-scanner",
+   "aliases": [],
+   "title": "Barcode Scanner",
+   "description": "Scan barcodes and QR codes with your camera or from an image, and export what you scanned.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "Barcode Scanner\nScan barcodes and QR codes with your camera or from an image, and export what you scanned.\nReads twenty-one barcode types, including QR Code, Data Matrix, Code 128, Code 39, EAN-13, UPC-A and UPC-E, with a phone or laptop camera or from a picture. Each scan is added to a list you can copy or download as a CSV file. On the scanner page the decoding happens in your browser: the camera picture and your images are not uploaded. The API reads a barcode from an uploaded PNG, in thirteen of those types.",
+   "headings": [
+    "Barcode Scanner"
+   ]
+  },
+  {
    "sourceKey": "nav:/apps",
    "url": "/apps",
    "aliases": [
@@ -5934,6 +6053,40 @@
    "body": "DNS Health\nDelegation, mail authentication and DNSSEC checks in one report.",
    "headings": [
     "DNS Health"
+   ]
+  },
+  {
+   "sourceKey": "nav:/tools/file-converter",
+   "url": "/tools/file-converter",
+   "aliases": [],
+   "title": "File Converter",
+   "description": "Convert images and PDF pages in your browser without uploading the files.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Tools",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "File Converter\nConvert images and PDF pages in your browser without uploading the files.",
+   "headings": [
+    "File Converter"
+   ]
+  },
+  {
+   "sourceKey": "nav:/tools/file-tools",
+   "url": "/tools/file-tools",
+   "aliases": [],
+   "title": "File Tools",
+   "description": "Browser-local image, PDF, media, archive, document and animation tools, plus optional transient REST API jobs.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Tools",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "File Tools\nBrowser-local image, PDF, media, archive, document and animation tools, plus optional transient REST API jobs.",
+   "headings": [
+    "File Tools"
    ]
   },
   {
@@ -13650,6 +13803,8 @@
   "/support",
   "/terms-of-service.php",
   "/tools",
+  "/tools/barcode-generator",
+  "/tools/barcode-scanner",
   "/tools/business-tools",
   "/tools/business-tools/employee-id-card-generator",
   "/tools/business-tools/mrz-generator",
@@ -13694,6 +13849,8 @@
   "/tools/domain/punycode",
   "/tools/domain/search",
   "/tools/favorites",
+  "/tools/file-converter",
+  "/tools/file-tools",
   "/tools/history",
   "/tools/ip/converters",
   "/tools/ip/domain-to-ip",
@@ -13702,6 +13859,7 @@
   "/tools/ip/lookup",
   "/tools/ip/my-ip",
   "/tools/ip/whois",
+  "/tools/label-designer",
   "/tools/monitors",
   "/tools/mrz-generator",
   "/tools/mrz-parser",
@@ -13722,10 +13880,14 @@
   "/tools/productivity/time-card",
   "/tools/productivity/wifi-qr",
   "/tools/productivity/word-counter",
+  "/tools/qr-business-card-designer",
+  "/tools/qr-code-maker",
   "/tools/reports",
   "/tools/security/ip-blacklist",
   "/tools/security/password",
   "/tools/security/ssl",
+  "/tools/shipping-label-generator",
+  "/tools/vda-4902-label-generator",
   "/tools/webmaster/open-graph",
   "/tools/webmaster/robots-generator",
   "/tools/webmaster/serp-simulator",
@@ -13752,8 +13914,8 @@
    "marketingPages": 55,
    "legalDocuments": 18,
    "documentation": 14,
-   "tools": 65,
-   "navigationRoutes": 114,
+   "tools": 72,
+   "navigationRoutes": 116,
    "phpPages": 75,
    "phpPolicies": 4,
    "faqs": 174,

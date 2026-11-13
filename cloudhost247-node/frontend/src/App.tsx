@@ -217,6 +217,8 @@ const MrzToolPage = lazy(() => import('./pages/tools/MrzToolPage'));
 const ComplianceDocumentsPage = lazy(() => import('./pages/tools/ComplianceDocumentsPage'));
 const BusinessToolsPage = lazy(() => import('./pages/tools/BusinessToolsPage'));
 const IdCardGeneratorPage = lazy(() => import('./pages/tools/IdCardGeneratorPage'));
+const DesignStudioPage = lazy(() => import('./pages/tools/DesignStudioPage'));
+const BarcodeScannerPage = lazy(() => import('./pages/tools/BarcodeScannerPage'));
 const BusinessToolWorkspacePage = lazy(() => import('./pages/tools/BusinessToolWorkspacePage'));
 const AdminMrzSettingsPage = lazy(() => import('./pages/AdminMrzSettingsPage'));
 const RdpHostingPage = lazy(() => import('./pages/RdpHostingPage'));
@@ -334,6 +336,20 @@ export default function App() {
         <Route path="/tools/business-tools/employee-id-card-generator" element={<IdCardGeneratorPage />} />
         <Route path="/tools/business-tools/:tool" element={<BusinessToolWorkspacePage />} />
 
+        {/* Design Studio: barcodes, labels, shipping labels and QR business cards. Each is a
+            catalogue tool (src/tools/catalog.ts) with a runnable API; these static routes give
+            them the studio page, with sections, examples and a preview of the generated artwork,
+            instead of the generic runner. The retained alias URLs (/tools/label-printing,
+            /tools/vda-4902 and the rest) still reach the generic /tools/* route, which forwards to
+            the canonical path here. Each route is keyed so that moving between the tools starts
+            the next one from its own defaults rather than from the previous tool's form state. */}
+        <Route path="/tools/barcode-generator" element={<DesignStudioPage key="barcode-generator" slug="barcode-generator" />} />
+        <Route path="/tools/label-designer" element={<DesignStudioPage key="label-designer" slug="label-designer" />} />
+        <Route path="/tools/vda-4902-label-generator" element={<DesignStudioPage key="vda-4902-label-generator" slug="vda-4902-label-generator" />} />
+        <Route path="/tools/shipping-label-generator" element={<DesignStudioPage key="shipping-label-generator" slug="shipping-label-generator" />} />
+        <Route path="/tools/qr-business-card-designer" element={<DesignStudioPage key="qr-business-card-designer" slug="qr-business-card-designer" />} />
+        <Route path="/tools/qr-code-maker" element={<DesignStudioPage key="qr-code-maker" slug="qr-code-maker" />} />
+        <Route path="/tools/barcode-scanner" element={<BarcodeScannerPage />} />
         <Route path="/tools/document" element={<ToolsHubPage />} />
         <Route path="/tools/mrz-generator" element={<MrzToolPage defaultTab="calculator" />} />
         <Route path="/tools/mrz-parser" element={<MrzToolPage defaultTab="parser" />} />
