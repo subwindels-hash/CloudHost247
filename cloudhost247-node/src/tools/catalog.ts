@@ -1400,6 +1400,27 @@ const newTools: ToolCatalogEntry[] = [
     keywords: ['uuid','identifier','random','generator','developer'],
   },
   {
+    slug: 'email-extractor', name: 'Email & Link Extractor', category: 'productivity',
+    summary: 'Pull every email address or web link out of pasted text.',
+    description: 'Finds every email address, or every web address, in the text you paste, removes duplicates, and returns the list with the separator you choose. Optional grouping, alphabetical sorting and a contains / does-not-contain filter. Addresses are matched by format only: nothing is fetched, no mailbox is contacted or verified, and no link is visited.',
+    icon: 'mail', path: '/tools/productivity/email-extractor', apiPath: '/api/tools/email-extractor',
+    methods: ['POST'], authRequired: false, visibility: 'public', rateLimitProfile: 'light', cacheSeconds: 0, timeoutMs: 5_000,
+    keywords: ['email extractor', 'extract emails', 'link extractor', 'url extractor', 'email list', 'text'],
+    notes: ['Only extract and use addresses you have a lawful basis to contact. Sending unsolicited bulk email is prohibited by the CloudHost247 Acceptable Use Policy.'],
+  },
+  {
+    slug: 'email-extractor-pro', name: 'Email Extractor Pro', category: 'productivity',
+    summary: 'Build subscription, unsubscription and exclusion lists from the clipboard, files or a folder.',
+    description: 'Extracts email addresses from the clipboard, from files you choose, or from a whole folder (optionally including sub-folders) into three managed lists: Subscription, UnSubscription and Excluding Email Address Pattern. Unsubscribed addresses and addresses matching an excluded pattern are kept out of the Subscription list. Files are read in your browser and only their text is sent for extraction; the lists stay in the open page and are not stored. Addresses are matched by format only: no mailbox is contacted or verified.',
+    icon: 'mail', path: '/tools/productivity/email-extractor-pro', apiPath: '/api/tools/email-extractor-pro',
+    methods: ['POST'], authRequired: false, visibility: 'public', rateLimitProfile: 'light', cacheSeconds: 0, timeoutMs: 5_000,
+    keywords: ['email extractor pro', 'subscription list', 'unsubscribe list', 'extract emails from files', 'email list cleaner', 'text'],
+    notes: [
+      'Only extract and use addresses you have a lawful basis to contact. Sending unsolicited bulk email is prohibited by the CloudHost247 Acceptable Use Policy.',
+      'Up to 500 files and 20 MB per run. The lists are lost when the page is closed or refreshed — use Save to keep them.',
+    ],
+  },
+  {
     slug: 'minecraft-color-codes', name: 'Minecraft Color Codes', category: 'productivity',
     summary: 'Minecraft colour and format code reference, with &-to-§ conversion.',
     description: 'Lists every standard Minecraft colour and format code with its colour value, and converts text between the ampersand (&a) and section-sign (§a) notations or strips the codes. Only codes in the standard set are converted.',
@@ -1497,6 +1518,9 @@ export const TOOL_CATALOG: readonly ToolCatalogEntry[] = allTools.map(tool => {
   // Curated cross-links where the category sibling list would not be the most useful next step.
   const relatedOverride: Record<string, string[]> = {
     'mrz-generator': ['encoding-tools', 'json-tools', 'password-tools'],
+    // The two extractors are separate tools that point at each other.
+    'email-extractor': ['email-extractor-pro', 'word-counter', 'notepad'],
+    'email-extractor-pro': ['email-extractor', 'word-counter', 'notepad'],
   };
   return { ...tool, path, legacyPaths: [...new Set([tool.path, `/tools/${tool.slug}`, ...(aliases[tool.slug] ?? [])])].filter(alias => alias !== path && !alias.includes(':')),
     discoveryCategories: [...new Set(categories)], seoTitle: `${tool.name} | CloudHost247`,

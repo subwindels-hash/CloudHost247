@@ -2,6 +2,8 @@ import ReturnToLogin from '../components/ReturnToLogin';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { measureBrowserConnection } from '../lib/tools-speed';
+import EmailExtractorPanel from '../components/tools/EmailExtractorPanel';
+import ExtractorProPanel from '../components/tools/ExtractorProPanel';
 import QrResult from '../components/tools/QrResult';
 import ToolResult from '../components/tools/ToolResult';
 import ToolSeo from '../components/tools/ToolSeo';
@@ -317,6 +319,11 @@ export default function ToolPage() {
         ) : null}
       </header>
 
+      {slug === 'email-extractor' ? (
+        <EmailExtractorPanel unavailable={unavailable} />
+      ) : slug === 'email-extractor-pro' ? (
+        <ExtractorProPanel unavailable={unavailable} />
+      ) : (
       <div className="tools-tool__grid">
         <form
           ref={formNode}
@@ -668,6 +675,7 @@ export default function ToolPage() {
           )}
         </section>
       </div>
+      )}
 
       {tool && tool.notes.length > 0 ? (
         <section className="tools-notes" aria-labelledby="tools-notes">
