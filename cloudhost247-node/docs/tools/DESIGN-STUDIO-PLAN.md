@@ -708,8 +708,10 @@ What a visitor's browser fetches the first time something is scanned, in additio
 So the full decoder is the larger download, by about 0.6 MB as stored. The application itself sends
 static files uncompressed; whether the binary travels compressed depends on the web server in front
 of it. The scanner page's own script is 22.9 kB (8.8 kB compressed) and its style sheet 4.4 kB. The
-embedded build for the WHMCS theme is unchanged at 456 kB (114 kB compressed): there the scanner is
-still the upload form that calls the API, and the bundle holds neither decoder.
+embedded build for the WHMCS theme was not changed by this round: there the scanner is still the
+upload form that calls the API, and the bundle holds neither decoder. It was 456 kB (114 kB
+compressed) before `main` was merged and is 480 kB (119 kB) after, the difference being the two
+tools `main` added.
 
 ### 14.5 Evidence (2026-11-13)
 
@@ -722,11 +724,20 @@ Run from `cloudhost247-node/`. These replace the scanner rows and the totals of 
 | The policy the application sends | `npx vitest run tests/unit/spa-security-headers.test.ts` | 6 passed |
 | The page in jsdom | `npx vitest run frontend/tests/unit/barcode-scanner-page.test.tsx` | 13 passed |
 | Pages in Chromium, production bundle | `npx playwright test e2e/design-studio.spec.ts e2e/barcode-scanner.spec.ts` | 49 passed (35 + 14) |
-| Every unit test in the application | `npx vitest run frontend/tests/unit tests/unit` | 3,088 passed in 176 files, none failed |
-| The integration suites listed in §13.5 | as there | 137 passed in 14 files |
+| Every unit test in the application | `npx vitest run frontend/tests/unit tests/unit` | 3,146 passed in 184 files, none failed |
+| The integration suites listed in §13.5, and the four more that `main` had changed | `npx vitest run tests/integration/<name>.test.ts` | 168 passed in 18 files |
 | Types | `npm run typecheck`, `npx tsc -p frontend/tsconfig.json --noEmit` | both exit 0 |
-| Production build | `npm run build` | exit 0, "82 tool entries; projection verified" |
+| Production build | `npm run build` | exit 0, "84 tool entries; projection verified" |
+| The compiled server starts | the `node -e "require('./dist/src/app.js')"` step of `.github/workflows/node-platform.yml` | loads cleanly |
 | Dependency audit | `npm audit --omit=dev --audit-level=high` | 0 vulnerabilities |
+| Python suites, from the repository root | `python3 -m unittest discover -s tests/website -p "test_*.py"`, the same with `-s tests/tools` | 247 OK (8 skipped), 26 OK |
+| The release-candidate gate, without its PHP steps | each non-PHP command of `scripts/release-candidate-check.sh`, in order | 24 of 24 pass |
+
+**These figures were taken after `main` was merged into the branch.** `main` had gained two tools
+(Email & Link Extractor, Email Extractor Pro) and their tests since the branch was cut, so the
+catalogue now holds 84 entries. Before the merge the same commands gave 3,088 unit tests in 176
+files, 137 integration tests in 14 files and 82 catalogue entries. The scanner's and the Design
+Studio's own counts in the rows above did not change.
 
 What these establish:
 
@@ -754,13 +765,26 @@ What these establish:
   false; the condition was deleted. The other twenty-one each failed at least one test.
 
 **Derived files** were regenerated in the order given in [OPERATIONS.md](./OPERATIONS.md), for the
-scanner's new description and notes. As before, the published copies under `frontend/public/docs/`
-and `docs.generated.json` were left as they were.
+scanner's new description and notes, and again from the merged catalogue after `main` was merged.
+The figures the website report declares (`docs/website-rebuild/FINAL-REPORT-2026-10-16.md`: rows of
+the page inventory, aliases, signpost routes, served tool routes) were brought into line with the
+regenerated inventory, as `main` did for its own two tools. The published copies under
+`frontend/public/docs/` and `docs.generated.json`, which the second round left alone because the
+generator rewrote them for unrelated reasons, are no longer rewritten by the generator on `main`.
 
 ### 14.6 Still not verified
 
 Everything in §12.6 and §13.7 still holds, and in addition:
 
+- **The PHP steps of the release-candidate gate** (PHP lint, the PHP test runners including
+  `tests/tools/site-integration.php`, and the rendered-site audit) were not run: PHP is not
+  installed where this was developed. Three of that test's checks that depend on the tool
+  catalogue (every path and alias resolves to its own tool, one path per capability, no served path
+  re-labelled) were reproduced in Python against the merged files and hold. The real run is the
+  pull request's CI.
+- **The other integration suites.** The application has more than a hundred; eighteen were run
+  here, chosen because they touch tools, the catalogue's derived files, routes, the sitemap, the
+  assistant's knowledge, or were changed on `main`. The whole set runs in CI.
 - **Chromium only.** The policy word, the full decoder and the fallback were run in headless
   Chromium. Firefox and Safari were not tried. A browser that does not know the word, or will not
   run WebAssembly for another reason, is expected to take the fallback, which is the path tested in
