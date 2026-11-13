@@ -28,6 +28,8 @@ import './hostinger-chrome.css';
 import '../../../shared/site/metals.css';
 // Inner-page spacing is scoped to the routed content, leaving the homepage and chrome intact.
 import './inner-pages.css';
+// Namespaced conversion workspace styles load last so they retain their page-specific controls.
+import './file-converter.css';
 // One dependency-free motion controller for tilt, parallax and reveals. It self-guards for
 // reduced motion, coarse pointers and small screens; there is no idle animation loop.
 import '../../../shared/site/motion.js';

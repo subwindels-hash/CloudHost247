@@ -1263,6 +1263,10 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/tools"
       },
       {
+        "label": "File Converter",
+        "to": "/tools/file-converter"
+      },
+      {
         "label": "Compliance & Document Tools",
         "to": "/tools/compliance-documents"
       },
@@ -1901,6 +1905,8 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/tools/document/mrz",
   "/tools/document/mrz-parser",
   "/tools/favorites",
+  "/tools/file-converter",
+  "/tools/file-tools",
   "/tools/history",
   "/tools/label-designer",
   "/tools/monitors",

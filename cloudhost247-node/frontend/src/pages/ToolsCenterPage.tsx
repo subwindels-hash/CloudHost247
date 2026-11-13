@@ -231,6 +231,14 @@ export default function ToolsCenterPage() {
           )}
         </div>
       </header>
+      <section className="fc-inline-promo" aria-label="File tools workspace">
+        <div>
+          <span className="fc-inline-promo__label">FILE TOOLS · BROWSER-LOCAL</span>
+          <h2>Convert, compress, and organize files</h2>
+          <p>Work with supported images and PDFs without uploading file contents.</p>
+        </div>
+        <Link to="/tools/file-tools">Explore File Tools <span aria-hidden="true">↗</span></Link>
+      </section>
       <nav className="tools-chips" aria-label="Tool categories">
         <Link
           className={`tools-chip${!category ? ' is-active' : ''}`}

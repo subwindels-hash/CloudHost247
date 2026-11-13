@@ -59,6 +59,7 @@ function sectionGroups(section: RegistrySection, liveTools: NavigationTool[]): R
     {
       title: 'Browse',
       links: [
+        { label: 'File Converter', to: '/tools/file-converter', description: 'Convert images and PDF pages locally in your browser.', icon: 'file' },
         { label: 'All Tools', to: '/tools', description: 'Search the full catalogue by name or category.', icon: 'grid' },
         { label: 'Business Tools', to: '/tools/business-tools', description: 'Payroll, tax, contract and document tools.', icon: 'briefcase' },
       ],

@@ -1903,6 +1903,12 @@
           }
         },
         {
+          "label": "File Converter",
+          "href": {
+            "spa": "/tools/file-converter"
+          }
+        },
+        {
           "label": "Compliance & Document Tools",
           "href": {
             "spa": "/tools/compliance-documents",

@@ -67,6 +67,7 @@ import { registerMrzToolRoutes } from './routes/mrz-tools';
 import { registerBusinessToolsRoutes } from './routes/business-tools';
 import { registerNavigationRoutes } from './routes/navigation';
 import { registerSeoRoutes } from './routes/seo';
+import { registerFileToolsRoutes } from './routes/file-tools';
 import { registerBuilderRoutes } from './routes/builder';
 import { registerStoreRoutes } from './routes/store';
 import { registerLogoMakerRoutes } from './routes/logo-maker';
@@ -277,6 +278,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // order — the ordering here is only so the more general registration is the one that reads
     // first when someone traces the routes.
     await registerToolsRoutes(instance, env, pool);
+    await registerFileToolsRoutes(instance);
 
     // Native Developer / Document Tools — ePassport MRZ Calculator, Validator, Parser & Super Admin settings.
     await registerMrzToolRoutes(instance, env, pool);

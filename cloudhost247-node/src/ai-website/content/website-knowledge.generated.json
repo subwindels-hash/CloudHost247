@@ -6056,6 +6056,23 @@
    ]
   },
   {
+   "sourceKey": "nav:/tools/file-converter",
+   "url": "/tools/file-converter",
+   "aliases": [],
+   "title": "File Converter",
+   "description": "CloudHost247 File Converter — navigation destination.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Footer — Tools",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "File Converter",
+   "headings": [
+    "File Converter"
+   ]
+  },
+  {
    "sourceKey": "php:refund-policy.php",
    "url": "/legal/refund-policy",
    "aliases": [
@@ -13815,6 +13832,8 @@
   "/tools/domain/punycode",
   "/tools/domain/search",
   "/tools/favorites",
+  "/tools/file-converter",
+  "/tools/file-tools",
   "/tools/history",
   "/tools/ip/converters",
   "/tools/ip/domain-to-ip",
@@ -13879,7 +13898,7 @@
    "legalDocuments": 18,
    "documentation": 14,
    "tools": 72,
-   "navigationRoutes": 114,
+   "navigationRoutes": 115,
    "phpPages": 75,
    "phpPolicies": 4,
    "faqs": 174,

@@ -154,7 +154,7 @@ Every rule has a negative case, and the suites were run in isolation as well as 
 
 | check | result |
 |---|---|
-| registry | v2.1.0, 7 mega menus, 8 footer columns, 255 links (244 app / 243 PHP) |
+| registry | v2.1.0, 7 mega menus, 8 footer columns, 256 links (245 app / 243 PHP) |
 | link integrity | 2,457 surfaces · 926 internal · 910 PHP · 5 external · 31 anchors — 0 broken, 0 placeholder, 0 dangling |
 | rendered site | 229 pages, 907 images, 3,063 asset references, 42,393 links, 45,510 controls, 194 indexable / 35 noindex, 194 canonical addresses, 0 problems |
 | hero artwork as rendered | 47 pages on a 3D scene, 1 flat, 19 legal documents text-only, 48 distinct artworks |
@@ -284,8 +284,8 @@ where the tree says `356` — a number no check could contradict. It now can.
   "routes_platform_entry_point": 8,
   "defect_classes_empty": 6,
   "tools_served_projection": 286,
-  "registry_links": 255,
-  "registry_spa_links": 244,
+  "registry_links": 256,
+  "registry_spa_links": 245,
   "registry_php_links": 243,
   "mega_menus": 7,
   "footer_columns": 8

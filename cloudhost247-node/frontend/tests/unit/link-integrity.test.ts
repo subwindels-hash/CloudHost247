@@ -14,12 +14,18 @@ import { LEGAL_INDEX, MARKETING_ROUTES } from '../../src/navigation/registry.gen
  * permission guards) lives in e2e/link-integrity.spec.ts and was verified live
  * against the running application — see docs/WEBSITE-FUNCTIONALITY-AUDIT.md.
  *
- * Server-served non-SPA resources linked deliberately from the sitemap page
- * (robots.txt, sitemap.xml, the public navigation JSON) are allow-listed: they
- * are real endpoints answered by the Fastify server, verified live with HTTP 200.
+ * Server-served non-SPA resources linked from client pages (robots.txt, sitemap.xml,
+ * public navigation JSON and the File Tools OpenAPI/docs endpoints) are allow-listed:
+ * they are real Fastify routes, and their integration tests verify the responses.
  */
 const SRC = path.resolve(__dirname, '../../src');
-const SERVER_RESOURCES = new Set(['/robots.txt', '/sitemap.xml', '/api/v1/navigation']);
+const SERVER_RESOURCES = new Set([
+  '/robots.txt',
+  '/sitemap.xml',
+  '/api/v1/navigation',
+  '/api/v1/file-tools/openapi.json',
+  '/api/v1/file-tools/docs',
+]);
 /** File-download anchors answered by the API (digital-product delivery), not SPA routes. */
 const SERVER_PREFIXES = ['/api/v1/public/downloads/'];
 
