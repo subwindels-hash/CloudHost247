@@ -1,0 +1,457 @@
+/* =============================================================================
+   Control Panels & Application Platforms — same background build as Contact Us.
+
+   The Contact Us page (pages/contact-page.css) is built from two surfaces:
+
+     1. a photographic hero under a neutral ink scrim, and
+     2. the homepage AssistantShowcase silver band — a #c0c0c0 base, a 115deg
+        hairline stripe layer and a 160deg silver ramp — with a slow specular
+        sheen travelling over it.
+
+   This page reuses that recipe verbatim (identical stripe angles, ramp stops,
+   scrim stops and sheen timing) so the two pages read as one system. The
+   catalogue cards keep the Contact Us form-card treatment: a translucent white
+   veil over the same finish, edged in graphite-silver, so they stay raised and
+   readable above the band.
+
+   Nothing here changes shared components: every rule is scoped to
+   `.ch247-control-panels-page`, which is the page's own root element.
+   ========================================================================== */
+
+.ch247-control-panels-page {
+  --cp-assistant-silver-bg:
+    repeating-linear-gradient(115deg, #ffffff2e 0 2px, #0000000d 2px 4px),
+    linear-gradient(135deg, #ffffff99 0%, #ffffff00 32%),
+    linear-gradient(160deg, #e9ecef 0%, #d3d7db 16%, #c2c7cd 40%, #b2b7be 56%, #c9cdd2 74%, #e3e6e9 100%);
+
+  /* Responsive hero photograph, following the shared `.ch247-hero--photo` pattern:
+     a 1280px scene on wide viewports, the 640px crop below 768px. The scene
+     matches Contact Us's 1584x672 wide-hero format, and its deliberately empty
+     left third carries the heading without the scrim having to fight it. */
+  --cp-hero-image: url('/media/cloudhost247/hero-backgrounds/servers-1280.webp');
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  overflow: clip;
+  color: #17202a;
+  background-color: #c0c0c0;
+  background-image: var(--cp-assistant-silver-bg);
+}
+
+/* Slow metallic sheen above the striped surface (z-index 2) but below readable
+   content (z-index 3) — the same layer Contact Us uses. */
+.ch247-control-panels-page::after {
+  content: '';
+  position: absolute;
+  inset: -20% -60%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(104deg, transparent 42%, rgba(255, 255, 255, .30) 49%, rgba(255, 255, 255, .10) 54%, transparent 61%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: translate3d(-120%, 0, 0);
+  animation: ch247-control-panels-specular 16s ease-in-out infinite;
+}
+
+/* Neutral ink scrim only: the photograph's own colours stay intact. */
+.ch247-control-panels-page .ch247-control-panels-hero {
+  position: relative;
+  z-index: auto;
+  color: #fff;
+  background:
+    linear-gradient(90deg, rgba(9, 15, 23, .92) 0%, rgba(9, 15, 23, .76) 45%, rgba(9, 15, 23, .35) 100%),
+    var(--cp-hero-image) center / cover no-repeat;
+  background-color: #10171d;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .14);
+}
+
+.ch247-control-panels-page .ch247-control-panels-hero .ch247-hero__inner {
+  position: relative;
+  z-index: 3;
+}
+
+.ch247-control-panels-page .ch247-control-panels-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 1.15rem;
+  padding: .42rem .85rem;
+  border: 1px solid rgba(255, 255, 255, .36);
+  border-radius: 999px;
+  background: rgba(9, 15, 23, .64);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 8px 24px rgba(9, 15, 23, .28);
+  color: #f4f6f8;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+.ch247-control-panels-page .ch247-control-panels-hero__eyebrow span {
+  font-size: .95em;
+  line-height: 1;
+  color: #e5e4e2;
+}
+
+.ch247-control-panels-page .ch247-control-panels-hero h1 {
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: .85rem;
+  color: #fff;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, .42));
+}
+
+.ch247-control-panels-page .ch247-control-panels-hero p:not(.ch247-control-panels-hero__eyebrow) {
+  max-width: 64ch;
+  margin: 0;
+  color: #eef2f5;
+  opacity: .96;
+}
+
+/* Silver title shine, identical to the Contact Us heading. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .ch247-control-panels-page .ch247-control-panels-hero h1 {
+    background: linear-gradient(100deg, #c9cdd1 0%, #e5e4e2 22%, #ffffff 40%, #c0c0c0 62%, #ffffff 82%, #e5e4e2 100%);
+    background-size: 180% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: ch247-control-panels-title-shine 12s ease-in-out infinite alternate;
+  }
+}
+
+/* The catalogue sits on the same silver band the Contact Us section uses. */
+.ch247-control-panels-page .ch247-control-panels-section {
+  position: relative;
+  z-index: auto;
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+  background: transparent;
+  border-bottom: 1px solid #a7acb3;
+}
+
+.ch247-control-panels-page .ch247-control-panels__body {
+  position: relative;
+  z-index: 3;
+  width: min(var(--ch247-width), 100% - 2 * var(--inner-gutter, 24px));
+  margin: 0 auto;
+}
+
+/* Filter bar: a translucent silver veil, thinner than the card veil, so the
+   controls read as one tool above the band rather than as page chrome. */
+.ch247-control-panels-page .ch247-control-panels-controls {
+  gap: 1.15rem;
+  margin: 0 0 1.75rem;
+  padding: clamp(1rem, 2.2vw, 1.5rem);
+  border: 1px solid rgba(98, 103, 109, .42);
+  border-radius: 18px;
+  background-color: #c0c0c0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .66), rgba(255, 255, 255, .66)),
+    var(--cp-assistant-silver-bg);
+  box-shadow:
+    0 18px 44px rgba(13, 17, 22, .16),
+    0 4px 12px rgba(23, 29, 36, .10),
+    inset 0 1px 0 rgba(255, 255, 255, .92),
+    inset 0 -1px 0 rgba(74, 79, 84, .22);
+}
+
+.ch247-control-panels-page .ch247-filter-tab {
+  border: 1px solid rgba(74, 79, 84, .38);
+  background: rgba(255, 255, 255, .86);
+  color: #3a4249;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 1px 3px rgba(23, 29, 36, .08);
+}
+
+.ch247-control-panels-page .ch247-filter-tab:hover {
+  border-color: rgba(98, 103, 109, .78);
+  color: #17202a;
+  background: rgba(255, 255, 255, .96);
+}
+
+.ch247-control-panels-page .ch247-filter-tab.is-active {
+  border-color: #2f353c;
+  background: linear-gradient(180deg, #3a4249 0%, #17202a 100%);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 4px 12px rgba(13, 17, 22, .28);
+}
+
+.ch247-control-panels-page .ch247-filter-tab.is-active .ch247-badge--muted {
+  background: rgba(255, 255, 255, .22);
+  color: #fff;
+}
+
+.ch247-control-panels-page .ch247-filter-tab:focus-visible,
+.ch247-control-panels-page .ch247-select-filter:focus-visible,
+.ch247-control-panels-page .ch247-search-field input:focus-visible {
+  outline: 3px solid rgba(98, 103, 109, .68);
+  outline-offset: 2px;
+}
+
+/* Inputs reuse the Contact Us form-control finish: white, graphite-silver edge,
+   a soft focus ring in the metal family rather than a brand-blue one. */
+.ch247-control-panels-page .ch247-search-field input,
+.ch247-control-panels-page .ch247-select-filter {
+  width: 100%;
+  border: 1px solid rgba(74, 79, 84, .42);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 2px 8px rgba(23, 29, 36, .06);
+  color: #17202a;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ch247-control-panels-page .ch247-search-field input::placeholder {
+  color: #6b727a;
+}
+
+.ch247-control-panels-page .ch247-search-field input:hover,
+.ch247-control-panels-page .ch247-select-filter:hover {
+  border-color: rgba(98, 103, 109, .72);
+}
+
+.ch247-control-panels-page .ch247-search-field input:focus-visible,
+.ch247-control-panels-page .ch247-select-filter:focus-visible {
+  border-color: #858585;
+  box-shadow: 0 0 0 5px rgba(192, 192, 192, .35);
+}
+
+.ch247-control-panels-page .ch247-select-filter {
+  width: auto;
+}
+
+/* Cards: the Contact Us form-card veil — white over the silver finish, so the
+   stripes stay faintly visible through the surface.
+
+   The grid minimum is raised from the shared 330px to 380px (capped at 100% so
+   narrow viewports still get one column). The catalogue row holds three cards on
+   a 1440px screen instead of three cramped ones, which is what lets the price
+   and the two actions sit on one line inside the footer. */
+.ch247-control-panels-page .ch247-panel-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+}
+
+.ch247-control-panels-page .ch247-panel-card {
+  position: relative;
+  z-index: 3;
+  border: 2px solid rgba(98, 103, 109, .48);
+  background-color: #c0c0c0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .90), rgba(255, 255, 255, .90)),
+    var(--cp-assistant-silver-bg);
+  box-shadow:
+    0 18px 44px rgba(13, 17, 22, .18),
+    0 5px 16px rgba(23, 29, 36, .12),
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    inset 0 -1px 0 rgba(74, 79, 84, .22);
+}
+
+.ch247-control-panels-page .ch247-panel-card:hover {
+  border-color: rgba(98, 103, 109, .86);
+  box-shadow:
+    0 26px 60px rgba(13, 17, 22, .26),
+    0 8px 22px rgba(23, 29, 36, .16),
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    inset 0 -1px 0 rgba(74, 79, 84, .22);
+}
+
+.ch247-control-panels-page .ch247-panel-card__logo-wrap {
+  border: 1px solid rgba(74, 79, 84, .28);
+  background: rgba(255, 255, 255, .92);
+}
+
+.ch247-control-panels-page .ch247-panel-card__specs {
+  border: 1px solid rgba(74, 79, 84, .20);
+  background: rgba(255, 255, 255, .62);
+}
+
+/* Three columns of cards leave the spec rows tight: keep the label on one line
+   and let the OS pills wrap on the right instead of breaking "Supported OS". */
+.ch247-control-panels-page .ch247-panel-card__specs .ch247-spec-item {
+  gap: .75rem;
+}
+
+.ch247-control-panels-page .ch247-panel-card__specs .ch247-spec-label {
+  flex: none;
+  white-space: nowrap;
+}
+
+.ch247-control-panels-page .ch247-panel-card__specs .ch247-spec-os {
+  justify-content: flex-end;
+}
+
+.ch247-control-panels-page .ch247-panel-card__footer {
+  border-top: 1px solid rgba(74, 79, 84, .22);
+  flex-wrap: wrap;
+  gap: .85rem 1rem;
+}
+
+.ch247-control-panels-page .ch247-panel-card__actions {
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+/* --- Buttons -----------------------------------------------------------------
+   `.ch247-btn` (and its --primary/--secondary variants) is used across the
+   infrastructure pages but has no base rule in any stylesheet, so on this page it
+   rendered as a bare prose link. Rather than restyle those other pages by adding a
+   global rule, the metal treatment lives here, scoped to this page. Primary is the
+   Contact Us submit button: the shared silver ramp; secondary is the brushed
+   sheet-metal counterpart. Both keep a 44px target. */
+.ch247-control-panels-page .ch247-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: .62rem 1.15rem;
+  border: 1px solid rgba(74, 79, 84, .55);
+  border-radius: 999px;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+  line-height: 1.15;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-position 620ms ease, box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease;
+}
+
+.ch247-control-panels-page .ch247-btn--primary {
+  background: var(--metal-ramp-silver, linear-gradient(115deg, #62676d, #c0c0c0, #ffffff, #858585, #a8adb3, #62676d));
+  background-position: 0% 50%;
+  background-size: 200% 100%;
+  color: #17202a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .92), 0 10px 22px rgba(23, 29, 36, .2);
+}
+
+.ch247-control-panels-page .ch247-btn--secondary {
+  border-color: rgba(74, 79, 84, .45);
+  background: linear-gradient(180deg, #ffffff 0%, #f2f3f4 46%, #dfe2e5 100%);
+  color: #262d34;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .98), 0 3px 10px rgba(23, 29, 36, .1);
+}
+
+.ch247-control-panels-page .ch247-btn:hover {
+  transform: translateY(-2px);
+}
+
+.ch247-control-panels-page .ch247-btn--primary:hover {
+  background-position: 100% 50%;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .92), 0 16px 30px rgba(23, 29, 36, .26);
+}
+
+.ch247-control-panels-page .ch247-btn--secondary:hover {
+  border-color: rgba(74, 79, 84, .78);
+  background: linear-gradient(180deg, #ffffff 0%, #f7f8f9 46%, #e8eaec 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .98), 0 8px 18px rgba(23, 29, 36, .14);
+}
+
+.ch247-control-panels-page .ch247-btn:focus-visible {
+  outline: 3px solid rgba(98, 103, 109, .68);
+  outline-offset: 2px;
+}
+
+.ch247-control-panels-page .ch247-empty .ch247-btn {
+  margin-top: .9rem;
+}
+
+/* Loading and empty states get the same veil so they are never bare type
+   floating on the band. */
+.ch247-control-panels-page .ch247-loading,
+.ch247-control-panels-page .ch247-empty {
+  position: relative;
+  z-index: 3;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid rgba(98, 103, 109, .42);
+  border-radius: 18px;
+  background-color: #c0c0c0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .84), rgba(255, 255, 255, .84)),
+    var(--cp-assistant-silver-bg);
+  box-shadow:
+    0 18px 44px rgba(13, 17, 22, .14),
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    inset 0 -1px 0 rgba(74, 79, 84, .22);
+  color: #3a4249;
+}
+
+/* Tablet: the 380px minimum would collapse to a single over-wide card on a
+   700–900px viewport, so fall back to a narrower minimum there and keep two
+   columns. Below 700px the minimum still resolves to one comfortable column. */
+@media (max-width: 899px) {
+  .ch247-control-panels-page .ch247-panel-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  }
+}
+
+@keyframes ch247-control-panels-specular {
+  0%, 10% {
+    opacity: 0;
+    transform: translate3d(-120%, 0, 0);
+  }
+  28% {
+    opacity: .34;
+  }
+  58% {
+    opacity: .22;
+    transform: translate3d(120%, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(120%, 0, 0);
+  }
+}
+
+@keyframes ch247-control-panels-title-shine {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+@media (max-width: 767px) {
+  .ch247-control-panels-page {
+    --cp-hero-image: url('/media/cloudhost247/hero-backgrounds/servers-640.webp');
+  }
+
+  .ch247-control-panels-page .ch247-control-panels-hero {
+    background:
+      linear-gradient(90deg, rgba(9, 15, 23, .94), rgba(9, 15, 23, .72)),
+      var(--cp-hero-image) 78% center / cover no-repeat;
+  }
+}
+
+@media (max-width: 640px) {
+  .ch247-control-panels-page .ch247-control-panels-controls {
+    border-radius: 14px;
+  }
+
+  .ch247-control-panels-page .ch247-panel-card {
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch247-control-panels-page .ch247-control-panels-hero h1,
+  .ch247-control-panels-page::after {
+    animation: none !important;
+  }
+
+  .ch247-control-panels-page::after {
+    display: none !important;
+  }
+}
+
+@media print {
+  .ch247-control-panels-page::after {
+    display: none !important;
+  }
+
+  .ch247-control-panels-page .ch247-panel-card {
+    box-shadow: none;
+  }
+}
