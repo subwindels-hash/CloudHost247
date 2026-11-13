@@ -196,9 +196,11 @@
 .fc-inline-promo { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 17px 20px; border: 1px solid #dedfdd; border-radius: 14px; background: linear-gradient(110deg, #fbf5e4, #fff 72%); }
 .fc-inline-promo__label { color: #5f450a; font-size: 9px; font-weight: 850; letter-spacing: .12em; }
 .fc-inline-promo h2 { margin: 5px 0 3px; color: #10171d; font-size: 16px; letter-spacing: -.02em; }
-.fc-inline-promo p { margin: 0; color: #68746c; font-size: 12px; }
+.fc-inline-promo p { margin: 0; color: #5e6a62; font-size: 12px; }
 .fc-inline-promo > a { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; padding: 11px 15px; border-radius: 9px; background: #171d24; color: #fff; font-size: 12px; font-weight: 750; text-decoration: none; }
 .fc-inline-promo > a:hover { background: #10171d; }
+/* Cross-promo back to the File Tools workspace on the converter page. */
+.fc-page .fc-inline-promo { margin-top: 22px; }
 
 @media (max-width: 820px) {
   .fc-hero { grid-template-columns: minmax(0, 1fr) minmax(210px, .7fr); gap: 10px; }

@@ -627,6 +627,15 @@ disabled={locked || jobs.length >= MAX_CONVERTER_FILES}
           )}
         </section>
 
+        <section className="fc-inline-promo" aria-label="File tools workspace">
+          <div>
+            <span className="fc-inline-promo__label">FILE TOOLS · BROWSER-LOCAL</span>
+            <h2>More than converting</h2>
+            <p>Compress, merge, rotate, resize, and organize images, PDFs, documents, and archives in one workspace.</p>
+          </div>
+          <Link to="/tools/file-tools">Explore File Tools <span aria-hidden="true">↗</span></Link>
+        </section>
+
         <section className="fc-benefits" aria-label="About this converter">
           <article><span className="fc-benefit-icon" aria-hidden="true">◎</span><h2>Private by design</h2><p>Conversion happens inside this browser tab. The selected file bytes are not sent to CloudHost247 or a conversion API.</p></article>
           <article><span className="fc-benefit-icon" aria-hidden="true">↗</span><h2>Useful formats</h2><p>Convert PNG, JPEG/JFIF, WebP, GIF, BMP, AVIF, HEIC/HEIF and sanitized SVG images; export PDF pages or save results together as a ZIP.</p></article>
