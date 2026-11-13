@@ -134,7 +134,7 @@
   color: #3f4a44; font-size: 10px; font-weight: 700; letter-spacing: .03em; text-decoration: none;
 }
 .community-flag--pinned { border-color: #dcc98f; background: #fbf5e4; color: #5f450a; }
-.community-flag--solved { border-color: #b9d3bb; background: #eef6ee; color: #245c2c; }
+.community-flag--solved { border-color: #e6d6a8; background: #fdf7e6; color: #6b4f0d; }
 .community-flag--category { border-color: #d8d9d5; background: #fff; color: #4a4030; }
 .community-flag--category:hover { border-color: #c9b273; }
 .community-card__title { margin: 0; font-size: 15px; line-height: 1.35; letter-spacing: -.01em; }
@@ -202,7 +202,7 @@
 .community-thread__actions form { display: inline; }
 
 .community-post { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 18px 20px; border: 1px solid #dedfdd; border-radius: 16px; background: #fff; }
-.community-post.is-solution { border-color: #b9d3bb; box-shadow: inset 3px 0 0 #5f8f63; }
+.community-post.is-solution { border-color: #e6d6a8; box-shadow: inset 3px 0 0 #b8860b; }
 .community-post.is-reply { margin-left: 0; }
 .community-post__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .community-post__actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }

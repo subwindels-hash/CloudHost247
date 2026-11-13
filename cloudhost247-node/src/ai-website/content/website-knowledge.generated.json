@@ -5323,6 +5323,23 @@
    ]
   },
   {
+   "sourceKey": "nav:/community",
+   "url": "/community",
+   "aliases": [],
+   "title": "Community Forum",
+   "description": "Ask other CloudHost247 users and staff, and search answers that already worked.",
+   "kind": "website_page",
+   "surface": "registry",
+   "section": "Resources",
+   "category": "Navigation",
+   "related": [],
+   "faqs": [],
+   "body": "Community Forum\nAsk other CloudHost247 users and staff, and search answers that already worked.",
+   "headings": [
+    "Community Forum"
+   ]
+  },
+  {
    "sourceKey": "nav:/contact",
    "url": "/contact",
    "aliases": [
@@ -13497,6 +13514,7 @@
   "/admin/audit",
   "/admin/audit-logs",
   "/admin/cloudflare",
+  "/admin/community",
   "/admin/control-panels",
   "/admin/deployments",
   "/admin/dns",
@@ -13597,6 +13615,16 @@
   "/cloud/server-management",
   "/cloudhost247-hosting.php",
   "/cloudhost247-sitemap.php",
+  "/community",
+  "/community/bookmarks",
+  "/community/categories",
+  "/community/developers",
+  "/community/discussions",
+  "/community/members",
+  "/community/new-discussion",
+  "/community/notifications",
+  "/community/search",
+  "/community/settings",
   "/contact",
   "/contact.php",
   "/cookie-policy.php",
@@ -13898,7 +13926,7 @@
    "legalDocuments": 18,
    "documentation": 14,
    "tools": 72,
-   "navigationRoutes": 115,
+   "navigationRoutes": 116,
    "phpPages": 75,
    "phpPolicies": 4,
    "faqs": 174,
