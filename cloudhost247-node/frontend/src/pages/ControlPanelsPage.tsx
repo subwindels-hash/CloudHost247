@@ -46,7 +46,7 @@ export default function ControlPanelsPage() {
 
   return (
     <div className="ch247-control-panels-page">
-      <section className="ch247-hero ch247-hero--compact ch247-control-panels-hero">
+      <section className="ch247-hero ch247-hero--compact ch247-control-panels-hero ch247-hero--servers">
         <div className="ch247-hero__inner">
           <p className="ch247-control-panels-hero__eyebrow"><span aria-hidden="true">✦</span> CloudHost247 platform catalog</p>
           <h1>Control Panels &amp; Application Platforms</h1>

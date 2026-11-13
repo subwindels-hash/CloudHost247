@@ -25,8 +25,10 @@
     linear-gradient(160deg, #e9ecef 0%, #d3d7db 16%, #c2c7cd 40%, #b2b7be 56%, #c9cdd2 74%, #e3e6e9 100%);
 
   /* Responsive hero photograph, following the shared `.ch247-hero--photo` pattern:
-     a 1280px scene on wide viewports, the 640px crop below 768px. */
-  --cp-hero-image: url('/media/cloudhost247/photography/data-centre-workstation-1280.webp');
+     a 1280px scene on wide viewports, the 640px crop below 768px. The scene
+     matches Contact Us's 1584x672 wide-hero format, and its deliberately empty
+     left third carries the heading without the scrim having to fight it. */
+  --cp-hero-image: url('/media/cloudhost247/hero-backgrounds/servers-1280.webp');
 
   position: relative;
   isolation: isolate;
@@ -413,13 +415,13 @@
 
 @media (max-width: 767px) {
   .ch247-control-panels-page {
-    --cp-hero-image: url('/media/cloudhost247/photography/data-centre-workstation-640.webp');
+    --cp-hero-image: url('/media/cloudhost247/hero-backgrounds/servers-640.webp');
   }
 
   .ch247-control-panels-page .ch247-control-panels-hero {
     background:
       linear-gradient(90deg, rgba(9, 15, 23, .94), rgba(9, 15, 23, .72)),
-      var(--cp-hero-image) 70% center / cover no-repeat;
+      var(--cp-hero-image) 78% center / cover no-repeat;
   }
 }
 
