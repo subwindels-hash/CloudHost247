@@ -1,0 +1,141 @@
+/* Email & Link Extractor — classic two-window utility panel in the CloudHost247 silver finish. */
+.ch247-extractor {
+  --ex-edge: #62676d;
+  max-width: 980px;
+  margin: 0 auto 1.5rem;
+  border: 2px solid var(--ex-edge);
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(160deg, #eef0f2 0%, #dfe2e5 45%, #d2d6da 100%);
+  box-shadow: 0 18px 44px rgba(13, 17, 22, .2), inset 0 1px 0 #fff;
+  color: #17202a;
+  font-size: .9rem;
+}
+.ch247-extractor *, .ch247-extractor *::before, .ch247-extractor *::after { box-sizing: border-box; }
+
+.ch247-extractor__titlebar {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .6rem 1rem;
+  background: linear-gradient(180deg, #1b242d, #10171d);
+  border-bottom: 2px solid #d4af37;
+  color: #fff;
+}
+.ch247-extractor__titlebar h2 { margin: 0; font-size: 1rem; font-weight: 800; letter-spacing: .01em; color: #fff; }
+.ch247-extractor__titlebar span { font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #e6c875; }
+
+.ch247-extractor__windows { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem 1rem .25rem; }
+.ch247-extractor__window { display: grid; gap: .5rem; min-width: 0; justify-items: center; }
+.ch247-extractor__window > label { justify-self: start; font-weight: 800; }
+.ch247-extractor .ch247-extractor__window textarea {
+  width: 100%; height: 260px; min-height: 160px; resize: vertical;
+  padding: .6rem .7rem;
+  border: 1px solid var(--ex-edge); border-radius: 4px;
+  background: #fff; color: #17202a;
+  box-shadow: inset 0 2px 4px rgba(13, 17, 22, .12);
+  font: .85rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.ch247-extractor .ch247-extractor__window textarea[readonly] { background: #f6f7f8; }
+
+.ch247-extractor__options { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: .75rem 1rem; }
+.ch247-extractor fieldset {
+  display: grid; gap: .6rem; align-content: start; min-width: 0; margin: 0;
+  padding: .7rem .9rem .9rem;
+  border: 1px solid #a7acb3; border-radius: 6px;
+  background: rgba(255, 255, 255, .55);
+}
+.ch247-extractor legend { padding: 0 .4rem; font-weight: 800; }
+.ch247-extractor__row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.ch247-extractor__row label { font-weight: 600; }
+.ch247-extractor__check { display: inline-flex; align-items: center; gap: .5rem; font-weight: 600; cursor: pointer; }
+.ch247-extractor .ch247-extractor__check input { width: 18px; height: 18px; min-height: 0; accent-color: #10171d; }
+
+.ch247-extractor .ch247-extractor__options select,
+.ch247-extractor .ch247-extractor__options input[type='text'],
+.ch247-extractor .ch247-extractor__options input[type='number'] {
+  min-height: 44px; padding: .4rem .6rem;
+  border: 1px solid var(--ex-edge); border-radius: 4px;
+  background: #fff; color: #17202a; font: inherit;
+}
+.ch247-extractor .ch247-extractor__options input.ch247-extractor__short { width: 5.5rem; }
+.ch247-extractor .ch247-extractor__options input:disabled { background: #e3e6e9; cursor: not-allowed; }
+.ch247-extractor #ch247-extractor-filter { width: 100%; }
+
+.ch247-extractor__actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; padding: .25rem 1rem 1rem; }
+.ch247-extractor .ch247-extractor__btn {
+  min-height: 44px; padding: .5rem 1.2rem;
+  border: 1px solid var(--ex-edge); border-radius: 6px;
+  background: linear-gradient(180deg, #ffffff, #d5d9dd);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(13, 17, 22, .16);
+  color: #17202a; font: inherit; font-weight: 700; cursor: pointer;
+}
+.ch247-extractor .ch247-extractor__btn:hover:not(:disabled) { background: linear-gradient(180deg, #ffffff, #c4c9ce); }
+.ch247-extractor .ch247-extractor__btn--primary { min-width: 9rem; border-color: #10171d; background: linear-gradient(180deg, #26323d, #10171d); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 2px 6px rgba(13,17,22,.3); }
+.ch247-extractor .ch247-extractor__btn--primary:hover:not(:disabled) { background: linear-gradient(180deg, #33414e, #17212a); }
+.ch247-extractor .ch247-extractor__btn:disabled { opacity: .6; cursor: not-allowed; }
+.ch247-extractor :is(button, input, select, textarea):focus-visible { outline: 3px solid #b8860b; outline-offset: 2px; }
+
+.ch247-extractor__counter { display: inline-flex; align-items: center; gap: .5rem; margin-left: auto; font-weight: 800; }
+.ch247-extractor__counter output {
+  min-width: 4.5rem; padding: .45rem .7rem; text-align: right;
+  border: 1px solid var(--ex-edge); border-radius: 4px; background: #fff;
+  box-shadow: inset 0 2px 4px rgba(13, 17, 22, .12);
+  font: 700 .95rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.ch247-extractor__message { margin: 0; padding: .6rem 1rem; border-top: 1px solid #a7acb3; background: rgba(255,255,255,.6); color: #2f353c; }
+.ch247-extractor__message--error { background: #fff0f0; color: #7a1717; font-weight: 700; }
+
+@media (max-width: 720px) {
+  .ch247-extractor__windows, .ch247-extractor__options { grid-template-columns: 1fr; }
+  .ch247-extractor .ch247-extractor__window textarea { height: 180px; }
+  .ch247-extractor__counter { margin-left: 0; }
+}
+
+/* Extractor Pro — clipboard / file / folder extraction into three managed lists. */
+.ch247-extractor-pro__top { display: grid; grid-template-columns: minmax(220px, 1fr) 2fr; gap: 1rem; padding: 1rem 1rem .5rem; }
+.ch247-extractor-pro__top fieldset { align-content: start; }
+.ch247-extractor-pro__top .ch247-extractor__btn { width: 100%; }
+.ch247-extractor .ch247-extractor-pro__top select,
+.ch247-extractor .ch247-extractor-pro__top input[type='text'],
+.ch247-extractor .ch247-extractor-pro__add input {
+  min-height: 44px; min-width: 0; padding: .4rem .6rem;
+  border: 1px solid var(--ex-edge); border-radius: 4px;
+  background: #fff; color: #17202a; font: inherit;
+}
+.ch247-extractor-pro__top .ch247-extractor__row { flex-wrap: nowrap; }
+.ch247-extractor-pro__top .ch247-extractor__row input { flex: 1 1 auto; width: 100%; }
+.ch247-extractor .ch247-extractor-pro__top input[readonly] { background: #f6f7f8; }
+.ch247-extractor .ch247-extractor-pro__tag { flex: 0 0 5.5rem; width: 5.5rem; text-align: center; font-weight: 700; }
+
+.ch247-extractor-pro__lists { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; padding: .5rem 1rem 1rem; }
+.ch247-extractor-pro__list { display: grid; gap: .45rem; min-width: 0; align-content: start; }
+.ch247-extractor-pro__listhead {
+  display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  padding: .4rem .6rem; border: 1px solid var(--ex-edge); border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, #ffffff, #d5d9dd); font-weight: 800;
+}
+.ch247-extractor-pro__listhead output { font: 700 .9rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.ch247-extractor .ch247-extractor-pro__list select {
+  width: 100%; height: 230px; padding: .25rem;
+  border: 1px solid var(--ex-edge); border-radius: 0 0 4px 4px; margin-top: -.45rem;
+  background: #fff; color: #17202a;
+  box-shadow: inset 0 2px 4px rgba(13, 17, 22, .12);
+  font: .82rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.ch247-extractor-pro__add { display: flex; gap: .4rem; }
+.ch247-extractor-pro__add input { flex: 1 1 auto; width: 100%; }
+.ch247-extractor-pro__tools { display: flex; flex-wrap: wrap; gap: .35rem; }
+.ch247-extractor .ch247-extractor-pro__tools .ch247-extractor__btn { flex: 1 1 auto; padding: .4rem .6rem; font-size: .8rem; }
+
+.ch247-extractor-pro__statusbar {
+  display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  padding: .5rem 1rem; border-top: 1px solid #a7acb3;
+  background: linear-gradient(180deg, #e3e6e9, #cfd3d7); color: #2f353c; font-size: .82rem;
+}
+.ch247-extractor-pro__statusbar span:last-child { font-weight: 800; }
+
+@media (max-width: 860px) {
+  .ch247-extractor-pro__top, .ch247-extractor-pro__lists { grid-template-columns: 1fr; }
+  .ch247-extractor .ch247-extractor-pro__list select { height: 170px; }
+}

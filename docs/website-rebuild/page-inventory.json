@@ -35,7 +35,7 @@
     "pages_by_route_owner": {
       "cloudhost247-theme": 75,
       "internal": 17,
-      "tools-front-controller": 265,
+      "tools-front-controller": 269,
       "whmcs-core": 8
     }
   },
@@ -10810,6 +10810,126 @@
       },
       "hero_asset": "",
       "visual": "domain",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/email-extractor.php",
+      "path": "/tools/email-extractor",
+      "canonical_url": "/tools/email-extractor",
+      "title": "Email & Link Extractor",
+      "page_title": "Email & Link Extractor",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Email & Link Extractor",
+        "description": "Pull every email address or web link out of pasted text."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/productivity/email-extractor.php",
+      "path": "/tools/productivity/email-extractor",
+      "canonical_url": "/tools/email-extractor",
+      "title": "Email & Link Extractor",
+      "page_title": "Email & Link Extractor",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Email & Link Extractor",
+        "description": "Pull every email address or web link out of pasted text."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/email-extractor-pro.php",
+      "path": "/tools/email-extractor-pro",
+      "canonical_url": "/tools/email-extractor-pro",
+      "title": "Email Extractor Pro",
+      "page_title": "Email Extractor Pro",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Email Extractor Pro",
+        "description": "Build subscription, unsubscription and exclusion lists from the clipboard, files or a folder."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/productivity/email-extractor-pro.php",
+      "path": "/tools/productivity/email-extractor-pro",
+      "canonical_url": "/tools/email-extractor-pro",
+      "title": "Email Extractor Pro",
+      "page_title": "Email Extractor Pro",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Email Extractor Pro",
+        "description": "Build subscription, unsubscription and exclusion lists from the clipboard, files or a folder."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
       "image_status": "n/a",
       "seo_status": "redirects (301)",
       "navigation_placement": "",
