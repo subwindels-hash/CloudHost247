@@ -152,10 +152,23 @@ will not pass `.wasm` files, or too old to know the word) gets the JavaScript de
 read there, and reads the other thirteen with the same results. Nothing else on the site uses
 WebAssembly.
 
-**To withdraw it.** Delete the word from `scriptSrc` in `src/plugins/security.ts` and update
-`tests/unit/spa-security-headers.test.ts`. No other change is needed: the scanner page finds out
-for itself whether WebAssembly is allowed, and the e2e spec already runs it that way ("where
-WebAssembly is refused").
+**To withdraw it.** Delete the word from `scriptSrc` in `src/plugins/security.ts`. The scanner page
+itself needs no change: it finds out whether WebAssembly is allowed and uses the JavaScript decoder
+when it is not, which is how the e2e test "where WebAssembly is refused" runs it. What must follow,
+because it checks or states that the word is there:
+
+- `tests/unit/spa-security-headers.test.ts` expects the word. CI runs this test, so it fails first.
+- `e2e/barcode-scanner.spec.ts`, two tests: "runs the full decoder under the security policy the
+  application sends" expects the word and the full decoder, and "where WebAssembly is refused"
+  expects that taking the word out changes the policy. CI does not run the browser tests, so
+  nothing reports these until someone runs them.
+- The `barcode-scanner` entry in `src/tools/catalog.ts`. Its description and first two notes say
+  the page reads twenty-one types; on this site it would then read thirteen. Two tests hold those
+  sentences word for word (`tests/unit/barcode-scanner.test.ts`,
+  `frontend/tests/unit/barcode-scanner-page.test.tsx`), and the files derived from the catalogue
+  are regenerated as in [OPERATIONS.md](./OPERATIONS.md), "Adding a tool".
+- This section, the scanner's paragraph in [README.md](./README.md) and §14 of
+  [DESIGN-STUDIO-PLAN.md](./DESIGN-STUDIO-PLAN.md).
 
 **What is not covered.** The WHMCS side of the site sets its own headers
 (`platform/src/core/security.js`) and is unchanged. The tools bundle embedded there
