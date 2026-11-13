@@ -702,7 +702,26 @@ export const NAV_SECTIONS: RegistrySection[] = [
       "to": "/tools/business-tools",
       "ctaLabel": "Open Business Tools"
     },
-    "groups": []
+    "groups": [
+      {
+        "title": "Curated collections",
+        "links": [
+          {
+            "label": "File Tools",
+            "to": "/tools/file-tools",
+            "description": "Convert, compress and organize supported images and PDFs locally in your browser.",
+            "icon": "file",
+            "badge": "NEW"
+          },
+          {
+            "label": "File Converter",
+            "to": "/tools/file-converter",
+            "description": "Convert images and PDF pages in your browser without uploading the files.",
+            "icon": "file"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "resources",
@@ -1261,6 +1280,10 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
       {
         "label": "All Tools",
         "to": "/tools"
+      },
+      {
+        "label": "File Converter",
+        "to": "/tools/file-converter"
       },
       {
         "label": "Compliance & Document Tools",
@@ -1899,6 +1922,8 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/tools/document/mrz",
   "/tools/document/mrz-parser",
   "/tools/favorites",
+  "/tools/file-converter",
+  "/tools/file-tools",
   "/tools/history",
   "/tools/monitors",
   "/tools/mrz-generator",
@@ -2140,6 +2165,8 @@ export const REGISTRY_ROUTES: string[] = [
   "/developers/environments",
   "/digital-products",
   "/hosting/control-panels",
+  "/tools/file-tools",
+  "/tools/file-converter",
   "/docs",
   "/help",
   "/faq",

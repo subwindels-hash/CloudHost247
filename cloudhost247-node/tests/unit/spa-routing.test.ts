@@ -20,7 +20,10 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
 
   beforeEach(() => {
     publicDir = mkdtempSync(path.join(tmpdir(), 'ch247-public-'));
-    writeFileSync(path.join(publicDir, 'index.html'), '<html><body>SPA shell</body></html>');
+    writeFileSync(
+      path.join(publicDir, 'index.html'),
+      '<html><head><title>SPA shell</title><meta name="description" content="SPA shell"></head><body>SPA shell</body></html>'
+    );
     writeFileSync(path.join(publicDir, 'app.js'), 'console.log("built asset");');
     // Mirrors the real build output (see frontend/public/) — favicon.svg is a top-level static file
     // (not under /assets/), copied as-is by Vite's publicDir passthrough. robots.txt is deliberately
@@ -59,6 +62,8 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     '/legal',
     '/legal/privacy-policy',
     '/tools',
+    '/tools/file-tools',
+    '/tools/file-converter',
     // The canonical MRZ tool route registered in the Tools Center catalogue. It is served by the
     // SPA shell with the catalogue's own <title>/canonical metadata (see src/tools/presentation.ts).
     '/tools/mrz-generator',
@@ -69,6 +74,14 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
     const res = await app.inject({ method: 'GET', url: route });
     expect(res.statusCode).toBe(200);
     expect(res.body).toContain('SPA shell');
+    if (route === '/tools/file-tools') {
+      expect(res.body).toContain('<title>File Tools | CloudHost247</title>');
+      expect(res.body).toContain('http://localhost:3000/tools/file-tools');
+    }
+    if (route === '/tools/file-converter') {
+      expect(res.body).toContain('<title>File Converter | CloudHost247</title>');
+      expect(res.body).toContain('http://localhost:3000/tools/file-converter');
+    }
     await app.close();
   });
 

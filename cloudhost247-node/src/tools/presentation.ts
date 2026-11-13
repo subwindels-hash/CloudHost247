@@ -12,6 +12,20 @@ import { BUSINESS_TOOLS, BUSINESS_TOOLS_ROOT } from './business';
  * The order matters — the collection hub is a page like the catalogue entries, not a tool.
  */
 export function resolveToolPage(path: string) {
+  if (path === '/tools/file-tools')
+    return {
+      path,
+      name: 'File Tools',
+      summary:
+        'Browser-local image, PDF, media, archive, document and animation tools, plus optional transient REST API conversion jobs.',
+    };
+  if (path === '/tools/file-converter')
+    return {
+      path,
+      name: 'File Converter',
+      summary:
+        'Convert images and PDF pages locally in your browser. Your files are not uploaded to CloudHost247.',
+    };
   if (path === '/tools/compliance-documents')
     return {
       path,

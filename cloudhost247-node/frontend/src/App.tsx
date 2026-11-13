@@ -202,6 +202,8 @@ const DomainBulkSearchPage = lazy(() => import('./pages/domains/BulkSearchPage')
 const DomainBrokerPage = lazy(() => import('./pages/domains/BrokerPage'));
 const DnsManagementPage = lazy(() => import('./pages/DnsManagementPage'));
 const ToolsCenterPage = lazy(() => import('./pages/ToolsCenterPage'));
+const FileToolsSuitePage = lazy(() => import('./pages/FileToolsSuitePage'));
+const FileConverterPage = lazy(() => import('./pages/FileConverterPage'));
 const ToolPage = lazy(() => import('./pages/ToolPage'));
 const ToolsHistoryPage = lazy(() => import('./pages/ToolsHistoryPage'));
 const ToolsFavoritesPage = lazy(() => import('./pages/ToolsFavoritesPage'));
@@ -302,6 +304,8 @@ export default function App() {
             to the /tools/* catalogue lookup and rendered "Tool not found". Registered before the
             catch-all so it wins. */}
         <Route path="/tools/compliance-documents" element={<ComplianceDocumentsPage />} />
+        <Route path="/tools/file-tools" element={<FileToolsSuitePage />} />
+        <Route path="/tools/file-converter" element={<FileConverterPage />} />
         <Route path="/tools/*" element={<ToolPage />} />
 
         {/* Developer / Document Tools — ePassport MRZ Calculator, Validator & Parser. This is the

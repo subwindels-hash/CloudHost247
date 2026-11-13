@@ -988,6 +988,23 @@
               }
             },
             {
+              "label": "File Tools",
+              "icon": "file",
+              "desc": "Browser-local image, PDF, media, archive, document and animation tools, plus optional transient REST API jobs.",
+              "href": {
+                "spa": "/tools/file-tools"
+              },
+              "badge": "NEW"
+            },
+            {
+              "label": "File Converter",
+              "icon": "file",
+              "desc": "Convert images and PDF pages in your browser without uploading the files.",
+              "href": {
+                "spa": "/tools/file-converter"
+              }
+            },
+            {
               "label": "Compliance & Document Tools",
               "icon": "file",
               "desc": "Calculators and generators for compliance paperwork and documents.",
@@ -1900,6 +1917,12 @@
           "href": {
             "spa": "/tools",
             "php": "tools"
+          }
+        },
+        {
+          "label": "File Converter",
+          "href": {
+            "spa": "/tools/file-converter"
           }
         },
         {
