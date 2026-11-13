@@ -13,11 +13,28 @@ import { classifyIpv6, generateUla } from '../ip/ipv6-tools';
 import { classifyEmailRouting, MAILBOX_NOT_VERIFIED, validateEmailSyntax } from '../email/verify';
 import { mxLookup } from '../dns/lookup';
 import type { ToolHandler } from './kit';
-import { maybeStr, num, oneOf, str, targetLabel } from './kit';
+import { EXTRACT_FILTER_MODES, EXTRACT_MAX_INPUT, EXTRACT_SEPARATORS, EXTRACT_TYPES, extractAddresses } from '../productivity/extractor';
+import { bool, maybeNum, maybeStr, num, oneOf, str, targetLabel } from './kit';
 
 const MINECRAFT_MODES: readonly MinecraftMode[] = ['ampersand-to-section', 'section-to-ampersand', 'strip'];
 
+const extractorHandler: ToolHandler = async (input) =>
+  extractAddresses({
+    text: str(input, 'text', { required: true, max: EXTRACT_MAX_INPUT, trim: false }),
+    type: oneOf(input, 'type', EXTRACT_TYPES, { default: 'email' }),
+    separator: oneOf(input, 'separator', EXTRACT_SEPARATORS, { default: 'comma' }),
+    customSeparator: maybeStr(input, 'customSeparator', { max: 20, trim: false }),
+    groupSize: maybeNum(input, 'groupSize', { min: 1, max: 10_000 }),
+    sort: bool(input, 'sort', false),
+    filter: maybeStr(input, 'filter', { max: 200 }),
+    filterMode: oneOf(input, 'filterMode', EXTRACT_FILTER_MODES, { default: 'only' }),
+  });
+
 export const gapHandlers: Record<string, ToolHandler> = {
+  'email-extractor': extractorHandler,
+  // Extractor Pro files the same extraction into managed lists in the browser.
+  'email-extractor-pro': extractorHandler,
+
   'minecraft-color-codes': async (input) => {
     const mode = oneOf(input, 'mode', MINECRAFT_MODES, { default: 'ampersand-to-section' });
     const text = maybeStr(input, 'text', { max: 5000 });
@@ -98,5 +115,8 @@ export const emailGapHandlers: Record<string, ToolHandler> = {
 };
 
 export const gapTargets: Record<string, (input: Record<string, unknown>) => string | null> = {
+  // Pasted text can hold personal addresses, so it is never used as a history label.
+  'email-extractor': () => null,
+  'email-extractor-pro': () => null,
   'ipv6-compatibility-checker': (input) => targetLabel(typeof input.domain === 'string' ? input.domain : null),
 };

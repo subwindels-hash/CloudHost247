@@ -1,6 +1,8 @@
+import { assessRetrievedSources, type TrustTrace } from './source-trust';
+import type { KnowledgeFailure } from './knowledge-trust';
 import type { Queryable } from '../db/types';
 import type { RetrievalRow } from './website-knowledge-repo';
-import { findChunksByTitle, searchChunks } from './website-knowledge-repo';
+import { findChunksByTitle, knowledgeIndexReady, searchChunks } from './website-knowledge-repo';
 import {
   QUESTION_SCAFFOLDING,
   retrievalQueryFor,
@@ -60,6 +62,9 @@ export interface RetrievedChunk {
 }
 
 export interface RetrievalResult {
+  /** Present when verification failed; empty is NOT evidence of an uncovered topic. */
+  verificationFailure?: KnowledgeFailure;
+  trustTrace?: TrustTrace;
   understanding: QueryUnderstanding;
   /** The query actually sent to the database, for the console and for tests. */
   effectiveQuery: string;
@@ -455,6 +460,17 @@ export async function retrieveKnowledge(
   // A resolved offering contributes its own vocabulary to the query. "Where can I manage my
   // hosting?" resolves to the customer account, so the account destinations are searched too —
   // without this, the words "manage" and "hosting" only ever match product pages.
+  const unavailable = (verificationFailure: KnowledgeFailure): RetrievalResult => ({
+    understanding, effectiveQuery, chunks: [], pages: [], entities: understanding.entities,
+    empty: true, verificationFailure,
+    trustTrace: { retrieved: [], selected: [], sources: [], conflicts: [], outcome: 'unavailable', escalationReason: verificationFailure },
+  });
+  try {
+    if (!await knowledgeIndexReady(db)) return unavailable('INDEX_NOT_READY');
+  } catch {
+    return unavailable('INDEX_STATUS_UNAVAILABLE');
+  }
+
   const entityTerms = understanding.entities
     .slice(0, 2)
     .flatMap((entity) => [entity.label, ...entity.aliases.slice(0, 4)]);
@@ -472,8 +488,8 @@ export async function retrieveKnowledge(
   try {
     rows = await searchChunks(db, { tsQuery, keywords, limit: options.limit ?? 60, kinds: options.kinds });
   } catch {
-    // A search failure must degrade to "I cannot verify", never to a fabricated answer.
-    rows = [];
+    // Do not turn an operational failure into a claim about absent website content.
+    return unavailable('SEARCH_UNAVAILABLE');
   }
 
   // Exact product/page-name match: the database's language configuration stems and stops words, so
@@ -487,7 +503,8 @@ export async function retrieveKnowledge(
       const exact = await findChunksByTitle(db, candidate, 6);
       if (exact.length > 0) rows = [...rows, ...exact];
     } catch {
-      /* the lexical rows are still valid */
+      // An incomplete candidate set is not a verified answer, even if one leg succeeded.
+      return unavailable('SEARCH_UNAVAILABLE');
     }
   }
 
@@ -524,11 +541,24 @@ export async function retrieveKnowledge(
         entities: understanding.entities,
         empty: true,
         ungroundedTerms: missing,
+        trustTrace: { retrieved: [...new Set(unique.map(r => r.source_id))], selected: [], sources: [], conflicts: [], outcome: 'no_match', escalationReason: null },
       };
     }
   }
   const useful = reranked.filter((chunk) => chunk.score >= MIN_USEFUL_SCORE);
-  const chunks = (useful.length > 0 ? useful : []).slice(0, options.limit ?? 24);
+  // Trust is applied to relevant evidence before it can reach any composer/model.
+  let trustTrace: TrustTrace;
+  try {
+    trustTrace = await assessRetrievedSources(db, [...new Set(useful.map(c => c.sourceId))]);
+  } catch {
+    return unavailable('TRUST_METADATA_UNAVAILABLE');
+  }
+  if (trustTrace.escalationReason) {
+    const failure = trustTrace.outcome === 'conflict' ? 'SOURCE_CONFLICT'
+      : trustTrace.outcome === 'unavailable' ? 'TRUST_METADATA_UNAVAILABLE' : 'SOURCE_NOT_CURRENT';
+    return { ...unavailable(failure), trustTrace };
+  }
+  const chunks = useful.filter(c => trustTrace.selected.includes(c.sourceId)).slice(0, options.limit ?? 24);
   const pages = groupByPage(chunks, options.pageLimit ?? 4);
 
   // Subject coverage (see `subjectCoverage`). When the page that won does not even contain most of
@@ -566,17 +596,14 @@ export async function retrieveKnowledge(
         entities: understanding.entities,
         empty: true,
         ungroundedTerms: subjectTerms,
+        trustTrace: { ...trustTrace, selected: [], outcome: 'no_match' },
       };
     }
   }
 
   return {
-    understanding,
-    effectiveQuery,
-    chunks,
-    pages,
-    entities: understanding.entities,
-    empty: pages.length === 0,
+    understanding, effectiveQuery, chunks, pages,
+    entities: understanding.entities, empty: pages.length === 0, trustTrace,
   };
 }
 

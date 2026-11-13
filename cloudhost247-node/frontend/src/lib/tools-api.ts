@@ -182,6 +182,19 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
   'ip-to-hostname': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true } ] },
   'isp-lookup': { method: 'GET', fields: [ { name: 'address', label: 'IP address', type: 'text', required: true } ] },
   'ip-converters': { method: 'POST', fields: [ select('mode', 'Conversion', ['ipv4-to-decimal', 'decimal-to-ipv4', 'ipv6-to-decimal', 'decimal-to-ipv6', 'ipv4-to-ipv6', 'ipv6-to-ipv4', 'expand-ipv6', 'compress-ipv6', 'cidr-to-range', 'range-to-cidr'], { required: true, defaultValue: 'ipv4-to-decimal' }), { name: 'value', label: 'Value', type: 'text', required: true, help: 'For range-to-cidr, enter "start end".' } ] },
+  'email-extractor': { method: 'POST', intro: 'Paste any text to pull out every email address or web link in it. Duplicates are removed. Addresses are matched by format only — nothing is contacted, verified or visited.', fields: [
+    { name: 'text', label: 'Input text', type: 'textarea', required: true, placeholder: 'Paste text containing email addresses or links…', help: 'Up to 500,000 characters.' },
+    select('type', 'Type of address to extract', ['email', 'web'], { defaultValue: 'email' }),
+    select('separator', 'Separator', ['comma', 'pipe', 'colon', 'new-line', 'other'], { defaultValue: 'comma' }),
+    { name: 'customSeparator', label: 'Custom separator', type: 'text', required: true, placeholder: ';', showWhen: { field: 'separator', equals: ['other'] } },
+    { name: 'groupSize', label: 'Group: new line after this many addresses (optional)', type: 'number', min: 1, max: 10000 },
+    { name: 'sort', label: 'Sort alphabetically', type: 'checkbox' },
+    { name: 'filter', label: 'Filter string (optional)', type: 'text', placeholder: '@example.com' },
+    select('filterMode', 'Filter mode', ['only', 'exclude'], { defaultValue: 'only', help: '“only” keeps addresses containing the filter string; “exclude” drops them.' }),
+  ] },
+  'email-extractor-pro': { method: 'POST', intro: 'Extract email addresses from the clipboard, files or a folder into Subscription, UnSubscription and exclusion lists.', fields: [
+    { name: 'text', label: 'Input text', type: 'textarea', required: true, help: 'Up to 500,000 characters per request.' },
+  ] },
   'minecraft-color-codes': { method: 'POST', intro: 'Reference for the standard Minecraft colour and format codes. Enter text to convert it; leave the text blank to see the table only.', fields: [
     { name: 'text', label: 'Text to convert (optional)', type: 'textarea', placeholder: 'Welcome &ato &lCloudHost247', help: 'Up to 5,000 characters.' },
     select('mode', 'Conversion', ['ampersand-to-section', 'section-to-ampersand', 'strip'], { defaultValue: 'ampersand-to-section' }),

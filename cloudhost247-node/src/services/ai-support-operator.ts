@@ -1,3 +1,5 @@
+import type { TrustTrace } from '../ai-website/source-trust';
+import { knowledgeFailureMessage, type KnowledgeFailure } from '../ai-website/knowledge-trust';
 import type { Queryable } from '../db/types';
 import { listKnowledgeEntries, type SupportKnowledgeEntry } from '../ai/knowledge';
 import { composeAnswer, type AnswerLink, type AnswerEvidence } from '../ai-website/answer-composer';
@@ -41,6 +43,9 @@ export type EscalationReason =
   | 'OTHER';
 
 export interface OperatorDecision {
+  /** Safe operational category, distinct from unanswered content. */
+  knowledgeFailure?: KnowledgeFailure;
+  trustTrace?: TrustTrace;
   kind: 'ANSWER' | 'ESCALATE' | 'NEWSLETTER' | 'CLARIFY';
   body: string;
   intent: string;
@@ -268,6 +273,13 @@ export async function decideSupportResponse(
     pageLimit: 4,
   });
 
+  if (retrieval.verificationFailure) {
+    return {
+      ...noAnswer('knowledge_unavailable', 'TECHNICAL_SUPPORT_REQUIRED', knowledgeFailureMessage(retrieval.verificationFailure), 0),
+      knowledgeFailure: retrieval.verificationFailure, trustTrace: retrieval.trustTrace, engine: 'retrieval', origin: 'website',
+    };
+  }
+
   if (reviewedEntry) {
     const names = await catalogNames(db);
     const reviewed = await reviewedAnswer(reviewedEntry, names);
@@ -281,7 +293,7 @@ export async function decideSupportResponse(
         existing.add(url);
       }
     }
-    return reviewed;
+    return { ...reviewed, trustTrace: retrieval.trustTrace };
   }
 
   const composed = await composeAnswer(text, retrieval.understanding, {
@@ -302,7 +314,7 @@ export async function decideSupportResponse(
       sources: [],
       reason: composed.escalateReason ?? 'AI_UNABLE_TO_ANSWER',
       engine: composed.engine,
-      origin: 'website',
+      origin: 'website', trustTrace: retrieval.trustTrace,
     };
   }
   if (composed.kind === 'CLARIFY') {
@@ -313,7 +325,7 @@ export async function decideSupportResponse(
       confidence: composed.confidence,
       sources: [],
       engine: composed.engine,
-      origin: 'website',
+      origin: 'website', trustTrace: retrieval.trustTrace,
     };
   }
 
@@ -327,7 +339,7 @@ export async function decideSupportResponse(
     links: composed.links,
     evidence: composed.evidence,
     engine: composed.engine,
-    origin: 'website',
+    origin: 'website', trustTrace: retrieval.trustTrace,
     followUps: suggestFollowUps(retrieval.understanding, retrieval, { resolveRoute, currentPath: context.currentPath ?? null }),
   };
 }

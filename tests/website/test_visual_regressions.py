@@ -77,7 +77,7 @@ REVIEWED_CARD_ARTWORK = {
 CACHE_BUSTING_STAMPS = {
     # (stamp, sha256). Re-cut after an intentional asset edit, together with the ?v= stamp.
     'templates/cloudhost247/css/site.css': (
-        '2026110801', '0667dd949a9ebe0a54245ef0012b757e067eb5d257bc6dd087b355553917acf6'),
+        '2026110802', '103b149fad10266e0d409de54a8a3dca0a723f4fe876ba68e5d4dc19f4d72d67'),
     'templates/cloudhost247/css/design-system.css': (
         '2026110801', '3a739ac64990fb5bd9c780f4a37b432495263a46779e35704d99fadf394d4508'),
     'templates/cloudhost247/js/site.js': (
@@ -89,9 +89,9 @@ CACHE_BUSTING_STAMPS = {
     'templates/cloudhost247/js/tools.js': (
         '20261016', 'c15666bec6bbf61b2f0317e69138c42cbe56992daaad9b767ff624c483544ee2'),
     'templates/cloudhost247/css/metals.css': (
-        '2026110801', '3d830466f4cefcda26d8ac291d7f85ccf17e7d0d7f7d557daa61048dde76b9e7'),
+        '2026111003', '7397fff62bb7da2ba6fa394bb6410af2f5cd531a8c3780cab529a9886c4b84dd'),
     'templates/cloudhost247/js/motion.js': (
-        '20261107', 'e7d6faf94d0420b732bc23f4e24c51cd0c8fa786a4e7709de91a844ad6909f27'),
+        '2026111002', '44780bb270f4848e5e003ff0bc9b5ae844dea1f1cd6cf30339b0c54ce3b9dcfa'),
     # GoDaddy/Amazon chrome benchmark for the WHMCS theme (loads after the generated sheets).
     'templates/cloudhost247/css/chrome-benchmark.css': (
         '2026110801', 'fcbe4ef4a410fb4a69116fa0e98eec29ef068542d3c288a0834648301f2d4415'),

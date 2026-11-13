@@ -59,7 +59,7 @@ describe('publishing a new service page', () => {
   /** Simulates a deploy that published one additional page, with its route registered. */
   function syncWithNewPage() {
     const discovery = discoverWebsiteDocuments({ extraDocuments: [NEW_PAGE] });
-    return syncWebsiteKnowledge(db, { trigger: 'deploy', discovery });
+    return syncWebsiteKnowledge(db, { trigger: 'event', discovery });
   }
 
   it('discovers and indexes a page the code has never seen', async () => {

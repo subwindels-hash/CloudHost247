@@ -1798,6 +1798,56 @@
       "resultMode": "calculated"
     },
     {
+      "slug": "email-extractor",
+      "name": "Email & Link Extractor",
+      "category": "productivity",
+      "summary": "Pull every email address or web link out of pasted text.",
+      "description": "Finds every email address, or every web address, in the text you paste, removes duplicates, and returns the list with the separator you choose. Optional grouping, alphabetical sorting and a contains / does-not-contain filter. Addresses are matched by format only: nothing is fetched, no mailbox is contacted or verified, and no link is visited.",
+      "icon": "mail",
+      "path": "/tools/email-extractor",
+      "apiPath": "/api/tools/email-extractor",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/email-extractor"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Email & Link Extractor | CloudHost247",
+      "relatedTools": [
+        "email-extractor-pro",
+        "word-counter",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
+      "slug": "email-extractor-pro",
+      "name": "Email Extractor Pro",
+      "category": "productivity",
+      "summary": "Build subscription, unsubscription and exclusion lists from the clipboard, files or a folder.",
+      "description": "Extracts email addresses from the clipboard, from files you choose, or from a whole folder (optionally including sub-folders) into three managed lists: Subscription, UnSubscription and Excluding Email Address Pattern. Unsubscribed addresses and addresses matching an excluded pattern are kept out of the Subscription list. Files are read in your browser and only their text is sent for extraction; the lists stay in the open page and are not stored. Addresses are matched by format only: no mailbox is contacted or verified.",
+      "icon": "mail",
+      "path": "/tools/email-extractor-pro",
+      "apiPath": "/api/tools/email-extractor-pro",
+      "authRequired": false,
+      "visibility": "public",
+      "legacyPaths": [
+        "/tools/productivity/email-extractor-pro"
+      ],
+      "discoveryCategories": [
+        "utilities"
+      ],
+      "seoTitle": "Email Extractor Pro | CloudHost247",
+      "relatedTools": [
+        "email-extractor",
+        "word-counter",
+        "notepad"
+      ],
+      "resultMode": "calculated"
+    },
+    {
       "slug": "minecraft-color-codes",
       "name": "Minecraft Color Codes",
       "category": "productivity",

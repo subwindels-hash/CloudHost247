@@ -1,6 +1,6 @@
 import {describe,expect,it,vi} from 'vitest';
 import {decideSupportResponse} from '../../src/services/ai-support-operator';
-const db={query:vi.fn(async()=>({rows:[{name:'Cloud VPS'}],rowCount:1}))} as any;
+const db={query:vi.fn(async(sql: string)=>({rows:sql.includes('AS latest_status') ? [{indexed:'1',incomplete:'0',latest_status:'succeeded'}] : [{name:'Cloud VPS'}],rowCount:1}))} as any;
 describe('embedded AI support operator',()=>{
  it('immediately escalates explicit human requests',async()=>{const result=await decideSupportResponse(db,'Please let me speak to a human agent');expect(result.kind).toBe('ESCALATE');expect(result.reason).toBe('USER_REQUESTED_HUMAN')});
  it('refuses to invent account-specific state',async()=>{const result=await decideSupportResponse(db,'Why is my server offline?');expect(result.kind).toBe('ESCALATE');expect(result.reason).toBe('ACCOUNT_SPECIFIC_REQUEST')});

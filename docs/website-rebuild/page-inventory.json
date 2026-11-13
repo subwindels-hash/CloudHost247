@@ -35,7 +35,7 @@
     "pages_by_route_owner": {
       "cloudhost247-theme": 75,
       "internal": 17,
-      "tools-front-controller": 282,
+      "tools-front-controller": 286,
       "whmcs-core": 8
     }
   },
@@ -935,12 +935,12 @@
         "description": "Explore downloadable digital products from CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/digital-products.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/digital-products.svg",
+      "visual": "storefronts/digital-products",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "platforms / Application platforms",
       "navigation_location": "platforms / Application platforms",
@@ -1445,12 +1445,12 @@
         "description": "Explore Google Workspace plans and collaboration options with CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/google-workspace.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/google-workspace.svg",
+      "visual": "storefronts/google-workspace",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
@@ -1835,12 +1835,12 @@
         "description": "Explore CloudHost247 virtual number services for your business."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/number-services.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/number-services.svg",
+      "visual": "storefronts/number-services",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
@@ -1895,12 +1895,12 @@
         "description": "Explore Microsoft 365 plans and productivity options with CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/office-365.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/office-365.svg",
+      "visual": "storefronts/office-365",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
@@ -2075,12 +2075,12 @@
         "description": "Explore LTE proxy plans and connection options with CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/proxy-services.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/proxy-services.svg",
+      "visual": "storefronts/proxy-services",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "cloud / Servers",
       "navigation_location": "cloud / Servers",
@@ -2135,12 +2135,12 @@
         "description": "Explore CloudHost247 remote desktop server plans and find the resources for your remote workspace."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/rdp-hosting.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/rdp-hosting.svg",
+      "visual": "storefronts/rdp-hosting",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "cloud / Servers",
       "navigation_location": "cloud / Servers",
@@ -2405,12 +2405,12 @@
         "description": "Explore CloudHost247 social media marketing services and find the right fit for your goals."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/smm-services.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/smm-services.svg",
+      "visual": "storefronts/smm-services",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
@@ -2435,12 +2435,12 @@
         "description": "Explore SMTP hosting plans and email sending options with CloudHost247."
       },
       "hero_artwork": {
-        "svg": "",
+        "svg": "storefronts/smtp-hosting.svg",
         "scene": ""
       },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
+      "hero_asset": "storefronts/smtp-hosting.svg",
+      "visual": "storefronts/smtp-hosting",
+      "image_status": "present",
       "seo_status": "ok",
       "navigation_placement": "hosting / Specialized hosting",
       "navigation_location": "hosting / Specialized hosting",
@@ -10810,6 +10810,126 @@
       },
       "hero_asset": "",
       "visual": "domain",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/email-extractor.php",
+      "path": "/tools/email-extractor",
+      "canonical_url": "/tools/email-extractor",
+      "title": "Email & Link Extractor",
+      "page_title": "Email & Link Extractor",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Email & Link Extractor",
+        "description": "Pull every email address or web link out of pasted text."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/productivity/email-extractor.php",
+      "path": "/tools/productivity/email-extractor",
+      "canonical_url": "/tools/email-extractor",
+      "title": "Email & Link Extractor",
+      "page_title": "Email & Link Extractor",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Email & Link Extractor",
+        "description": "Pull every email address or web link out of pasted text."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/email-extractor-pro.php",
+      "path": "/tools/email-extractor-pro",
+      "canonical_url": "/tools/email-extractor-pro",
+      "title": "Email Extractor Pro",
+      "page_title": "Email Extractor Pro",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Email Extractor Pro",
+        "description": "Build subscription, unsubscription and exclusion lists from the clipboard, files or a folder."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/productivity/email-extractor-pro.php",
+      "path": "/tools/productivity/email-extractor-pro",
+      "canonical_url": "/tools/email-extractor-pro",
+      "title": "Email Extractor Pro",
+      "page_title": "Email Extractor Pro",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Email Extractor Pro",
+        "description": "Build subscription, unsubscription and exclusion lists from the clipboard, files or a folder."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
       "image_status": "n/a",
       "seo_status": "redirects (301)",
       "navigation_placement": "",

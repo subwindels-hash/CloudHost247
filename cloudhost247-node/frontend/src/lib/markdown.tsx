@@ -29,7 +29,7 @@ interface Block {
 function parseInline(text: string, keyPrefix: string): ReactNode[] {
   // Documentation is fetched from public Markdown at runtime, outside Vite's module transform.
   // Apply the same customer-facing punctuation rule to prose while leaving fenced code untouched.
-  // split/join rather than replaceAll: frontend/tsconfig.json pins lib to ES2020 (TS2550).
+  // split/join remains compatible with the frontend ES2020 library target.
   text = text.split('\u2014').join('-');
   const nodes: ReactNode[] = [];
   // Links first, then code, then emphasis — order matters, because a link label may contain code.

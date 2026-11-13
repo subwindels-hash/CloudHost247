@@ -7,6 +7,7 @@ original_manifest='docs/independent-rebuild/original-file-manifest.sha256'
 
 # Some language overrides are intentionally CRLF; ignore only the carriage return in a CRLF line ending.
 git -c core.whitespace=cr-at-eol diff --check
+git -c core.whitespace=cr-at-eol diff --cached --check
 
 # --- Generated public-site surfaces --------------------------------------------------------------
 # The registry feed, the PHP theme registry, robots.txt, the published documentation and the route
@@ -121,6 +122,7 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 node --test server-agent/tests/*.test.js
+node --test tests/site/*.test.mjs
 
 # --- Static verification (runs without PHP or WHMCS) -------------------------------------------
 python3 -m unittest -v tests/foundation/test_static.py tests/theme/test_static.py tests/currency/test_static.py tests/marketing/test_static.py tests/ovh/test_static.py tests/ovh/test_product_services_static.py tests/ovh/test_public_catalog_static.py tests/rdp/test_static.py tests/integrations/test_static.py tests/modules/test_static.py tests/builder/test_static.py tests/smm/test_static.py tests/tools/test_static.py tests/broker/test_static.py tests/cart_recovery/test_static.py tests/passkey/test_static.py tests/digitalproducts/test_static.py tests/payments/test_static.py tests/security/test_security.py tests/security/test_archive_integration.py tests/security/test_release_workflow_docs.py tests/security/test_release_gate_static.py tests/security/test_domain_data_provenance.py
@@ -160,7 +162,7 @@ php tests/tools/site-integration.php
 # Browser tools (MRZ among them) are pure modules; run them on Node so a broken handler fails here.
 node tests/tools/local.test.mjs
 php tests/website/run.php
-python3 -m unittest -v tests/website/test_static.py tests/website/test_account_pages.py tests/website/test_cart_skin.py tests/website/test_theme_palette.py tests/website/test_brand_defaults.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py tests/website/test_catalogue_honesty.py tests/website/test_media_library_parity.py tests/website/test_page_inventory.py tests/website/test_tools_surface.py tests/website/test_report_figures.py tests/website/test_visual_regressions.py tests/website/test_global_positioning.py
+python3 -m unittest -v tests/website/test_static.py tests/website/test_account_pages.py tests/website/test_cart_skin.py tests/website/test_theme_palette.py tests/website/test_brand_defaults.py tests/website/test_manifest_visuals.py tests/website/test_accessibility_contract.py tests/website/test_fixture_checks.py tests/website/test_catalogue_honesty.py tests/website/test_media_library_parity.py tests/website/test_page_inventory.py tests/website/test_tools_surface.py tests/website/test_report_figures.py tests/website/test_visual_regressions.py tests/website/test_global_positioning.py tests/website/test_digital_products_storefront.py tests/website/test_domain_navigation.py tests/website/test_google_workspace_storefront.py tests/website/test_number_storefront.py tests/website/test_office_365_storefront.py tests/website/test_proxy_storefront.py tests/website/test_rdp_storefront.py tests/website/test_service_page_motion.py tests/website/test_smm_storefront.py tests/website/test_smtp_storefront.py
 python3 scripts/verify-website.py
 # Published-link integrity across every surface: the registry's menus and footer columns, the SPA
 # router and content JSON, the PHP theme templates and page controllers, and the tools tree. This is
