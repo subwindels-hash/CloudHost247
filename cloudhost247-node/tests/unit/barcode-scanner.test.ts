@@ -32,6 +32,7 @@ import { handlerFor, targetFor } from '../../src/tools/handlers';
 import { renderSymbolPng } from '../../src/tools/design-studio/barcode/encoder';
 import { symbologyById, type Symbology } from '../../src/tools/design-studio/barcode/symbologies';
 import { BASIC_SCAN_FORMATS, SCAN_BUDGET_MS, SCAN_FORMATS, kindOf, luminanceOf, scanHit, scanPasses, scanPixels, telepenNumber, visibleText, type ScanHit, type ScanPixels } from '../../src/tools/scanner/decode';
+import { leniently, strictly } from '../../src/tools/scanner/formats';
 import { scanImage, type BarcodeScanResult } from '../../src/tools/scanner/scan-image';
 import { libraryReader } from '../helpers/barcode-reader';
 
@@ -827,6 +828,73 @@ describe('text beyond ASCII: both decoders, in the same words', () => {
     expect(await both(await holding('qrcode', [0x41, 0xe9, 0x42, 0xc3], eci(26)), 'not UTF-8')).toEqual({ type: 'QR Code', text: 'A\ufffdB\ufffd' });
     // Shift JIS with the three control characters Node's converter would exchange.
     expect(await both(await holding('azteccode', [0x93, 0xfa, 0x1a, 0x96, 0x7b, 0x1c, 0x7f, 0x41], eci(20)), 'controls')).toEqual({ type: 'Aztec Code', text: '日\u001a本\u001c\u007fA' });
+  }, 60_000);
+
+  it('converts Windows-1252 by a table of its own, whatever the runtime makes of that set', async () => {
+    // Node 24.8.0's converter gives ISO-8859-1 for Windows-1252: a euro sign (byte 80) comes out as
+    // a control character, where a browser and Node 22 give the euro sign. The basic decoder
+    // therefore converts this set itself. These are the characters of bytes 80 to 9F, the only
+    // ones in which the two sets differ; the five places the code page leaves empty hold the
+    // control character of the same number.
+    const characters = [
+      0x20ac, 0x0081, 0x201a, 0x0192, 0x201e, 0x2026, 0x2020, 0x2021, 0x02c6, 0x2030, 0x0160, 0x2039, 0x0152, 0x008d, 0x017d, 0x008f,
+      0x0090, 0x2018, 0x2019, 0x201c, 0x201d, 0x2022, 0x2013, 0x2014, 0x02dc, 0x2122, 0x0161, 0x203a, 0x0153, 0x009d, 0x017e, 0x0178,
+    ];
+    const text = String.fromCharCode(...characters);
+    const places = characters.map((_, index) => 0x80 + index);
+
+    // Checked against the full decoder, which is another library with a table of its own, in every
+    // two-dimensional type. Under Node 24.8.0 this is the check that fails without the table. (Half
+    // the bytes to a symbol: the QR Code that holds all thirty-two is one of the few clean symbols
+    // the basic decoder's library does not find.)
+    for (const from of [0, 16]) {
+      for (const [bcid, type] of TWO_D) {
+        expect(await both(await holding(bcid, places.slice(from, from + 16), eci(23)), `${bcid} Windows-1252 from ${from}`)).toEqual({ type, text: text.slice(from, from + 16) });
+      }
+    }
+
+    // Every byte, under each name the set goes by here. No byte is invalid in it.
+    const all = Uint8Array.from({ length: 256 }, (_, value) => value);
+    const whole = Array.from(all, (value) => (value >= 0x80 && value <= 0x9f ? String.fromCharCode(characters[value - 0x80] as number) : String.fromCharCode(value))).join('');
+    for (const label of ['windows-1252', 'cp1252', 'x-cp1252']) {
+      expect(leniently(label, all), label).toBe(whole);
+      expect(strictly(label, all), label).toBe(whole);
+    }
+
+    // The same with a converter that is wrong about the set in the way Node 24.8.0's is, so that
+    // this holds on a runtime whose own converter happens to be right.
+    const Runtime = TextDecoder;
+    const picture = pixelsOf(await holding('qrcode', places.slice(0, 16), eci(23)));
+    const before = scanPixels(picture, 'thorough');
+    expect(before?.text).toBe(text.slice(0, 16));
+    let asked = 0;
+    vi.stubGlobal(
+      'TextDecoder',
+      class {
+        private readonly runtime: TextDecoder;
+        constructor(label?: string, options?: TextDecoderOptions) {
+          this.runtime = new Runtime(label, options);
+        }
+        get encoding(): string {
+          return this.runtime.encoding;
+        }
+        decode(bytes: Uint8Array): string {
+          asked += 1;
+          return this.runtime.encoding === 'windows-1252' ? Buffer.from(bytes).toString('latin1') : this.runtime.decode(bytes);
+        }
+      }
+    );
+    expect(new TextDecoder('windows-1252').decode(Uint8Array.of(0x80))).toBe('\u0080');
+    asked = 0;
+    expect(leniently('windows-1252', all)).toBe(whole);
+    expect(strictly('cp1252', all)).toBe(whole);
+    expect(scanPixels(picture, 'thorough')).toEqual(before);
+    // The converter was not asked for this set at all.
+    expect(asked).toBe(0);
+    // A set left to the runtime still goes to it, and a name it does not know still throws.
+    expect(leniently('windows-1250', Uint8Array.of(0x8a, 0x9a))).toBe('\u0160\u0161');
+    expect(asked).toBe(1);
+    expect(() => leniently('cp437', all)).toThrow(RangeError);
   }, 60_000);
 
   it('judges the bytes of a QR Code apart from its digits and capitals, and reads one written in Kanji mode', async () => {

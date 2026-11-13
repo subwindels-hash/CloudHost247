@@ -97,15 +97,41 @@ export function latin1(bytes: ArrayLike<number>): string {
 }
 
 /**
+ * Windows-1252 where it is not ISO-8859-1: the characters of bytes 80 to 9F, as the Encoding
+ * Standard gives them. The five places the code page leaves empty (81, 8D, 8F, 90, 9D) hold the
+ * control character of the same number.
+ */
+const WINDOWS_1252_80_TO_9F =
+  '\u20ac\u0081\u201a\u0192\u201e\u2026\u2020\u2021\u02c6\u2030\u0160\u2039\u0152\u008d\u017d\u008f' +
+  '\u0090\u2018\u2019\u201c\u201d\u2022\u2013\u2014\u02dc\u2122\u0161\u203a\u0153\u009d\u017e\u0178';
+
+/** Bytes in Windows-1252 as text. Every byte is a character in it, so nothing is ever invalid. */
+function windows1252(bytes: Uint8Array): string {
+  let text = '';
+  for (let index = 0; index < bytes.length; index += 1) {
+    const value = bytes[index] as number;
+    text += value >= 0x80 && value <= 0x9f ? (WINDOWS_1252_80_TO_9F[value - 0x80] as string) : String.fromCharCode(value);
+  }
+  return text;
+}
+
+/**
  * Bytes as text, by the runtime's converter for a character set. A byte-order mark is kept: it is
  * part of what the barcode holds.
  *
- * Shift JIS takes care. Node's converter exchanges three control characters (bytes 1A, 1C and 7F)
- * where a browser's leaves them as they are, so those three are taken out of its hands and the text
- * is the same in both.
+ * Two sets are not left to the runtime, because runtimes disagree about them and the text has to be
+ * the same wherever this runs:
+ *
+ *  - Windows-1252. The converter of Node 24.8.0 gives ISO-8859-1 for it, so a euro sign (byte 80)
+ *    comes out as a control character; a browser and Node 22 give the euro sign. It is converted
+ *    here, by the table above. The runtime is still asked what a label means, so every name of the
+ *    set is covered and an unknown name still throws.
+ *  - Shift JIS. Node's converter exchanges three control characters (bytes 1A, 1C and 7F) where a
+ *    browser's leaves them as they are, so those three are taken out of its hands.
  */
 function converted(label: string, bytes: Uint8Array, fatal: boolean): string {
   const converter = new TextDecoder(label, { fatal, ignoreBOM: true });
+  if (converter.encoding === 'windows-1252') return windows1252(bytes);
   if (converter.encoding !== 'shift_jis') return converter.decode(bytes);
   let text = '';
   let from = 0;

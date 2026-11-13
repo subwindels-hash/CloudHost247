@@ -645,6 +645,14 @@ the number of the set as a character of the data. Now:
 - A character set the barcode states (an ECI) is applied: UTF-8, UTF-16, the ISO-8859 and Windows
   sets, Shift JIS, Big5, GB 18030 and EUC-KR are exercised in the tests, in each of QR Code, Data
   Matrix, PDF417 and Aztec Code.
+- Windows-1252 is converted by a table of the decoder's own (`formats.ts`), not by the runtime.
+  Node 24.8.0's converter gives ISO-8859-1 for that set, so under it the API reported a euro sign
+  as a control character, while the page, in a browser, reported the euro sign. The pull request's
+  CI found this: its Node 24.8.0 job failed the test that reads each character set with both
+  decoders, and its Node 22.12.0 job passed. The table is checked against the full decoder's, byte
+  by byte, and against a stand-in for the faulty converter, so the check does not depend on which
+  Node runs it. The converters for thirty-five other sets were compared between Node 22.22.3 and
+  24.8.0 on the bytes 00 to FF and gave the same text.
 - Bytes that are not text in any of these are given one character to each byte by both decoders.
   Left to itself the full decoder's library gives a few stray characters and a row of replacement
   marks for them, and the bytes are gone; where its text holds such a mark the scanner works the
@@ -707,7 +715,7 @@ What a visitor's browser fetches the first time something is scanned, in additio
 
 So the full decoder is the larger download, by about 0.6 MB as stored. The application itself sends
 static files uncompressed; whether the binary travels compressed depends on the web server in front
-of it. The scanner page's own script is 22.9 kB (8.8 kB compressed) and its style sheet 4.4 kB. The
+of it. The scanner page's own script is 23.1 kB (9.0 kB compressed) and its style sheet 4.4 kB. The
 embedded build for the WHMCS theme was not changed by this round: there the scanner is still the
 upload form that calls the API, and the bundle holds neither decoder. It was 456 kB (114 kB
 compressed) before `main` was merged and is 480 kB (119 kB) after, the difference being the two
@@ -719,12 +727,12 @@ Run from `cloudhost247-node/`. These replace the scanner rows and the totals of 
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Both decoders and the API | `npx vitest run tests/unit/barcode-scanner.test.ts` | 141 passed |
+| Both decoders and the API | `npx vitest run tests/unit/barcode-scanner.test.ts` | 142 passed |
 | The loader: which decoder a browser is given | `npx vitest run tests/unit/barcode-scanner-engine.test.ts` | 6 passed |
 | The policy the application sends | `npx vitest run tests/unit/spa-security-headers.test.ts` | 6 passed |
 | The page in jsdom | `npx vitest run frontend/tests/unit/barcode-scanner-page.test.tsx` | 13 passed |
 | Pages in Chromium, production bundle | `npx playwright test e2e/design-studio.spec.ts e2e/barcode-scanner.spec.ts` | 49 passed (35 + 14) |
-| Every unit test in the application | `npx vitest run frontend/tests/unit tests/unit` | 3,146 passed in 184 files, none failed |
+| Every unit test in the application | `npx vitest run frontend/tests/unit tests/unit` | 3,147 passed in 184 files, none failed, under Node 22.22.3 and again under Node 24.8.0 |
 | The integration suites listed in §13.5, and the four more that `main` had changed | `npx vitest run tests/integration/<name>.test.ts` | 168 passed in 18 files |
 | Types | `npm run typecheck`, `npx tsc -p frontend/tsconfig.json --noEmit` | both exit 0 |
 | Production build | `npm run build` | exit 0, "84 tool entries; projection verified" |
@@ -732,12 +740,20 @@ Run from `cloudhost247-node/`. These replace the scanner rows and the totals of 
 | Dependency audit | `npm audit --omit=dev --audit-level=high` | 0 vulnerabilities |
 | Python suites, from the repository root | `python3 -m unittest discover -s tests/website -p "test_*.py"`, the same with `-s tests/tools` | 247 OK (8 skipped), 26 OK |
 | The release-candidate gate, without its PHP steps | each non-PHP command of `scripts/release-candidate-check.sh`, in order | 24 of 24 pass |
+| The whole gate, PHP steps included | CI on the pull request, jobs "Release candidate (PHP 7.4)" and "(PHP 8.2)" | both pass |
+| Every unit and integration suite, build and start | CI on the pull request, job "Build, typecheck, test (Node 22.12.0)" | passes |
 
 **These figures were taken after `main` was merged into the branch.** `main` had gained two tools
 (Email & Link Extractor, Email Extractor Pro) and their tests since the branch was cut, so the
 catalogue now holds 84 entries. Before the merge the same commands gave 3,088 unit tests in 176
 files, 137 integration tests in 14 files and 82 catalogue entries. The scanner's and the Design
-Studio's own counts in the rows above did not change.
+Studio's own counts in the rows above did not change with the merge.
+
+**What CI found.** The first run on the pull request passed on PHP 7.4, PHP 8.2 and Node 22.12.0
+and failed on Node 24.8.0, in one test: the Windows-1252 case of §14.2. That is a fault in the
+scanner's API under that Node version, not in the test, and it is fixed as §14.2 describes; the
+fix added one test, which is why the scanner's file now counts 142 and the suite 3,147. The row for
+Node 22.12.0 above is from the run before the fix.
 
 What these establish:
 
@@ -777,14 +793,15 @@ generator rewrote them for unrelated reasons, are no longer rewritten by the gen
 Everything in §12.6 and §13.7 still holds, and in addition:
 
 - **The PHP steps of the release-candidate gate** (PHP lint, the PHP test runners including
-  `tests/tools/site-integration.php`, and the rendered-site audit) were not run: PHP is not
-  installed where this was developed. Three of that test's checks that depend on the tool
-  catalogue (every path and alias resolves to its own tool, one path per capability, no served path
-  re-labelled) were reproduced in Python against the merged files and hold. The real run is the
-  pull request's CI.
-- **The other integration suites.** The application has more than a hundred; eighteen were run
-  here, chosen because they touch tools, the catalogue's derived files, routes, the sitemap, the
-  assistant's knowledge, or were changed on `main`. The whole set runs in CI.
+  `tests/tools/site-integration.php`, and the rendered-site audit) have been run only by the pull
+  request's CI, where they pass (§14.5). PHP is not installed where this was developed, so they
+  cannot be repeated there.
+- **The other integration suites.** The application has more than a hundred; eighteen were run in
+  development, chosen because they touch tools, the catalogue's derived files, routes, the sitemap,
+  the assistant's knowledge, or were changed on `main`. The whole set has been run only by CI.
+- **Other versions of Node.** The scanner's tests were run under 22.12.0, 22.22.3 and 24.8.0. The
+  application supports Node from 20.9; no other version was tried, and the Windows-1252 fault shows
+  that a runtime's converters can differ between versions.
 - **Chromium only.** The policy word, the full decoder and the fallback were run in headless
   Chromium. Firefox and Safari were not tried. A browser that does not know the word, or will not
   run WebAssembly for another reason, is expected to take the fallback, which is the path tested in
