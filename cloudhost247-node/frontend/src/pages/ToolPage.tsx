@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { measureBrowserConnection } from '../lib/tools-speed';
 import QrResult from '../components/tools/QrResult';
+import StudioResult, { isStudioResult } from '../components/tools/StudioResult';
 import ToolResult from '../components/tools/ToolResult';
 import ToolSeo from '../components/tools/ToolSeo';
 import { toolsHost } from '../lib/tools-runtime';
@@ -11,6 +12,7 @@ import { usePageMeta } from '../lib/usePageMeta';
 import {
   buildToolInput,
   isFieldActive,
+  isStudioTool,
   toolForm,
   toolsApi,
   type ToolEnvelope,
@@ -483,6 +485,9 @@ export default function ToolPage() {
             >
               {busy === 'run' ? 'Running…' : 'Run tool'}
             </button>
+            {/* Design Studio artwork is drawn afresh on every run and never cached, so a
+                second button that promises to skip the cache would promise nothing. */}
+            {!isStudioTool(slug) && (
             <button
               type="button"
               className="ch247-button ch247-button--ghost"
@@ -491,6 +496,7 @@ export default function ToolPage() {
             >
               Run without cache
             </button>
+            )}
           </div>
 
           {error ? (
@@ -528,6 +534,11 @@ export default function ToolPage() {
                 <span className="tools-badge">
                   {envelope.meta.durationMs} ms
                 </span>
+                {/* A studio result is printed from its own PDF. Printing this web page, or saving
+                    the response as JSON, would hand the visitor the wrong thing under a familiar
+                    label. */}
+                {!isStudioResult(envelope.data) && (
+                  <>
                 <button
                   type="button"
                   className="ch247-button ch247-button--ghost"
@@ -542,6 +553,8 @@ export default function ToolPage() {
                 >
                   Print / PDF
                 </button>
+                  </>
+                )}
               </div>
             ) : null}
           </div>
@@ -573,6 +586,14 @@ export default function ToolPage() {
               {['qr-generator', 'wifi-qr'].includes(slug) && (
                 <QrResult value={envelope.data} />
               )}
+              {/* Design Studio tools return artwork: previews and print files, not fields to read.
+                  They get their own panel, and the raw response is not rendered because it is
+                  mostly base64. Their results are never saved as reports or tickets, so those
+                  actions are not offered either. */}
+              {isStudioResult(envelope.data) ? (
+                <StudioResult value={envelope.data} />
+              ) : (
+                <>
               <ToolResult value={envelope.data} />
               <details>
                 <summary>Raw response data</summary>
@@ -599,7 +620,9 @@ export default function ToolPage() {
               >
                 Copy result
               </button>
-              {!toolsHost().embedded && (
+                </>
+              )}
+              {!toolsHost().embedded && !isStudioResult(envelope.data) && (
                 <div className="tools-runner__actions">
                   <button
                     type="button"
@@ -699,6 +722,7 @@ export default function ToolPage() {
               service is healthy or unhealthy.
             </p>
           </details>
+          {!isStudioTool(slug) && (
           <details>
             <summary>Can I rely on a cached result?</summary>
             <p>
@@ -707,6 +731,7 @@ export default function ToolPage() {
               subject to the same abuse limits.
             </p>
           </details>
+          )}
         </section>
       )}
       {tool && (

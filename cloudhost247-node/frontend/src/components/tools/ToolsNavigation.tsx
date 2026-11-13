@@ -9,13 +9,21 @@ import {
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../../lib/api';
 import { toolsPresentation } from '../../lib/tools-presentation';
-type NavigationTool = {
+export type NavigationTool = {
   slug: string;
   name: string;
   path: string;
+  summary?: string;
   discoveryCategories?: string[];
 };
 const Context = createContext<NavigationTool[]>([]);
+/**
+ * The tools the catalogue currently publishes for navigation: active, public and runnable. Empty
+ * until /api/tools/navigation has answered, and outside the provider.
+ */
+export function useToolsNavigation(): NavigationTool[] {
+  return useContext(Context);
+}
 export function ToolsNavigationProvider({ children }: { children: ReactNode }) {
   const [tools, setTools] = useState<NavigationTool[]>([]);
   useEffect(() => {

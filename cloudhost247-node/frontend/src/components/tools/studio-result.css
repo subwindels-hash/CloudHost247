@@ -1,0 +1,43 @@
+/* Result panel shared by the Design Studio tools: previews, downloads, notices and facts. */
+.studio-result { display: grid; gap: 24px; min-width: 0; }
+.studio-result h3 { margin: 0 0 10px; font-size: 14px; font-weight: 700; letter-spacing: 0.01em; color: #10171d; }
+
+.studio-previews { display: grid; gap: 16px; }
+.studio-previews--many { grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); align-items: start; }
+.studio-preview { margin: 0; min-width: 0; }
+.studio-preview__frame {
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; border: 1px solid #dedfdd; border-radius: 10px;
+  /* A quiet checker so white artwork and transparent backgrounds are both visible. */
+  background-color: #f4f5f3;
+  background-image: linear-gradient(45deg, #eceeea 25%, transparent 25%), linear-gradient(-45deg, #eceeea 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eceeea 75%), linear-gradient(-45deg, transparent 75%, #eceeea 75%);
+  background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+/* The picture's box is always exactly the artwork. Its width is the smallest of the frame, a fixed
+   limit, and the height limit multiplied by the artwork's own proportions (--studio-ratio, set per
+   preview), so a tall label is narrowed instead of being centred in a wider, empty box.
+   --studio-preview-max is the height limit; a page that knows how much of the screen is free may
+   lower it (see design-studio.css). */
+.studio-preview img {
+  display: block; height: auto;
+  width: min(100%, 460px, calc(var(--studio-preview-max, 460px) * var(--studio-ratio, 1)));
+  background: transparent; box-shadow: 0 1px 2px rgba(16, 23, 29, 0.18), 0 6px 18px rgba(16, 23, 29, 0.08);
+}
+.studio-preview--page img { width: min(100%, 300px, calc(min(420px, var(--studio-preview-max, 420px)) * var(--studio-ratio, 1))); background: #fff; }
+.studio-preview figcaption { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; font-size: 13px; color: #52666d; }
+.studio-preview figcaption strong { color: #10171d; font-weight: 650; overflow-wrap: anywhere; }
+
+.studio-downloads ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.studio-downloads li { display: grid; gap: 4px; }
+.studio-downloads__buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.studio-downloads small { font-size: 12.5px; color: #52666d; }
+.studio-result__message { margin: 12px 0 0; font-size: 13px; color: #8b291d; }
+
+.studio-notices { border: 1px solid #ead9a8; background: #fdf8e9; border-radius: 10px; padding: 16px 18px; }
+.studio-notices ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 13.5px; color: #3d3210; }
+
+.studio-facts { margin: 0; display: grid; gap: 0; border-top: 1px solid #dedfdd; }
+.studio-facts > div { display: grid; grid-template-columns: minmax(110px, 34%) 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid #dedfdd; }
+.studio-facts dt { font-size: 12.5px; font-weight: 650; color: #52666d; }
+.studio-facts dd { margin: 0; font-size: 13.5px; overflow-wrap: anywhere; }
+@media (max-width: 520px) { .studio-facts > div { grid-template-columns: 1fr; gap: 2px; } }

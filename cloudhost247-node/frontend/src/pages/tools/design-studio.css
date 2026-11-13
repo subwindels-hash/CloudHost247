@@ -1,0 +1,81 @@
+/* Design Studio tool pages: Barcode Generator, Online Label Printing, VDA 4902, Shipping Labels and
+   QR Code Business Cards. Builds on the Tools Center tokens in tools-center.css. */
+.studio { display: flex; flex-direction: column; margin: 0 auto; }
+.studio-head { display: grid; gap: 14px; }
+.studio-head h1 { margin: 0; }
+.tools-center.studio h1 { font-size: clamp(2rem, 4.2vw, 3.3rem); }
+.studio-head__intro { margin: 0; max-width: 760px; font-size: 16px; color: #3c4f56; }
+.studio-switcher { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.tools-center .studio-switcher .tools-chip.is-active { background: #10171d; border-color: #10171d; color: #fff; }
+
+.studio-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; }
+@media (max-width: 1000px) { .studio-grid { grid-template-columns: 1fr; } }
+
+.studio-form, .studio-output { min-width: 0; background: #fff; border: 1px solid #dedfdd; border-radius: 12px; padding: 26px; }
+/* --studio-top is the height of the site header when it stays on screen, plus a gap; the page
+   measures it (DesignStudioPage). Without it the panel would stick underneath the header. */
+.studio-output { position: sticky; top: var(--studio-top, 16px); scroll-margin-top: var(--studio-top, 16px); display: grid; gap: 18px; }
+@media (max-width: 1000px) { .studio-output { position: static; } }
+/* Side by side with the form, the panel starts under the site header. The preview is kept short
+   enough that the first download button is on screen with it on a laptop, without scrolling:
+   about 400px of the screen's height goes to the header, the panel's heading and that button. */
+@media (min-width: 1001px) { .studio-output { --studio-preview-max: clamp(200px, calc(100vh - 400px), 460px); } }
+@media (max-width: 600px) { .studio-form, .studio-output { padding: 18px; } }
+
+.tools-center .studio-form h2, .tools-center .studio-output h2 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+.studio-form { display: grid; gap: 20px; }
+.studio-form__top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+.studio-form__tools { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.studio-link {
+  appearance: none; background: none; border: 0; padding: 10px 0; min-height: 44px; font: inherit; font-size: 13px;
+  color: #5f450a; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+.studio-link:hover { color: #10171d; }
+.studio-link:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.studio-section { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 12px; }
+.studio-section + .studio-section { padding-top: 20px; border-top: 1px solid #e8e9e6; }
+/* Floated so the legend takes part in the section's own layout instead of sitting on its top
+   border; every section then has the same space between its heading and its first field. */
+.studio-section legend { float: left; width: 100%; padding: 0; margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5f450a; }
+.studio-section__note { margin: 0; font-size: 13px; color: #52666d; }
+
+.studio-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+.studio-fields__cell { grid-column: 1 / -1; min-width: 0; }
+.studio-fields__cell--half { grid-column: span 1; }
+@media (max-width: 520px) { .studio-fields__cell--half { grid-column: 1 / -1; } }
+
+.studio-field { display: grid; gap: 6px; min-width: 0; }
+.studio-field > label { font-size: 13px; font-weight: 650; color: #1d2a30; }
+.studio-field abbr { color: #8b291d; text-decoration: none; }
+.studio-field small { font-size: 12.5px; line-height: 1.45; color: #52666d; }
+.tools-center .studio-field input[type='text'],
+.tools-center .studio-field input[type='number'],
+.tools-center .studio-field select,
+.tools-center .studio-field textarea { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #858585; border-radius: 6px; font: inherit; font-size: 14px; background: #fff; color: #10171d; }
+.tools-center .studio-field textarea { resize: vertical; line-height: 1.45; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+.studio-field input:focus-visible, .studio-field select:focus-visible, .studio-field textarea:focus-visible { border-color: #10171d; }
+
+.studio-field--check > label { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 10px 0; font-weight: 500; cursor: pointer; }
+.tools-center .studio-field--check input[type='checkbox'] { flex: none; width: 18px; height: 18px; margin: 2px 0 0; accent-color: #10171d; }
+
+.studio-colour { display: flex; gap: 8px; align-items: stretch; }
+.tools-center .studio-colour input[type='color'] { flex: none; width: 46px; min-height: 44px; padding: 3px; border: 1px solid #858585; border-radius: 6px; background: #fff; cursor: pointer; }
+.tools-center .studio-colour input[type='text'] { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.studio-form__actions { display: grid; gap: 10px; padding-top: 4px; }
+.tools-center .studio-submit { width: 100%; min-height: 50px; font-size: 15px; font-weight: 650; }
+.studio-form__privacy { margin: 0; font-size: 12.5px; color: #52666d; }
+
+.studio-muted { margin: 0; font-size: 14px; color: #52666d; }
+.studio-empty { display: grid; gap: 14px; justify-items: start; padding: 28px; border: 1px dashed #c0c4bd; border-radius: 10px; background: #f8f9f7; }
+.studio-empty p { margin: 0; font-size: 14px; color: #3c4f56; }
+.studio-output__stale { opacity: 0.5; transition: opacity 0.15s; }
+.tools-center .studio-error { padding: 16px 18px; }
+.tools-center .studio-changed { margin: 0 0 14px; padding: 12px 16px; font-size: 14px; }
+.studio-error p { margin: 6px 0 0; font-size: 14px; }
+
+.studio .tools-notes { border-top: 1px solid #dedfdd; padding-top: 28px; }
+.studio .tools-notes h2 { margin: 0 0 12px; }
+.studio .tools-notes p { max-width: 860px; font-size: 15px; color: #3c4f56; }
+.studio .tools-notes ul { max-width: 860px; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; color: #3c4f56; }

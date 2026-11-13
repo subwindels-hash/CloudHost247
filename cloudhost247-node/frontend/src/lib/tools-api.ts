@@ -7,6 +7,7 @@
  * into a generic error, because "CONFIGURATION_REQUIRED" and "RATE_LIMITED" need different advice.
  */
 import { apiFetch, ApiRequestError } from './api';
+import { STUDIO_FORMS, studioFields, type StudioField } from '../../../src/tools/design-studio/forms';
 
 export type ToolStatus = 'ACTIVE' | 'DISABLED' | 'MAINTENANCE' | 'CONFIGURATION_REQUIRED' | 'SERVICE_UNAVAILABLE';
 
@@ -120,10 +121,46 @@ const select = (name: string, label: string, options: string[], extra: Partial<T
 });
 
 /**
+ * The Design Studio tools (barcodes, labels, shipping labels, business cards) describe their inputs
+ * once, in src/tools/design-studio/forms.ts, from the same registries the API validates against.
+ * Their own page renders that description with sections and examples; this is the same description
+ * flattened for the generic tool page and the embedded build, so both always send what the API reads.
+ *
+ * Four types have no generic control and become text fields: a decimal (the generic number input
+ * only accepts whole steps), a colour (its hex value), a date (year-month-day) and a time.
+ */
+function flattenStudioField(field: StudioField): ToolField {
+  const type: ToolField['type'] = field.type === 'decimal' || field.type === 'color' || field.type === 'date' || field.type === 'time' ? 'text' : field.type;
+  return {
+    name: field.name,
+    label: field.label,
+    type,
+    ...(field.required ? { required: true } : {}),
+    ...(field.placeholder ? { placeholder: field.placeholder } : field.type === 'color' ? { placeholder: '#000000' } : {}),
+    ...(field.help ? { help: field.help } : {}),
+    ...(field.options ? { options: field.options.map((entry) => ({ value: entry.value, label: entry.group ? `${entry.group}: ${entry.label}` : entry.label })) } : {}),
+    ...(field.min !== undefined ? { min: field.min } : {}),
+    ...(field.max !== undefined ? { max: field.max } : {}),
+    ...(field.defaultValue !== undefined ? { defaultValue: field.defaultValue } : {}),
+    ...(field.showWhen ? { showWhen: field.showWhen } : {}),
+  };
+}
+
+/** True for the Design Studio tools, whose results are artwork and are never cached. */
+export function isStudioTool(slug: string): boolean {
+  return Object.prototype.hasOwnProperty.call(STUDIO_FORMS, slug);
+}
+
+const STUDIO_TOOL_FORMS: Record<string, ToolForm> = Object.fromEntries(
+  Object.values(STUDIO_FORMS).map((form) => [form.slug, { method: 'POST' as const, intro: form.intro, fields: studioFields(form).map(flattenStudioField) }])
+);
+
+/**
  * Per-tool input schemas. Tools without an entry fall back to a free-form JSON editor, which is
  * always available anyway under "Advanced input".
  */
 export const TOOL_FORMS: Record<string, ToolForm> = {
+  ...STUDIO_TOOL_FORMS,
   'dns-propagation': { method: 'POST', fields: [ { name: 'domain', label: 'Domain', type: 'text', required: true, placeholder: 'example.com' }, select('type', 'Record type', ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA'], { defaultValue: 'A' }), { name: 'expected', label: 'Expected value (optional)', type: 'text', help: 'Propagation compares each resolver answer with this value.' } ] },
   'dns-lookup': { method: 'GET', fields: [ { name: 'name', label: 'Domain or hostname', type: 'text', required: true, placeholder: 'example.com' }, select('type', 'Record type', ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'CAA', 'SRV', 'PTR'], { defaultValue: 'A' }), { name: 'dnssec', label: 'Request DNSSEC records (DO bit)', type: 'checkbox' } ] },
   'dns-health': { method: 'POST', fields: [ { name: 'domain', label: 'Domain', type: 'text', required: true }, { name: 'selectors', label: 'DKIM selectors (comma separated)', type: 'text', help: 'Leave empty to try the common selectors and report which exist.' }, { name: 'extended', label: 'Include BIMI and DNSSEC checks', type: 'checkbox', defaultValue: true } ] },
@@ -265,6 +302,8 @@ export const TOOL_FORMS: Record<string, ToolForm> = {
   'runic-translator': { method: 'POST', fields: [ { name: 'text', label: 'Text', type: 'textarea', required: true }, select('direction', 'Direction', ['to-runes', 'to-latin'], { defaultValue: 'to-runes' }) ] },
   'qr-generator': { method: 'POST', fields: [ { name: 'content', label: 'Content', type: 'textarea', required: true }, select('format', 'Format', ['png', 'svg'], { defaultValue: 'png' }), select('errorCorrectionLevel', 'Error correction', ['L', 'M', 'Q', 'H'], { defaultValue: 'M' }), { name: 'size', label: 'Size (px)', type: 'number', min: 64, max: 2048, defaultValue: 512 } ] },
   'qr-scanner': { method: 'POST', fields: [ { name: 'image', label: 'Image as base64 data URL', type: 'textarea', required: true, help: 'Decoded locally; the QR content is never visited.' } ] },
+  // The scanner's own page decodes in the browser, with a camera. This form is the API's: a PNG, uploaded.
+  'barcode-scanner': { method: 'POST', intro: 'Upload a PNG picture of a barcode. The content is reported as text and is never opened or followed.', fields: [ { name: 'image', label: 'Image as base64 data URL', type: 'textarea', required: true, help: 'PNG only. One barcode is read per image.' } ] },
   'wifi-qr': { method: 'POST', fields: [ { name: 'ssid', label: 'Network name (SSID)', type: 'text', required: true }, { name: 'password', label: 'Password', type: 'text' }, select('security', 'Security', ['WPA', 'WEP', 'nopass'], { defaultValue: 'WPA' }), { name: 'hidden', label: 'Hidden network', type: 'checkbox' } ] },
   'time-card': { method: 'POST', fields: [ { name: 'entries', label: 'Clock-in/out pairs (one per line: HH:MM HH:MM)', type: 'textarea', required: true, placeholder: '09:00 17:30\n09:15 17:45' }, { name: 'defaultBreakMinutes', label: 'Break per day (minutes)', type: 'number', min: 0, max: 720, defaultValue: 30 }, { name: 'weeklyOvertimeAfterMinutes', label: 'Weekly overtime after (minutes)', type: 'number', min: 0, max: 10080, defaultValue: 2400 }, { name: 'hourlyRate', label: 'Hourly rate (optional)', type: 'number', min: 0 } ] },
   'color-tools': {

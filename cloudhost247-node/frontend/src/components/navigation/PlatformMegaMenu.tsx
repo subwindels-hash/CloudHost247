@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useLocale } from '../../i18n/LocaleProvider';
 import { navigationLabel } from '../../i18n/site-text';
 import { NAV_SECTIONS, TOOLS_CATEGORIES, type RegistryGroup, type RegistrySection } from '../../navigation/registry.generated';
+import { useToolsNavigation, type NavigationTool } from '../tools/ToolsNavigation';
 
 export function Brand({ className }: { className?: string }) {
   return (
@@ -12,9 +13,31 @@ export function Brand({ className }: { className?: string }) {
   );
 }
 
+/**
+ * The barcode, label and card tools, in the order the Tools panel lists them. They get a group of
+ * their own because they are a different kind of tool from the diagnostics around them: they make
+ * something to print, and the last of them reads it back. The list is slugs only; names and paths
+ * come from the live catalogue.
+ * (Kept in step with STUDIO_TOOL_SLUGS, plus the scanner, by tests/unit/design-studio-tools.test.ts.
+ * The registry module itself is not imported here because this file is part of every page's first
+ * load.)
+ */
+export const STUDIO_MENU_SLUGS: readonly string[] = [
+  'barcode-generator',
+  'label-designer',
+  'vda-4902-label-generator',
+  'shipping-label-generator',
+  'qr-business-card-designer',
+  'qr-code-maker',
+  'barcode-scanner',
+];
+
 /** Tools is the one section whose contents come from the live tool catalogue's category list. */
-function sectionGroups(section: RegistrySection): RegistryGroup[] {
+function sectionGroups(section: RegistrySection, liveTools: NavigationTool[]): RegistryGroup[] {
   if (!section.toolsDriven) return section.groups;
+  // Live data, like the rest of this panel: a tool is listed only while the catalogue reports it
+  // as available, so the menu never links a tool that has been switched off.
+  const studio = STUDIO_MENU_SLUGS.map((slug) => liveTools.find((tool) => tool.slug === slug)).filter((tool): tool is NavigationTool => Boolean(tool));
   return [
     {
       title: 'Free online tools',
@@ -25,6 +48,14 @@ function sectionGroups(section: RegistrySection): RegistryGroup[] {
         icon: category.icon,
       })),
     },
+    ...(studio.length > 0
+      ? [
+          {
+            title: 'Barcodes, labels and cards',
+            links: studio.map((tool) => ({ label: tool.name, to: tool.path, description: tool.summary ?? '', icon: 'tag' })),
+          },
+        ]
+      : []),
     {
       title: 'Browse',
       links: [
@@ -52,6 +83,7 @@ export function PlatformMenu() {
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const location = useLocation();
+  const liveTools = useToolsNavigation();
 
   const active = NAV_SECTIONS.find((section) => section.id === openId) ?? null;
 
@@ -84,7 +116,7 @@ export function PlatformMenu() {
     setOpenId((current) => (current === section.id ? null : section.id));
   }
 
-  const groups = active ? sectionGroups(active) : [];
+  const groups = active ? sectionGroups(active, liveTools) : [];
 
   return (
     <div className="hg-menu__root" ref={rootRef}>

@@ -35,7 +35,7 @@
     "pages_by_route_owner": {
       "cloudhost247-theme": 75,
       "internal": 17,
-      "tools-front-controller": 265,
+      "tools-front-controller": 282,
       "whmcs-core": 8
     }
   },
@@ -10990,6 +10990,516 @@
       },
       "hero_asset": "",
       "visual": "dns",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/barcode-generator.php",
+      "path": "/tools/barcode-generator",
+      "canonical_url": "/tools/barcode-generator",
+      "title": "Barcode Generator",
+      "page_title": "Barcode Generator",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Barcode Generator",
+        "description": "Create 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/barcode.php",
+      "path": "/tools/barcode",
+      "canonical_url": "/tools/barcode-generator",
+      "title": "Barcode Generator",
+      "page_title": "Barcode Generator",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Barcode Generator",
+        "description": "Create 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/label-designer.php",
+      "path": "/tools/label-designer",
+      "canonical_url": "/tools/label-designer",
+      "title": "Online Label Printing",
+      "page_title": "Online Label Printing",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Online Label Printing",
+        "description": "Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/label-printing.php",
+      "path": "/tools/label-printing",
+      "canonical_url": "/tools/label-designer",
+      "title": "Online Label Printing",
+      "page_title": "Online Label Printing",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Online Label Printing",
+        "description": "Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/online-label-printing.php",
+      "path": "/tools/online-label-printing",
+      "canonical_url": "/tools/label-designer",
+      "title": "Online Label Printing",
+      "page_title": "Online Label Printing",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Online Label Printing",
+        "description": "Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/vda-4902-label-generator.php",
+      "path": "/tools/vda-4902-label-generator",
+      "canonical_url": "/tools/vda-4902-label-generator",
+      "title": "VDA 4902 Label Generator",
+      "page_title": "VDA 4902 Label Generator",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "VDA 4902 Label Generator",
+        "description": "Fill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/vda-4902.php",
+      "path": "/tools/vda-4902",
+      "canonical_url": "/tools/vda-4902-label-generator",
+      "title": "VDA 4902 Label Generator",
+      "page_title": "VDA 4902 Label Generator",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "VDA 4902 Label Generator",
+        "description": "Fill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/shipping-label-generator.php",
+      "path": "/tools/shipping-label-generator",
+      "canonical_url": "/tools/shipping-label-generator",
+      "title": "Shipping Label Generator",
+      "page_title": "Shipping Label Generator",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Shipping Label Generator",
+        "description": "Make carrier-neutral 4 \u00d7 6 in and A6 parcel labels with a reference or SSCC barcode."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/shipping-labels.php",
+      "path": "/tools/shipping-labels",
+      "canonical_url": "/tools/shipping-label-generator",
+      "title": "Shipping Label Generator",
+      "page_title": "Shipping Label Generator",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Shipping Label Generator",
+        "description": "Make carrier-neutral 4 \u00d7 6 in and A6 parcel labels with a reference or SSCC barcode."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/qr-business-card-designer.php",
+      "path": "/tools/qr-business-card-designer",
+      "canonical_url": "/tools/qr-business-card-designer",
+      "title": "QR Code Business Cards",
+      "page_title": "QR Code Business Cards",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "QR Code Business Cards",
+        "description": "Design a business card with a QR Code or Data Matrix that saves your contact to a phone."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/qr-code-business-cards.php",
+      "path": "/tools/qr-code-business-cards",
+      "canonical_url": "/tools/qr-business-card-designer",
+      "title": "QR Code Business Cards",
+      "page_title": "QR Code Business Cards",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "QR Code Business Cards",
+        "description": "Design a business card with a QR Code or Data Matrix that saves your contact to a phone."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/qr-code-maker.php",
+      "path": "/tools/qr-code-maker",
+      "canonical_url": "/tools/qr-code-maker",
+      "title": "QR Code Maker",
+      "page_title": "QR Code Maker",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "QR Code Maker",
+        "description": "Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/qr-maker.php",
+      "path": "/tools/qr-maker",
+      "canonical_url": "/tools/qr-code-maker",
+      "title": "QR Code Maker",
+      "page_title": "QR Code Maker",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "QR Code Maker",
+        "description": "Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/qr-codes.php",
+      "path": "/tools/qr-codes",
+      "canonical_url": "/tools/qr-code-maker",
+      "title": "QR Code Maker",
+      "page_title": "QR Code Maker",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "QR Code Maker",
+        "description": "Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/barcode-scanner.php",
+      "path": "/tools/barcode-scanner",
+      "canonical_url": "/tools/barcode-scanner",
+      "title": "Barcode Scanner",
+      "page_title": "Barcode Scanner",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "platform signpost route",
+      "implementation_status": "platform signpost route",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Barcode Scanner",
+        "description": "Scan barcodes and QR codes with your camera or from an image, and export what you scanned."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "noindex signpost",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/barcode-reader.php",
+      "path": "/tools/barcode-reader",
+      "canonical_url": "/tools/barcode-scanner",
+      "title": "Barcode Scanner",
+      "page_title": "Barcode Scanner",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Barcode Scanner",
+        "description": "Scan barcodes and QR codes with your camera or from an image, and export what you scanned."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
+      "image_status": "n/a",
+      "seo_status": "redirects (301)",
+      "navigation_placement": "",
+      "navigation_location": "",
+      "footer_placement": "",
+      "footer_location": "",
+      "reachable": true
+    },
+    {
+      "php_page": "tools/scan-barcode.php",
+      "path": "/tools/scan-barcode",
+      "canonical_url": "/tools/barcode-scanner",
+      "title": "Barcode Scanner",
+      "page_title": "Barcode Scanner",
+      "category": "Tool",
+      "route_owner": "tools-front-controller",
+      "status": "redirect alias",
+      "implementation_status": "redirect alias",
+      "template": "cloudhost247-tools",
+      "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
+      "seo_metadata": {
+        "title": "Barcode Scanner",
+        "description": "Scan barcodes and QR codes with your camera or from an image, and export what you scanned."
+      },
+      "hero_artwork": {
+        "svg": "",
+        "scene": ""
+      },
+      "hero_asset": "",
+      "visual": "productivity",
       "image_status": "n/a",
       "seo_status": "redirects (301)",
       "navigation_placement": "",

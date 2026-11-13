@@ -520,6 +520,62 @@
       "category": "diagnostics",
       "description": "Scheduled SSL-expiry, DNS-record and email-configuration monitoring.",
       "visibility": "customer"
+    },
+    {
+      "slug": "barcode-generator",
+      "name": "Barcode Generator",
+      "path": "/tools/barcode-generator",
+      "category": "productivity",
+      "description": "Create 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF.",
+      "visibility": "public"
+    },
+    {
+      "slug": "label-designer",
+      "name": "Online Label Printing",
+      "path": "/tools/label-designer",
+      "category": "productivity",
+      "description": "Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer.",
+      "visibility": "public"
+    },
+    {
+      "slug": "vda-4902-label-generator",
+      "name": "VDA 4902 Label Generator",
+      "path": "/tools/vda-4902-label-generator",
+      "category": "productivity",
+      "description": "Fill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes.",
+      "visibility": "public"
+    },
+    {
+      "slug": "shipping-label-generator",
+      "name": "Shipping Label Generator",
+      "path": "/tools/shipping-label-generator",
+      "category": "productivity",
+      "description": "Make carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode.",
+      "visibility": "public"
+    },
+    {
+      "slug": "qr-business-card-designer",
+      "name": "QR Code Business Cards",
+      "path": "/tools/qr-business-card-designer",
+      "category": "productivity",
+      "description": "Design a business card with a QR Code or Data Matrix that saves your contact to a phone.",
+      "visibility": "public"
+    },
+    {
+      "slug": "qr-code-maker",
+      "name": "QR Code Maker",
+      "path": "/tools/qr-code-maker",
+      "category": "productivity",
+      "description": "Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment.",
+      "visibility": "public"
+    },
+    {
+      "slug": "barcode-scanner",
+      "name": "Barcode Scanner",
+      "path": "/tools/barcode-scanner",
+      "category": "productivity",
+      "description": "Scan barcodes and QR codes with your camera or from an image, and export what you scanned.",
+      "visibility": "public"
     }
   ]
 }

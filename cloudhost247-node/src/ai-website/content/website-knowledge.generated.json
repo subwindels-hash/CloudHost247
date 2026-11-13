@@ -3813,7 +3813,7 @@
     "/docs/API_COMMERCE.md"
    ],
    "title": "Commerce API",
-   "description": "This document is the API contract for Phase 5A, \"Commerce foundation\": a customer's cart and the orders it becomes when checked out. Keep this in sync with the code — the source of truth is cloudhost2",
+   "description": "This document is the API contract for Phase 5A, \"Commerce foundation\": a customer's cart and the orders it becomes when checked out. Keep this in sync with the code - the source of truth is cloudhost2",
    "kind": "website_doc",
    "surface": "spa",
    "section": "APIs",
@@ -5179,6 +5179,125 @@
    "body": "Reverse Image Search\nLaunch an image search with the engines you choose.",
    "headings": [
     "Reverse Image Search"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/barcode-generator",
+   "url": "/tools/barcode-generator",
+   "aliases": [],
+   "title": "Barcode Generator",
+   "description": "Create 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "Barcode Generator\nCreate 83 barcode types, including Code 128, EAN-13, UPC, QR Code and Data Matrix, as SVG, PNG or PDF.",
+   "headings": [
+    "Barcode Generator"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/label-designer",
+   "url": "/tools/label-designer",
+   "aliases": [],
+   "title": "Online Label Printing",
+   "description": "Print asset tags, product, shelf, QR code and address labels on label sheets or a label printer.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "Online Label Printing\nPrint asset tags, product, shelf, QR code and address labels on label sheets or a label printer.",
+   "headings": [
+    "Online Label Printing"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/vda-4902-label-generator",
+   "url": "/tools/vda-4902-label-generator",
+   "aliases": [],
+   "title": "VDA 4902 Label Generator",
+   "description": "Fill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "VDA 4902 Label Generator\nFill in and print the 16-field VDA 4902 transport label at A5 or KLT size, with Code 39 barcodes.",
+   "headings": [
+    "VDA 4902 Label Generator"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/shipping-label-generator",
+   "url": "/tools/shipping-label-generator",
+   "aliases": [],
+   "title": "Shipping Label Generator",
+   "description": "Make carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "Shipping Label Generator\nMake carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode.",
+   "headings": [
+    "Shipping Label Generator"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/qr-business-card-designer",
+   "url": "/tools/qr-business-card-designer",
+   "aliases": [],
+   "title": "QR Code Business Cards",
+   "description": "Design a business card with a QR Code or Data Matrix that saves your contact to a phone.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "QR Code Business Cards\nDesign a business card with a QR Code or Data Matrix that saves your contact to a phone.",
+   "headings": [
+    "QR Code Business Cards"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/qr-code-maker",
+   "url": "/tools/qr-code-maker",
+   "aliases": [],
+   "title": "QR Code Maker",
+   "description": "Make QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "QR Code Maker\nMake QR codes that open a link, join Wi-Fi, save a contact, start a WhatsApp chat, add an event or set up a SEPA payment.",
+   "headings": [
+    "QR Code Maker"
+   ]
+  },
+  {
+   "sourceKey": "tool:/tools/barcode-scanner",
+   "url": "/tools/barcode-scanner",
+   "aliases": [],
+   "title": "Barcode Scanner",
+   "description": "Scan barcodes and QR codes with your camera or from an image, and export what you scanned.",
+   "kind": "website_tool",
+   "surface": "spa",
+   "section": "Tools — productivity",
+   "category": "Tools",
+   "related": [],
+   "faqs": [],
+   "body": "Barcode Scanner\nScan barcodes and QR codes with your camera or from an image, and export what you scanned.",
+   "headings": [
+    "Barcode Scanner"
    ]
   },
   {
@@ -13365,6 +13484,14 @@
   "/admin/email-forensics",
   "/admin/email-trace",
   "/admin/expert-services",
+  "/admin/fraud-sentinel",
+  "/admin/fraud-sentinel/alerts",
+  "/admin/fraud-sentinel/assessments",
+  "/admin/fraud-sentinel/customers",
+  "/admin/fraud-sentinel/investigations",
+  "/admin/fraud-sentinel/operations",
+  "/admin/fraud-sentinel/rules",
+  "/admin/fraud-sentinel/transactions",
   "/admin/infrastructure",
   "/admin/infrastructure/availability",
   "/admin/infrastructure/control-panels",
@@ -13639,6 +13766,8 @@
   "/support",
   "/terms-of-service.php",
   "/tools",
+  "/tools/barcode-generator",
+  "/tools/barcode-scanner",
   "/tools/business-tools",
   "/tools/business-tools/employee-id-card-generator",
   "/tools/business-tools/mrz-generator",
@@ -13691,6 +13820,7 @@
   "/tools/ip/lookup",
   "/tools/ip/my-ip",
   "/tools/ip/whois",
+  "/tools/label-designer",
   "/tools/monitors",
   "/tools/mrz-generator",
   "/tools/mrz-parser",
@@ -13711,10 +13841,14 @@
   "/tools/productivity/time-card",
   "/tools/productivity/wifi-qr",
   "/tools/productivity/word-counter",
+  "/tools/qr-business-card-designer",
+  "/tools/qr-code-maker",
   "/tools/reports",
   "/tools/security/ip-blacklist",
   "/tools/security/password",
   "/tools/security/ssl",
+  "/tools/shipping-label-generator",
+  "/tools/vda-4902-label-generator",
   "/tools/webmaster/open-graph",
   "/tools/webmaster/robots-generator",
   "/tools/webmaster/serp-simulator",
@@ -13741,7 +13875,7 @@
    "marketingPages": 55,
    "legalDocuments": 18,
    "documentation": 14,
-   "tools": 65,
+   "tools": 72,
    "navigationRoutes": 114,
    "phpPages": 75,
    "phpPolicies": 4,
