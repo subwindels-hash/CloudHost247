@@ -32,7 +32,7 @@ import { sweepDomainServices, DOMAIN_SERVICES_SWEEP_INTERVAL_MS } from './domain
 import { sweepEmailTrace, EMAIL_TRACE_SWEEP_INTERVAL_MS } from './email-trace-sweep';
 import { runAiSweep, AI_SWEEP_INTERVAL_MS } from '../ai-os/jobs/sweep';
 import { sweepWebsiteKnowledge, WEBSITE_KNOWLEDGE_INTERVAL_MS } from '../ai-website/knowledge-worker';
-import { refreshCommunitySolutions, COMMUNITY_SOLUTION_REFRESH_INTERVAL_MS } from '../community/community-knowledge';
+import { refreshCommunitySolutions, COMMUNITY_REFRESH_INTERVAL_MS } from '../community/community-knowledge';
 import { monitorSweep, providerHealthSweep, resolverHealthSweep } from '../tools/worker/sweep';
 import { getSetting } from '../db/ops-tables';
 import type { EngineOptions } from '../deployments/engine';
@@ -423,7 +423,7 @@ async function runWorkerCycle(
       logger.error(`[worker:${ctx.workerId}] ai website knowledge sweep failed: ${(error as Error).message}`);
     }
   }
-  if (now - schedule.lastCommunitySolutionRefresh >= COMMUNITY_SOLUTION_REFRESH_INTERVAL_MS) {
+  if (now - schedule.lastCommunitySolutionRefresh >= COMMUNITY_REFRESH_INTERVAL_MS) {
     schedule.lastCommunitySolutionRefresh = now;
     try {
       const solutions = await refreshCommunitySolutions(ctx.db);

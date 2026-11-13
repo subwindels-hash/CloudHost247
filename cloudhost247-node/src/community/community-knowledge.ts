@@ -50,6 +50,37 @@ export function sourceKeyForDiscussion(discussionId: string): string {
   return `community:discussion:${discussionId}`;
 }
 
+/**
+ * The one place the published text is assembled.
+ *
+ * Publish and the worker's refresh both hash the result with `contentFingerprint`, so they must
+ * build the *same* string: a single word of difference between them makes every sweep look like an
+ * edit nobody made, and would silently strip authority from an answer a moderator had just
+ * approved. That is why this is a function rather than two copy-pasted templates.
+ */
+export function buildSolutionBody(parts: {
+  title: string;
+  categoryName: string;
+  question: string;
+  answer: string;
+  answerAuthor?: string | null;
+  url: string;
+}): string {
+  return [
+    `Question published in the CloudHost247 community (${parts.categoryName}).`,
+    '',
+    `**Question:** ${parts.title}`,
+    '',
+    parts.question,
+    '',
+    `**Verified answer** — contributed by ${parts.answerAuthor ?? 'a community member'} and verified by CloudHost247:`,
+    '',
+    parts.answer,
+    '',
+    `Read the full thread: ${parts.url}`,
+  ].join('\n');
+}
+
 interface PublishableDiscussion {
   id: string;
   slug: string;
@@ -111,21 +142,14 @@ export async function publishAcceptedSolution(
   }
 
   const url = `/community/discussion/${discussion.slug}`;
-  const question = stripMarkdown(discussion.body).slice(0, 4000);
-  const answer = stripMarkdown(discussion.accepted_body).slice(0, 6000);
-  const body = [
-    `Question published in the CloudHost247 community (${discussion.category_name}).`,
-    '',
-    `**Question:** ${discussion.title}`,
-    '',
-    question,
-    '',
-    `**Verified answer** — contributed by ${discussion.accepted_author_username ?? 'a community member'} and verified by CloudHost247:`,
-    '',
-    answer,
-    '',
-    `Read the full thread: ${url}`,
-  ].join('\n');
+  const body = buildSolutionBody({
+    title: discussion.title,
+    categoryName: discussion.category_name,
+    question: stripMarkdown(discussion.body).slice(0, 4000),
+    answer: stripMarkdown(discussion.accepted_body).slice(0, 6000),
+    answerAuthor: discussion.accepted_author_username,
+    url,
+  });
 
   const fingerprint = contentFingerprint({
     title: discussion.title,
@@ -250,10 +274,6 @@ export async function revokePublishedSolution(
   return true;
 }
 
-// The trust model lets a published answer ride for 7 days; an hourly pass revalidation keeps the
-// stamp far inside that window and withdraws a withdrawn answer long before it expires.
-export const COMMUNITY_SOLUTION_REFRESH_INTERVAL_MS = 60 * 60_000;
-
 /**
  * Keeps every published solution inside the trust model's 7-day freshness window, and withdraws one
  * whose accepted answer disappeared or whose thread was edited after verification.
@@ -267,15 +287,16 @@ export async function refreshCommunitySolutions(
   const { rows } = await db.query<{
     id: string; discussion_id: string; fingerprint: string | null; approved_fingerprint: string | null;
     accepted_reply_id: string | null; deleted_at: string | null; body: string; title: string; slug: string;
-    accepted_body: string | null; category_name: string;
+    accepted_body: string | null; category_name: string; accepted_author_username: string | null;
   }>(
     `SELECT s.id, s.fingerprint, s.approved_fingerprint,
             d.id AS discussion_id, d.accepted_reply_id, d.deleted_at, d.body, d.title, d.slug,
-            r.body AS accepted_body, c.name AS category_name
+            r.body AS accepted_body, c.name AS category_name, ru.username AS accepted_author_username
        FROM ai_knowledge_sources s
        JOIN community_discussions d ON s.source_key = 'community:discussion:' || d.id
        JOIN community_categories c ON c.id = d.category_id
        LEFT JOIN community_replies r ON r.id = d.accepted_reply_id AND r.deleted_at IS NULL
+       LEFT JOIN users ru ON ru.id = r.author_id
       WHERE s.source_kind = 'community_solution' AND s.excluded = false
       LIMIT 500`
   );
@@ -293,19 +314,14 @@ export async function refreshCommunitySolutions(
     const current = contentFingerprint({
       title: row.title,
       description: `Verified community solution · ${row.category_name}`,
-      body: [
-        `Question published in the CloudHost247 community (${row.category_name}).`,
-        '',
-        `**Question:** ${row.title}`,
-        '',
-        stripMarkdown(row.body).slice(0, 4000),
-        '',
-        '**Verified answer** — verified by CloudHost247:',
-        '',
-        stripMarkdown(row.accepted_body).slice(0, 6000),
-        '',
-        `Read the full thread: /community/discussion/${row.slug}`,
-      ].join('\n'),
+      body: buildSolutionBody({
+        title: row.title,
+        categoryName: row.category_name,
+        question: stripMarkdown(row.body).slice(0, 4000),
+        answer: stripMarkdown(row.accepted_body).slice(0, 6000),
+        answerAuthor: row.accepted_author_username,
+        url: `/community/discussion/${row.slug}`,
+      }),
       faqs: [],
     });
     if (row.approved_fingerprint && current !== row.approved_fingerprint) {

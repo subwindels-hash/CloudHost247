@@ -7,6 +7,7 @@ import { migrateUp } from '../../database/migrate';
 import { buildApp } from '../../src/app';
 import { loadEnv } from '../../src/config/env';
 import { deleteSourcesNotIn } from '../../src/ai-website/website-knowledge-repo';
+import { refreshCommunitySolutions } from '../../src/community/community-knowledge';
 
 /**
  * Community Forum API — end-to-end through the real Fastify app against a real (embedded) Postgres.
@@ -402,6 +403,31 @@ describe('Community Forum API', () => {
         `SELECT count(*)::text AS count FROM ai_knowledge_sources WHERE source_kind = 'community_solution'`
       );
       expect(survives.rows[0]?.count).toBe('1');
+
+      // The worker's revalidation must be a genuine no-op for an untouched thread. Publish and
+      // refresh hash the same assembled text, so an hourly sweep restamps the answer instead of
+      // withdrawing authority nobody revoked — the failure mode this assertion exists for.
+      const firstSweep = await refreshCommunitySolutions(db as never);
+      expect(firstSweep).toMatchObject({ refreshed: 1, revoked: 0 });
+      const secondSweep = await refreshCommunitySolutions(db as never);
+      expect(secondSweep).toMatchObject({ refreshed: 1, revoked: 0 });
+      const untouched = await db.query<{ approval_status: string; excluded: boolean }>(
+        'SELECT approval_status, excluded FROM ai_knowledge_sources WHERE id = $1',
+        [row.id]
+      );
+      expect(untouched.rows[0]).toMatchObject({ approval_status: 'approved', excluded: false });
+
+      // An edit after verification withdraws the authority rather than carrying it to text nobody
+      // reviewed, and says so in the source row a moderator reads.
+      await db.query('UPDATE community_replies SET body = $2 WHERE id = $1', [reply.json().id, 'Just lower the TTL whenever it suits you.']);
+      const afterEdit = await refreshCommunitySolutions(db as never);
+      expect(afterEdit).toMatchObject({ refreshed: 0, revoked: 1 });
+      const unreviewed = await db.query<{ approval_status: string; approved_fingerprint: string | null }>(
+        'SELECT approval_status, approved_fingerprint FROM ai_knowledge_sources WHERE id = $1',
+        [row.id]
+      );
+      expect(unreviewed.rows[0]?.approval_status).toBe('unreviewed');
+      expect(unreviewed.rows[0]?.approved_fingerprint).toBeNull();
 
       // Withdrawal removes it from retrieval but keeps the audit row.
       const revoked = await app.inject({
