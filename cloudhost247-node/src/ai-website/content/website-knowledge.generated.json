@@ -6060,33 +6060,16 @@
    "url": "/tools/file-converter",
    "aliases": [],
    "title": "File Converter",
-   "description": "Convert images and PDF pages in your browser without uploading the files.",
+   "description": "CloudHost247 File Converter — navigation destination.",
    "kind": "website_page",
    "surface": "registry",
-   "section": "Tools",
+   "section": "Footer — Tools",
    "category": "Navigation",
    "related": [],
    "faqs": [],
-   "body": "File Converter\nConvert images and PDF pages in your browser without uploading the files.",
+   "body": "File Converter",
    "headings": [
     "File Converter"
-   ]
-  },
-  {
-   "sourceKey": "nav:/tools/file-tools",
-   "url": "/tools/file-tools",
-   "aliases": [],
-   "title": "File Tools",
-   "description": "Browser-local image, PDF, media, archive, document and animation tools, plus optional transient REST API jobs.",
-   "kind": "website_page",
-   "surface": "registry",
-   "section": "Tools",
-   "category": "Navigation",
-   "related": [],
-   "faqs": [],
-   "body": "File Tools\nBrowser-local image, PDF, media, archive, document and animation tools, plus optional transient REST API jobs.",
-   "headings": [
-    "File Tools"
    ]
   },
   {
@@ -13915,7 +13898,7 @@
    "legalDocuments": 18,
    "documentation": 14,
    "tools": 72,
-   "navigationRoutes": 116,
+   "navigationRoutes": 115,
    "phpPages": 75,
    "phpPolicies": 4,
    "faqs": 174,

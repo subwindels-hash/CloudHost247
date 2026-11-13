@@ -702,26 +702,7 @@ export const NAV_SECTIONS: RegistrySection[] = [
       "to": "/tools/business-tools",
       "ctaLabel": "Open Business Tools"
     },
-    "groups": [
-      {
-        "title": "Curated collections",
-        "links": [
-          {
-            "label": "File Tools",
-            "to": "/tools/file-tools",
-            "description": "Browser-local image, PDF, media, archive, document and animation tools, plus optional transient REST API jobs.",
-            "icon": "file",
-            "badge": "NEW"
-          },
-          {
-            "label": "File Converter",
-            "to": "/tools/file-converter",
-            "description": "Convert images and PDF pages in your browser without uploading the files.",
-            "icon": "file"
-          }
-        ]
-      }
-    ]
+    "groups": []
   },
   {
     "id": "resources",
@@ -2179,8 +2160,6 @@ export const REGISTRY_ROUTES: string[] = [
   "/developers/environments",
   "/digital-products",
   "/hosting/control-panels",
-  "/tools/file-tools",
-  "/tools/file-converter",
   "/docs",
   "/help",
   "/faq",
