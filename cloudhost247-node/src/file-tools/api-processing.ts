@@ -1,7 +1,42 @@
-import { createCanvas } from '@napi-rs/canvas';
+import type { createCanvas as CreateCanvasFn } from '@napi-rs/canvas';
 import { PDFDocument, StandardFonts, degrees } from 'pdf-lib';
 import { Gunzip, Unzip, UnzipInflate, UnzipPassThrough, gzipSync, zipSync } from 'fflate';
-import sharp from 'sharp';
+import type sharpType from 'sharp';
+
+let cachedSharp: typeof sharpType | null = null;
+let cachedCreateCanvas: typeof CreateCanvasFn | null = null;
+
+function getSharp(): typeof sharpType {
+  if (!cachedSharp) {
+    try {
+      // Lazy-loaded so native libvips bindings do not spawn thread pools or fail process startup on
+      // restricted shared-hosting environments when File Tools image jobs are never invoked.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const loaded = require('sharp') as typeof sharpType | { default?: typeof sharpType };
+      cachedSharp = (typeof loaded === 'function' ? loaded : loaded.default) as typeof sharpType;
+    } catch (err) {
+      throw new FileProcessingError(
+        `Server-side image processing is unavailable in this environment (${err instanceof Error ? err.message : 'native module unavailable'}). Use the browser-local tool instead.`,
+      );
+    }
+  }
+  return cachedSharp;
+}
+
+function getCreateCanvas(): typeof CreateCanvasFn {
+  if (!cachedCreateCanvas) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const loaded = require('@napi-rs/canvas') as { createCanvas: typeof CreateCanvasFn };
+      cachedCreateCanvas = loaded.createCanvas;
+    } catch (err) {
+      throw new FileProcessingError(
+        `Server-side PDF rasterization is unavailable in this environment (${err instanceof Error ? err.message : 'native canvas module unavailable'}). Use the browser-local tool instead.`,
+      );
+    }
+  }
+  return cachedCreateCanvas;
+}
 
 export const API_MAX_FILE_BYTES = 8 * 1024 * 1024;
 export const API_MAX_TOTAL_INPUT_BYTES = 16 * 1024 * 1024;
@@ -140,6 +175,7 @@ async function savePdf(pdf: PDFDocument, name: string): Promise<ApiOutputFile> {
 async function processImage(operation: 'image.convert' | 'image.compress' | 'image.resize' | 'image.crop' | 'image.rotate' | 'gif.compress', file: { fileName: string; data: Uint8Array }, options: Record<string, unknown>): Promise<ApiOutputFile> {
   const isGif = operation === 'gif.compress';
   const input = Buffer.from(file.data);
+  const sharp = getSharp();
   let image = sharp(input, { animated: isGif, failOn: 'error', limitInputPixels: API_MAX_IMAGE_PIXELS, sequentialRead: true });
   const metadata = await image.metadata().catch(() => null);
   if (!metadata?.width || !metadata.height || metadata.width * metadata.height > API_MAX_IMAGE_PIXELS) throw new FileProcessingError('Could not read this image or its pixel dimensions exceed the API safety limit.');
@@ -291,6 +327,7 @@ async function compressPdf(file: { fileName: string; data: Uint8Array }, options
       const height = Math.ceil(viewport.height);
       renderedPixels += width * height;
       if (width < 1 || height < 1 || width * height > 32_000_000 || renderedPixels > API_MAX_PDF_PIXELS) throw new FileProcessingError('PDF compression exceeded the rasterization pixel limit. Try fewer pages or a lower DPI.');
+      const createCanvas = getCreateCanvas();
       const canvas = createCanvas(width, height);
       const context = canvas.getContext('2d');
       await page.render({ canvasContext: context as never, viewport }).promise;

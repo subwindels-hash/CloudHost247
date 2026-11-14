@@ -10,7 +10,17 @@
  * a person. Missing/outdated data yields "Location or network information unavailable."
  */
 
-import geoip, { type Lookup as GeoLookup } from 'geoip-lite';
+import type geoipType from 'geoip-lite';
+import type { Lookup as GeoLookup } from 'geoip-lite';
+
+let cachedGeoIp: typeof geoipType | null = null;
+function getGeoIp(): typeof geoipType {
+  if (!cachedGeoIp) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    cachedGeoIp = require('geoip-lite') as typeof geoipType;
+  }
+  return cachedGeoIp;
+}
 
 import type { AddressClass, IpIntelligenceLookup } from './types';
 import { classifyAddress, type AddressClass as AC } from './ip-classification';
@@ -57,7 +67,7 @@ export class GeoIpLiteAdapter implements IpIntelligenceAdapter {
 
     let entry: GeoLookup | null;
     try {
-      entry = geoip.lookup(ip);
+      entry = getGeoIp().lookup(ip);
     } catch {
       return null;
     }

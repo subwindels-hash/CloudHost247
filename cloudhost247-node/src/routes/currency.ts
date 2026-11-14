@@ -1,11 +1,20 @@
 import type { FastifyInstance } from 'fastify';
-import geoip from 'geoip-lite';
+import type geoipType from 'geoip-lite';
 import { whereAlpha2 } from 'iso-3166-1';
 import { resolveVisitorIpFromRequest, VISITOR_IP_VARY } from './visitor-ip';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
 import { buildDisplayCurrencyStatus, loadLatestDisplaySnapshot } from '../services/fx-service';
+
+let cachedGeoIp: typeof geoipType | null = null;
+function getGeoIp(): typeof geoipType {
+  if (!cachedGeoIp) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    cachedGeoIp = require('geoip-lite') as typeof geoipType;
+  }
+  return cachedGeoIp;
+}
 
 /**
  * Public display-currency status: which currencies may be shown next to USD prices, the rate
@@ -31,7 +40,7 @@ export async function registerCurrencyRoutes(app: FastifyInstance, env: Env, ove
     let country: string | null = null;
     if (ip) {
       try {
-        const code = geoip.lookup(ip)?.country?.toUpperCase();
+        const code = getGeoIp().lookup(ip)?.country?.toUpperCase();
         if (code && whereAlpha2(code)) country = code;
       } catch { /* A missing or unreadable database must not break the site. */ }
     }

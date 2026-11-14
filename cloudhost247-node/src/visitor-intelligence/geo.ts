@@ -1,4 +1,15 @@
-import geoip from 'geoip-lite';
+import type geoipType from 'geoip-lite';
+
+let cachedGeoIp: typeof geoipType | null = null;
+function getGeoIp(): typeof geoipType {
+  if (!cachedGeoIp) {
+    // Lazy-loaded: geoip-lite reads ~140 MB of IP tables into memory on require(), which can
+    // exceed CloudLinux LVE limits at startup on shared cPanel hosting before a socket binds.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    cachedGeoIp = require('geoip-lite') as typeof geoipType;
+  }
+  return cachedGeoIp;
+}
 
 export interface ApproximateGeo {
   countryName: string | null;
@@ -54,9 +65,9 @@ function coarseCoordinate(value: unknown): number | null {
  */
 export function resolveApproximateGeo(ip: string | null): ApproximateGeo {
   if (!ip) return { ...EMPTY_GEO };
-  let result: ReturnType<typeof geoip.lookup>;
+  let result: ReturnType<typeof geoipType.lookup>;
   try {
-    result = geoip.lookup(ip);
+    result = getGeoIp().lookup(ip);
   } catch {
     return { ...EMPTY_GEO };
   }
@@ -65,7 +76,7 @@ export function resolveApproximateGeo(ip: string | null): ApproximateGeo {
   }
   const latitude = coarseCoordinate(result.ll?.[0]);
   const longitude = coarseCoordinate(result.ll?.[1]);
-  const details = result as ReturnType<typeof geoip.lookup> & { timezone?: unknown };
+  const details = result as ReturnType<typeof geoipType.lookup> & { timezone?: unknown };
   const timezone = typeof details.timezone === 'string' && details.timezone.length <= 64
     ? details.timezone
     : null;

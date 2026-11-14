@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolveToolPage, toolPageHtml } from './tools/presentation';
 import Fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify';
 import fastifyStatic from '@fastify/static';
@@ -326,7 +326,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // limiting) do not propagate to a parent/sibling context, so registering these on the root
     // instance served every HTML/JS/CSS response without CSP, HSTS, X-Frame-Options, etc.
     // Pinned by tests/unit/spa-security-headers.test.ts.
-    if (serveFrontend) {
+    const hasPublicDir = serveFrontend && existsSync(publicDir);
+    if (hasPublicDir) {
       await instance.register(fastifyStatic, {
         root: publicDir,
         index: false,
@@ -356,6 +357,21 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
         reply.code(404).send({ error: 'NOT_FOUND', message: 'Resource not found' });
         return;
       }
+      const indexHtmlPath = path.join(publicDir, 'index.html');
+      if (!hasPublicDir || !existsSync(indexHtmlPath)) {
+        reply
+          .code(503)
+          .header('cache-control', 'no-store')
+          .type('text/html; charset=utf-8')
+          .send(
+            '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+              '<title>Frontend Build Missing | CloudHost247</title></head><body style="margin:0;background:#101e2c;color:#fff;font:16px/1.6 system-ui,sans-serif">' +
+              '<main style="max-width:720px;margin:10vh auto;padding:24px"><h1>CloudHost247 frontend assets are not built yet</h1>' +
+              '<p>The backend API is running, but <code>public/index.html</code> was not found. Run <code>npm run build</code> in the application directory (or upload the pre-built cPanel release archive) and restart the application.</p>' +
+              '</main></body></html>',
+          );
+        return;
+      }
       // With wildcard:false, fastify-static registers only files present at startup. A frontend
       // rebuild can introduce new hashed assets while this process is still running. Serve those
       // from the static root rather than returning the SPA shell (or a false 404). Limit this
@@ -375,7 +391,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
         if (page && page.path !== route) {
           return reply.redirect(mount + page.path, 301);
         }
-        if (page) return reply.type('text/html').send(toolPageHtml(readFileSync(path.join(publicDir,'index.html'),'utf8'), page, env.APP_URL));
+        if (page) return reply.type('text/html').send(toolPageHtml(readFileSync(indexHtmlPath,'utf8'), page, env.APP_URL));
         // The independent Document Tools module retains its existing routes and authorization.
         if (!['/tools/document','/tools/document/mrz','/tools/document/mrz-parser'].includes(route)) reply.code(404).header('X-Robots-Tag','noindex');
       }

@@ -1,36 +1,36 @@
 /**
- * cPanel Passenger / Application Manager startup file.
+ * cPanel Passenger / LiteSpeed (lsnode) / Application Manager startup file.
  *
  * This file is intentionally plain CommonJS JavaScript (not TypeScript) because Passenger
- * launches it directly with the Node.js binary selected in cPanel's "Setup Node.js App" screen —
- * it does not run a build step for you. It loads the compiled application from dist/, which is
- * produced by `npm run build` (see package.json and docs/CPANEL_DEPLOYMENT.md).
+ * launches it directly with the Node.js binary selected in cPanel's "Setup Node.js App" screen.
  *
- * Do not put application logic in this file. Do not hardcode a port — the real listener is
- * configured in src/server.ts via process.env.PORT.
- *
- * Missing-build recovery (see docs/CPANEL_DEPLOYMENT.md, Appendix B):
- *   `dist/` is git-ignored build output, so a fresh source upload has no
- *   `dist/src/server.js` until the server is compiled. Passenger then crash-loops on this file
- *   forever. To stop that crash-loop, this file now:
- *     1. requires `dist/src/server.js` when it exists (the normal path);
- *     2. otherwise detects the common "pre-built zip extracted into a nested folder" mistake and
- *        starts that complete nested build, with a loud warning telling the operator to fix the
- *        layout at the next maintenance window;
- *     3. otherwise, when the TypeScript + Vite build tooling is installed, performs a one-time
- *        atomic recovery build (server into a temp dir, frontend into public/) under a lock, then
- *        requires the result;
- *     4. otherwise prints diagnostics and the exact fix, and exits cleanly (never a stack trace).
- *
- *   Set DISABLE_AUTO_BUILD=1 to skip step 3 and fail fast. Set DISABLE_NESTED_BUILD=1 to skip
- *   step 2 as well. Both are useful in CI and when an operator prefers to build manually in the
- *   cPanel virtual-environment terminal.
+ * Startup guarantees against cPanel 503 crash-loops:
+ *   1. Caps libuv / Go (esbuild) / Rust Rayon (@napi-rs/canvas) / libvips (sharp) thread pools
+ *      before any module loads so 32/64-core CloudLinux shared hosts with tight NPROC limits (20-35)
+ *      never panic with EAGAIN on thread creation.
+ *   2. Normalizes working directory to APP_ROOT and pre-loads <APP_ROOT>/.env without overriding
+ *      host-injected variables.
+ *   3. Fast path: when both dist/src/server.js and public/index.html exist, requires the compiled
+ *      server immediately.
+ *   4. Nested-package recovery: when a single complete pre-built zip was extracted into a
+ *      subfolder, boots it with a clear warning.
+ *   5. Non-blocking recovery build: when build output is missing (unless DISABLE_AUTO_BUILD=1),
+ *      binds the Passenger socket/PORT immediately so PassengerStartTimeout never kills the build,
+ *      installs missing devDependencies if needed, compiles TypeScript + Vite asynchronously under
+ *      a PID-verified lock, and hot-mounts the compiled Fastify app onto the live HTTP server.
  */
 'use strict';
 
+// --- 1. CloudLinux LVE thread-pool safety (must run before any native module loads) ----------
+process.env.UV_THREADPOOL_SIZE = process.env.UV_THREADPOOL_SIZE || '4';
+process.env.GOMAXPROCS = process.env.GOMAXPROCS || '2';
+process.env.RAYON_NUM_THREADS = process.env.RAYON_NUM_THREADS || '2';
+process.env.VIPS_CONCURRENCY = process.env.VIPS_CONCURRENCY || '2';
+
 const fs = require('fs');
+const http = require('http');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const { spawn } = require('child_process');
 
 const APP_ROOT = __dirname;
 const compiledEntry = path.join(APP_ROOT, 'dist', 'src', 'server.js');
@@ -40,21 +40,82 @@ const srcEntry = path.join(APP_ROOT, 'src', 'server.ts');
 const tsconfigPath = path.join(APP_ROOT, 'tsconfig.json');
 const frontendViteConfig = path.join(APP_ROOT, 'frontend', 'vite.config.ts');
 const tscBin = path.join(APP_ROOT, 'node_modules', 'typescript', 'bin', 'tsc');
+const tsModuleDir = path.join(APP_ROOT, 'node_modules', 'typescript');
+const esbuildModuleDir = path.join(APP_ROOT, 'node_modules', 'esbuild');
 const viteBin = path.join(APP_ROOT, 'node_modules', 'vite', 'bin', 'vite.js');
 const buildLockDir = path.join(APP_ROOT, '.server-build-lock');
+const buildLockOwnerFile = path.join(buildLockDir, 'owner.json');
 
-const BUILD_TIMEOUT_MS = 300000; // 5 minutes; shared hosting can be slow.
-const LOCK_STALE_MS = 10 * 60 * 1000; // clean up a lock left by a killed Passenger process.
-
-function isDisabled(name) {
-  const value = process.env[name];
-  return value === '1' || value === 'true' || value === 'yes';
-}
+const BUILD_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes max per build step on shared hosting
+const LOCK_STALE_MS = 10 * 60 * 1000;
 
 function log(lines) {
   const prefix = '[server.js] ';
   // eslint-disable-next-line no-console
   console.error(prefix + lines.join('\n' + prefix));
+}
+
+function isDisabled(name) {
+  const value = String(process.env[name] || '').trim().toLowerCase();
+  return value === '1' || value === 'true' || value === 'yes';
+}
+
+function escapeHtml(input) {
+  return String(input)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Minimal .env loader so <APP_ROOT>/.env flags (DISABLE_AUTO_BUILD, PORT, JWT_SECRET, etc.) take
+ * effect before dotenv loads and survive chdir() into a nested release directory.
+ */
+function preloadDotEnv(envFile) {
+  try {
+    if (!fs.existsSync(envFile)) return;
+    const content = fs.readFileSync(envFile, 'utf8');
+    for (const rawLine of content.split(/\r?\n/)) {
+      const trimmed = rawLine.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const body = trimmed.startsWith('export ') ? trimmed.slice(7).trim() : trimmed;
+      const eq = body.indexOf('=');
+      if (eq === -1) continue;
+      const key = body.slice(0, eq).trim();
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+      if (process.env[key] !== undefined) continue;
+      let val = body.slice(eq + 1).trim();
+      if (
+        (val.startsWith('"') && val.endsWith('"') && val.length >= 2) ||
+        (val.startsWith("'") && val.endsWith("'") && val.length >= 2)
+      ) {
+        const quote = val[0];
+        val = val.slice(1, -1);
+        if (quote === '"') {
+          val = val
+            .replace(/\\n/g, '\n')
+            .replace(/\\t/g, '\t')
+            .replace(/\\"/g, '"')
+            .replace(/\\\\/g, '\\');
+        }
+      } else {
+        const commentIdx = val.indexOf(' #');
+        if (commentIdx !== -1) val = val.slice(0, commentIdx).trim();
+      }
+      process.env[key] = val;
+    }
+  } catch (_) {
+    // Non-fatal; host env vars may be sufficient.
+  }
+}
+
+preloadDotEnv(path.join(APP_ROOT, '.env'));
+try {
+  process.chdir(APP_ROOT);
+} catch (err) {
+  log([`Warning: could not chdir to ${APP_ROOT}: ${err.message}`]);
 }
 
 /** Top-level folders that cannot be a mistakenly-extracted release package. */
@@ -86,7 +147,7 @@ function findNestedBuilds() {
   try {
     for (const entry of fs.readdirSync(APP_ROOT, { withFileTypes: true })) {
       if (!entry.isDirectory() || NON_PACKAGE_DIRS.has(entry.name)) continue;
-      if (entry.name.startsWith('.dist-build-')) continue;
+      if (entry.name.startsWith('.dist-build-') || entry.name.startsWith('.')) continue;
       const nestedRoot = path.join(APP_ROOT, entry.name);
       const nestedEntry = path.join(nestedRoot, 'dist', 'src', 'server.js');
       if (!fs.existsSync(nestedEntry)) continue;
@@ -94,7 +155,7 @@ function findNestedBuilds() {
       try {
         mtime = fs.statSync(nestedEntry).mtimeMs;
       } catch (_) {
-        // stat failed — still usable, just sort it last.
+        // stat failed — still usable, sort last.
       }
       builds.push({
         root: nestedRoot,
@@ -111,96 +172,345 @@ function findNestedBuilds() {
 
 function useNestedBuild(build) {
   log([
-    'dist/src/server.js is missing, but a complete pre-built package was found in a nested folder:',
+    'dist/src/server.js is missing at <APP_ROOT>, but a complete pre-built package was found in a nested folder:',
     `  ${build.root}`,
     'Starting that build now as a RECOVERY path. This is not the intended layout —',
     `move the CONTENTS of ${build.root} into ${APP_ROOT}`,
     'at the next maintenance window, then Restart the application.',
     'See DEPLOY.txt / docs/CPANEL_DEPLOYMENT.md in the release package.',
   ]);
-  // dotenv/config reads .env from process.cwd(); keep env lookup at the configured app root.
+  // <APP_ROOT>/.env was already preloaded above; also preload nested .env as fallback and chdir
+  // into build.root so relative config/ and manifests/ paths inside the package resolve cleanly.
+  preloadDotEnv(path.join(build.root, '.env'));
   try {
-    process.chdir(APP_ROOT);
+    process.chdir(build.root);
   } catch (err) {
-    log([`Warning: could not chdir to ${APP_ROOT}: ${err.message}`]);
+    log([`Warning: could not chdir to ${build.root}: ${err.message}`]);
   }
 }
 
-/** Atomic mkdir-based lock. Returns 'acquired', 'wait', or throws. */
+function isPidAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return err && err.code === 'EPERM';
+  }
+}
+
+function writeLockOwner() {
+  try {
+    fs.writeFileSync(
+      buildLockOwnerFile,
+      JSON.stringify({ pid: process.pid, startedAt: Date.now() }),
+      'utf8'
+    );
+  } catch (_) {
+    // Best-effort metadata for immediate dead-PID recovery.
+  }
+}
+
+/**
+ * Atomic mkdir-based lock with dead-PID detection. If a previous Passenger worker was SIGKILLed
+ * mid-build by CloudLinux LVE, its dead PID in owner.json lets us reclaim the lock immediately
+ * instead of stalling for 10 minutes.
+ */
 function acquireBuildLock() {
   try {
     fs.mkdirSync(buildLockDir);
+    writeLockOwner();
     return 'acquired';
   } catch (err) {
     if (err.code !== 'EEXIST') throw err;
-    let age = Infinity;
+
+    let stale = false;
     try {
-      age = Date.now() - fs.statSync(buildLockDir).mtimeMs;
+      if (fs.existsSync(buildLockOwnerFile)) {
+        const owner = JSON.parse(fs.readFileSync(buildLockOwnerFile, 'utf8'));
+        if (owner && Number.isInteger(owner.pid) && owner.pid !== process.pid && !isPidAlive(owner.pid)) {
+          stale = true;
+        }
+      }
+      if (!stale) {
+        const age = Date.now() - fs.statSync(buildLockDir).mtimeMs;
+        if (age > LOCK_STALE_MS) stale = true;
+      }
     } catch (_) {
-      // lock disappeared between mkdir and stat — treat as stale.
+      stale = true;
     }
-    if (age > LOCK_STALE_MS) {
+
+    if (stale) {
       try {
         fs.rmSync(buildLockDir, { recursive: true, force: true });
         fs.mkdirSync(buildLockDir);
+        writeLockOwner();
         return 'acquired';
       } catch (_) {
-        // Another process won the race; fall through to wait.
+        // Another worker won the race; fall through to wait.
       }
     }
     return 'wait';
   }
 }
 
-function waitForRecoveryBuild(timeoutMs) {
-  const deadline = Date.now() + timeoutMs;
-  const sleeper = new Int32Array(new SharedArrayBuffer(4));
-  while (Date.now() < deadline) {
-    if (fs.existsSync(compiledEntry) && fs.existsSync(publicIndex)) return true;
-    // Atomics.wait is available on Node's main thread and blocks without spinning the CPU.
-    Atomics.wait(sleeper, 0, 0, 1000);
+function releaseBuildLock() {
+  try {
+    fs.rmSync(buildLockDir, { recursive: true, force: true });
+  } catch (_) {
+    // Best effort only.
   }
-  return fs.existsSync(compiledEntry) && fs.existsSync(publicIndex);
 }
 
-function runStep(label, bin, args) {
-  log([label]);
-  const result = spawnSync(process.execPath, [bin, ...args], {
-    cwd: APP_ROOT,
-    stdio: 'inherit',
-    timeout: BUILD_TIMEOUT_MS,
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  if (result.error) {
-    log([`${label} failed to start: ${result.error.message}`]);
-    return false;
+function buildChildEnv(extraEnv) {
+  const env = Object.assign({}, process.env, extraEnv || {});
+  if (!env.NODE_OPTIONS || !env.NODE_OPTIONS.includes('--max-old-space-size')) {
+    env.NODE_OPTIONS = ((env.NODE_OPTIONS || '') + ' --max-old-space-size=1536').trim();
   }
-  if (result.status !== 0) {
-    const why = result.signal ? `killed by ${result.signal}` : `exit code ${result.status}`;
-    log([`${label} failed (${why}). See the build output above.`]);
-    return false;
-  }
-  return true;
+  env.GOMAXPROCS = env.GOMAXPROCS || '2';
+  env.UV_THREADPOOL_SIZE = env.UV_THREADPOOL_SIZE || '4';
+  env.RAYON_NUM_THREADS = env.RAYON_NUM_THREADS || '2';
+  env.VIPS_CONCURRENCY = env.VIPS_CONCURRENCY || '2';
+  return env;
 }
 
 /**
- * Build server + frontend into place without ever leaving a half-written dist/.
- * TypeScript emits to .dist-build-XXXX/ first; only after BOTH halves succeed do we swap it to
- * dist/. A concurrent Passenger worker waits on the lock instead of racing the compiler.
+ * Low-memory server transpiler script executed in a short-lived child process.
+ * Full `tsc -p tsconfig.json` typechecking allocates ~900 MB+ (due to AWS SDK + large generated
+ * JSON ASTs), which gets OOM-killed on 1 GB CloudLinux cPanel LVE containers. File-by-file
+ * transpilation via TypeScript's own `transpileModule` (or esbuild) emits identical CommonJS
+ * output in ~2 seconds using < 80 MB of RAM, and copies JSON assets imported via resolveJsonModule.
  */
-function tryRecoveryBuild() {
-  if (isDisabled('DISABLE_AUTO_BUILD')) {
-    return { ok: false, reason: 'disabled' };
-  }
+const LOW_MEM_TRANSPILER_SCRIPT = `
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const outRoot = process.env.CH247_OUT_DIR;
+const appRoot = process.cwd();
 
-  const missing = [];
-  if (!fs.existsSync(srcEntry)) missing.push('src/server.ts');
-  if (!fs.existsSync(tsconfigPath)) missing.push('tsconfig.json');
-  if (!fs.existsSync(frontendViteConfig)) missing.push('frontend/vite.config.ts');
-  if (!fs.existsSync(tscBin)) missing.push('node_modules/typescript/bin/tsc');
-  if (!fs.existsSync(viteBin)) missing.push('node_modules/vite/bin/vite.js');
-  if (missing.length > 0) {
-    return { ok: false, reason: 'missing-tooling', missing };
+function walk(dir, acc) {
+  if (!fs.existsSync(dir)) return acc;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) walk(full, acc);
+    else acc.push(full);
+  }
+  return acc;
+}
+
+let transpileFn = null;
+try {
+  const ts = require('typescript');
+  transpileFn = (code, fileName) => ts.transpileModule(code, {
+    fileName,
+    compilerOptions: {
+      target: ts.ScriptTarget.ES2021,
+      module: ts.ModuleKind.CommonJS,
+      moduleResolution: ts.ModuleResolutionKind.NodeJs,
+      esModuleInterop: true,
+      resolveJsonModule: true,
+      sourceMap: false,
+    },
+  }).outputText;
+} catch (_) {
+  const esbuild = require('esbuild');
+  transpileFn = (code, fileName) => esbuild.transformSync(code, {
+    loader: 'ts',
+    format: 'cjs',
+    target: 'es2021',
+    sourcefile: fileName,
+  }).code;
+}
+
+const files = [...walk(path.join(appRoot, 'src'), []), ...walk(path.join(appRoot, 'database'), [])];
+let count = 0;
+for (const file of files) {
+  const rel = path.relative(appRoot, file);
+  if (file.endsWith('.d.ts')) continue;
+  if (file.endsWith('.ts')) {
+    const dest = path.join(outRoot, rel.replace(/\\.ts$/, '.js'));
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    const src = fs.readFileSync(file, 'utf8');
+    fs.writeFileSync(dest, transpileFn(src, file), 'utf8');
+    count += 1;
+  } else if (file.endsWith('.json')) {
+    const dest = path.join(outRoot, rel);
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(file, dest);
+  }
+}
+console.error('[server.js] Transpiled ' + count + ' server modules into ' + outRoot);
+`;
+
+function runStepAsync(label, cmd, args, extraEnv) {
+  log([label]);
+  return new Promise((resolve) => {
+    let settled = false;
+    const child = spawn(cmd, args, {
+      cwd: APP_ROOT,
+      env: buildChildEnv(extraEnv),
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    const tail = [];
+    const pushLines = (chunk) => {
+      const text = chunk.toString('utf8');
+      process.stderr.write(text);
+      for (const line of text.split(/\r?\n/)) {
+        if (line.trim()) {
+          tail.push(line.trim());
+          if (tail.length > 25) tail.shift();
+        }
+      }
+    };
+
+    if (child.stdout) child.stdout.on('data', pushLines);
+    if (child.stderr) child.stderr.on('data', pushLines);
+
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      try {
+        child.kill('SIGKILL');
+      } catch (_) {
+        // ignore
+      }
+      log([`${label} timed out after ${Math.round(BUILD_TIMEOUT_MS / 1000)}s.`]);
+      resolve({ ok: false, detail: `${label} timed out`, tail });
+    }, BUILD_TIMEOUT_MS);
+    timer.unref();
+
+    child.on('error', (err) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      log([`${label} failed to start: ${err.message}`]);
+      resolve({ ok: false, detail: err.message, tail });
+    });
+
+    child.on('close', (code, signal) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (code === 0) {
+        resolve({ ok: true, tail });
+      } else {
+        const why = signal ? `killed by ${signal}` : `exit code ${code}`;
+        log([`${label} failed (${why}).`]);
+        resolve({ ok: false, detail: `${label} failed (${why})`, tail });
+      }
+    });
+  });
+}
+
+function resolveNpmCommand() {
+  const siblingNpmCli = path.join(
+    path.dirname(process.execPath),
+    '..',
+    'lib',
+    'node_modules',
+    'npm',
+    'bin',
+    'npm-cli.js'
+  );
+  if (fs.existsSync(siblingNpmCli)) {
+    return { cmd: process.execPath, prefixArgs: [siblingNpmCli] };
+  }
+  const siblingNpm = path.join(path.dirname(process.execPath), 'npm');
+  if (fs.existsSync(siblingNpm)) {
+    return { cmd: siblingNpm, prefixArgs: [] };
+  }
+  return { cmd: 'npm', prefixArgs: [] };
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function newestSourceMtimeMs(dirs) {
+  let newest = 0;
+  const stack = dirs.slice();
+  while (stack.length > 0) {
+    const dir = stack.pop();
+    if (!dir || !fs.existsSync(dir)) continue;
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch (_) {
+      continue;
+    }
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(full);
+      } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.json')) {
+        try {
+          const mtime = fs.statSync(full).mtimeMs;
+          if (mtime > newest) newest = mtime;
+        } catch (_) {
+          // ignore race
+        }
+      }
+    }
+  }
+  return newest;
+}
+
+/**
+ * Returns true if dist/src/server.js is missing OR (when src/ exists in a git checkout) older
+ * than src/ or compiled from a pre-resilience revision. Ensures `git pull` + Passenger Restart
+ * never silently boots stale dist/ code from an earlier commit.
+ */
+function isServerBuildOutdated() {
+  if (!fs.existsSync(compiledEntry)) return true;
+  if (!fs.existsSync(srcEntry)) return false;
+  try {
+    const entryCode = fs.readFileSync(compiledEntry, 'utf8');
+    if (!entryCode.includes('createRuntimeApp')) return true;
+    const compiledMtime = fs.statSync(compiledEntry).mtimeMs;
+    const srcMtime = newestSourceMtimeMs([
+      path.join(APP_ROOT, 'src'),
+      path.join(APP_ROOT, 'database'),
+    ]);
+    return srcMtime > compiledMtime + 1000;
+  } catch (_) {
+    return true;
+  }
+}
+
+async function waitForConcurrentBuild(timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (!isServerBuildOutdated() && fs.existsSync(publicIndex)) return true;
+    // If the lock disappeared or its owner died without producing the build, stop waiting early.
+    if (!fs.existsSync(buildLockDir)) {
+      return !isServerBuildOutdated() && fs.existsSync(publicIndex);
+    }
+    try {
+      if (fs.existsSync(buildLockOwnerFile)) {
+        const owner = JSON.parse(fs.readFileSync(buildLockOwnerFile, 'utf8'));
+        if (owner && Number.isInteger(owner.pid) && !isPidAlive(owner.pid)) {
+          return false;
+        }
+      }
+    } catch (_) {
+      // keep waiting briefly
+    }
+    await sleep(1000);
+  }
+  return !isServerBuildOutdated() && fs.existsSync(publicIndex);
+}
+
+async function runAsyncRecoveryBuild(onPhase) {
+  const needServerBuild = isServerBuildOutdated();
+  const needFrontendBuild = !fs.existsSync(publicIndex);
+
+  const sourceMissing = [];
+  if (needServerBuild && !fs.existsSync(srcEntry)) sourceMissing.push('src/server.ts');
+  if (needServerBuild && !fs.existsSync(tsconfigPath)) sourceMissing.push('tsconfig.json');
+  if (needFrontendBuild && !fs.existsSync(frontendViteConfig)) sourceMissing.push('frontend/vite.config.ts');
+  if (sourceMissing.length > 0) {
+    return { ok: false, reason: 'missing-source', missing: sourceMissing };
   }
 
   let lockState;
@@ -211,56 +521,111 @@ function tryRecoveryBuild() {
   }
 
   if (lockState === 'wait') {
-    log(['Another startup is already building dist/ — waiting up to 5 minutes for it to finish…']);
-    if (waitForRecoveryBuild(BUILD_TIMEOUT_MS)) {
+    onPhase('Waiting for in-progress application build…');
+    log(['Another worker is already building dist/ — waiting asynchronously for it to finish…']);
+    if (await waitForConcurrentBuild(BUILD_TIMEOUT_MS)) {
       return { ok: true, waited: true };
     }
-    return { ok: false, reason: 'wait-timeout' };
+    // Re-attempt lock acquisition in case the previous builder died mid-flight.
+    try {
+      lockState = acquireBuildLock();
+    } catch (err) {
+      return { ok: false, reason: 'lock-error', error: err.message };
+    }
+    if (lockState !== 'acquired') {
+      return { ok: false, reason: 'wait-timeout' };
+    }
   }
 
   let tempDir = null;
   try {
-    // A previous failed attempt may have left a partial dist/. It is generated output only.
-    fs.rmSync(distDir, { recursive: true, force: true });
-    tempDir = fs.mkdtempSync(path.join(APP_ROOT, '.dist-build-'));
+    // On cPanel with Application mode = Production, "Run NPM Install" runs with NODE_ENV=production
+    // and skips devDependencies (typescript, vite, @vitejs/plugin-react). When only the server
+    // needs transpilation (e.g. after `git pull`), install just `typescript` (~22 MB, 0 sub-deps)
+    // rather than all devDependencies (which include Playwright/Chromium).
+    const freshNeedServer = isServerBuildOutdated();
+    const freshNeedFrontend = !fs.existsSync(publicIndex);
+    const hasServerTranspiler = () => fs.existsSync(tsModuleDir) || fs.existsSync(esbuildModuleDir);
 
-    if (
-      !runStep('Attempting one-time recovery build: compiling TypeScript server…', tscBin, [
-        '-p',
-        tsconfigPath,
-        '--outDir',
-        tempDir,
-      ])
-    ) {
-      return { ok: false, reason: 'tsc-failed' };
+    if (freshNeedFrontend && !fs.existsSync(viteBin)) {
+      onPhase('Installing TypeScript and frontend build tools…');
+      const npmBin = resolveNpmCommand();
+      const installStep = await runStepAsync(
+        'Installing missing build devDependencies (npm install --include=dev)…',
+        npmBin.cmd,
+        [...npmBin.prefixArgs, 'install', '--include=dev', '--no-audit', '--no-fund'],
+        { NODE_ENV: 'development', npm_config_production: 'false' }
+      );
+      if (!installStep.ok || !fs.existsSync(viteBin) || (freshNeedServer && !hasServerTranspiler())) {
+        const missingTools = [];
+        if (freshNeedServer && !hasServerTranspiler()) missingTools.push('node_modules/typescript');
+        if (!fs.existsSync(viteBin)) missingTools.push('node_modules/vite/bin/vite.js');
+        return {
+          ok: false,
+          reason: 'missing-tooling',
+          missing: missingTools,
+          detail: installStep.detail,
+        };
+      }
+    } else if (freshNeedServer && !hasServerTranspiler()) {
+      onPhase('Installing TypeScript transpiler…');
+      const npmBin = resolveNpmCommand();
+      const installStep = await runStepAsync(
+        'Installing TypeScript transpiler (npm install --no-save typescript)…',
+        npmBin.cmd,
+        [...npmBin.prefixArgs, 'install', '--no-save', '--no-package-lock', '--no-audit', '--no-fund', 'typescript@^5.5.4'],
+        { NODE_ENV: 'development', npm_config_production: 'false' }
+      );
+      if (!installStep.ok || !hasServerTranspiler()) {
+        return {
+          ok: false,
+          reason: 'missing-tooling',
+          missing: ['node_modules/typescript'],
+          detail: installStep.detail,
+        };
+      }
     }
 
-    if (
-      !runStep('Attempting one-time recovery build: building frontend static assets…', viteBin, [
-        'build',
-        '--config',
-        frontendViteConfig,
-      ])
-    ) {
-      return { ok: false, reason: 'vite-failed' };
+    if (freshNeedServer) {
+      onPhase('Compiling TypeScript server…');
+      tempDir = fs.mkdtempSync(path.join(APP_ROOT, '.dist-build-'));
+      const tscStep = await runStepAsync(
+        'Recovery build: transpiling TypeScript server (low-memory mode)…',
+        process.execPath,
+        ['-e', LOW_MEM_TRANSPILER_SCRIPT],
+        { CH247_OUT_DIR: tempDir }
+      );
+      if (!tscStep.ok) {
+        return { ok: false, reason: 'tsc-failed', detail: tscStep.detail };
+      }
+      if (!fs.existsSync(path.join(tempDir, 'src', 'server.js'))) {
+        return { ok: false, reason: 'no-compiled-entry' };
+      }
     }
 
-    if (!fs.existsSync(path.join(tempDir, 'src', 'server.js'))) {
-      log(['TypeScript finished but dist/src/server.js was not produced — check tsconfig rootDir/outDir.']);
-      return { ok: false, reason: 'no-compiled-entry' };
-    }
-    if (!fs.existsSync(publicIndex)) {
-      log(['Vite finished but public/index.html is missing — the SPA cannot be served.']);
-      return { ok: false, reason: 'no-public-index' };
+    if (freshNeedFrontend) {
+      onPhase('Building frontend static assets…');
+      const viteStep = await runStepAsync(
+        'Recovery build: building frontend static assets…',
+        process.execPath,
+        [viteBin, 'build', '--config', frontendViteConfig]
+      );
+      if (!viteStep.ok) {
+        return { ok: false, reason: 'vite-failed', detail: viteStep.detail };
+      }
+      if (!fs.existsSync(publicIndex)) {
+        return { ok: false, reason: 'no-public-index' };
+      }
     }
 
-    fs.rmSync(distDir, { recursive: true, force: true });
-    // mkdtemp creates 0700; Passenger runs as the app owner, but 0755 keeps dist/ readable by
-    // any cPanel tooling (migration CLI, File Manager) that inspects the build output.
-    fs.chmodSync(tempDir, 0o755);
-    fs.renameSync(tempDir, distDir);
-    tempDir = null;
-    log(['Recovery build succeeded — starting compiled application.']);
+    if (tempDir) {
+      fs.rmSync(distDir, { recursive: true, force: true });
+      fs.chmodSync(tempDir, 0o755);
+      fs.renameSync(tempDir, distDir);
+      tempDir = null;
+    }
+
+    log(['Recovery build succeeded — mounting compiled application.']);
     return { ok: true };
   } catch (err) {
     return { ok: false, reason: 'exception', error: err.message };
@@ -269,14 +634,10 @@ function tryRecoveryBuild() {
       try {
         fs.rmSync(tempDir, { recursive: true, force: true });
       } catch (_) {
-        // best effort only
+        // best effort
       }
     }
-    try {
-      fs.rmSync(buildLockDir, { recursive: true, force: true });
-    } catch (_) {
-      // best effort only
-    }
+    releaseBuildLock();
   }
 }
 
@@ -284,7 +645,7 @@ function printFatalDiagnostics(result) {
   const nested = findNestedBuilds();
   const has = (p) => (fs.existsSync(p) ? 'yes' : 'NO');
   const lines = [
-    'Compiled application not found at dist/src/server.js.',
+    'Compiled application not ready (dist/src/server.js or public/index.html missing).',
     `  app root (__dirname): ${APP_ROOT}`,
     `  cwd: ${process.cwd()}`,
     `  node: ${process.version}`,
@@ -293,46 +654,37 @@ function printFatalDiagnostics(result) {
     `  frontend/vite.config.ts: ${has(frontendViteConfig)}`,
     `  TypeScript compiler: ${has(tscBin)}`,
     `  Vite compiler: ${has(viteBin)}`,
+    `  dist/src/server.js: ${has(compiledEntry)}`,
     `  public/index.html: ${has(publicIndex)}`,
   ];
 
   if (result.reason === 'disabled') {
     lines.push('', '  Auto-build is disabled (DISABLE_AUTO_BUILD=1) — failing fast as requested.');
-  } else if (result.reason === 'missing-tooling') {
+  } else if (result.reason === 'missing-tooling' || result.reason === 'missing-source') {
     lines.push(
       '',
-      `  Auto-build skipped — missing: ${result.missing.join(', ')}`,
-      '  A source-only upload cannot start without a build. Run "npm ci" (full install, NOT',
-      '  --omit=dev) in the cPanel virtual-environment terminal, or use the pre-built zip.'
+      `  Auto-build could not proceed — missing: ${(result.missing || []).join(', ')}`,
+      '  Run "npm ci && npm run build" in the cPanel virtual-environment terminal, or upload the pre-built cPanel zip.'
     );
   } else if (result.reason === 'wait-timeout') {
-    lines.push('', '  Timed out waiting for another startup to finish the recovery build.');
+    lines.push('', '  Timed out waiting for another worker to finish the recovery build.');
   } else if (result.reason === 'lock-error') {
     lines.push('', `  Could not acquire build lock: ${result.error}`);
   } else if (result.reason === 'exception') {
     lines.push('', `  Recovery build threw: ${result.error}`);
+  } else if (result.detail) {
+    lines.push('', `  Build step failed: ${result.detail}`);
   }
 
   if (nested.length > 0) {
-    lines.push(
-      '',
-      `  Nested pre-built package(s) found (${nested.length}):`
-    );
+    lines.push('', `  Nested pre-built package(s) found (${nested.length}):`);
     for (const build of nested) {
       lines.push(
         `    ${build.root}${build.hasPublic ? '' : '  [INCOMPLETE: public/index.html missing]'}`
       );
     }
-    if (!isDisabled('DISABLE_NESTED_BUILD')) {
-      lines.push(
-        '  A single complete nested package is normally started automatically. If you see this',
-        '  message, either none of them is complete, or more than one was found (refusing to guess).'
-      );
-    }
     lines.push(
-      '  Fix: move the CONTENTS of the correct nested folder into the application root',
-      '  (server.js, dist/, public/, database/, manifests/, package.json must all sit directly',
-      '  in <APP_ROOT>), then Restart.'
+      '  Fix: move the CONTENTS of the correct nested folder into <APP_ROOT>, then Restart.'
     );
   }
 
@@ -340,27 +692,215 @@ function printFatalDiagnostics(result) {
     '',
     '  Fix — pick ONE:',
     '    A) Build on the server (needs terminal access):',
-    '         cPanel → Setup Node.js App → "Enter to virtual environment", then run:',
+    '         cPanel -> Setup Node.js App -> "Enter to virtual environment", then run:',
     '           npm ci && npm run build',
-    '         ("npm run build:server" alone is NOT enough — src/app.ts serves public/ and will',
-    '          fail without public/index.html. Do NOT use "npm ci --omit=dev" here: TypeScript',
-    '          and Vite are devDependencies.) Then Restart the application.',
-    '    B) No terminal / builds keep getting killed (CloudLinux LVE limits) — pre-built zip:',
-    '         On a laptop/CI:  cd cloudhost247-node && bash scripts/package-cpanel.sh',
-    '         Upload release/cloudhost247-cpanel-<sha>.zip via File Manager, Extract, then move',
-    '         the CONTENTS of cloudhost247-cpanel-<sha>/ into <APP_ROOT> (see DEPLOY.txt inside',
-    '         the zip). Run "npm ci --omit=dev", then Restart. No server-side build is needed.',
+    '         Then Restart the application.',
+    '    B) Pre-built cPanel package (no server-side build required):',
+    '         On a workstation/CI:  cd cloudhost247-node && bash scripts/package-cpanel.sh',
+    '         Upload release/cloudhost247-cpanel-<sha>.zip, Extract, move its CONTENTS into',
+    '         <APP_ROOT>, run "npm ci --omit=dev", then Restart.',
     '',
-    '  See docs/CPANEL_DEPLOYMENT.md §0a/§2 and Appendix B.',
-    '  Set DISABLE_AUTO_BUILD=1 to skip the automatic build attempt and fail fast.'
+    '  See docs/CPANEL_DEPLOYMENT.md §0a/§2 and Appendix B.'
   );
 
   log(lines);
 }
 
-let entryToRequire = compiledEntry;
+function resolveListenTarget() {
+  const explicitSocket = (process.env.SOCKET_PATH || '').trim();
+  if (explicitSocket) return { path: explicitSocket };
 
-if (!fs.existsSync(compiledEntry)) {
+  const rawPort = (process.env.PORT || '').trim();
+  if (rawPort && /^(\/|unix:|\\\\\.\\pipe\\)/i.test(rawPort)) {
+    return { path: rawPort.replace(/^unix:/i, '') };
+  }
+
+  const parsedPort = Number(rawPort);
+  const port = Number.isInteger(parsedPort) && parsedPort > 0 && parsedPort <= 65535 ? parsedPort : 3000;
+  return { port, host: '0.0.0.0' };
+}
+
+function renderWarmupPage(phase) {
+  return (
+    '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<meta name="robots" content="noindex">' +
+    '<meta http-equiv="refresh" content="5">' +
+    '<title>Starting CloudHost247…</title>' +
+    '<style>body{margin:0;background:#101e2c;color:#fff;font:16px/1.65 system-ui,-apple-system,sans-serif}' +
+    'main{max-width:680px;margin:12vh auto;padding:32px}' +
+    '.badge{display:inline-block;background:#1d354d;color:#b4f2cd;padding:4px 10px;border-radius:4px;font-size:13px;font-weight:600;margin-bottom:16px}' +
+    'h1{font-size:clamp(28px,4vw,40px);margin:0 0 12px}p{color:#c6d3dd}' +
+    '.status{background:#16283a;border:1px solid #294661;border-radius:8px;padding:16px 20px;margin-top:20px;color:#b4f2cd;font-family:ui-monospace,monospace;font-size:14px}' +
+    '</style></head><body><main>' +
+    '<span class="badge">CloudHost247 Platform</span>' +
+    '<h1>Preparing application…</h1>' +
+    '<p>CloudHost247 is completing its one-time startup build. This page refreshes automatically every 5 seconds and will open as soon as compilation finishes.</p>' +
+    `<div class="status">${escapeHtml(phase)}</div>` +
+    '</main></body></html>'
+  );
+}
+
+function renderBuildRequiredPage(reason) {
+  return (
+    '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<meta name="robots" content="noindex">' +
+    '<title>Build Required | CloudHost247</title>' +
+    '<style>body{margin:0;background:#101e2c;color:#fff;font:16px/1.65 system-ui,-apple-system,sans-serif}' +
+    'main{max-width:760px;margin:8vh auto;padding:32px}' +
+    '.badge{display:inline-block;background:#1d354d;color:#b4f2cd;padding:4px 10px;border-radius:4px;font-size:13px;font-weight:600;margin-bottom:16px}' +
+    'h1{font-size:clamp(28px,4vw,40px);margin:0 0 12px}p,li{color:#c6d3dd}' +
+    '.card{background:#16283a;border:1px solid #294661;border-radius:8px;padding:20px;margin:20px 0}' +
+    'code,pre{background:#0b1520;color:#b4f2cd;border-radius:4px;font-size:14px}' +
+    'code{padding:2px 6px}pre{padding:12px;overflow-x:auto}</style></head><body><main>' +
+    '<span class="badge">CloudHost247 Deployment Check</span>' +
+    '<h1>Application Build Artifacts Missing</h1>' +
+    `<p>The Node.js server is online, but compiled artifacts (<code>dist/src/server.js</code> and <code>public/index.html</code>) are missing and automatic build could not complete (<code>${escapeHtml(reason)}</code>).</p>` +
+    '<div class="card"><strong>Option A — Build in cPanel Terminal:</strong>' +
+    '<pre>npm ci && npm run build</pre>' +
+    '<strong>Option B — Upload Pre-Built cPanel Package (Recommended for shared hosting):</strong>' +
+    '<pre>cd cloudhost247-node && bash scripts/package-cpanel.sh</pre>' +
+    '<p>Extract the generated <code>release/cloudhost247-cpanel-&lt;sha&gt;.zip</code> directly into your application root, run <code>npm ci --omit=dev</code>, and click <strong>Restart</strong> in cPanel.</p></div>' +
+    '</main></body></html>'
+  );
+}
+
+/**
+ * Starts an HTTP listener immediately (preventing Passenger startup timeouts / 503 kills), runs
+ * the recovery build in the background, and hot-mounts the compiled Fastify app onto the same
+ * live http.Server once ready.
+ */
+async function startWithBackgroundRecovery() {
+  let state = 'building';
+  let currentPhase = 'Initializing startup recovery build…';
+  let failReason = 'unknown';
+  let mountedApp = null;
+  let closeDbPool = null;
+
+  let activeHandler = (req, res) => {
+    const pathname = (req.url || '/').split(/[?#]/)[0] || '/';
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+
+    if (state === 'building') {
+      if (pathname === '/health') {
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ status: 'starting', phase: currentPhase }));
+        return;
+      }
+      if (pathname === '/ready' || pathname.startsWith('/api')) {
+        res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8', 'Retry-After': '5' });
+        res.end(
+          JSON.stringify({
+            status: 'starting',
+            error: 'APPLICATION_STARTING',
+            message: currentPhase,
+          })
+        );
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(renderWarmupPage(currentPhase));
+      return;
+    }
+
+    if (pathname === '/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ status: 'degraded', error: 'BUILD_REQUIRED', reason: failReason }));
+      return;
+    }
+    if (pathname === '/ready' || pathname.startsWith('/api')) {
+      res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(
+        JSON.stringify({
+          status: 'error',
+          error: 'BUILD_REQUIRED',
+          reason: failReason,
+          message: 'Compiled application artifacts (dist/ and public/) are missing. See stderr.log.',
+        })
+      );
+      return;
+    }
+    res.writeHead(503, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(renderBuildRequiredPage(failReason));
+  };
+
+  const httpServer = http.createServer((req, res) => {
+    activeHandler(req, res);
+  });
+  httpServer.keepAliveTimeout = 72000;
+
+  const target = resolveListenTarget();
+  if (target.path) {
+    try {
+      if (fs.existsSync(target.path)) fs.unlinkSync(target.path);
+    } catch (_) {
+      // Ignore if Passenger owns or just replaced the socket path.
+    }
+  }
+  await new Promise((resolve, reject) => {
+    httpServer.once('error', reject);
+    httpServer.listen(target, resolve);
+  });
+  log(['HTTP listener bound immediately while one-time recovery build runs in background.']);
+
+  let shuttingDown = false;
+  const shutdown = async (signal) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    log([`Received ${signal}, shutting down…`]);
+    releaseBuildLock();
+    await new Promise((resolve) => httpServer.close(resolve));
+    try {
+      if (mountedApp) await mountedApp.close();
+      if (closeDbPool) await closeDbPool();
+    } catch (_) {
+      // best effort
+    }
+    process.exit(0);
+  };
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+  process.on('SIGINT', () => void shutdown('SIGINT'));
+
+  const buildResult = await runAsyncRecoveryBuild((phase) => {
+    currentPhase = phase;
+  });
+
+  if (!buildResult.ok) {
+    state = 'failed';
+    failReason = buildResult.reason || 'build-failed';
+    printFatalDiagnostics(buildResult);
+    return;
+  }
+
+  try {
+    currentPhase = 'Starting compiled application…';
+    process.env.CH247_DEFER_AUTORUN = '1';
+    const compiledServer = require(compiledEntry);
+    const poolMod = require(path.join(APP_ROOT, 'dist', 'src', 'db', 'pool.js'));
+    closeDbPool = poolMod.closePool;
+    const { app } = compiledServer.createRuntimeApp();
+    await app.ready();
+    mountedApp = app;
+    activeHandler = (req, res) => {
+      app.server.emit('request', req, res);
+    };
+    state = 'ready';
+    log(['Recovery build mounted cleanly — CloudHost247 application is now live.']);
+  } catch (err) {
+    state = 'failed';
+    failReason = err && err.name === 'EnvValidationError' ? 'invalid-environment' : 'boot-error';
+    log([`Failed to initialize compiled application after recovery build: ${err && err.message ? err.message : err}`]);
+  }
+}
+
+// --- Entrypoint dispatch ----------------------------------------------------------------------
+const hasCompleteFreshBuild = !isServerBuildOutdated() && fs.existsSync(publicIndex);
+
+if (hasCompleteFreshBuild) {
+  require(compiledEntry);
+} else {
   const nested = findNestedBuilds();
   const canUseNested =
     !isDisabled('DISABLE_NESTED_BUILD') &&
@@ -369,14 +909,14 @@ if (!fs.existsSync(compiledEntry)) {
 
   if (canUseNested) {
     useNestedBuild(nested[0]);
-    entryToRequire = nested[0].entry;
+    require(nested[0].entry);
+  } else if (isDisabled('DISABLE_AUTO_BUILD') || isDisabled('FAIL_FAST_STARTUP')) {
+    printFatalDiagnostics({ ok: false, reason: 'disabled' });
+    process.exit(1);
   } else {
-    const result = tryRecoveryBuild();
-    if (!result.ok) {
-      printFatalDiagnostics(result);
+    startWithBackgroundRecovery().catch((err) => {
+      log([`Fatal startup error: ${err && err.stack ? err.stack : err}`]);
       process.exit(1);
-    }
+    });
   }
 }
-
-require(entryToRequire);
