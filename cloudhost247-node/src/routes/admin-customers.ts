@@ -20,6 +20,12 @@ import {
   listTicketsForUser,
   updateTicketStatus,
 } from '../db/support-tickets';
+import {
+  createTicketAttachment,
+  findAttachment,
+  listAttachmentsForTicket,
+} from '../db/support-attachments';
+import { decodeAndValidateUpload, MAX_TICKET_ATTACHMENT_BYTES } from '../lib/media-upload';
 import { requireRole } from '../lib/require-role';
 import { NotFoundError, ValidationError } from '../lib/errors';
 import {
@@ -27,6 +33,7 @@ import {
   toAdminCustomerServiceDTO,
   toAdminCustomerSummaryDTO,
   toPublicUser,
+  toTicketAttachmentDTO,
   toTicketMessageDTO,
   toTicketSummaryDTO,
 } from '../dto/account';
@@ -93,7 +100,19 @@ const updateDomainSchema = z
 const statusSchema = z.object({ status: z.enum(['active', 'suspended', 'disabled']) });
 const roleSchema = z.object({ role: z.enum(['customer', 'staff', 'admin', 'super_admin']) });
 const ticketStatusSchema = z.object({ status: z.enum(['open', 'pending_customer', 'pending_staff', 'closed']) });
-const replyMessageSchema = z.object({ message: z.string().min(1).max(10000) });
+const attachmentInputSchema = z.object({
+  base64: z.string().min(1, 'attachment.base64 is required'),
+  contentType: z.string().min(1, 'attachment.contentType is required').max(64),
+  filename: z.string().min(1, 'attachment.filename is required').max(255),
+});
+const replyMessageSchema = z.object({
+  message: z.string().min(1).max(10000),
+  attachment: attachmentInputSchema.optional(),
+});
+const ticketAttachmentParamSchema = z.object({
+  id: z.string().uuid('id must be a valid UUID'),
+  attachmentId: z.string().uuid('attachmentId must be a valid UUID'),
+});
 const listTicketsQuerySchema = z.object({
   status: z.enum(['open', 'pending_customer', 'pending_staff', 'closed']).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
@@ -293,13 +312,24 @@ export async function registerAdminCustomerRoutes(app: FastifyInstance, env: Env
     const ticket = await findTicketById(pool, id);
     if (!ticket) throw new NotFoundError('No ticket was found with that id');
 
-    const [messages, customer] = await Promise.all([listMessagesForTicket(pool, ticket.id), findUserById(pool, ticket.user_id)]);
+    const [messages, customer, attachments] = await Promise.all([
+      listMessagesForTicket(pool, ticket.id),
+      findUserById(pool, ticket.user_id),
+      listAttachmentsForTicket(pool, ticket.id),
+    ]);
 
     return {
       ticket: {
         ...toTicketSummaryDTO(ticket),
         closedAt: ticket.closed_at,
-        messages: messages.map((m) => toTicketMessageDTO(m, auth.userId)),
+        messages: messages.map((m) =>
+          toTicketMessageDTO(
+            m,
+            auth.userId,
+            attachments.filter((a) => a.message_id === m.id)
+          )
+        ),
+        attachments: attachments.filter((a) => a.message_id === null).map((a) => toTicketAttachmentDTO(a, ticket.id)),
       },
       customer: customer ? toAdminCustomerSummaryDTO(customer) : null,
     };
@@ -308,21 +338,50 @@ export async function registerAdminCustomerRoutes(app: FastifyInstance, env: Env
   app.post<{ Params: { id: string } }>('/api/v1/admin/tickets/:id/messages', async (request, reply) => {
     const auth = await assertStaff(request);
     const { id } = parseOrThrow(idParamSchema, request.params);
-    const { message } = parseOrThrow(replyMessageSchema, request.body);
+    const { message, attachment } = parseOrThrow(replyMessageSchema, request.body);
 
     const ticket = await findTicketById(pool, id);
     if (!ticket) throw new NotFoundError('No ticket was found with that id');
 
-    await appendTicketMessage(pool, { id: randomUUID(), ticketId: ticket.id, authorId: auth.userId, authorRole: auth.role, body: message });
+    const file = attachment
+      ? decodeAndValidateUpload(attachment.base64, attachment.contentType, attachment.filename, MAX_TICKET_ATTACHMENT_BYTES)
+      : null;
+
+    const messageId = randomUUID();
+    await appendTicketMessage(pool, { id: messageId, ticketId: ticket.id, authorId: auth.userId, authorRole: auth.role, body: message });
+
+    if (file) {
+      await createTicketAttachment(pool, {
+        id: randomUUID(),
+        ticketId: ticket.id,
+        messageId,
+        uploadedBy: auth.userId,
+        uploaderRole: auth.role,
+        filename: file.filename,
+        contentType: file.contentType,
+        data: file.data,
+        checksum: file.checksum,
+      });
+    }
 
     const updatedTicket = await findTicketById(pool, ticket.id);
-    const messages = await listMessagesForTicket(pool, ticket.id);
+    const [messages, attachments] = await Promise.all([
+      listMessagesForTicket(pool, ticket.id),
+      listAttachmentsForTicket(pool, ticket.id),
+    ]);
     reply.code(201);
     return {
       ticket: {
         ...toTicketSummaryDTO(updatedTicket ?? ticket),
         closedAt: (updatedTicket ?? ticket).closed_at,
-        messages: messages.map((m) => toTicketMessageDTO(m, auth.userId)),
+        messages: messages.map((m) =>
+          toTicketMessageDTO(
+            m,
+            auth.userId,
+            attachments.filter((a) => a.message_id === m.id)
+          )
+        ),
+        attachments: attachments.filter((a) => a.message_id === null).map((a) => toTicketAttachmentDTO(a, ticket.id)),
       },
     };
   });
@@ -336,4 +395,32 @@ export async function registerAdminCustomerRoutes(app: FastifyInstance, env: Env
     if (!ticket) throw new NotFoundError('No ticket was found with that id');
     return { ticket: { ...toTicketSummaryDTO(ticket), closedAt: ticket.closed_at } };
   });
+
+  /**
+   * Staff download of a customer's attachment.
+   *
+   * Staff may read any ticket they can already open, so the only check is the staff role — but the
+   * file is still fetched scoped to the ticket id in the path (src/db/support-attachments.ts
+   * `findAttachment`), so an id from a different ticket is a 404 rather than a cross-ticket read.
+   */
+  app.get<{ Params: { id: string; attachmentId: string } }>(
+    '/api/v1/admin/tickets/:id/attachments/:attachmentId/download',
+    async (request, reply) => {
+      await assertStaff(request);
+      const { id, attachmentId } = parseOrThrow(ticketAttachmentParamSchema, request.params);
+
+      const attachment = await findAttachment(pool, id, attachmentId);
+      if (!attachment) throw new NotFoundError('No attachment was found with that id');
+
+      reply
+        .header('Content-Type', attachment.content_type)
+        .header(
+          'Content-Disposition',
+          `attachment; filename="${attachment.filename.replace(/[^A-Za-z0-9._-]/g, '_')}"`
+        )
+        .header('X-Content-Type-Options', 'nosniff')
+        .header('Cache-Control', 'private, no-store');
+      return reply.send(attachment.data);
+    }
+  );
 }

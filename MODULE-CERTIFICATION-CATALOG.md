@@ -23,7 +23,7 @@ Six junctions: front door · validation · DB state · permissions · honest fai
 | **SMM** | modules smmprovisioning + `cloudhost247_smm` | ✔ | ✔ | ✔ | ✔ admin | ✔ fail-closed | ✔ | Implemented at source level; provisioning units green; provider runtime = CT-06 | codebase modules + partial suites |
 | **Billing (wallets/invoices/refunds/reconciliation)** | admin-billing + billing-ledger | ✔ | ✔ | ✔ append-only w/ trigger | ✔ BILLING_STAFF_ROLES | ✔ (409 mismatch, refund guidance) | ✔ global refund-key identity | **Internally certified financial integrity** (Phase 14–16); provider reconciliation = CT-05 | 170/170 + 8/8 real-PG probes |
 | **Administration (RBAC/audit/config)** | admin-suite | ✔ | ✔ | ✔ (audit log 0002) | ✔ super-admin-only integrity closures | ✔ (audit on every action) | ✔ | Internally tested | admin-role-guard-hardening.test.ts + P3–P9 regressions |
-| **Support (tickets/replies/escalation; attachments pending)** | account.ts tickets | ✔ | ✔ | ✔ | ✔ owner-only, 404-not-enumerable | ✔ | ✔ append-only messages | Internally tested (journeys; attachments deliberately absent) | `phase17-support-journey.test.ts` |
+| **Support (tickets/replies/escalation/attachments)** | account.ts tickets + `TicketAttachments`/`TicketAttachmentPicker` | ✔ | ✔ (zod + magic-number sniff + 5 MiB cap enforced twice) | ✔ (`support_ticket_attachments`, 0103; cascade on delete) | ✔ owner-only on customer routes, staff-guarded on admin routes; cross-ticket id = 404 | ✔ 404-not-403, named 400/413, no orphaned bytes on refusal | ✔ one file per request, per-message cap enforced in-transaction | Internally tested — **attachments built 2026-11-13** | `phase17-support-journey.test.ts` + `tests/integration/support-ticket-attachments.test.ts` (10) |
 
 ## Ordered backlog for the P1 external work streams (untouched here)
 
@@ -33,9 +33,38 @@ drill. Their completion converts "Internally tested" rows into "Provider-certifi
 
 ## Genuine unfinished items acknowledged (not hidden)
 
-Support attachments: not implemented (by design earlier; escalation path exists but no binary
-upload claims). Browser runtime: CT-07 blocked. Hosting email quotas: QUEUE-based; configurable,
-not externally verified.
+~~Support attachments: not implemented.~~ **Built 2026-11-13** — migration `0103_create_support_ticket_attachments.sql`,
+customer + staff upload/download/delete routes, and the SPA surfaces; 10 integration tests over a
+real embedded Postgres cover the six junctions plus the three refusals that matter (wrong bytes,
+oversized file, someone else's ticket). See §"Support attachments" below.
+Browser runtime: CT-07 blocked. Hosting email quotas: QUEUE-based; configurable, not externally
+verified.
+
+## Support attachments — what was built and what it deliberately is not
+
+The capability was recorded here as "deliberately absent", so closing it is documented rather than
+merely deleted from the list.
+
+| Junction | How it is held |
+|---|---|
+| Front door | Both upload paths require a session; admin paths additionally require `admin`/`super_admin` |
+| Validation | Declared type must be whitelisted *and* match the bytes' magic number; 5 MiB cap on decoded bytes; filename normalised from the detected type |
+| DB state | `bytea` in the platform database (same model as `builder_media`, so backups capture it); `byte_size`/`checksum` are of the stored bytes; `ON DELETE CASCADE` from the ticket |
+| Permissions | `findAttachment` is scoped by `ticket_id` in SQL, so no route can read a file by id alone; outsiders get 404, never 403 |
+| Honest failure | Wrong type, oversized file and quota exhaustion each name the limit; a rejected upload leaves no ticket, no message and no row |
+| No-dup retry | One file per request; the per-message cap is counted inside the insert's transaction |
+
+**Deliberately not implemented, and why:** no public share links or tokens (an attachment must not
+outlive the reader's session), no antivirus claim (there is no scanner in this deployment — the type
+sniffing is structural, and the docs must not imply a malware guarantee), no multipart upload
+(`@fastify/multipart` is not a dependency), and no deletion by staff of a customer's evidence (only
+the uploader may remove their own file; staff removal would be an audit event of its own and is not
+claimed here).
+
+**Correction made while building it:** `src/lib/media-upload.ts` claimed markup was "rejected
+outright". That was never true of the text branch — HTML bytes in a `.txt` are accepted as
+`text/plain` (which is correct for a support attachment), and what prevents execution is the stored
+type plus `nosniff` on every serving route, not the sniff. The comment now says that instead.
 
 
 ## Phase 19 additions

@@ -3,10 +3,12 @@ import { Link, useParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
 import { getMyTicket, replyToMyTicket } from '../lib/account-api';
 import { ApiRequestError } from '../lib/api';
-import type { TicketDetail } from '../lib/account-types';
+import type { TicketAttachmentInput, TicketDetail } from '../lib/account-types';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
 import TicketThread from '../components/TicketThread';
+import TicketAttachmentPicker from '../components/TicketAttachmentPicker';
+import TicketAttachments from '../components/TicketAttachments';
 
 type LoadState = { status: 'loading' } | { status: 'error'; message: string } | { status: 'success'; ticket: TicketDetail };
 
@@ -23,6 +25,7 @@ export default function SupportTicketPage() {
   const [reply, setReply] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [replyError, setReplyError] = useState<string | null>(null);
+  const [attachment, setAttachment] = useState<TicketAttachmentInput | null>(null);
 
   const load = useCallback(() => {
     setState({ status: 'loading' });
@@ -50,9 +53,10 @@ export default function SupportTicketPage() {
     setSubmitting(true);
     setReplyError(null);
     try {
-      const res = await replyToMyTicket(id, reply);
+      const res = await replyToMyTicket(id, reply, attachment ?? undefined);
       setState({ status: 'success', ticket: res.ticket });
       setReply('');
+      setAttachment(null);
     } catch (err) {
       setReplyError(err instanceof Error ? err.message : 'Could not send your reply.');
     } finally {
@@ -78,7 +82,24 @@ export default function SupportTicketPage() {
               <span className="ch247-page__hint">Priority: {state.ticket.priority}</span>
             </p>
 
-            <TicketThread messages={state.ticket.messages} />
+            <TicketThread
+              messages={state.ticket.messages}
+              ticketId={state.ticket.id}
+              canDeleteAttachments
+              onAttachmentDeleted={load}
+            />
+
+            {state.ticket.attachments && state.ticket.attachments.length > 0 && (
+              <div className="ch247-card ch247-card--nested">
+                <h2 className="ch247-field-label">Files on this ticket</h2>
+                <TicketAttachments
+                  ticketId={state.ticket.id}
+                  attachments={state.ticket.attachments}
+                  canDelete
+                  onDeleted={load}
+                />
+              </div>
+            )}
 
             {state.ticket.status !== 'closed' ? (
               <form className="ch247-form ch247-form--wide" onSubmit={onSubmit}>
@@ -86,6 +107,7 @@ export default function SupportTicketPage() {
                   <span className="ch247-field-label">Reply</span>
                   <textarea value={reply} onChange={(e) => setReply(e.target.value)} required maxLength={10000} rows={4} />
                 </label>
+                <TicketAttachmentPicker attachment={attachment} onChange={setAttachment} disabled={submitting} />
                 <button type="submit" disabled={submitting}>
                   {submitting ? 'Sending…' : 'Send reply'}
                 </button>
@@ -99,6 +121,7 @@ export default function SupportTicketPage() {
                   <span className="ch247-field-label">Reply</span>
                   <textarea value={reply} onChange={(e) => setReply(e.target.value)} required maxLength={10000} rows={4} />
                 </label>
+                <TicketAttachmentPicker attachment={attachment} onChange={setAttachment} disabled={submitting} />
                 <button type="submit" disabled={submitting}>
                   {submitting ? 'Sending…' : 'Reopen with reply'}
                 </button>

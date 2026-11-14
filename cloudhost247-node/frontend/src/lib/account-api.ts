@@ -3,7 +3,7 @@
  * top of the shared apiFetch (lib/api.ts). Kept separate from lib/api.ts itself so that file stays
  * a generic transport helper with no knowledge of any particular route.
  */
-import { apiFetch } from './api';
+import { apiFetch, apiFetchBlob } from './api';
 import type {
   AccountProfile,
   AccountRecoveryRequest,
@@ -21,6 +21,8 @@ import type {
   CustomerDomain,
   CustomerService,
   PublicUser,
+  TicketAttachment,
+  TicketAttachmentInput,
   TicketDetail,
   TicketStatus,
   TicketSummary,
@@ -54,7 +56,12 @@ export function listMyTickets() {
   return apiFetch<{ tickets: TicketSummary[] }>('/api/v1/account/tickets');
 }
 
-export function createMyTicket(input: { subject: string; message: string; priority?: 'low' | 'normal' | 'high' }) {
+export function createMyTicket(input: {
+  subject: string;
+  message: string;
+  priority?: 'low' | 'normal' | 'high';
+  attachment?: TicketAttachmentInput;
+}) {
   return apiFetch<{ ticket: TicketSummary }>('/api/v1/account/tickets', {
     method: 'POST',
     body: JSON.stringify(input),
@@ -65,11 +72,40 @@ export function getMyTicket(id: string) {
   return apiFetch<{ ticket: TicketDetail }>(`/api/v1/account/tickets/${id}`);
 }
 
-export function replyToMyTicket(id: string, message: string) {
+export function replyToMyTicket(id: string, message: string, attachment?: TicketAttachmentInput) {
   return apiFetch<{ ticket: TicketDetail }>(`/api/v1/account/tickets/${id}/messages`, {
     method: 'POST',
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, ...(attachment ? { attachment } : {}) }),
   });
+}
+
+/** Deletes one of the caller's own attachments. The server refuses anyone else's with a 404. */
+export function deleteTicketAttachment(ticketId: string, attachmentId: string) {
+  return apiFetch<void>(`/api/v1/account/tickets/${ticketId}/attachments/${attachmentId}`, { method: 'DELETE' });
+}
+
+/**
+ * Downloads an attachment through the authenticated client.
+ *
+ * Not an `<a href>`: the download route requires the bearer token, and the token lives in
+ * memory/localStorage rather than a cookie, so a plain link would arrive unauthenticated. The
+ * response is turned into a Blob and handed to the browser under its real filename.
+ */
+export async function downloadTicketAttachment(attachment: TicketAttachment): Promise<void> {
+  const blob = await apiFetchBlob(attachment.downloadPath);
+  const url = URL.createObjectURL(blob);
+  try {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = attachment.filename;
+    anchor.rel = 'noopener';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  } finally {
+    // Revoked on the next tick: revoking synchronously can race the browser's own read in Safari.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
 }
 
 // --- Staff (admin / super_admin) ----------------------------------------------------------------
@@ -157,10 +193,10 @@ export function getTicketForStaff(id: string) {
   return apiFetch<{ ticket: TicketDetail; customer: AdminCustomerSummary | null }>(`/api/v1/admin/tickets/${id}`);
 }
 
-export function replyToTicketAsStaff(id: string, message: string) {
+export function replyToTicketAsStaff(id: string, message: string, attachment?: TicketAttachmentInput) {
   return apiFetch<{ ticket: TicketDetail }>(`/api/v1/admin/tickets/${id}/messages`, {
     method: 'POST',
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, ...(attachment ? { attachment } : {}) }),
   });
 }
 

@@ -221,17 +221,43 @@ export interface TicketSummary {
   updatedAt: string;
 }
 
+/**
+ * A file attached to a ticket message. `downloadPath` is answered by a session-scoped route, so a
+ * download must go through the authenticated API client (see `downloadTicketAttachment`) — it is
+ * not a public URL and cannot be opened from a bare link in a new tab.
+ */
+export interface TicketAttachment {
+  id: string;
+  filename: string;
+  contentType: string;
+  byteSize: number;
+  createdAt: string;
+  downloadPath: string;
+}
+
 export interface TicketMessage {
   id: string;
   authorRole: string;
   body: string;
   createdAt: string;
   isSelf: boolean;
+  /** Present on every message (empty array when there are none) so the UI can distinguish
+   * "no attachments" from "not loaded". */
+  attachments?: TicketAttachment[];
 }
 
 export interface TicketDetail extends TicketSummary {
   closedAt: string | null;
   messages: TicketMessage[];
+  /** Attachments that belong to the ticket rather than to a single message. */
+  attachments?: TicketAttachment[];
+}
+
+/** One file on its way out — base64 plus the claims the server will verify against the bytes. */
+export interface TicketAttachmentInput {
+  base64: string;
+  contentType: string;
+  filename: string;
 }
 
 export interface AdminCustomerSummary {

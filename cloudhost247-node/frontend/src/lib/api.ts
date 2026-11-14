@@ -199,3 +199,43 @@ export async function publicFetch<T>(path: string, init?: RequestInit): Promise<
 
   return body.value as T;
 }
+
+/**
+ * Fetches a binary resource through the same authenticated path as `apiFetch`.
+ *
+ * Needed because several downloads (support-ticket attachments, generated PDFs) are served from
+ * session-gated routes: a `<a href download>` would carry no bearer token and would land on a 401.
+ * The error handling deliberately mirrors `apiFetch` — a 401 that carried a token still clears the
+ * session, and a non-JSON failure still produces the "this didn't come from the app" explanation
+ * rather than a page full of binary garbage.
+ */
+export async function apiFetchBlob(path: string): Promise<Blob> {
+  const token = toolsHost().embedded ? null : getToken();
+  const res = await fetch(toolsApiPath(path), {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!res.ok) {
+    const { isJson, value, text } = await readBody(res);
+    if (res.status === 401 && token && isJson) clearSession();
+    const body = (isJson && value && typeof value === 'object' ? value : null) as ApiError | null;
+    if (!body) {
+      throw new ApiRequestError(
+        res.status,
+        'NON_JSON_RESPONSE',
+        describeNonJsonResponse(res, path, text),
+        res.status >= 500 || res.status === 429
+      );
+    }
+    throw new ApiRequestError(
+      res.status,
+      body.error || body.code || 'UNKNOWN',
+      body.message || res.statusText || 'Download failed',
+      body.retryable
+    );
+  }
+
+  return res.blob();
+}

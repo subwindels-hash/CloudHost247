@@ -162,6 +162,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0101_create_fraud_sentinel.sql',
     // AI trust is renumbered to avoid a duplicate schema_migrations primary key.
     '0102_ai_source_trust.sql',
+    '0103_create_support_ticket_attachments.sql',
   ];
 
   it('finds the committed migration files in order', () => {

@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
 import { useApiResource } from '../lib/useApiResource';
 import { createMyTicket } from '../lib/account-api';
-import type { TicketSummary } from '../lib/account-types';
+import type { TicketAttachmentInput, TicketSummary } from '../lib/account-types';
+import TicketAttachmentPicker from '../components/TicketAttachmentPicker';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
 
@@ -23,6 +24,7 @@ export default function SupportPage() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [priority, setPriority] = useState<'low' | 'normal' | 'high'>('normal');
+  const [attachment, setAttachment] = useState<TicketAttachmentInput | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formMessage, setFormMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
@@ -31,10 +33,11 @@ export default function SupportPage() {
     setSubmitting(true);
     setFormMessage(null);
     try {
-      await createMyTicket({ subject, message, priority });
+      await createMyTicket({ subject, message, priority, attachment: attachment ?? undefined });
       setSubject('');
       setMessage('');
       setPriority('normal');
+      setAttachment(null);
       setFormMessage({ kind: 'ok', text: 'Your ticket has been opened.' });
       setRefreshKey((n) => n + 1);
     } catch (err) {
@@ -73,6 +76,7 @@ export default function SupportPage() {
               rows={4}
             />
           </label>
+          <TicketAttachmentPicker attachment={attachment} onChange={setAttachment} />
           <button type="submit" disabled={submitting}>
             {submitting ? 'Opening ticket…' : 'Open ticket'}
           </button>

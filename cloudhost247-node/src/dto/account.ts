@@ -2,6 +2,7 @@ import type { UserRecord } from '../db/users';
 import type { CustomerServiceRow } from '../db/customer-services';
 import type { CustomerDomainRow } from '../db/customer-domains';
 import type { SupportTicketRow, SupportTicketMessageRow } from '../db/support-tickets';
+import type { TicketAttachmentRow } from '../db/support-attachments';
 
 /**
  * Phase 4 DTOs — same "never leak an internal field, never leak someone else's data" pattern as
@@ -236,21 +237,60 @@ export interface TicketMessageDTO {
   /** True when the message's author is the caller themself — lets the UI render "You" without
    * exposing any other user's id. Computed per-request by the route, not stored. */
   isSelf: boolean;
+  /** Files sent with this message. Empty when there are none — never omitted, so a UI can tell
+   * "no attachments" from "attachments not loaded". */
+  attachments?: TicketAttachmentDTO[];
 }
 
-export function toTicketMessageDTO(row: SupportTicketMessageRow, viewerUserId: string): TicketMessageDTO {
+/**
+ * Attachment metadata as a customer or staff member may see it.
+ *
+ * Note what is absent and must stay absent: the stored bytes, the storage checksum, and the
+ * uploader's user id. `downloadPath` is a relative URL the session-scoped download route answers;
+ * there is no public URL and no share token, so an attachment cannot outlive the reader's session.
+ */
+export interface TicketAttachmentDTO {
+  id: string;
+  filename: string;
+  contentType: string;
+  byteSize: number;
+  createdAt: string;
+  downloadPath: string;
+}
+
+export function toTicketAttachmentDTO(row: TicketAttachmentRow, ticketId: string): TicketAttachmentDTO {
+  return {
+    id: row.id,
+    filename: row.filename,
+    contentType: row.content_type,
+    byteSize: row.byte_size,
+    createdAt: row.created_at,
+    // Relative on purpose: the SPA is served from the same origin as the API (see
+    // frontend/src/lib/api.ts), and a staff and a customer route share this shape.
+    downloadPath: `/api/v1/account/tickets/${ticketId}/attachments/${row.id}/download`,
+  };
+}
+
+export function toTicketMessageDTO(
+  row: SupportTicketMessageRow,
+  viewerUserId: string,
+  attachments: TicketAttachmentRow[] = []
+): TicketMessageDTO {
   return {
     id: row.id,
     authorRole: row.author_role,
     body: row.body,
     createdAt: row.created_at,
     isSelf: row.author_id === viewerUserId,
+    attachments: attachments.map((a) => toTicketAttachmentDTO(a, row.ticket_id)),
   };
 }
 
 export interface TicketDetailDTO extends TicketSummaryDTO {
   closedAt: string | null;
   messages: TicketMessageDTO[];
+  /** Ticket-level attachments not tied to a single message (e.g. evidence added to the ticket). */
+  attachments?: TicketAttachmentDTO[];
 }
 
 // --- Admin customer directory --------------------------------------------------------------------
