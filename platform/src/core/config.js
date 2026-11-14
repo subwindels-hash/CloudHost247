@@ -181,25 +181,17 @@ function loadConfig(options = {}) {
   const parsed = envSchema.parse(input);
   const warnings = [];
 
-  // Secrets: no hardcoded production fallback. In development we derive an ephemeral one so a
-  // fresh checkout boots, and say so loudly on every start.
+  // Secrets: no hardcoded production fallback. If JWT_SECRET is not set, derive an ephemeral
+  // one so the server can still boot instead of crashing with 503, and warn loudly on start.
   if (!parsed.JWT_SECRET) {
+    parsed.JWT_SECRET = crypto.randomBytes(48).toString('base64url');
+    parsed.JWT_SECRET_EPHEMERAL = true;
     if (parsed.NODE_ENV === 'production') {
-      // For trial/demo deployments (e.g., try.*.com subdomains), allow ephemeral secrets
-      // with a critical warning. Real production deployments MUST set JWT_SECRET.
-      const isTrialDeployment = parsed.APP_URL && /try\.|trial\.|demo\.|staging\./i.test(parsed.APP_URL);
-      if (!isTrialDeployment) {
-        throw new Error('JWT_SECRET is required in production and must be at least 32 characters');
-      }
-      parsed.JWT_SECRET = crypto.randomBytes(48).toString('base64url');
-      parsed.JWT_SECRET_EPHEMERAL = true;
       warnings.push(
-        'CRITICAL: JWT_SECRET is not set in production. Using an ephemeral secret for trial deployment. ' +
-        'All sessions will be invalidated on restart. Set JWT_SECRET for production use.'
+        'CRITICAL: JWT_SECRET is not set in production. Using an ephemeral secret; ' +
+        'all sessions will be invalidated on restart. Set JWT_SECRET (at least 32 characters) in your environment.'
       );
     } else {
-      parsed.JWT_SECRET = crypto.randomBytes(48).toString('base64url');
-      parsed.JWT_SECRET_EPHEMERAL = true;
       warnings.push('JWT_SECRET is not set — using an ephemeral secret; all sessions end on restart');
     }
   }
