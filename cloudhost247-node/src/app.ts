@@ -54,6 +54,7 @@ import { registerEmailForensicsCustomerRoutes } from './routes/email-forensics-c
 import { registerEmailForensicsAdminRoutes } from './routes/email-forensics-admin';
 import type { DnsPropagationOptions } from './dns/propagation';
 import { registerSslRoutes } from './routes/ssl';
+import { registerAcmeChallengeRoutes } from './routes/acme-challenge';
 import { registerFirewallRoutes } from './routes/firewall';
 import { registerRevenueGuardianRoutes } from './revenue-guardian/controllers/routes';
 import { registerFraudSentinelRoutes } from './fraud-sentinel/controllers/routes';
@@ -244,6 +245,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerEmailTraceAdminRoutes(instance, env, pool);
     await registerEmailForensicsCustomerRoutes(instance, env, pool);
     await registerEmailForensicsAdminRoutes(instance, env, pool);
+    // The ACME HTTP-01 responder is deliberately public: the certificate authority has no session.
+    await registerAcmeChallengeRoutes(instance, env, pool);
     await registerSslRoutes(instance, env, pool);
     await registerFirewallRoutes(instance, env, pool);
 

@@ -948,6 +948,14 @@ sub-phase before the next one begins.
     - `0046_create_firewall_rules.sql` — `firewall_rules` schema for protocol (`TCP`, `UDP`, `ICMP`, `ALL`), port ranges, CIDR source blocks, rule actions (`ALLOW`, `DENY`), and panel profiles.
   - **Persistence & API Layer:**
     - `src/db/ssl.ts` & `src/routes/ssl.ts` — Certificate ordering, ACME issuance, CSR handling, certificate revocation, and automated renewal triggers.
+      **Corrected 2026-11-13:** this line previously described ACME capability that did not exist — `/issue` and `/renew` wrote `ISSUED`
+      plus a `+90 days` expiry without contacting any authority. Real issuance now lives in `src/ssl/acme-client.ts` (RFC 8555: JWS/ES256,
+      single-use nonces, account/order/authorization/finalize/chain), `src/ssl/certificate.ts` (CSR + independent X.509 parsing) and
+      `src/ssl/ssl-issuance-service.ts` (state machine), with the public HTTP-01 responder in `src/routes/acme-challenge.ts` and
+      `acme_accounts`/`acme_challenges` in migration `0107`. `ISSUED` requires a CA-issued certificate whose SANs cover every ordered name.
+      With no `ACME_DIRECTORY_URL` the route returns `503 SSL_ISSUANCE_NOT_CONFIGURED` and writes nothing. Tested against an independent
+      loopback CA (`tests/integration/ssl-acme-issuance.test.ts`, 11 tests), cross-checked with `openssl x509`/`req`. **Never run against a
+      public CA** — provider runtime is still CT-04, and certificate installation onto a hosting node is CT-01/CT-06.
     - `src/db/firewall.ts` & `src/routes/firewall.ts` — Server firewall rule listing, creation, deletion, and dynamic baseline application. Baseline rules derive from the installed control panel's required ports (e.g., cPanel opens 2083/2087, Dokploy opens 3000, Plesk opens 8443) alongside standard SSH (22), HTTP (80), and HTTPS (443).
   - **Customer Portal UI:**
     - `/dashboard/ssl` (`frontend/src/pages/SslManagementPage.tsx`) — SSL certificate overview, new certificate ordering wizard, validation challenge tracker, and auto-renew toggle.

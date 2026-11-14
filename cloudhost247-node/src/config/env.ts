@@ -117,6 +117,33 @@ const envSchema = z.object({
   // credential-key rotation.
   SECURITY_PIN_HMAC_KEY: z.string().min(32).optional(),
 
+  // --- SSL: ACME certificate issuance (src/ssl/*) ---------------------------------------------
+  // The ACME directory URL. Unset means "no CA is configured", and the issuance endpoints answer
+  // 503 SSL_ISSUANCE_NOT_CONFIGURED rather than pretending to issue. There is deliberately no
+  // default pointing at Let's Encrypt: a production CA must be a deliberate operator choice, and a
+  // hidden default would silently start ordering real certificates from a staging deployment.
+  //
+  //   Let's Encrypt production: https://acme-v02.api.letsencrypt.org/directory
+  //   Let's Encrypt staging:    https://acme-staging-v02.api.letsencrypt.org/directory
+  //
+  // Use the staging directory for every test that is not a real launch: its certificates are not
+  // trusted by browsers, which is the point.
+  ACME_DIRECTORY_URL: z.string().url().optional(),
+  // Contact address registered on the ACME account. RFC 8555 allows omitting it; CAs use it to
+  // send expiry/revocation notices, so it is recommended but not required.
+  ACME_CONTACT_EMAIL: z.string().email().optional(),
+  // How long the client waits for a challenge to validate before giving up and recording FAILED.
+  // Lets Encrypt's own validation timeout is well inside this.
+  ACME_VALIDATION_TIMEOUT_MS: z.coerce.number().int().min(5_000).max(600_000).default(60_000),
+  // Poll interval while waiting on the CA. Small values are kind to tests and rude to the CA;
+  // the default matches Let's Encrypt's documented guidance for order polling.
+  ACME_POLL_INTERVAL_MS: z.coerce.number().int().min(250).max(30_000).default(2_000),
+  // HTTP-01 requires the CA to fetch http://<domain>/.well-known/acme-challenge/<token> from the
+  // customer's site. This server exposes that path (see src/routes/acme-challenge.ts) and the
+  // operator must ensure the domain resolves here. Documented as a deployment prerequisite, not
+  // silently assumed — the issuance route reports which prerequisite is unmet.
+  ACME_HTTP01_ENABLED: boolFromString.optional().default(true),
+
   // Directory containing the application manifest catalog (manifests/<slug>/manifest.yaml).
   MARKETPLACE_MANIFESTS_DIR: z.string().default('manifests'),
 

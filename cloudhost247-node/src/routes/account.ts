@@ -14,6 +14,17 @@ import {
   listMessagesForTicket,
   listTicketsForUser,
 } from '../db/support-tickets';
+import {
+  createTicketAttachment,
+  deleteTicketAttachment,
+  findAttachment,
+  listAttachmentsForTicket,
+} from '../db/support-attachments';
+import {
+  decodeAndValidateUpload,
+  MAX_TICKET_ATTACHMENT_BYTES,
+  TICKET_ATTACHMENT_BODY_LIMIT_BYTES,
+} from '../lib/media-upload';
 import { hashPassword, verifyPassword } from '../lib/password';
 import { authenticate } from '../lib/require-auth';
 import { guardSupportMode } from '../lib/support-mode';
@@ -22,6 +33,7 @@ import {
   toCustomerDomainDTO,
   toCustomerServiceDTO,
   toPublicUser,
+  toTicketAttachmentDTO,
   toTicketMessageDTO,
   toTicketSummaryDTO,
 } from '../dto/account';
@@ -41,11 +53,70 @@ const createTicketSchema = z.object({
   priority: z.enum(['low', 'normal', 'high']).optional(),
 });
 
-const replyTicketSchema = z.object({
-  message: z.string().min(1, 'message is required').max(10000),
+/**
+ * One optional attachment per message request.
+ *
+ * Base64 in the body rather than multipart, matching every other upload in this platform
+ * (builder media, store products, expert services): `@fastify/multipart` is not a dependency, and
+ * the validator in src/lib/media-upload.ts re-derives type, size and filename from the decoded
+ * bytes, so nothing the client declares is trusted either way.
+ *
+ * The declared content type is *checked against* the bytes rather than believed; a mismatch is a
+ * 400 that names both types.
+ */
+const ticketAttachmentSchema = z.object({
+  base64: z.string().min(1, 'attachment.base64 is required'),
+  contentType: z.string().min(1, 'attachment.contentType is required').max(64),
+  filename: z.string().min(1, 'attachment.filename is required').max(255),
 });
 
+const replyTicketSchema = z.object({
+  message: z.string().min(1, 'message is required').max(10000),
+  attachment: ticketAttachmentSchema.optional(),
+});
+
+const createTicketWithAttachmentSchema = createTicketSchema.extend({
+  attachment: ticketAttachmentSchema.optional(),
+});
+
+/**
+ * Turns a body-limit rejection into an answer a customer can act on.
+ *
+ * Fastify throws FST_ERR_CTP_BODY_TOO_LARGE with the generic text "Request body is too large";
+ * for an upload that names neither the limit nor the field. This says both, in the same words the
+ * validator uses, so a customer with an oversized screenshot is told what to do instead of being
+ * shown a transport error. Any other error is re-thrown to the app-wide handler.
+ */
+function ticketBodyLimitHandler(
+  error: Error & { code?: string; statusCode?: number },
+  _request: unknown,
+  reply: { code: (n: number) => { send: (b: unknown) => unknown } }
+) {
+  if (error.code === 'FST_ERR_CTP_BODY_TOO_LARGE' || error.statusCode === 413) {
+    return reply.code(413).send({
+      error: 'PAYLOAD_TOO_LARGE',
+      message: `That attachment is larger than the ${Math.floor(MAX_TICKET_ATTACHMENT_BYTES / (1024 * 1024))} MB limit for support attachments`,
+    });
+  }
+  throw error;
+}
+
+/**
+ * The two ticket routes that may carry a file need a body limit above Fastify's 1 MiB default,
+ * otherwise a legal 2 MiB screenshot is rejected before the validator runs. Kept in one place so
+ * the two routes cannot drift apart.
+ */
+const TICKET_UPLOAD_ROUTE_OPTIONS = {
+  config: { rateLimit: { max: 30, timeWindow: '1 minute' } },
+  bodyLimit: TICKET_ATTACHMENT_BODY_LIMIT_BYTES,
+  errorHandler: ticketBodyLimitHandler,
+};
+
 const idParamSchema = z.object({ id: z.string().uuid('id must be a valid UUID') });
+const attachmentParamSchema = z.object({
+  id: z.string().uuid('id must be a valid UUID'),
+  attachmentId: z.string().uuid('attachmentId must be a valid UUID'),
+});
 
 function parseOrThrow<T>(schema: z.ZodType<T>, value: unknown): T {
   const parsed = schema.safeParse(value);
@@ -154,17 +225,43 @@ export async function registerAccountRoutes(app: FastifyInstance, env: Env, over
     return { tickets: tickets.map(toTicketSummaryDTO) };
   });
 
-  app.post('/api/v1/account/tickets', async (request, reply) => {
+  app.post('/api/v1/account/tickets', TICKET_UPLOAD_ROUTE_OPTIONS, async (request, reply) => {
     const auth = await authenticate(request, env, pool);
-    const input = parseOrThrow(createTicketSchema, request.body);
+    const input = parseOrThrow(createTicketWithAttachmentSchema, request.body);
 
+    // Validated before the ticket row is written, so a rejected file never leaves behind a ticket
+    // whose first message the customer has to retype.
+    const file = input.attachment
+      ? decodeAndValidateUpload(
+          input.attachment.base64,
+          input.attachment.contentType,
+          input.attachment.filename,
+          MAX_TICKET_ATTACHMENT_BYTES
+        )
+      : null;
+
+    const messageId = randomUUID();
     const ticket = await createTicket(pool, {
       id: randomUUID(),
       userId: auth.userId,
       subject: input.subject,
       priority: input.priority,
-      firstMessage: { id: randomUUID(), authorId: auth.userId, authorRole: 'customer', body: input.message },
+      firstMessage: { id: messageId, authorId: auth.userId, authorRole: 'customer', body: input.message },
     });
+
+    if (file) {
+      await createTicketAttachment(pool, {
+        id: randomUUID(),
+        ticketId: ticket.id,
+        messageId,
+        uploadedBy: auth.userId,
+        uploaderRole: 'customer',
+        filename: file.filename,
+        contentType: file.contentType,
+        data: file.data,
+        checksum: file.checksum,
+      });
+    }
 
     reply.code(201);
     return { ticket: toTicketSummaryDTO(ticket) };
@@ -180,37 +277,160 @@ export async function registerAccountRoutes(app: FastifyInstance, env: Env, over
       throw new NotFoundError('No ticket was found with that id');
     }
 
-    const messages = await listMessagesForTicket(pool, ticket.id);
+    const [messages, attachments] = await Promise.all([
+      listMessagesForTicket(pool, ticket.id),
+      listAttachmentsForTicket(pool, ticket.id),
+    ]);
     return {
       ticket: {
         ...toTicketSummaryDTO(ticket),
         closedAt: ticket.closed_at,
-        messages: messages.map((m) => toTicketMessageDTO(m, auth.userId)),
+        messages: messages.map((m) =>
+          toTicketMessageDTO(
+            m,
+            auth.userId,
+            attachments.filter((a) => a.message_id === m.id)
+          )
+        ),
+        // Files that belong to the ticket rather than to one message.
+        attachments: attachments.filter((a) => a.message_id === null).map((a) => toTicketAttachmentDTO(a, ticket.id)),
       },
     };
   });
 
-  app.post<{ Params: { id: string } }>('/api/v1/account/tickets/:id/messages', async (request, reply) => {
-    const auth = await authenticate(request, env, pool);
-    const { id } = parseOrThrow(idParamSchema, request.params);
-    const { message } = parseOrThrow(replyTicketSchema, request.body);
+  app.post<{ Params: { id: string } }>(
+    '/api/v1/account/tickets/:id/messages',
+    TICKET_UPLOAD_ROUTE_OPTIONS,
+    async (request, reply) => {
+      const auth = await authenticate(request, env, pool);
+      const { id } = parseOrThrow(idParamSchema, request.params);
+      const { message, attachment } = parseOrThrow(replyTicketSchema, request.body);
 
-    const ticket = await findTicketById(pool, id);
-    if (!ticket || ticket.user_id !== auth.userId) {
-      throw new NotFoundError('No ticket was found with that id');
+      const ticket = await findTicketById(pool, id);
+      if (!ticket || ticket.user_id !== auth.userId) {
+        throw new NotFoundError('No ticket was found with that id');
+      }
+
+      // Validated before the message is appended, so a rejected file does not leave an empty reply
+      // in the thread that the customer cannot delete.
+      const file = attachment
+        ? decodeAndValidateUpload(
+            attachment.base64,
+            attachment.contentType,
+            attachment.filename,
+            MAX_TICKET_ATTACHMENT_BYTES
+          )
+        : null;
+
+      const messageId = randomUUID();
+      await appendTicketMessage(pool, {
+        id: messageId,
+        ticketId: ticket.id,
+        authorId: auth.userId,
+        authorRole: 'customer',
+        body: message,
+      });
+
+      if (file) {
+        await createTicketAttachment(pool, {
+          id: randomUUID(),
+          ticketId: ticket.id,
+          messageId,
+          uploadedBy: auth.userId,
+          uploaderRole: 'customer',
+          filename: file.filename,
+          contentType: file.contentType,
+          data: file.data,
+          checksum: file.checksum,
+        });
+      }
+
+      const updatedTicket = await findTicketById(pool, ticket.id);
+      const [messages, attachments] = await Promise.all([
+        listMessagesForTicket(pool, ticket.id),
+        listAttachmentsForTicket(pool, ticket.id),
+      ]);
+      reply.code(201);
+      return {
+        ticket: {
+          ...toTicketSummaryDTO(updatedTicket ?? ticket),
+          closedAt: (updatedTicket ?? ticket).closed_at,
+          messages: messages.map((m) =>
+            toTicketMessageDTO(
+              m,
+              auth.userId,
+              attachments.filter((a) => a.message_id === m.id)
+            )
+          ),
+          attachments: attachments.filter((a) => a.message_id === null).map((a) => toTicketAttachmentDTO(a, ticket.id)),
+        },
+      };
     }
+  );
 
-    await appendTicketMessage(pool, { id: randomUUID(), ticketId: ticket.id, authorId: auth.userId, authorRole: 'customer', body: message });
+  /**
+   * Attachment download for the ticket's owner.
+   *
+   * Ownership is re-derived from the session on every request; the bytes are never reachable
+   * through a share token or a public URL, so an attachment cannot be read after the reader's
+   * session ends. A ticket that is not the caller's is a 404 (indistinguishable from nonexistent),
+   * matching every other route in this file.
+   */
+  app.get<{ Params: { id: string; attachmentId: string } }>(
+    '/api/v1/account/tickets/:id/attachments/:attachmentId/download',
+    async (request, reply) => {
+      const auth = await authenticate(request, env, pool);
+      const { id, attachmentId } = parseOrThrow(attachmentParamSchema, request.params);
 
-    const updatedTicket = await findTicketById(pool, ticket.id);
-    const messages = await listMessagesForTicket(pool, ticket.id);
-    reply.code(201);
-    return {
-      ticket: {
-        ...toTicketSummaryDTO(updatedTicket ?? ticket),
-        closedAt: (updatedTicket ?? ticket).closed_at,
-        messages: messages.map((m) => toTicketMessageDTO(m, auth.userId)),
-      },
-    };
-  });
+      const ticket = await findTicketById(pool, id);
+      if (!ticket || ticket.user_id !== auth.userId) {
+        throw new NotFoundError('No ticket was found with that id');
+      }
+
+      const attachment = await findAttachment(pool, ticket.id, attachmentId);
+      if (!attachment) throw new NotFoundError('No attachment was found with that id');
+
+      reply
+        .header('Content-Type', attachment.content_type)
+        .header(
+          'Content-Disposition',
+          `attachment; filename="${attachment.filename.replace(/[^A-Za-z0-9._-]/g, '_')}"`
+        )
+        .header('X-Content-Type-Options', 'nosniff')
+        .header('Cache-Control', 'private, no-store');
+      return reply.send(attachment.data);
+    }
+  );
+
+  /**
+   * Removes one of the caller's own attachments.
+   *
+   * Only a file *this* user uploaded can be deleted, so one party on a thread cannot remove the
+   * other's evidence. Staff removal is a separate admin concern and is not offered here.
+   */
+  app.delete<{ Params: { id: string; attachmentId: string } }>(
+    '/api/v1/account/tickets/:id/attachments/:attachmentId',
+    async (request, reply) => {
+      const auth = await authenticate(request, env, pool);
+      const { id, attachmentId } = parseOrThrow(attachmentParamSchema, request.params);
+
+      const ticket = await findTicketById(pool, id);
+      if (!ticket || ticket.user_id !== auth.userId) {
+        throw new NotFoundError('No ticket was found with that id');
+      }
+
+      // Scope the uploader check to a lookup that is already ticket-scoped, so a foreign id is a
+      // 404 rather than a 403.
+      const existing = await findAttachment(pool, ticket.id, attachmentId);
+      if (!existing || existing.uploaded_by !== auth.userId) {
+        throw new NotFoundError('No attachment was found with that id');
+      }
+
+      const removed = await deleteTicketAttachment(pool, ticket.id, attachmentId);
+      if (!removed) throw new NotFoundError('No attachment was found with that id');
+
+      reply.code(204);
+      return reply.send();
+    }
+  );
 }

@@ -81,7 +81,7 @@ Legend: ✅ present · ⚠️ partial / documented as deferred · ❌ absent. "P
 | 12 | Subscriptions / renewals | ✅ (schema + routes) | ✅ (schema) | neither verified end-to-end |
 | 13 | **Multi-currency canonical pricing / FX / rounding** | ⚠️ display-only `0083` | ⚠️ `src/lib/money.js` minor-unit scales | neither has genuine multi-currency; see `docs/MULTI-CURRENCY-ARCHITECTURE.md` |
 | 14 | DNS zones/records, upstream propagation fail-closed | ✅ | ✅ | `src/dns/propagation.ts`; platform `src/domains/dns.js` |
-| 15 | SSL certificate records | ✅ | ✅ | neither has a proven ACME/CA issuance client |
+| 15 | SSL certificate records | ✅ **(+ ACME issuance 2026-11-13)** | ✅ | `cloudhost247-node` now has a real RFC 8555 client (`src/ssl/acme-client.ts`, `ssl-issuance-service.ts`) proven end to end against a loopback CA; `platform/` still has challenge generation only. Neither has been run against a public CA — that is CT-04 |
 | 16 | Domain services: registrar adapters (GoDaddy/Namecheap/RDAP/GoValue), availability, transfers | ✅ | ✅ | both ported; **platform §5 explicitly defers domain availability lookup** |
 | 17 | Infrastructure provider adapters (12–13 kinds) | ✅ | ✅ | `src/infrastructure/providers/**`; `platform/src/lib/providers/**` |
 | 18 | **Writing provider state / executing provisioning jobs** | ✅ (worker + `server-agent`) | ⚠️ | `platform/MIGRATION.md` §3: worker executes queued jobs but "order-driven provisioning path … still deferred" |

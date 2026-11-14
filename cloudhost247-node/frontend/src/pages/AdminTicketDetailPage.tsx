@@ -3,10 +3,12 @@ import { Link, useParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
 import { getTicketForStaff, replyToTicketAsStaff, setTicketStatus } from '../lib/account-api';
 import { ApiRequestError } from '../lib/api';
-import type { AdminCustomerSummary, TicketDetail, TicketStatus } from '../lib/account-types';
+import type { AdminCustomerSummary, TicketAttachmentInput, TicketDetail, TicketStatus } from '../lib/account-types';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
 import TicketThread from '../components/TicketThread';
+import TicketAttachmentPicker from '../components/TicketAttachmentPicker';
+import TicketAttachments from '../components/TicketAttachments';
 
 type LoadState =
   | { status: 'loading' }
@@ -24,6 +26,7 @@ export default function AdminTicketDetailPage() {
   usePageMeta('Manage ticket', 'View and reply to a CloudHost247 support ticket.');
   const [state, setState] = useState<LoadState>({ status: 'loading' });
   const [reply, setReply] = useState('');
+  const [attachment, setAttachment] = useState<TicketAttachmentInput | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -53,7 +56,7 @@ export default function AdminTicketDetailPage() {
     setSubmitting(true);
     setMessage(null);
     try {
-      const res = await replyToTicketAsStaff(id, reply);
+      const res = await replyToTicketAsStaff(id, reply, attachment ?? undefined);
       setState((prev) => (prev.status === 'success' ? { ...prev, ticket: res.ticket } : prev));
       setReply('');
     } catch (err) {
@@ -118,12 +121,28 @@ export default function AdminTicketDetailPage() {
               </select>
             </div>
 
-            <TicketThread messages={state.ticket.messages} />
+            <TicketThread
+              messages={state.ticket.messages}
+              ticketId={state.ticket.id}
+              canDeleteAttachments={false}
+            />
+
+            {state.ticket.attachments && state.ticket.attachments.length > 0 && (
+              <div className="ch247-card ch247-card--nested">
+                <h2 className="ch247-field-label">Files on this ticket</h2>
+                <TicketAttachments
+                  ticketId={state.ticket.id}
+                  attachments={state.ticket.attachments}
+                  canDelete={false}
+                />
+              </div>
+            )}
 
             <form className="ch247-form ch247-form--wide" onSubmit={onReply}>
               <label>
                 <span className="ch247-field-label">Reply as support</span>
                 <textarea value={reply} onChange={(e) => setReply(e.target.value)} required maxLength={10000} rows={4} />
+                <TicketAttachmentPicker attachment={attachment} onChange={setAttachment} disabled={submitting} />
               </label>
               <button type="submit" disabled={submitting}>
                 {submitting ? 'Sending…' : 'Send reply'}

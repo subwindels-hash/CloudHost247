@@ -46,6 +46,10 @@ DTOs (`src/dto/catalog.ts`).
   messaging. Ticket `status` lifecycle: `open` → `pending_staff` (customer replied, awaiting
   staff) / `pending_customer` (staff replied, awaiting customer) → `closed`. A customer reply on a
   closed ticket **reopens it** (see `src/db/support-tickets.ts`) instead of being silently dropped.
+- `support_ticket_attachments` (`0106`) — files attached to a ticket message or to the ticket
+  itself. Bytes are stored in the database (`bytea`), matching `builder_media` and the store's
+  digital products, so the existing backup path captures them; `byte_size`/`checksum` describe the
+  stored bytes. Deleting a ticket or a message cascades to its files.
 - `users.password_changed_at` (`0012`) — see "Password change & session invalidation" below.
 - `auth_audit_log` event types were widened (`0013`, not a new table) to also accept
   `profile_update`, `password_change`, `admin_status_change`, `admin_role_change`.
@@ -60,6 +64,9 @@ Phase 3 catalog admin API (`src/routes/catalog-admin.ts`).
 |---|---|---|---|
 | Edit own full name / change own password | ✅ (self only) | ✅ (self only) | ✅ (self only) |
 | View/reply to own tickets | ✅ (self only) | ✅ (self only) | ✅ (self only) |
+| Attach/download a file on own ticket | ✅ (self only) | ✅ (self only) | ✅ (self only) |
+| Download any ticket's attachment | ❌ | ✅ | ✅ |
+| Delete an attachment uploaded by someone else | ❌ (own uploads only) | ❌ | ❌ |
 | View own services/domains (read-only) | ✅ (self only) | ✅ (self only) | ✅ (self only) |
 | View customer directory / any customer's detail | ❌ | ✅ | ✅ |
 | Create/edit any customer's service or domain record | ❌ | ✅ | ✅ |
@@ -182,9 +189,13 @@ Returns `{ tickets: TicketSummaryDTO[] }` for the caller only.
 
 ### `POST /api/v1/account/tickets`
 
-Body: `{ "subject": string (1-255), "message": string (1-10000), "priority"?: "low"|"normal"|"high" }`.
+Body: `{ "subject": string (1-255), "message": string (1-10000), "priority"?: "low"|"normal"|"high",
+"attachment"?: { "base64": string, "contentType": string, "filename": string } }`.
 Creates a new ticket plus its first message (`authorRole: "customer"`). Returns `201` with
 `{ ticket: TicketSummaryDTO }`.
+
+The optional attachment is validated **before** anything is written: a rejected file never leaves a
+ticket behind. See "Ticket attachments" below for the accepted types and the two size limits.
 
 ### `GET /api/v1/account/tickets/:id`
 
@@ -193,9 +204,43 @@ doesn't exist or belongs to someone else.
 
 ### `POST /api/v1/account/tickets/:id/messages`
 
-Body: `{ "message": string (1-10000) }`. Appends a customer reply; reopens the ticket if it was
-`closed`. `404` (never `403`) for another customer's ticket id. Returns `201` with the updated
-ticket + full thread.
+Body: `{ "message": string (1-10000), "attachment"?: { base64, contentType, filename } }`. Appends
+a customer reply; reopens the ticket if it was `closed`. `404` (never `403`) for another customer's
+ticket id. Returns `201` with the updated ticket + full thread (each message carrying its own
+`attachments`).
+
+### `GET /api/v1/account/tickets/:id/attachments/:attachmentId/download`
+
+Streams one file. Session-gated on every request — there is no public URL and no share token — so
+the SPA downloads it through `apiFetchBlob` rather than an `<a href>`. Responds with the stored type,
+`Content-Disposition: attachment`, `X-Content-Type-Options: nosniff` and
+`Cache-Control: private, no-store`. A file id from a different ticket is `404`, because the lookup
+is scoped by `ticket_id` in SQL rather than checked afterwards.
+
+### `DELETE /api/v1/account/tickets/:id/attachments/:attachmentId`
+
+`204` on success. Only the **uploader** may delete their own file; anyone else, including the other
+party on the thread, gets `404`. Deleting a file never deletes the message it came with.
+
+## Ticket attachments
+
+| Property | Value | Enforced by |
+|---|---|---|
+| Accepted types | PNG, JPEG, WebP, GIF, PDF, ZIP, TXT, CSV | whitelist in `src/lib/media-upload.ts` |
+| Type trust | the declared type must **equal** the type detected from the leading bytes | `sniffUploadType` + `decodeAndValidateUpload` |
+| Per-file limit | 5 MiB of decoded bytes | validator **and** a table `CHECK` constraint |
+| Per-message limit | 5 files | counted inside the insert transaction |
+| Request body ceiling | `TICKET_ATTACHMENT_BODY_LIMIT_BYTES` (~6.8 MiB) | Fastify `bodyLimit` on the two upload routes only |
+| Stored filename | slug of the client's name + extension from the **detected** type | `normalizeFilename` |
+| Storage | `bytea` in `support_ticket_attachments` (captured by the DB backup path) | migration `0106` |
+
+Explicitly **not** offered: public share links, unattached file uploads (there is no route that
+stores a file without a ticket), multipart upload, and any antivirus claim — there is no scanner in
+this deployment, so the documented protection is type/size/shape validation, not malware detection.
+
+The request body ceiling is a real finding from building this: Fastify's default is 1 MiB, which
+would have made the advertised 5 MiB limit unreachable (a legal 2 MiB screenshot would have been a
+bare `413`). The two upload routes raise it; every other route keeps the 1 MiB default.
 
 ## Staff API — `/api/v1/admin/customers/*`, `/api/v1/admin/tickets/*`
 

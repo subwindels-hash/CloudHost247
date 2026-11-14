@@ -167,6 +167,11 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0103_create_community.sql',
     '0104_seed_community_configuration.sql',
     '0105_community_ai_knowledge.sql',
+    // Support attachments and ACME renumbered 0103/0104 -> 0106/0107 for the same reason 0102 was
+    // renumbered: the forum line landed on main first and took 0103-0105. `schema_migrations.version`
+    // is the primary key, so two files sharing a prefix is a hard collision, not a merge nuisance.
+    '0106_create_support_ticket_attachments.sql',
+    '0107_create_acme_accounts_and_challenges.sql',
   ];
 
   it('finds the committed migration files in order', () => {

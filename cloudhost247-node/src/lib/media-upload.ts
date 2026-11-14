@@ -9,8 +9,15 @@
  *   - the declared content type must be in the whitelist AND the decoded bytes must match that
  *     type's magic number, so a PNG cannot be relabelled as a PDF (or vice versa) to smuggle
  *     something past the check;
- *   - SVG, HTML and scripts are rejected outright — an "image" that is an XML document is a
- *     script-delivery vector, not an image;
+ *   - `text/html`, `image/svg+xml` and `application/javascript` are not in the whitelist at all,
+ *     so markup can never be *stored under an executable type*. It can still arrive as a text
+ *     upload (a `.txt` holding an HTML fragment is indistinguishable from prose at this depth and
+ *     is a legitimate thing to attach to a support ticket); what stops it from executing is that
+ *     it is stored as `text/plain` — the detected type, not the claimed one — and every route
+ *     that serves stored bytes sends `X-Content-Type-Options: nosniff` with either
+ *     `Content-Disposition: attachment` or a non-executable type. That is the guarantee; it is
+ *     enforced at read time as well as here. (An earlier version of this comment claimed markup
+ *     was "rejected outright", which was never true of the text branch — corrected 2026-11-13.)
  *   - the size cap applies to the decoded bytes, not to the base64 string;
  *   - the stored filename is normalised to a slug plus the extension implied by the *detected*
  *     type, so the original name can never carry a path or a second extension.
@@ -22,6 +29,26 @@ import { ValidationError } from './errors';
 export const MAX_MEDIA_BYTES = 2 * 1024 * 1024;
 /** 10 MiB for digital-product downloads (matched by the store_products CHECK constraint). */
 export const MAX_DIGITAL_PRODUCT_BYTES = 10 * 1024 * 1024;
+/**
+ * 5 MiB per support-ticket attachment (matched by the support_ticket_attachments CHECK
+ * constraint in migration 0106). Larger than a media-library image because a customer's evidence
+ * is often a multi-page PDF or a screenshot bundle, and smaller than a digital product because a
+ * ticket can carry several files.
+ */
+export const MAX_TICKET_ATTACHMENT_BYTES = 5 * 1024 * 1024;
+/** A ticket thread is a conversation, not a file-sharing service. */
+export const MAX_TICKET_ATTACHMENTS_PER_MESSAGE = 5;
+/**
+ * Fastify request-body ceiling for the two ticket routes that can carry a file.
+ *
+ * Base64 inflates by 4/3, so the 5 MiB cap above needs ~6.7 MiB of JSON, plus room for a
+ * 10,000-character message and the JSON envelope. Fastify's default is 1 MiB, which would reject
+ * a perfectly legal 2 MiB screenshot with a bare 413 before validation ran — this constant is the
+ * reason the documented per-file limit is actually reachable. Kept slightly above the true
+ * arithmetic requirement so a file *just* over 5 MiB reaches the validator and gets the specific
+ * "larger than the 5 MB limit" message rather than a generic body-size refusal.
+ */
+export const TICKET_ATTACHMENT_BODY_LIMIT_BYTES = Math.ceil((MAX_TICKET_ATTACHMENT_BYTES * 4) / 3) + 64 * 1024;
 
 export const ALLOWED_UPLOAD_TYPES = {
   'image/png': 'png',
