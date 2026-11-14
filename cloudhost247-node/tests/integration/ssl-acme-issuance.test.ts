@@ -365,12 +365,27 @@ describe('SSL — ACME issuance [integration]', () => {
       // OpenSSL wants PEM here; `-inform der` would work too, but PEM is what a CA actually reads.
       const b64 = csr.csrDer.toString('base64').match(/.{1,64}/g)?.join('\n');
       writeFileSync(csrPath, `-----BEGIN CERTIFICATE REQUEST-----\n${b64}\n-----END CERTIFICATE REQUEST-----\n`);
-      const text = execFileSync('openssl', ['req', '-in', csrPath, '-noout', '-text', '-verify'], {
+      // Two properties, checked two ways — deliberately NOT by grepping OpenSSL's human-readable
+      // output. OpenSSL versions disagree on both things this suite used to assert: the spacing of a
+      // DN ("CN = a.example.com" vs "CN=a.example.com"), and whether "self-signature verify OK"
+      // goes to stdout or stderr. Both pass locally and fail on CI, which is exactly what happened.
+
+      // 1. The structure: `-text` to stdout, asserted on content only.
+      const text = execFileSync('openssl', ['req', '-in', csrPath, '-noout', '-text'], {
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
       });
-      expect(text).toContain('CN = a.example.com');
+      expect(text).toMatch(/Subject Alternative Name/);
       expect(text).toContain('DNS:a.example.com, DNS:b.example.com');
+
+      // 2. The signature: `-verify` exits non-zero on a bad self-signature, so the exit code is the
+      //    assertion. execFileSync throws on a non-zero status, so reaching the next line is the pass,
+      //    and the message stays useful if it ever does fail.
+      expect(() =>
+        execFileSync('openssl', ['req', '-in', csrPath, '-noout', '-verify'], {
+          stdio: ['ignore', 'pipe', 'pipe'],
+        })
+      ).not.toThrow();
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
