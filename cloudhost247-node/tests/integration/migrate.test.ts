@@ -163,6 +163,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     // AI trust is renumbered to avoid a duplicate schema_migrations primary key.
     '0102_ai_source_trust.sql',
     '0103_create_support_ticket_attachments.sql',
+    '0104_create_acme_accounts_and_challenges.sql',
   ];
 
   it('finds the committed migration files in order', () => {

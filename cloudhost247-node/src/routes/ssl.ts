@@ -13,6 +13,14 @@ import {
   createSslCertificate,
   deleteSslCertificate,
 } from '../db/ssl';
+import {
+  SSL_ISSUANCE_NOT_CONFIGURED,
+  orderedDnsNames,
+  revokeAtCa,
+  startOrResumeIssuance,
+} from '../ssl/ssl-issuance-service';
+import { AcmeError } from '../ssl/acme-client';
+import { daysUntilExpiry, isCurrentlyValid } from '../ssl/certificate';
 
 const idSchema = z.string().uuid();
 const domainSchema = z
@@ -100,7 +108,85 @@ export async function registerSslRoutes(
       const id = parseOrThrow(idSchema, request.params.id);
       const cert = await findSslCertificateById(pool, id);
       if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
-      return { certificate: cert };
+
+      // Status is reported from the certificate itself where one exists. `daysRemaining` and
+      // `currentlyValid` are derived from its own validity window, never from `status` alone.
+      const metadata = (cert.metadata ?? {}) as { validFrom?: string; issuanceError?: string };
+      const currentlyValid =
+        metadata.validFrom && cert.expires_at
+          ? isCurrentlyValid(metadata.validFrom, cert.expires_at)
+          : null;
+
+      return {
+        certificate: {
+          ...cert,
+          daysRemaining: daysUntilExpiry(cert.expires_at),
+          currentlyValid,
+          issuanceError: metadata.issuanceError ?? null,
+          orderedNames: orderedDnsNames(cert),
+        },
+      };
+    });
+
+    /**
+     * Starts — or resumes — real certificate issuance against the configured ACME CA.
+     *
+     * Idempotent by design: the first call creates an order and returns the challenges that must
+     * be satisfied; calling it again after they are satisfied finalizes and stores the certificate.
+     * With no CA configured this answers 503 and touches nothing, which is the honest answer for a
+     * deployment that has not chosen a CA yet.
+     */
+    app.post<{ Params: { id: string } }>(`${prefix}/ssl/certificates/:id/issue`, async (request, reply) => {
+      const auth = await authenticate(request, env, pool);
+      const id = parseOrThrow(idSchema, request.params.id);
+      const cert = await findSslCertificateById(pool, id);
+      if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
+
+      if (cert.status === 'REVOKED') {
+        throw new ConflictError('A revoked certificate cannot be re-issued; request a new certificate');
+      }
+      if (cert.certificate_pem && cert.status === 'ISSUED') {
+        throw new ConflictError('This certificate is already issued; use renew to replace it');
+      }
+      // A pasted CUSTOM certificate is already real material — issuing would overwrite it.
+      if (cert.issuer === 'CUSTOM' && cert.certificate_pem) {
+        throw new ConflictError('This certificate was uploaded, not requested from a CA; there is nothing to issue');
+      }
+
+      try {
+        const result = await startOrResumeIssuance({ env, pool }, cert);
+
+        await auditRequest(pool, request, auth.userId, {
+          action: 'SSL_CERTIFICATE_ISSUANCE_ATTEMPTED',
+          resourceType: 'ssl_certificate',
+          resourceId: cert.id,
+          metadata: {
+            domain: cert.domain_name,
+            names: orderedDnsNames(cert),
+            outcome: result.status,
+            ...(result.failureReason ? { failure: result.failureReason } : {}),
+          },
+        });
+
+        reply.code(result.status === 'ISSUED' ? 200 : 202);
+        return {
+          status: result.status,
+          certificate: await findSslCertificateById(pool, cert.id),
+          // What the caller must do next, verbatim, when the CA is waiting on them.
+          challenges: result.pendingChallenges,
+          failureReason: result.failureReason,
+        };
+      } catch (err) {
+        if (err instanceof Error && (err as { code?: string }).code === SSL_ISSUANCE_NOT_CONFIGURED) {
+          reply.code(503);
+          return { error: SSL_ISSUANCE_NOT_CONFIGURED, message: err.message, configurationRequired: true };
+        }
+        if (err instanceof AcmeError) {
+          reply.code(err.status && err.status >= 400 && err.status < 500 ? 502 : 502);
+          return { error: err.code, message: err.message, retryable: err.retryable };
+        }
+        throw err;
+      }
     });
 
     app.post<{ Params: { id: string } }>(`${prefix}/ssl/certificates/:id/renew`, async (request) => {
@@ -117,6 +203,39 @@ export async function registerSslRoutes(
       if (!cert.certificate_pem || (cert.status !== 'ISSUED' && cert.status !== 'EXPIRED')) {
         throw new ConflictError('Only a certificate with issued material can be renewed; request issuance first');
       }
+
+      // Renewal is a fresh issuance, not a status change. The previous certificate stays valid and
+      // readable until the CA issues its replacement, so a failed renewal never leaves the customer
+      // without a working certificate.
+      if (env.ACME_DIRECTORY_URL) {
+        // Clear the challenge rows from the previous issuance so the new order gets fresh tokens.
+        await pool.query('DELETE FROM acme_challenges WHERE certificate_id = $1', [id]);
+        const renewalTarget = { ...cert, certificate_pem: null };
+        const result = await startOrResumeIssuance({ env, pool }, renewalTarget);
+
+        await auditRequest(pool, request, auth.userId, {
+          action: 'SSL_CERTIFICATE_RENEWAL_REQUESTED',
+          resourceType: 'ssl_certificate',
+          resourceId: id,
+          metadata: {
+            domain: cert.domain_name,
+            previousExpiresAt: cert.expires_at,
+            outcome: result.status,
+            ...(result.failureReason ? { failure: result.failureReason } : {}),
+          },
+        });
+
+        return {
+          certificate: await findSslCertificateById(pool, id),
+          status: result.status,
+          challenges: result.pendingChallenges,
+          failureReason: result.failureReason,
+        };
+      }
+
+      // No CA configured. Renewal cannot be FABRICATED: the truthful state is VALIDATING (a renewal
+      // is outstanding), never ISSUED with a synthetic expiry. This branch exists so a deployment
+      // without a CA still records the request instead of silently doing nothing.
       await pool.query(
         `UPDATE ssl_certificates SET status = 'VALIDATING', updated_at = now() WHERE id = $1`,
         [id]
@@ -127,10 +246,19 @@ export async function registerSslRoutes(
         action: 'SSL_CERTIFICATE_RENEWAL_REQUESTED',
         resourceType: 'ssl_certificate',
         resourceId: id,
-        metadata: { domain: cert.domain_name, expiresAt: cert.expires_at, note: 'CA/ACME adapter not yet connected; renewal marked VALIDATING until issuance completes' },
+        metadata: {
+          domain: cert.domain_name,
+          expiresAt: cert.expires_at,
+          note: SSL_ISSUANCE_NOT_CONFIGURED,
+        },
       });
 
-      return { certificate: updated };
+      return {
+        certificate: updated,
+        status: 'VALIDATING',
+        challenges: [],
+        failureReason: null,
+      };
     });
 
     app.post<{ Params: { id: string } }>(`${prefix}/ssl/certificates/:id/revoke`, async (request) => {
@@ -139,9 +267,26 @@ export async function registerSslRoutes(
       const cert = await findSslCertificateById(pool, id);
       if (!cert || cert.user_id !== auth.userId) throw new NotFoundError('Certificate not found');
 
+      // Revocation is two facts, not one: the CA stopped trusting it, and this platform recorded
+      // that. The row is marked REVOKED either way, but the response reports whether the CA was
+      // actually contacted — a local-only revocation of a publicly trusted certificate would leave
+      // the certificate valid in the outside world, and claiming otherwise would be a lie.
+      const ca = await revokeAtCa({ env, pool }, cert);
+
       await pool.query(
-        `UPDATE ssl_certificates SET status = 'REVOKED', updated_at = now() WHERE id = $1`,
-        [id]
+        `UPDATE ssl_certificates
+            SET status = 'REVOKED',
+                metadata = COALESCE(metadata,'{}'::jsonb) || $2::jsonb,
+                updated_at = now()
+          WHERE id = $1`,
+        [
+          id,
+          JSON.stringify({
+            revokedAt: new Date().toISOString(),
+            revokedAtCa: ca.revokedAtCa,
+            ...(ca.reason ? { revocationNote: ca.reason } : {}),
+          }),
+        ]
       );
       const updated = await findSslCertificateById(pool, id);
 
@@ -149,10 +294,17 @@ export async function registerSslRoutes(
         action: 'SSL_CERTIFICATE_REVOKED',
         resourceType: 'ssl_certificate',
         resourceId: id,
-        metadata: { domain: cert.domain_name },
+        metadata: { domain: cert.domain_name, revokedAtCa: ca.revokedAtCa, reason: ca.reason },
       });
 
-      return { certificate: updated };
+      return {
+        certificate: updated,
+        revokedAtCa: ca.revokedAtCa,
+        // Plainly states what the customer should do when the CA was not contacted.
+        message: ca.revokedAtCa
+          ? 'The certificate was revoked at the certificate authority and recorded here.'
+          : `Recorded as revoked here, but the certificate authority was not contacted${ca.reason ? ` (${ca.reason})` : ''}. The certificate may still be trusted outside this platform.`,
+      };
     });
 
     app.delete<{ Params: { id: string } }>(`${prefix}/ssl/certificates/:id`, async (request, reply) => {
