@@ -4,7 +4,7 @@ import { ValidationError } from '../lib/errors';
 import { MAX_TICKET_ATTACHMENTS_PER_MESSAGE } from '../lib/media-upload';
 
 /**
- * Support-ticket attachments (migration 0103).
+ * Support-ticket attachments (migration 0106).
  *
  * Deliberately narrow: this module stores and returns bytes and metadata, and nothing else. Every
  * authorisation decision (is this the ticket's owner? is this caller staff?) belongs to the route,

@@ -31,7 +31,7 @@ export const MAX_MEDIA_BYTES = 2 * 1024 * 1024;
 export const MAX_DIGITAL_PRODUCT_BYTES = 10 * 1024 * 1024;
 /**
  * 5 MiB per support-ticket attachment (matched by the support_ticket_attachments CHECK
- * constraint in migration 0103). Larger than a media-library image because a customer's evidence
+ * constraint in migration 0106). Larger than a media-library image because a customer's evidence
  * is often a multi-page PDF or a screenshot bundle, and smaller than a digital product because a
  * ticket can carry several files.
  */

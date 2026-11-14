@@ -202,6 +202,23 @@ const DomainBulkSearchPage = lazy(() => import('./pages/domains/BulkSearchPage')
 const DomainBrokerPage = lazy(() => import('./pages/domains/BrokerPage'));
 const DnsManagementPage = lazy(() => import('./pages/DnsManagementPage'));
 const ToolsCenterPage = lazy(() => import('./pages/ToolsCenterPage'));
+// Community Forum — public discovery, discussion threads, the developer corner, member profiles,
+// and the member's own notifications/bookmarks/settings. Posts use the existing CloudHost247
+// account: there is no second registration form anywhere in this section.
+const CommunityHomePage = lazy(() => import('./pages/community/CommunityHomePage'));
+const CommunityDiscussionPage = lazy(() => import('./pages/community/CommunityDiscussionPage'));
+const CommunityNewDiscussionPage = lazy(() => import('./pages/community/CommunityNewDiscussionPage'));
+const CommunityCategoriesPage = lazy(() => import('./pages/community/CommunityBrowsePages').then((m) => ({ default: m.CommunityCategoriesPage })));
+const CommunityDiscussionsPage = lazy(() => import('./pages/community/CommunityBrowsePages').then((m) => ({ default: m.CommunityDiscussionsPage })));
+const CommunityCategoryPage = lazy(() => import('./pages/community/CommunityBrowsePages').then((m) => ({ default: m.CommunityCategoryPage })));
+const CommunitySearchPage = lazy(() => import('./pages/community/CommunityBrowsePages').then((m) => ({ default: m.CommunitySearchPage })));
+const CommunityMembersPage = lazy(() => import('./pages/community/CommunityBrowsePages').then((m) => ({ default: m.CommunityMembersPage })));
+const CommunityMemberPage = lazy(() => import('./pages/community/CommunityBrowsePages').then((m) => ({ default: m.CommunityMemberPage })));
+const CommunityDevelopersPage = lazy(() => import('./pages/community/CommunityBrowsePages').then((m) => ({ default: m.CommunityDevelopersPage })));
+const CommunityNotificationsPage = lazy(() => import('./pages/community/CommunityMemberPages').then((m) => ({ default: m.CommunityNotificationsPage })));
+const CommunityBookmarksPage = lazy(() => import('./pages/community/CommunityMemberPages').then((m) => ({ default: m.CommunityBookmarksPage })));
+const CommunitySettingsPage = lazy(() => import('./pages/community/CommunityMemberPages').then((m) => ({ default: m.CommunitySettingsPage })));
+const AdminCommunityPage = lazy(() => import('./pages/community/AdminCommunityPage'));
 const FileToolsSuitePage = lazy(() => import('./pages/FileToolsSuitePage'));
 const FileConverterPage = lazy(() => import('./pages/FileConverterPage'));
 const ToolPage = lazy(() => import('./pages/ToolPage'));
@@ -358,6 +375,18 @@ export default function App() {
 
         <Route path="/legal" element={<LegalIndexPage />} />
 
+        {/* Community Forum — public surfaces. Browsing, search and member profiles need no account;
+            posting is gated by RequireAuth below and re-checked server-side on every write. */}
+        <Route path="/community" element={<CommunityHomePage />} />
+        <Route path="/community/categories" element={<CommunityCategoriesPage />} />
+        <Route path="/community/category/:slug" element={<CommunityCategoryPage />} />
+        <Route path="/community/discussions" element={<CommunityDiscussionsPage />} />
+        <Route path="/community/discussion/:slug" element={<CommunityDiscussionPage />} />
+        <Route path="/community/search" element={<CommunitySearchPage />} />
+        <Route path="/community/members" element={<CommunityMembersPage />} />
+        <Route path="/community/member/:username" element={<CommunityMemberPage />} />
+        <Route path="/community/developers" element={<CommunityDevelopersPage />} />
+
         {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -371,6 +400,13 @@ export default function App() {
           {/* Customer Cloud Assistant — server-side scoped to the caller's own account; safe for
               every signed-in role (customers see only their own data, staff see only theirs). */}
           <Route path="/account/assistant" element={<AiAssistantPage />} />
+          {/* Community surfaces that are personal data: composing, notifications, bookmarks and
+              settings. The API answers 401 without a token, so RequireAuth sends a guest to /login
+              with a return path instead of rendering a page that can only fail. */}
+          <Route path="/community/new-discussion" element={<CommunityNewDiscussionPage />} />
+          <Route path="/community/notifications" element={<CommunityNotificationsPage />} />
+          <Route path="/community/bookmarks" element={<CommunityBookmarksPage />} />
+          <Route path="/community/settings" element={<CommunitySettingsPage />} />
           <Route path="/websites/builder" element={<BuilderPage />} />
           <Route path="/websites/builder/:siteId" element={<BuilderPage />} />
           <Route path="/websites/ai-builder" element={<AiBuilderPage />} />
@@ -456,6 +492,7 @@ export default function App() {
             <Route path="/admin/expert-services" element={<AdminExpertServicesPage />} />
             <Route path="/admin/marketing-services" element={<AdminMarketingServicesPage />} />
             <Route path="/admin/unified-inbox" element={<AdminUnifiedInboxPage />} />
+            <Route path="/admin/community" element={<AdminCommunityPage />} />
           </Route>
 
           {/* Staff-only (admin + super_admin) customer/ticket/billing management. RequireRole is a

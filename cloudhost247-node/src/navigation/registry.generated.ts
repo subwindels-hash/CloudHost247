@@ -733,6 +733,12 @@ export const NAV_SECTIONS: RegistrySection[] = [
             "icon": "help"
           },
           {
+            "label": "Community Forum",
+            "to": "/community",
+            "description": "Ask other CloudHost247 users and staff, and search answers that already worked.",
+            "icon": "users"
+          },
+          {
             "label": "FAQs",
             "to": "/faq",
             "description": "The questions we are asked most, answered plainly.",
@@ -1293,6 +1299,10 @@ export const FOOTER_COLUMNS: RegistryFooterColumn[] = [
         "to": "/help"
       },
       {
+        "label": "Community Forum",
+        "to": "/community"
+      },
+      {
         "label": "FAQs",
         "to": "/faq"
       },
@@ -1729,6 +1739,7 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/admin/audit-logs",
   "/admin/cloudflare",
   "/admin/cloudflare/:tab",
+  "/admin/community",
   "/admin/control-panels",
   "/admin/control-panels/:id",
   "/admin/customers/:id",
@@ -1820,6 +1831,19 @@ export const SPA_ROUTE_PATTERNS: string[] = [
   "/billing",
   "/cart",
   "/checkout",
+  "/community",
+  "/community/bookmarks",
+  "/community/categories",
+  "/community/category/:slug",
+  "/community/developers",
+  "/community/discussion/:slug",
+  "/community/discussions",
+  "/community/member/:username",
+  "/community/members",
+  "/community/new-discussion",
+  "/community/notifications",
+  "/community/search",
+  "/community/settings",
   "/contact",
   "/dashboard",
   "/dashboard/apps",
@@ -2162,6 +2186,7 @@ export const REGISTRY_ROUTES: string[] = [
   "/hosting/control-panels",
   "/docs",
   "/help",
+  "/community",
   "/faq",
   "/support",
   "/search",

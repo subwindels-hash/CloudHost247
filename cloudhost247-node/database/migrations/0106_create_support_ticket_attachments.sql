@@ -1,4 +1,4 @@
--- Migration: 0103_create_support_ticket_attachments.sql
+-- Migration: 0106_create_support_ticket_attachments.sql
 -- Purpose: Support-ticket attachments — the one capability the module certification catalog
 -- recorded as "deliberately absent" (docs/MODULE-CERTIFICATION-CATALOG.md §"Genuine unfinished
 -- items"). This adds it without inventing anything the rest of the module does not already have.

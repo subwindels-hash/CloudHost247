@@ -1,4 +1,4 @@
--- Migration: 0104_create_acme_accounts_and_challenges.sql
+-- Migration: 0107_create_acme_accounts_and_challenges.sql
 -- Purpose: the persistence the SSL module needs to speak ACME (RFC 8555) rather than fabricate a
 -- certificate. Two tables, kept separate from `ssl_certificates` because both outlive any single
 -- certificate:

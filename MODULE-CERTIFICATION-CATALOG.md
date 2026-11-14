@@ -23,7 +23,7 @@ Six junctions: front door · validation · DB state · permissions · honest fai
 | **SMM** | modules smmprovisioning + `cloudhost247_smm` | ✔ | ✔ | ✔ | ✔ admin | ✔ fail-closed | ✔ | Implemented at source level; provisioning units green; provider runtime = CT-06 | codebase modules + partial suites |
 | **Billing (wallets/invoices/refunds/reconciliation)** | admin-billing + billing-ledger | ✔ | ✔ | ✔ append-only w/ trigger | ✔ BILLING_STAFF_ROLES | ✔ (409 mismatch, refund guidance) | ✔ global refund-key identity | **Internally certified financial integrity** (Phase 14–16); provider reconciliation = CT-05 | 170/170 + 8/8 real-PG probes |
 | **Administration (RBAC/audit/config)** | admin-suite | ✔ | ✔ | ✔ (audit log 0002) | ✔ super-admin-only integrity closures | ✔ (audit on every action) | ✔ | Internally tested | admin-role-guard-hardening.test.ts + P3–P9 regressions |
-| **Support (tickets/replies/escalation/attachments)** | account.ts tickets + `TicketAttachments`/`TicketAttachmentPicker` | ✔ | ✔ (zod + magic-number sniff + 5 MiB cap enforced twice) | ✔ (`support_ticket_attachments`, 0103; cascade on delete) | ✔ owner-only on customer routes, staff-guarded on admin routes; cross-ticket id = 404 | ✔ 404-not-403, named 400/413, no orphaned bytes on refusal | ✔ one file per request, per-message cap enforced in-transaction | Internally tested — **attachments built 2026-11-13** | `phase17-support-journey.test.ts` + `tests/integration/support-ticket-attachments.test.ts` (10) |
+| **Support (tickets/replies/escalation/attachments)** | account.ts tickets + `TicketAttachments`/`TicketAttachmentPicker` | ✔ | ✔ (zod + magic-number sniff + 5 MiB cap enforced twice) | ✔ (`support_ticket_attachments`, 0106; cascade on delete) | ✔ owner-only on customer routes, staff-guarded on admin routes; cross-ticket id = 404 | ✔ 404-not-403, named 400/413, no orphaned bytes on refusal | ✔ one file per request, per-message cap enforced in-transaction | Internally tested — **attachments built 2026-11-13** | `phase17-support-journey.test.ts` + `tests/integration/support-ticket-attachments.test.ts` (10) |
 
 ## Ordered backlog for the P1 external work streams (untouched here)
 
@@ -33,7 +33,7 @@ drill. Their completion converts "Internally tested" rows into "Provider-certifi
 
 ## Genuine unfinished items acknowledged (not hidden)
 
-~~Support attachments: not implemented.~~ **Built 2026-11-13** — migration `0103_create_support_ticket_attachments.sql`,
+~~Support attachments: not implemented.~~ **Built 2026-11-13** — migration `0106_create_support_ticket_attachments.sql`,
 customer + staff upload/download/delete routes, and the SPA surfaces; 10 integration tests over a
 real embedded Postgres cover the six junctions plus the three refusals that matter (wrong bytes,
 oversized file, someone else's ticket). See §"Support attachments" below.

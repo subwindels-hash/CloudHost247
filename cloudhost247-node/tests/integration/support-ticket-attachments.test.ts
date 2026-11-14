@@ -10,7 +10,7 @@ import { buildApp } from '../../src/app';
 import { signAuthToken } from '../../src/lib/jwt';
 
 /**
- * Support-ticket attachments (migration 0103).
+ * Support-ticket attachments (migration 0106).
  *
  * The capability was recorded as "deliberately absent" in
  * docs/MODULE-CERTIFICATION-CATALOG.md; this suite is the evidence that it now exists and that

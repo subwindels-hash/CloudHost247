@@ -46,7 +46,7 @@ DTOs (`src/dto/catalog.ts`).
   messaging. Ticket `status` lifecycle: `open` → `pending_staff` (customer replied, awaiting
   staff) / `pending_customer` (staff replied, awaiting customer) → `closed`. A customer reply on a
   closed ticket **reopens it** (see `src/db/support-tickets.ts`) instead of being silently dropped.
-- `support_ticket_attachments` (`0103`) — files attached to a ticket message or to the ticket
+- `support_ticket_attachments` (`0106`) — files attached to a ticket message or to the ticket
   itself. Bytes are stored in the database (`bytea`), matching `builder_media` and the store's
   digital products, so the existing backup path captures them; `byte_size`/`checksum` describe the
   stored bytes. Deleting a ticket or a message cascades to its files.
@@ -232,7 +232,7 @@ party on the thread, gets `404`. Deleting a file never deletes the message it ca
 | Per-message limit | 5 files | counted inside the insert transaction |
 | Request body ceiling | `TICKET_ATTACHMENT_BODY_LIMIT_BYTES` (~6.8 MiB) | Fastify `bodyLimit` on the two upload routes only |
 | Stored filename | slug of the client's name + extension from the **detected** type | `normalizeFilename` |
-| Storage | `bytea` in `support_ticket_attachments` (captured by the DB backup path) | migration `0103` |
+| Storage | `bytea` in `support_ticket_attachments` (captured by the DB backup path) | migration `0106` |
 
 Explicitly **not** offered: public share links, unattached file uploads (there is no route that
 stores a file without a ticket), multipart upload, and any antivirus claim — there is no scanner in

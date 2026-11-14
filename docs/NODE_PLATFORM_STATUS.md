@@ -952,7 +952,7 @@ sub-phase before the next one begins.
       plus a `+90 days` expiry without contacting any authority. Real issuance now lives in `src/ssl/acme-client.ts` (RFC 8555: JWS/ES256,
       single-use nonces, account/order/authorization/finalize/chain), `src/ssl/certificate.ts` (CSR + independent X.509 parsing) and
       `src/ssl/ssl-issuance-service.ts` (state machine), with the public HTTP-01 responder in `src/routes/acme-challenge.ts` and
-      `acme_accounts`/`acme_challenges` in migration `0104`. `ISSUED` requires a CA-issued certificate whose SANs cover every ordered name.
+      `acme_accounts`/`acme_challenges` in migration `0107`. `ISSUED` requires a CA-issued certificate whose SANs cover every ordered name.
       With no `ACME_DIRECTORY_URL` the route returns `503 SSL_ISSUANCE_NOT_CONFIGURED` and writes nothing. Tested against an independent
       loopback CA (`tests/integration/ssl-acme-issuance.test.ts`, 11 tests), cross-checked with `openssl x509`/`req`. **Never run against a
       public CA** — provider runtime is still CT-04, and certificate installation onto a hosting node is CT-01/CT-06.
