@@ -231,6 +231,26 @@ one.
 - **Migrations `0023`, `0024`, `0025`, `0041`** — prepared and tested only; held in
   `QUARANTINED_MIGRATIONS`, never run against production.
 
+### 2b-ii. Closed 2026-11-13 — SSL issuance was writing a certificate it never obtained
+
+`/ssl/certificates/:id/issue` and `/renew` used to set `status = 'ISSUED'` and `expires_at = now + 90
+days` without contacting any certificate authority: a customer could be shown a "valid" certificate
+whose bytes did not exist. Both now run a real RFC 8555 conversation
+(`src/ssl/acme-client.ts` → `src/ssl/ssl-issuance-service.ts`) and can only reach `ISSUED` when the CA
+returns a certificate whose SANs cover **every** ordered name; `expires_at` is read from that
+certificate's own `notAfter`. With no `ACME_DIRECTORY_URL` the route answers
+`503 SSL_ISSUANCE_NOT_CONFIGURED` and writes nothing, which is the honest state for a deployment that
+has not configured a CA.
+
+Proven against `tests/helpers/mock-acme-server.ts` — an independent server-half implementation that
+verifies JWS signatures, enforces single-use nonces and `kid`-vs-`jwk`, and issues genuine X.509 —
+then cross-checked with `node:crypto`'s `X509Certificate` **and** `openssl x509` / `openssl req -text`.
+That cross-check earned its keep: production `buildCsr` was omitting the
+`Extensions ::= SEQUENCE OF Extension` wrapper, so OpenSSL reported the CSR's self-signature as OK and
+silently dropped the SANs — a request that carried no names at all. 11 integration tests.
+**Not provider-certified:** no public CA was reachable here, so CT-04 (real directory URL, publicly
+reachable HTTP-01, a domain that resolves) is still what converts this row.
+
 ### 2c. Open verification/staging items
 
 - Vultr `console` capability backfill on stored server/product rows (runbook written, not executed).
