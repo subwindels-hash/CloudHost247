@@ -44,7 +44,7 @@
       "title": "Customer application API",
       "summary": "This document is the API contract for the Phase 4 \"Customer App\" layer: self-service customer account management, passive/informational service and domain records, and a basic support ticket system, p",
       "source": "docs/API_CUSTOMER_APP.md",
-      "bytes": 15327
+      "bytes": 18446
     },
     {
       "slug": "domain-services-architecture",
