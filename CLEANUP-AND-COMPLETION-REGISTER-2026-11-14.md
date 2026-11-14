@@ -96,6 +96,43 @@ runners, and an operator who cannot tell which module owns an order.
   `docs/UNFINISHED-BUILD-CODE-NAME-LIST.md`, `docs/UNFINISHED-MODULES.md` — wording updated from
   "superseded, left in the tree" to "removed".
 
+### 2.4 Inactive earlier email build (12 files)
+
+`modules/servers/cloudhost247_email/` was documented as *"an earlier, INACTIVE build"* superseded
+by `cloudhost247_email_hosting`. Two email provisioning modules for one product line means two
+schemas, two webhook endpoints and an ambiguous owner — the same defect as the SMM prototype.
+
+Removed with its mock suite (`tests/cloudhost247_email/`, 71 checks). Every reference was updated:
+
+| Artefact | Change |
+|---|---|
+| `RELEASE-MANIFEST.json` | `whmcsModules` now lists `modules/servers/cloudhost247_email_hosting` |
+| `modules/addons/cloudhost247_integrations/lib/Registry/ProviderCatalog.php` | Microsoft Graph `used_by` repointed to `cloudhost247_email_hosting` |
+| `scripts/release-candidate-check.sh` + `.github/workflows/independent-foundation.yml` | deleted suite removed from both gates (a gate referencing a missing file fails `test_every_referenced_suite_actually_exists`) |
+| `tests/security/test_release_gate_static.py` | entry-file assertion removed; prose counts corrected |
+| `tests/security/test_security.py` | release-gate marker swapped to `tests/payments/run.php`; comment corrected |
+| `scripts/php-lint-targets.sh`, `scripts/php-wasm/shim.mjs`, `scripts/migrate-legacy-names-to-cloudhost247.sql` | stale references in comments corrected |
+| `README.md`, `docs/BRANDING-COMPATIBILITY.md`, `docs/UNFINISHED-MODULES.md` (B9), `docs/UNFINISHED-BUILD-CODE-NAME-LIST.md` (#9), `docs/UNFINISHED-BUILD-CODE-NAMES.md`, `docs/MICROSOFT-365-CSP-AUDIT.md`, `docs/GOOGLE-WORKSPACE-IMPLEMENTATION-REPORT.md` | current-state wording updated; dated changelog entries left as history |
+
+Data is untouched: any deployment that still carries `mod_cloudhost247_email_accounts` keeps it as
+inert history. Removing code never deletes rows.
+
+### 2.5 Superseded vendor module — resolved, **not** removed
+
+`modules/servers/Smtphosting/` was the other open decision. It **cannot** be removed: `smtp-hosting.php`
+queries live products with `where('p.servertype', 'Smtphosting')`, so deleting the module would break
+an active product line. Its six zero-byte files are **hash-locked as empty** in
+`docs/independent-rebuild/original-file-manifest.sha256` (the release gate runs
+`sha256sum --check`), so they cannot be filled either. Verified:
+
+```
+$ sha256sum --check --quiet docs/independent-rebuild/original-file-manifest.sha256   → exit 0
+```
+
+Resolution: the module stays untouched as third-party code, and the six stubs stay documented in
+inventory rows C1–C6, which is exactly what that policy requires. (An attempt to drop the three
+empty, unreferenced templates was reverted — they are part of the vendor baseline.)
+
 ---
 
 ## 3. Completed
@@ -139,7 +176,7 @@ failed with messages unrelated to the code under test.
 * `scripts/php-wasm/shim.mjs` now defaults `OPENSSL_CONF` to that file when the variable is unset;
   an explicit `OPENSSL_CONF` still wins.
 
-Result: **18/18 PHP suites green** (see §4.3), including the two that were red.
+Result: **every PHP suite green** (17 after the inactive email build was removed — see §4.3), including the two that were red.
 
 ### 3.3 Stale statements removed
 
@@ -176,13 +213,13 @@ The complete 309-file Vitest run (118 integration files, several at 60–90 s ea
 this 2-CPU host; it was sampled to **539 checks with zero failures** before being stopped. The
 suites that cover everything this change touched were run to completion above.
 
-### 4.3 PHP suites (WASM PHP 8.2) — 18/18 green
+### 4.3 PHP suites (WASM PHP 8.2) — 17/17 green
 
 ```
 green foundation · theme (# 60 assertions, 0 failed) · currency · smm · tools · ovh · rdp
 green integrations · modules (# 237 assertions, 0 failed) · builder · broker · marketing
 green cart_recovery · passkey (All passkey tests passed) · phoneservices (23/23)
-green customaffiliate (36/36) · cloudhost247_email (71/71) · payments
+green customaffiliate (36/36) · payments
 green website (# 313 assertions, 0 failed)
 SUITE FAILURES: 0
 ```
@@ -233,8 +270,7 @@ GET /ready                               200
 
 | Item | Why it stays |
 |---|---|
-| `modules/servers/Smtphosting/` (6 zero-byte vendor files) | Third-party ModulesGarden build. Filling vendor placeholders from this repository is forbidden by `docs/UNFINISHED-MODULES.md` §C; deleting a licensed vendor module is a procurement decision, not a cleanup. |
-| `modules/servers/cloudhost247_email/` | Earlier email build, marked INACTIVE — but it owns `mod_cloudhost247_email_accounts` and has a **71-check green suite**. Removing it is a data-lifecycle decision for the owner, not dead-code removal. Flagged in §6. |
+| `modules/servers/Smtphosting/` (6 zero-byte vendor files) | **Live.** `smtp-hosting.php` sells products with `servertype = 'Smtphosting'`, and the six empty files are hash-locked in `original-file-manifest.sha256`. Removing or filling either would break a product line or the vendor integrity baseline — see §2.5. |
 | `frontend/src/i18n/messages/drafts/{hi,sw}.ts` | Draft translations. `locales.ts` deliberately withholds a language until its catalogue is verified; these are the work-in-progress source, not dead code. |
 | `templates/cloudhost247_legacy/`, `templates/orderforms/` | Licensed WHMCS theme and order forms; the legacy `comingsoon.tpl` belongs to that theme, not to the removed route. |
 | `modules/addons/xtreme_currency_rates/`, `soyoustart*`, `RDP/` | Licence-gated vendor modules; excluded from enforcement and documented in §B of the unfinished register. |
@@ -255,9 +291,5 @@ them, and none was touched here:
 6. Browser binaries for the E2E ceremonies (the Playwright download host is unreachable here).
 7. Designation of the first `super_admin`.
 
-**Two decisions for the owner that this pass surfaced but did not take:**
-
-* `modules/servers/cloudhost247_email/` — keep the inactive build (and its 71-check suite) or remove
-  it together with `tests/cloudhost247_email/` and its table-ownership note?
-* `modules/servers/Smtphosting/` — retain the vendor module, or drop it (and its 6 zero-byte files)
-  from the deployable set?
+**Both decisions raised in the first pass are now closed** (§2.4, §2.5): the inactive email build
+was removed; the SMTP hosting vendor module stays, because it is live and hash-locked.

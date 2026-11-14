@@ -500,7 +500,7 @@ final class ProviderCatalog
                 'documentation' => 'https://learn.microsoft.com/graph/api/overview',
                 'credentials_url' => 'Entra admin center -> App registrations -> Certificates & secrets',
                 'scopes' => array('Organization.Read.All', 'User.ReadWrite.All', 'Directory.Read.All'),
-                'used_by' => array('modules/servers/cloudhost247_email'),
+                'used_by' => array('modules/servers/cloudhost247_email_hosting'),
                 'fields' => array(
                     array('key' => 'tenant_id', 'label' => 'Directory (tenant) ID', 'type' => 'text', 'storage' => 'option', 'required' => true),
                     array('key' => 'client_id', 'label' => 'Application (client) ID', 'type' => 'text', 'storage' => 'option', 'required' => true),

@@ -101,7 +101,6 @@ php -d display_errors=1 tests/cart_recovery/run.php
 php -d display_errors=1 tests/passkey/run.php
 php -d display_errors=1 tests/phoneservices/run.php
 php -d display_errors=1 tests/customaffiliate/run.php
-php -d display_errors=1 tests/cloudhost247_email/run.php
 php -d display_errors=1 tests/payments/run.php
 
 # --- Server agent (Node) -----------------------------------------------------------------------

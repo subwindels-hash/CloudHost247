@@ -34,9 +34,8 @@ const argv = process.argv.slice(2);
  * operation that needs one fails (`openssl_pkey_new()` returns false and
  * `openssl_pkey_export()` warns "Cannot get key from parameter 1"). Suites that
  * build a throwaway key for their own fixtures — tests/passkey builds a P-256
- * WebAuthn credential, tests/cloudhost247_email builds an RSA service-account
- * key — then fail with messages that have nothing to do with the code they are
- * testing. Default OPENSSL_CONF to the bundled config so the gate is runnable
+ * WebAuthn credential — then fail with messages that have nothing to do with the
+ * code they are testing. Default OPENSSL_CONF to the bundled config so the gate is runnable
  * on a host with no PHP toolchain; an explicit OPENSSL_CONF still wins.
  */
 const defaultOpensslConf = fileURLToPath(new URL('./openssl.cnf', import.meta.url));

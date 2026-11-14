@@ -7,9 +7,10 @@ The deployed product configuration, permissions and any outside CSP provider are
 
 ## Existing implementation
 
-* `modules/servers/cloudhost247_email_hosting/` is the newer WHMCS server module;
-  `modules/servers/cloudhost247_email/` is another, older module. Do not add a third or
-  migrate existing products without a deployed-data inventory.
+* `modules/servers/cloudhost247_email_hosting/` is the WHMCS server module. The older
+  `modules/servers/cloudhost247_email/` module this audit also examined was **removed on
+  2026-11-14** (inactive and superseded); one email provisioning module remains. Do not add a
+  second, and do not migrate existing products without a deployed-data inventory.
 * `lib/Providers/Microsoft365Provider.php` authenticates to **Microsoft Graph** with
   client credentials. It can read the configured tenant's subscribed SKUs and perform
   individual user and licence operations. These are not CSP purchases, a partner product

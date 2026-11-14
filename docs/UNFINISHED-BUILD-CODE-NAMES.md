@@ -272,7 +272,7 @@ reachable HTTP-01, a domain that resolves) is still what converts this row.
 | `ovh_cart` order form | `templates/orderforms/ovh_cart/` | vendor; replacement needed |
 | Vendor crons `getServer.php`, `getIpStatus.php`, `priceSync.php`, `emailSend.php` | `crons/` | coupled to WGS classes; hash-locked replacements shipped but vendor files remain |
 | `Smtphosting` (ModulesGarden v3) | `modules/servers/Smtphosting/` | third-party, inactive, superseded; 6 zero-byte placeholders |
-| `cloudhost247_email` | `modules/servers/cloudhost247_email/` | earlier build — INACTIVE |
+| `cloudhost247_email` | ~~`modules/servers/cloudhost247_email/`~~ | **REMOVED 2026-11-14** — inactive earlier build |
 | `smmaddon` | `modules/addons/smmaddon/` | prototype, superseded by `cloudhost247_smm` |
 | `smmprovisioning` | `modules/servers/smmprovisioning/` | prototype, superseded by `cloudhost247_smm` |
 

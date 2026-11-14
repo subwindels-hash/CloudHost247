@@ -65,8 +65,6 @@ the history of the repository reorganization.
 │       ├── cloudhost247_email_hosting/  **CloudHost247 Email Hosting** (M365 / Google Workspace /
 │       │                                Professional Email; renamed off the vendor module id —
 │       │                                run scripts/migrate-legacy-names-to-cloudhost247.sql)
-│       ├── cloudhost247_email/        Earlier email provisioning build — INACTIVE, kept for
-│       │                                reference; owns mod_cloudhost247_email_accounts
 │       └── cloudhost247_smm/          CloudHost247 SMM marketplace provisioning (payment-gated, idempotent)
 ├── templates/
 │   ├── cloudhost247/                ← CloudHost247 independent theme (child of twenty-one)
@@ -111,7 +109,7 @@ the history of the repository reorganization.
 | Smtphosting v3 | server | `modules/servers/Smtphosting/` |
 | SoYouStart (dedicated) | server | `modules/servers/soyoustart/` |
 | SoYouStart VPS | server | `modules/servers/soyoustart_vps/` |
-| **CloudHost247 Email Hosting** | server | `modules/servers/cloudhost247_email_hosting/` (module id `cloudhost247_email_hosting`; `modules/servers/cloudhost247_email/` is an earlier, inactive build) |
+| **CloudHost247 Email Hosting** | server | `modules/servers/cloudhost247_email_hosting/` (module id `cloudhost247_email_hosting`) — the only email provisioning module; the earlier inactive build was removed |
 
 **Notes**
 - The duplicate `CloudHost247_tools` (capital C) module was removed in the v2.2.7

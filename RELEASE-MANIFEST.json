@@ -16,7 +16,7 @@
    "buildCheck": "tsc exit 0"
   },
   "whmcsModules": [
-   "modules/servers/cloudhost247_email*",
+   "modules/servers/cloudhost247_email_hosting",
    "modules/servers/phoneservices_*",
    "modules/addons/phoneservices",
    "modules/servers/* (RDP, Smtphosting, lteproxy, soyoustart)"

@@ -182,10 +182,12 @@ The *Deploy order and rollback* section at the end of that script records the
 exact sequence and the reverse statements. Historical `tblmodulelog` rows keep the identifier they logged
 under — an audit trail is never rewritten.
 
-`modules/servers/cloudhost247_email/` is a **different, inactive** module that
-owns `mod_cloudhost247_email_accounts`; it was deliberately not touched, and
-the new table prefix `mod_cloudhost247_email_hosting_*` was chosen so the two
-can never collide.
+The earlier inactive email build that used to live in
+`modules/servers/cloudhost247_email/` (owner of `mod_cloudhost247_email_accounts`)
+was **removed on 2026-11-14**: two email provisioning modules in one tree means
+two schemas and an ambiguous owner for a product. The new table prefix
+`mod_cloudhost247_email_hosting_*` remains, so a database that still carries the
+old tables can keep them as inert history without any collision.
 
 ## Retained identifiers
 
@@ -314,9 +316,8 @@ blocks and banners.
 - `docs/independent-rebuild/BRAND-RENAME.md`, `docs/pre-restructuring-audit.md`
   and `docs/RESTRUCTURING.md` are rename/audit records: they describe what the
   old names were. Their current-state statements were updated in this pass.
-- `tests/security/test_security.py` and `tests/cloudhost247_email/run.php`
-  assert that the legacy identifiers are **gone**; a negative assertion has to
-  name the thing it forbids.
+- `tests/security/test_security.py` asserts that the legacy identifiers are
+  **gone**; a negative assertion has to name the thing it forbids.
 
 The same script also settles the footer question in §2 of the previous pass:
 `templates/cloudhost247_legacy/includes/blocks/copyright.tpl` renders a stored
