@@ -162,6 +162,11 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0101_create_fraud_sentinel.sql',
     // AI trust is renumbered to avoid a duplicate schema_migrations primary key.
     '0102_ai_source_trust.sql',
+    // Community Forum: the forum's own tables, the twelve seeded categories, and the knowledge-base
+    // vocabulary that lets a verified answer be published into the corpus.
+    '0103_create_community.sql',
+    '0104_seed_community_configuration.sql',
+    '0105_community_ai_knowledge.sql',
   ];
 
   it('finds the committed migration files in order', () => {
