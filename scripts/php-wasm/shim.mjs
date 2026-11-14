@@ -21,11 +21,28 @@
  * `match` expressions before it reaches a server running 7.4.
  */
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { loadNodeRuntime, useHostFilesystem } from '@php-wasm/node';
 import { PHP, FileLockManagerInMemory } from '@php-wasm/universal';
 
 const version = process.env.PHP_WASM_VERSION || '8.2';
 const argv = process.argv.slice(2);
+
+/**
+ * The wasm runtime has an OpenSSL extension but no `openssl.cnf`, so any key
+ * operation that needs one fails (`openssl_pkey_new()` returns false and
+ * `openssl_pkey_export()` warns "Cannot get key from parameter 1"). Suites that
+ * build a throwaway key for their own fixtures — tests/passkey builds a P-256
+ * WebAuthn credential, tests/cloudhost247_email builds an RSA service-account
+ * key — then fail with messages that have nothing to do with the code they are
+ * testing. Default OPENSSL_CONF to the bundled config so the gate is runnable
+ * on a host with no PHP toolchain; an explicit OPENSSL_CONF still wins.
+ */
+const defaultOpensslConf = fileURLToPath(new URL('./openssl.cnf', import.meta.url));
+if (!process.env.OPENSSL_CONF && existsSync(defaultOpensslConf)) {
+	process.env.OPENSSL_CONF = defaultOpensslConf;
+}
 
 // Environment is handed to the runtime at load time, as the stock CLI does.
 const { TMPDIR, ...env } = process.env;

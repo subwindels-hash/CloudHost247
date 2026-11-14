@@ -66,10 +66,11 @@ interface MeResponse {
  * (see App.tsx), so a signed-out visitor never reaches this component at all — they're redirected
  * to /login first.
  *
- * Phase 4: services, domains, and support tickets are now real, API-backed summaries (see
- * docs/API_CUSTOMER_APP.md) rather than placeholders. Billing/invoices remain an honest "not
- * available yet" notice — this platform has no payment/billing system, and Phase 4 explicitly
- * does not add one (see the non-goals list in docs/API_CUSTOMER_APP.md).
+ * Services, domains and support tickets are real, API-backed summaries (see
+ * docs/API_CUSTOMER_APP.md) rather than placeholders. Billing and invoices are real too: the
+ * platform serves /api/v1/invoices and /api/v1/billing/ledger (src/routes/billing.ts), so this page
+ * links out to /billing instead of claiming a billing system does not exist. The card below is a
+ * pointer, not a notice.
  */
 export default function DashboardPage() {
   usePageMeta('Dashboard', 'Your CloudHost247 account overview.');

@@ -33,15 +33,17 @@ const DocsIndexPage = lazy(() => import('./pages/marketing/DocsPages').then((m) 
 const DocPage = lazy(() => import('./pages/marketing/DocsPages').then((m) => ({ default: m.DocPage })));
 const SitemapPage = lazy(() => import('./pages/marketing/SitemapPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
-// Superseded by content pages under pages/marketing/ (see shared/site/content/products.json):
-// /hosting, /hosting/cpanel, /hosting/vps, /hosting/dedicated and /hosting/application-hosting now
-// render the marketing shell plus the same live ProductPlansSection. The modules are kept because
-// their test suites pin the catalogue honesty contract; nothing routes to them.
+// /hosting, /hosting/cpanel, /hosting/vps, /hosting/dedicated and /hosting/application-hosting are
+// content pages under pages/marketing/ (see shared/site/content/products.json); each renders the
+// marketing shell plus the same live ProductPlansSection. The five superseded standalone modules
+// that used to duplicate them were removed rather than left unrouted.
 const DomainsMarketingPage = lazy(() => import('./pages/DomainsMarketingPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const FaqPage = lazy(() => import('./pages/FaqPage'));
-// Superseded by pages/marketing/LegalPages.tsx, which renders the real extracted policies.
-// The module is kept because its own test suite pins the previous behaviour; nothing routes to it.
+// /legal and every /legal/* document are rendered by pages/marketing/LegalPages.tsx, which reads
+// the real policies extracted from the live site (frontend/src/content/legal.generated.json).
+// The earlier placeholder modules (pages/LegalIndexPage.tsx, pages/LegalPage.tsx,
+// pages/PrivacyPolicyPage.tsx) were superseded and have been removed.
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));

@@ -32,7 +32,7 @@ Module-specific README/INSTALL files live with their modules:
 - `modules/addons/tools_center/` (README.md, INSTALL.md, API.md)
 - `modules/addons/cloudhost247_domain_lookup/README.md` (includes the rename provenance note)
 - `modules/addons/digitalproducts/README.md`
-- `modules/addons/smmaddon/README.md`
+- `modules/addons/cloudhost247_smm/README.md`
 - `modules/addons/dnschecker/README.txt`
 - `modules/servers/cloudhost247_lteproxy/README.md`
 - `templates/cloudhost247_legacy/README.md` (original theme note)

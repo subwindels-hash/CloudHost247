@@ -145,8 +145,8 @@ foreach (array('dashboard', 'login', 'cart') as $spaPath) {
     $tests['gated app route excluded: /' . $spaPath] = !CrawlPolicy::isPublic('/' . $spaPath);
 }
 foreach (array('cart.php', 'clientarea.php', 'register.php', 'pwreset.php', 'logout.php', 'submitticket.php',
-    'supporttickets.php', 'viewticket.php', 'site-search.php', 'service-error.php', 'tables.php',
-    'tools/api.php', 'cloudhost247-sample.php') as $phpPath) {
+    'supporttickets.php', 'viewticket.php', 'site-search.php', 'service-error.php',
+    'tools/api.php') as $phpPath) {
     $tests['private PHP route excluded: ' . $phpPath] = !CrawlPolicy::isPublic($phpPath);
 }
 foreach (array('admin/', 'modules/', 'crons/', 'errors/', 'tools/data/', 'tools/admin/') as $directory) {

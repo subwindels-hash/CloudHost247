@@ -15,7 +15,6 @@ User-agent: *
 Disallow: /account
 Disallow: /admin
 Disallow: /admin/
-Disallow: /all-element-cloudhost247.php
 Disallow: /api/
 Disallow: /billing
 Disallow: /cart
@@ -23,13 +22,10 @@ Disallow: /cart.php
 Disallow: /checkout
 Disallow: /clientarea.php
 Disallow: /cloudhost247-marketing-track.php
-Disallow: /cloudhost247-sample.php
-Disallow: /cloudhost247-vps-sample.php
 Disallow: /crons/
 Disallow: /dashboard
 Disallow: /errors/
 Disallow: /forgot-password
-Disallow: /future-element.php
 Disallow: /inbox
 Disallow: /invoices
 Disallow: /login
@@ -48,7 +44,6 @@ Disallow: /site-search.php
 Disallow: /submitticket.php
 Disallow: /support
 Disallow: /supporttickets.php
-Disallow: /tables.php
 Disallow: /tools/admin/
 Disallow: /tools/api.php
 Disallow: /tools/data/

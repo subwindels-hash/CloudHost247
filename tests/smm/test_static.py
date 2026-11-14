@@ -380,9 +380,13 @@ class TestProvisioning(unittest.TestCase):
         hooks = re.findall(r"add_hook\('(\w+)'", src)
         self.assertEqual(hooks, ["AfterCronJob"], "unexpected page-render hooks: %s" % hooks)
 
-    def test_superseded_legacy_module_untouched(self):
-        # the old basic module must still exist (superseded, not replaced)
-        self.assertTrue(os.path.isfile(os.path.join(ROOT, "modules", "addons", "smmaddon", "smmaddon.php")))
+    def test_superseded_legacy_prototype_is_gone(self):
+        # The single-provider prototype (smmaddon + smmprovisioning) was removed rather than
+        # shipped alongside this module: two SMM implementations in one tree means two schemas,
+        # two cron runners and an operator who cannot tell which one owns an order. This module
+        # is the only SMM implementation; the assertion is inverted so a revert is caught.
+        self.assertFalse(os.path.exists(os.path.join(ROOT, "modules", "addons", "smmaddon")))
+        self.assertFalse(os.path.exists(os.path.join(ROOT, "modules", "servers", "smmprovisioning")))
 
 
 class TestBehaviorSuite(unittest.TestCase):

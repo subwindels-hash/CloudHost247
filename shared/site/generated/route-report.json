@@ -8,7 +8,7 @@
   "phpLinks": 243,
   "spaRoutesKnown": 185,
   "toolPathsKnown": 82,
-  "phpPagesKnown": 92,
+  "phpPagesKnown": 86,
   "legalDocuments": 17,
   "toolsCategories": 9,
   "marketingPages": 55,
@@ -20,7 +20,7 @@
   "assetsCopied": 603,
   "phpPagesEnriched": 43,
   "phpSitemapPaths": 99,
-  "phpCrawlExclusions": 23,
+  "phpCrawlExclusions": 18,
   "toolsCategoryToolCounts": {
     "dns-domains": 20,
     "email": 9,

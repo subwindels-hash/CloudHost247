@@ -23,7 +23,7 @@
     "staging-functional": "licensed WHMCS staging installation"
   },
   "totals": {
-    "root_php_pages": 92,
+    "root_php_pages": 86,
     "registered_public_pages": 75,
     "navigation_destinations": 126,
     "footer_destinations": 120,
@@ -34,7 +34,7 @@
     "distinct_hero_scenes": 49,
     "pages_by_route_owner": {
       "cloudhost247-theme": 75,
-      "internal": 17,
+      "internal": 11,
       "tools-front-controller": 286,
       "whmcs-core": 8
     }
@@ -107,36 +107,6 @@
       "footer_placement": "Legal",
       "footer_location": "Legal",
       "reachable": true
-    },
-    {
-      "php_page": "all-element-cloudhost247.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
     },
     {
       "php_page": "api-hosting.php",
@@ -272,7 +242,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Blog",
-        "description": "Platform releases and product notes from CloudHost247 \u2014 what shipped, what it replaces, and what it deliberately does not do yet."
+        "description": "Platform releases and product notes from CloudHost247 — what shipped, what it replaces, and what it deliberately does not do yet."
       },
       "hero_artwork": {
         "svg": "blog/insights.svg",
@@ -392,7 +362,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Cloud Hosting Plans",
-        "description": "Compare CloudHost247 hosting: web, business, WordPress, reseller, Windows and email hosting \u2014 with free SSL, backups, mailboxes, databases and 24/7 support."
+        "description": "Compare CloudHost247 hosting: web, business, WordPress, reseller, Windows and email hosting — with free SSL, backups, mailboxes, databases and 24/7 support."
       },
       "hero_artwork": {
         "svg": "cloud/cloud-hosting.svg",
@@ -469,36 +439,6 @@
       "reachable": false
     },
     {
-      "php_page": "cloudhost247-sample.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
-    },
-    {
       "php_page": "cloudhost247-sitemap.php",
       "path": "",
       "canonical_url": "",
@@ -527,66 +467,6 @@
       "footer_placement": "Resources",
       "footer_location": "Resources",
       "reachable": true
-    },
-    {
-      "php_page": "cloudhost247-vps-sample.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
-    },
-    {
-      "php_page": "comingsoon.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
     },
     {
       "php_page": "cookie-policy.php",
@@ -1367,36 +1247,6 @@
       "footer_placement": "Cloud & Servers",
       "footer_location": "Cloud & Servers",
       "reachable": true
-    },
-    {
-      "php_page": "future-element.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
     },
     {
       "php_page": "game-servers.php",
@@ -2477,36 +2327,6 @@
       "footer_placement": "Products",
       "footer_location": "Products",
       "reachable": true
-    },
-    {
-      "php_page": "tables.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
     },
     {
       "php_page": "terms-of-service.php",
@@ -5852,7 +5672,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Name Checker",
-        "description": "Check a name\u2019s format, then ask the registry whether .com, .net and .org domain records exist. Social accounts are not checked."
+        "description": "Check a name’s format, then ask the registry whether .com, .net and .org domain records exist. Social accounts are not checked."
       },
       "hero_artwork": {
         "svg": "",
@@ -7882,8 +7702,8 @@
       "php_page": "tools/ip/domain-to-ip.php",
       "path": "/tools/ip/domain-to-ip",
       "canonical_url": "/tools/domain-to-ip",
-      "title": "Domain \u2192 IP",
-      "page_title": "Domain \u2192 IP",
+      "title": "Domain → IP",
+      "page_title": "Domain → IP",
       "category": "Tool",
       "route_owner": "tools-front-controller",
       "status": "redirect alias",
@@ -7891,7 +7711,7 @@
       "template": "cloudhost247-tools",
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
-        "title": "Domain \u2192 IP",
+        "title": "Domain → IP",
         "description": "Resolve a hostname to IPv4/IPv6 with the full CNAME chain."
       },
       "hero_artwork": {
@@ -7912,8 +7732,8 @@
       "php_page": "tools/ip/ip-to-hostname.php",
       "path": "/tools/ip/ip-to-hostname",
       "canonical_url": "/tools/ip-to-hostname",
-      "title": "IP \u2192 Hostname",
-      "page_title": "IP \u2192 Hostname",
+      "title": "IP → Hostname",
+      "page_title": "IP → Hostname",
       "category": "Tool",
       "route_owner": "tools-front-controller",
       "status": "redirect alias",
@@ -7921,7 +7741,7 @@
       "template": "cloudhost247-tools",
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
-        "title": "IP \u2192 Hostname",
+        "title": "IP → Hostname",
         "description": "Reverse DNS for an address, with FCRDNS confirmation."
       },
       "hero_artwork": {
@@ -7942,8 +7762,8 @@
       "php_page": "tools/ip-to-domain.php",
       "path": "/tools/ip-to-domain",
       "canonical_url": "/tools/ip-to-hostname",
-      "title": "IP \u2192 Hostname",
-      "page_title": "IP \u2192 Hostname",
+      "title": "IP → Hostname",
+      "page_title": "IP → Hostname",
       "category": "Tool",
       "route_owner": "tools-front-controller",
       "status": "redirect alias",
@@ -7951,7 +7771,7 @@
       "template": "cloudhost247-tools",
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
-        "title": "IP \u2192 Hostname",
+        "title": "IP → Hostname",
         "description": "Reverse DNS for an address, with FCRDNS confirmation."
       },
       "hero_artwork": {
@@ -8042,7 +7862,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "IP Converters",
-        "description": "Decimal \u2194 IP, IPv4 \u2194 IPv6, IPv6 compression/expansion, CIDR \u2194 range."
+        "description": "Decimal ↔ IP, IPv4 ↔ IPv6, IPv6 compression/expansion, CIDR ↔ range."
       },
       "hero_artwork": {
         "svg": "",
@@ -8072,7 +7892,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "IP Converters",
-        "description": "Decimal \u2194 IP, IPv4 \u2194 IPv6, IPv6 compression/expansion, CIDR \u2194 range."
+        "description": "Decimal ↔ IP, IPv4 ↔ IPv6, IPv6 compression/expansion, CIDR ↔ range."
       },
       "hero_artwork": {
         "svg": "",
@@ -8912,7 +8732,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Encoding Tools",
-        "description": "Base64, MD5, binary \u2194 text, ROT13 and Morse code."
+        "description": "Base64, MD5, binary ↔ text, ROT13 and Morse code."
       },
       "hero_artwork": {
         "svg": "",
@@ -8942,7 +8762,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Encoding Tools",
-        "description": "Base64, MD5, binary \u2194 text, ROT13 and Morse code."
+        "description": "Base64, MD5, binary ↔ text, ROT13 and Morse code."
       },
       "hero_artwork": {
         "svg": "",
@@ -10432,8 +10252,8 @@
       "php_page": "tools/image-ocr.php",
       "path": "/tools/image-ocr",
       "canonical_url": "/tools/image-ocr",
-      "title": "Image \u2192 Text (OCR)",
-      "page_title": "Image \u2192 Text (OCR)",
+      "title": "Image → Text (OCR)",
+      "page_title": "Image → Text (OCR)",
       "category": "Tool",
       "route_owner": "tools-front-controller",
       "status": "platform signpost route",
@@ -10441,7 +10261,7 @@
       "template": "cloudhost247-tools",
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
-        "title": "Image \u2192 Text (OCR)",
+        "title": "Image → Text (OCR)",
         "description": "Extract text from an image using a configured OCR provider."
       },
       "hero_artwork": {
@@ -10462,8 +10282,8 @@
       "php_page": "tools/productivity/image-ocr.php",
       "path": "/tools/productivity/image-ocr",
       "canonical_url": "/tools/image-ocr",
-      "title": "Image \u2192 Text (OCR)",
-      "page_title": "Image \u2192 Text (OCR)",
+      "title": "Image → Text (OCR)",
+      "page_title": "Image → Text (OCR)",
       "category": "Tool",
       "route_owner": "tools-front-controller",
       "status": "redirect alias",
@@ -10471,7 +10291,7 @@
       "template": "cloudhost247-tools",
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
-        "title": "Image \u2192 Text (OCR)",
+        "title": "Image → Text (OCR)",
         "description": "Extract text from an image using a configured OCR provider."
       },
       "hero_artwork": {
@@ -10952,7 +10772,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Minecraft Color Codes",
-        "description": "Minecraft colour and format code reference, with &-to-\u00a7 conversion."
+        "description": "Minecraft colour and format code reference, with &-to-§ conversion."
       },
       "hero_artwork": {
         "svg": "",
@@ -11072,7 +10892,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Email Verifier",
-        "description": "Check an address\u2019s syntax and whether its domain accepts mail, using DNS only."
+        "description": "Check an address’s syntax and whether its domain accepts mail, using DNS only."
       },
       "hero_artwork": {
         "svg": "",
@@ -11342,7 +11162,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Shipping Label Generator",
-        "description": "Make carrier-neutral 4 \u00d7 6 in and A6 parcel labels with a reference or SSCC barcode."
+        "description": "Make carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode."
       },
       "hero_artwork": {
         "svg": "",
@@ -11372,7 +11192,7 @@
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "Shipping Label Generator",
-        "description": "Make carrier-neutral 4 \u00d7 6 in and A6 parcel labels with a reference or SSCC barcode."
+        "description": "Make carrier-neutral 4 × 6 in and A6 parcel labels with a reference or SSCC barcode."
       },
       "hero_artwork": {
         "svg": "",
