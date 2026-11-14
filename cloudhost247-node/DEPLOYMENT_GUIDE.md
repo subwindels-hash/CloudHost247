@@ -16,9 +16,16 @@ This guide provides step-by-step instructions for deploying the CloudHost247 Nod
 
 3. **SSL Certificate** installed for your domain
 
-## Generated Artifacts (2026-10-04)
+## Generated Artifacts
 
-- **Deployment ZIP:** `release/cloudhost247-cpanel-b54b047.zip` (2.3 MB; 1,138 files; 70 migrations)
+> **Regenerate before deploying.** The SHA/size/file counts below describe the historical
+> 2026-10-04 artifact only. Run `bash scripts/package-cpanel.sh` from `cloudhost247-node/` to
+> produce `release/cloudhost247-cpanel-<git-sha>.zip` for the current commit, and read the
+> `DEPLOY.txt` inside it: the contents of the extracted folder must be moved into `<APP_ROOT>`.
+> The authoritative current procedure is `docs/CPANEL_DEPLOYMENT.md` (app-root copy) and the
+> repository-root `docs/CPANEL_DEPLOYMENT.md`.
+
+- **Historical Deployment ZIP:** `release/cloudhost247-cpanel-b54b047.zip` (2.3 MB; 1,138 files; 70 migrations)
   - Includes compiled server/frontend, production package metadata, migrations, manifests, and `.env.example`.
   - SHA-256: `d2321760556f36cc68e05c9f7dac1691db248b08003fc5820ea1fb6384888236`.
   - The archive passed `unzip -t`; it does **not** contain `.env`, real credentials, or `node_modules`.

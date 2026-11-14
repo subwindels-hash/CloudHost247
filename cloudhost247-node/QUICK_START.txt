@@ -1,13 +1,14 @@
 CloudHost247 Node Platform — Deployment Quick Start
-Generated: 2026-10-04
+Regenerate the package for the current commit before every deploy.
 
 DEPLOYMENT ZIP
-  File:   cloudhost247-node/release/cloudhost247-cpanel-b54b047.zip
-  Size:   2.3 MB
-  SHA-256: d2321760556f36cc68e05c9f7dac1691db248b08003fc5820ea1fb6384888236
-  Includes: pre-built server + frontend, 70 migrations, manifests, .env.example
+  Generate: cd cloudhost247-node && bash scripts/package-cpanel.sh
+  Output:   cloudhost247-node/release/cloudhost247-cpanel-<git-sha>.zip
+  Includes: pre-built server + frontend, migrations, manifests, .env.example,
+            docs/CPANEL_DEPLOYMENT.md, DEPLOY.txt
   Excludes: .env, real secrets, node_modules
-  Note: ZIP and .env are git-ignored local outputs; neither is included in the PR.
+  Note: The zip is a generated local output. Do not commit a stale SHA/size here; read DEPLOY.txt
+        inside the freshly built zip for the extraction warning.
 
 FULL ENVIRONMENT FILE
   File: cloudhost247-node/.env
@@ -38,7 +39,7 @@ DEPLOY
   8. Schedule the worker as a one-shot cron job using the actual cPanel paths:
      * * * * * cd <APP_ROOT> && <NODE_PATH> dist/src/worker/main.js --once
 
-VERIFICATION RUN FOR THIS ARTIFACT
+VERIFICATION RUN (re-run these for each newly generated artifact)
   - bash scripts/package-cpanel.sh: success (production server + frontend build)
   - npm test: success (129 files / 1,158 tests)
   - npm run env:check: success (shape validation only; not a DB connectivity test)
