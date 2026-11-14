@@ -105,3 +105,26 @@ describe('File Converter advanced controls', () => {
     expect(screen.getByRole('button', { name: 'Convert files' })).toHaveProperty('disabled', true);
   });
 });
+
+describe('File Converter cross-promo', () => {
+  it('cross-promotes the File Tools workspace with the same inline banner as the Tools Center', () => {
+    renderConverter();
+    const promo = screen.getByRole('region', { name: 'File tools workspace' });
+    expect(promo.className).toBe('fc-inline-promo');
+    expect(promo.querySelector('.fc-inline-promo__label')?.textContent).toBe('FILE TOOLS · BROWSER-LOCAL');
+    expect(promo.querySelector('h2')?.textContent).toBe('More than converting');
+
+    const link = screen.getByRole('link', { name: /Explore File Tools/ });
+    expect(promo.contains(link)).toBe(true);
+    expect(link.getAttribute('href')).toBe('/tools/file-tools');
+    expect(link.querySelector('[aria-hidden="true"]')?.textContent).toBe('↗');
+  });
+
+  it('keeps conversion as the primary action, with the banner below the workspace', () => {
+    renderConverter();
+    const workspace = screen.getByRole('heading', { level: 2, name: 'Start with a file' }).closest('section')!;
+    const promo = screen.getByRole('region', { name: 'File tools workspace' });
+    expect(workspace.contains(promo)).toBe(false);
+    expect(workspace.compareDocumentPosition(promo) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});

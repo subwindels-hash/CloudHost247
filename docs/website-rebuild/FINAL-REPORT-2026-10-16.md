@@ -284,8 +284,8 @@ where the tree says `356` — a number no check could contradict. It now can.
   "routes_platform_entry_point": 8,
   "defect_classes_empty": 6,
   "tools_served_projection": 286,
-  "registry_links": 256,
-  "registry_spa_links": 245,
+  "registry_links": 258,
+  "registry_spa_links": 247,
   "registry_php_links": 243,
   "mega_menus": 7,
   "footer_columns": 8

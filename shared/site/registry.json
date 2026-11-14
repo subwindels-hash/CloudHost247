@@ -1047,6 +1047,14 @@
               }
             },
             {
+              "label": "Community Forum",
+              "icon": "users",
+              "desc": "Ask other CloudHost247 users and staff, and search answers that already worked.",
+              "href": {
+                "spa": "/community"
+              }
+            },
+            {
               "label": "Knowledge Base",
               "icon": "book",
               "desc": "Articles maintained by our support team.",
@@ -1945,6 +1953,12 @@
           "href": {
             "spa": "/help",
             "php": "help-center.php"
+          }
+        },
+        {
+          "label": "Community Forum",
+          "href": {
+            "spa": "/community"
           }
         },
         {

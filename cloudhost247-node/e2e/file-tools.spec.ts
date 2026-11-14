@@ -274,3 +274,28 @@ test.describe('File Tools browser-local workflows', () => {
     expect(metadata.pages).toBeGreaterThan(1);
   });
 });
+
+test.describe('File Converter cross-promo', () => {
+  test('offers the File Tools workspace with the same inline banner as the Tools Center', async ({ page }) => {
+    await page.goto('/tools');
+    const centerPromo = page.getByRole('region', { name: 'File tools workspace' });
+    await expect(centerPromo.getByRole('link', { name: /Explore File Tools/ })).toHaveAttribute('href', '/tools/file-tools');
+
+    await page.goto('/tools/file-converter');
+    const promo = page.getByRole('region', { name: 'File tools workspace' });
+    await expect(promo).toHaveClass(/fc-inline-promo/);
+    await expect(promo.locator('.fc-inline-promo__label')).toHaveText('FILE TOOLS · BROWSER-LOCAL');
+    await expect(promo.getByRole('heading', { name: 'More than converting' })).toBeVisible();
+    await expect(promo.getByRole('link', { name: /Explore File Tools/ })).toHaveAttribute('href', '/tools/file-tools');
+
+    if ((await page.viewportSize())!.width < 620) {
+      const promoBox = (await promo.boundingBox())!;
+      const linkBox = (await promo.getByRole('link', { name: /Explore File Tools/ }).boundingBox())!;
+      expect(linkBox.width).toBeGreaterThan(promoBox.width * 0.85);
+    }
+
+    await promo.getByRole('link', { name: /Explore File Tools/ }).click();
+    await expect(page).toHaveURL(/\/tools\/file-tools$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'File Tools' })).toBeVisible();
+  });
+});
