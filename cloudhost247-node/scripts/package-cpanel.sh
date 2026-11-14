@@ -26,7 +26,7 @@ npm run build
 
 echo "==> Staging runtime files"
 mkdir -p "${STAGE}/database" "${STAGE}/docs"
-cp -R dist public manifests "${STAGE}/"
+cp -R dist public manifests config "${STAGE}/"
 cp -R database/migrations "${STAGE}/database/"
 cp server.js package.json package-lock.json .env.example "${STAGE}/"
 # The startup file's error messages point at docs/CPANEL_DEPLOYMENT.md — ship the app-root copy so

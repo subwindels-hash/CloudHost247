@@ -175,7 +175,28 @@ function loadConfig(options = {}) {
   // Strip empty strings so `JWT_SECRET=` in .env reads as "unset", not "set to empty".
   const input = {};
   for (const [key, value] of Object.entries(merged)) {
-    if (value !== '' && value !== undefined) input[key] = value;
+    if (value !== '' && value !== undefined && !(typeof value === 'string' && value.trim() === '')) {
+      input[key] = value;
+    }
+  }
+
+  if (typeof input.PORT === 'string' && !/^\d+$/.test(input.PORT.trim())) {
+    const portVal = input.PORT.trim();
+    if (/^(\/|unix:|\\\\\.\\pipe\\)/i.test(portVal)) {
+      if (!input.SOCKET_PATH) input.SOCKET_PATH = portVal.replace(/^unix:/i, '');
+      delete input.PORT;
+    } else if (portVal.toLowerCase() === 'passenger') {
+      delete input.PORT;
+    }
+  }
+
+  if (typeof input.APP_URL === 'string' && !input.APP_URL.includes('://')) {
+    const urlVal = input.APP_URL.trim();
+    if (/^(localhost|127\.0\.0\.1)(:\d+)?(\/.*)?$/i.test(urlVal)) {
+      input.APP_URL = `http://${urlVal}`;
+    } else if (/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(:\d+)?(\/.*)?$/i.test(urlVal)) {
+      input.APP_URL = `https://${urlVal}`;
+    }
   }
 
   const parsed = envSchema.parse(input);

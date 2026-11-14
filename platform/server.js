@@ -23,7 +23,7 @@ const { loadConfig } = require('./src/core/config');
 const { createLogger } = require('./src/core/logger');
 const { buildApp } = require('./src/app');
 
-const MIN_NODE = [22, 20, 0];
+const MIN_NODE = [20, 9, 0];
 
 function checkNodeVersion() {
   const [major, minor, patch] = process.versions.node.split('.').map(Number);
@@ -31,11 +31,10 @@ function checkNodeVersion() {
   const ok = current[0] > MIN_NODE[0]
     || (current[0] === MIN_NODE[0] && (current[1] > MIN_NODE[1]
       || (current[1] === MIN_NODE[1] && current[2] >= MIN_NODE[2])));
-  const tooNew = current[0] >= 25;
 
-  if (!ok || tooNew) {
+  if (!ok) {
     process.stderr.write(
-      `[server] FATAL: Node.js ${MIN_NODE.join('.')} or newer (but below 25) is required.\n`
+      `[server] FATAL: Node.js ${MIN_NODE.join('.')} or newer is required.\n`
       + `[server] Current version: ${process.versions.node}\n`
       + `[server] If using cPanel, update the Node.js version in Setup Node.js App.\n`
       + `[server] See: docs/CPANEL_DEPLOYMENT.md\n`
@@ -95,6 +94,14 @@ async function main() {
   server.keepAliveTimeout = 65_000;
   server.headersTimeout = 70_000;
   server.requestTimeout = 120_000;
+
+  if (config.SOCKET_PATH) {
+    try {
+      if (fs.existsSync(config.SOCKET_PATH)) fs.unlinkSync(config.SOCKET_PATH);
+    } catch {
+      // Ignore if Passenger owns or just replaced the socket path.
+    }
+  }
 
   const listenOptions = config.SOCKET_PATH
     ? { path: config.SOCKET_PATH }

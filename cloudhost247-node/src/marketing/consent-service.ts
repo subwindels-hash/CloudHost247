@@ -1,7 +1,16 @@
 import { createHash, createHmac, randomBytes, randomUUID } from 'node:crypto';
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import geoip from 'geoip-lite';
+import type geoipType from 'geoip-lite';
 import type { Env } from '../config/env';
+
+let cachedGeoIp: typeof geoipType | null = null;
+function getGeoIp(): typeof geoipType {
+  if (!cachedGeoIp) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    cachedGeoIp = require('geoip-lite') as typeof geoipType;
+  }
+  return cachedGeoIp;
+}
 import type { Queryable } from '../db/types';
 import { withTransaction } from '../db/transaction';
 import { safeEqual } from '../lib/crypto';
@@ -37,7 +46,7 @@ export function cookieValue(request: FastifyRequest, name: string): string | nul
 export function resolveJurisdiction(request: FastifyRequest, env: Env): string | null {
   const ip = resolveVisitorIpFromRequest(request, env).ip;
   if (!ip) return null;
-  try { const country = geoip.lookup(ip)?.country; return country && /^[A-Z]{2}$/.test(country) ? country : null; }
+  try { const country = getGeoIp().lookup(ip)?.country; return country && /^[A-Z]{2}$/.test(country) ? country : null; }
   catch { return null; }
 }
 export function requiresOptIn(policy: string, country: string | null) {

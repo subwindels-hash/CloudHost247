@@ -38,7 +38,8 @@ export async function registerHealthRoutes(app: FastifyInstance, env: Env, pool?
     const started = Date.now();
     let website = 'operational';
     try {
-      await isDatabaseReachable(env, 3000, pool);
+      const dbOk = await isDatabaseReachable(env, 3000, pool);
+      if (!dbOk) website = 'degraded';
     } catch {
       website = 'degraded';
     }

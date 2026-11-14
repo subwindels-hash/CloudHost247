@@ -9,13 +9,21 @@ import type { Env } from '../config/env';
  * Passenger manages — no reliance on Nginx/Apache-level modules, so it must be correct here.
  */
 export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
+  const extraFrameAncestors = env.FRAME_ANCESTORS
+    ? env.FRAME_ANCESTORS.trim().split(/\s+/).filter(Boolean)
+    : [];
+
   await app.register(helmet, {
+    frameguard: extraFrameAncestors.length > 0 ? false : undefined,
     // The SPA is served by this same app, so keep CSP permissive enough for same-origin assets
     // while still removing the most common risky defaults. Tightened further in later phases
     // once the frontend's asset hashing strategy is finalized.
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
+        ...(extraFrameAncestors.length > 0
+          ? { frameAncestors: ["'self'", ...extraFrameAncestors] }
+          : {}),
         imgSrc: ["'self'", 'data:', 'https://www.facebook.com', 'https://www.google.com', 'https://www.googleadservices.com', 'https://googleads.g.doubleclick.net', 'https://www.googletagmanager.com', 'https://www.google-analytics.com', 'https://region1.google-analytics.com', 'https://analytics.tiktok.com'],
         styleSrc: ["'self'", "'unsafe-inline'"],
         // Only explicitly used Meta, Google and TikTok origins; no script wildcards.

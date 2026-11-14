@@ -8,14 +8,17 @@
  *  - DATABASE_URL is a single connection string so the same code works whether PostgreSQL
  *    is provided locally by the host or by an external managed provider.
  */
+import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
 
 // Loaded once, lazily, so unit tests can set process.env before first access.
 let cached: Env | null = null;
 
 const boolFromString = z
-  .union([z.literal('true'), z.literal('false'), z.literal('1'), z.literal('0')])
-  .transform((v) => v === 'true' || v === '1');
+  .string()
+  .transform((v) => v.trim().toLowerCase())
+  .pipe(z.enum(['true', 'false', '1', '0', 'yes', 'no', 'on', 'off']))
+  .transform((v) => v === 'true' || v === '1' || v === 'yes' || v === 'on');
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -27,6 +30,7 @@ const envSchema = z.object({
   // Optional: some Passenger setups bind to a unix domain socket path instead of a TCP port.
   // Not commonly required for cPanel Application Manager, but supported if provided.
   SOCKET_PATH: z.string().optional(),
+  FRAME_ANCESTORS: z.string().max(1000).optional(),
 
   // Public URL of the deployed application (used for building absolute links in emails, etc.)
   APP_URL: z.string().url().default('http://localhost:3000'),
@@ -322,17 +326,113 @@ export class EnvValidationError extends Error {
   }
 }
 
+const STRICT_REQUIRED_KEYS = new Set(['DATABASE_URL', 'JWT_SECRET']);
+
+/**
+ * Normalizes common cPanel / Passenger / LiteSpeed environment quirks before schema parsing:
+ *  - Blank optional strings (`KEY=""` in `.env` or cPanel UI) become `undefined`.
+ *  - Unix domain socket paths injected via `PORT` (LiteSpeed lsnode / Passenger) move to `SOCKET_PATH`.
+ *  - Bare hostnames in `APP_URL` (matching cPanel's scheme-less Application URL field) gain `https://`.
+ */
+function normalizeEnvInput(source: NodeJS.ProcessEnv): Record<string, string | undefined> {
+  const normalized: Record<string, string | undefined> = {};
+
+  for (const [key, raw] of Object.entries(source)) {
+    if (raw === undefined) continue;
+    if (!STRICT_REQUIRED_KEYS.has(key) && typeof raw === 'string' && raw.trim() === '') {
+      continue;
+    }
+    normalized[key] = raw;
+  }
+
+  if (typeof normalized.PORT === 'string' && !/^\d+$/.test(normalized.PORT.trim())) {
+    const portVal = normalized.PORT.trim();
+    if (/^(\/|unix:|\\\\\.\\pipe\\)/i.test(portVal)) {
+      if (!normalized.SOCKET_PATH) {
+        normalized.SOCKET_PATH = portVal.replace(/^unix:/i, '');
+      }
+      delete normalized.PORT;
+    } else if (portVal.toLowerCase() === 'passenger') {
+      delete normalized.PORT;
+    }
+  }
+
+  if (typeof normalized.APP_URL === 'string' && !normalized.APP_URL.includes('://')) {
+    const urlVal = normalized.APP_URL.trim();
+    if (/^(localhost|127\.0\.0\.1)(:\d+)?(\/.*)?$/i.test(urlVal)) {
+      normalized.APP_URL = `http://${urlVal}`;
+    } else if (/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(:\d+)?(\/.*)?$/i.test(urlVal)) {
+      normalized.APP_URL = `https://${urlVal}`;
+    }
+  }
+
+  return normalized;
+}
+
 /**
  * Parses and validates process.env. Throws EnvValidationError with human-readable, secret-free
  * messages on failure. Never logs the offending values (they may be partially-typed secrets).
  */
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
-  const result = envSchema.safeParse(source);
+  const result = envSchema.safeParse(normalizeEnvInput(source));
   if (!result.success) {
     const issues = result.error.issues.map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`);
     throw new EnvValidationError(issues);
   }
   return result.data;
+}
+
+export interface RuntimeEnvResult {
+  env: Env;
+  warnings: string[];
+  databaseConfigured: boolean;
+  jwtSecretEphemeral: boolean;
+}
+
+export const UNCONFIGURED_DATABASE_SENTINEL = 'postgresql://unconfigured.invalid:5432/unconfigured';
+
+/**
+ * Runtime loader used by `src/server.ts` so a fresh cPanel / Passenger deployment without
+ * `JWT_SECRET` or `DATABASE_URL` boots and serves pages instead of crash-looping with 503.
+ * Direct `loadEnv()` callers (CLI tools, worker, tests) retain strict validation.
+ */
+export function loadRuntimeEnv(source: NodeJS.ProcessEnv = process.env): RuntimeEnvResult {
+  const effective: NodeJS.ProcessEnv = { ...source };
+  const warnings: string[] = [];
+  let jwtSecretEphemeral = false;
+  let databaseConfigured = true;
+
+  if (!effective.JWT_SECRET || effective.JWT_SECRET.trim() === '') {
+    const generated = randomBytes(48).toString('base64url');
+    effective.JWT_SECRET = generated;
+    jwtSecretEphemeral = true;
+    if (source === process.env) {
+      process.env.JWT_SECRET = generated;
+    }
+    warnings.push(
+      'CRITICAL: JWT_SECRET is not set. Using an ephemeral secret for this process; ' +
+        'all sessions will be invalidated on restart. Set JWT_SECRET (at least 32 characters) in your environment.'
+    );
+  }
+
+  if (!effective.DATABASE_URL || effective.DATABASE_URL.trim() === '' || effective.DATABASE_URL === UNCONFIGURED_DATABASE_SENTINEL) {
+    effective.DATABASE_URL = UNCONFIGURED_DATABASE_SENTINEL;
+    databaseConfigured = false;
+    if (source === process.env) {
+      process.env.DATABASE_URL = UNCONFIGURED_DATABASE_SENTINEL;
+    }
+    warnings.push(
+      'CRITICAL: DATABASE_URL is not set. Starting with database unconfigured; ' +
+        'public pages and stateless tools are available, while database-backed routes return 503 DATABASE_NOT_CONFIGURED until DATABASE_URL is configured.'
+    );
+  }
+
+  const env = loadEnv(effective);
+  if (source === process.env) {
+    cached = env;
+  }
+
+  return { env, warnings, databaseConfigured, jwtSecretEphemeral };
 }
 
 /** Cached accessor for use across the app; call resetEnvCache() in tests between cases. */
