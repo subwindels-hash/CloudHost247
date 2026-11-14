@@ -84,15 +84,23 @@ bash scripts/package-cpanel.sh        # -> release/cloudhost247-cpanel-<sha>.zip
 
 The zip contains only what the server executes: `server.js`, `package.json`, `package-lock.json`,
 `dist/` (compiled server + migration CLI), `public/` (built frontend), `database/migrations/`,
-`manifests/` and `.env.example`. With it, the server-side steps in section 2 become:
+`manifests/`, `.env.example`, an app-root copy of this guide at
+`docs/CPANEL_DEPLOYMENT.md`, and `DEPLOY.txt`. With it, the server-side steps in section 2 become:
 
-- step 1: upload the zip with File Manager, *Extract*, and move the contents of
-  `cloudhost247-cpanel-<sha>/` into `<APP_ROOT>`;
+- step 1: upload the zip with File Manager, *Extract*, and move the **contents** of
+  `cloudhost247-cpanel-<sha>/` into `<APP_ROOT>` - `DEPLOY.txt` repeats this warning because
+  leaving the folder nested is the most common cause of the missing-`dist/` crash-loop;
 - step 4: install **production dependencies only** - the *Run NPM Install* button on the app page,
   or `npm ci --omit=dev` in the app's virtual-environment terminal. (CloudLinux keeps
   `node_modules` in `~/nodevenv/...` and symlinks it; if the app page complains that a
   `node_modules` folder already exists in the app root, delete that folder and retry);
 - step 5 (`npm run build`) is **skipped**.
+
+`server.js` also has a startup recovery path (section 3 / Appendix B): it can start a complete
+package that was accidentally left nested, or perform a one-time build when the tooling is present.
+That is a safety net, not a reason to skip the explicit extraction step. `docs/CPANEL_DEPLOYMENT.md`
+is shipped inside the zip so the path printed by `server.js` resolves inside `<APP_ROOT>` rather
+than only in a full Git checkout.
 
 Every later update is: build a new package, upload/extract over `<APP_ROOT>`, run section 6 if the
 release has new migrations, and *Restart*. Re-run the NPM install only if `package-lock.json`
@@ -126,6 +134,9 @@ The production application root (`<APP_ROOT>`, e.g. `/home/cpaneluser/cloudhost2
 ```
 <APP_ROOT>/
   server.js              # Passenger/Application Manager startup file (do not rename)
+  DEPLOY.txt             # pre-built zip only: extraction / nested-folder warning
+  docs/
+    CPANEL_DEPLOYMENT.md # app-root copy so server.js error links resolve on the server
   package.json
   package-lock.json
   .env                   # created on the server only - never committed to Git
@@ -147,10 +158,14 @@ codebase assumes a specific username or path.
 ## 2. First-time setup (initial deployment)
 
 1. **Get the code onto the server.** Either:
-   - `git clone` the repository into `<APP_ROOT>` (requires the host to allow outbound git over
-     HTTPS/SSH from a terminal), or
-   - Upload a release archive of the `cloudhost247-node/` subtree via cPanel File Manager / FTP
-     and extract it into `<APP_ROOT>`.
+   - Clone the repository to a temporary directory, then copy the **contents of
+     `cloudhost247-node/`** into `<APP_ROOT>` (requires the host to allow outbound git over
+     HTTPS/SSH from a terminal). Do **not** set `<APP_ROOT>` to the repository root: Passenger's
+     startup file must be `<APP_ROOT>/server.js`, not `<APP_ROOT>/cloudhost247-node/server.js`, or
+     `dist/` will appear to be missing.
+   - Upload a release archive of the `cloudhost247-node/` subtree (or the pre-built zip from
+     section 0a) via cPanel File Manager / FTP and extract it into `<APP_ROOT>`. Move the
+     *contents* of any extracted folder into `<APP_ROOT>`; never leave it one level nested.
 
    Only the contents of `cloudhost247-node/` belong at `<APP_ROOT>` - do not copy the WHMCS PHP
    tree into the same directory as the Node app.
@@ -196,6 +211,12 @@ codebase assumes a specific username or path.
    This runs `tsc` (compiling `src/` and `database/` into `dist/`) and `vite build` (compiling
    `frontend/` into `public/`). The app **never** runs `npm run dev` or a Vite dev server in
    production - Passenger only ever executes the compiled `dist/src/server.js` via `server.js`.
+   `npm run build:server` alone is **not** sufficient: `src/app.ts` serves the SPA out of
+   `public/` and will fail without `public/index.html`.
+
+   If you restart before this step, `server.js` will attempt the one-time recovery build described
+   in section 3. Treat that as a crash-loop safety net, not a substitute for running the build in
+   your terminal where errors are visible. Set `DISABLE_AUTO_BUILD=1` to opt out.
 
 6. **Verify environment variables are complete** before starting the app:
 
@@ -232,11 +253,26 @@ codebase assumes a specific username or path.
 
 `<APP_ROOT>/server.js` is plain CommonJS JavaScript, not TypeScript, because Passenger executes
 it directly with the Node.js binary you selected in *Setup Node.js App* - there is no build step
-between "Passenger starts the app" and "your code runs" for this one file. Its only job is:
+between "Passenger starts the app" and "your code runs" for this one file. Its only job is to get
+the compiled application running:
 
-1. Confirm `dist/src/server.js` exists (i.e. `npm run build` has been run) and fail with a clear,
-   actionable message if not - rather than a confusing stack trace deep in a missing-file error.
-2. `require()` the compiled entry point.
+1. If `dist/src/server.js` exists, `require()` it (the normal path).
+2. If it is missing but exactly one **complete** pre-built package was extracted into a nested
+   folder (the common zip mistake), start that build with a loud warning telling the operator to
+   move its contents into `<APP_ROOT>` at the next maintenance window.
+3. Otherwise, when `src/`, `tsconfig.json`, `frontend/vite.config.ts`, TypeScript and Vite are
+   installed and `DISABLE_AUTO_BUILD` is not set, perform a **one-time atomic recovery build**:
+   TypeScript emits to a temporary `.dist-build-*` directory, Vite builds `public/`, and only
+   after both succeed is the temp directory renamed to `dist/`. A lock prevents concurrent
+   Passenger workers from racing the compiler; a killed process's stale lock is reclaimed after
+   10 minutes. This avoids leaving a half-written `dist/` that would produce a confusing
+   `MODULE_NOT_FOUND` on the next restart.
+4. If none of those are possible, print diagnostics (app root, cwd, Node version, which files /
+   tools are missing) plus the exact build / pre-built-zip commands, and exit cleanly - never a
+   stack trace deep in a missing-file error.
+
+`DISABLE_AUTO_BUILD=1` skips step 3; `DISABLE_NESTED_BUILD=1` skips step 2 as well. Both are
+documented in `.env.example` and are useful in CI or when an operator prefers an explicit build.
 
 All real application logic (the Fastify server, routes, database access) lives in
 `src/server.ts` → compiled to `dist/src/server.js`, which:
@@ -300,6 +336,8 @@ local development reference only. Never commit a real `.env` file.
 | `JWT_EXPIRES_IN` | no | Defaults to `12h`. |
 | `CRON_JOB_TOKEN` | reserved | Reserved for future authenticated HTTP job endpoints. The current queue/notification/reconciliation worker is invoked as a lease-protected CLI one-shot from cPanel Cron; see section 9. |
 | `LOG_LEVEL` | no | Defaults to `info`. Structured JSON logs (`pino`) are written to stdout, which cPanel/Passenger captures to the app's log file. |
+| `DISABLE_AUTO_BUILD` | no | Set to `1` to make `server.js` fail fast instead of attempting its one-time recovery build when `dist/` is missing. Leave unset for self-healing startup. |
+| `DISABLE_NESTED_BUILD` | no | Set to `1` to also refuse to start a complete pre-built package found in a nested folder. |
 
 **After changing any environment variable, you must restart the application** (*Setup Node.js
 App* → *Restart*) - Passenger does not hot-reload environment variables into a running process.
@@ -548,12 +586,27 @@ against the same database unless you have deliberately designed that deployment 
 
 ## Appendix B - troubleshooting a Passenger crash-loop
 
-1. Check *Setup Node.js App*'s log viewer / `<APP_ROOT>`'s Passenger log file first.
-2. Run `npm run env:check` in the app's terminal - most crash-loops at first deploy are a missing
-   or malformed environment variable.
-3. Confirm `dist/src/server.js` exists (`npm run build` was actually run after the last code
-   change) - `server.js` prints an explicit message and exits cleanly (not a stack trace) if this
-   file is missing.
+1. Check *Setup Node.js App*'s log viewer / `<APP_ROOT>/stderr.log` first. The newest
+   `[server.js]` block prints the exact `<APP_ROOT>`, `cwd`, Node version, and whether `src/`,
+   `tsconfig.json`, TypeScript, Vite and `public/index.html` are present.
+2. **Repeating `Compiled application not found at dist/src/server.js`** means the build output is
+   missing or in the wrong place. Check in this order:
+   - `dist/src/server.js` and `public/index.html` must sit **directly** in `<APP_ROOT>`. If they
+     are under `<APP_ROOT>/cloudhost247-cpanel-<sha>/`, move the *contents* of that folder up one
+     level (see `DEPLOY.txt`) and Restart. `server.js` will start a single complete nested package
+     automatically as a recovery path, but the layout still must be corrected.
+   - For a source deploy, run `npm ci && npm run build` in the cPanel virtual-environment
+     terminal. Do not use `npm ci --omit=dev` before building (TypeScript/Vite are devDependencies)
+     and do not use `npm run build:server` alone (the SPA needs `public/`).
+   - If builds are killed by CloudLinux LVE limits, rebuild/upload the pre-built zip from section
+     0a instead; no server-side build is then required.
+   - `server.js` attempts a one-time atomic recovery build when the tooling is present. Set
+     `DISABLE_AUTO_BUILD=1` to fail fast instead, or `DISABLE_NESTED_BUILD=1` to also disable the
+     nested-package recovery. Temp state (`.dist-build-*`, `.server-build-lock/`) is git-ignored
+     and cleaned up after a successful or failed build.
+3. Run `npm run env:check` in the app's terminal - the other common first-deploy crash-loop is a
+   missing or malformed environment variable (especially `DATABASE_URL`, `JWT_SECRET`,
+   `CREDENTIAL_ENCRYPTION_KEY`). Remember to Restart after changing env vars.
 4. Confirm `DATABASE_URL` is reachable from the app's terminal (e.g.
    `node dist/database/migrate.js status`, which requires a working connection) - a database the
    app can't reach will fail `/ready` and any route touching the DB, though `/health` still

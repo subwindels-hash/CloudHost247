@@ -116,7 +116,7 @@
       "title": "cPanel deployment",
       "summary": "This document covers deploying, updating, and operating the new independent Node.js/TypeScript platform (cloudhost247-node/) on cPanel shared hosting only, using cPanel's Application Manager (Passenge",
       "source": "docs/CPANEL_DEPLOYMENT.md",
-      "bytes": 39438
+      "bytes": 43951
     },
     {
       "slug": "integrations-google-ads",
