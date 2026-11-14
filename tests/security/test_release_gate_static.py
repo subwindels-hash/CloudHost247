@@ -21,8 +21,9 @@ found on 2026-10-02 by running the gate's own steps in a clean checkout:
    all 27 language overrides (a syntax error there breaks the whole client area), 18 public
    policy pages (`privacy-policy.php`, `cookie-policy.php`, `legal.php`, `faqs.php`, …), the
    Blockonomics gateway (9), the LTE-proxy server module (16), digitalproducts (21),
-   tools_center (18), customaffiliate (15), dnschecker (2), cloudhost247_email (4) and the
-   superseded SMM prototypes (12). Both gates now ask `scripts/php-lint-targets.sh`, which
+   tools_center (18), customaffiliate (15) and dnschecker (2). (The superseded SMM prototypes
+   and the inactive earlier email build that this paragraph used to count have since been removed
+   from the tree entirely.) Both gates now ask `scripts/php-lint-targets.sh`, which
    computes the list from the tree — including the 26 addon `*.tpl` files that are really PHP —
    so a new file is linted the moment it exists and the two gates cannot disagree.
 4. **Three documents described an integrity-baseline exemption mechanism that does not exist.**
@@ -257,7 +258,6 @@ class ReleaseGateCoverageTests(unittest.TestCase):
                      'modules/addons/digitalproducts/hooks.php',
                      'modules/addons/tools_center/tools_center.php',
                      'modules/addons/dnschecker/dnschecker.php',
-                     'modules/servers/cloudhost247_email/cloudhost247_email.php',
                      'modules/addons/phoneservices/templates/admin/dashboard.tpl'):
             self.assertIn(path, actual, f'{path} is first-party PHP and must be linted')
 

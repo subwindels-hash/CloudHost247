@@ -1,0 +1,32 @@
+[
+  {
+    "path": "all-element-cloudhost247.php",
+    "removed": "2026-11-14",
+    "reason": "Demo route. Nothing was ever published for the 'all-elements' slug, so it always answered 404 while remaining a crawl exclusion."
+  },
+  {
+    "path": "cloudhost247-sample.php",
+    "removed": "2026-11-14",
+    "reason": "Sample-content route ('Sample Page'). Nothing was published for the slug; it existed only to demonstrate the page builder."
+  },
+  {
+    "path": "cloudhost247-vps-sample.php",
+    "removed": "2026-11-14",
+    "reason": "Sample-content route ('VPS Sample'). Unpublished, and the real VPS page is vps-hosting.php."
+  },
+  {
+    "path": "comingsoon.php",
+    "removed": "2026-11-14",
+    "reason": "Placeholder route ('Coming Soon') with no published entry. A permanent 'coming soon' page is the demo surface this cleanup removes; the real work is published on the product pages."
+  },
+  {
+    "path": "future-element.php",
+    "removed": "2026-11-14",
+    "reason": "Demo route ('Future Element'). Never published, never linked, and named after a theme demo block rather than a service."
+  },
+  {
+    "path": "tables.php",
+    "removed": "2026-11-14",
+    "reason": "Page-builder demo route ('Tables') whose catalogue entry was never published; the product table is rendered inside the real product pages."
+  }
+]

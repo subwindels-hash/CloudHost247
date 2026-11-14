@@ -3,9 +3,10 @@
 WHMCS 8.9.x / PHP 7.4+ addon + provisioning module pair that turns WHMCS into
 a reseller front-end for SMM (social media marketing) provider panels.
 
-It supersedes the earlier single-provider prototype in
-`modules/addons/smmaddon` + `modules/servers/smmprovisioning` (which remain in
-the tree untouched; disable them when this module goes live).
+It supersedes the earlier single-provider prototype that lived in
+`modules/addons/smmaddon` + `modules/servers/smmprovisioning`. That prototype
+has been **removed** from the tree: this module is the only SMM implementation,
+so there is exactly one schema, one cron entry and one order owner.
 
 ## Components
 

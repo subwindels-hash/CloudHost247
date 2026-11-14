@@ -5,8 +5,8 @@
 # Both scripts/release-candidate-check.sh and .github/workflows/independent-foundation.yml call
 # it, so the two gates cannot drift apart — that drift is how 199 first-party PHP files (all 27
 # language overrides, 18 public policy pages, the Blockonomics gateway, the LTE-proxy server
-# module, phoneservices, customaffiliate, digitalproducts, tools_center, dnschecker,
-# cloudhost247_email and the superseded SMM prototypes) came to be linted by neither gate.
+# module, phoneservices, customaffiliate, digitalproducts, tools_center and dnschecker) came to be
+# linted by neither gate.
 #
 # The list is computed from the tree, not hand-kept: a new PHP file is linted the moment it
 # exists. tests/security/test_release_gate_static.py pins the partition and fails if an

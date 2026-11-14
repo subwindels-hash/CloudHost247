@@ -15,6 +15,25 @@ There are two distinct runtime targets:
 
 The repository/ZIP does not include WHMCS core, a WHMCS licence, production credentials, a database, or the target's `configuration.php`. It is not safe to unzip the entire repository or ZIP into `public_html`. For the package build, hash verification, private extraction, file-list review and non-destructive overlay procedure, follow [`DEPLOYMENT-GUIDE.md`](DEPLOYMENT-GUIDE.md).
 
+### 1.1 What this package no longer ships (2026-11-14)
+
+Three redundant implementations and six demo routes were removed from the tree. A **fresh**
+installation is unaffected — they simply are not there. An **upgrade** of a staging installation
+that still runs any of them must follow [§4.1](#41-retire-the-modules-this-package-no-longer-ships-upgrade-only)
+*before* the overlay is applied, because the files that implement them no longer exist in the
+package:
+
+| Removed | Replaced by |
+|---|---|
+| `modules/addons/smmaddon/` + `modules/servers/smmprovisioning/` | `cloudhost247_smm` (addon + server module) — now the only SMM implementation |
+| `modules/servers/cloudhost247_email/` (inactive earlier build) | `modules/servers/cloudhost247_email_hosting/` — now the only email provisioning module |
+| `comingsoon.php`, `future-element.php`, `all-element-cloudhost247.php`, `cloudhost247-sample.php`, `cloudhost247-vps-sample.php`, `tables.php` | nothing — demo routes whose content-store entry was never published, so each could only ever answer 404 |
+
+Each removed route is recorded with its reason in
+[`website-rebuild/removed-routes.json`](website-rebuild/removed-routes.json), and the repository's
+link verifier fails if one is reintroduced. Full evidence for the cleanup is in
+[`CLEANUP-AND-COMPLETION-REGISTER-2026-11-14.md`](../CLEANUP-AND-COMPLETION-REGISTER-2026-11-14.md).
+
 ## 2. Prerequisites
 
 Complete these checks before uploading or activating anything:
@@ -41,7 +60,7 @@ If installing the Node platform too, separately verify the host's Node.js versio
 
 Do not install on a production host, and do not copy configuration files, database backups, credentials, evidence, Git metadata, internal docs or tests into the public document root.
 
-## 4. Activate the core WHMCS addons
+## 4. Module activation — retire superseded modules first, then activate
 
 Validate the migration set from the protected checkout:
 
@@ -50,6 +69,34 @@ python3 scripts/validate-migrations.py --json-output /secure/evidence/migrations
 ```
 
 This command validates source migration versions, ordering, namespace and static idempotency rules; it does **not** apply a database migration. Apply migrations only by activating the WHMCS modules in the documented UI—never by hand-running ad-hoc SQL.
+
+### 4.1 Retire the modules this package no longer ships (upgrade only)
+
+Do this **before** overlaying the new files, so no product is left pointing at a server module whose
+files have just been removed.
+
+An **addon** has a switch: deactivate it in *Addon Modules*. A **server module** does not — it is in
+use for as long as a product's *Server* field names it, so the only way to retire one is to move the
+products off it.
+
+1. **SMM prototype.** Deactivate `smmaddon` in *Addon Modules*. Then, before the overlay, record every
+   product whose server is `smmprovisioning`, and every service, remote order id and open order on it;
+   move those products to the `cloudhost247_smm` server module (or hide them) so nothing is
+   provisioned by a module that will no longer exist. Do not delete services to make the binding
+   problem disappear.
+2. **Inactive earlier email build.** If no product's server is `cloudhost247_email`, there is nothing
+   to do. If one is, move it to `cloudhost247_email_hosting` first. Removing the code never deletes
+   rows: `mod_cloudhost247_email_accounts` and any remote/user ids recorded against it stay in the
+   database as history — do not drop that table as part of this upgrade.
+3. **Demo routes.** If an earlier overlay left `comingsoon.php`, `future-element.php`,
+   `all-element-cloudhost247.php`, `cloudhost247-sample.php`, `cloudhost247-vps-sample.php` or
+   `tables.php` in the target, delete those six files and remove any navigation, redirect or sitemap
+   entry that still points at them.
+4. Make those binding changes through the WHMCS UI (the *Server* field on a product). If SQL is
+   unavoidable, treat it as a reviewed change with a fresh backup, a recorded before/after snapshot
+   and an entry in the acceptance evidence.
+
+### 4.2 Activation order
 
 For the baseline CloudHost247 installation, activate in this order in **WHMCS Admin → System Settings → Addon Modules**:
 
@@ -67,7 +114,8 @@ Activate only modules explicitly included in the staging test plan. The reposito
 | API & Integrations | Activate Foundation first. Configure only staging credentials through its encrypted settings; see [`independent-rebuild/API-INTEGRATIONS.md`](independent-rebuild/API-INTEGRATIONS.md). If using central OVH credentials, follow its documented ordering and credential migration. |
 | Module Manager | Requires Foundation and the documented PHP extensions/storage outside the webroot. Restrict `modules.*` capabilities to Super Admin; installed packages start disabled. See [`independent-rebuild/MODULE-MANAGER.md`](independent-rebuild/MODULE-MANAGER.md). |
 | Website Builder, Brokerage, Marketing, Cart Recovery, Passkey and Tools | Activate only after their prerequisites, capability policy, migration set, external provider needs and test rows are approved. See their individual module docs and the staging matrix. |
-| CloudHost247 Email Hosting | This is a WHMCS **server** module, not an addon. Configure an authorized disposable Microsoft/Google/Professional Email tenant; the module does not create products or set prices. Follow the module-specific install sequence and test matrix before assigning a product. |
+| CloudHost247 Email Hosting | This is a WHMCS **server** module, not an addon — and the only email provisioning module in this package. Configure an authorized disposable Microsoft/Google/Professional Email tenant; the module does not create products or set prices. Follow the module-specific install sequence and test matrix before assigning a product. |
+| CloudHost247 SMM Marketplace | Addon **plus** server module (`cloudhost247_smm`). Activate the addon after Foundation/Core, then bind products to its server module. It is the only SMM implementation: the single-provider prototype is no longer in the package, so follow [§4.1](#41-retire-the-modules-this-package-no-longer-ships-upgrade-only) if the target still runs it. |
 | RDP | **Do not activate.** The active entry point in the current source is the vendor version; the secure rebuild is not active. Resolve the code, provider authorization and licensing prerequisites before installation or provisioning tests. |
 
 ## 5. Configure the staging presentation and providers
@@ -90,6 +138,26 @@ After activation/configuration:
 - Compare the applied migration set and schema with the pre-install baseline. Confirm protected WHMCS tables and financial snapshots have no unexplained changes.
 - Use WHMCS's supported maintenance/cache action. If the filesystem must be touched, verify the actual `templates_c` path and remove only compiled files inside it; never run a recursive delete against an unverified path.
 - Verify HTTPS, `SystemURL`, staging banner, theme/order form, health checks, logs, client ownership, role restrictions and that legacy modules remain inactive.
+- Verify the retired surfaces are gone from the target — and from every binding:
+
+  ```bash
+  # Files: nothing should be reported.
+  for f in modules/addons/smmaddon modules/servers/smmprovisioning \
+           modules/servers/cloudhost247_email comingsoon.php future-element.php \
+           all-element-cloudhost247.php cloudhost247-sample.php \
+           cloudhost247-vps-sample.php tables.php; do
+    test -e "$f" && echo "STILL PRESENT: $f"
+  done
+  ```
+
+  ```sql
+  -- Bindings: no rows, or only rows deliberately parked inactive.
+  SELECT id, name, servertype, hidden FROM tblproducts
+   WHERE servertype IN ('smmprovisioning', 'cloudhost247_email');
+  ```
+
+  A row returned here is a product that will fail to provision; rebind it per §4.1 rather than
+  hiding the problem.
 - Run the applicable tests in [`independent-rebuild/STAGING-TEST-MATRIX.md`](independent-rebuild/STAGING-TEST-MATRIX.md) on the real licensed staging installation: login/register/reset, client area, CMS, cart/checkout with test gateways, browser/device behavior, migration idempotency, currency, OVH and rollback.
 - Use `scripts/verify-website.py --base https://exact-staging-host.example/ --output /secure/evidence/staging-web.json` for read-only HTTP checks. Fixture tests are source QA only; they do not prove WHMCS database/session/checkout behavior.
 - Capture before/after financial evidence and compare it with an explicit reviewed change allowlist. Generate acceptance reports only from real staging evidence.
@@ -103,7 +171,7 @@ If preflight, migration, health or test validation fails:
 1. Keep the staging installation in maintenance mode and pause cron/jobs.
 2. Stop new test orders and provider mutations.
 3. Restore the **proven** database backup and reviewed file backup into staging; do not reverse-edit customer/financial rows or improvise reverse SQL.
-4. Restore the previous approved file overlay and stock WHMCS theme/order form; disable only the CloudHost247 staging modules.
+4. Restore the previous approved file overlay and stock WHMCS theme/order form; disable only the CloudHost247 staging modules. Rolling back to an overlay built **before 2026-11-14** reintroduces the retired SMM prototype and inactive email build as files — deactivate them again (§4.1), or the installation runs code this guide no longer covers.
 5. Clear only the verified staging `templates_c` cache, re-run environment/financial checks, and retain redacted logs.
 
 For upgrades, repeat the freeze, preflight, backup/restore proof, baseline, reviewed overlay and migration validation steps. Additive migrations must be applied through the module's supported activation path and verified as idempotent. Do not delete module tables or erase operator content during uninstall/deactivation. See [`DEPLOYMENT-GUIDE.md`](DEPLOYMENT-GUIDE.md) for the package overlay and [`RELEASE-WORKFLOW.md`](RELEASE-WORKFLOW.md) for the evidence/approval stages.

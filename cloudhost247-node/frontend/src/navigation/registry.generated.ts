@@ -1686,11 +1686,6 @@ export const SITEMAP_POLICY = {
     "site-search.php",
     "service-error.php",
     "cloudhost247-marketing-track.php",
-    "cloudhost247-sample.php",
-    "cloudhost247-vps-sample.php",
-    "all-element-cloudhost247.php",
-    "future-element.php",
-    "tables.php",
     "tools/data/",
     "tools/admin/",
     "tools/api.php"

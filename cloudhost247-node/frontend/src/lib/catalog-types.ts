@@ -69,7 +69,7 @@ const BILLING_PERIOD_LABELS: Record<PublicPrice['billingPeriod'], string> = {
 
 /** Formats a published price for display, e.g. "$9.99 / per month". Never used on an unpublished
  * or missing price — callers should check `pricing.length > 0` first and show an honest
- * "pricing not yet published" state instead (see HostingCpanelPage/HostingVpsPage). */
+ * "pricing not yet published" state instead (see components/ProductPlansSection). */
 export function formatPrice(price: PublicPrice): string {
   const amount = new Intl.NumberFormat('en-US', { style: 'currency', currency: price.currency }).format(price.amount);
   return `${amount} ${BILLING_PERIOD_LABELS[price.billingPeriod]}`;

@@ -140,9 +140,9 @@ between the agent and the control plane; no real multi-gigabyte archive hashed.
 | 6 | `ovh_cart` order form | `templates/orderforms/ovh_cart/` | vendor; replacement needed |
 | 7 | Vendor crons `getServer.php`, `getIpStatus.php`, `priceSync.php`, `emailSend.php` | `crons/` | coupled to WGS classes; hash-locked replacements shipped (`crons/cloudhost247_ovh.php`, OVH `PricingService`, `crons/cloudhost247_marketing.php`) but the vendor files remain |
 | 8 | `Smtphosting` (ModulesGarden v3) | `modules/servers/Smtphosting/` | third-party, inactive, superseded; 6 zero-byte placeholders |
-| 9 | `cloudhost247_email` | `modules/servers/cloudhost247_email/` | earlier build — INACTIVE |
-| 10 | `smmaddon` | `modules/addons/smmaddon/` | prototype, superseded by `cloudhost247_smm` |
-| 11 | `smmprovisioning` | `modules/servers/smmprovisioning/` | prototype, superseded by `cloudhost247_smm` |
+| 9 | `cloudhost247_email` | ~~`modules/servers/cloudhost247_email/`~~ | **REMOVED 2026-11-14** — inactive earlier build, deleted with `tests/cloudhost247_email/`; `cloudhost247_email_hosting` is the only email provisioning module |
+| 10 | `smmaddon` | ~~`modules/addons/smmaddon/`~~ | **REMOVED 2026-11-14** — superseded prototype, deleted; `cloudhost247_smm` is the only SMM implementation |
+| 11 | `smmprovisioning` | ~~`modules/servers/smmprovisioning/`~~ | **REMOVED 2026-11-14** — superseded prototype, deleted |
 | 12 | `RDP` (vendor archive extracted over the secure rebuild) | `modules/servers/RDP/` | vendor module active; provider API authorization + licence/redistribution prerequisites unsatisfied |
 
 ---
@@ -270,7 +270,7 @@ implemented and tested, and the two capabilities this build cannot perform are r
 **Never independently built:** `[retired-addon]` *(not in the tree)* · `xtreme_currency_rates` ·
 `soyoustart` (addon) · `soyoustart` (server) · `soyoustart_vps` · `ovh_cart` · vendor crons
 `getServer.php` / `getIpStatus.php` / `priceSync.php` / `emailSend.php` · `Smtphosting` ·
-`cloudhost247_email` · `smmaddon` · `smmprovisioning` · `RDP`
+~~`cloudhost247_email`~~ · ~~`smmaddon`~~ · ~~`smmprovisioning`~~ (all three removed 2026-11-14) · `RDP`
 
 **Stubs — 13 zero-byte files:** 6 × `Smtphosting` vendor placeholders · `clientareacreditcard.tpl` ·
 `creditcard.tpl` · `pwreset.tpl` · `override.css`(+`.new`) · `override.js`(+`.js.new`)

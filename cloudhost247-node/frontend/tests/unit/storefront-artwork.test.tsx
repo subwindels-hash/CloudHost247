@@ -29,12 +29,11 @@ describe('service-specific storefront hero components', () => {
     expect(artwork.hasAttribute('data-showcase-depth')).toBe(true);
     expect(container.querySelector('section')?.contains(artwork)).toBe(true);
     expect(screen.getByRole('heading', { level: 1 })).toBeTruthy();
-    if (slug === 'proxy-services') {
-      expect(screen.queryByTestId('published-plans')).toBeNull();
-      expect(screen.getByText('Proxy services are coming soon.')).toBeTruthy();
-      expect(screen.getByRole('link', { name: 'Contact sales →' }).getAttribute('href')).toBe('/contact');
-    } else {
-      expect(screen.getByTestId('published-plans')).toBeTruthy();
-    }
+    // Every service line renders its plans from the published catalog. Proxy Services used to be
+    // the one exception (a hardcoded "coming soon" block); it now uses the same component as the
+    // others, so an unpublished product gets the honest empty states inside ProductPlansSection
+    // rather than a promise on the page itself.
+    expect(screen.getByTestId('published-plans')).toBeTruthy();
+    expect(screen.queryByText(/coming soon/i)).toBeNull();
   });
 });

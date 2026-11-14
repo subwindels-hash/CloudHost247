@@ -18,12 +18,14 @@ the history of the repository reorganization.
 
 ```
 /                                   ← WHMCS document root (cPanel public_html)
-├── *.php                           ← 46 client-area pages
-│   │                                  (28 legacy theme pages: aboutus, vps-hosting,
+├── *.php                           ← 86 root routes (75 published, 11 internal)
+│   │                                  (legacy theme pages: aboutus, vps-hosting,
 │   │                                   cpanel-hosting, blog, ssl-certificate, …
-│   │                                   + 18 CloudHost247 legal/policy pages:
+│   │                                   + the CloudHost247 legal/policy pages:
 │   │                                   refund-policy, privacy-policy, terms-of-service,
-│   │                                   faqs, help-center, legal, …)
+│   │                                   faqs, help-center, legal, …
+│   │                                   + utilities: robots, sitemaps, notfound)
+│   │                                  Counted by docs/website-rebuild/page-inventory.json.
 ├── crons/                          ← SoYouStart/OVH automation cron scripts
 │   ├── emailSend.php
 │   ├── getIpStatus.php
@@ -47,8 +49,8 @@ the history of the repository reorganization.
 │   │   ├── customaffiliate/           Custom affiliate commission engine
 │   │   ├── digitalproducts/           Digital products marketplace / secure downloads
 │   │   ├── phoneservices/             Phone number platform (Twilio/Telnyx style)
-│   │   ├── smmaddon/                  SMM panel integration, basic prototype (superseded)
-│   │   ├── cloudhost247_smm/          CloudHost247 SMM marketplace (multi-provider; supersedes smmaddon)
+│   │   ├── cloudhost247_smm/          CloudHost247 SMM marketplace (multi-provider). Supersedes the
+│   │   │                              removed single-provider prototype; the only SMM implementation.
 │   │   ├── soyoustart/                OVH/SoYouStart admin suite (WGS-OVH v8.0.8)
 │   │   └── xtreme_currency_rates/     Xtreme Currency Rates (ionCube)
 │   ├── gateways/                   ← Payment gateway modules
@@ -63,9 +65,6 @@ the history of the repository reorganization.
 │       ├── cloudhost247_email_hosting/  **CloudHost247 Email Hosting** (M365 / Google Workspace /
 │       │                                Professional Email; renamed off the vendor module id —
 │       │                                run scripts/migrate-legacy-names-to-cloudhost247.sql)
-│       ├── cloudhost247_email/        Earlier email provisioning build — INACTIVE, kept for
-│       │                                reference; owns mod_cloudhost247_email_accounts
-│       ├── smmprovisioning/           SMM panel order automation (superseded by cloudhost247_smm)
 │       └── cloudhost247_smm/          CloudHost247 SMM marketplace provisioning (payment-gated, idempotent)
 ├── templates/
 │   ├── cloudhost247/                ← CloudHost247 independent theme (child of twenty-one)
@@ -102,7 +101,6 @@ the history of the repository reorganization.
 | Custom Affiliate | addon | `modules/addons/customaffiliate/` |
 | Digital Products Marketplace | addon | `modules/addons/digitalproducts/` |
 | Phone Number Platform | addon | `modules/addons/phoneservices/` |
-| SMM Addon (prototype) | addon | `modules/addons/smmaddon/` |
 | CloudHost247 SMM Marketplace | addon + server | `modules/addons/cloudhost247_smm/` + `modules/servers/cloudhost247_smm/` (multi-provider, cron `crons/cloudhost247_smm.php`) |
 | SoYouStart admin suite | addon | `modules/addons/soyoustart/` |
 | Xtreme Currency Rates 6.0 | addon | `modules/addons/xtreme_currency_rates/` |
@@ -111,8 +109,7 @@ the history of the repository reorganization.
 | Smtphosting v3 | server | `modules/servers/Smtphosting/` |
 | SoYouStart (dedicated) | server | `modules/servers/soyoustart/` |
 | SoYouStart VPS | server | `modules/servers/soyoustart_vps/` |
-| **CloudHost247 Email Hosting** | server | `modules/servers/cloudhost247_email_hosting/` (module id `cloudhost247_email_hosting`; `modules/servers/cloudhost247_email/` is an earlier, inactive build) |
-| SMM Provisioning (prototype) | server | `modules/servers/smmprovisioning/` |
+| **CloudHost247 Email Hosting** | server | `modules/servers/cloudhost247_email_hosting/` (module id `cloudhost247_email_hosting`) — the only email provisioning module; the earlier inactive build was removed |
 
 **Notes**
 - The duplicate `CloudHost247_tools` (capital C) module was removed in the v2.2.7

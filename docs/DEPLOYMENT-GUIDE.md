@@ -18,6 +18,18 @@ It does **not** contain WHMCS core, a database, a WHMCS licence, or the target's
 
 The ZIP verifier checks archive integrity, required files, referenced assets and known secret patterns. A pass is not a staging test, a security approval, or permission to deploy every file in the archive.
 
+### 1.1 What the package stopped carrying on 2026-11-14
+
+Three redundant implementations and six demo routes were removed from the tree, so they are absent from any package built after that date:
+
+| No longer packaged | Replacement in the package |
+|---|---|
+| `modules/addons/smmaddon/`, `modules/servers/smmprovisioning/` | `modules/addons/cloudhost247_smm/`, `modules/servers/cloudhost247_smm/` |
+| `modules/servers/cloudhost247_email/` | `modules/servers/cloudhost247_email_hosting/` |
+| `comingsoon.php`, `future-element.php`, `all-element-cloudhost247.php`, `cloudhost247-sample.php`, `cloudhost247-vps-sample.php`, `tables.php` | nothing — demo routes whose content entry was never published, so each could only answer 404 |
+
+This matters here for one reason: **an overlay copies files in, it does not take them out.** Absence from the package is not removal from the target. A deployment onto an installation that still runs any of these must move the affected product bindings and delete the exact paths (§7.1) — otherwise the target keeps executing code that no release record covers. The operator sequence in [`INSTALLATION-GUIDE.md`](INSTALLATION-GUIDE.md) §4.1 describes the same step from the WHMCS-admin side.
+
 ## 2. Non-negotiable stop conditions
 
 Stop and do not deploy if any of these is true:
@@ -160,6 +172,58 @@ rsync --archive --checksum --itemize-changes --dry-run \
 
 Review every proposed addition and update with the staging owner. **Never add `--delete`.** Stop if the dry-run proposes an unapproved overwrite, a deletion, a file outside the reviewed list, or a change under operator-managed content. Only after the dry-run is approved, repeat the same command without `--dry-run` and preserve the itemized result.
 
+### 7.1 Remove the paths this package no longer ships
+
+Because `--delete` is forbidden, the retired paths from §1.1 survive the overlay on any target that already has them. Remove them deliberately, in the same maintenance window, and record the result.
+
+**Order matters.** A server module has no on/off switch: it is in use for as long as a product's *Server* field names it. Move the bindings first, delete the files second, or the services on those products fail in between.
+
+**Step 1 — move the bindings.** Record both the products and what they carry, then move them in the WHMCS UI (the *Server* field on a product) to `cloudhost247_smm` or `cloudhost247_email_hosting`, or hide the product until it is ready:
+
+```sql
+SELECT p.id, p.name, p.servertype, p.hidden,
+       (SELECT COUNT(*) FROM tblhosting h WHERE h.packageid = p.id) AS services
+  FROM tblproducts p
+ WHERE p.servertype IN ('smmprovisioning', 'cloudhost247_email');
+```
+
+Capture that result before and after the change as evidence. Do not delete services or product rows to clear the list: a rebinding is reversible, a deletion is not.
+
+**Step 2 — list what is actually present.** Nothing is deleted in this step:
+
+```bash
+RETIRED=(
+  modules/addons/smmaddon
+  modules/servers/smmprovisioning
+  modules/servers/cloudhost247_email
+  comingsoon.php
+  future-element.php
+  all-element-cloudhost247.php
+  cloudhost247-sample.php
+  cloudhost247-vps-sample.php
+  tables.php
+)
+for p in "${RETIRED[@]}"; do
+  [ -e "$WHMCS_ROOT/$p" ] && printf '%s\n' "$p"
+done | tee "$EVIDENCE/retired-present.txt"
+```
+
+Review that list with the staging owner. Every line must correspond to a path this guide names — a line you cannot explain is a stop condition, not something to delete.
+
+**Step 3 — remove exactly those entries**, refusing anything that resolves outside `$WHMCS_ROOT`:
+
+```bash
+while IFS= read -r p; do
+  real="$(realpath -m -- "$WHMCS_ROOT/$p")"
+  case "$real" in
+    "$WHMCS_ROOT"/*) printf 'removing %s\n' "$real"; rm -rf -- "$real" ;;
+    *) printf 'REFUSED (outside staging root): %s\n' "$p" >&2 ;;
+  esac
+done < "$EVIDENCE/retired-present.txt"
+```
+
+Keep `retired-present.txt` and the command output in the evidence set. Deleting files never deletes rows: `mod_cloudhost247_email_accounts` and any remote/user ids recorded against it stay in the database as history — do not drop that table, and do not treat its presence as a sign the removal failed.
+
 ## 8. Re-check the installed release and activate only the approved modules
 
 After the overlay, run the release-candidate preflight against the staging root:
@@ -181,6 +245,8 @@ The source migration validator checks the repository's required versions/order a
 
 Set capability/role access before granting other administrators access. Do not activate RDP or any other module outside the approved test scope. Capture the post-migration schema/version list and compare protected WHMCS table counts against the baseline. Repeating activation must be a no-op.
 
+Before activating, re-run the §7.1 binding query. It must return no rows, or only rows deliberately hidden until they are ready. A row here is a product that will fail on its next provisioning attempt; move it to `cloudhost247_smm` or `cloudhost247_email_hosting` and record the before/after values — a silent rebinding is not a reviewed change.
+
 ## 9. Configure staging-only settings and providers
 
 - Select the CloudHost247 client theme and CloudHost247 order form on staging only.
@@ -199,6 +265,7 @@ Confirm all of the following before reopening staging traffic:
 - staging banner and maintenance controls are correct;
 - Foundation health checks pass and each expected migration appears exactly once;
 - original-file integrity checks pass and legacy vendor addons remain inactive;
+- the retired paths from §1.1 are gone from the target and the `retired-present.txt` list is fully accounted for;
 - CloudHost247 theme/order form render without fatal errors or legacy-vendor licence requests;
 - logs contain no credentials, tokens, payment data or customer rows;
 - all test gateways/providers are still isolated from production.
@@ -257,7 +324,7 @@ If any step fails:
 1. Keep staging in maintenance mode and pause its cron/jobs.
 2. Stop new test orders and provider mutations.
 3. Restore the reviewed application files and database from the **proven** step 5 backup into staging; do not improvise reverse SQL or edit financial/customer records.
-4. Restore the stock WHMCS theme/order-form selections, disable only the CloudHost247 staging modules, and clear only the verified staging template cache.
+4. Restore the stock WHMCS theme/order-form selections, disable only the CloudHost247 staging modules, and clear only the verified staging template cache. Restoring a pre-2026-11-14 file backup reintroduces the retired modules and demo routes from §1.1 as files — remove them again before the next deployment, or the target runs code this guide does not cover.
 5. Re-run the preflight and financial comparison, record the outcome, and preserve redacted logs.
 
 If all staging evidence is complete, step 13 of [`RELEASE-WORKFLOW.md`](RELEASE-WORKFLOW.md) remains a human approval gate. This guide has no production command and does not authorize promotion. A named approver must review the exact candidate SHA, acceptance artifacts, evidence paths and tested rollback before any separate production change is planned.

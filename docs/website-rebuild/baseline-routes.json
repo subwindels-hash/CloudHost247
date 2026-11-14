@@ -16,13 +16,6 @@
     "templates": []
   },
   {
-    "path": "all-element-cloudhost247.php",
-    "category": "Administrative/internal",
-    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'all-elements', 'All Elements')",
-    "runtime": "WHMCS init.php required",
-    "templates": []
-  },
-  {
     "path": "backup-policy.php",
     "category": "Legal",
     "renderer": "backuppolicy",
@@ -81,30 +74,9 @@
     ]
   },
   {
-    "path": "cloudhost247-sample.php",
-    "category": "Administrative/internal",
-    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'cloudhost247-sample', 'Sample Page')",
-    "runtime": "WHMCS init.php required",
-    "templates": []
-  },
-  {
     "path": "cloudhost247-sitemap.php",
     "category": "Administrative/internal",
     "renderer": "",
-    "runtime": "WHMCS init.php required",
-    "templates": []
-  },
-  {
-    "path": "cloudhost247-vps-sample.php",
-    "category": "Administrative/internal",
-    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'vps-sample', 'VPS Sample')",
-    "runtime": "WHMCS init.php required",
-    "templates": []
-  },
-  {
-    "path": "comingsoon.php",
-    "category": "Marketing",
-    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'coming-soon', 'Coming Soon')",
     "runtime": "WHMCS init.php required",
     "templates": []
   },
@@ -257,13 +229,6 @@
     ]
   },
   {
-    "path": "future-element.php",
-    "category": "Administrative/internal",
-    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'future-element', 'Future Element')",
-    "runtime": "WHMCS init.php required",
-    "templates": []
-  },
-  {
     "path": "game-servers.php",
     "category": "Dedicated",
     "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'game-servers', 'Game Servers')",
@@ -345,13 +310,6 @@
     "path": "ssl-certificate.php",
     "category": "Product",
     "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'ssl-certificate', 'SSL Certificates')",
-    "runtime": "WHMCS init.php required",
-    "templates": []
-  },
-  {
-    "path": "tables.php",
-    "category": "Administrative/internal",
-    "renderer": "PublicPage::route(new \\WHMCS\\ClientArea(), 'tables', 'Tables')",
     "runtime": "WHMCS init.php required",
     "templates": []
   },

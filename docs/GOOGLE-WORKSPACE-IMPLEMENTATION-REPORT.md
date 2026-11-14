@@ -12,9 +12,11 @@ Google account, payment gateway, or live API. No purchases or provider operation
   Google tenant. It does not create reseller customers or subscriptions. The module has WHMCS
   lifecycle entry points, per-service locks, operation records and reconciliation for its
   mailbox workflow; those mechanisms are not proof of subscription-level idempotency.
-* `modules/servers/cloudhost247_email/` is a separate older WHMCS server module with Google
-  code. Both exist in the repository. Do not install another module or automatically migrate
-  or remove either: first inventory actual product/server assignments and data on staging.
+* `modules/servers/cloudhost247_email/` was a separate older WHMCS server module with Google
+  code. **It was removed on 2026-11-14** (inactive, superseded); `cloudhost247_email_hosting` is
+  now the only email provisioning module in the tree. Before migrating any deployed product,
+  inventory actual product/server assignments and data on staging — removing the code does not
+  move or delete data.
 * `email-hosting.php`, `PublicCatalog.php`, the WHMCS theme template and `ContentRepository.php`
   expose a general email catalogue backed by WHMCS products and pricing. The newer module's
   mailboxes-included setting is informational, not per-seat subscription billing. Its client
@@ -30,8 +32,10 @@ Google account, payment gateway, or live API. No purchases or provider operation
   their existence does not establish an integrated WHMCS Workspace checkout. The separate
   `platform/` backend also exists; see `docs/ARCHITECTURE-DECISION-RECORD.md` before choosing
   any Node integration. Do not create a parallel billing ledger for Workspace.
-* `tests/cloudhost247_email/run.php` is a mock-only PHP harness for the newer email module.
-  It does not verify WHMCS billing or Google reseller subscriptions.
+* `tests/cloudhost247_email/run.php` was a mock-only PHP harness for the newer email module
+  (removed with the older module on 2026-11-14). It never verified WHMCS billing or Google
+  reseller subscriptions, and its removal does not weaken that guarantee — that work remains a
+  staging requirement.
 
 ## Gaps and risks
 
@@ -56,8 +60,9 @@ These are **planned**, not completed; exact names may change after a staging inv
 Google API contract review. Avoid duplicating existing tables, modules, routes or billing logic.
 
 1. Inventory deployed WHMCS product/server assignments and schemas; decide an explicit legacy
-   migration plan. Review `modules/servers/cloudhost247_email/` and
-   `modules/servers/cloudhost247_email_hosting/` before touching either.
+   migration plan. `modules/servers/cloudhost247_email_hosting/` is now the only email
+   provisioning module in the tree (the older `cloudhost247_email/` was removed on 2026-11-14,
+   which is why the inventory has to come from the deployed database, not from the source tree).
 2. Extend the newer module in place: add a distinct reseller adapter under
    `modules/servers/cloudhost247_email_hosting/lib/Providers/`, and subscription workflow,
    repository and reconciliation classes under its existing `lib/Service/` and
@@ -74,7 +79,7 @@ Google API contract review. Avoid duplicating existing tables, modules, routes o
    actual WHMCS products, configurable options, invoices and services; let WHMCS own tax,
    payment, credits and recurring billing. Store verified, country/currency-specific catalogue
    configuration without hard-coded prices or entitlements. Fail closed when unavailable.
-5. Add mocked tests to `tests/cloudhost247_email/run.php` or its successor for API contracts,
+5. Add mocked tests to the email hosting module's suite for API contracts,
    uncertain outcomes, authorization and replay, plus WHMCS integration tests and mobile
    end-to-end tests in an isolated staging environment. Validate the entire payment, invoice,
    subscription and provider reconciliation chain with authorized non-chargeable test data.

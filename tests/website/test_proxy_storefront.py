@@ -16,8 +16,12 @@ class ProxyStorefrontTest(unittest.TestCase):
             self.assertIn(text, tpl)
         self.assertNotIn('visual3d', tpl)
         page = (ROOT / 'cloudhost247-node/frontend/src/pages/ProxyServicesPage.tsx').read_text()
-        self.assertIn('coming soon', page)
-        self.assertNotIn('ProductPlansSection', page)
+        # The SPA renders this service line from the platform's published catalogue, exactly like
+        # every other storefront. It used to carry a hardcoded "coming soon" block, which is a
+        # promise the page cannot keep and a second ordering story beside the real one. An
+        # unpublished product already gets an honest empty state inside ProductPlansSection.
+        self.assertIn('<ProductPlansSection slug="proxy-services"/>', page)
+        self.assertNotIn('coming soon', page.lower())
 
     def test_menu_and_footer_links(self):
         registry = json.loads((ROOT / 'shared/site/registry.json').read_text())

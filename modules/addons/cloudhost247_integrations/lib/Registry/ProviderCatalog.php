@@ -500,7 +500,7 @@ final class ProviderCatalog
                 'documentation' => 'https://learn.microsoft.com/graph/api/overview',
                 'credentials_url' => 'Entra admin center -> App registrations -> Certificates & secrets',
                 'scopes' => array('Organization.Read.All', 'User.ReadWrite.All', 'Directory.Read.All'),
-                'used_by' => array('modules/servers/cloudhost247_email'),
+                'used_by' => array('modules/servers/cloudhost247_email_hosting'),
                 'fields' => array(
                     array('key' => 'tenant_id', 'label' => 'Directory (tenant) ID', 'type' => 'text', 'storage' => 'option', 'required' => true),
                     array('key' => 'client_id', 'label' => 'Application (client) ID', 'type' => 'text', 'storage' => 'option', 'required' => true),
@@ -798,11 +798,11 @@ final class ProviderCatalog
                 'category' => 'social',
                 'capabilities' => array('smm', 'orders'),
                 'vendor' => 'SMM panel operator',
-                'summary' => 'Standard SMM panel v2 API used by the social-media reseller modules.',
-                'documentation' => 'modules/addons/smmaddon/README.md',
+                'summary' => 'Standard SMM panel v2 API used by the CloudHost247 SMM marketplace module.',
+                'documentation' => 'modules/addons/cloudhost247_smm/README.md',
                 'credentials_url' => 'SMM panel account -> API section.',
                 'scopes' => array('balance', 'services', 'add', 'status'),
-                'used_by' => array('modules/addons/smmaddon', 'modules/servers/smmprovisioning'),
+                'used_by' => array('modules/addons/cloudhost247_smm', 'modules/servers/cloudhost247_smm'),
                 'fields' => array(
                     array('key' => 'base_url', 'label' => 'API URL', 'type' => 'url', 'storage' => 'column', 'required' => true, 'help' => 'The panel API endpoint, for example https://panel.example.com/api/v2'),
                     array('key' => 'api_key', 'label' => 'API key', 'type' => 'secret', 'required' => true, 'help' => 'Submitted in the POST body as "key"; never in a query string.'),

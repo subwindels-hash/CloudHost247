@@ -236,6 +236,11 @@ def validate(data):
  baseline=json.loads((ROOT/'docs/website-rebuild/baseline-routes.json').read_text())
  for row in baseline:
   if not (ROOT/row['path']).is_file():errors.append('Original route removed: '+row['path'])
+ # ...and every entry point that was deliberately dropped stays dropped, with its reason on
+ # record. Removing a route is a decision, not drift; putting it back is drift.
+ removed=json.loads((ROOT/'docs/website-rebuild/removed-routes.json').read_text())
+ for row in removed:
+  if (ROOT/row['path']).exists():errors.append('Removed route came back: '+row['path'])
  # Critical shell has no dummy anchor destinations or ad hoc external footer URLs.
  for name in ['site-nav.tpl','site-footer.tpl']:
   text=(ROOT/'templates/cloudhost247/includes'/name).read_text()

@@ -1,0 +1,21 @@
+# Minimal OpenSSL configuration for the php-wasm runtime.
+#
+# The wasm PHP ships an OpenSSL extension but no `openssl.cnf`, so every key
+# operation that needs one fails with "Cannot get key from parameter 1":
+# `openssl_pkey_new()` returns false, `openssl_pkey_export()` warns, and any
+# suite that builds a throwaway key (tests/passkey, tests/cloudhost247_email)
+# reports unrelated failures. Pointing OPENSSL_CONF at this file — which the
+# shim does automatically when the variable is unset — makes those suites run
+# on a host with no PHP toolchain, which is the whole point of the shim.
+#
+# Deliberately minimal: activate the default provider and nothing else. No key
+# material, no policy, no paths outside the runtime.
+
+[ openssl_init ]
+providers = provider_sect
+
+[ provider_sect ]
+default = default_sect
+
+[ default_sect ]
+activate = 1

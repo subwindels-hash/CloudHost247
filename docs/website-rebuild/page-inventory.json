@@ -23,7 +23,7 @@
     "staging-functional": "licensed WHMCS staging installation"
   },
   "totals": {
-    "root_php_pages": 92,
+    "root_php_pages": 86,
     "registered_public_pages": 75,
     "navigation_destinations": 126,
     "footer_destinations": 120,
@@ -34,7 +34,7 @@
     "distinct_hero_scenes": 49,
     "pages_by_route_owner": {
       "cloudhost247-theme": 75,
-      "internal": 17,
+      "internal": 11,
       "tools-front-controller": 286,
       "whmcs-core": 8
     }
@@ -107,36 +107,6 @@
       "footer_placement": "Legal",
       "footer_location": "Legal",
       "reachable": true
-    },
-    {
-      "php_page": "all-element-cloudhost247.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
     },
     {
       "php_page": "api-hosting.php",
@@ -469,36 +439,6 @@
       "reachable": false
     },
     {
-      "php_page": "cloudhost247-sample.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
-    },
-    {
       "php_page": "cloudhost247-sitemap.php",
       "path": "",
       "canonical_url": "",
@@ -527,66 +467,6 @@
       "footer_placement": "Resources",
       "footer_location": "Resources",
       "reachable": true
-    },
-    {
-      "php_page": "cloudhost247-vps-sample.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
-    },
-    {
-      "php_page": "comingsoon.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
     },
     {
       "php_page": "cookie-policy.php",
@@ -1367,36 +1247,6 @@
       "footer_placement": "Cloud & Servers",
       "footer_location": "Cloud & Servers",
       "reachable": true
-    },
-    {
-      "php_page": "future-element.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
     },
     {
       "php_page": "game-servers.php",
@@ -2477,36 +2327,6 @@
       "footer_placement": "Products",
       "footer_location": "Products",
       "reachable": true
-    },
-    {
-      "php_page": "tables.php",
-      "path": "",
-      "canonical_url": "",
-      "title": "",
-      "page_title": "",
-      "category": "",
-      "route_owner": "internal",
-      "status": "internal",
-      "implementation_status": "internal",
-      "template": "",
-      "test_status": "php-syntax; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
-      "seo_metadata": {
-        "title": "",
-        "description": ""
-      },
-      "hero_artwork": {
-        "svg": "",
-        "scene": ""
-      },
-      "hero_asset": "",
-      "visual": "",
-      "image_status": "n/a",
-      "seo_status": "n/a",
-      "navigation_placement": "",
-      "navigation_location": "",
-      "footer_placement": "",
-      "footer_location": "",
-      "reachable": false
     },
     {
       "php_page": "terms-of-service.php",

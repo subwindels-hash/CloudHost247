@@ -59,7 +59,7 @@ class RebuildSecurityReview(unittest.TestCase):
   self.assertIn("'mod_cloudhost247_theme_pages'",sql)
   self.assertIn("UPDATE tblservers  SET type       = 'cloudhost247_email_hosting'",sql)
   self.assertIn("UPDATE tblproducts SET servertype = 'cloudhost247_email_hosting'",sql)
-  # the inactive legacy cloudhost247_email module owns mod_cloudhost247_email_accounts
+  # no product may be repointed at the module id that the hosting module replaced
   self.assertNotIn("UPDATE tblproducts SET servertype = 'cloudhost247_email'",sql)
   self.assertIn('cloudhost247_email_hosting',register);self.assertIn('X-CloudHost247-Signature',register);self.assertNotIn('X-'+'Host'+'x-*',register)
  def test_email_module_source_carries_no_legacy_branding_identifier(self):
@@ -97,7 +97,7 @@ class RebuildSecurityReview(unittest.TestCase):
   self.assertEqual(matched,27)
  def test_release_candidate_check_is_complete(self):
   s=(ROOT/'scripts/release-candidate-check.sh').read_text()
-  for marker in ('php -l','tests/foundation/run.php','tests/cloudhost247_email/run.php','unittest','validate-migrations.py','branding-audit.py','original-file-manifest.sha256','sha256sum --check','core.whitespace=cr-at-eol diff --check'):self.assertIn(marker,s)
+  for marker in ('php -l','tests/foundation/run.php','tests/payments/run.php','unittest','validate-migrations.py','branding-audit.py','original-file-manifest.sha256','sha256sum --check','core.whitespace=cr-at-eol diff --check'):self.assertIn(marker,s)
  def test_audit_filters_and_pagination_are_bounded(self):
   s=(ROOT/'modules/addons/cloudhost247_core/lib/Support/AuditRepository.php').read_text()
   for name in ('module','action','resource_type','resource','result','correlation_id','admin_id','from','to','q'):self.assertIn("'"+name+"'",s)
