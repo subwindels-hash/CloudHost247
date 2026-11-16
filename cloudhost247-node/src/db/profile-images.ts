@@ -2,9 +2,9 @@
  * Profile images (spec §28–§30).
  *
  * Storage decision: bytes live in `user_profile_images` in the platform's own database rather
- * than on the filesystem or in a new object store. The supported deployment target is cPanel +
- * Passenger (docs/CPANEL_DEPLOYMENT.md) where the application directory is redeployed wholesale
- * and no object-storage credentials exist; putting avatars in the database keeps them backed up,
+ * than on the filesystem or in a new object store. The deployment target is an Ubuntu 24.04 VPS
+ * (docs/VPS_DEPLOYMENT.md) where `deploy.sh` replaces the application directory wholesale and no
+ * object-storage credentials exist; putting avatars in the database keeps them backed up,
  * replicated, and access-controlled by exactly the same mechanisms as everything else, and
  * avoids handing the web server a user-writable public directory.
  *

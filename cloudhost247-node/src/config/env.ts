@@ -1,9 +1,9 @@
 /**
- * Environment validation for CloudHost247 (cPanel Passenger + external/managed PostgreSQL).
+ * Environment validation for CloudHost247 (Ubuntu VPS: systemd + local PostgreSQL, behind Nginx).
  *
  * Design constraints (see docs/CPANEL_DEPLOYMENT.md):
  *  - No secret ever has a hardcoded fallback. Missing secrets fail startup loudly.
- *  - PORT is supplied by the hosting environment (cPanel Passenger / Application Manager).
+ *  - PORT is supplied by the systemd unit (Environment=PORT=3000) and proxied by Nginx.
  *    A development-only fallback is provided so `npm run dev` works locally.
  *  - DATABASE_URL is a single connection string so the same code works whether PostgreSQL
  *    is provided locally by the host or by an external managed provider.
@@ -23,19 +23,19 @@ const boolFromString = z
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
-  // Supplied by cPanel Passenger/Application Manager in production. A fallback is only used
+  // Supplied by the systemd unit in production. A fallback is only used
   // for local `npm run dev`; production must never rely on the fallback.
   PORT: z.coerce.number().int().positive().default(3000),
 
-  // Optional: some Passenger setups bind to a unix domain socket path instead of a TCP port.
-  // Not commonly required for cPanel Application Manager, but supported if provided.
+  // Optional: bind to a unix domain socket path instead of a TCP port.
+  // Not used by the shipped systemd unit (it sets PORT=3000), but supported if provided.
   SOCKET_PATH: z.string().optional(),
   FRAME_ANCESTORS: z.string().max(1000).optional(),
 
   // Public URL of the deployed application (used for building absolute links in emails, etc.)
   APP_URL: z.string().url().default('http://localhost:3000'),
 
-  // Single connection string. Works for local PostgreSQL (if the cPanel account has it) and
+  // Single connection string. Used for the local PostgreSQL 16 instance on the VPS and
   // for an external managed PostgreSQL provider. Never construct this from separate
   // hardcoded host/user/password fields.
   DATABASE_URL: z
@@ -53,7 +53,7 @@ const envSchema = z.object({
 
   DATABASE_POOL_MAX: z.coerce.number().int().positive().max(50).default(5),
 
-  // JWT signing secret for the authentication foundation. Must be injected via cPanel
+  // JWT signing secret for the authentication foundation. Must be injected via
   // environment variables / .env (never committed).
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
   JWT_EXPIRES_IN: z.string().default('12h'),
@@ -193,7 +193,7 @@ const envSchema = z.object({
   // How long a claimed-but-unrenewed deployment lease stays valid before another worker may
   // take the job over (crash recovery). Jobs renew the lease while running.
   WORKER_LEASE_MS: z.coerce.number().int().min(10_000).max(600_000).default(120_000),
-  // cPanel must invoke a bounded one-shot cycle from Cron rather than leave an SSH-launched
+  // Cron/systemd must invoke a bounded one-shot cycle rather than leave an SSH-launched
   // daemon running. `npm run worker:once` sets this through the CLI; this environment flag is
   // available for hosts whose scheduler cannot pass arguments.
   WORKER_ONCE: boolFromString.optional().default(false),
@@ -329,10 +329,11 @@ export class EnvValidationError extends Error {
 const STRICT_REQUIRED_KEYS = new Set(['DATABASE_URL', 'JWT_SECRET']);
 
 /**
- * Normalizes common cPanel / Passenger / LiteSpeed environment quirks before schema parsing:
- *  - Blank optional strings (`KEY=""` in `.env` or cPanel UI) become `undefined`.
- *  - Unix domain socket paths injected via `PORT` (LiteSpeed lsnode / Passenger) move to `SOCKET_PATH`.
- *  - Bare hostnames in `APP_URL` (matching cPanel's scheme-less Application URL field) gain `https://`.
+ * Normalizes common hosting-environment quirks before schema parsing (kept because these are
+ * harmless and still possible: a socket path passed as PORT, a blank optional variable):
+ *  - Blank optional strings (`KEY=""` in `.env`) become `undefined`.
+ *  - A unix domain socket path supplied via `PORT` moves to `SOCKET_PATH`.
+ *  - Bare hostnames in `APP_URL` gain `https://`.
  */
 function normalizeEnvInput(source: NodeJS.ProcessEnv): Record<string, string | undefined> {
   const normalized: Record<string, string | undefined> = {};
@@ -392,7 +393,7 @@ export interface RuntimeEnvResult {
 export const UNCONFIGURED_DATABASE_SENTINEL = 'postgresql://unconfigured.invalid:5432/unconfigured';
 
 /**
- * Runtime loader used by `src/server.ts` so a fresh cPanel / Passenger deployment without
+ * Runtime loader used by `src/server.ts` so a deployment without
  * `JWT_SECRET` or `DATABASE_URL` boots and serves pages instead of crash-looping with 503.
  * Direct `loadEnv()` callers (CLI tools, worker, tests) retain strict validation.
  */

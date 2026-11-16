@@ -1,15 +1,17 @@
 import type { FastifyInstance } from 'fastify';
 import type { Env } from '../config/env';
-import { isDatabaseReachable } from '../db/pool';
+import { isDatabaseReachable, isSchemaPresent } from '../db/pool';
 import type { Queryable } from '../db/types';
 
 /**
  * /health — liveness. Confirms the Node process is up and answering HTTP requests. Must stay
- * dependency-free (no DB calls) so cPanel/uptime monitors get a fast, reliable signal even if
- * the database is temporarily unreachable.
+ * dependency-free (no DB calls) so uptime monitors and the systemd/Nginx healthcheck get a fast,
+ * reliable signal even if the database is temporarily unreachable.
  *
- * /ready — readiness. Confirms dependencies required to actually serve traffic (currently:
- * PostgreSQL) are reachable. Never returns credentials, connection strings, or stack traces.
+ * /ready — readiness. Confirms the dependencies required to actually serve traffic are usable:
+ * PostgreSQL accepts connections AND the migration ledger is present. Reachability alone is not
+ * enough — an empty schema accepts connections and answers `SELECT 1` perfectly, while every real
+ * query fails. Never returns credentials, connection strings, or stack traces.
  *
  * /api/v1/public/status — the website's status page. It reports ONLY what this process can verify
  * about itself right now, and marks everything else `unmonitored`.
@@ -31,7 +33,14 @@ export async function registerHealthRoutes(app: FastifyInstance, env: Env, pool?
       reply.code(503);
       return { status: 'error', checks: { database: 'error' } };
     }
-    return { status: 'ok', checks: { database: 'ok' } };
+    // A reachable database with no migration ledger means migrations never ran (or refused —
+    // see the quarantine gate). Say so, instead of reporting ready over an empty schema.
+    const schemaOk = await isSchemaPresent(env, 3000, pool);
+    if (!schemaOk) {
+      reply.code(503);
+      return { status: 'error', checks: { database: 'ok', schema: 'missing' } };
+    }
+    return { status: 'ok', checks: { database: 'ok', schema: 'ok' } };
   });
 
   app.get('/api/v1/public/status', async () => {

@@ -1735,3 +1735,65 @@ sub-phase before the next one begins.
 - **Not claimed, again:** the read-only console output that `GetConsoleOutput` used to return is no longer
   surfaced anywhere. It was never rendered, and a boot log can contain secrets; if it is wanted later it should
   be a deliberate, separately designed diagnostic surface, not a side effect of the console flag.
+
+---
+
+## VPS deployment target — Ubuntu 24.04 (added 2026-11-15)
+
+- **Decision:** the production target is a plain **Ubuntu 24.04 LTS VPS** —
+  Nginx 1.24 + Certbot, PHP 8.2-FPM (ondrej/php PPA) + ionCube Loader, MySQL 8.0
+  for WHMCS 8.x; Node.js 22 LTS + PostgreSQL 16 under systemd for this platform;
+  UFW + fail2ban; system cron and checksummed backups. It replaces the
+  cPanel/Passenger target without changing application code: `server.js` already
+  binds `0.0.0.0:$PORT` (default 3000) with `trustProxy: true`, so the same build
+  runs behind Nginx instead of Passenger.
+- **Deployment target: VPS only (2026-11-15).** The cPanel/Passenger path is retired
+  and removed from the tree: `docs/CPANEL_DEPLOYMENT.md`, the app-root copy,
+  `cloudhost247-node/scripts/package-cpanel.sh`, the `server.js` Passenger
+  bootstrap (922 lines), `infrastructure/litespeed/`, and the prebuilt cPanel
+  release ZIP. `npm start` now runs `dist/src/server.js`. The product still
+  *sells* cPanel hosting (`src/control-panels/adapters/`, the pricing pages, the
+  marketing copy) — that is commercial content, not deployment infrastructure,
+  and it is untouched. `smoke-test.sh` [11] fails the build if any retired
+  artefact returns.
+- **Artefacts:** `infrastructure/vps/` (provisioning script, Nginx vhosts,
+  PHP-FPM pool/ini, systemd units `cloudhost247-node`/`cloudhost247-worker`,
+  cron, logrotate, fail2ban jail, and `install-whmcs.sh` / `deploy.sh` /
+  `backup.sh` / `restore.sh` / `healthcheck.sh`), plus
+  `cloudhost247-node/scripts/package-vps.sh` and the runbook
+  `docs/VPS_DEPLOYMENT.md`.
+- **Verified by automated tests (206 assertions, all passing):**
+  `tests/nginx-live-test.sh` loads the shipped vhosts into a **real nginx 1.24.0**
+  (built from source for this verification) and asserts on live HTTP responses:
+  secret-file denies, no PHP source disclosure, ACME challenge reachable over
+  plain HTTP, redirect preserving path+query, pretty-URL and `/tools/`
+  front-controller routing, exactly one `Cache-Control`, security headers
+  surviving nested `add_header` locations, `X-Forwarded-*` reaching the Node
+  app, and HTTP/2 (43). `tests/deploy-migrate-test.sh` (28) runs the compiled
+  application the way a deploy does: the real migration runner against a real
+  database, the documented quarantine override, and the systemd entrypoint
+  booted over TCP. Plus `smoke-test.sh` (92), `setup-dry-run.sh` (33, the
+  provisioning script end to end with stubbed system commands), `gate-test.sh`
+  (8, proving the final gate rejects ionCube-less / PHP 8.3 / missing-extension
+  hosts) and `tls-check-test.sh` (5). `.github/workflows/vps-stack.yml` runs all
+  of them on every push.
+  - Two deploy blockers were found and fixed by that last harness, not by review:
+    (a) a fresh production database applied **zero** migrations, because
+    quarantined `0041` has pending dependents and the runner fails closed —
+    `deploy.sh` now reports this and forwards `AUTHORIZED_MIGRATIONS`;
+    (b) the `cloudhost247-node` unit started the cPanel Passenger bootstrap
+    `./server.js`, which compiles in-process, instead of the compiled
+    `dist/src/server.js`;
+    (c) `npm run build` could not succeed on a VPS at all — the build writes
+    `../../modules/.../tools.json` and `../../assets/cloudhost247-tools`, i.e.
+    repo-root paths, so building in `/opt/cloudhost247` (which contains only
+    `cloudhost247-node/`) failed at the pre-build projection check and never
+    produced `dist/`. `deploy.sh` now builds in the git checkout and publishes
+    `dist/` + `public/`. `/ready` also now checks the schema instead of only
+    connection reachability (`SELECT 1` passes against an empty database).
+- **VPS staging verification: BLOCKED — NOT PERFORMED.** No Ubuntu 24.04 VPS
+  (or WHMCS licence) has been available in this environment, so nothing in
+  Appendix C of `docs/VPS_DEPLOYMENT.md` is checked off, and no
+  "production-ready" claim is made for this target. The same standing condition
+  as the cPanel path applies: the claim requires a real run on a real host with
+  recorded evidence (versions, logs, healthcheck output, restore drill).

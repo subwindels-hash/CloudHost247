@@ -1,5 +1,11 @@
 # CloudHost247 — Staging Certification Report (2026-11-09)
 
+> **Historical record (2026-11-15).** The cPanel/Passenger deployment path described in this
+> document has been **retired**. This project deploys to an Ubuntu 24.04 VPS only — see
+> `docs/VPS_DEPLOYMENT.md`. The text below is preserved unchanged as the record of what was
+> measured at the time; do not follow it as instructions.
+
+
 Branch: `arena/fe9b2088-cloudhost247` · HEAD at execution: `c578ff2f`
 Environment: **controlled local staging substitute** — the unmodified application stack
 (`npm run dev:stack`): Fastify API on :3000 + Vite SPA on :5173, **real embedded Postgres

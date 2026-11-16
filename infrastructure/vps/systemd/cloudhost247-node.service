@@ -1,0 +1,52 @@
+# CloudHost247 — Node platform (Fastify API + SPA) under systemd.
+# The app binds 0.0.0.0:$PORT (default 3000); Nginx proxies 127.0.0.1:3000.
+# __APP_ROOT__ / __APP_USER__ are rendered by setup-ubuntu-24.04.sh.
+[Unit]
+Description=CloudHost247 Node platform (Fastify API + SPA)
+After=network.target postgresql.service
+Wants=postgresql.service
+# Do not crash-loop forever on a bad build: systemd gives up after 5 starts in
+# 60s and leaves the unit failed, which healthcheck.sh and the operator can see.
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=__APP_USER__
+Group=__APP_USER__
+WorkingDirectory=__APP_ROOT__
+# Runs the compiled application. deploy.sh builds it with `npm ci && npm run
+# build` before this unit is restarted, so a missing/partial build is a deploy
+# fault, and ExecStartPre makes it fail loudly instead of half-starting.
+ExecStartPre=/usr/bin/test -f __APP_ROOT__/dist/src/server.js
+# --max-old-space-size is the VPS equivalent of what the old Passenger bootstrap
+# did with UV_THREADPOOL_SIZE/GOMAXPROCS: bound memory so a leak triggers a
+# clean OOM restart (Restart=on-failure) instead of the kernel OOM-killer
+# taking down postgres or nginx alongside it. Sized for a 2 GB host; raise it on
+# a larger one. Node's default heap is derived from total system RAM, which on a
+# shared VPS can exceed what this service is actually allowed to use.
+ExecStart=/usr/bin/node --max-old-space-size=512 dist/src/server.js
+
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGTERM
+
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOST=0.0.0.0
+EnvironmentFile=-__APP_ROOT__/.env
+
+# Hardening (the app needs no shell, no root, no extra capabilities).
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=__APP_ROOT__ /var/log/cloudhost247
+
+# Logging: journald (query with `journalctl -u cloudhost247-node -f`).
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -127,7 +127,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // strict structural check trips on an unrelated optional property (`msgPrefix`) — this is a
     // known friction point between the `pino` and `fastify` type packages, not a runtime issue.
     loggerInstance: createLogger(env) as unknown as FastifyBaseLogger,
-    trustProxy: true, // cPanel/Apache sits in front of this process via Passenger's reverse proxy
+    // Nginx sits in front of this process and is the only listener on 443, so X-Forwarded-For is
+    // trustworthy here. If the app is ever exposed directly, this must be false.
+    trustProxy: true,
   });
 
   // Capture raw request body bytes for cryptographic webhook signature verification
@@ -184,7 +186,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
   });
 
   // The path prefix this application is served under, when APP_URL carries a pathname (a
-  // Passenger BaseURI / sub-path deployment). Request URLs arrive with that prefix intact, so it
+  // reverse-proxy sub-path deployment). Request URLs arrive with that prefix intact, so it
   // has to come off before anything tests for `/api`. Without this, `/myapp/api/tools/catalog`
   // looks like a page, gets answered with the SPA shell, and the visitor is shown a JSON parser
   // error instead of the tool.
@@ -367,7 +369,7 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
             '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
               '<title>Frontend Build Missing | CloudHost247</title></head><body style="margin:0;background:#101e2c;color:#fff;font:16px/1.6 system-ui,sans-serif">' +
               '<main style="max-width:720px;margin:10vh auto;padding:24px"><h1>CloudHost247 frontend assets are not built yet</h1>' +
-              '<p>The backend API is running, but <code>public/index.html</code> was not found. Run <code>npm run build</code> in the application directory (or upload the pre-built cPanel release archive) and restart the application.</p>' +
+              '<p>The backend API is running, but <code>public/index.html</code> was not found. Run <code>npm run build</code> in the application directory, then <code>sudo systemctl restart cloudhost247-node</code>.</p>' +
               '</main></body></html>',
           );
         return;

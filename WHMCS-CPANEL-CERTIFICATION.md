@@ -1,5 +1,11 @@
 # CloudHost247 — WHMCS & cPanel Certification (Phase 6, 2026-11-09)
 
+> **Historical record (2026-11-15).** The cPanel/Passenger deployment path described in this
+> document has been **retired**. This project deploys to an Ubuntu 24.04 VPS only — see
+> `docs/VPS_DEPLOYMENT.md`. The text below is preserved unchanged as the record of what was
+> measured at the time; do not follow it as instructions.
+
+
 ## Status: STOPPED — licensing/infrastructure gate (Phase 6 §7)
 
 **Authorization discipline record:**

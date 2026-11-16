@@ -1,9 +1,8 @@
-import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import http from 'node:http';
-import net from 'node:net';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import http from 'node:http';
+import net from 'node:net';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../../src/app';
 import { EnvValidationError, loadRuntimeEnv, resetEnvCache } from '../../src/config/env';
@@ -54,7 +53,7 @@ async function waitForHttp(
   throw lastError ?? new Error('Timed out waiting for HTTP listener');
 }
 
-describe('cPanel / Passenger startup resilience against 503 crashes', () => {
+describe('startup resilience: a bad environment must not 503 the site', () => {
   const tempDirs: string[] = [];
 
   afterEach(() => {
@@ -65,7 +64,7 @@ describe('cPanel / Passenger startup resilience against 503 crashes', () => {
   });
 
   it('boots cleanly and serves pages when JWT_SECRET and DATABASE_URL are unset', async () => {
-    const publicDir = mkdtempSync(path.join(tmpdir(), 'ch247-cpanel-pub-'));
+    const publicDir = mkdtempSync(path.join(tmpdir(), 'ch247-pub-'));
     tempDirs.push(publicDir);
     writeFileSync(
       path.join(publicDir, 'index.html'),
@@ -164,37 +163,4 @@ describe('cPanel / Passenger startup resilience against 503 crashes', () => {
       Object.assign(process.env, prevEnv);
     }
   });
-
-  it.skipIf(!existsSync(path.join(APP_ROOT, 'dist', 'src', 'server.js')))(
-    'spawns server.js over a Passenger Unix domain socket in PORT with zero env secrets',
-    async () => {
-      const sockDir = mkdtempSync(path.join(tmpdir(), 'ch247-sock-'));
-      tempDirs.push(sockDir);
-      const sockPath = path.join(sockDir, 'passenger.sock');
-
-      const child = spawn(process.execPath, [path.join(APP_ROOT, 'server.js')], {
-        cwd: APP_ROOT,
-        env: {
-          PATH: process.env.PATH,
-          HOME: process.env.HOME,
-          NODE_ENV: 'production',
-          PORT: sockPath,
-        },
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-
-      try {
-        const health = await waitForHttp({ socketPath: sockPath, path: '/health' });
-        expect(health.statusCode).toBe(200);
-        expect(JSON.parse(health.body)).toEqual({ status: 'ok' });
-
-        const home = await httpGet({ socketPath: sockPath, path: '/' });
-        expect(home.statusCode).toBe(200);
-        expect(home.body.toLowerCase()).toContain('<!doctype html');
-      } finally {
-        child.kill('SIGTERM');
-        await new Promise((resolve) => child.once('exit', resolve));
-      }
-    },
-  );
 });

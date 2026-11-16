@@ -92,6 +92,15 @@
       "bytes": 7208
     },
     {
+      "slug": "vps-deployment",
+      "href": "/docs/vps-deployment",
+      "section": "Operations",
+      "title": "VPS deployment (Ubuntu 24.04)",
+      "summary": "Target: a plain Linux VPS running Ubuntu 24.04 LTS (noble) with root access. This is the only supported deployment target. The cPanel/Passenger path was retired on 2026-11-15 (see Appendix B).",
+      "source": "docs/VPS_DEPLOYMENT.md",
+      "bytes": 24977
+    },
+    {
       "slug": "passkey",
       "href": "/docs/passkey",
       "section": "Accounts",
@@ -108,15 +117,6 @@
       "summary": "The CloudHost247 ePassport Machine Readable Zone (MRZ) Developer Tool provides a native, privacy-first utility for:",
       "source": "docs/MRZ_DEVELOPER_TOOL.md",
       "bytes": 15712
-    },
-    {
-      "slug": "cpanel-deployment",
-      "href": "/docs/cpanel-deployment",
-      "section": "Operations",
-      "title": "cPanel deployment",
-      "summary": "This document covers deploying, updating, and operating the new independent Node.js/TypeScript platform (cloudhost247-node/) on cPanel shared hosting only, using cPanel's Application Manager (Passenge",
-      "source": "docs/CPANEL_DEPLOYMENT.md",
-      "bytes": 43951
     },
     {
       "slug": "integrations-google-ads",

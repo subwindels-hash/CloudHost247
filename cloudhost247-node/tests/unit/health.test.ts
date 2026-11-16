@@ -24,23 +24,38 @@ describe('/health and /ready', () => {
     await app.close();
   });
 
-  it('GET /ready returns 200 ok when the database is reachable', async () => {
+  it('GET /ready returns 200 ok when the database is reachable and migrated', async () => {
     vi.spyOn(pool, 'isDatabaseReachable').mockResolvedValue(true);
+    vi.spyOn(pool, 'isSchemaPresent').mockResolvedValue(true);
     const app = buildApp(env, { serveFrontend: false });
     const res = await app.inject({ method: 'GET', url: '/ready' });
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({ status: 'ok', checks: { database: 'ok' } });
+    expect(res.json()).toEqual({ status: 'ok', checks: { database: 'ok', schema: 'ok' } });
+    await app.close();
+  });
+
+  it('GET /ready returns 503 when the database is reachable but the schema was never migrated', async () => {
+    // The failure a fresh VPS hits when the migration step is skipped or refuses: Postgres
+    // accepts connections and answers SELECT 1, but every real query fails.
+    vi.spyOn(pool, 'isDatabaseReachable').mockResolvedValue(true);
+    vi.spyOn(pool, 'isSchemaPresent').mockResolvedValue(false);
+    const app = buildApp(env, { serveFrontend: false });
+    const res = await app.inject({ method: 'GET', url: '/ready' });
+    expect(res.statusCode).toBe(503);
+    expect(res.json()).toEqual({ status: 'error', checks: { database: 'ok', schema: 'missing' } });
     await app.close();
   });
 
   it('GET /ready returns 503 and no sensitive details when the database is unreachable', async () => {
     vi.spyOn(pool, 'isDatabaseReachable').mockResolvedValue(false);
+    const schemaSpy = vi.spyOn(pool, 'isSchemaPresent');
     const app = buildApp(env, { serveFrontend: false });
     const res = await app.inject({ method: 'GET', url: '/ready' });
     expect(res.statusCode).toBe(503);
     const body = res.json();
     expect(body).toEqual({ status: 'error', checks: { database: 'error' } });
     expect(JSON.stringify(body)).not.toMatch(/postgres|password|user:pass/i);
+    expect(schemaSpy).not.toHaveBeenCalled();
     await app.close();
   });
 

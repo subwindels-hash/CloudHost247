@@ -1,5 +1,12 @@
 # CloudHost247 Node Platform - Deployment Guide
 
+> **RETIRED (2026-11-15).** This document describes deploying `cloudhost247-node` to cPanel
+> shared hosting via Passenger. That path has been removed from the project: `server.js`,
+> `scripts/package-cpanel.sh` and `docs/CPANEL_DEPLOYMENT.md` no longer exist.
+> **The only supported deployment is an Ubuntu 24.04 VPS — see**
+> [`docs/VPS_DEPLOYMENT.md`](../docs/VPS_DEPLOYMENT.md) **at the repository root.**
+> The commands below will not work; they are kept only as a historical record.
+
 ## Overview
 
 This guide provides step-by-step instructions for deploying the CloudHost247 Node.js platform to a cPanel shared hosting environment using Passenger (Application Manager).

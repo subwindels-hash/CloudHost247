@@ -1,5 +1,11 @@
 # CloudHost247 — Complete Database Recovery Report (Phase 5, 2026-11-09)
 
+> **Historical record (2026-11-15).** The cPanel/Passenger deployment path described in this
+> document has been **retired**. This project deploys to an Ubuntu 24.04 VPS only — see
+> `docs/VPS_DEPLOYMENT.md`. The text below is preserved unchanged as the record of what was
+> measured at the time; do not follow it as instructions.
+
+
 **Supersedes and extends** `DATABASE-RECOVERY-REPORT.md` (Phase 3) under audit finding D4-F1.
 Evidence: `docs/staging/db-recovery-evidence-full-2026-11-09.json` (runner:
 `scripts/staging/db-recovery-exercise.mjs`, executed live against the staging database —

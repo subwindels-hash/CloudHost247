@@ -212,4 +212,17 @@ esac
 # widget classes against the sheet the Builder serves, and fails on an unstyled one or on a hook
 # exemption that no longer matches anything.
 python3 scripts/audit-builder-widget-classes.py
+# The Ubuntu 24.04 VPS stack (Nginx vhosts, PHP-FPM pool, systemd units, cron,
+# install/deploy/backup/restore/healthcheck scripts) must be internally
+# consistent before anyone is handed it: every template placeholder rendered,
+# PHP 8.2 (not 8.3), the Node proxy headers, and no recursive copy of the repo
+# into the WHMCS webroot. Offline and fast; the live nginx -t runs in the
+# vps-stack workflow.
+bash infrastructure/vps/tests/smoke-test.sh
+bash infrastructure/vps/tests/tls-check-test.sh
+bash infrastructure/vps/tests/gate-test.sh
+# Proves a deploy actually lands a schema and a serving process, not just that
+# the artefacts look right. Runs the compiled app if cloudhost247-node is built
+# (skips with a loud SKIP otherwise).
+bash infrastructure/vps/tests/deploy-migrate-test.sh
 echo 'Release-candidate source verification passed.'

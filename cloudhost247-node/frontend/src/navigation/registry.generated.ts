@@ -2021,7 +2021,6 @@ export const PUBLIC_DOC_ROUTES: string[] = [
   "/docs/api-commerce",
   "/docs/api-customer-app",
   "/docs/api-payments",
-  "/docs/cpanel-deployment",
   "/docs/domain-brokerage",
   "/docs/domain-services-architecture",
   "/docs/integrations-google-ads",
@@ -2029,7 +2028,8 @@ export const PUBLIC_DOC_ROUTES: string[] = [
   "/docs/passkey",
   "/docs/platform-services-architecture",
   "/docs/server-agent",
-  "/docs/server-provisioning"
+  "/docs/server-provisioning",
+  "/docs/vps-deployment"
 ];
 
 /** Public tool routes taken from the live tool catalogue; account-only tools are excluded. */
