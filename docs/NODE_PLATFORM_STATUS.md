@@ -1753,13 +1753,18 @@ sub-phase before the next one begins.
   `backup.sh` / `restore.sh` / `healthcheck.sh`), plus
   `cloudhost247-node/scripts/package-vps.sh` and the runbook
   `docs/VPS_DEPLOYMENT.md`.
-- **Source/local verification only:** `bash infrastructure/vps/tests/smoke-test.sh`
-  (artefact, placeholder, proxy-header, systemd user/group and webroot-leak
-  checks), `tests/tls-check-test.sh` (healthcheck certificate classification) and
-  `tests/setup-dry-run.sh` (the provisioning script executed end to end with
-  stubbed system commands, asserting rendered templates and UFW ordering) all
-  pass locally; `.github/workflows/vps-stack.yml` runs them plus a real
-  `nginx -t` against the rendered vhosts.
+- **Verified by automated tests (165 assertions, all passing):**
+  `tests/nginx-live-test.sh` loads the shipped vhosts into a **real nginx 1.24.0**
+  (built from source for this verification) and asserts on live HTTP responses:
+  secret-file denies, no PHP source disclosure, ACME challenge reachable over
+  plain HTTP, redirect preserving path+query, pretty-URL and `/tools/`
+  front-controller routing, exactly one `Cache-Control`, security headers
+  surviving nested `add_header` locations, `X-Forwarded-*` reaching the Node
+  app, and HTTP/2 (43). Plus `smoke-test.sh` (76), `setup-dry-run.sh` (33, the
+  provisioning script end to end with stubbed system commands), `gate-test.sh`
+  (8, proving the final gate rejects ionCube-less / PHP 8.3 / missing-extension
+  hosts) and `tls-check-test.sh` (5). `.github/workflows/vps-stack.yml` runs all
+  of them on every push.
 - **VPS staging verification: BLOCKED — NOT PERFORMED.** No Ubuntu 24.04 VPS
   (or WHMCS licence) has been available in this environment, so nothing in
   Appendix C of `docs/VPS_DEPLOYMENT.md` is checked off, and no

@@ -57,23 +57,23 @@ jobs:
       - name: Provisioning script dry run with stubbed system commands
         run: bash infrastructure/vps/tests/setup-dry-run.sh
 
+      - name: Provisioning gate rejects an unready host
+        run: bash infrastructure/vps/tests/gate-test.sh
+
       - name: Nginx configuration test with real nginx
-        # Proves `nginx -t` passes with the vhosts as shipped: the placeholders are
+        # Proves `nginx -t` passes with the vhosts as shipped: placeholders are
         # rendered exactly like setup-ubuntu-24.04.sh does, and a throwaway
-        # self-signed certificate is generated at the paths Certbot will later use
-        # (the same bootstrap the setup script performs).
+        # self-signed certificate is generated at the paths Certbot will later
+        # use (the same bootstrap the setup script performs).
         run: |
           set -euo pipefail
+          sudo apt-get update -qq
           sudo apt-get install -y -qq nginx openssl
 
-          DOMAIN=example.test
-          APP_DOMAIN=app.example.test
-
           sudo mkdir -p /etc/nginx/snippets /var/www/letsencrypt
-          sudo cp infrastructure/vps/nginx/snippets/security-headers.conf /etc/nginx/snippets/
-          sudo cp infrastructure/vps/nginx/snippets/csp-whmcs.conf /etc/nginx/snippets/
+          sudo cp infrastructure/vps/nginx/snippets/*.conf /etc/nginx/snippets/
 
-          for d in "$DOMAIN" "$APP_DOMAIN"; do
+          for d in cloudhost247.com app.cloudhost247.com; do
             sudo mkdir -p "/etc/letsencrypt/live/$d"
             sudo openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
               -keyout "/etc/letsencrypt/live/$d/privkey.pem" \
@@ -83,11 +83,37 @@ jobs:
           done
 
           for vhost in cloudhost247-whmcs.conf cloudhost247-node.conf; do
-            sudo sed -e "s/__DOMAIN__/$DOMAIN/g" -e "s/__APP_DOMAIN__/$APP_DOMAIN/g" \
+            sudo sed -e "s/__DOMAIN__/cloudhost247.com/g" -e "s/__APP_DOMAIN__/app.cloudhost247.com/g" \
               "infrastructure/vps/nginx/$vhost" \
               | sudo tee "/etc/nginx/sites-enabled/$vhost" >/dev/null
           done
           sudo rm -f /etc/nginx/sites-enabled/default
-
-          # The snippets reference a PHP socket path that need not exist for -t.
           sudo nginx -t
+
+  live-nginx:
+    name: Live nginx behaviour (real responses, not just syntax)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install nginx, curl, openssl, python3
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq nginx curl openssl python3
+
+      - name: Run the live integration test
+        # Exercises the shipped vhosts against a running nginx: secret denies,
+        # PHP source-disclosure regression, ACME reachability, pretty-URL and
+        # /tools/ routing, single Cache-Control, header inheritance, proxy
+        # headers, HTTP/2. This is the test that caught the ^~ /tools/ bug.
+        run: |
+          sudo env NGINX_BIN=/usr/sbin/nginx \
+            bash infrastructure/vps/tests/nginx-live-test.sh
+
+      - name: Upload nginx logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nginx-logs
+          path: /var/log/nginx/*.log
+          if-no-files-found: ignore

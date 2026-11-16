@@ -60,10 +60,13 @@ done
 # These must print plausible output because the script parses it.
 cat > "${BIN}/php" <<'EOF'
 #!/usr/bin/env bash
-case "$*" in
-  "-v")  echo "PHP 8.2.29 (cli) (built: dry-run)"; exit 0 ;;
-  "-m")  printf 'ionCube Loader\ncurl\njson\nopenssl\nPDO\npdo_mysql\nmbstring\ndom\nfileinfo\nfilter\ngd\nimap\nsoap\nxml\nzip\nintl\nbcmath\n'; exit 0 ;;
-  *)     exit 0 ;;
+# Match on $1, not "$*": the gate calls `php -r 'echo PHP_VERSION;'`, whose $*
+# is "-r echo PHP_VERSION;" and would not match a "-r" pattern.
+case "$1" in
+  -v) echo "PHP 8.2.29 (cli) (built: dry-run)"; exit 0 ;;
+  -m) printf 'ionCube Loader\ncurl\njson\nopenssl\nPDO\npdo_mysql\nmbstring\ndom\nfileinfo\nfilter\ngd\nimap\nsoap\nxml\nzip\nintl\nbcmath\n'; exit 0 ;;
+  -r) echo "8.2.29"; exit 0 ;;
+  *)  exit 0 ;;
 esac
 EOF
 chmod +x "${BIN}/php"
@@ -263,6 +266,30 @@ if grep -qE "rsync .*\\\$\\{SRC_DIR\\}/\\\" \\\"\\\$\\{WHMCS_ROOT\\}" \
 else
   pass "no repo-root rsync into the webroot"
 fi
+
+echo
+echo "[provisioning robustness — no unverified external blocker]"
+SETUP="${REPO_ROOT}/infrastructure/vps/setup-ubuntu-24.04.sh"
+# A 404 on a vendor URL must not make provisioning unrecoverable.
+grep -q 'IONCUBE_ARCHIVE' "${SETUP}" \
+  && pass "ionCube supports a pre-downloaded archive (offline fallback)" \
+  || fail "ionCube download has no offline fallback (a 404 ends the run)"
+grep -q 'IONCUBE_URLS=' "${SETUP}" \
+  && pass "ionCube tries more than one URL" || fail "ionCube has a single hard-coded URL"
+# Optional packages must not be able to abort the run.
+# Match it as a bare package token on an apt install line, not as the comment
+# that explains why it is absent.
+if grep -E '^[[:space:]]+[a-z0-9-]+' "${SETUP}" | grep -qw 'libc-client-dev'; then
+  fail "libc-client-dev is requested (not packaged in Ubuntu 24.04)"
+else
+  pass "no libc-client-dev in any package list (dropped by Ubuntu)"
+fi
+grep -q 'php_opt_failed' "${SETUP}" \
+  && pass "optional PHP extensions installed individually (partial failure tolerated)" \
+  || fail "optional PHP extensions use an all-or-nothing retry"
+grep -q 'Final verification' "${SETUP}" \
+  && pass "provisioning ends with a hard PHP/Node gate" \
+  || fail "no final verification gate"
 
 echo
 echo "[overlay must not delete WHMCS core]"

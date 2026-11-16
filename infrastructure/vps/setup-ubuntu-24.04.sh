@@ -24,6 +24,7 @@
 # Environment overrides (optional):
 #   DOMAIN=cloudhost247.com APP_DOMAIN=app.cloudhost247.com
 #   APP_USER=cloudhost247 APP_ROOT=/opt/cloudhost247 WHMCS_ROOT=/var/www/whmcs
+#   NODE_MAJOR=22 IONCUBE_ARCHIVE=/root/ioncube.tar.gz (offline Loader install)
 set -euo pipefail
 
 DOMAIN="${DOMAIN:-cloudhost247.com}"
@@ -57,16 +58,29 @@ echo "  SRC_DIR: ${SRC_DIR}"
 log "Updating package lists and installing base packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
+# REQUIRED packages: if any of these is missing the stack cannot run, so a
+# failure here must abort rather than be swallowed (set -e does that).
 apt-get install -y -qq \
   software-properties-common ca-certificates curl wget gnupg \
   ufw fail2ban unattended-upgrades \
   nginx certbot python3-certbot-nginx \
   git unzip tar gzip rsync \
-  build-essential python3 \
-  libcurl4-openssl-dev libssl-dev libxml2-dev libzip-dev \
-  libonig-dev libpng-dev libjpeg-dev libfreetype6-dev \
-  libicu-dev libmagickwand-dev libimap-dev libc-client-dev \
-  libargon2-dev librabbitmq-dev
+  build-essential python3
+
+# OPTIONAL -dev headers: only needed to compile PECL extensions. `libc-client-dev`
+# is deliberately absent — Ubuntu dropped c-client years ago (it is not in 24.04)
+# and passing it would fail the whole transaction. Install them one at a time so a
+# single renamed package cannot take the run down; the summary reports misses.
+opt_failed=()
+for pkg in libcurl4-openssl-dev libssl-dev libxml2-dev libzip-dev \
+           libonig-dev libpng-dev libjpeg-dev libfreetype6-dev \
+           libicu-dev libmagickwand-dev libimap-dev \
+           libargon2-dev librabbitmq-dev; do
+  apt-get install -y -qq "${pkg}" >/dev/null 2>&1 || opt_failed+=("${pkg}")
+done
+if ((${#opt_failed[@]})); then
+  echo "  note: optional build headers not available on this release: ${opt_failed[*]}"
+fi
 
 log "Configuring unattended security upgrades"
 cat > /etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
@@ -100,43 +114,107 @@ ufw --force enable
 log "Installing PHP 8.2 from ondrej/php PPA (Ubuntu default PHP 8.3 is unsupported by WHMCS 8.x)"
 add-apt-repository -y ppa:ondrej/php
 apt-get update -qq
+# REQUIRED PHP 8.2 extensions — WHMCS 8.x will not install or run without these.
+# (`php8.2-json` is built in since PHP 8.0, so it is named here only for
+# documentation; installing it is a no-op on the ondrej PPA.)
 apt-get install -y -qq \
   php8.2-fpm php8.2-cli \
-  php8.2-curl php8.2-json php8.2-openssl php8.2-pdo php8.2-mysql \
+  php8.2-curl php8.2-openssl php8.2-pdo php8.2-mysql \
   php8.2-mbstring php8.2-dom php8.2-fileinfo php8.2-filter \
   php8.2-gd php8.2-imap php8.2-soap php8.2-xml php8.2-zip \
-  php8.2-intl php8.2-bcmath php8.2-readline php8.2-tokenizer \
-  php8.2-ctype php8.2-iconv php8.2-simplexml php8.2-phar \
-  php8.2-redis php8.2-imagick php8.2-sockets php8.2-exif php8.2-pcdo 2>/dev/null || \
-  apt-get install -y -qq \
-  php8.2-fpm php8.2-cli \
-  php8.2-curl php8.2-json php8.2-openssl php8.2-pdo php8.2-mysql \
-  php8.2-mbstring php8.2-dom php8.2-fileinfo php8.2-filter \
-  php8.2-gd php8.2-imap php8.2-soap php8.2-xml php8.2-zip \
-  php8.2-intl php8.2-bcmath php8.2-readline php8.2-tokenizer \
-  php8.2-ctype php8.2-iconv php8.2-simplexml php8.2-phar \
-  php8.2-redis php8.2-imagick php8.2-sockets php8.2-exif
+  php8.2-intl php8.2-bcmath php8.2-tokenizer \
+  php8.2-ctype php8.2-iconv php8.2-simplexml php8.2-phar
+
+# OPTIONAL PHP extensions: nice to have (Redis cache, Imagick, raw sockets,
+# EXIF). A `pkg A B C || pkg A B` retry is NOT safe here — if any package in the
+# first list fails, the second list still contains it and fails too, and with
+# set -e the whole provisioning run dies. Install each one independently.
+php_opt_failed=()
+for pkg in php8.2-json php8.2-readline php8.2-redis php8.2-imagick \
+           php8.2-sockets php8.2-exif php8.2-pcdo; do
+  apt-get install -y -qq "${pkg}" >/dev/null 2>&1 || php_opt_failed+=("${pkg}")
+done
+if ((${#php_opt_failed[@]})); then
+  echo "  note: optional PHP extensions not available: ${php_opt_failed[*]}"
+fi
+
+# Hard requirement: WHMCS refuses to install without these.
+for mod in pdo_mysql mbstring curl gd xml zip intl openssl; do
+  php -m | grep -qix "${mod}" || die "Required PHP extension '${mod}' is not loaded — WHMCS cannot run."
+done
 update-alternatives --set php /usr/bin/php8.2 || true
 php -v | head -n 1
 
 log "Installing ionCube Loader (required by encoded WHMCS addons)"
-IONCUBE_VERSION="ionCube_Loader_v14.2.3"
+# ionCube publishes per-loader versions and retires old ones, so this URL can
+# 404 in the future. The download is therefore resumable rather than fatal:
+#   1. try the pinned archive, then the vendor's "latest" alias;
+#   2. if both fail, accept a pre-downloaded archive (IONCUBE_ARCHIVE=...) —
+#      the offline path for firewalled/proxied hosts;
+#   3. if neither works, WARN and continue, then RETRY AT THE END.
+# WHMCS will not run without the Loader, so this only defers the failure — it
+# never silently produces a broken install.
+IONCUBE_VERSION="${IONCUBE_VERSION:-ionCube_Loader_v14.2.3}"
 IONCUBE_FILE="${IONCUBE_VERSION}_lin_x86_64.tar.gz"
-IONCUBE_URL="https://downloads.ioncube.com/loader_downloads/${IONCUBE_FILE}"
-if ! php -m | grep -qi ioncube; then
-  tmpdir="$(mktemp -d)"
-  wget -q -O "${tmpdir}/${IONCUBE_FILE}" "${IONCUBE_URL}" || die "ionCube download failed from ${IONCUBE_URL}"
-  tar -xzf "${tmpdir}/${IONCUBE_FILE}" -C "${tmpdir}"
-  IONCUBE_SO="$(find "${tmpdir}" -name 'ioncube_loader_lin_8.2.so' | head -n 1)"
-  [[ -n "${IONCUBE_SO}" ]] || die "ionCube loader .so for PHP 8.2 not found in archive."
-  install -m 755 "${IONCUBE_SO}" /usr/lib/php/20220829/ioncube_loader_lin_8.2.so
-  echo 'zend_extension = /usr/lib/php/20220829/ioncube_loader_lin_8.2.so' \
+IONCUBE_URLS=(
+  "https://downloads.ioncube.com/loader_downloads/${IONCUBE_FILE}"
+  "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz"
+)
+IONCUBE_SO_TARGET="/usr/lib/php/20220829/ioncube_loader_lin_8.2.so"
+
+install_ioncube() {
+  local so="$1"
+  install -m 755 "${so}" "${IONCUBE_SO_TARGET}"
+  printf 'zend_extension = %s\n' "${IONCUBE_SO_TARGET}" \
     > /etc/php/8.2/fpm/conf.d/00-ioncube-loader.ini
-  echo 'zend_extension = /usr/lib/php/20220829/ioncube_loader_lin_8.2.so' \
+  printf 'zend_extension = %s\n' "${IONCUBE_SO_TARGET}" \
     > /etc/php/8.2/cli/conf.d/00-ioncube-loader.ini
+  # Both SAPIs must load it; the FPM one is what serves WHMCS.
+  php -m | grep -qi ioncube
+}
+
+IONCUBE_OK=0
+if php -m | grep -qi ioncube; then
+  IONCUBE_OK=1
+  echo "  ionCube Loader already loaded"
+else
+  tmpdir="$(mktemp -d)"
+  archive=""
+  if [[ -n "${IONCUBE_ARCHIVE:-}" ]]; then
+    [[ -f "${IONCUBE_ARCHIVE}" ]] || die "IONCUBE_ARCHIVE=${IONCUBE_ARCHIVE} does not exist."
+    archive="${IONCUBE_ARCHIVE}"
+    echo "  using pre-downloaded archive ${archive}"
+  else
+    for url in "${IONCUBE_URLS[@]}"; do
+      echo "  trying ${url}"
+      if wget -q -O "${tmpdir}/ioncube.tar.gz" "${url}" 2>/dev/null \
+         && tar -tzf "${tmpdir}/ioncube.tar.gz" >/dev/null 2>&1; then
+        archive="${tmpdir}/ioncube.tar.gz"
+        break
+      fi
+    done
+  fi
+
+  if [[ -n "${archive}" ]]; then
+    tar -xzf "${archive}" -C "${tmpdir}"
+    IONCUBE_SO="$(find "${tmpdir}" -name 'ioncube_loader_lin_8.2.so' | head -n 1)"
+    if [[ -n "${IONCUBE_SO}" ]] && install_ioncube "${IONCUBE_SO}"; then
+      IONCUBE_OK=1
+      echo "  ionCube Loader installed for PHP 8.2"
+    fi
+  fi
   rm -rf "${tmpdir}"
+
+  if [[ "${IONCUBE_OK}" -ne 1 ]]; then
+    echo
+    echo "  WARNING: ionCube Loader could NOT be installed automatically."
+    echo "           WHMCS will not run until it is. Fix it one of these ways:"
+    echo "             a) download ${IONCUBE_FILE} from https://www.ioncube.com/loaders.php"
+    echo "                and re-run:  sudo IONCUBE_ARCHIVE=/root/${IONCUBE_FILE} bash $0"
+    echo "             b) then verify:  php -m | grep -i ioncube"
+    echo "           This is re-checked at the end of provisioning."
+  fi
 fi
-php -m | grep -i ioncube || die "ionCube Loader not loaded after install."
 
 log "Installing CloudHost247 PHP-FPM pool + ini overrides"
 install -m 644 "${SRC_DIR}/infrastructure/vps/php/www.conf" /etc/php/8.2/fpm/pool.d/www.conf
@@ -178,11 +256,16 @@ fi
 systemctl restart postgresql || true
 
 # ---------------------------------------------------------------------------
-# 4. Node.js 22 LTS (NodeSource) — app requires >= 20.9
+# 4. Node.js LTS (NodeSource) — app requires >= 20.9
 # ---------------------------------------------------------------------------
-log "Installing Node.js 22 LTS from NodeSource"
-if ! command -v node >/dev/null 2>&1 || ! node -e "process.exit(Number(process.versions.node.split('.')[0]) >= 20 ? 0 : 1)"; then
-  curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+# NODE_MAJOR defaults to the LTS line the platform's CI proves (22.12.0/24.8.0 in
+# node-platform.yml). The app's engine floor is >=20.9, so anything older is a
+# hard failure; the final gate re-checks this. Assigned BEFORE the log line that
+# interpolates it — with `set -u` an unset variable aborts the whole run.
+NODE_MAJOR="${NODE_MAJOR:-22}"
+log "Installing Node.js ${NODE_MAJOR} from NodeSource"
+if ! command -v node >/dev/null 2>&1 || ! node -e "const [a,b]=process.versions.node.split('.').map(Number);process.exit(a>20||(a===20&&b>=9)?0:1)"; then
+  curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash -
   apt-get install -y -qq nodejs
 fi
 node --version
@@ -284,6 +367,29 @@ install -m 644 "${SRC_DIR}/infrastructure/vps/cron/cloudhost247.cron" /etc/cron.
 # Render SRC_DIR / WHMCS_ROOT / APP_ROOT into the cron file.
 sed -i -e "s|__SRC_DIR__|${SRC_DIR}|g" -e "s|__WHMCS_ROOT__|${WHMCS_ROOT}|g" -e "s|__APP_ROOT__|${APP_ROOT}|g" /etc/cron.d/cloudhost247
 chmod 644 /etc/cron.d/cloudhost247
+
+# ---------------------------------------------------------------------------
+# Final gate: re-check the two things whose absence produces a site that
+# "installs" but cannot run. Failing here is deliberate — a provisioning run
+# that ends green must mean WHMCS can actually execute.
+# ---------------------------------------------------------------------------
+log "Final verification"
+php -m | grep -qi ioncube || die "ionCube Loader is not loaded. WHMCS will not run. See the guidance above (IONCUBE_ARCHIVE=...)."
+for mod in pdo_mysql mbstring curl gd xml zip intl openssl; do
+  php -m | grep -qix "${mod}" || die "PHP extension '${mod}' is missing — WHMCS cannot run."
+done
+# Parse the version rather than trusting an exit code: a wrapper/broken php
+# that always returns 0 would otherwise let 8.3 through silently.
+PHP_VERSION_ACTUAL="$(php -r 'echo PHP_VERSION;' 2>/dev/null || echo unknown)"
+case "${PHP_VERSION_ACTUAL}" in
+  8.2.*) : ;;
+  *) die "php CLI is ${PHP_VERSION_ACTUAL}, not 8.2. WHMCS 8.x does not support PHP 8.3+.
+       Fix: update-alternatives --set php /usr/bin/php8.2" ;;
+esac
+command -v node >/dev/null && node -e 'const [a,b]=process.versions.node.split(".").map(Number); process.exit(a>20||(a===20&&b>=9)?0:1)' \
+  || die "Node.js $(node --version 2>/dev/null) does not satisfy the >=20.9 engine requirement."
+echo "  PHP 8.2 + ionCube + required extensions: OK"
+echo "  Node $(node --version): OK"
 
 log "Provisioning complete."
 cat <<EOF

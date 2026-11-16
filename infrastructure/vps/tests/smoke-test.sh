@@ -43,6 +43,8 @@ required=(
   scripts/restore.sh
   scripts/healthcheck.sh
   tests/smoke-test.sh
+  tests/gate-test.sh
+  tests/nginx-live-test.sh
   cron/cloudhost247.cron
   logrotate/cloudhost247
   fail2ban/jail.local
@@ -62,6 +64,9 @@ shell_scripts=(
   "${VPS_DIR}/scripts/healthcheck.sh"
   "${VPS_DIR}/tests/smoke-test.sh"
   "${VPS_DIR}/tests/tls-check-test.sh"
+  "${VPS_DIR}/tests/gate-test.sh"
+  "${VPS_DIR}/tests/nginx-live-test.sh"
+  "${VPS_DIR}/tests/setup-dry-run.sh"
   "${REPO_ROOT}/cloudhost247-node/scripts/package-vps.sh"
 )
 for f in "${shell_scripts[@]}"; do

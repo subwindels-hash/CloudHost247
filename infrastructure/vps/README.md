@@ -39,7 +39,9 @@ infrastructure/vps/
 │   └── cloudhost247-worker.service  ← deployment worker (persistent)
 ├── tests/
 │   ├── smoke-test.sh            ← offline validation of every artefact (run in CI)
-│   ├── tls-check-test.sh        ← healthcheck certificate classification (run in CI)
+│   ├── nginx-live-test.sh       ← real nginx: routing, denies, headers, HTTP/2
+│   ├── gate-test.sh             ← proves the provisioning gate can reject a bad host
+│   ├── tls-check-test.sh        ← healthcheck certificate classification
 │   └── setup-dry-run.sh         ← runs the provisioning script with stubbed commands
 ├── scripts/
 │   ├── install-whmcs.sh         ← WHMCS core + CloudHost247 overlay installer
@@ -90,19 +92,30 @@ and pins it as the default. Do not switch the FPM pool to 8.3.
 
 ## Why Node 22 (not Ubuntu's default 18)?
 
-The Node platform requires **Node ≥ 20.9** (`cloudhost247-node/package.json`
-`engines.node`; Fastify v5 dropped Node 18). Ubuntu 24.04 ships Node 18.
-The setup script installs **Node.js 22 LTS from NodeSource**.
+The application requires **Node ≥ 20.9** (`cloudhost247-node/package.json`
+`engines.node`; Fastify v5 dropped Node 18), and Ubuntu 24.04 ships Node 18.
+The setup script therefore installs **Node.js 22 LTS from NodeSource**.
+
+Why 22 and not 24: 22 is what the platform's CI matrix and lockfile are proven
+against (`node-platform.yml` tests 22.12.0 and 24.8.0), and 22 is still an LTS
+line. Node 24 also works for the app, but 22 is the conservative default for a
+production host — raise `NODE_MAJOR` in the setup script if you need 24. Pin the
+**exact** version in the app's `engines`/`.nvmrc` rather than trusting "22".
 
 ## Validating this stack before you run it
 
 Three offline harnesses run in CI (`.github/workflows/vps-stack.yml`):
 
-| Harness | Proves |
-|---|---|
-| `tests/smoke-test.sh` | every artefact exists/parses, PHP 8.2 not 8.3, proxy headers, systemd user+group, every placeholder rendered, backup auth, docs links |
-| `tests/tls-check-test.sh` | `healthcheck.sh` classifies valid / expiring / missing / bootstrap-self-signed certificates correctly |
-| `tests/setup-dry-run.sh` | the provisioning script runs end to end with stubbed system commands and renders every template (incl. UFW ordering) |
+| Harness | Proves | Assertions |
+|---|---|---|
+| `tests/nginx-live-test.sh` | against a **running** nginx 1.24: secret denies, no PHP source disclosure, ACME reachable over HTTP, redirect keeps path+query, pretty-URL and `/tools/` routing, one `Cache-Control`, header inheritance, `X-Forwarded-*`, HTTP/2 | 43 |
+| `tests/smoke-test.sh` | every artefact exists/parses, PHP 8.2 not 8.3, proxy headers, systemd user+group, every placeholder rendered, backup auth, docs links | 76 |
+| `tests/setup-dry-run.sh` | the provisioning script runs end to end with stubbed system commands and renders every template (incl. UFW ordering, ionCube fallback) | 33 |
+| `tests/gate-test.sh` | the provisioning gate **rejects** a host lacking ionCube, on PHP 8.3, or missing a required extension | 8 |
+| `tests/tls-check-test.sh` | `healthcheck.sh` classifies valid / expiring / missing / bootstrap-self-signed certificates correctly | 5 |
+
+`nginx-live-test.sh` needs root and is destructive to `/etc/nginx`, so it only
+runs in a disposable container/runner — never on a live host.
 
 `setup-dry-run.sh` rewrites only the paths and `SRC_DIR` in a **copy** of the
 script (nothing on the host is touched) and asserts the rendered output.

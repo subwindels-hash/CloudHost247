@@ -220,4 +220,5 @@ python3 scripts/audit-builder-widget-classes.py
 # vps-stack workflow.
 bash infrastructure/vps/tests/smoke-test.sh
 bash infrastructure/vps/tests/tls-check-test.sh
+bash infrastructure/vps/tests/gate-test.sh
 echo 'Release-candidate source verification passed.'

@@ -14,12 +14,31 @@ server, PHP runtime, and process manager differ.
 | Node DB | **PostgreSQL 16** | cPanel PostgreSQL |
 | Firewall / IDS | **UFW** + **fail2ban** | cPHulk |
 
-> **Status:** this is the VPS deployment path. It has **not** been executed
-> against a live VPS in this repository's history — the scripts are written to
-> be idempotent and verifiable (`bash -n`, `nginx -t`, `healthcheck.sh`), but
-> you must still run the Appendix C checklist on your real VPS before
-> describing the platform as production-ready. WHMCS core is commercial
-> software and is **not** in this repo; you download it from whmcs.com.
+> **Status — what is verified, and what is not.**
+>
+> **Verified in automated tests** (`infrastructure/vps/tests/`, run in CI by
+> `.github/workflows/vps-stack.yml`):
+> - The shipped Nginx vhosts pass `nginx -t` **and** behave correctly against a
+>   real nginx 1.24.0 (the Ubuntu 24.04 version): secret-file denies, no PHP
+>   source disclosure, ACME challenge reachable over plain HTTP, HTTP→HTTPS
+>   redirect preserving path and query, pretty-URL and `/tools/` front-controller
+>   routing, exactly one `Cache-Control`, security headers surviving the nested
+>   `add_header` locations, `X-Forwarded-*` to the Node app, HTTP/2 — 43 assertions.
+> - The provisioning script runs end to end with stubbed system commands and
+>   renders every template correctly (33 assertions).
+> - Its final gate **rejects** a host without ionCube, on PHP 8.3, or missing a
+>   required extension (8 assertions), so a green run cannot mean a WHMCS that
+>   will not boot.
+> - Backup/restore use Ubuntu-correct database auth; every placeholder is
+>   rendered; no recursive copy can leak repo files into the webroot.
+>
+> **NOT verified:** none of this has run on a real Ubuntu 24.04 VPS with a
+> licensed WHMCS. No `apt-get` install, `systemd` start, MySQL/PostgreSQL
+> creation, Certbot issuance, or WHMCS installer run has been executed. The
+> ionCube download host was unreachable from the verification environment, so
+> that URL is unconfirmed (the script now has an offline fallback). **Complete
+> Appendix C on your real VPS before calling this production-ready.** WHMCS core
+> is commercial software and is **not** in this repo; download it from whmcs.com.
 
 ---
 
@@ -56,7 +75,9 @@ Nginx (80/443, TLS via Let's Encrypt)
   pins it. Never switch the FPM pool to 8.3.
 - **The Node platform requires Node ≥ 20.9** (`cloudhost247-node/package.json`
   `engines.node`; Fastify v5 dropped Node 18). Ubuntu 24.04 ships **Node 18**.
-  The setup script installs **Node.js 22 LTS from NodeSource**.
+  The setup script installs **Node.js 22 LTS from NodeSource** — 22 is what CI
+  proves the platform against (`node-platform.yml` runs 22.12.0 and 24.8.0).
+  Node 24 is also supported by the app; export `NODE_MAJOR=24` to use it.
 
 ---
 
