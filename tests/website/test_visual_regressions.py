@@ -77,7 +77,7 @@ REVIEWED_CARD_ARTWORK = {
 CACHE_BUSTING_STAMPS = {
     # (stamp, sha256). Re-cut after an intentional asset edit, together with the ?v= stamp.
     'templates/cloudhost247/css/site.css': (
-        '2026110802', '103b149fad10266e0d409de54a8a3dca0a723f4fe876ba68e5d4dc19f4d72d67'),
+        '2026111602', 'a1bbc4283325f3a6704518358fe36c0d5637fbce4d282b742a095a15cb781ed0'),
     'templates/cloudhost247/css/design-system.css': (
         '2026110801', '3a739ac64990fb5bd9c780f4a37b432495263a46779e35704d99fadf394d4508'),
     'templates/cloudhost247/js/site.js': (

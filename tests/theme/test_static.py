@@ -121,7 +121,6 @@ class PublicRouteTests(unittest.TestCase):
         'website-design.php': 'website-design',
         'windows-hosting.php': 'windows-hosting',
         'wordpress-hosting.php': 'wordpress-hosting',
-        'ssl-certificate.php': 'ssl-certificate',
         'data-protection-standards.php': 'data-protection-standards',
         'terms-of-service.php': 'terms-of-service',
     }
@@ -137,6 +136,20 @@ class PublicRouteTests(unittest.TestCase):
             # The vendor shell is gone, and so is the vendor content table.
             self.assertNotIn('cloudhost247_legacy', text, page)
             self.assertNotIn('mod_cloudhost247_theme_pages', text, page)
+
+    def test_certificate_storefront_sells_from_the_live_catalogue(self):
+        """The SSL page is commerce, not an editorial placeholder."""
+        text = (ROOT / 'ssl-certificate.php').read_text()
+        self.assertIn("define('CLIENTAREA', true);", text)
+        self.assertIn("require __DIR__ . '/init.php';", text)
+        self.assertIn('WhmcsDataSource', text)
+        self.assertIn('CartLinks::product', text)
+        self.assertIn("setTemplate('ssl-certificate')", text)
+        self.assertNotIn('cloudhost247_legacy', text)
+        self.assertNotIn('mod_cloudhost247_theme_pages', text)
+        # A product page that cannot read the catalogue must say so, not show
+        # an empty grid as if the operator published nothing.
+        self.assertIn("assign('sslError', $error)", text)
 
     def test_not_found_route_always_answers_404(self):
         text = (ROOT / 'notfound.php').read_text()

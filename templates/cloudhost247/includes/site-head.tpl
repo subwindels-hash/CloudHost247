@@ -5,7 +5,7 @@
    the one that has to win, because it is what keeps this site and the CloudHost247
    application on one palette, one type scale and one focus treatment.
    Do not reorder these two lines. *}
-<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/site.css?v=2026110802">
+<link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/site.css?v=2026111602">
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/design-system.css?v=2026110801">
 <link rel="stylesheet" href="{$WEB_ROOT}/templates/cloudhost247/css/auth.css?v=20261107">
 {* Generated copy of shared/site/metals.css. Must load last among the shared sheets: it restyles

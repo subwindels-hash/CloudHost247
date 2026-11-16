@@ -2308,7 +2308,7 @@
       "route_owner": "cloudhost247-theme",
       "status": "published",
       "implementation_status": "published",
-      "template": "cloudhost247-page",
+      "template": "ssl-certificate",
       "test_status": "php-syntax; php-behaviour; link-integrity; website-static; rendered-fixtures; hero-render; accessibility-contract; browser-qa (blocked: no browser binary in the audit host); staging-functional (blocked: licensed WHMCS staging installation)",
       "seo_metadata": {
         "title": "SSL Certificates",

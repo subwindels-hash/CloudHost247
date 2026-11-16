@@ -40,6 +40,7 @@ foreach ($catalog['pages'] as $path => $page) {
 }
 $pages['cloudhost247-hosting.php'] = 'cloudhost247-product-catalog.tpl';
 $pages['email-hosting.php'] = 'cloudhost247-email-hosting.tpl';
+$pages['ssl-certificate.php'] = 'ssl-certificate.tpl';
 $pages['aboutus.php'] = 'aboutus.tpl';
 $pages['faqs.php'] = 'faqs.tpl';
 foreach (array('applications.php','operating-systems.php','deployments.php','server-management.php') as $path) { $pages[$path] = 'cloudhost247-platform.tpl'; }
@@ -233,6 +234,23 @@ foreach ($pages as $path => $template) {
         require_once $root . '/modules/servers/cloudhost247_email_hosting/lib/Repository/ContentRepository.php';
         $content = \CloudHost247\Email\Repository\ContentRepository::defaults();
         $smarty->assign(array('emailHero'=>$content['hero'],'emailProviderContent'=>$content['providers'],'emailDnsContent'=>$content['dns'],'emailFaqs'=>$content['faqs'],'emailProviders'=>array(),'emailComparison'=>array(),'emailPlanCount'=>0,'emailCurrency'=>'','emailCatalogError'=>''));
+    }
+    if ($path === 'ssl-certificate.php') {
+        // A rendered certificate card, so the fixture checks the plan grid, the
+        // price block and the checkout link the live route renders — not just the
+        // empty state a database-free harness would otherwise produce.
+        $smarty->assign(array(
+            'sslPlans' => array(array(
+                'name' => 'Fixture SSL Certificate',
+                'description' => 'Fixture plan. Live names, descriptions and prices come from the WHMCS catalogue.',
+                'group' => 'SSL Certificates',
+                'billing_label' => 'year',
+                'price' => array('formatted' => '$49.00', 'currency' => 'USD', 'setup' => ''),
+                'order_url' => 'cart.php?a=add&pid=1&billingcycle=annually',
+            )),
+            'sslError' => '',
+            'sslPlanCount' => 1,
+        ));
     }
     if ($template === 'cloudhost247-search.tpl') {
         $smarty->assign(array(
