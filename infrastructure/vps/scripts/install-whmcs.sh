@@ -40,11 +40,16 @@ log "Extracting WHMCS core to ${WHMCS_ROOT} (preserving configuration.php)"
 mkdir -p "${WHMCS_ROOT}"
 tmpdir="$(mktemp -d)"
 unzip -q "${WHMCS_ZIP}" -d "${tmpdir}"
-# WHMCS ZIP extracts to a single top-level folder (e.g. whmcs-8.x/); handle both.
+# WHMCS ZIP extracts to a single top-level folder (e.g. whmcs-8.x/); handle both
+# layouts. NOT `[[ -d "${tmpdir}/whmcs"* ]]`: -d does not glob, and bash compares
+# the quoted prefix literally against the expanded word list, so that test is
+# always false. The find therefore never ran, WHMCS_SRC stayed ${tmpdir}, and
+# init.php was looked for one level too high — so this installer failed on every
+# real WHMCS archive. ask find directly; it handles both layouts and cannot glob
+# wrongly.
 WHMCS_SRC="${tmpdir}"
-if [[ -d "${tmpdir}/whmcs"* ]]; then
-  WHMCS_SRC="$(find "${tmpdir}" -maxdepth 1 -type d -name 'whmcs*' | head -n 1)"
-fi
+nested_whmcs="$(find "${tmpdir}" -maxdepth 1 -type d -name 'whmcs*' | head -n 1)"
+[[ -n "${nested_whmcs}" ]] && WHMCS_SRC="${nested_whmcs}"
 [[ -f "${WHMCS_SRC}/init.php" ]] || die "WHMCS core not found in ZIP (init.php missing)."
 # Never overwrite an existing configuration.php (holds DB creds + licence key).
 if [[ -f "${WHMCS_ROOT}/configuration.php" ]]; then

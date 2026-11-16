@@ -128,6 +128,16 @@ for unit in cloudhost247-node cloudhost247-worker; do
   grep -q '^Group=__APP_USER__' "${VPS_DIR}/systemd/${unit}.service" \
     && pass "${unit} declares a Group" || fail "${unit} does not declare Group= (useradd needs --user-group)"
 done
+# install-whmcs.sh must locate init.php in BOTH archive layouts. The old
+# `[[ -d "${tmpdir}/whmcs"* ]]` guard never matched (-d does not glob), so the
+# find never ran and the installer died on every real WHMCS ZIP.
+grep -q 'nested_whmcs="$(find' "${VPS_DIR}/scripts/install-whmcs.sh" \
+  && pass "install-whmcs.sh locates a nested whmcs-*/ archive" \
+  || fail "install-whmcs.sh cannot locate a nested whmcs-*/ archive"
+# Match the executable line only (leading `if `), not the explanatory comment.
+grep -qE '^[[:space:]]*if \[\[ -d "\$\{tmpdir\}/whmcs"\* \]\]' "${VPS_DIR}/scripts/install-whmcs.sh" \
+  && fail "install-whmcs.sh is back to the never-matching -d glob test" \
+  || pass "install-whmcs.sh does not use the never-matching -d glob test"
 grep -q 'useradd --system --user-group' "${VPS_DIR}/setup-ubuntu-24.04.sh" \
   && pass "setup creates a matching user group" || fail "setup uses useradd without --user-group"
 

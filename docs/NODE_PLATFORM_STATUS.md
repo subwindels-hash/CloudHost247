@@ -1762,7 +1762,7 @@ sub-phase before the next one begins.
   `backup.sh` / `restore.sh` / `healthcheck.sh`), plus
   `cloudhost247-node/scripts/package-vps.sh` and the runbook
   `docs/VPS_DEPLOYMENT.md`.
-- **Verified by automated tests (199 assertions, all passing):**
+- **Verified by automated tests (206 assertions, all passing):**
   `tests/nginx-live-test.sh` loads the shipped vhosts into a **real nginx 1.24.0**
   (built from source for this verification) and asserts on live HTTP responses:
   secret-file denies, no PHP source disclosure, ACME challenge reachable over
@@ -1772,7 +1772,7 @@ sub-phase before the next one begins.
   app, and HTTP/2 (43). `tests/deploy-migrate-test.sh` (28) runs the compiled
   application the way a deploy does: the real migration runner against a real
   database, the documented quarantine override, and the systemd entrypoint
-  booted over TCP. Plus `smoke-test.sh` (82), `setup-dry-run.sh` (33, the
+  booted over TCP. Plus `smoke-test.sh` (92), `setup-dry-run.sh` (33, the
   provisioning script end to end with stubbed system commands), `gate-test.sh`
   (8, proving the final gate rejects ionCube-less / PHP 8.3 / missing-extension
   hosts) and `tls-check-test.sh` (5). `.github/workflows/vps-stack.yml` runs all

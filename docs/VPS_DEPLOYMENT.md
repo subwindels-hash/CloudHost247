@@ -33,7 +33,7 @@ retired on 2026-11-15 (see Appendix B).
 > - **A deploy actually lands.** The compiled Node app is built with the same
 >   `npm ci && npm run build` that `deploy.sh` runs, the real migration runner is
 >   executed against a real database, and the systemd entrypoint
->   (`node dist/src/server.js`) is booted over TCP and probed — 28 assertions.
+>   (`node dist/src/server.js`) is booted over TCP and probed — 29 assertions.
 >   This found and closed three genuine deploy blockers:
 >   1. `deploy.sh` applied **no migrations at all** on a fresh database, because
 >      quarantined migration `0041` has pending dependents and the runner fails
@@ -60,6 +60,11 @@ retired on 2026-11-15 (see Appendix B).
 > - `/ready` now verifies the **schema**, not just the connection. It previously
 >   ran `SELECT 1`, which succeeds against a completely empty database, so a
 >   deploy that skipped migrations reported ready while every real query failed.
+> - `install-whmcs.sh` **could never have installed WHMCS**. Its guard
+>   `[[ -d "${tmpdir}/whmcs"* ]]` never matched — `-d` does not glob, so the test
+>   was always false, the `find` fallback never ran, and `init.php` was looked
+>   for one level above where a real WHMCS archive puts it. Found by ShellCheck in
+>   CI, reproduced against both archive layouts, fixed.
 >
 > **NOT verified:** none of this has run on a real Ubuntu 24.04 VPS with a
 > licensed WHMCS. No `apt-get` install, `systemd` start, MySQL/PostgreSQL
