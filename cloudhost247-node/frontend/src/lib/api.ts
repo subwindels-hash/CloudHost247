@@ -2,7 +2,7 @@
  * Thin fetch wrapper. Uses relative URLs only — this SPA is always served from the same origin
  * as the API (by the Fastify server in production, or via the Vite dev proxy locally), so it
  * never needs to know a hostname/port. This is required for the app to work correctly whether
- * it is reached through cPanel/Apache/Passenger or a local dev server.
+ * it is reached through Nginx on the VPS or a local dev server.
  */
 import { toolsApiPath, toolsHost } from './tools-runtime';
 import { clearSession, getToken } from './auth';

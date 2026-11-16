@@ -3,8 +3,8 @@ import type geoipType from 'geoip-lite';
 let cachedGeoIp: typeof geoipType | null = null;
 function getGeoIp(): typeof geoipType {
   if (!cachedGeoIp) {
-    // Lazy-loaded: geoip-lite reads ~140 MB of IP tables into memory on require(), which can
-    // exceed CloudLinux LVE limits at startup on shared cPanel hosting before a socket binds.
+    // Lazy-loaded: geoip-lite reads ~140 MB of IP tables into memory on require(); deferring
+    // until the first request keeps cold boot fast and idle RSS low on small VPS instances.
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     cachedGeoIp = require('geoip-lite') as typeof geoipType;
   }

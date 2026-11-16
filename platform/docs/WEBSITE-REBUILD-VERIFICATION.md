@@ -1,5 +1,13 @@
 # CloudHost247 Website Rebuild — Verification Report
 
+> **Historical record (2026-11-16).** The deployment instructions in the "Outstanding items"
+> section below describe the **retired** cPanel/LiteSpeed target. `infrastructure/litespeed/` and
+> its `webroot-hardening.htaccess` have been **deleted**, and environment variables are no longer
+> set in a control-panel env editor. CloudHost247 deploys to an Ubuntu 24.04 VPS only:
+> `docs/VPS_DEPLOYMENT.md` (Nginx edge rules live in `infrastructure/vps/nginx/`, environment in
+> `/opt/cloudhost247/.env` consumed by systemd). Preserved unchanged as a record of what was
+> verified on 2026-10-05; do not follow the deployment steps below as instructions.
+
 **Date:** 2026-10-05
 **Branch:** `arena/63cb2db6-cloudhost247`
 **Scope:** professional rebuild of the public website, client-area shell, SEO/accessibility

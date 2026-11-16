@@ -1,9 +1,8 @@
 /**
  * Tools Center — controlled result caching (spec §67).
  *
- * Cache entries live in `tool_cache` rather than process memory, because a cPanel Passenger
- * deployment runs several short-lived processes and an in-memory cache would give each of them a
- * different answer to the same question (and evict itself on every restart).
+ * Cache entries live in `tool_cache` rather than process memory so cached answers survive
+ * systemd service restarts and remain consistent across multiple Node/worker processes.
  *
  * Rules enforced here:
  *   - Only successful, non-personal results are cached. A handler returning `undefined`/null, or

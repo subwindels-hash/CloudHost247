@@ -115,8 +115,14 @@ mkdir -p /etc/nginx/snippets /etc/nginx/sites-available /etc/nginx/sites-enabled
 rm -f /etc/nginx/sites-enabled/default
 cp "${NGINX_DIR}/snippets/"*.conf /etc/nginx/snippets/
 for vhost in cloudhost247-whmcs.conf cloudhost247-node.conf; do
-  sed -e "s/__DOMAIN__/${DOMAIN}/g" -e "s/__APP_DOMAIN__/${APP_DOMAIN}/g" \
+  sed -e "s|__DOMAIN__|${DOMAIN}|g" -e "s|__APP_DOMAIN__|${APP_DOMAIN}|g" \
+      -e "s|__WHMCS_ROOT__|${WEBROOT}|g" \
     "${NGINX_DIR}/${vhost}" > "/etc/nginx/sites-enabled/${vhost}"
+  # An unrendered placeholder would make `nginx -t` pass while serving the wrong
+  # root — assert the rendering instead of trusting it.
+  if grep -q '__[A-Z_]*__' "/etc/nginx/sites-enabled/${vhost}"; then
+    fail "unrendered placeholder left in ${vhost}: $(grep -o '__[A-Z_]*__' "/etc/nginx/sites-enabled/${vhost}" | sort -u | tr '\n' ' ')"
+  fi
 done
 [ -f /etc/nginx/mime.types ] || printf 'types { text/html html; text/css css; application/json json; text/xml xml; }\n' > /etc/nginx/mime.types
 # Distributions ship these two includes in the nginx package; a bare container

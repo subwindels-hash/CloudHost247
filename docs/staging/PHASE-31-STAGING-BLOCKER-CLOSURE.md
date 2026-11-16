@@ -1,5 +1,11 @@
 # Phase 31 — Staging Blocker Closure and Release Governance
 
+> **Historical record (2026-11-16).** The cPanel/Passenger staging target described in this
+> document has been **retired**. This project deploys to an Ubuntu 24.04 VPS only — see
+> `docs/VPS_DEPLOYMENT.md` (host cron lives in `infrastructure/vps/cron/cloudhost247.cron`).
+> The text below is preserved unchanged as the record of what was measured at the time; do not
+> follow it as instructions.
+
 ## Decision and scope
 
 **PRODUCTION NO-GO. No B1–B4 staging blocker is closed in full.** Genuine local PostgreSQL and browser evidence reduces uncertainty, but does not replace provider certification, a deployed WHMCS/cPanel staging host, or an observed scheduler cycle. A report alone does not close a blocker.
@@ -12,7 +18,7 @@ Before this continuation's edits: verified cwd/branch/HEAD and dirty status, rea
 
 `gh secret list` returned **exit 1 / HTTP 403 Resource not accessible by integration**. Remote secrets are not inspectable with this integration; absence must not be inferred. GitHub PR read operations work. Local repository edits and throwaway database operations are permitted. No production connection, staging host identity, or external provider credentials were supplied. Outbound access is restricted to the sandbox's documented package/GitHub hosts; model/hosting/payment hosts are not available simply because source configuration names them.
 
-`command -v crontab` found no executable. `/etc/cron.d` contains a system maintenance entry, not CloudHost247 scheduling. The cPanel cron command is documented at `docs/CPANEL_DEPLOYMENT.md` §9; documentation is not an installed schedule.
+`command -v crontab` found no executable. `/etc/cron.d` contains a system maintenance entry, not CloudHost247 scheduling. The host cron schedule is documented at `docs/VPS_DEPLOYMENT.md` §8 (rendered by `infrastructure/vps/setup-ubuntu-24.04.sh` into `/etc/cron.d/cloudhost247`); documentation is not an installed schedule.
 
 Plan carried out: stop B1/B2 certification for missing dependencies; classify existing worker/browser evidence honestly; fix retrieval without bypassing escalation/security; preserve evidence under `docs/staging/evidence/phase31/`; run affected tests and source release gate; do not merge or deploy.
 

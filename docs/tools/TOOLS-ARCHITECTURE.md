@@ -82,21 +82,25 @@ Artifacts:
 |---|---|---|
 | `cloudhost247-node/dist`, `public` | Node app deployment | `npm run build` |
 | `assets/cloudhost247-tools/tools.js`, `tools.css` | WHMCS web root's `assets/cloudhost247-tools/` | `npm run build:tools` |
-| `tools/index.php`, `tools/.htaccess` | WHMCS web root's `tools/` | source |
+| `tools/index.php`, `tools/api.php`, `tools/lib/`, `tools/admin/` | WHMCS web root's `tools/` | source |
 | `templates/cloudhost247/cloudhost247-tools.tpl` | matching active child theme | source |
 | theme `lib/ToolsSite.php`, `lib/Site.php`, `resources/tools.json`, shared nav/footer/JS/CSS | matching WHMCS theme/module revision | source/projection |
 
-Generated bundles are ignored by Git, not omitted from deployment. The cPanel
-packager emits a separately named WHMCS Tools overlay alongside the Node ZIP.
-Deploy the matching theme/module Git revision too; the overlay alone does not
-upgrade an older theme. Never discard committed vendor `dist`/`out` runtime files
-when packaging the **full** repository. The PHP release gate builds the Tools
-adapter before checking asset references; build dependencies must be installed.
+Generated bundles are ignored by Git, not omitted from deployment.
+`infrastructure/vps/scripts/install-whmcs.sh` overlays `tools/` into the WHMCS
+web root (excluding the developer-only `preview-router.php` and
+`build-manifests.py`), and `cloudhost247-node/scripts/package-vps.sh` emits the
+Node release ZIP. Deploy the matching theme/module Git revision too; the overlay
+alone does not upgrade an older theme. Never discard committed vendor
+`dist`/`out` runtime files when packaging the **full** repository. The PHP
+release gate builds the Tools adapter before checking asset references; build
+dependencies must be installed.
 
 Set the existing theme admin `platform_base_path` to `/platform` (or the actual
 same-origin mount). Proxy that mount to Node **stripping the mount prefix**.
-Example nginx topology (adapt socket, PHP handler, WHMCS web root and limits to
-hosting; this is not a complete WHMCS vhost):
+The shipped VPS vhost (`infrastructure/vps/nginx/cloudhost247-whmcs.conf`)
+already contains the `/tools` routing below; the example is here for adapters
+that mount Node under a sub-path instead of its own `app.` hostname:
 
 ```nginx
 location /platform/ {
@@ -115,12 +119,14 @@ location /tools/ { rewrite ^ /tools/index.php last; }
 # The existing secure PHP location must take /tools/index.php, preserving REQUEST_URI.
 ```
 
-Apache deployments may use the scoped `tools/.htaccess` supplied here, requiring
-rewrite support and permitted overrides. Do not replace WHMCS's root rewrite
-rules. `/tools` must reach PHP, not expose the repository's developer scripts.
-For subdirectory WHMCS installations, preserve the prefix in the PHP script name
-and request URI; the adapter supplies it as Router basename. Validate this on
-the actual web server. No browser code may point at `localhost` or another port.
+Nginx is the only supported edge: `/tools` must reach PHP through
+`tools/index.php` and must not expose the repository's developer scripts
+(`preview-router.php`, `build-manifests.py`), and `/tools/data/` is denied at the
+web layer so operator overrides and rate-limit state are never served. For
+subdirectory WHMCS installations, preserve the prefix in the PHP script name and
+request URI; the adapter supplies it as Router basename. Validate routing against
+a live host with `infrastructure/vps/tests/nginx-live-test.sh`. No browser code
+may point at `localhost` or another port.
 
 Keep Node reachable only behind the configured trusted edge; otherwise spoofed
 forwarded headers can defeat IP-based controls. Configure provider credentials

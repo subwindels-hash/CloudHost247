@@ -77,7 +77,8 @@ image uploads are each reached through an adapter interface. Two rules hold thro
   migrations too.
 * **Worker**: background sweeps (transfer polling, auction deadlines, notification queue, inbox
   housekeeping, availability watches) run in the existing worker under the platform's lease system —
-  schedule it on the deployment host (see `docs/CPANEL_DEPLOYMENT.md`).
+  supervised by `cloudhost247-worker.service` on the VPS, with a lease-guarded one-shot cron fallback
+  (see `docs/VPS_DEPLOYMENT.md`).
 * **Readiness**: `GET /health` is dependency-free liveness; `GET /ready` checks PostgreSQL and
   answers 503 when it cannot reach it.
 * **SEO**: `GET /sitemap.xml` and `GET /robots.txt` are generated at request time (published sites and

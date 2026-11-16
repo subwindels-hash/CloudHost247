@@ -109,7 +109,7 @@ node -e "const {z}=require('zod'); console.log(require('zod/package.json').versi
 | Blocker | Consequence |
 | --- | --- |
 | No provider credentials (registrar, infrastructure, DNS/CDN, CA, email, LLM, payment) | Domain registration/transfer, live VPS provisioning, SSL issuance, CDN/DDoS, mailbox creation, external AI generation, and gateway flows are **Blocked by external provider**. All adapters were inspected to be configuration-gated and fail closed rather than simulating success. |
-| Native PHP / licensed WHMCS core / cPanel host absent | PHP/WHMCS runtime parity, WHMCS template rendering, and the 18-point `docs/CPANEL_DEPLOYMENT.md` checklist cannot be verified. PHP WASM syntax lint is the only PHP signal here. |
+| Native PHP / licensed WHMCS core / Ubuntu 24.04 VPS host absent | PHP/WHMCS runtime parity, WHMCS template rendering, and the `docs/VPS_DEPLOYMENT.md` Appendix C go-live checklist cannot be verified on a live host. PHP WASM syntax lint is the only PHP signal here. |
 | Quarantined migrations `0023`/`0024`/`0025`/`0041`; PR #12 open; webhooks frozen | Production DB cannot advance past `0040`; no financial setting changed; no gateway activated. |
 | No browser binary | No screenshots, no mobile/tablet/desktop visual verification, no rendered-page inspection. `docs/ACCEPTANCE-CRITERIA.md` marks C4 PARTIAL with 520 stale cases. |
 | Full Vitest suite timed out at 900 s | Full-suite status unknown. Only the 49-file targeted result (873/875) is asserted here. |

@@ -1,8 +1,8 @@
 /**
  * Tools Center — API integration tests.
  *
- * These run with no outbound network (like many cPanel/Passenger deployments), which is exactly the
- * interesting case: a tool that cannot reach a resolver or a provider must say so with a typed
+ * These run with no outbound network (as a firewalled or egress-restricted VPS would), which is
+ * exactly the interesting case: a tool that cannot reach a resolver or a provider must say so with a typed
  * error envelope, never answer with an empty-but-successful result. The suite covers:
  *   • discovery (catalogue + dashboard) and implementation coverage
  *   • pure tools that run entirely in-process (JSON, encoding, punycode, passwords, subnets…)

@@ -3,7 +3,7 @@
  *
  * A single `Ctx` is built per request and carries: the parsed URL and query, path params, the
  * parsed body (plus the untouched raw bytes, which webhook signature verification needs), the
- * client IP behind the cPanel/Apache reverse proxy, and the response builder.
+ * client IP behind the Nginx reverse proxy, and the response builder.
  *
  * Everything here uses `node:http` primitives only.
  */
@@ -100,7 +100,7 @@ function parseCookies(header) {
 }
 
 /**
- * Client IP behind a reverse proxy (cPanel Apache / Passenger in front of this process).
+ * Client IP behind a reverse proxy (Nginx on the VPS in front of this process).
  * Takes the left-most entry of X-Forwarded-For, which is the original client; subsequent hops are
  * proxies. Only trusted because the platform is documented as always sitting behind a proxy.
  */

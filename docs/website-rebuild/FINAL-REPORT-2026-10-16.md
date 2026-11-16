@@ -1,5 +1,12 @@
 # CloudHost247 — final report (§26)
 
+> **Historical record (2026-11-16).** This report describes the tree as it stood on 2026-10-16,
+> including packaging rules for the **retired** cPanel/Passenger deployment target (`.htaccess` as
+> an allowed dotfile, `platform/.htaccess`). Those files have since been **deleted**; the only
+> supported target is an Ubuntu 24.04 VPS (`docs/VPS_DEPLOYMENT.md`, `infrastructure/vps/`) and
+> `scripts/build-production-zip.py` now allows `.env.example` as the sole dotfile. Preserved
+> unchanged as a record; do not follow it as instructions.
+
 **Date:** 2026-10-16
 **Branch:** `arena/eb372481-cloudhost247` (based on `main` @ `48350fe`)
 **Pull request:** [#86](https://github.com/subwindels-hash/CloudHost247/pull/86) — base `main`, **draft/staging only**

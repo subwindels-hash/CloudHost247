@@ -28,7 +28,7 @@ HEADER = [
 
 NOCRED = 'Vault credentials + provider sandbox account; none configured; activation needs explicit authorisation'
 NOPROD = 'Migrations 0023/0024/0025/0041 quarantined in cloudhost247-node/database/migrate.ts; no production DDL authorised'
-STAGE = 'cPanel staging BLOCKED: no cPanel host or credentials'
+STAGE = 'VPS staging BLOCKED: no Ubuntu 24.04 VPS host or credentials'
 V = 'Phase 1 run: docs/PHASE-1-VERIFICATION.md'
 AD = 'docs/ACCEPTANCE-CRITERIA.md; docs/NODE_PLATFORM_STATUS.md'
 
@@ -552,9 +552,10 @@ GROUP('AR Architecture', 'Architecture and compatibility',
     ('AR05', 'Migration quarantine & payment freeze',
      'QUARANTINED_MIGRATIONS 0023/0024/0025/0041; PR #12 open; webhooks frozen', 'BLK',
      'No production DDL or payment change authorised', 'Admin flows exist but must not be activated'),
-    ('AR06', 'cPanel deployment constraints',
-     'docs/CPANEL_DEPLOYMENT.md 18-point checklist all unchecked', 'BLK',
-     'No cPanel environment or credentials', 'No staging verification possible'),
+    ('AR06', 'VPS deployment constraints',
+     'docs/VPS_DEPLOYMENT.md Appendix C go-live checklist all unchecked on a live host', 'BLK',
+     'No Ubuntu 24.04 VPS available to this sandbox; stack proven offline by infrastructure/vps/tests/',
+     'No live-host staging verification possible'),
     ('AR07', 'Provider credential governance',
      'modules/addons/cloudhost247_integrations vault (AES-256-GCM); 108 provider catalogue keys; per-environment config', 'VER', '', ''),
 ])

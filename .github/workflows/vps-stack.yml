@@ -89,12 +89,20 @@ jobs:
             sudo cp "/etc/letsencrypt/live/$d/fullchain.pem" "/etc/letsencrypt/live/$d/chain.pem"
           done
 
+          sudo mkdir -p /var/www/whmcs
           for vhost in cloudhost247-whmcs.conf cloudhost247-node.conf; do
-            sudo sed -e "s/__DOMAIN__/cloudhost247.com/g" -e "s/__APP_DOMAIN__/app.cloudhost247.com/g" \
+            sudo sed -e "s|__DOMAIN__|cloudhost247.com|g" -e "s|__APP_DOMAIN__|app.cloudhost247.com|g" \
+                     -e "s|__WHMCS_ROOT__|/var/www/whmcs|g" \
               "infrastructure/vps/nginx/$vhost" \
               | sudo tee "/etc/nginx/sites-enabled/$vhost" >/dev/null
           done
           sudo rm -f /etc/nginx/sites-enabled/default
+          # A leftover placeholder would still parse in some positions; fail loudly.
+          if sudo grep -rq '__[A-Z_]*__' /etc/nginx/sites-enabled/; then
+            echo "Unrendered placeholder in a vhost:" >&2
+            sudo grep -rn '__[A-Z_]*__' /etc/nginx/sites-enabled/ >&2
+            exit 1
+          fi
           sudo nginx -t
 
   deploy-path:

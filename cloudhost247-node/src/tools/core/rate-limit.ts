@@ -6,7 +6,7 @@
  * not enough for this platform, because the expensive operations here have very different costs:
  * a JSON validation costs nothing, a crawl of 25 pages or a traceroute costs real outbound
  * traffic. So each tool declares a profile, and the counters live in the database
- * (`tool_rate_limits`) so they survive process restarts and hold across Passenger workers.
+ * (`tool_rate_limits`) so they survive systemd restarts and hold across multiple processes.
  *
  * Escalation: repeated rejections from an address inside the abuse window mark it temporarily
  * blocked from diagnostic tools. The block is recorded in `tool_abuse_events` (auditable) and shown

@@ -104,7 +104,9 @@ is implied by a diagram or menu entry. Availability comes from the backend.
   canonical location is `/errors/`. If a web server internally serves them at an
   arbitrary request URL, transform those links to the configured installation
   base at deployment or serve error responses from a fixed base-aware handler.
-  Do not add an untested global `.htaccess` rule that intercepts WHMCS routes.
+  Do not add an untested global Nginx `location` rule that intercepts WHMCS
+  routes; the supported edge configuration is
+  `infrastructure/vps/nginx/cloudhost247-whmcs.conf`.
 - Submit `cloudhost247-sitemap.php` and `builder-sitemap.php` in the search console.
   Insert their absolute URLs into `robots.txt` using your real SystemURL. No
   environment-specific production domain is hard-coded into the new assets.

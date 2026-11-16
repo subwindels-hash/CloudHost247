@@ -62,22 +62,22 @@ describe('env validation', () => {
     expect(env.SOCKET_PATH).toBeUndefined();
   });
 
-  it('maps Unix socket paths injected into PORT (LiteSpeed lsnode / Passenger) to SOCKET_PATH', () => {
+  it('maps Unix domain socket paths supplied in PORT to SOCKET_PATH', () => {
     const env = loadEnv({
       ...validBase,
-      PORT: '/tmp/lshttpd/lsnode.sock',
+      PORT: '/run/cloudhost247/node.sock',
     } as NodeJS.ProcessEnv);
-    expect(env.SOCKET_PATH).toBe('/tmp/lshttpd/lsnode.sock');
+    expect(env.SOCKET_PATH).toBe('/run/cloudhost247/node.sock');
     expect(env.PORT).toBe(3000);
 
     const unixPrefixed = loadEnv({
       ...validBase,
-      PORT: 'unix:/home/cpaneluser/passenger.sock',
+      PORT: 'unix:/run/cloudhost247/api.sock',
     } as NodeJS.ProcessEnv);
-    expect(unixPrefixed.SOCKET_PATH).toBe('/home/cpaneluser/passenger.sock');
+    expect(unixPrefixed.SOCKET_PATH).toBe('/run/cloudhost247/api.sock');
   });
 
-  it('normalizes scheme-less APP_URL hostnames entered in cPanel', () => {
+  it('normalizes scheme-less APP_URL hostnames', () => {
     const prod = loadEnv({
       ...validBase,
       APP_URL: 'try.vortexprecisionit.com',

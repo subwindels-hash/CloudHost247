@@ -95,7 +95,7 @@ Legend: ✅ present · ⚠️ partial / documented as deferred · ❌ absent. "P
 | 26 | Tools Centre (75+ tools), MRZ, business tools | ✅ | ⚠️ | platform has `tools`/`mrz-tools` domains |
 | 27 | **Shared design system / navigation registry / PHP+WHMCS projection** | ✅ | ❌ | `scripts/site/generate.mjs` writes `registry.generated.ts` into `cloudhost247-node/` and `site.json` into `templates/cloudhost247/`; **no reference to `platform/` anywhere in the generator** |
 | 28 | **Versioned, checksummed migrations with production quarantine** | ✅ | ❌ | `database/migrate.ts` + `QUARANTINED_MIGRATIONS`; platform has one generated schema, no migration history |
-| 29 | WHMCS / PHP / cPanel deployment path | ✅ | ❌ | `docs/CPANEL_DEPLOYMENT.md`, `templates/cloudhost247/`, 84 PHP pages; platform has only `.htaccess` + `TROUBLESHOOTING-503.md` |
+| 29 | WHMCS / PHP / Ubuntu 24.04 VPS deployment path | ✅ | ❌ | `docs/VPS_DEPLOYMENT.md`, `infrastructure/vps/`, `templates/cloudhost247/`, 84 PHP pages; platform has only `TROUBLESHOOTING-503.md` |
 | 30 | PWA service worker, Capacitor Android/iOS shells | ❌ | ✅ | `platform/public/sw.js`, `manifest.webmanifest`, `platform/mobile/` |
 | 31 | Zero-dependency runtime / JSON file store / crawlable static HTML site | ❌ | ✅ | `platform/public/*.html` (~40), `src/store/json-store.js` |
 | 32 | Application manifest catalogue (60+ self-hosted apps) | ⚠️ | ✅ | `platform/manifests/*.yaml` |

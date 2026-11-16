@@ -24,6 +24,7 @@
 # Environment overrides (optional):
 #   DOMAIN=cloudhost247.com APP_DOMAIN=app.cloudhost247.com
 #   APP_USER=cloudhost247 APP_ROOT=/opt/cloudhost247 WHMCS_ROOT=/var/www/whmcs
+#   MODULE_STORAGE=/var/lib/cloudhost247
 #   NODE_MAJOR=22 IONCUBE_ARCHIVE=/root/ioncube.tar.gz (offline Loader install)
 set -euo pipefail
 
@@ -32,6 +33,10 @@ APP_DOMAIN="${APP_DOMAIN:-app.cloudhost247.com}"
 APP_USER="${APP_USER:-cloudhost247}"
 APP_ROOT="${APP_ROOT:-/opt/cloudhost247}"
 WHMCS_ROOT="${WHMCS_ROOT:-/var/www/whmcs}"
+# Private (never web-served) storage for WHMCS Module Manager / Digital Products
+# uploads. Must live OUTSIDE ${WHMCS_ROOT}; PHP-FPM reaches it via
+# env[CH247_MODULE_STORAGE] and it is inside open_basedir.
+MODULE_STORAGE="${MODULE_STORAGE:-/var/lib/cloudhost247}"
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 log() { printf '\n==> %s\n' "$*"; }
@@ -50,7 +55,17 @@ log "Pre-flight checks"
 echo "  OS: ${PRETTY_NAME:-Ubuntu 24.04}"
 echo "  DOMAIN: ${DOMAIN}  APP_DOMAIN: ${APP_DOMAIN}"
 echo "  APP_USER: ${APP_USER}  APP_ROOT: ${APP_ROOT}  WHMCS_ROOT: ${WHMCS_ROOT}"
+echo "  MODULE_STORAGE: ${MODULE_STORAGE}"
 echo "  SRC_DIR: ${SRC_DIR}"
+
+case "${MODULE_STORAGE}" in
+  /var/www/*|"${WHMCS_ROOT}"|"${WHMCS_ROOT}"/*) die "MODULE_STORAGE must live OUTSIDE the web root (got ${MODULE_STORAGE})." ;;
+  /*) : ;;
+  *) die "MODULE_STORAGE must be an absolute path (got ${MODULE_STORAGE})." ;;
+esac
+case "${SRC_DIR}" in
+  /root/*) die "The repository checkout must not live under /root: www-data and ${APP_USER} cannot traverse it. Move it to ${WHMCS_ROOT}-adjacent storage such as /opt/cloudhost247-src." ;;
+esac
 
 # ---------------------------------------------------------------------------
 # 1. Base packages + hardening
@@ -218,8 +233,13 @@ fi
 
 log "Installing CloudHost247 PHP-FPM pool + ini overrides"
 install -m 644 "${SRC_DIR}/infrastructure/vps/php/www.conf" /etc/php/8.2/fpm/pool.d/www.conf
-# open_basedir hardcodes the WHMCS root; keep it correct when WHMCS_ROOT is overridden.
-sed -i -E "s#^php_admin_value\[open_basedir\] = .*#php_admin_value[open_basedir] = ${WHMCS_ROOT}/:/tmp/:/var/tmp/#" \
+# open_basedir hardcodes the WHMCS root and private storage root; keep them correct
+# when WHMCS_ROOT / MODULE_STORAGE are overridden.
+sed -i -E "s#^php_admin_value\[open_basedir\] = .*#php_admin_value[open_basedir] = ${WHMCS_ROOT}/:${MODULE_STORAGE}/:/tmp/:/var/tmp/#" \
+  /etc/php/8.2/fpm/pool.d/www.conf
+# env[CH247_MODULE_STORAGE] tells the WHMCS Module Manager / Digital Products addons where to keep
+# uploaded packages outside the web root.
+sed -i -E "s#^env\[CH247_MODULE_STORAGE\] = .*#env[CH247_MODULE_STORAGE] = ${MODULE_STORAGE}#" \
   /etc/php/8.2/fpm/pool.d/www.conf
 install -m 644 "${SRC_DIR}/infrastructure/vps/php/zz-cloudhost247.ini" /etc/php/8.2/fpm/conf.d/zz-cloudhost247.ini
 install -m 644 "${SRC_DIR}/infrastructure/vps/php/zz-cloudhost247.ini" /etc/php/8.2/cli/conf.d/zz-cloudhost247.ini
@@ -279,6 +299,11 @@ log "Creating app user and directories"
 # must exist (plain `useradd --system` does not create one).
 id "${APP_USER}" >/dev/null 2>&1 || useradd --system --user-group --home "${APP_ROOT}" --shell /usr/sbin/nologin "${APP_USER}"
 mkdir -p "${APP_ROOT}" "${WHMCS_ROOT}" /var/log/cloudhost247 /var/backups/cloudhost247
+# Private module storage: 0700 www-data so only PHP-FPM can read/write it and no
+# other system account (or the Node app user) can reach uploaded packages.
+mkdir -p "${MODULE_STORAGE}"
+chown -R www-data:www-data "${MODULE_STORAGE}"
+chmod 700 "${MODULE_STORAGE}"
 # Two separate ownerships: the Node tree belongs to the app user, the WHMCS tree
 # to the web server. Never let one write the other.
 chown -R "${APP_USER}":"${APP_USER}" "${APP_ROOT}"
@@ -332,14 +357,21 @@ for cert_domain in "${DOMAIN}" "${APP_DOMAIN}"; do
   fi
 done
 
-# Render DOMAIN / APP_DOMAIN into the vhosts (placeholders __DOMAIN__ / __APP_DOMAIN__).
+# Render DOMAIN / APP_DOMAIN / WHMCS_ROOT into the vhosts (placeholders __DOMAIN__,
+# __APP_DOMAIN__, __WHMCS_ROOT__).
 for vhost in cloudhost247-whmcs.conf cloudhost247-node.conf; do
-  sed -e "s/__DOMAIN__/${DOMAIN}/g" -e "s/__APP_DOMAIN__/${APP_DOMAIN}/g" \
+  sed -e "s|__DOMAIN__|${DOMAIN}|g" -e "s|__APP_DOMAIN__|${APP_DOMAIN}|g" \
+      -e "s|__WHMCS_ROOT__|${WHMCS_ROOT}|g" \
     "${SRC_DIR}/infrastructure/vps/nginx/${vhost}" > "/etc/nginx/sites-available/${vhost}"
 done
 ln -sf /etc/nginx/sites-available/cloudhost247-whmcs.conf /etc/nginx/sites-enabled/cloudhost247-whmcs.conf
 ln -sf /etc/nginx/sites-available/cloudhost247-node.conf /etc/nginx/sites-enabled/cloudhost247-node.conf
 rm -f /etc/nginx/sites-enabled/default
+for vhost in cloudhost247-whmcs.conf cloudhost247-node.conf; do
+  if grep -q '__[A-Z_]*__' "/etc/nginx/sites-available/${vhost}"; then
+    die "Unrendered placeholder remains in ${vhost}: $(grep -o '__[A-Z_]*__' "/etc/nginx/sites-available/${vhost}" | sort -u | tr '\n' ' ')"
+  fi
+done
 nginx -t || die "Nginx config test failed — inspect the error above before continuing."
 systemctl enable --now nginx
 
@@ -364,9 +396,15 @@ install -m 644 "${SRC_DIR}/infrastructure/vps/logrotate/cloudhost247" /etc/logro
 install -m 644 "${SRC_DIR}/infrastructure/vps/fail2ban/jail.local" /etc/fail2ban/jail.local
 systemctl restart fail2ban || true
 install -m 644 "${SRC_DIR}/infrastructure/vps/cron/cloudhost247.cron" /etc/cron.d/cloudhost247
-# Render SRC_DIR / WHMCS_ROOT / APP_ROOT into the cron file.
-sed -i -e "s|__SRC_DIR__|${SRC_DIR}|g" -e "s|__WHMCS_ROOT__|${WHMCS_ROOT}|g" -e "s|__APP_ROOT__|${APP_ROOT}|g" /etc/cron.d/cloudhost247
+# Render the runbook-specific paths/users/domains into the cron file.
+sed -i -e "s|__SRC_DIR__|${SRC_DIR}|g" -e "s|__WHMCS_ROOT__|${WHMCS_ROOT}|g" \
+       -e "s|__APP_ROOT__|${APP_ROOT}|g" -e "s|__APP_USER__|${APP_USER}|g" \
+       -e "s|__DOMAIN__|${DOMAIN}|g" -e "s|__APP_DOMAIN__|${APP_DOMAIN}|g" \
+       -e "s|__MODULE_STORAGE__|${MODULE_STORAGE}|g" /etc/cron.d/cloudhost247
 chmod 644 /etc/cron.d/cloudhost247
+if grep -q '__[A-Z_]*__' /etc/cron.d/cloudhost247; then
+  die "Unrendered placeholder remains in /etc/cron.d/cloudhost247: $(grep -o '__[A-Z_]*__' /etc/cron.d/cloudhost247 | sort -u | tr '\n' ' ')"
+fi
 
 # ---------------------------------------------------------------------------
 # Final gate: re-check the two things whose absence produces a site that
@@ -393,6 +431,11 @@ echo "  Node $(node --version): OK"
 
 log "Provisioning complete."
 cat <<EOF
+
+Paths provisioned:
+  - WHMCS web root:  ${WHMCS_ROOT}   (www-data:www-data, 755)
+  - Node runtime:    ${APP_ROOT}     (${APP_USER}:${APP_USER}, 755; .env must be 600)
+  - Module storage:  ${MODULE_STORAGE} (www-data:www-data, 700 — outside the web root)
 
 Next steps (see docs/VPS_DEPLOYMENT.md):
   1. Point DNS: ${DOMAIN} and ${APP_DOMAIN} → this VPS IP.

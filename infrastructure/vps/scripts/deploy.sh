@@ -34,6 +34,12 @@ die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 [[ "$(id -u)" -eq 0 ]] || die "Run as root (sudo bash ...)."
 [[ -d "${SRC_DIR}/cloudhost247-node" ]] || die "SRC_DIR does not contain cloudhost247-node: ${SRC_DIR}"
 [[ -f "${APP_ROOT}/.env" ]] || die "Missing ${APP_ROOT}/.env — create it from cloudhost247-node/.env.example (docs/VPS_DEPLOYMENT.md §6)."
+# The build runs as ${APP_USER} inside the checkout, so the checkout must be
+# traversable and writable by that account. /root is 0700 root — building there
+# fails with a confusing EACCES halfway through `npm run build`.
+case "${SRC_DIR}" in
+  /root|/root/*) die "SRC_DIR must not live under /root (${SRC_DIR}): the unprivileged build user cannot traverse it. Move the checkout to e.g. /opt/cloudhost247-src." ;;
+esac
 
 if [[ "${1:-}" == "--rollback" ]]; then
   MODE="rollback"
@@ -62,7 +68,7 @@ log "Syncing Node platform to ${APP_ROOT}"
 # Exclude secrets, node_modules, and build output from the sync.
 rsync -a --delete \
   --exclude '.env' --exclude 'node_modules' --exclude 'dist' --exclude 'public' \
-  --exclude '.git' --exclude 'release' \
+  --exclude '.git' --exclude 'release' --exclude '.previous-build' \
   "${SRC_DIR}/cloudhost247-node/" "${APP_ROOT}/"
 chown -R "${APP_USER}:${APP_USER}" "${APP_ROOT}"
 
@@ -93,13 +99,24 @@ if [[ "${SKIP_BUILD}" != "1" ]]; then
   # outputs into ${APP_ROOT}. devDependencies (tsc, vite, tsx) are needed for
   # this and are then discarded.
   log "Installing dependencies and building (TypeScript + Vite) in ${SRC_DIR}"
-  sudo -u cloudhost247 bash -c "cd ${SRC_DIR}/cloudhost247-node && npm ci --no-audit --no-fund && npm run build" \
+  # The build user must own the app directory AND be able to write the two
+  # repo-root projection targets: modules/addons/cloudhost247_theme/resources
+  # (tools:catalog) and assets/cloudhost247-tools (build:tools, created on
+  # demand). chown the parents non-recursively so nothing unrelated to the
+  # build is re-owned, and best-effort the generated dirs themselves.
+  chown -R "${APP_USER:-cloudhost247}:${APP_USER:-cloudhost247}" "${SRC_DIR}/cloudhost247-node"
+  chown "${APP_USER:-cloudhost247}:${APP_USER:-cloudhost247}" \
+    "${SRC_DIR}" "${SRC_DIR}/assets" "${SRC_DIR}/modules/addons/cloudhost247_theme" \
+    "${SRC_DIR}/modules/addons/cloudhost247_theme/resources" 2>/dev/null || true
+  chown -R "${APP_USER:-cloudhost247}:${APP_USER:-cloudhost247}" \
+    "${SRC_DIR}/assets/cloudhost247-tools" 2>/dev/null || true
+  sudo -u "${APP_USER:-cloudhost247}" bash -c "cd ${SRC_DIR}/cloudhost247-node && npm ci --no-audit --no-fund && npm run build" \
     || { rm -rf "${APP_ROOT}/dist"; [[ -d "${PREVIOUS}/dist" ]] && cp -a "${PREVIOUS}/dist" "${APP_ROOT}/"; die "Build failed; the previous build was restored and services were not restarted."; }
 
   log "Installing runtime-only dependencies in ${APP_ROOT}"
   # The service runs the compiled app; it needs dependencies, not compilers.
   # --omit=dev drops tsc/vite/vitest/playwright and the browser binaries.
-  sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm ci --omit=dev --no-audit --no-fund" \
+  sudo -u "${APP_USER:-cloudhost247}" bash -c "cd ${APP_ROOT} && npm ci --omit=dev --no-audit --no-fund" \
     || die "Installing runtime dependencies failed. Services were NOT restarted."
 
   log "Publishing build output to ${APP_ROOT}"
@@ -118,8 +135,8 @@ log "Running database migrations (status → verify → up → verify)"
 # the pending set and confirming no checksum drift. CONFIRM_MIGRATION=yes is
 # the documented production gate; taking a backup first is the operator's job
 # (backup.sh, or BACKUP_S3_* in the control plane).
-sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm run migrate:status"
-sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm run migrate:verify" \
+sudo -u "${APP_USER:-cloudhost247}" bash -c "cd ${APP_ROOT} && npm run migrate:status"
+sudo -u "${APP_USER:-cloudhost247}" bash -c "cd ${APP_ROOT} && npm run migrate:verify" \
   || die "Migration checksum drift detected. Do NOT continue. Investigate with 'npm run migrate:status' (docs/VPS_DEPLOYMENT.md §9)."
 
 # A production migration run REFUSES to apply anything while a quarantined
@@ -129,7 +146,7 @@ sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm run migrate:verify" \
 # and the app would serve 503s over a nonexistent schema. Capture the output so
 # the operator gets the real reason instead of "migration failed".
 MIGRATE_OUT="$(mktemp)"
-if ! sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && CONFIRM_MIGRATION=yes ${AUTHORIZED_MIGRATIONS:+AUTHORIZED_MIGRATIONS=${AUTHORIZED_MIGRATIONS}} npm run migrate" 2>&1 | tee "${MIGRATE_OUT}"; then
+if ! sudo -u "${APP_USER:-cloudhost247}" bash -c "cd ${APP_ROOT} && CONFIRM_MIGRATION=yes ${AUTHORIZED_MIGRATIONS:+AUTHORIZED_MIGRATIONS=${AUTHORIZED_MIGRATIONS}} npm run migrate" 2>&1 | tee "${MIGRATE_OUT}"; then
   if grep -qi 'quarantin' "${MIGRATE_OUT}"; then
     QUARANTINED_IDS="$(grep -oiE '[0-9]{4} \([^)]+\) is quarantined' "${MIGRATE_OUT}" \
       | grep -oE '^[0-9]{4}' | sort -u | tr '\n' ' ')"
@@ -158,7 +175,7 @@ if ! sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && CONFIRM_MIGRATION=yes ${AUT
   die "Migration failed for a reason other than quarantine (see the SQL error above). Services were NOT restarted; the previous build is still live."
 fi
 rm -f "${MIGRATE_OUT}"
-sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm run migrate:verify"
+sudo -u "${APP_USER:-cloudhost247}" bash -c "cd ${APP_ROOT} && npm run migrate:verify"
 
 log "Restarting systemd services"
 systemctl restart cloudhost247-node

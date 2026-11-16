@@ -2,8 +2,8 @@
  * Tools Center — QR tools (spec §54 generator, §55 scanner, §56 WiFi QR).
  *
  * Generation and decoding are real: `qrcode` is a pure-JavaScript encoder and `jsqr` a pure-JavaScript
- * decoder, so nothing here needs a native toolchain (the constraint that shaped the rest of this
- * platform — see docs/CPANEL_DEPLOYMENT.md). The scanner decodes the uploaded IMAGE locally and
+ * decoder, so nothing here needs an external native binary (see docs/VPS_DEPLOYMENT.md). The scanner
+ * decodes the uploaded IMAGE locally and
  * never fetches, opens or follows whatever the QR code contains: a QR code pointed at a phishing URL
  * is reported as text with a warning, not visited.
  */

@@ -2,8 +2,19 @@
 
 Single source of truth for "what has actually been verified" vs. "what has only been built and
 locally/CI tested." Update this file at the end of every phase. Do not describe any phase as
-"cPanel-ready" or "production-ready" anywhere (chat, PRs, commit messages) unless this ledger
-says the corresponding cPanel gate is CLOSED with evidence.
+"deployment-ready" or "production-ready" anywhere (chat, PRs, commit messages) unless this ledger
+says the corresponding deployment gate is CLOSED with evidence.
+
+> **Deployment target changed (2026-11-15/16).** CloudHost247 deploys **only** on a dedicated
+> **Ubuntu 24.04 LTS VPS** (Nginx 1.24 + PHP 8.2-FPM + MySQL 8.0 + PostgreSQL 16 + Node 22 under
+> systemd) — see [`VPS_DEPLOYMENT.md`](VPS_DEPLOYMENT.md). The shared-hosting/Passenger target and
+> its runbook (`docs/CPANEL_DEPLOYMENT.md`) were removed from the tree, so every historical entry
+> below that says "cPanel staging" describes **that retired target** and reads today as "the
+> deployment-host staging gate", which is still **BLOCKED / NOT PERFORMED** (no VPS was available).
+> The gate's checklist now lives in `docs/VPS_DEPLOYMENT.md` Appendix C, and the stack is proven
+> offline by `infrastructure/vps/tests/`. Where cPanel appears as a *control panel we integrate
+> with and sell* (adapters, WHM/UAPI, `cpanel_smtp`, `/hosting/cpanel`), that is product scope and
+> is unchanged.
 
 ---
 
@@ -71,18 +82,18 @@ sub-phase before the next one begins.
     Postgres-wire-protocol test database (PGlite), not a real cPanel/Postgres host.
   - `git diff` against base commit confirms zero WHMCS/PHP files modified.
 - **cPanel staging verification: BLOCKED — NOT PERFORMED.**
-  - Reason: no cPanel staging environment, credentials, or connector has been available to this
-    work at any point.
-  - Full detail and the 18-point checklist: `docs/CPANEL_DEPLOYMENT.md`, "Status of this
-    document" note and Appendix C. All 18 items unchecked.
+  - Reason: no staging host matching the deployment target, credentials, or connector has been
+    available to this work at any point. (The target at the time of writing was shared
+    cPanel/Passenger hosting; it is now an Ubuntu 24.04 VPS and the gate is unchanged.)
+  - Full detail and the go-live checklist: `docs/VPS_DEPLOYMENT.md`, "Status of this
+    document" note and Appendix C. All items unchecked on a live host.
   - **Explicit decision on record:** the project owner was told this exact blocker in plain terms
     and chose to let Phase 2 proceed in parallel rather than pause on it, with the explicit
-    condition that no "cPanel-ready"/"production-ready" claim is made until the real cPanel run
-    happens. This is a deliberate, informed exception — not a skipped step.
-  - **Action required before production use:** deploy the latest reviewed commit on
-    `arena/01a0e82a-cloudhost247` (Phase 1 baseline: `3523035c5817b857eb2917c188db2452bebab35a`)
-    to a real disposable cPanel account and complete every item in
-    `docs/CPANEL_DEPLOYMENT.md` Appendix C, then update this ledger with real evidence (versions,
+    condition that no "cPanel-ready"/"production-ready" claim is made until the real deployment-host
+    run happens. This is a deliberate, informed exception — not a skipped step.
+  - **Action required before production use:** deploy the latest reviewed commit
+    to a real disposable **Ubuntu 24.04 VPS** and complete every item in
+    `docs/VPS_DEPLOYMENT.md` Appendix C, then update this ledger with real evidence (versions,
     logs, route-test results) before that claim is made anywhere.
 
 ## Phase 2 — Public website + shared application shell
@@ -102,8 +113,7 @@ sub-phase before the next one begins.
   - Manual smoke test against the built app (background server, DB intentionally unreachable):
     `/`, `/about`, `/hosting/cpanel`, `/legal/privacy-policy`, `/login`, `/register`, `/dashboard`
     all returned `200`; CSS/JS bundle assets served correctly.
-- **Content honesty decisions made this phase** (see `docs/CPANEL_DEPLOYMENT.md` section 8 for
-  detail): reused the *real* CloudHost247 brand tokens/hero copy from
+- **Content honesty decisions made this phase:** reused the *real* CloudHost247 brand tokens/hero copy from
   `modules/addons/cloudhost247_theme/lib/ThemeRepository.php`; did **not** reuse the Lorem
   Ipsum/fabricated team-bio content from the legacy purchased WHMCS theme
   (`templates/cloudhost247_legacy/aboutus.tpl`); did **not** invent hosting plan prices (the real
@@ -307,12 +317,12 @@ sub-phase before the next one begins.
 - **API contract documentation:** `docs/API_CATALOG.md` — endpoints, methods, auth/authz
   requirements, request/response DTOs, and the full error-code table, written directly against the
   actual route/schema code in this phase (not aspirational).
-- **cPanel staging verification: still BLOCKED / UNVERIFIED** — unchanged reason as every prior
-  phase (no cPanel environment/credentials have been available at any point in this project). This
-  phase does not add or remove any cPanel-incompatible dependency (still Fastify + `pg` +
-  `process.env.PORT`, no Docker/K8s/systemd/mandatory-Redis/PM2/custom-Nginx/daemons/root). Must
-  not be described as cPanel-ready/production-ready until Appendix C of
-  `docs/CPANEL_DEPLOYMENT.md` is closed with real evidence from an actual cPanel account.
+- **Deployment-host staging verification: still BLOCKED / UNVERIFIED** — unchanged reason as every
+  prior phase (no host matching the deployment target has been available at any point in this
+  project). This phase does not add or remove any dependency that constrains the host (still
+  Fastify + `pg` + `process.env.PORT`; no Docker/K8s/mandatory-Redis/PM2/daemons). Must not be
+  described as deployment-ready/production-ready until Appendix C of `docs/VPS_DEPLOYMENT.md` is
+  closed with real evidence from an actual Ubuntu 24.04 VPS.
 - **Known limitation carried over, unchanged:** no automated headless-browser (Playwright/
   Chromium) visual/responsive verification is possible in this sandbox (browser binary download
   fails — registry-only network access). The new `.ch247-plan-grid`/`.ch247-state-banner` CSS
@@ -1354,7 +1364,8 @@ sub-phase before the next one begins.
   route registration*, which runs while the app is being built, so an unreachable database made
   `buildApp()`/`app.ready()` throw and took the whole platform down with it — including `/health`
   (contractually database-free), `/ready` (whose job is to *report* the outage) and every static/SPA
-  route; under Passenger that is a restart loop a brief database blip can keep alive. Seeding now runs
+  route; under a `Restart=on-failure` systemd unit that is a restart loop a brief database blip can
+  keep alive. Seeding now runs
   in an `onReady` hook that logs and continues on failure, and `ensureAgentRegistrySeeded()` repairs the
   registry on the next **authorized** AI request (after `requireAiPermission`/`authenticate`, never
   before — an anonymous or non-staff caller cannot trigger registry writes) as well as on every worker
@@ -1794,6 +1805,6 @@ sub-phase before the next one begins.
 - **VPS staging verification: BLOCKED — NOT PERFORMED.** No Ubuntu 24.04 VPS
   (or WHMCS licence) has been available in this environment, so nothing in
   Appendix C of `docs/VPS_DEPLOYMENT.md` is checked off, and no
-  "production-ready" claim is made for this target. The same standing condition
-  as the cPanel path applies: the claim requires a real run on a real host with
-  recorded evidence (versions, logs, healthcheck output, restore drill).
+  "production-ready" claim is made for this target. The standing condition is
+  unchanged: the claim requires a real run on a real host with recorded evidence
+  (versions, logs, healthcheck output, restore drill).

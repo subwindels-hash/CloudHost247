@@ -5,11 +5,10 @@
  *   - the local PostgreSQL 16 instance on the VPS, or
  *   - An external/managed PostgreSQL provider (Supabase, RDS, Neon, DigitalOcean, etc.)
  * selected purely by DATABASE_URL. Nothing here hardcodes a host, user, password or database
- * name — see docs/CPANEL_DEPLOYMENT.md section "Database" for how to obtain DATABASE_URL.
+ * name — see docs/VPS_DEPLOYMENT.md §4/§6 for configuring DATABASE_URL.
  *
  * VPS note: pool size stays small and configurable
- * (DATABASE_POOL_MAX) because shared hosting / small managed Postgres plans usually cap the
- * number of concurrent connections per account.
+ * (DATABASE_POOL_MAX) so small VPS / managed Postgres plans never exhaust max_connections.
  */
 import { Pool, type PoolConfig } from 'pg';
 import type { Env } from '../config/env';

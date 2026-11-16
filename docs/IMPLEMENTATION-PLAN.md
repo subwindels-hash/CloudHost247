@@ -227,7 +227,7 @@ P0-1..P0-5 ─────────────┤                           
 5. **Country/currency consistency:** at least three locales/countries across product/pricing/cart/checkout/invoice/dashboard; assert one canonical charged amount.
 6. **Responsive/visual:** install Chromium (`npx playwright install chromium`; prior attempt failed TLS `ECONNRESET` — retry with an approved mirror) and capture mobile/tablet/desktop screenshots of the top 20 routes; inspect rendered pages and generated files.
 7. **Security:** dependency audit, secrets scan, CSP/CORS/headers review, SSRF/DNS suite caveats from `scripts/php-wasm/README.md`, RBAC cross-tenant negative tests, rate-limit tests, provider fail-closed tests.
-8. **Production-readiness report:** per-feature status using the six allowed statuses, exact files/DB/API/routes/integrations/tests/results/evidence/limitations, failed tests and outstanding blockers, and the 18-point `docs/CPANEL_DEPLOYMENT.md` checklist. State unambiguously that no production deploy occurred.
+8. **Production-readiness report:** per-feature status using the six allowed statuses, exact files/DB/API/routes/integrations/tests/results/evidence/limitations, failed tests and outstanding blockers, and the `docs/VPS_DEPLOYMENT.md` Appendix C go-live checklist. State unambiguously that no production deploy occurred.
 
 ---
 

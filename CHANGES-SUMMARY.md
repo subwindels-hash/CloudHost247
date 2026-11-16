@@ -1,5 +1,13 @@
 # Summary of Changes to Fix 503 Error
 
+> **Historical record (2026-11-16).** This document describes a 503 fix delivered against the
+> **retired** cPanel/Passenger deployment target. CloudHost247 now deploys to an Ubuntu 24.04 VPS
+> only — see `docs/VPS_DEPLOYMENT.md`. Artefacts described below have since been **deleted from the
+> tree**: `platform/.htaccess` (Passenger directives) and `FIX-503-ERROR.md`. The equivalent
+> current guidance is `platform/TROUBLESHOOTING-503.md` (systemd + Nginx diagnosis) and
+> `infrastructure/vps/systemd/cloudhost247-node.service`. The text is preserved unchanged as the
+> record of what was done at the time; do not follow it as instructions.
+
 ## Problem
 The CloudHost247 platform at try.vortexprecisionit.com was returning a 503 Service Unavailable error because the Node.js application was failing to start in production mode.
 

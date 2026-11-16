@@ -55,8 +55,8 @@ export function hashAuthActionToken(token: string): string {
 
 function actionUrl(appUrl: string, path: string, token: string): string {
   const base = new URL(appUrl);
-  // APP_URL may be hosted under a Passenger prefix. Preserve that prefix instead of assuming the
-  // application is always mounted at '/'.
+  // APP_URL may be mounted under a reverse-proxy path prefix. Preserve that prefix instead of
+  // assuming the application is always mounted at '/'.
   base.pathname = `${base.pathname.replace(/\/$/, '')}/${path}`.replace(/\/+/g, '/');
   base.search = new URLSearchParams({ token }).toString();
   base.hash = '';

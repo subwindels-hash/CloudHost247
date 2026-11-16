@@ -163,7 +163,7 @@ describe('email verification and password recovery', () => {
     expect(report).toMatchObject({ claimed: 1, delivered: 1 });
     expect(fetchCalls).toHaveLength(1);
     expect(fetchCalls[0]?.body).toContain(token);
-    // APP_URL's Passenger prefix is retained in the generated link.
+    // APP_URL's reverse-proxy path prefix is retained in the generated link.
     expect(fetchCalls[0]?.body).toContain('https://panel.example.test/customer/verify-email?token=');
 
     const persisted = await db.query<Record<string, unknown>>(`SELECT * FROM auth_email_outbox`);

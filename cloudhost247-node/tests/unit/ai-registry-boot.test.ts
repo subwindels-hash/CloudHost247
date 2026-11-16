@@ -12,8 +12,8 @@ import type { Queryable } from '../../src/db/types';
  * application is being built. That made "the database is unreachable right now" fatal to the whole
  * platform: `buildApp()`/`app.ready()` threw, so `/health` (contractually database-free), `/ready`
  * (whose entire job is to *report* an unreachable database) and every static/SPA route went down
- * with it, and Passenger kept restarting a process that could never come up while the database was
- * briefly unavailable.
+ * with it, and a `Restart=on-failure` supervisor kept restarting a process that could never come up
+ * while the database was briefly unavailable.
  *
  * These tests pin the replacement contract:
  *   1. the app builds and becomes ready with the database unreachable, and still serves /health,

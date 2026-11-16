@@ -4,8 +4,7 @@
  *
  * Rules carried over from the existing platform:
  *   - No secret ever has a hardcoded production fallback. Missing secrets fail startup loudly.
- *   - PORT comes from the hosting environment (cPanel Passenger injects it); the 3000 fallback is
- *     development-only.
+ *   - PORT comes from the systemd unit / VPS environment; the 3000 fallback is development-only.
  *   - DATABASE_URL is optional here (unlike the old platform) because the JSON file store is a
  *     first-class backend. When it IS set it must be a postgres:// URL.
  */
@@ -184,8 +183,6 @@ function loadConfig(options = {}) {
     const portVal = input.PORT.trim();
     if (/^(\/|unix:|\\\\\.\\pipe\\)/i.test(portVal)) {
       if (!input.SOCKET_PATH) input.SOCKET_PATH = portVal.replace(/^unix:/i, '');
-      delete input.PORT;
-    } else if (portVal.toLowerCase() === 'passenger') {
       delete input.PORT;
     }
   }

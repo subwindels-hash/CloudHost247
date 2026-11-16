@@ -1,7 +1,7 @@
 /**
- * CloudHost247 migration runner — cPanel-safe CLI.
+ * CloudHost247 migration runner — production VPS CLI.
  *
- * Usage (after `npm run build`, from the application root on the cPanel server):
+ * Usage (after `npm run build`, from /opt/cloudhost247 on the VPS):
  *   node dist/database/migrate.js status     # show applied / pending migrations, no changes
  *   node dist/database/migrate.js verify      # checksum-verify already-applied migrations
  *   node dist/database/migrate.js up          # apply pending migrations (explicit, controlled)
@@ -27,8 +27,8 @@ import { DbClient, PgClient } from './db-client';
 
 // Resolved relative to the current working directory rather than __dirname so this works
 // identically whether the runner executes from compiled output (dist/database/migrate.js) or
-// directly from TypeScript source (tests). cPanel Node.js Application Manager (Passenger) and
-// `npm run migrate` both invoke this with the application root as the working directory.
+// directly from TypeScript source (tests). `deploy.sh` and `npm run migrate` both invoke this
+// with the application root (/opt/cloudhost247) as the working directory.
 export const MIGRATIONS_DIR = path.join(process.cwd(), 'database', 'migrations');
 
 export interface MigrationFile {

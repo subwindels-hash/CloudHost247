@@ -3,19 +3,18 @@
 **Gate rule:** every checkbox must carry dated execution evidence. Nothing here authorizes
 production by itself; production remains NO-GO until CT-01..CT-08 close with verifier signatures.
 
-> **Target:** this checklist was written for the cPanel staging target. The VPS
-> equivalent — host provisioning, WHMCS install, Node deploy, cron/backups, and
-> the Ubuntu 24.04 go-live gates — is
-> [`docs/VPS_DEPLOYMENT.md`](docs/VPS_DEPLOYMENT.md) Appendix C. The gates here
-> (migrations, provider certifications, payment/financial drills, restore drill)
-> still apply unchanged on the VPS; only CT-01/CT-02 (WHMCS + cPanel staging)
-> are replaced by the VPS certification steps.
+> **Target:** Ubuntu 24.04 LTS VPS — the only supported deployment target.
+> Host provisioning, WHMCS install, Node deploy, cron/backups, and the go-live
+> gates are in [`docs/VPS_DEPLOYMENT.md`](docs/VPS_DEPLOYMENT.md) Appendix C.
+> The gates here (migrations, provider certifications, payment/financial drills,
+> restore drill) run on that VPS; CT-01/CT-02 are the WHMCS + VPS staging
+> certification steps.
 
 ## Pre-flight (must all be closed before any deploy)
 
 - [ ] CT-03 authorized managed PostgreSQL reachable; `migrateUp` applied (currently 94 migrations) with checksum verify OK
 - [ ] Quarantined migrations 0023/0024/0025/0041 explicitly reviewed + owner-authorized or still skipped
-- [ ] CT-01/CT-02 WHMCS + cPanel staging certified (transaction IDs captured)
+- [ ] CT-01/CT-02 WHMCS + Ubuntu 24.04 VPS staging certified (transaction IDs captured)
 - [ ] CT-04 email relay certified (delivery + bounce + retry evidence)
 - [ ] CT-05 payment sandbox certified per provider (Stripe/PayPal/Paystack/Blockonomics)
 - [ ] CT-06 compute/registrar/DNS providers certified

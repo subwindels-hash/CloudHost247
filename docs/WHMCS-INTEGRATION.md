@@ -55,7 +55,8 @@ Everything below is a consequence of that sentence.
 1. **Create an API credential in WHMCS** — *System Settings → Staff Management → API Credentials*. Give it the
    smallest role that can read products (and, later and separately, orders). Do not reuse an administrator's
    credentials.
-2. **Set the environment** (cPanel → *Setup Node.js App* → environment variables, or `.env`):
+2. **Set the environment** in `/opt/cloudhost247/.env` (mode `0600`, owned by the `cloudhost247`
+   system user; `systemctl restart cloudhost247-node cloudhost247-worker` afterwards):
 
    ```
    WHMCS_BASE_URL=https://billing.example.com
