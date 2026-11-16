@@ -96,9 +96,9 @@
       "href": "/docs/vps-deployment",
       "section": "Operations",
       "title": "VPS deployment (Ubuntu 24.04)",
-      "summary": "Target: a plain Linux VPS running Ubuntu 24.04 LTS (noble) with root access. This guide replaces the cPanel/Passenger target (docs/CPANEL_DEPLOYMENT.md) with native VPS services. Both targets run the ",
+      "summary": "Target: a plain Linux VPS running Ubuntu 24.04 LTS (noble) with root access. This is the only supported deployment target. The cPanel/Passenger path was retired on 2026-11-15 (see Appendix B).",
       "source": "docs/VPS_DEPLOYMENT.md",
-      "bytes": 24161
+      "bytes": 24977
     },
     {
       "slug": "passkey",
