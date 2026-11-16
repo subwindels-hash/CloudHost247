@@ -22,6 +22,7 @@
 set -euo pipefail
 
 APP_ROOT="${APP_ROOT:-/opt/cloudhost247}"
+APP_USER="${APP_USER:-cloudhost247}"
 SRC_DIR="${SRC_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)}"
 SKIP_BUILD="${SKIP_BUILD:-0}"
 PREVIOUS="${APP_ROOT}/.previous-build"
@@ -42,7 +43,7 @@ if [[ "${1:-}" == "--rollback" ]]; then
   rm -rf "${APP_ROOT}/dist" "${APP_ROOT}/public"
   cp -a "${PREVIOUS}/dist" "${PREVIOUS}/public" "${APP_ROOT}/"
   [[ -f "${PREVIOUS}/package-lock.json" ]] && cp -a "${PREVIOUS}/package-lock.json" "${APP_ROOT}/" || true
-  chown -R cloudhost247:cloudhost247 "${APP_ROOT}"
+  chown -R "${APP_USER}:${APP_USER}" "${APP_ROOT}"
   systemctl start cloudhost247-node cloudhost247-worker
   sleep 3
   systemctl is-active --quiet cloudhost247-node || die "Rollback started the service but it immediately failed. Check: journalctl -u cloudhost247-node -n 50"
@@ -63,7 +64,7 @@ rsync -a --delete \
   --exclude '.env' --exclude 'node_modules' --exclude 'dist' --exclude 'public' \
   --exclude '.git' --exclude 'release' \
   "${SRC_DIR}/cloudhost247-node/" "${APP_ROOT}/"
-chown -R cloudhost247:cloudhost247 "${APP_ROOT}"
+chown -R "${APP_USER}:${APP_USER}" "${APP_ROOT}"
 
 if [[ "${SKIP_BUILD}" != "1" ]]; then
   # Snapshot the currently-serving build before overwriting it (see --rollback).
@@ -76,9 +77,40 @@ if [[ "${SKIP_BUILD}" != "1" ]]; then
     [[ -f "${APP_ROOT}/package-lock.json" ]] && cp -a "${APP_ROOT}/package-lock.json" "${PREVIOUS}/"
   fi
 
-  log "Installing dependencies and building (TypeScript + Vite)"
-  sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm ci --no-audit --no-fund && npm run build" \
+  # BUILD IN THE REPO CHECKOUT, NOT IN ${APP_ROOT}. This is not a preference.
+  #
+  # The build writes outside cloudhost247-node/: script `tools:catalog:check`
+  # regenerates modules/addons/cloudhost247_theme/resources/tools.json, and
+  # `build:tools` emits assets/cloudhost247-tools/. Both paths are resolved as
+  # ../../<x> from the app directory, i.e. they are REPO-root paths. ${APP_ROOT}
+  # is /opt/cloudhost247 and contains only that one subdirectory, so there
+  # ../../modules resolves to /opt/modules and the build either dies with
+  # ENOENT or silently writes into /opt. Worse, `npm run build` runs
+  # tools:catalog:check BEFORE build:server, so it fails before producing a
+  # single byte of dist/ — which is exactly what a real VPS deploy hit.
+  #
+  # The checkout has the correct layout, so build there and copy the build
+  # outputs into ${APP_ROOT}. devDependencies (tsc, vite, tsx) are needed for
+  # this and are then discarded.
+  log "Installing dependencies and building (TypeScript + Vite) in ${SRC_DIR}"
+  sudo -u cloudhost247 bash -c "cd ${SRC_DIR}/cloudhost247-node && npm ci --no-audit --no-fund && npm run build" \
     || { rm -rf "${APP_ROOT}/dist"; [[ -d "${PREVIOUS}/dist" ]] && cp -a "${PREVIOUS}/dist" "${APP_ROOT}/"; die "Build failed; the previous build was restored and services were not restarted."; }
+
+  log "Installing runtime-only dependencies in ${APP_ROOT}"
+  # The service runs the compiled app; it needs dependencies, not compilers.
+  # --omit=dev drops tsc/vite/vitest/playwright and the browser binaries.
+  sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm ci --omit=dev --no-audit --no-fund" \
+    || die "Installing runtime dependencies failed. Services were NOT restarted."
+
+  log "Publishing build output to ${APP_ROOT}"
+  for out in dist public; do
+    [[ -d "${SRC_DIR}/cloudhost247-node/${out}" ]] || die "Build produced no ${out}/ — refusing to publish a broken build."
+    rm -rf "${APP_ROOT:?}/${out}"
+    cp -a "${SRC_DIR}/cloudhost247-node/${out}" "${APP_ROOT}/"
+  done
+  # The compiled app resolves paths relative to its own directory and loads
+  # <APP_ROOT>/.env (which rsync excludes), so ownership must be reset here.
+  chown -R "${APP_USER}:${APP_USER}" "${APP_ROOT}"
 fi
 
 log "Running database migrations (status → verify → up → verify)"

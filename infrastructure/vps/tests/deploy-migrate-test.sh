@@ -17,7 +17,9 @@
 #   3. Proves a second run is a no-op, because deploy.sh reruns it every deploy.
 #   4. Proves deploy.sh reports the quarantine as a quarantine (not "SQL error")
 #      and passes AUTHORIZED_MIGRATIONS through to the migration command.
-#   5. Proves the entrypoint the systemd unit runs (`node dist/src/server.js`)
+#   5. Proves the build runs where it can resolve repo-root paths, and that
+#      building anywhere else fails with an explanation.
+#   6. Proves the entrypoint the systemd unit runs (`node dist/src/server.js`)
 #      boots over TCP with only PORT + env, serves /health, reports /ready 503
 #      when the database is down without crashing, and exits on SIGTERM.
 #
@@ -243,7 +245,45 @@ STUB
 fi
 
 # ---------------------------------------------------------------------------
-# [5] The entrypoint systemd actually launches must boot on its own.
+# [5] The build must run in the repo checkout, not in APP_ROOT.
+#     cloudhost247-node/'s build writes to ../../modules/... and ../../assets/...,
+#     which are REPO-root paths. /opt/cloudhost247 contains only one subdirectory,
+#     so building there fails before build:server emits any dist/.
+# ---------------------------------------------------------------------------
+echo
+echo "  build location"
+
+DEPLOY_BLOCK="$(sed -n '/Installing dependencies and building/,/Publishing build output/p' "${DEPLOY}")"
+grep -q 'cd ${SRC_DIR}/cloudhost247-node && npm ci' <<<"${DEPLOY_BLOCK}" \
+  && pass "deploy.sh installs devDependencies and builds in the checkout (SRC_DIR)" \
+  || fail "deploy.sh does not build in SRC_DIR"
+grep -q 'cd ${APP_ROOT} && npm ci --omit=dev' <<<"${DEPLOY_BLOCK}" \
+  && pass "deploy.sh installs runtime-only dependencies in APP_ROOT" \
+  || fail "deploy.sh does not install runtime-only dependencies in APP_ROOT"
+grep -qE 'cd \$\{APP_ROOT\} && npm ci.*npm run build' <<<"${DEPLOY_BLOCK}" \
+  && fail "deploy.sh still builds inside APP_ROOT (the build cannot resolve ../../modules)" \
+  || pass "deploy.sh does not build inside APP_ROOT"
+
+# Direct proof of the constraint, without a full install: the projection script
+# resolves its target from the repo root, so running it from a bare app dir must
+# fail with an explanation rather than a misleading "stale projection".
+BARE="${WORK}/bare-app"
+mkdir -p "${BARE}"
+cp -a "${APP}/scripts" "${BARE}/"
+cp -a "${APP}/src" "${BARE}/"
+ln -s "${APP}/node_modules" "${BARE}/node_modules"
+BARE_OUT="$(cd "${BARE}" && ./node_modules/.bin/tsx scripts/export-tools-site.ts --check 2>&1)"
+if grep -q 'projection target does not exist' <<<"${BARE_OUT}"; then
+  pass "build outside the checkout fails with an actionable message (not 'stale projection')"
+else
+  fail "build outside the checkout did not explain itself: $(head -3 <<<"${BARE_OUT}" | tr '\n' ' ')"
+fi
+grep -q 'must run in the git checkout' <<<"${BARE_OUT}" \
+  && pass "the message names the required build location" \
+  || fail "the message does not name the required build location"
+
+# ---------------------------------------------------------------------------
+# [6] The entrypoint systemd actually launches must boot on its own.
 #     `node dist/src/server.js` with only the environment the unit provides
 #     (PORT + .env). No Passenger socket, no in-process build.
 # ---------------------------------------------------------------------------

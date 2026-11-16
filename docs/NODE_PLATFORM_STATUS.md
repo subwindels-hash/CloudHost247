@@ -1753,14 +1753,14 @@ sub-phase before the next one begins.
   `backup.sh` / `restore.sh` / `healthcheck.sh`), plus
   `cloudhost247-node/scripts/package-vps.sh` and the runbook
   `docs/VPS_DEPLOYMENT.md`.
-- **Verified by automated tests (194 assertions, all passing):**
+- **Verified by automated tests (199 assertions, all passing):**
   `tests/nginx-live-test.sh` loads the shipped vhosts into a **real nginx 1.24.0**
   (built from source for this verification) and asserts on live HTTP responses:
   secret-file denies, no PHP source disclosure, ACME challenge reachable over
   plain HTTP, redirect preserving path+query, pretty-URL and `/tools/`
   front-controller routing, exactly one `Cache-Control`, security headers
   surviving nested `add_header` locations, `X-Forwarded-*` reaching the Node
-  app, and HTTP/2 (43). `tests/deploy-migrate-test.sh` (23) runs the compiled
+  app, and HTTP/2 (43). `tests/deploy-migrate-test.sh` (28) runs the compiled
   application the way a deploy does: the real migration runner against a real
   database, the documented quarantine override, and the systemd entrypoint
   booted over TCP. Plus `smoke-test.sh` (82), `setup-dry-run.sh` (33, the
@@ -1774,7 +1774,13 @@ sub-phase before the next one begins.
     `deploy.sh` now reports this and forwards `AUTHORIZED_MIGRATIONS`;
     (b) the `cloudhost247-node` unit started the cPanel Passenger bootstrap
     `./server.js`, which compiles in-process, instead of the compiled
-    `dist/src/server.js`. `/ready` also now checks the schema instead of only
+    `dist/src/server.js`;
+    (c) `npm run build` could not succeed on a VPS at all — the build writes
+    `../../modules/.../tools.json` and `../../assets/cloudhost247-tools`, i.e.
+    repo-root paths, so building in `/opt/cloudhost247` (which contains only
+    `cloudhost247-node/`) failed at the pre-build projection check and never
+    produced `dist/`. `deploy.sh` now builds in the git checkout and publishes
+    `dist/` + `public/`. `/ready` also now checks the schema instead of only
     connection reachability (`SELECT 1` passes against an empty database).
 - **VPS staging verification: BLOCKED — NOT PERFORMED.** No Ubuntu 24.04 VPS
   (or WHMCS licence) has been available in this environment, so nothing in

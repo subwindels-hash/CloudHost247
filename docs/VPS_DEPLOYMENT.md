@@ -34,8 +34,8 @@ server, PHP runtime, and process manager differ.
 > - **A deploy actually lands.** The compiled Node app is built with the same
 >   `npm ci && npm run build` that `deploy.sh` runs, the real migration runner is
 >   executed against a real database, and the systemd entrypoint
->   (`node dist/src/server.js`) is booted over TCP and probed — 23 assertions.
->   This found and closed two genuine deploy blockers:
+>   (`node dist/src/server.js`) is booted over TCP and probed — 28 assertions.
+>   This found and closed three genuine deploy blockers:
 >   1. `deploy.sh` applied **no migrations at all** on a fresh database, because
 >      quarantined migration `0041` has pending dependents and the runner fails
 >      closed. The schema stayed empty — see "First deploy: the quarantine gate"
@@ -47,6 +47,16 @@ server, PHP runtime, and process manager differ.
 >      that exists only to survive Passenger's startup timeout, and a way to end
 >      up serving a build that never ran `npm ci`. The unit now runs
 >      `node dist/src/server.js` behind an `ExecStartPre` guard.
+>   3. **`npm run build` could not succeed on a VPS at all.** The build writes
+>      `modules/addons/cloudhost247_theme/resources/tools.json` and
+>      `assets/cloudhost247-tools/`, both at `../../` — repo-root paths.
+>      `deploy.sh` built inside `/opt/cloudhost247`, which contains only
+>      `cloudhost247-node/`, so the pre-build `tools:catalog:check` step died
+>      with "Tools projection is stale" and `dist/` was never produced. (Adding
+>      `public/` to the rsync excludes made this deterministic: the check fails
+>      whatever state `public/` was in.) `deploy.sh` now builds in the checkout
+>      and publishes `dist/` + `public/`; the projection script now says where
+>      the build must run instead of reporting a stale projection.
 > - `/ready` now verifies the **schema**, not just the connection. It previously
 >   ran `SELECT 1`, which succeeds against a completely empty database, so a
 >   deploy that skipped migrations reported ready while every real query failed.
@@ -266,10 +276,22 @@ cd /opt/cloudhost247-src
 sudo AUTHORIZED_MIGRATIONS=0041 bash infrastructure/vps/scripts/deploy.sh
 ```
 
-This syncs `cloudhost247-node/` → `/opt/cloudhost247`, runs `npm ci` +
-`npm run build`, applies migrations with `CONFIRM_MIGRATION=yes`, verifies
-checksums, restarts `cloudhost247-node` + `cloudhost247-worker`, reloads
+This syncs `cloudhost247-node/` → `/opt/cloudhost247`, **builds in the git
+checkout**, installs runtime-only dependencies into `/opt/cloudhost247`,
+publishes `dist/` + `public/`, applies migrations with `CONFIRM_MIGRATION=yes`,
+verifies checksums, restarts `cloudhost247-node` + `cloudhost247-worker`, reloads
 Nginx, and runs the healthcheck.
+
+> **Why the build happens in the checkout and not in `/opt/cloudhost247`.**
+> `cloudhost247-node`'s build writes two things **outside** its own directory:
+> `modules/addons/cloudhost247_theme/resources/tools.json` (via
+> `tools:catalog:check`/`tools:catalog`) and `assets/cloudhost247-tools/` (the
+> tools bundle). Both are resolved as `../../…` — i.e. paths relative to the
+> **repository root**. `/opt/cloudhost247` holds only `cloudhost247-node/`, so
+> `../../modules` becomes `/opt/modules`. `npm run build` runs
+> `tools:catalog:check` *before* `build:server`, so building there dies before
+> emitting a single byte of `dist/`. Building in the checkout also means the
+> devDependencies (`tsc`, `vite`, `tsx`) are discarded instead of shipped.
 
 ### First deploy: the quarantine gate
 
