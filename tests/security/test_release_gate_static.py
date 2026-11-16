@@ -207,10 +207,16 @@ class ReleaseGateCoverageTests(unittest.TestCase):
 
     def test_every_referenced_suite_actually_exists(self):
         require_repository_wiring()
+        # The prefix is part of the path. Matching only `tests/...` found the
+        # substring inside `infrastructure/vps/tests/smoke-test.sh`, resolved it
+        # against the repo root, and reported a file that exists as missing --
+        # so any gate legitimately running a nested tests/ directory was a false
+        # positive. Anchor the match to a real path segment boundary instead.
         missing = [path
                    for gate in (SCRIPT, WORKFLOW)
-                   for path in set(re.findall(r'(?:tests|scripts)/[A-Za-z0-9_./-]+\.(?:py|php|sh)',
-                                              gate.read_text()))
+                   for path in set(re.findall(
+                       r'(?:[A-Za-z0-9_.-]+/)*(?:tests|scripts)/[A-Za-z0-9_./-]+\.(?:py|php|sh)',
+                       gate.read_text()))
                    if not (ROOT / path).is_file()]
         self.assertEqual([], sorted(set(missing)), 'a gate references files that do not exist')
 
