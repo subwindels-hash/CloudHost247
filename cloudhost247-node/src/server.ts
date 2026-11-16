@@ -1,12 +1,9 @@
 /**
  * Production/development server entry point. Compiled to dist/src/server.js, which is what the
- * `cloudhost247-node` systemd unit starts on the VPS (see infrastructure/vps/systemd/).
+ * `cloudhost247-node` systemd unit starts on the Ubuntu 24.04 VPS (see infrastructure/vps/systemd/).
  *
- * It can also be loaded by the repository-root server.js, the legacy Passenger bootstrap used for
- * the documented cPanel fallback (docs/CPANEL_DEPLOYMENT.md). systemd does not use that path.
- *
- * Port binding: the systemd unit injects PORT (default 3000; Nginx proxies 127.0.0.1:3000) or a
- * unix domain socket into the process environment and reverse-proxies traffic to it. We must
+ * Port binding: the systemd unit injects PORT (default 3000; Nginx proxies 127.0.0.1:3000) or an
+ * explicit unix domain socket into the process environment and reverse-proxies traffic to it. We must
  * always bind to whatever PORT/socket is provided and never hardcode a production port.
  */
 import http from 'node:http';
@@ -173,8 +170,7 @@ export async function startServer(): Promise<ServerHandle> {
     console.error('[server] fatal startup error:', err instanceof Error ? err.message : err);
     if (
       err instanceof EnvValidationError &&
-      !isTruthyFlag(process.env.FAIL_FAST_STARTUP) &&
-      !isTruthyFlag(process.env.DISABLE_AUTO_BUILD)
+      !isTruthyFlag(process.env.FAIL_FAST_STARTUP)
     ) {
       const diagServer = await startConfigDiagnosticServer(err);
       return {

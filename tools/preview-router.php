@@ -1,6 +1,9 @@
 <?php
 /**
- * Router for the PHP built-in server only. Production uses tools/.htaccess.
+ * Router for the PHP built-in server only (`php -S`). Never deployed to the VPS
+ * web root — infrastructure/vps/scripts/install-whmcs.sh excludes it. Production
+ * routing is done by infrastructure/vps/nginx/cloudhost247-whmcs.conf
+ * (`location /tools/ { try_files $uri $uri/ /tools/index.php?$query_string; }`).
  * WHMCS product pages still require init.php and are not mocked here.
  */
 $uri = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/', PHP_URL_PATH);

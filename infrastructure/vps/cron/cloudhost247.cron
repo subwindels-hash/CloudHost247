@@ -1,6 +1,19 @@
 # CloudHost247 — cron schedule for Ubuntu 24.04 VPS.
-# Installed to /etc/cron.d/cloudhost247 by setup-ubuntu-24.04.sh.
-# __SRC_DIR__ / __WHMCS_ROOT__ / __APP_ROOT__ are rendered by the setup script.
+# Installed to /etc/cron.d/cloudhost247 by setup-ubuntu-24.04.sh, which renders
+# __SRC_DIR__, __WHMCS_ROOT__, __APP_ROOT__, __APP_USER__, __DOMAIN__,
+# __APP_DOMAIN__ and __MODULE_STORAGE__ (the setup script fails if any
+# placeholder survives).
+#
+# Every job below is owned by `root` and drops privileges with `sudo -u` for the
+# work itself. That split is deliberate and load-bearing:
+#   - the PROCESS runs as www-data / __APP_USER__, so every file it writes
+#     (templates_c, attachments, activity log, worker artefacts) is owned by the
+#     account that must later read it — not by root;
+#   - the SHELL that performs the `>>` log redirect is root's, so the log files
+#     in /var/log/cloudhost247 stay root:adm, which is exactly what
+#     infrastructure/vps/logrotate/cloudhost247 recreates them as. A job that
+#     ran *as* www-data would have its log recreated root-owned after the first
+#     rotation and then fail to write forever.
 #
 # WHMCS automation (invoicing, provisioning, email, domain sync) runs via
 # crons/cron.php and MUST run every 5 minutes.
@@ -9,20 +22,44 @@
 # cloudhost247-worker. The one-shot line below is a FALLBACK that only fires
 # when that service is not active (e.g. it was stopped for maintenance or is
 # crash-looping), so sweeps are never executed twice in parallel. Both paths
-# are additionally guarded by database leases - see src/worker/worker-lease.ts.
+# are additionally guarded by database leases — see src/worker/worker-lease.ts.
+#
+# PHP is invoked as php8.2 explicitly: WHMCS 8.x does not support PHP 8.3+, and
+# naming the interpreter stops a future default-PHP change from silently moving
+# every scheduled job onto an unsupported runtime.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # WHMCS cron — every 5 minutes (required).
-*/5 * * * * root /usr/bin/php __WHMCS_ROOT__/crons/cron.php >> /var/log/cloudhost247/whmcs-cron.log 2>&1
+*/5 * * * * root sudo -u www-data /usr/bin/php8.2 __WHMCS_ROOT__/crons/cron.php >> /var/log/cloudhost247/whmcs-cron.log 2>&1
+
+# CloudHost247 addon crons. Schedules are the ones each script documents in its
+# own header: marketing delivery is per-pass idempotent and wants the shortest
+# interval, SMM sync every 5 minutes, passkey housekeeping hourly. All three are
+# CLI-only (they answer 403 over HTTP) and /crons/ is denied at the Nginx layer.
+* * * * * root sudo -u www-data /usr/bin/php8.2 __WHMCS_ROOT__/crons/cloudhost247_marketing.php >> /var/log/cloudhost247/marketing-cron.log 2>&1
+*/5 * * * * root sudo -u www-data /usr/bin/php8.2 __WHMCS_ROOT__/crons/cloudhost247_smm.php >> /var/log/cloudhost247/smm-cron.log 2>&1
+7 * * * * root sudo -u www-data /usr/bin/php8.2 __WHMCS_ROOT__/crons/cloudhost247_passkey.php >> /var/log/cloudhost247/passkey-cron.log 2>&1
+
+# Provider-specific crons (crons/cloudhost247_ovh.php, getServer.php,
+# priceSync.php, getIpStatus.php, cloudhost247_currency.php,
+# cloudhost247_integrations.php, cloudhost247_builder.php) are deliberately NOT
+# scheduled here: each needs live provider credentials and its own interval
+# decision. Add them once the corresponding integration is certified — see
+# docs/INSTALLATION-GUIDE.md and docs/STAGING-ENVIRONMENT-REQUIREMENTS.md (W9).
 
 # Node worker one-shot fallback — every minute, ONLY if the service is down.
-* * * * * root /bin/bash -c 'systemctl is-active --quiet cloudhost247-worker || su -s /bin/bash -c "cd __APP_ROOT__ && /usr/bin/node dist/src/worker/main.js --once" cloudhost247' >> /var/log/cloudhost247/worker-once.log 2>&1
+# `systemctl is-active` is a read-only query, so root can ask it directly.
+* * * * * root systemctl is-active --quiet cloudhost247-worker || sudo -u __APP_USER__ /bin/bash -c "cd __APP_ROOT__ && /usr/bin/node dist/src/worker/main.js --once" >> /var/log/cloudhost247/worker-once.log 2>&1
 
 # Host-level backup — daily at 02:30 (retention 30 days, see backup.sh).
-30 2 * * * root /bin/bash __SRC_DIR__/infrastructure/vps/scripts/backup.sh >> /var/log/cloudhost247/backup.log 2>&1
+# Roots are passed explicitly so the job cannot silently back up a default path
+# that differs from what was provisioned.
+30 2 * * * root WHMCS_ROOT=__WHMCS_ROOT__ APP_ROOT=__APP_ROOT__ APP_USER=__APP_USER__ MODULE_STORAGE=__MODULE_STORAGE__ /bin/bash __SRC_DIR__/infrastructure/vps/scripts/backup.sh >> /var/log/cloudhost247/backup.log 2>&1
 
 # Healthcheck — every 15 minutes, appended to a rotating log (alerting hook:
 # pipe this file to your monitoring agent or add `|| mail -s ...`).
-*/15 * * * * root /bin/bash __SRC_DIR__/infrastructure/vps/scripts/healthcheck.sh >> /var/log/cloudhost247/healthcheck.log 2>&1
+*/15 * * * * root DOMAIN=__DOMAIN__ APP_DOMAIN=__APP_DOMAIN__ WHMCS_ROOT=__WHMCS_ROOT__ APP_ROOT=__APP_ROOT__ /bin/bash __SRC_DIR__/infrastructure/vps/scripts/healthcheck.sh >> /var/log/cloudhost247/healthcheck.log 2>&1
 
 # Certbot renewal — twice daily (Certbot's own timer also runs; harmless).
 17 */12 * * * root /usr/bin/certbot renew --quiet --deploy-hook "systemctl reload nginx" >> /var/log/cloudhost247/certbot.log 2>&1

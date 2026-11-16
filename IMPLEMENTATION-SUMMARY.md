@@ -1,5 +1,13 @@
 # CloudHost247 Implementation Summary
 
+> **Historical record (2026-11-16).** This summary documents work delivered against the **retired**
+> cPanel/Passenger deployment target. CloudHost247 now deploys to an Ubuntu 24.04 VPS only — see
+> `docs/VPS_DEPLOYMENT.md`. Artefacts named below have since been **deleted from the tree**:
+> `platform/.htaccess` (Passenger directives). Environment configuration now lives in
+> `/opt/cloudhost247/.env` (mode `0600`) consumed by systemd units, not in a control-panel "Setup
+> Node.js App" screen. The text is preserved unchanged as the record of what was done at the time;
+> do not follow it as instructions.
+
 **Date:** 2026-10-13  
 **Branch:** arena/e5e168c8-cloudhost247  
 **Status:** ✅ Implementation Complete & Verified

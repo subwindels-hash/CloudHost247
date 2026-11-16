@@ -51,8 +51,8 @@ SKIP_DIRS = {
     'platform',
 }
 SKIP_FILES = {'.env', 'configuration.php', 'overrides.json', 'package-lock.json'}
-# Dotfiles are excluded wholesale except for the ones a deployment genuinely needs.
-ALLOWED_DOTFILES = {'.env.example', '.htaccess'}
+# Dotfiles are excluded wholesale except for the ones a VPS deployment genuinely needs.
+ALLOWED_DOTFILES = {'.env.example'}
 # Real key material only. Documentation placeholders and test assertions are not secrets.
 SECRET = re.compile(
     r'(AKIA[0-9A-Z]{16}'
@@ -68,15 +68,19 @@ SECRET = re.compile(
     r'[^\s@\'"]{8,}@)'
 )
 
-# Paths that must exist for the archive to be deployable at all.
+# Paths that must exist for the archive to be deployable on the Ubuntu 24.04 VPS target.
 REQUIRED = [
     'README.md',
+    'docs/VPS_DEPLOYMENT.md',
     'docs/DEPLOYMENT-GUIDE.md',
     'docs/INSTALLATION-GUIDE.md',
+    'infrastructure/vps/setup-ubuntu-24.04.sh',
+    'infrastructure/vps/scripts/deploy.sh',
+    'infrastructure/vps/scripts/install-whmcs.sh',
     'web-hosting.php',
     'cloudhost247-node/package.json',
-    'cloudhost247-node/server.js',
     'cloudhost247-node/.env.example',
+    'cloudhost247-node/dist/src/server.js',
     'cloudhost247-node/dist/src/app.js',
     'cloudhost247-node/public/index.html',
     'cloudhost247-node/public/media/cloudhost247/brand/logo-horizontal-dark.svg',
@@ -111,7 +115,11 @@ def build_application(log) -> None:
     if npm is None:
         log('npm not found — skipping the application build (--skip-build implies this)')
         return
-    for script, where in (('build:server', ROOT / 'cloudhost247-node'), ('build:frontend', ROOT / 'cloudhost247-node')):
+    for script, where in (
+        ('build:server', ROOT / 'cloudhost247-node'),
+        ('build:frontend', ROOT / 'cloudhost247-node'),
+        ('build:tools', ROOT / 'cloudhost247-node'),
+    ):
         log(f'running npm run {script}')
         result = subprocess.run([npm, 'run', script], cwd=where, capture_output=True, text=True)
         if result.returncode != 0:
@@ -138,8 +146,9 @@ Contents
      (init.php, includes/, vendor/, assets/) is NOT included.
 
 * CloudHost247 platform cloudhost247-node/  (compiled dist/, database/, manifests/, scripts/)
-  -> Deploy per cloudhost247-node/DEPLOYMENT_GUIDE.md. Copy .env.example to .env and fill it in;
-     no credential is shipped in this archive.
+  -> Deploy on Ubuntu 24.04 VPS per docs/VPS_DEPLOYMENT.md (infrastructure/vps/) and
+     cloudhost247-node/DEPLOYMENT_GUIDE.md. Copy .env.example to /opt/cloudhost247/.env (mode 0600)
+     and fill it in; no credential is shipped in this archive.
 
 * Public website        cloudhost247-node/public/  (built SPA, /media illustrations, /docs/*.md)
   -> Served by the platform; it is also valid static output if fronted by a web server that

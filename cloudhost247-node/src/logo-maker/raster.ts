@@ -1,9 +1,8 @@
 /**
  * Logo Maker PNG rasterizer.
  *
- * The platform ships no font rasterizer (no headless browser, no native canvas) because the
- * supported cPanel/Passenger target cannot be relied on to build one. Rather than pretend otherwise
- * — or silently return an empty PNG — PNG export is rasterized here by this module's own renderer:
+ * The platform ships a pure-JS rasterizer (no headless browser or external font daemon required)
+ * so PNG export is self-contained and deterministic on any Linux VPS:
  *
  *   - the mark is drawn from the same geometry as the SVG, at the requested pixel size;
  *   - typography is drawn with a built-in 5×7 block font that is scaled by an integer factor and

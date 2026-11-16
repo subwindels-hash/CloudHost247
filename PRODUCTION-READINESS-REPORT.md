@@ -1,5 +1,11 @@
 # CloudHost247 Production Readiness Report
 
+> **Historical record (2026-11-16).** Artefacts listed below that belong to the **retired**
+> cPanel/Passenger deployment target have since been **deleted from the tree** — notably
+> `platform/.htaccess`. CloudHost247 deploys to an Ubuntu 24.04 VPS only; see
+> `docs/VPS_DEPLOYMENT.md` and `infrastructure/vps/`. The text is preserved unchanged as the
+> record of what was assessed at the time; do not follow it as instructions.
+
 > ## ⏳ Certification status as of 2026-11-09 — supersedes the 2026-10-13 claim below
 >
 > **Source verification: PASSED. Production certification: NOT YET GRANTED. Deployment stays frozen.**

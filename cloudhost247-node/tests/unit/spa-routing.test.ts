@@ -6,11 +6,11 @@ import { loadEnv } from '../../src/config/env';
 import { buildApp } from '../../src/app';
 
 /**
- * Verifies the requirement in docs/CPANEL_DEPLOYMENT.md / spec section 17: React routes such as
+ * Verifies the requirement in docs/VPS_DEPLOYMENT.md / spec section 17: React routes such as
  * /dashboard, /billing, etc. must not 404 on direct navigation or browser refresh, while actual
  * static assets and unknown API routes still behave correctly.
  */
-describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
+describe('SPA fallback routing (Nginx/VPS refresh safety)', () => {
   let publicDir: string;
   const env = loadEnv({
     NODE_ENV: 'test',
@@ -199,7 +199,7 @@ describe('SPA fallback routing (Apache/cPanel refresh safety)', () => {
   });
 
   /**
-   * A deployment mounted under a path prefix (Passenger BaseURI, a proxied sub-path) receives
+   * A deployment mounted under a path prefix (an Nginx-proxied sub-path) receives
    * every URL with that prefix attached, including the API's. Stripping it before the API test is
    * what keeps `/app/api/...` from looking like an unknown *page* and being answered with HTML.
    */

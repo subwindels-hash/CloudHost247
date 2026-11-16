@@ -1,256 +1,94 @@
-# Troubleshooting 503 Service Unavailable Error
+# Troubleshooting 502 / 503 Errors on Ubuntu 24.04 VPS
 
-This guide helps diagnose and fix the "Error 503. Service Unavailable" error on CloudHost247 platform deployments.
+> **Note:** `cloudhost247-node/` is the canonical production Node platform deployed to `/opt/cloudhost247` by `infrastructure/vps/scripts/deploy.sh` (see [`docs/VPS_DEPLOYMENT.md`](../docs/VPS_DEPLOYMENT.md)). This guide covers diagnosing Nginx / systemd upstream 502 and 503 errors on the VPS.
 
-## Quick Diagnosis
+## Quick Diagnosis (Ubuntu 24.04 VPS)
 
-Run these checks in order:
+Run these checks over SSH on the VPS in order:
 
-### 1. Check if the Node.js application is running (cPanel)
+### 1. Check systemd service status
 
 ```bash
-# In cPanel → Software → Setup Node.js App
-# Check if your application shows as "Running" or "Stopped"
-# If stopped, click the restart button
+sudo systemctl status cloudhost247-node cloudhost247-worker nginx postgresql
 ```
 
-### 2. Check application logs
+If `cloudhost247-node` is stopped or failed, restart it after checking logs:
 
 ```bash
-# In cPanel → Setup Node.js App → click on your application
-# Look for "Application logs" or "stderr.log"
-# Common errors:
-# - "JWT_SECRET is required in production"
-# - "Node.js X.X.X is required"
-# - "Cannot find module"
+sudo systemctl restart cloudhost247-node
 ```
 
-### 3. Verify Node.js version
+### 2. Inspect systemd journal logs
 
 ```bash
-# In the application's virtual environment terminal:
+sudo journalctl -u cloudhost247-node -n 100 --no-pager
+sudo tail -n 50 /var/log/nginx/cloudhost247-node.error.log
+```
+
+### 3. Verify Node.js runtime version
+
+```bash
 node --version
-# Must be >= 22.20.0 and < 25
-# If older, update in cPanel → Setup Node.js App → Node.js version
+# Canonical cloudhost247-node requires >= 20.9.0 (Node 22 LTS installed by setup-ubuntu-24.04.sh)
+# Legacy platform/ requires >= 22.20.0 < 25
 ```
 
-### 4. Check environment variables
+### 4. Verify `/opt/cloudhost247/.env`
+
+Ensure `/opt/cloudhost247/.env` exists (`chmod 600`, owned by `cloudhost247:cloudhost247`) and sets:
+
+- `NODE_ENV=production`
+- `PORT=3000`
+- `APP_URL=https://app.your-domain.com`
+- `DATABASE_URL=postgresql://cloudhost247:<password>@127.0.0.1:5432/cloudhost247`
+- `DATABASE_SSL=false` (for localhost PostgreSQL 16 on the VPS)
+- `JWT_SECRET=<64+ character random secret>`
+- `CREDENTIAL_ENCRYPTION_KEY=<64-hex random key>`
+
+### 5. Run the automated VPS healthcheck
 
 ```bash
-# In cPanel → Setup Node.js App → your application → Environment variables
-# Required variables:
-# - NODE_ENV=production
-# - APP_URL=https://your-domain.com
-# - JWT_SECRET=<64+ character random string>
-# Optional:
-# - DATABASE_URL=postgresql://... (uses JSON store if not set)
-```
-
-### 5. Test the application locally
-
-```bash
-cd platform
-npm install
-NODE_ENV=development node server.js
-# Should start on http://localhost:3000
-# Check /health endpoint: curl http://localhost:3000/health
+sudo bash /opt/cloudhost247-src/infrastructure/vps/scripts/healthcheck.sh
 ```
 
 ## Common Causes and Fixes
 
-### Cause 1: Missing JWT_SECRET (Most Common)
+### Cause 1: Missing or Malformed Environment Variables
 
-**Error message:**
-```
-[server] configuration error: JWT_SECRET is required in production and must be at least 32 characters
-```
+If `JWT_SECRET` or `DATABASE_URL` is malformed in `/opt/cloudhost247/.env`, edit `/opt/cloudhost247/.env` and restart systemd:
 
-**Fix:**
 ```bash
-# Generate a secure JWT_SECRET:
 node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
-
-# Add to cPanel → Setup Node.js App → Environment variables:
-# JWT_SECRET=<paste the generated value>
-
-# Restart the application
+sudo nano /opt/cloudhost247/.env
+sudo systemctl restart cloudhost247-node cloudhost247-worker
 ```
 
-### Cause 2: Wrong Node.js Version
+### Cause 2: Build Output (`dist/`) Missing
 
-**Error message:**
-```
-[server] FATAL: Node.js 22.20.0 or newer (but below 25) is required.
-[server] Current version: 18.x.x
-```
-
-**Fix:**
-1. Go to cPanel → Setup Node.js App
-2. Click on your application
-3. Change "Node.js version" to 22.x or newer
-4. Save and restart
-
-### Cause 3: Application Not Built (cloudhost247-node only)
-
-**Error message:**
-```
-[server.js] Compiled application not found at dist/src/server.js.
-```
-
-**Fix:**
-```bash
-# This only applies to cloudhost247-node/, not platform/
-cd cloudhost247-node
-npm ci
-npm run build
-# Then restart the application
-```
-
-### Cause 4: Database Connection Failed
-
-**Symptoms:**
-- Application starts but `/ready` returns 503
-- Logs show database connection errors
-
-**Fix:**
-```bash
-# Check DATABASE_URL format:
-# postgresql://username:password@host:port/database
-
-# Test connection:
-node scripts/migrate.js status
-
-# If using JSON store (no DATABASE_URL), this doesn't apply
-```
-
-### Cause 5: Port Binding Issues
-
-**Symptoms:**
-- Application starts but isn't accessible
-- Logs show "EADDRINUSE" or similar
-
-**Fix:**
-```bash
-# Don't hardcode PORT - let cPanel/Passenger inject it
-# The server.js automatically uses process.env.PORT
-
-# If testing locally, use:
-PORT=3000 node server.js
-```
-
-### Cause 6: Missing Dependencies
-
-**Error message:**
-```
-Error: Cannot find module 'pg'
-```
-
-**Fix:**
-```bash
-cd platform
-npm ci --omit=dev
-# Restart the application
-```
-
-## cPanel-Specific Checks
-
-### Verify Application Configuration
-
-1. **Application root:** Should point to your `platform/` directory
-2. **Application URL:** Should match your domain (e.g., `try.vortexprecisionit.com`)
-3. **Application startup file:** Must be `server.js`
-4. **Application mode:** Should be `Production`
-
-### Check .htaccess Conflicts
-
-If you have a `.htaccess` file in the application root or parent directories, it might conflict with Passenger. The platform includes its own `.htaccess` that's compatible with Passenger.
-
-### Verify File Permissions
+`cloudhost247-node.service` enforces `ExecStartPre=/usr/bin/test -f /opt/cloudhost247/dist/src/server.js`. Run the VPS deployment script from the git checkout:
 
 ```bash
-# Application files should be readable:
-chmod 644 server.js
-chmod 644 package.json
-chmod -R 755 src/
-chmod -R 755 public/
-
-# Data directory should be writable:
-chmod 755 data/
+cd /opt/cloudhost247-src
+sudo bash infrastructure/vps/scripts/deploy.sh
 ```
 
-## Health Check Endpoints
+### Cause 3: Pending or Quarantined Database Migrations (`/ready` returns 503)
 
-Once the application is running, verify these endpoints:
+If `GET /health` returns `200` while `GET /ready` returns `503 {"checks":{"database":"ok","schema":"missing"}}`, migrations have not been applied yet. On a fresh database, explicitly authorize quarantined migration `0041` after reviewing `docs/VPS_DEPLOYMENT.md` §6:
 
 ```bash
-# Liveness check (should return 200)
-curl https://try.vortexprecisionit.com/health
-# Expected: {"status":"ok"}
-
-# Readiness check (should return 200 if storage is working)
-curl https://try.vortexprecisionit.com/ready
-# Expected: {"status":"ok","checks":{"storage":"ok"}}
-
-# Main page
-curl -I https://try.vortexprecisionit.com/
-# Expected: HTTP/2 200
+cd /opt/cloudhost247-src
+sudo AUTHORIZED_MIGRATIONS=0041 bash infrastructure/vps/scripts/deploy.sh
 ```
 
-## Emergency Recovery
+### Cause 4: Port 3000 Conflict or Upstream Down (Nginx 502 Bad Gateway)
 
-If the application won't start:
+Verify the process is listening on `0.0.0.0:3000` (or `127.0.0.1:3000`):
 
-1. **Switch to development mode temporarily:**
-   ```bash
-   # In cPanel → Environment variables:
-   NODE_ENV=development
-   # Restart - this allows ephemeral JWT_SECRET
-   ```
+```bash
+ss -tlnp | grep ':3000'
+curl -fsS http://127.0.0.1:3000/health
+curl -fsS http://127.0.0.1:3000/ready
+```
 
-2. **Check stderr logs:**
-   ```bash
-   # In cPanel → Setup Node.js App → your application
-   # Click "View logs" or check stderr.log
-   ```
-
-3. **Test locally first:**
-   ```bash
-   # On your local machine:
-   git clone https://github.com/subwindels-hash/CloudHost247
-   cd CloudHost247/platform
-   npm install
-   node server.js
-   # Verify it works locally before deploying
-   ```
-
-4. **Contact support:**
-   If none of the above works, contact CloudHost247 Technical Support with:
-   - Node.js version
-   - Full stderr.log output
-   - Environment variables (redact secrets)
-   - cPanel version
-
-## Prevention
-
-To prevent 503 errors in the future:
-
-1. **Always set JWT_SECRET** before deploying to production
-2. **Test in development mode** before switching to production
-3. **Monitor application logs** after deployment
-4. **Use health check monitoring** (e.g., UptimeRobot, Pingdom)
-5. **Keep Node.js version updated** to the latest 22.x LTS
-6. **Back up your data directory** regularly if using JSON store
-
-## Still Having Issues?
-
-If you've tried all the above and still see 503 errors:
-
-1. Check the CloudHost247 status page
-2. Review the deployment guide: `docs/CPANEL_DEPLOYMENT.md`
-3. Open an issue on GitHub: https://github.com/subwindels-hash/CloudHost247/issues
-4. Contact support: support@cloudhost247.com
-
----
-
-**Last updated:** 2026-10-13
-**Applies to:** CloudHost247 Platform v1.0.0+
+For full VPS provisioning, updates, backups, and rollback (`deploy.sh --rollback`), see [`docs/VPS_DEPLOYMENT.md`](../docs/VPS_DEPLOYMENT.md).

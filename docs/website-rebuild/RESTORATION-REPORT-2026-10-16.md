@@ -1,5 +1,12 @@
 # Visual-preservation restoration — 2026-10-16
 
+> **Historical record (2026-11-16).** References below to `platform/.htaccess` and to PR #84's
+> 503 fix describe the **retired** cPanel/Passenger deployment path. `platform/.htaccess` and
+> `FIX-503-ERROR.md` have since been **deleted**; the only supported target is an Ubuntu 24.04 VPS
+> (`docs/VPS_DEPLOYMENT.md`, `infrastructure/vps/`), and the current 503/502 guidance is
+> `platform/TROUBLESHOOTING-503.md`. Preserved unchanged as a record; do not follow it as
+> instructions.
+
 Scope: correct the unintended changes to the website's appearance and prevent their recurrence.
 Preservation-first: no redesign, no theme replacement, no header/footer rebuild, no new design
 system. Baseline for "original appearance" is `668a3523` (merge of PR #83) — the last known-good

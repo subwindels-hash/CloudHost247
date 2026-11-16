@@ -99,13 +99,25 @@ Nginx (80/443, TLS via Let's Encrypt)
 
 - **WHMCS** (`/var/www/whmcs`) is the public site, client area, cart, and
   billing system. The CloudHost247 overlay (`templates/`, `modules/`, `crons/`,
-  `lang/`, `config/`, root `*.php`) is copied over a stock WHMCS install.
+  `lang/`, `config/`, `tools/`, root `*.php`) is copied over a stock WHMCS
+  install by `infrastructure/vps/scripts/install-whmcs.sh`.
 - **Node platform** (`/opt/cloudhost247`) is the independent control plane
   (API + portal + deployment worker). It is a **separate application** with its
-  own PostgreSQL database and `.env` - never copy it into the WHMCS root.
+  own PostgreSQL database and `.env` - never copy it into the WHMCS root. The
+  build runs in the git checkout (`/opt/cloudhost247-src`) because it writes
+  repo-root projections (`modules/addons/cloudhost247_theme/resources/`,
+  `assets/cloudhost247-tools/`), then publishes `dist/` + `public/`.
+- **Private module storage** (`/var/lib/cloudhost247`, `0700` `www-data`) holds
+  WHMCS Module Manager / Digital Products uploads **outside** the web root.
+  PHP-FPM reaches it through `env[CH247_MODULE_STORAGE]` and it is inside
+  `open_basedir`; Nginx never serves it. Override with `MODULE_STORAGE=…` -
+  the setup script refuses a value inside the web root.
 - **Nginx** is the TLS edge and reverse proxy for both. The Node app binds
   `0.0.0.0:$PORT` (default 3000) with `trustProxy: true`, so it expects to sit
-  behind the Nginx vhost shipped in `infrastructure/vps/nginx/`.
+  behind the Nginx vhost shipped in `infrastructure/vps/nginx/`. The WHMCS
+  vhost denies `/crons/`, `/storage/`, `/vendor/`, `/templates_c/`,
+  `/attachments/`, `/downloads/`, `/tools/data/` and the domain-lookup addon
+  cache, and refuses PHP execution inside `/assets/ch247-media/`.
 
 ### Why PHP 8.2 and Node 22?
 
@@ -218,17 +230,24 @@ sudo bash infrastructure/vps/scripts/install-whmcs.sh /root/whmcs.zip
 
 This extracts WHMCS core into `/var/www/whmcs` (preserving any existing
 `configuration.php`), overlays the CloudHost247 customizations
-(`templates/`, `modules/`, `crons/`, `lang/`, `config/`, root `*.php`,
-`assets/`, `errors/`), and fixes ownership (`www-data`) and permissions
-(`templates_c`, `attachments`, `downloads` → 775).
+(`templates/`, `modules/`, `crons/`, `lang/`, `config/`, `tools/`, root
+`*.php`, `assets/`, `errors/`), and fixes ownership (`www-data`) and
+permissions (`templates_c`, `attachments`, `downloads` → 775).
+
+`tools/` is the public Tools PHP adapter that Nginx routes at `/tools` and
+`/tools/<slug>`. The installer deliberately **excludes** the developer-only
+helpers `tools/preview-router.php` (for `php -S`) and `tools/build-manifests.py`
+(manifest generation), plus operator state (`tools/data/overrides.json`,
+`tools/data/ratelimit/`, `tools/data/security.log`), and asserts afterwards that
+`tools/index.php` landed while `preview-router.php` did not.
 
 The overlay **merge-copies without `--delete`**: `templates/`, `modules/` and
 `crons/` contain stock WHMCS files this repository does not ship
 (`templates/orderforms/standard_cart/`, `crons/cron.php`, vendor modules) and
 deleting them would break the order forms and WHMCS automation. The installer
-asserts afterwards that `crons/cron.php` and `standard_cart` are still there.
-Obsolete files from an older release are removed from a reviewed list, never by
-blanket deletion.
+asserts afterwards that `crons/cron.php`, `standard_cart` and `tools/index.php`
+are still there. Obsolete files from an older release are removed from a
+reviewed list, never by blanket deletion.
 
 Then:
 
@@ -399,11 +418,25 @@ templates and product server bindings per
 
 | Schedule | Job |
 |---|---|
-| Every 5 min | WHMCS `crons/cron.php` (invoicing, provisioning, email) |
+| Every 5 min | WHMCS `crons/cron.php` (invoicing, provisioning, email) - as `www-data` |
+| Every minute | `crons/cloudhost247_marketing.php` (delivery worker) - as `www-data` |
+| Every 5 min | `crons/cloudhost247_smm.php` (SMM status/reconciliation sync) - as `www-data` |
+| Hourly (:07) | `crons/cloudhost247_passkey.php` (challenge/credential housekeeping) - as `www-data` |
 | Every minute | Node worker one-shot fallback (lease-guarded; the persistent systemd worker is primary) |
 | Every 15 min | `healthcheck.sh` → `/var/log/cloudhost247/healthcheck.log` (exit 1 on failure) |
 | Daily 02:30 | Host backup (`backup.sh`, 30-day retention) |
 | Every 12 h | Certbot renewal + Nginx reload |
+
+Every job is owned by `root` and drops privileges with `sudo -u` for the work, so
+process-written files stay `www-data`/`cloudhost247`-owned while the `>>` log
+redirect is performed by root's shell. That keeps the logs `root:adm`, which is
+what `infrastructure/vps/logrotate/cloudhost247` recreates them as - a job that
+ran *as* `www-data` would lose write access to its own log after the first
+rotation. Provider-specific crons (`cloudhost247_ovh.php`, `getServer.php`,
+`priceSync.php`, `getIpStatus.php`, `cloudhost247_currency.php`,
+`cloudhost247_integrations.php`, `cloudhost247_builder.php`) are deliberately
+**not** scheduled: each needs certified provider credentials and its own
+interval decision.
 
 All commands below run from the checkout (`cd /opt/cloudhost247-src`).
 
@@ -420,9 +453,16 @@ password on disk) and PostgreSQL as the `postgres` OS user (Ubuntu's default
 `peer` rule), so **run both scripts as root without `sudo -u`**. Restores are
 dry-run unless you pass `--confirm`, and the archive checksum is verified first.
 
-Backups contain the MySQL dump, PostgreSQL dump (`pg_dump -Fc`), WHMCS files,
-and Node `.env` + manifests. Off-server upload for server-agent archives is
-handled by the Node control plane (`BACKUP_S3_*` env → S3/R2/Wasabi/MinIO).
+Backups contain the MySQL dump, PostgreSQL dump (`pg_dump -Fc`), WHMCS files
+(excluding `templates_c` cache and `install/`), the private module storage
+(`/var/lib/cloudhost247`), and the Node runtime tree - `.env`, manifests,
+`config/`, `database/migrations/`, `dist/` and `public/`, so a restore boots
+**without** a rebuild (`node_modules/` is excluded and reinstalled by
+`restore.sh`). Archives are compressed and SHA-256 checksummed, created under
+`umask 077` in a `0700` `/var/backups/cloudhost247`, and the sidecar records a
+**relative** filename so `sha256sum -c` verifies from any working directory (or
+on another host). Off-server upload for server-agent archives is handled by the
+Node control plane (`BACKUP_S3_*` env → S3/R2/Wasabi/MinIO).
 
 **Updates:**
 
@@ -462,6 +502,9 @@ journalctl -u cloudhost247-worker -f
 | Node 502 (Nginx) | `systemctl status cloudhost247-node`, `journalctl -u cloudhost247-node -n 50`, `curl http://127.0.0.1:3000/health` |
 | Node 503 `DATABASE_NOT_CONFIGURED` | `DATABASE_URL` in `/opt/cloudhost247/.env`, `pg_isready`, `sudo -u postgres psql -c '\l'` |
 | WHMCS pretty URLs 404 | Nginx `try_files` in `cloudhost247-whmcs.conf`; `nginx -t && systemctl reload nginx` |
+| `/tools` or `/tools/<slug>` 404 | `tools/index.php` present in the web root? `grep -n 'location /tools/' /etc/nginx/sites-enabled/cloudhost247-whmcs.conf`; re-run `install-whmcs.sh` |
+| Module Manager / Digital Products cannot write uploads | `stat -c '%a %U:%G' /var/lib/cloudhost247` must be `700 www-data:www-data`; `php-fpm` pool must export `env[CH247_MODULE_STORAGE]` **and** list that path in `open_basedir`; `systemctl restart php8.2-fpm` after any pool edit |
+| A scheduled job's log stops growing after rotation | the job must run as `root` with `sudo -u <user>` for the work - a cron line owned by `www-data` cannot write the `root:adm` file logrotate recreates |
 | PHP version wrong | `php -v` must be 8.2.x; `update-alternatives --set php /usr/bin/php8.2` |
 | Certificate errors | `certbot certificates`, then `certbot certonly --webroot -w /var/www/letsencrypt -d <domain> && systemctl reload nginx` |
 
@@ -482,16 +525,44 @@ journalctl -u cloudhost247-worker -f
 | `/etc/logrotate.d/cloudhost247` | `infrastructure/vps/logrotate/cloudhost247` |
 | `/etc/fail2ban/jail.local` | `infrastructure/vps/fail2ban/jail.local` |
 | `/var/www/whmcs` | WHMCS core + repo overlay (`install-whmcs.sh`) |
+| `/var/www/whmcs/tools/` | repo `tools/` (minus `preview-router.php`, `build-manifests.py`, operator state) |
 | `/opt/cloudhost247` | `cloudhost247-node/` (`deploy.sh`) |
+| `/opt/cloudhost247-src` | full git checkout - where `npm run build` must run |
+| `/var/lib/cloudhost247` | private module storage (`0700` `www-data`; `CH247_MODULE_STORAGE`) |
+| `/var/log/cloudhost247` | cron/healthcheck/backup logs (`root:adm`, rotated) |
+| `/var/backups/cloudhost247` | host backups + `.sha256` sidecars (`0700`) |
 
 ## Appendix B - What this stack replaced
 
-The cPanel/Passenger deployment path was **retired on 2026-11-15**. Removed:
+The cPanel/Passenger deployment path was **retired on 2026-11-15** and the last
+of its artefacts were removed on **2026-11-16**. Removed:
 `docs/CPANEL_DEPLOYMENT.md`, `cloudhost247-node/docs/CPANEL_DEPLOYMENT.md`,
 `cloudhost247-node/scripts/package-cpanel.sh`,
-`infrastructure/litespeed/webroot-hardening.htaccess`, and the 922-line
+`infrastructure/litespeed/webroot-hardening.htaccess`, the 922-line
 `cloudhost247-node/server.js` Passenger bootstrap (which bound a socket, then
-compiled TypeScript in-process to survive Passenger's startup timeout).
+compiled TypeScript in-process to survive Passenger's startup timeout), the
+inert Apache files `platform/.htaccess`, `tools/.htaccess` and
+`tools/data/.htaccess`, the Passenger-era `FIX-503-ERROR.md` and
+`cloudhost247-node/DEPLOYMENT_SUMMARY.md`, and the `PORT=passenger` /
+`DISABLE_AUTO_BUILD` shims in `src/config/env.ts`, `src/server.ts` and
+`platform/src/core/config.js`. The startup-resilience suites were renamed to
+`cloudhost247-node/tests/unit/startup-resilience.test.ts` and
+`platform/tests/startup-resilience.test.js` - same coverage, no
+control-panel-specific assertions.
+
+What replaced the removed behaviour rather than just disappearing:
+
+- **`tools/.htaccess` → Nginx:** `location = /tools` rewrites to
+  `/tools/index.php`, `location /tools/` uses `try_files … /tools/index.php`,
+  and `location ^~ /tools/data/` denies operator overrides and rate-limit
+  state. `tools/preview-router.php` stays a `php -S`-only helper and is
+  excluded from the web root by `install-whmcs.sh`.
+- **`tools/data/.htaccess` and the runtime `.htaccess` writers** in
+  `cloudhost247_builder` / `cloudhost247_modules` / `digitalproducts` are
+  defence-in-depth for customer-installed modules and are **kept**; on this
+  stack the authoritative protection is that uploads live in
+  `/var/lib/cloudhost247` (`0700`, outside the web root) plus the Nginx deny
+  rules and `php_flag engine off` equivalents above.
 
 The mapping for anyone migrating an existing cPanel install:
 
@@ -521,7 +592,14 @@ The mapping for anyone migrating an existing cPanel install:
 - [ ] `node --version` = v22.x, `nginx -t` clean
 - [ ] DNS resolves for both domains; Certbot certificates valid (> 14 days)
 - [ ] WHMCS installer completed; `install/` deleted; `SystemURL` = HTTPS
-- [ ] `crons/cron.php` and `templates/orderforms/standard_cart/` still present after the overlay
+- [ ] `crons/cron.php`, `templates/orderforms/standard_cart/` and `tools/index.php` still present
+      after the overlay; `tools/preview-router.php` and `tools/build-manifests.py` are **absent**
+- [ ] No `__PLACEHOLDER__` survives in `/etc/nginx/sites-enabled/*`, `/etc/cron.d/cloudhost247`
+      or the systemd units (`grep -r '__[A-Z_]*__' /etc/nginx/sites-enabled /etc/cron.d/cloudhost247`)
+- [ ] `/var/lib/cloudhost247` exists as `0700 www-data:www-data`, is in `open_basedir`, is
+      exported as `env[CH247_MODULE_STORAGE]`, and is **not** web-reachable
+- [ ] Nginx denies `/crons/`, `/storage/`, `/vendor/`, `/tools/data/` and the domain-lookup cache,
+      and refuses PHP execution under `/assets/ch247-media/` (each returns 403/404)
 - [ ] All §7 modules activated; payment gateways in test mode
 - [ ] Node `/health` = 200; `/ready` = 200 **with `"schema":"ok"`** (a 503 here means
       migrations did not apply - see §6 "First deploy: the quarantine gate")
@@ -529,7 +607,9 @@ The mapping for anyone migrating an existing cPanel install:
       used on this host is recorded in the change log
 - [ ] WHMCS `/` = 200/302
 - [ ] `healthcheck.sh` = ALL CHECKS PASSED
-- [ ] WHMCS cron running (check `whmcs-cron.log`); worker service active
-- [ ] `backup.sh` created + `restore.sh` dry-run verified; restore tested on staging
+- [ ] WHMCS cron running (check `whmcs-cron.log`); worker service active; marketing/smm/passkey
+      addon crons producing their own logs
+- [ ] `backup.sh` created + `restore.sh` dry-run verified; restore tested on staging, including
+      the module-storage tarball and the `npm ci --omit=dev` reinstall path
 - [ ] UFW + fail2ban active; SSH key-only
 - [ ] Second reviewer signed off (see `DEPLOYMENT-CHECKLIST.md` gates CT-01..CT-08)

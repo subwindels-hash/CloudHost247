@@ -11,9 +11,9 @@ No staging installation or production installation was performed when this guide
 There are two distinct runtime targets:
 
 1. **WHMCS layer:** CloudHost247 pages, templates, addons, server modules, hooks and cron files are installed as a reviewed overlay into an existing WHMCS document root.
-2. **Node platform:** `cloudhost247-node/` is a separate application with its own process, environment variables and PostgreSQL database. It must not be copied into the WHMCS root. Follow [`VPS_DEPLOYMENT.md`](VPS_DEPLOYMENT.md) §§6–8 when that platform is in scope (the older cPanel path is [`CPANEL_DEPLOYMENT.md`](CPANEL_DEPLOYMENT.md)).
+2. **Node platform:** `cloudhost247-node/` is a separate application with its own process, environment variables and PostgreSQL database. It must not be copied into the WHMCS root. Follow [`VPS_DEPLOYMENT.md`](VPS_DEPLOYMENT.md) §§6–8 when that platform is in scope — the Ubuntu 24.04 VPS is the only supported target.
 
-The repository/ZIP does not include WHMCS core, a WHMCS licence, production credentials, a database, or the target's `configuration.php`. It is not safe to unzip the entire repository or ZIP into `public_html`. For the package build, hash verification, private extraction, file-list review and non-destructive overlay procedure, follow [`DEPLOYMENT-GUIDE.md`](DEPLOYMENT-GUIDE.md).
+The repository/ZIP does not include WHMCS core, a WHMCS licence, production credentials, a database, or the target's `configuration.php`. It is not safe to unzip the entire repository or ZIP into the web root (`/var/www/whmcs`): use `infrastructure/vps/scripts/install-whmcs.sh`, which overlays a reviewed file list only. For the package build, hash verification, private extraction, file-list review and non-destructive overlay procedure, follow [`DEPLOYMENT-GUIDE.md`](DEPLOYMENT-GUIDE.md).
 
 ### 1.1 What this package no longer ships (2026-11-14)
 
@@ -47,7 +47,7 @@ Complete these checks before uploading or activating anything:
 - A tested backup and a successful restore to a separate staging root/database. Do not treat a backup file that has never been restored as rollback evidence.
 - A protected evidence directory outside the webroot, least-privilege staging credentials, and disposable test products/services for any provider-backed workflow.
 
-If installing the Node platform too, separately verify the host's Node.js version (at least 20.9), the process supervisor (systemd on the VPS; Passenger on cPanel), PostgreSQL connectivity, application root and environment-variable support. The Node platform has additional staged-migration restrictions documented in `VPS_DEPLOYMENT.md` §6/§9 (and `CPANEL_DEPLOYMENT.md` for shared hosting); WHMCS readiness does not certify platform readiness on either target.
+If installing the Node platform too, separately verify the host's Node.js version (at least 20.9 — `setup-ubuntu-24.04.sh` installs Node 22 LTS from NodeSource), the process supervisor (systemd units `cloudhost247-node` and `cloudhost247-worker`), PostgreSQL connectivity, application root (`/opt/cloudhost247`) and `.env` support (mode `0600`, owned by the app user). The Node platform has additional staged-migration restrictions documented in `VPS_DEPLOYMENT.md` §6/§9; WHMCS readiness does not certify platform readiness.
 
 ## 3. Prepare the staging installation
 

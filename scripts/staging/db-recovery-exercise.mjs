@@ -27,7 +27,7 @@ import { createRequire } from 'node:module';
 
 // This script lives at the repo root but drives the cloudhost247-node embedded database:
 // resolve that package's dependency explicitly (bare specifiers resolve from the importing
-// file's own directory — the failure mode docs/CPANEL_DEPLOYMENT.md warns about).
+// file's own directory, which is the repo root here and has no node_modules of its own).
 const nodePkgRequire = createRequire(new URL('../../cloudhost247-node/package.json', import.meta.url));
 const { PGlite } = await import(nodePkgRequire.resolve('@electric-sql/pglite'));
 

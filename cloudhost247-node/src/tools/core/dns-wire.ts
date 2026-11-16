@@ -1,8 +1,8 @@
 /**
  * Tools Center — DNS message encoding/decoding (RFC 1035, RFC 3596, RFC 6891).
  *
- * This is a real wire-format implementation rather than a wrapper around `dig`: cPanel/Passenger
- * deployments cannot be assumed to have a DNS client binary, and the platform must be able to say
+ * This is a real wire-format implementation rather than a wrapper around `dig`: minimal container
+ * and VPS environments need no external DNS client binary, and the platform must be able to say
  * exactly which question was asked and exactly what came back. Every parse path is defensive — a
  * malformed or truncated message raises a `ToolError` instead of inventing records.
  *

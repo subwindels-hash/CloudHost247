@@ -89,7 +89,7 @@
       "title": "Platform services architecture",
       "summary": "The CLOUDHOST247 platform (the Node/TypeScript application in cloudhost247-node/) runs the domain, hosting, website-building, AI-website, store, expert, marketing, logo, inbox and commerce services. T",
       "source": "docs/PLATFORM_SERVICES_ARCHITECTURE.md",
-      "bytes": 7208
+      "bytes": 7272
     },
     {
       "slug": "vps-deployment",
@@ -98,7 +98,7 @@
       "title": "VPS deployment (Ubuntu 24.04)",
       "summary": "Target: a plain Linux VPS running Ubuntu 24.04 LTS (noble) with root access. This is the only supported deployment target. The cPanel/Passenger path was retired on 2026-11-15 (see Appendix B).",
       "source": "docs/VPS_DEPLOYMENT.md",
-      "bytes": 24977
+      "bytes": 31165
     },
     {
       "slug": "passkey",

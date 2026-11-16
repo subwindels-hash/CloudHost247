@@ -1,18 +1,21 @@
 # CloudHost247 — Ubuntu 24.04 VPS deployment (WHMCS 8.x + Node platform)
 
-Plain-Linux VPS deployment for **Ubuntu 24.04 LTS**, replacing the cPanel/Passenger
-target (`docs/CPANEL_DEPLOYMENT.md`) with root-owned native services:
+This is the **only** supported deployment target for CloudHost247: a dedicated
+**Ubuntu 24.04 LTS** VPS running root-owned native services. Shared hosting,
+control-panel "Application Manager" runtimes and Apache module process managers
+are not supported and no longer have any configuration in this repository.
 
-| Layer | VPS technology | cPanel equivalent (replaced) |
-|---|---|---|
-| Web server / TLS edge | **Nginx 1.24** + Certbot (Let's Encrypt) | Apache + cPanel AutoSSL |
-| WHMCS 8.x (PHP) | **PHP 8.2-FPM** (ondrej/php PPA) + ionCube Loader | cPanel PHP Selector |
-| WHMCS database | **MySQL 8.0** (Ubuntu default) | cPanel MySQL |
-| Node platform (`cloudhost247-node/`) | **Node.js 22 LTS** (NodeSource) under **systemd** | Passenger / Application Manager |
-| Node database | **PostgreSQL 16** (Ubuntu default) | cPanel PostgreSQL |
-| Process supervision | **systemd** (`cloudhost247-node`, `cloudhost247-worker`) | Passenger |
-| Firewall / IDS | **UFW** + **fail2ban** | cPHulk |
-| Cron | system **cron** (WHMCS + worker + backups) | cPanel Cron Jobs |
+| Layer | Technology on the VPS |
+|---|---|
+| Web server / TLS edge | **Nginx 1.24** + Certbot (Let's Encrypt, webroot plugin) |
+| WHMCS 8.x (PHP) | **PHP 8.2-FPM** (ondrej/php PPA) + ionCube Loader |
+| WHMCS database | **MySQL 8.0** (Ubuntu default, localhost-only) |
+| Node platform (`cloudhost247-node/`) | **Node.js 22 LTS** (NodeSource) under **systemd** |
+| Node database | **PostgreSQL 16** (Ubuntu default, localhost-only) |
+| Process supervision | **systemd** (`cloudhost247-node`, `cloudhost247-worker`) |
+| Firewall / IDS | **UFW** + **fail2ban** |
+| Cron | system **cron** (WHMCS + worker safety net + backups + healthcheck) |
+| Private module storage | `/var/lib/cloudhost247` (0700 `www-data`, outside the web root) |
 
 WHMCS core (`init.php`, `includes/`, `vendor/`, licence, `configuration.php`) is
 commercial software and is **not** in this repository. The VPS scripts below install
@@ -109,9 +112,9 @@ Three offline harnesses run in CI (`.github/workflows/vps-stack.yml`):
 | Harness | Proves | Assertions |
 |---|---|---|
 | `tests/nginx-live-test.sh` | against a **running** nginx 1.24: secret denies, no PHP source disclosure, ACME reachable over HTTP, redirect keeps path+query, pretty-URL and `/tools/` routing, one `Cache-Control`, header inheritance, `X-Forwarded-*`, HTTP/2 | 43 |
-| `tests/deploy-migrate-test.sh` | a deploy actually **lands**: the migration runner refuses on a fresh production DB (quarantined 0041), the documented override applies all 104 migrations into 264 tables, a re-run is a no-op, `deploy.sh` diagnoses the refusal correctly, and the systemd entrypoint `node dist/src/server.js` boots over TCP, serves `/health`, 503s `/ready` without crashing, and exits on SIGTERM; and the build runs where `../../modules` resolves | 28 |
-| `tests/smoke-test.sh` | every artefact exists/parses, PHP 8.2 not 8.3, proxy headers, systemd user+group, compiled (not Passenger) entrypoint, every placeholder rendered, backup auth, docs links, cPanel path stays retired | 92 |
-| `tests/setup-dry-run.sh` | the provisioning script runs end to end with stubbed system commands and renders every template (incl. UFW ordering, ionCube fallback) | 33 |
+| `tests/deploy-migrate-test.sh` | a deploy actually **lands**: the migration runner refuses on a fresh production DB (quarantined 0041), the documented override applies all 104 migrations into 264 tables, a re-run is a no-op, `deploy.sh` diagnoses the refusal correctly, and the systemd entrypoint `node dist/src/server.js` boots over TCP, serves `/health`, 503s `/ready` without crashing, and exits on SIGTERM; and the build runs where `../../modules` resolves | 29 |
+| `tests/smoke-test.sh` | every artefact exists/parses, PHP 8.2 not 8.3, proxy headers, systemd user+group, compiled entrypoint, every placeholder rendered, backup auth, docs links, the retired shared-hosting path stays retired | 93 |
+| `tests/setup-dry-run.sh` | the provisioning script runs end to end with stubbed system commands and renders every template (incl. UFW ordering, ionCube fallback, `__WHMCS_ROOT__` rendering, out-of-webroot module storage + `open_basedir`, Nginx deny rules for `crons/`/`storage/`/`vendor/` and uploaded builder media, cron user rendering, `tools/` overlay without developer helpers) | 50 |
 | `tests/gate-test.sh` | the provisioning gate **rejects** a host lacking ionCube, on PHP 8.3, or missing a required extension | 8 |
 | `tests/tls-check-test.sh` | `healthcheck.sh` classifies valid / expiring / missing / bootstrap-self-signed certificates correctly | 5 |
 
@@ -140,7 +143,8 @@ for f in infrastructure/vps/setup-ubuntu-24.04.sh \
          cloudhost247-node/scripts/package-vps.sh; do bash -n "$f" && echo "OK $f"; done
 
 # Nginx config (on a machine with Nginx; renders placeholders first):
-sed -e 's/__DOMAIN__/example.com/g' -e 's/__APP_DOMAIN__/app.example.com/g' \
+sed -e 's|__DOMAIN__|example.com|g' -e 's|__APP_DOMAIN__|app.example.com|g' \
+    -e 's|__WHMCS_ROOT__|/var/www/whmcs|g' \
   infrastructure/vps/nginx/cloudhost247-whmcs.conf > /etc/nginx/sites-enabled/test.conf
 nginx -t
 ```
@@ -149,12 +153,23 @@ nginx -t
 that is exactly why `setup-ubuntu-24.04.sh` bootstraps self-signed certs before
 issuing the Let's Encrypt ones.
 
-## cPanel vs VPS — which to use?
+## Deployment target vs. control panels we sell
 
-- **cPanel** (`docs/CPANEL_DEPLOYMENT.md`): shared hosting, no root, Passenger.
-- **VPS** (this directory): dedicated Ubuntu 24.04, root, Nginx + systemd.
+These are two different things and are deliberately kept apart:
 
-Both run the same application code. The Node server binds `0.0.0.0:$PORT`
-(default 3000) and sets `trustProxy: true`, so it works unchanged behind
-Passenger (cPanel) or Nginx (VPS). WHMCS runs identically; only the web
-server, PHP runtime, and process manager differ.
+- **Deployment target (this directory).** CloudHost247 is deployed only on a
+  dedicated Ubuntu 24.04 LTS VPS: Nginx + PHP-FPM + MySQL 8 + PostgreSQL 16 +
+  systemd + UFW/fail2ban. There is no shared-hosting, Apache-module or
+  control-panel-managed Node runtime in this repository. The Node server binds
+  `0.0.0.0:$PORT` (default 3000) and sets `trustProxy: true`, so Nginx is the
+  only trusted edge.
+- **Control panels as a product.** Customers can still buy and be provisioned
+  onto cPanel, Plesk, CyberPanel and DirectAdmin hosting: those are runtime
+  adapters in `cloudhost247-node/src/control-panels/adapters/` and
+  `cloudhost247-node/src/deployments/adapters/`, plus the `cpanel-hosting.php`
+  marketing page and the `cpanel_smtp` mail provider. They describe where
+  *customer workloads* run, never where CloudHost247 itself is installed, and
+  they must not be removed as part of deployment cleanup.
+
+For the end-to-end operator runbook (DNS, WHMCS install, `.env`, migrations,
+TLS, backups, rollback) see `docs/VPS_DEPLOYMENT.md`.

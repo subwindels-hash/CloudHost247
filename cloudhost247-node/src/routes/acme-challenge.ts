@@ -68,7 +68,7 @@ export async function registerAcmeChallengeRoutes(
 
   app.get<{ Params: { token: string } }>('/.well-known/acme-challenge/:token', handler);
 
-  // Sub-path deployments: APP_URL may carry a BaseURI (cPanel Passenger). Registering the same
+  // Sub-path deployments: APP_URL may carry a path prefix behind Nginx. Registering the same
   // handler under that prefix keeps the CA's well-known request reachable without a redirect.
   const mount = new URL(env.APP_URL).pathname.replace(/\/+$/, '');
   if (mount) {

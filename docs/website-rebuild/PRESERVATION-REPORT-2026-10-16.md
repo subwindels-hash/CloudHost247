@@ -1,5 +1,10 @@
 # Website preservation report — 2026-10-16
 
+> **Historical record (2026-11-16).** Findings below about `platform/.htaccess` describe a file
+> that has since been **deleted** along with the rest of the retired cPanel/Passenger deployment
+> path. The only supported target is an Ubuntu 24.04 VPS (`docs/VPS_DEPLOYMENT.md`,
+> `infrastructure/vps/`). Preserved unchanged as a record; do not follow it as instructions.
+
 Preservation-first maintenance pass on `subwindels-hash/CloudHost247`. This report answers the ten
 required items in order, records what was deliberately **not** changed and why, and lists the
 decisions that are still yours to make.

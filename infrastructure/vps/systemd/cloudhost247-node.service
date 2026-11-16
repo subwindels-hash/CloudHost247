@@ -19,12 +19,9 @@ WorkingDirectory=__APP_ROOT__
 # build` before this unit is restarted, so a missing/partial build is a deploy
 # fault, and ExecStartPre makes it fail loudly instead of half-starting.
 ExecStartPre=/usr/bin/test -f __APP_ROOT__/dist/src/server.js
-# --max-old-space-size is the VPS equivalent of what the old Passenger bootstrap
-# did with UV_THREADPOOL_SIZE/GOMAXPROCS: bound memory so a leak triggers a
-# clean OOM restart (Restart=on-failure) instead of the kernel OOM-killer
-# taking down postgres or nginx alongside it. Sized for a 2 GB host; raise it on
-# a larger one. Node's default heap is derived from total system RAM, which on a
-# shared VPS can exceed what this service is actually allowed to use.
+# --max-old-space-size bounds V8 heap memory so a leak triggers a clean OOM
+# restart (Restart=on-failure) instead of the kernel OOM-killer taking down
+# postgres or nginx alongside it. Sized for a 2 GB VPS; raise it on larger hosts.
 ExecStart=/usr/bin/node --max-old-space-size=512 dist/src/server.js
 
 Restart=on-failure

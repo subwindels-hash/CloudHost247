@@ -5,8 +5,8 @@ import rateLimit from '@fastify/rate-limit';
 import type { Env } from '../config/env';
 
 /**
- * Baseline security hardening. All of this runs inside the single Node process that cPanel
- * Passenger manages — no reliance on Nginx/Apache-level modules, so it must be correct here.
+ * Baseline security hardening. Enforced directly inside the Fastify process in addition to the
+ * edge headers set by Nginx (infrastructure/vps/nginx/snippets/security-headers.conf).
  */
 export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
   const extraFrameAncestors = env.FRAME_ANCESTORS

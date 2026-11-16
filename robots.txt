@@ -4,7 +4,7 @@
 #
 # This static file is the FALLBACK. When the CloudHost247 Node platform owns the domain root
 # it answers /robots.txt itself; otherwise route robots.txt to robots.php with one rewrite rule
-# (infrastructure/litespeed/webroot-hardening.htaccess) to get absolute Sitemap URLs. The
+# (infrastructure/vps/nginx/cloudhost247-whmcs.conf) to get absolute Sitemap URLs. The
 # specification ignores a relative Sitemap directive, so this file states none rather than
 # publishing a line that does nothing.
 #

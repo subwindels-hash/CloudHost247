@@ -31,7 +31,7 @@ Therefore the conditional in the instruction ("*if* `platform/` is the complete 
 | AI/LLM provider | ✅ OpenAI/Anthropic-compatible + ledger + fail-closed router | ❌ zero matches in `platform/src` |
 | Provider adapters | ✅ 13 kinds | ✅ 12 kinds |
 | Tests | 168 Vitest files | 74 `node:test` files / 876 tests (876/876 on two clean re-runs; 2 transient failures in one earlier run, not reproduced) |
-| cPanel/WHMCS deployment path | ✅ `docs/CPANEL_DEPLOYMENT.md`, 84 PHP pages | ❌ only `.htaccess` + `TROUBLESHOOTING-503.md` |
+| VPS/WHMCS deployment path | ✅ `docs/VPS_DEPLOYMENT.md` + `infrastructure/vps/`, 84 PHP pages | ❌ only `TROUBLESHOOTING-503.md` |
 
 Full per-route evidence: [`docs/audit/canonical-backend-route-comparison.csv`](audit/canonical-backend-route-comparison.csv) (838 rows). Full reasoning: [`docs/CANONICAL-BACKEND-COMPARISON.md`](CANONICAL-BACKEND-COMPARISON.md).
 

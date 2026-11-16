@@ -6,7 +6,8 @@
 #   1. Verifies PHP 8.2 + ionCube + MySQL are ready (setup-ubuntu-24.04.sh).
 #   2. Extracts WHMCS core into /var/www/whmcs (never overwrites configuration.php).
 #   3. Overlays the CloudHost247 customizations from this repo (templates/,
-#      modules/, crons/, lang/, config/, root *.php) — reviewed file list only.
+#      modules/, crons/, lang/, config/, tools/, root *.php) — reviewed file
+#      list only.
 #   4. Fixes ownership/permissions (templates_c, attachments, downloads).
 #   5. Prints the WHMCS web-installer URL + activation order (docs/VPS_DEPLOYMENT.md).
 #
@@ -92,6 +93,20 @@ echo "  copied ${#root_pages[@]} root file(s)"
 for extra in assets errors; do
   [[ -d "${SRC_DIR}/${extra}" ]] && rsync -a "${SRC_DIR}/${extra}/" "${WHMCS_ROOT}/${extra}/" || true
 done
+# Public Tools PHP adapter: Nginx routes /tools and /tools/<slug> to tools/index.php.
+# Developer-only helpers (preview-router.php for `php -S`, build-manifests.py for
+# manifest generation) must never land in the webroot, and data/ keeps only the
+# documented overrides example — never operator overrides or rate-limit state.
+if [[ -d "${SRC_DIR}/tools" ]]; then
+  rsync -a --itemize-changes \
+    --exclude 'preview-router.php' \
+    --exclude 'build-manifests.py' \
+    --exclude 'data/overrides.json' \
+    --exclude 'data/ratelimit/' \
+    --exclude 'data/security.log' \
+    "${SRC_DIR}/tools/" "${WHMCS_ROOT}/tools/"
+  echo "  copied tools/ adapter (excluded developer-only helpers)"
+fi
 shopt -s nullglob
 root_xml=("${SRC_DIR}"/*.xml)
 shopt -u nullglob
@@ -102,7 +117,11 @@ log "Verifying WHMCS core survived the overlay"
   die "WHMCS core cron.php missing after overlay — the WHMCS ZIP may be incomplete. The 5-minute cron entry depends on it."
 [[ -d "${WHMCS_ROOT}/templates/orderforms/standard_cart" ]] || \
   die "WHMCS core standard_cart order form missing — ovh_cart falls back to it."
-echo "  WHMCS core files present (crons/cron.php, standard_cart)"
+[[ -f "${WHMCS_ROOT}/tools/index.php" ]] || \
+  die "Public Tools adapter missing at tools/index.php — Nginx routes /tools to it."
+[[ ! -f "${WHMCS_ROOT}/tools/preview-router.php" ]] || \
+  die "Developer-only tools/preview-router.php was copied into the webroot."
+echo "  WHMCS core files present (crons/cron.php, standard_cart, tools/index.php)"
 
 log "Fixing ownership and permissions"
 chown -R www-data:www-data "${WHMCS_ROOT}"

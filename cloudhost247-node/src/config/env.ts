@@ -1,7 +1,7 @@
 /**
- * Environment validation for CloudHost247 (Ubuntu VPS: systemd + local PostgreSQL, behind Nginx).
+ * Environment validation for CloudHost247 (Ubuntu 24.04 VPS: systemd + local/managed PostgreSQL, behind Nginx).
  *
- * Design constraints (see docs/CPANEL_DEPLOYMENT.md):
+ * Design constraints (see docs/VPS_DEPLOYMENT.md):
  *  - No secret ever has a hardcoded fallback. Missing secrets fail startup loudly.
  *  - PORT is supplied by the systemd unit (Environment=PORT=3000) and proxied by Nginx.
  *    A development-only fallback is provided so `npm run dev` works locally.
@@ -352,8 +352,6 @@ function normalizeEnvInput(source: NodeJS.ProcessEnv): Record<string, string | u
       if (!normalized.SOCKET_PATH) {
         normalized.SOCKET_PATH = portVal.replace(/^unix:/i, '');
       }
-      delete normalized.PORT;
-    } else if (portVal.toLowerCase() === 'passenger') {
       delete normalized.PORT;
     }
   }

@@ -1,15 +1,14 @@
-# CloudHost247 platform infrastructure — self-hosted stack (staging/production).
+# CloudHost247 platform infrastructure — containerized stack (staging/local VPS parity).
 #
 # Runs the control plane (API + portal), the deployment worker, PostgreSQL, Redis, and Traefik
-# on one or more Docker hosts. The PHP marketing site and cPanel deployment story are separate
-# (docs/CPANEL_DEPLOYMENT.md); this compose is for the Docker/VPS deployment of the platform
-# itself.
+# on a Docker host. For the bare-metal Ubuntu 24.04 LTS VPS deployment (WHMCS + Nginx + systemd +
+# PostgreSQL 16 + MySQL 8), see docs/VPS_DEPLOYMENT.md.
 #
 # Usage:
 #   cp .env.example .env   # fill in secrets
 #   docker compose up -d
 #   docker compose exec -e CONFIRM_MIGRATION=yes app npm run migrate   # explicit, controlled migrations
-#   docker compose exec app node dist/src/scripts-import-manifests.js   # or POST /api/v1/admin/manifests/import
+#   docker compose exec app npm run import:manifests                   # or POST /api/v1/admin/manifests/import
 #
 # Keep this shared map on both app and worker. The app validates providers and resolves customer
 # choices; the worker performs the provider calls. Blank optional values fail closed in the adapter.

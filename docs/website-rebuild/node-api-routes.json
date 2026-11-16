@@ -48,6 +48,90 @@
     "category": "Client Area"
   },
   {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "GET",
+    "path": "/api/v1/account/security",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "GET",
+    "path": "/api/v1/account/username/availability",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "PATCH",
+    "path": "/api/v1/account/username",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "POST",
+    "path": "/api/v1/account/security-pin/view",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "POST",
+    "path": "/api/v1/account/security-pin/resend",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "POST",
+    "path": "/api/v1/account/security-pin/verify",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "POST",
+    "path": "/api/v1/account/security-pin/reveal",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "POST",
+    "path": "/api/v1/account/recovery",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "GET",
+    "path": "/api/v1/account/recovery",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-security.ts",
+    "method": "POST",
+    "path": "/api/v1/account/recovery/:id/cancel",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-whmcs.ts",
+    "method": "GET",
+    "path": "/api/v1/account/whmcs",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-whmcs.ts",
+    "method": "POST",
+    "path": "/api/v1/account/whmcs/link",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-whmcs.ts",
+    "method": "DELETE",
+    "path": "/api/v1/account/whmcs/link",
+    "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/account-whmcs.ts",
+    "method": "POST",
+    "path": "/api/v1/account/whmcs/sso",
+    "category": "Client Area"
+  },
+  {
     "source": "cloudhost247-node/src/routes/account.ts",
     "method": "PATCH",
     "path": "/api/v1/account/profile",
@@ -94,6 +178,66 @@
     "method": "POST",
     "path": "/api/v1/account/tickets/:id/messages",
     "category": "Client Area"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/acme-challenge.ts",
+    "method": "GET",
+    "path": "/.well-known/acme-challenge/:token",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-account-security.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/security-pin/policy",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-account-security.ts",
+    "method": "PUT",
+    "path": "/api/v1/admin/security-pin/policy",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-account-security.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/users/:id/security-pin",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-account-security.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/users/:id/security-pin/rotate",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-account-security.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/security-pin/due",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-account-security.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/recovery-requests",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-account-security.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/recovery-requests/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-account-security.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/recovery-requests/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-account-security.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/customers/lookup",
+    "category": "Administrative/internal"
   },
   {
     "source": "cloudhost247-node/src/routes/admin-billing.ts",
@@ -225,6 +369,120 @@
     "source": "cloudhost247-node/src/routes/admin-cloudflare.ts",
     "method": "GET",
     "path": "/api/v1/admin/cloudflare/logs",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/community/overview",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/community/categories",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/community/categories",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/community/categories/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/community/categories/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/community/discussions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/community/discussions/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/community/discussions/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/community/replies/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/community/reports",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/community/reports/:id/resolve",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/community/members/:id/restriction",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/community/members/:id/roles",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/community/members/:id/badges",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/community/members/:id/badges",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/community/discussions/:id/publish-solution",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/community/discussions/:id/publish-solution",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/community/solutions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-community.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/community/categories/:slug",
     "category": "Administrative/internal"
   },
   {
@@ -572,6 +830,12 @@
   {
     "source": "cloudhost247-node/src/routes/admin-platform.ts",
     "method": "GET",
+    "path": "/api/v1/site/social-links",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/admin-platform.ts",
+    "method": "GET",
     "path": "/api/v1/admin/settings",
     "category": "Administrative/internal"
   },
@@ -726,6 +990,78 @@
     "category": "Developer"
   },
   {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/knowledge/overview",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/knowledge/search",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/knowledge/sources/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/knowledge/sources",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/ai-support/knowledge/sources/:id/trust",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/ai-support/knowledge/reindex",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/ai-support/knowledge/retry",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/knowledge/exclusions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/ai-support/knowledge/exclusions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "DELETE",
+    "path": "/api/v1/admin/ai-support/knowledge/exclusions/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/knowledge/gaps",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-knowledge-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/ai-support/knowledge/coverage",
+    "category": "Administrative/internal"
+  },
+  {
     "source": "cloudhost247-node/src/routes/ai-support.ts",
     "method": "POST",
     "path": "/api/v1/ai-support/conversations",
@@ -795,6 +1131,12 @@
     "source": "cloudhost247-node/src/routes/ai-support.ts",
     "method": "PATCH",
     "path": "/api/v1/admin/ai-support/conversations/:id",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/ai-support.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/ai-support/knowledge/gaps/:questionKey",
     "category": "Administrative/internal"
   },
   {
@@ -1226,6 +1568,12 @@
   {
     "source": "cloudhost247-node/src/routes/catalog-admin.ts",
     "method": "GET",
+    "path": "/api/v1/admin/catalog/products/:id/translations",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/catalog-admin.ts",
+    "method": "GET",
     "path": "/api/v1/admin/catalog/products",
     "category": "Administrative/internal"
   },
@@ -1417,6 +1765,12 @@
   },
   {
     "source": "cloudhost247-node/src/routes/commerce.ts",
+    "method": "POST",
+    "path": "/api/v1/cart/catalog-items",
+    "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/commerce.ts",
     "method": "PATCH",
     "path": "/api/v1/cart/items/:id",
     "category": "Checkout"
@@ -1467,6 +1821,186 @@
     "source": "cloudhost247-node/src/routes/commerce.ts",
     "method": "GET",
     "path": "/api/v1/platform-services/plans",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/home",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/categories",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/categories/:slug",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/members",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/members/:username",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/developers",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/discussions",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/discussions/:slug",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/discussions/:slug/view",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/search",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/discussions",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "PATCH",
+    "path": "/api/v1/community/discussions/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "DELETE",
+    "path": "/api/v1/community/discussions/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/discussions/:id/replies",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/discussions/:id/accept",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "DELETE",
+    "path": "/api/v1/community/discussions/:id/accept",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/discussions/:id/bookmark",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/discussions/:id/subscribe",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "PATCH",
+    "path": "/api/v1/community/replies/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "DELETE",
+    "path": "/api/v1/community/replies/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/reactions",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/reports",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/attachments",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/attachments/:id",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/me",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/settings",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "PUT",
+    "path": "/api/v1/community/settings",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/bookmarks",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "GET",
+    "path": "/api/v1/community/notifications",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/community.ts",
+    "method": "POST",
+    "path": "/api/v1/community/notifications/read",
     "category": "Developer"
   },
   {
@@ -1860,6 +2394,186 @@
     "category": "Domains"
   },
   {
+    "source": "cloudhost247-node/src/routes/email-forensics-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/email-forensics/stats",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/email-forensics/database-versions",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/email-forensics/database-update",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/email-forensics/audit-logs",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/email-forensics/disable",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-customer.ts",
+    "method": "POST",
+    "path": "/api/v1/email-forensics/analyze",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-customer.ts",
+    "method": "POST",
+    "path": "/api/v1/email-forensics/analyze-file",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-forensics/history",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-forensics/history/:id",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-customer.ts",
+    "method": "DELETE",
+    "path": "/api/v1/email-forensics/history/:id",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-forensics/report/:id",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-forensics-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-forensics/database-status",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/email-trace",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/email-trace/summary",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/email-trace/sources",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-admin.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/email-trace/sources/:sourceId",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-admin.ts",
+    "method": "POST",
+    "path": "/api/v1/admin/email-trace/collect",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/email-trace/collection-runs",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-admin.ts",
+    "method": "PATCH",
+    "path": "/api/v1/admin/email-trace/events/:eventId",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/email-trace/queue",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-admin.ts",
+    "method": "GET",
+    "path": "/api/v1/admin/email-trace/:traceId",
+    "category": "Administrative/internal"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-trace/statuses",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-trace",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-trace/summary",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-trace/queue",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-trace/health",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-trace/domains/:domainId",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-trace/domains/:domainId/diagnostics",
+    "category": "Domains"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-trace/:traceId/timeline",
+    "category": "Email"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/email-trace-customer.ts",
+    "method": "GET",
+    "path": "/api/v1/email-trace/:traceId",
+    "category": "Email"
+  },
+  {
     "source": "cloudhost247-node/src/routes/experts.ts",
     "method": "GET",
     "path": "/api/v1/experts/offerings",
@@ -1902,6 +2616,48 @@
     "category": "Developer"
   },
   {
+    "source": "cloudhost247-node/src/routes/file-tools-api.ts",
+    "method": "POST",
+    "path": "/api/v1/file-tools/jobs",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/file-tools-api.ts",
+    "method": "GET",
+    "path": "/api/v1/file-tools/jobs/:jobId",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/file-tools-api.ts",
+    "method": "GET",
+    "path": "/api/v1/file-tools/jobs/:jobId/download",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/file-tools-api.ts",
+    "method": "GET",
+    "path": "/api/v1/file-tools/openapi.json",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/file-tools-api.ts",
+    "method": "GET",
+    "path": "/api/v1/file-tools/docs",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/file-tools.ts",
+    "method": "GET",
+    "path": "/api/file-tools/capabilities",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/file-tools.ts",
+    "method": "GET",
+    "path": "/api/v1/file-tools/capabilities",
+    "category": "Developer"
+  },
+  {
     "source": "cloudhost247-node/src/routes/firewall.ts",
     "method": "GET",
     "path": "/api/v1/servers/:serverId/firewall",
@@ -1935,6 +2691,12 @@
     "source": "cloudhost247-node/src/routes/health.ts",
     "method": "GET",
     "path": "/api/v1/public/status",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/inbox.ts",
+    "method": "POST",
+    "path": "/api/v1/contact",
     "category": "Developer"
   },
   {
@@ -2976,6 +3738,12 @@
     "category": "Administrative/internal"
   },
   {
+    "source": "cloudhost247-node/src/routes/visitor-ip.ts",
+    "method": "GET",
+    "path": "/api/v1/visitor/ip",
+    "category": "Developer"
+  },
+  {
     "source": "cloudhost247-node/src/routes/webhooks.ts",
     "method": "POST",
     "path": "/api/v1/webhooks/:gateway",
@@ -2986,5 +3754,17 @@
     "method": "POST",
     "path": "/api/v1/webhooks/payment/:provider",
     "category": "Checkout"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/whmcs-public.ts",
+    "method": "GET",
+    "path": "/api/v1/whmcs/orderability",
+    "category": "Developer"
+  },
+  {
+    "source": "cloudhost247-node/src/routes/whmcs-public.ts",
+    "method": "GET",
+    "path": "/api/v1/whmcs/orderability/:serviceKey",
+    "category": "Developer"
   }
 ]

@@ -136,6 +136,7 @@ sed -e "s#/etc/#${DRY_ROOT}/etc/#g" \
     -e "s#/var/log/#${DRY_ROOT}/var/log/#g" \
     -e "s#/var/backups/#${DRY_ROOT}/var/backups/#g" \
     -e "s#/var/www/#${DRY_ROOT}/var/www/#g" \
+    -e "s#/var/lib/#${DRY_ROOT}/var/lib/#g" \
     -e "s#/opt/cloudhost247#${DRY_ROOT}/opt/cloudhost247#g" \
     -e "s#/usr/lib/php/#${DRY_ROOT}/usr/lib/php/#g" \
     -e "s#/run/php/#${DRY_ROOT}/run/php/#g" \
@@ -156,11 +157,13 @@ mkdir -p "${DRY_ROOT}/etc"/{nginx/sites-available,nginx/sites-enabled,nginx/snip
          "${DRY_ROOT}/etc"/{mysql/mysql.conf.d,apt/apt.conf.d,postgresql/16/main} \
          "${DRY_ROOT}/etc"/letsencrypt/live \
          "${DRY_ROOT}/var/log" "${DRY_ROOT}/var/www" "${DRY_ROOT}/var/backups" \
+         "${DRY_ROOT}/var/lib" \
          "${DRY_ROOT}/usr/lib/php" "${DRY_ROOT}/run/php" "${DRY_ROOT}/opt"
 
 run_output="$(PATH="${BIN}:${PATH}" DOMAIN=dry.example APP_DOMAIN=app.dry.example \
   APP_USER=dryuser APP_ROOT="${DRY_ROOT}/opt/cloudhost247" \
   WHMCS_ROOT="${DRY_ROOT}/var/www/whmcs" \
+  MODULE_STORAGE="${DRY_ROOT}/var/lib/cloudhost247" \
   SRC_DIR="${REPO_ROOT}" \
   bash "${SCRIPT}" 2>&1)"
 run_status=$?
@@ -192,6 +195,51 @@ else
   fail "Node vhost not rendered"
 fi
 
+if [[ -f "${vhost}" ]]; then
+  grep -q "root ${DRY_ROOT}/var/www/whmcs;" "${vhost}" \
+    && pass "  WHMCS_ROOT rendered into the vhost root directive" \
+    || fail "  vhost root is not the rendered WHMCS_ROOT"
+  grep -q '__WHMCS_ROOT__' "${vhost}" \
+    && fail "  __WHMCS_ROOT__ placeholder left behind" || pass "  no __WHMCS_ROOT__ left behind"
+  grep -qE 'location ~ \^/\(templates_c\|attachments\|downloads\|crons\|storage\|vendor\)/' "${vhost}" \
+    && pass "  internal WHMCS directories (crons/storage/vendor) are denied" \
+    || fail "  crons/, storage/ or vendor/ is still web-reachable"
+  grep -q '/modules/addons/cloudhost247_domain_lookup/cache/' "${vhost}" \
+    && pass "  addon cache directory is denied" || fail "  addon cache directory is web-reachable"
+  grep -q '\^/assets/ch247-media/.*\\.(php' "${vhost}" \
+    && pass "  PHP execution is denied inside uploaded builder media" \
+    || fail "  uploaded builder media can still execute PHP"
+fi
+
+pool="${DRY_ROOT}/etc/php/8.2/fpm/pool.d/www.conf"
+if [[ -f "${pool}" ]]; then
+  grep -q "^env\[CH247_MODULE_STORAGE\] = ${DRY_ROOT}/var/lib/cloudhost247$" "${pool}" \
+    && pass "  PHP-FPM exports CH247_MODULE_STORAGE (out-of-webroot module storage)" \
+    || fail "  CH247_MODULE_STORAGE not rendered into the PHP-FPM pool"
+  grep -q "^php_admin_value\[open_basedir\] = ${DRY_ROOT}/var/www/whmcs/:${DRY_ROOT}/var/lib/cloudhost247/:/tmp/:/var/tmp/$" "${pool}" \
+    && pass "  open_basedir covers the WHMCS root AND module storage" \
+    || fail "  open_basedir does not match the rendered roots: $(grep -m1 'open_basedir' "${pool}")"
+fi
+
+storage="${DRY_ROOT}/var/lib/cloudhost247"
+if [[ -d "${storage}" ]]; then
+  pass "module storage directory created outside the web root"
+  # chown to www-data needs root, which a dry run may not have — assert the mode
+  # here and the ownership commands in the script itself.
+  mode="$(stat -c '%a' "${storage}")"
+  [[ "${mode}" == "700" ]] \
+    && pass "  module storage is mode 0700" \
+    || fail "  module storage mode is ${mode}, expected 700"
+else
+  fail "module storage directory not created at ${storage}"
+fi
+if grep -q 'chown -R www-data:www-data "${MODULE_STORAGE}"' "${REPO_ROOT}/infrastructure/vps/setup-ubuntu-24.04.sh" \
+   && grep -q 'chmod 700 "${MODULE_STORAGE}"' "${REPO_ROOT}/infrastructure/vps/setup-ubuntu-24.04.sh"; then
+  pass "  module storage is chowned to www-data and locked to 0700"
+else
+  fail "  module storage ownership/permissions are not enforced by the setup script"
+fi
+
 unit="${DRY_ROOT}/etc/systemd/system/cloudhost247-node.service"
 if [[ -f "${unit}" ]]; then
   pass "node systemd unit rendered"
@@ -214,6 +262,13 @@ if [[ -f "${cron_file}" ]]; then
     && pass "  backup job points at the real checkout" || fail "  backup job path wrong"
   grep -q 'systemctl is-active --quiet cloudhost247-worker' "${cron_file}" \
     && pass "  worker fallback is guarded by systemd" || fail "  worker fallback not guarded"
+  grep -q '__[A-Z_]*__' "${cron_file}" \
+    && fail "  unrendered placeholder left in cron file" || pass "  every cron placeholder is rendered"
+  grep -q 'sudo -u www-data /usr/bin/php8.2 .*crons/cron.php' "${cron_file}" \
+    && pass "  WHMCS cron runs as www-data (files it writes stay web-server owned)" \
+    || fail "  WHMCS cron does not run as www-data"
+  grep -q '^30 2 \* \* \* root .*backup.sh' "${cron_file}" \
+    && pass "  nightly backup runs as root with explicit roots" || fail "  nightly backup entry is wrong"
 else
   fail "cron file not installed"
 fi
@@ -305,6 +360,21 @@ grep -q 'crons/cron.php' "${INSTALLER}" \
 grep -q 'standard_cart' "${INSTALLER}" \
   && pass "installer verifies standard_cart order form survived" \
   || fail "installer does not verify standard_cart"
+
+echo
+echo "[public Tools adapter is deployed, developer helpers are not]"
+grep -q '"${SRC_DIR}/tools/" "${WHMCS_ROOT}/tools/"' "${INSTALLER}" \
+  && pass "install-whmcs.sh overlays tools/ into the web root (Nginx routes /tools to it)" \
+  || fail "install-whmcs.sh never deploys tools/index.php, so /tools 404s on a fresh VPS"
+grep -q "exclude 'preview-router.php'" "${INSTALLER}" \
+  && pass "developer-only preview-router.php is excluded from the web root" \
+  || fail "preview-router.php would be published to the web root"
+grep -q "exclude 'build-manifests.py'" "${INSTALLER}" \
+  && pass "developer-only build-manifests.py is excluded from the web root" \
+  || fail "build-manifests.py would be published to the web root"
+grep -q 'tools/index.php' "${INSTALLER}" \
+  && pass "installer verifies the Tools front controller landed" \
+  || fail "installer does not verify tools/index.php"
 
 echo
 echo "----------------------------------------"

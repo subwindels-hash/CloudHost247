@@ -10,8 +10,8 @@
  * src/core/* and src/lib/* need). The single optional dependency is pg@8.16.3, loaded lazily and
  * only when DATABASE_URL is set.
  *
- * Binding: the host supplies PORT (cPanel Passenger / Application Manager injects it). This file
- * never hardcodes a production port; 3000 is a development-only fallback declared in .env.
+ * Binding: systemd supplies PORT (default 3000) behind Nginx on the VPS. This file never
+ * hardcodes a production port; 3000 is a development-only fallback declared in .env.
  */
 'use strict';
 
@@ -36,8 +36,8 @@ function checkNodeVersion() {
     process.stderr.write(
       `[server] FATAL: Node.js ${MIN_NODE.join('.')} or newer is required.\n`
       + `[server] Current version: ${process.versions.node}\n`
-      + `[server] If using cPanel, update the Node.js version in Setup Node.js App.\n`
-      + `[server] See: docs/CPANEL_DEPLOYMENT.md\n`
+      + `[server] Install Node.js 22 LTS on your Ubuntu 24.04 VPS.\n`
+      + `[server] See: docs/VPS_DEPLOYMENT.md\n`
     );
     process.exit(1);
   }
@@ -89,7 +89,7 @@ async function main() {
     });
   });
 
-  // cPanel/Apache fronts this process; the kernel backlog and Node's defaults are fine, but an
+  // Nginx fronts this process on the VPS; the kernel backlog and Node's defaults are fine, and an
   // explicit keep-alive timeout prevents slow clients holding sockets open indefinitely.
   server.keepAliveTimeout = 65_000;
   server.headersTimeout = 70_000;
@@ -99,7 +99,7 @@ async function main() {
     try {
       if (fs.existsSync(config.SOCKET_PATH)) fs.unlinkSync(config.SOCKET_PATH);
     } catch {
-      // Ignore if Passenger owns or just replaced the socket path.
+      // Ignore if an upstream supervisor owns or just replaced the socket path.
     }
   }
 
@@ -128,7 +128,7 @@ async function main() {
   let shuttingDown = false;
 
   /**
-   * Graceful shutdown. cPanel/Passenger sends SIGTERM on restart and deploy; stopping the
+   * Graceful shutdown. systemd sends SIGTERM on restart and deploy; stopping the
    * listener first lets in-flight requests finish, then pending writes are flushed to disk.
    */
   const shutdown = async (signal) => {
@@ -161,7 +161,7 @@ async function main() {
   });
   process.on('uncaughtException', (err) => {
     // Log and exit: continuing after an uncaught exception risks serving corrupt state. The
-    // process manager (Passenger/systemd/pm2) restarts us.
+    // process manager (systemd) restarts us.
     logger.fatal({ err }, 'uncaught exception, exiting');
     void shutdown('uncaughtException');
   });

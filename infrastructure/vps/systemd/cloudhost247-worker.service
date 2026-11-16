@@ -1,26 +1,27 @@
-# CloudHost247 — deployment worker (persistent) under systemd.
-# Runs the provisioning/deployment pipelines (npm run worker).
-# On cPanel this is `npm run worker:once` via Cron every minute; on the VPS a
-# persistent systemd service is preferred (DB-backed leases prevent overlap).
-# __APP_ROOT__ / __APP_USER__ are rendered by setup-ubuntu-24.04.sh.
+# CloudHost247 — Deployment & provisioning worker under systemd.
+# Runs as a persistent supervised service with 5s poll cadence (database-backed
+# leases prevent duplicate processing).
 [Unit]
-Description=CloudHost247 deployment worker (persistent)
+Description=CloudHost247 deployment & provisioning worker
 After=network.target postgresql.service cloudhost247-node.service
 Wants=postgresql.service
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Service]
 Type=simple
 User=__APP_USER__
 Group=__APP_USER__
 WorkingDirectory=__APP_ROOT__
-ExecStart=/usr/bin/node dist/src/worker/main.js
+ExecStartPre=/usr/bin/test -f __APP_ROOT__/dist/src/worker/main.js
+ExecStart=/usr/bin/node --max-old-space-size=512 dist/src/worker/main.js
+
 Restart=on-failure
-RestartSec=5
-TimeoutStopSec=30
+RestartSec=10
+TimeoutStopSec=60
 KillSignal=SIGTERM
 
 Environment=NODE_ENV=production
-Environment=DISABLE_AUTO_BUILD=1
 EnvironmentFile=-__APP_ROOT__/.env
 
 NoNewPrivileges=true

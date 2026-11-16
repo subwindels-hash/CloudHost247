@@ -1,46 +1,40 @@
-CloudHost247 Node Platform — Deployment Quick Start
-Regenerate the package for the current commit before every deploy.
+CloudHost247 Node Platform — Ubuntu 24.04 VPS Quick Start
+Target: Ubuntu 24.04 LTS VPS (Nginx 1.24 + Node.js 22 LTS + PostgreSQL 16 + systemd)
+Full runbook: docs/VPS_DEPLOYMENT.md
 
-DEPLOYMENT ZIP
-  Generate: cd cloudhost247-node && bash scripts/package-cpanel.sh
-  Output:   cloudhost247-node/release/cloudhost247-cpanel-<git-sha>.zip
-  Includes: pre-built server + frontend, migrations, manifests, .env.example,
-            docs/CPANEL_DEPLOYMENT.md, DEPLOY.txt
-  Excludes: .env, real secrets, node_modules
-  Note: The zip is a generated local output. Do not commit a stale SHA/size here; read DEPLOY.txt
-        inside the freshly built zip for the extraction warning.
+1. PROVISION HOST (run once as root on Ubuntu 24.04 LTS)
+   git clone <repo-url> /opt/cloudhost247-src
+   cd /opt/cloudhost247-src
+   sudo bash infrastructure/vps/setup-ubuntu-24.04.sh
 
-FULL ENVIRONMENT FILE
-  File: cloudhost247-node/.env
-  Mode: 0600 (git-ignored; not inside the ZIP)
-  IMPORTANT: DATABASE_URL is a placeholder. Set the real PostgreSQL connection string,
-  confirm APP_URL and database TLS settings, and configure only the provider/email
-  integrations you plan to use before deployment. Preserve CREDENTIAL_ENCRYPTION_KEY.
+2. CREATE POSTGRESQL DATABASE
+   sudo -u postgres psql -c "CREATE USER cloudhost247 WITH PASSWORD '<strong-password>';"
+   sudo -u postgres psql -c "CREATE DATABASE cloudhost247 OWNER cloudhost247;"
 
-BEFORE YOU DEPLOY
-  - Confirm the cPanel account has Setup Node.js App/Passenger and Node.js >= 20.9.0.
-  - Confirm PostgreSQL access, terminal/npm install access, domain routing, and HTTPS.
-  - Real cPanel staging has NOT been performed; use docs/CPANEL_DEPLOYMENT.md as the
-    authoritative deployment checklist and close its staging gate before production.
+3. CONFIGURE ENVIRONMENT (/opt/cloudhost247/.env, mode 0600)
+   sudo cp /opt/cloudhost247-src/cloudhost247-node/.env.example /opt/cloudhost247/.env
+   sudo chown cloudhost247:cloudhost247 /opt/cloudhost247/.env
+   sudo chmod 600 /opt/cloudhost247/.env
+   # Set DATABASE_URL, APP_URL, JWT_SECRET, CREDENTIAL_ENCRYPTION_KEY (PORT=3000 behind Nginx)
 
-DEPLOY
-  1. Upload the ZIP to cPanel File Manager, extract it, and move the contents of
-     cloudhost247-cpanel-b54b047/ into your application root.
-  2. Create a Production Node.js app with startup file server.js. Passenger supplies PORT;
-     do not configure PORT yourself.
-  3. Configure the active variables from .env in cPanel's Environment Variables UI
-     (recommended), or upload the customized .env with mode 600.
-  4. In the cPanel virtual-environment terminal, run: npm ci --omit=dev
-  5. Run: npm run env:check
-  6. Review migration status, back up the database, then follow docs/CPANEL_DEPLOYMENT.md
-     §0a/§6. Migrations 0023, 0024, 0025, and 0041 are quarantined in production and
-     require explicit owner authorization before applying.
-  7. Restart the app; verify /health, /ready, and the final application URL.
-  8. Schedule the worker as a one-shot cron job using the actual cPanel paths:
-     * * * * * cd <APP_ROOT> && <NODE_PATH> dist/src/worker/main.js --once
+4. DEPLOY (build -> migrate -> systemd restart -> healthcheck)
+   cd /opt/cloudhost247-src
+   # First deploy on a fresh DB (see docs/VPS_DEPLOYMENT.md §6 quarantine gate):
+   sudo AUTHORIZED_MIGRATIONS=0041 bash infrastructure/vps/scripts/deploy.sh
+   # Subsequent deploys:
+   sudo bash infrastructure/vps/scripts/deploy.sh
 
-VERIFICATION RUN (re-run these for each newly generated artifact)
-  - bash scripts/package-cpanel.sh: success (production server + frontend build)
-  - npm test: success (129 files / 1,158 tests)
-  - npm run env:check: success (shape validation only; not a DB connectivity test)
-  - unzip -t: success; 1,138 files; 70 SQL migrations; no .env in the ZIP
+5. OPTIONAL PRE-BUILT VPS PACKAGE (CI / workstation build)
+   cd cloudhost247-node && bash scripts/package-vps.sh
+   # Output: cloudhost247-node/release/cloudhost247-vps-<git-sha>.zip
+
+6. TLS & HEALTH VERIFICATION
+   sudo certbot certonly --webroot -w /var/www/letsencrypt -d app.cloudhost247.com
+   sudo systemctl reload nginx
+   sudo bash /opt/cloudhost247-src/infrastructure/vps/scripts/healthcheck.sh
+
+7. OPERATIONS & ROLLBACK
+   Logs:     sudo journalctl -u cloudhost247-node -f
+             sudo journalctl -u cloudhost247-worker -f
+   Rollback: sudo bash /opt/cloudhost247-src/infrastructure/vps/scripts/deploy.sh --rollback
+   Backup:   sudo bash /opt/cloudhost247-src/infrastructure/vps/scripts/backup.sh

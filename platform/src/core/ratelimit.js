@@ -3,7 +3,7 @@
  *
  * Fixed-window counter per key, held in memory with a periodic sweep of expired buckets.
  *
- * This is per-process: behind a multi-worker Passenger setup each worker keeps its own counters,
+ * This is per-process: if multiple Node workers run behind Nginx each worker keeps its own counters,
  * so the effective limit is (configured limit x worker count). That is the right trade for a
  * single-dependency monolith; a Redis-backed limiter can be added without touching call sites
  * because everything goes through rateLimit().
