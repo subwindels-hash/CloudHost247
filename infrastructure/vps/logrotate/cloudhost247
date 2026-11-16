@@ -1,0 +1,51 @@
+# CloudHost247 — log rotation for Ubuntu 24.04 VPS.
+# Installed to /etc/logrotate.d/cloudhost247 by setup-ubuntu-24.04.sh.
+#
+# Two stanzas on purpose: the owners differ. Nginx logs must stay readable by
+# www-data (the worker keeps the fd open across rotation); the cron/healthcheck/
+# backup logs are written by root jobs and are recreated root:adm. A single
+# stanza would hand one owner's files to the other and break the next write.
+
+# --- Nginx access/error logs ------------------------------------------------
+/var/log/nginx/cloudhost247-*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 www-data adm
+    sharedscripts
+    postrotate
+        systemctl reload nginx > /dev/null 2>&1 || true
+    endscript
+}
+
+# --- PHP-FPM log (written by the pool's www-data worker) --------------------
+/var/log/php8.2-fpm*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 www-data adm
+    sharedscripts
+    postrotate
+        systemctl reload php8.2-fpm > /dev/null 2>&1 || true
+    endscript
+}
+
+# --- CloudHost247 cron/operations logs (root jobs, group adm) --------------
+/var/log/cloudhost247/*.log {
+    daily
+    rotate 30
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 root adm
+    sharedscripts
+    # No reload needed: each cron run opens and appends, so the new file is
+    # picked up on the next invocation.
+}

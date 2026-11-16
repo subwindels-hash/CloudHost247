@@ -1,0 +1,33 @@
+# CloudHost247 — fail2ban jail for Ubuntu 24.04 VPS.
+# Installed to /etc/fail2ban/jail.local by setup-ubuntu-24.04.sh.
+# SSH is key-only (see docs/VPS_DEPLOYMENT.md §3); fail2ban bans brute-force
+# attempts against SSH and the WHMCS admin login.
+
+[DEFAULT]
+bantime = 1h
+findtime = 10m
+maxretry = 5
+backend = systemd
+
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 1h
+
+[nginx-http-auth]
+enabled = true
+port = http,https
+filter = nginx-http-auth
+logpath = /var/log/nginx/cloudhost247-*.error.log
+maxretry = 5
+
+[nginx-botsearch]
+enabled = true
+port = http,https
+filter = nginx-botsearch
+logpath = /var/log/nginx/cloudhost247-*.access.log
+maxretry = 2
+bantime = 1h

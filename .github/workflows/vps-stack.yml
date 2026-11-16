@@ -1,0 +1,93 @@
+name: VPS deployment stack
+
+# Validates the Ubuntu 24.04 VPS provisioning artefacts (Nginx vhosts, PHP-FPM
+# pool, systemd units, cron/logrotate/fail2ban, install/deploy/backup/restore/
+# healthcheck scripts). Path-filtered: this never builds the Node app or the
+# PHP/WHMCS tree, so it is cheap and independent of the other two workflows.
+on:
+  push:
+    paths:
+      - 'infrastructure/vps/**'
+      - 'cloudhost247-node/scripts/package-vps.sh'
+      - 'docs/VPS_DEPLOYMENT.md'
+      - '.github/workflows/vps-stack.yml'
+  pull_request:
+    paths:
+      - 'infrastructure/vps/**'
+      - 'cloudhost247-node/scripts/package-vps.sh'
+      - 'docs/VPS_DEPLOYMENT.md'
+      - '.github/workflows/vps-stack.yml'
+
+jobs:
+  validate:
+    name: Validate VPS stack artefacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell syntax for every script
+        run: |
+          set -euo pipefail
+          for f in infrastructure/vps/setup-ubuntu-24.04.sh \
+                   infrastructure/vps/scripts/*.sh \
+                   infrastructure/vps/tests/*.sh \
+                   cloudhost247-node/scripts/package-vps.sh; do
+            bash -n "$f"
+            echo "OK $f"
+          done
+
+      - name: ShellCheck at error severity
+        # Warnings are advisory here; hard errors (unquoted expansions that break,
+        # undefined commands, bad conditionals) must be fixed.
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck
+          shellcheck --severity=error \
+            infrastructure/vps/setup-ubuntu-24.04.sh \
+            infrastructure/vps/scripts/*.sh \
+            infrastructure/vps/tests/*.sh \
+            cloudhost247-node/scripts/package-vps.sh
+
+      - name: Stack smoke test for files, placeholders, units and proxies
+        run: bash infrastructure/vps/tests/smoke-test.sh
+
+      - name: Healthcheck TLS classification test
+        run: bash infrastructure/vps/tests/tls-check-test.sh
+
+      - name: Provisioning script dry run with stubbed system commands
+        run: bash infrastructure/vps/tests/setup-dry-run.sh
+
+      - name: Nginx configuration test with real nginx
+        # Proves `nginx -t` passes with the vhosts as shipped: the placeholders are
+        # rendered exactly like setup-ubuntu-24.04.sh does, and a throwaway
+        # self-signed certificate is generated at the paths Certbot will later use
+        # (the same bootstrap the setup script performs).
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y -qq nginx openssl
+
+          DOMAIN=example.test
+          APP_DOMAIN=app.example.test
+
+          sudo mkdir -p /etc/nginx/snippets /var/www/letsencrypt
+          sudo cp infrastructure/vps/nginx/snippets/security-headers.conf /etc/nginx/snippets/
+          sudo cp infrastructure/vps/nginx/snippets/csp-whmcs.conf /etc/nginx/snippets/
+
+          for d in "$DOMAIN" "$APP_DOMAIN"; do
+            sudo mkdir -p "/etc/letsencrypt/live/$d"
+            sudo openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
+              -keyout "/etc/letsencrypt/live/$d/privkey.pem" \
+              -out "/etc/letsencrypt/live/$d/fullchain.pem" \
+              -subj "/CN=$d" >/dev/null 2>&1
+            sudo cp "/etc/letsencrypt/live/$d/fullchain.pem" "/etc/letsencrypt/live/$d/chain.pem"
+          done
+
+          for vhost in cloudhost247-whmcs.conf cloudhost247-node.conf; do
+            sudo sed -e "s/__DOMAIN__/$DOMAIN/g" -e "s/__APP_DOMAIN__/$APP_DOMAIN/g" \
+              "infrastructure/vps/nginx/$vhost" \
+              | sudo tee "/etc/nginx/sites-enabled/$vhost" >/dev/null
+          done
+          sudo rm -f /etc/nginx/sites-enabled/default
+
+          # The snippets reference a PHP socket path that need not exist for -t.
+          sudo nginx -t

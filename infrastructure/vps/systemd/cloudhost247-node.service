@@ -1,0 +1,43 @@
+# CloudHost247 — Node platform (Fastify API + SPA) under systemd.
+# Replaces cPanel Passenger/Application Manager on the VPS.
+# The app binds 0.0.0.0:$PORT (default 3000); Nginx proxies 127.0.0.1:3000.
+# __APP_ROOT__ / __APP_USER__ are rendered by setup-ubuntu-24.04.sh.
+[Unit]
+Description=CloudHost247 Node platform (Fastify API + SPA)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=__APP_USER__
+Group=__APP_USER__
+WorkingDirectory=__APP_ROOT__
+# server.js is the Passenger-compatible entrypoint; it works identically under
+# systemd (it just starts the compiled Fastify app on $PORT). DISABLE_AUTO_BUILD
+# is set so a missing dist/ fails fast instead of attempting a server-side build
+# (builds happen in deploy.sh with full devDependencies).
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGTERM
+
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOST=0.0.0.0
+Environment=DISABLE_AUTO_BUILD=1
+EnvironmentFile=-__APP_ROOT__/.env
+
+# Hardening (the app needs no shell, no root, no extra capabilities).
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=__APP_ROOT__ /var/log/cloudhost247
+
+# Logging: journald (query with `journalctl -u cloudhost247-node -f`).
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

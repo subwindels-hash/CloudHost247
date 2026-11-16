@@ -1735,3 +1735,34 @@ sub-phase before the next one begins.
 - **Not claimed, again:** the read-only console output that `GetConsoleOutput` used to return is no longer
   surfaced anywhere. It was never rendered, and a boot log can contain secrets; if it is wanted later it should
   be a deliberate, separately designed diagnostic surface, not a side effect of the console flag.
+
+---
+
+## VPS deployment target — Ubuntu 24.04 (added 2026-11-15)
+
+- **Decision:** the production target is a plain **Ubuntu 24.04 LTS VPS** —
+  Nginx 1.24 + Certbot, PHP 8.2-FPM (ondrej/php PPA) + ionCube Loader, MySQL 8.0
+  for WHMCS 8.x; Node.js 22 LTS + PostgreSQL 16 under systemd for this platform;
+  UFW + fail2ban; system cron and checksummed backups. It replaces the
+  cPanel/Passenger target without changing application code: `server.js` already
+  binds `0.0.0.0:$PORT` (default 3000) with `trustProxy: true`, so the same build
+  runs behind Nginx instead of Passenger.
+- **Artefacts:** `infrastructure/vps/` (provisioning script, Nginx vhosts,
+  PHP-FPM pool/ini, systemd units `cloudhost247-node`/`cloudhost247-worker`,
+  cron, logrotate, fail2ban jail, and `install-whmcs.sh` / `deploy.sh` /
+  `backup.sh` / `restore.sh` / `healthcheck.sh`), plus
+  `cloudhost247-node/scripts/package-vps.sh` and the runbook
+  `docs/VPS_DEPLOYMENT.md`.
+- **Source/local verification only:** `bash infrastructure/vps/tests/smoke-test.sh`
+  (artefact, placeholder, proxy-header, systemd user/group and webroot-leak
+  checks), `tests/tls-check-test.sh` (healthcheck certificate classification) and
+  `tests/setup-dry-run.sh` (the provisioning script executed end to end with
+  stubbed system commands, asserting rendered templates and UFW ordering) all
+  pass locally; `.github/workflows/vps-stack.yml` runs them plus a real
+  `nginx -t` against the rendered vhosts.
+- **VPS staging verification: BLOCKED — NOT PERFORMED.** No Ubuntu 24.04 VPS
+  (or WHMCS licence) has been available in this environment, so nothing in
+  Appendix C of `docs/VPS_DEPLOYMENT.md` is checked off, and no
+  "production-ready" claim is made for this target. The same standing condition
+  as the cPanel path applies: the claim requires a real run on a real host with
+  recorded evidence (versions, logs, healthcheck output, restore drill).

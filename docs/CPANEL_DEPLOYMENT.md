@@ -1,5 +1,12 @@
 # CloudHost247 Node Platform — cPanel Deployment Guide
 
+> **This is no longer the deployment target.** The supported production target is a
+> plain **Ubuntu 24.04 LTS VPS** with Nginx + PHP 8.2-FPM + systemd — see
+> [`docs/VPS_DEPLOYMENT.md`](VPS_DEPLOYMENT.md) and `infrastructure/vps/`.
+> This document is retained because the cPanel path may still be used for
+> staging on shared hosting, and because the application code is identical on
+> both (only the web server, PHP runtime and process manager differ).
+
 This document covers deploying, updating, and operating the new independent Node.js/TypeScript
 platform (`cloudhost247-node/`) on **cPanel shared hosting only**, using cPanel's Application
 Manager (Passenger) and Apache reverse-proxy integration. It assumes **no root access, no WHM

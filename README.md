@@ -3,11 +3,29 @@
 This repository contains the CloudHost247 WHMCS customizations **and** a separate
 Node.js platform. WHMCS core (`init.php`, `includes/`, `vendor/`, licence and database)
 is not included. Do **not** copy the whole checkout or production ZIP directly into
-`public_html`: the archive also contains Node files, internal documentation, tests and
-release scripts. Follow [`docs/DEPLOYMENT-GUIDE.md`](docs/DEPLOYMENT-GUIDE.md) for the
-staging-first package procedure and file-selection rules, then [`docs/INSTALLATION-GUIDE.md`](docs/INSTALLATION-GUIDE.md)
-for WHMCS activation/configuration. Deploy the Node platform separately using
-[`docs/CPANEL_DEPLOYMENT.md`](docs/CPANEL_DEPLOYMENT.md).
+the webroot: the archive also contains Node files, internal documentation, tests and
+release scripts.
+
+### Deployment target: Ubuntu 24.04 VPS (primary)
+
+The supported production target is a **plain Ubuntu 24.04 LTS VPS** running
+Nginx + PHP 8.2-FPM + MySQL 8.0 (WHMCS 8.x) and Node.js 22 + PostgreSQL 16
+(Node platform), with systemd units, UFW/fail2ban, cron and backups.
+
+- **Start here:** [`docs/VPS_DEPLOYMENT.md`](docs/VPS_DEPLOYMENT.md) — full runbook
+  (provision → WHMCS install → Node deploy → modules → cron/backups → checklist).
+- **Provisioning stack:** [`infrastructure/vps/`](infrastructure/vps/) —
+  `setup-ubuntu-24.04.sh` plus Nginx vhosts, PHP-FPM pool/ini, systemd units,
+  cron, logrotate, fail2ban, and the install/deploy/backup/restore/healthcheck scripts.
+- **File selection / staging-first packaging:** [`docs/DEPLOYMENT-GUIDE.md`](docs/DEPLOYMENT-GUIDE.md),
+  then [`docs/INSTALLATION-GUIDE.md`](docs/INSTALLATION-GUIDE.md) for WHMCS
+  activation/configuration.
+
+The older **cPanel/Apache target remains documented for reference** but is no
+longer the target: [`docs/CPANEL_DEPLOYMENT.md`](docs/CPANEL_DEPLOYMENT.md)
+(Passenger + Application Manager). Both targets run the same application code —
+only the web server, PHP runtime, and process manager differ (see the VPS guide's
+Appendix B migration table).
 
 The site customizations are arranged to match WHMCS paths, but every overlay must be
 reviewed against the target's existing files and operator-owned content. WHMCS core
@@ -17,7 +35,7 @@ the history of the repository reorganization.
 ## Directory structure
 
 ```
-/                                   ← WHMCS document root (cPanel public_html)
+/                                   ← WHMCS document root (/var/www/whmcs on VPS)
 ├── *.php                           ← 86 root routes (75 published, 11 internal)
 │   │                                  (legacy theme pages: aboutus, vps-hosting,
 │   │                                   cpanel-hosting, blog, ssl-certificate, …
@@ -220,12 +238,23 @@ inventory.
 
 ## Runtime requirements (deployment target)
 
-- WHMCS 8.x (order form `templates/orderforms/cloudhost247_legacy` requires WHMCS 8.1+,
-  error pages `templates/cloudhost247_legacy/error/` require WHMCS 8.8+)
-- PHP 7.4–8.2 with **ionCube Loader** (the legacy theme-helper addon in `modules/addons/[retired-addon]/`
-  and `xtreme_currency_rates` are encoded), cURL, JSON, PDO, OpenSSL
+- **OS:** Ubuntu 24.04 LTS (noble), root access, 2 vCPU / 4 GB RAM minimum
+- **Web server:** Nginx 1.24 (Ubuntu default) + Certbot (Let's Encrypt TLS)
+- **WHMCS 8.x** (order form `templates/orderforms/cloudhost247_legacy` requires WHMCS 8.1+,
+  error pages `templates/cloudhost247_legacy/error/` require WHMCS 8.8+),
+  served by **PHP 8.2-FPM** from the ondrej/php PPA — WHMCS 8.x supports PHP 7.4–8.2
+  only, so Ubuntu's default PHP 8.3 must **not** be used
+- **ionCube Loader** (the retired theme-helper addon and `xtreme_currency_rates`
+  are encoded), cURL, JSON, PDO/`pdo_mysql`, OpenSSL, mbstring, GD, SOAP, ZIP, Intl
+- **MySQL 8.0** (utf8mb4/InnoDB) for WHMCS
+- **PostgreSQL 16** for the Node platform, **Node.js 22 LTS** (the app requires ≥ 20.9;
+  Ubuntu ships 18) under systemd (`cloudhost247-node`, `cloudhost247-worker`)
 - `templates/orderforms/ovh_cart/` falls back to WHMCS core `standard_cart`
   templates — a stock WHMCS installation provides them.
+
+Installation of all of the above is automated by
+`infrastructure/vps/setup-ubuntu-24.04.sh`; see
+[`docs/VPS_DEPLOYMENT.md`](docs/VPS_DEPLOYMENT.md).
 
 ## Branding
 

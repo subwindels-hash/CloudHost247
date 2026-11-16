@@ -3,6 +3,14 @@
 **Gate rule:** every checkbox must carry dated execution evidence. Nothing here authorizes
 production by itself; production remains NO-GO until CT-01..CT-08 close with verifier signatures.
 
+> **Target:** this checklist was written for the cPanel staging target. The VPS
+> equivalent — host provisioning, WHMCS install, Node deploy, cron/backups, and
+> the Ubuntu 24.04 go-live gates — is
+> [`docs/VPS_DEPLOYMENT.md`](docs/VPS_DEPLOYMENT.md) Appendix C. The gates here
+> (migrations, provider certifications, payment/financial drills, restore drill)
+> still apply unchanged on the VPS; only CT-01/CT-02 (WHMCS + cPanel staging)
+> are replaced by the VPS certification steps.
+
 ## Pre-flight (must all be closed before any deploy)
 
 - [ ] CT-03 authorized managed PostgreSQL reachable; `migrateUp` applied (currently 94 migrations) with checksum verify OK
