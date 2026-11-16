@@ -35,7 +35,7 @@ import { websiteVocabulary } from './website-discovery';
  * There is no embedding stage, and none is implemented: no embedding call, no vector column, no
  * configuration key. An earlier comment here described `AI_LLM_*`-configured embeddings as an
  * "optional additive signal", which implied a capability that does not exist. The engine is
- * complete on its own, which is why it works on a stock cPanel PostgreSQL with no extensions;
+ * complete on its own, which is why it works on a stock PostgreSQL 16 with no extensions;
  * `RetrievedChunk.score` is the seam a future hybrid scorer would use (see §5.4 of
  * docs/AI_WEBSITE_INTELLIGENCE.md for why embeddings are absent).
  */

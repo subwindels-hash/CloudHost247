@@ -1753,18 +1753,29 @@ sub-phase before the next one begins.
   `backup.sh` / `restore.sh` / `healthcheck.sh`), plus
   `cloudhost247-node/scripts/package-vps.sh` and the runbook
   `docs/VPS_DEPLOYMENT.md`.
-- **Verified by automated tests (165 assertions, all passing):**
+- **Verified by automated tests (194 assertions, all passing):**
   `tests/nginx-live-test.sh` loads the shipped vhosts into a **real nginx 1.24.0**
   (built from source for this verification) and asserts on live HTTP responses:
   secret-file denies, no PHP source disclosure, ACME challenge reachable over
   plain HTTP, redirect preserving path+query, pretty-URL and `/tools/`
   front-controller routing, exactly one `Cache-Control`, security headers
   surviving nested `add_header` locations, `X-Forwarded-*` reaching the Node
-  app, and HTTP/2 (43). Plus `smoke-test.sh` (76), `setup-dry-run.sh` (33, the
+  app, and HTTP/2 (43). `tests/deploy-migrate-test.sh` (23) runs the compiled
+  application the way a deploy does: the real migration runner against a real
+  database, the documented quarantine override, and the systemd entrypoint
+  booted over TCP. Plus `smoke-test.sh` (82), `setup-dry-run.sh` (33, the
   provisioning script end to end with stubbed system commands), `gate-test.sh`
   (8, proving the final gate rejects ionCube-less / PHP 8.3 / missing-extension
   hosts) and `tls-check-test.sh` (5). `.github/workflows/vps-stack.yml` runs all
   of them on every push.
+  - Two deploy blockers were found and fixed by that last harness, not by review:
+    (a) a fresh production database applied **zero** migrations, because
+    quarantined `0041` has pending dependents and the runner fails closed —
+    `deploy.sh` now reports this and forwards `AUTHORIZED_MIGRATIONS`;
+    (b) the `cloudhost247-node` unit started the cPanel Passenger bootstrap
+    `./server.js`, which compiles in-process, instead of the compiled
+    `dist/src/server.js`. `/ready` also now checks the schema instead of only
+    connection reachability (`SELECT 1` passes against an empty database).
 - **VPS staging verification: BLOCKED — NOT PERFORMED.** No Ubuntu 24.04 VPS
   (or WHMCS licence) has been available in this environment, so nothing in
   Appendix C of `docs/VPS_DEPLOYMENT.md` is checked off, and no

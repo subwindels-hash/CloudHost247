@@ -2,12 +2,12 @@
  * PostgreSQL connection pool.
  *
  * Works against:
- *   - PostgreSQL provided directly on the cPanel account (if available), or
+ *   - the local PostgreSQL 16 instance on the VPS, or
  *   - An external/managed PostgreSQL provider (Supabase, RDS, Neon, DigitalOcean, etc.)
  * selected purely by DATABASE_URL. Nothing here hardcodes a host, user, password or database
  * name — see docs/CPANEL_DEPLOYMENT.md section "Database" for how to obtain DATABASE_URL.
  *
- * cPanel shared hosting note: pool size is intentionally small and configurable
+ * VPS note: pool size stays small and configurable
  * (DATABASE_POOL_MAX) because shared hosting / small managed Postgres plans usually cap the
  * number of concurrent connections per account.
  */
@@ -38,7 +38,8 @@ export function getPool(env: Env): Pool {
   if (!pool) {
     pool = new Pool(buildPoolConfig(env));
     // Prevent unhandled 'error' events (emitted on idle client errors, e.g. connection drops)
-    // from crashing the whole Passenger-managed process.
+    // from crashing the whole process. On the VPS this is a systemd unit, so an unhandled error
+    // means a hard restart and a 502 from Nginx until it comes back.
     pool.on('error', (err) => {
       // eslint-disable-next-line no-console
       console.error('[db] unexpected idle client error', err.message);
@@ -73,6 +74,34 @@ export async function isDatabaseReachable(
       new Promise((_, reject) => setTimeout(() => reject(new Error('db check timeout')), timeoutMs)),
     ]);
     return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Schema probe used by /ready. `SELECT 1` answers "is the server accepting connections"; it does
+ * NOT answer "can this process serve traffic", because a database with an empty schema accepts
+ * connections just fine. A deploy that skipped or refused its migrations (see the quarantine gate
+ * documented in docs/VPS_DEPLOYMENT.md §6) leaves exactly that state, and a readiness check that
+ * stays green through it guarantees the failure surfaces to a customer instead of to the operator.
+ *
+ * Resolves true only when the migrations ledger itself exists — every real table is created by a
+ * migration, so its presence is a cheap, version-agnostic proof that migrations ran. Never throws.
+ */
+export async function isSchemaPresent(
+  env: Env,
+  timeoutMs = 3000,
+  overridePool?: Queryable,
+): Promise<boolean> {
+  const p = overridePool ?? getPool(env);
+  try {
+    const result = await Promise.race([
+      p.query(`SELECT to_regclass('public.schema_migrations') AS ledger`),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('schema check timeout')), timeoutMs)),
+    ]);
+    const rows = (result as { rows?: Array<Record<string, unknown>> }).rows ?? [];
+    return Boolean(rows[0]?.ledger);
   } catch {
     return false;
   }

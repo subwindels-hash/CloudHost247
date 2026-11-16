@@ -17,6 +17,8 @@
 # Environment overrides:
 #   APP_ROOT=/opt/cloudhost247 SRC_DIR=<repo checkout>
 #   SKIP_BUILD=1 (restart only, no rebuild)
+#   AUTHORIZED_MIGRATIONS=0041  (comma-separated quarantine versions to apply;
+#                               REQUIRED on a fresh database — see below)
 set -euo pipefail
 
 APP_ROOT="${APP_ROOT:-/opt/cloudhost247}"
@@ -87,8 +89,43 @@ log "Running database migrations (status → verify → up → verify)"
 sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm run migrate:status"
 sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm run migrate:verify" \
   || die "Migration checksum drift detected. Do NOT continue. Investigate with 'npm run migrate:status' (docs/VPS_DEPLOYMENT.md §9)."
-sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && CONFIRM_MIGRATION=yes npm run migrate" \
-  || die "Migration failed. Services were NOT restarted; the previous build is still live."
+
+# A production migration run REFUSES to apply anything while a quarantined
+# migration (currently 0041) is pending and has pending dependents — it fails
+# closed before executing any DDL rather than committing a partial upgrade.
+# On a fresh database that is every migration, so the schema would stay empty
+# and the app would serve 503s over a nonexistent schema. Capture the output so
+# the operator gets the real reason instead of "migration failed".
+MIGRATE_OUT="$(mktemp)"
+if ! sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && CONFIRM_MIGRATION=yes ${AUTHORIZED_MIGRATIONS:+AUTHORIZED_MIGRATIONS=${AUTHORIZED_MIGRATIONS}} npm run migrate" 2>&1 | tee "${MIGRATE_OUT}"; then
+  if grep -qi 'quarantin' "${MIGRATE_OUT}"; then
+    QUARANTINED_IDS="$(grep -oiE '[0-9]{4} \([^)]+\) is quarantined' "${MIGRATE_OUT}" \
+      | grep -oE '^[0-9]{4}' | sort -u | tr '\n' ' ')"
+    [[ -n "${QUARANTINED_IDS}" ]] || QUARANTINED_IDS="$(grep -oE '\b00[0-9]{2}\b' "${MIGRATE_OUT}" | sort -u | tr '\n' ' ')"
+    rm -f "${MIGRATE_OUT}"
+    die "Migrations are blocked by a standing quarantine, not by a SQL error.
+
+  The pending quarantine rule(s) affect: ${QUARANTINED_IDS:-see output above}
+  Recording the refusal is correct behaviour — the runner fails closed rather
+  than half-upgrading the schema. Resolve it deliberately:
+
+    a) Review the standing restriction in docs/NODE_PLATFORM_STATUS.md
+       ('Standing restrictions') and confirm the artifacts are authorized.
+
+    b) Apply them explicitly for this run (one line):
+
+         sudo AUTHORIZED_MIGRATIONS=<comma-separated versions> bash infrastructure/vps/scripts/deploy.sh
+
+       e.g. AUTHORIZED_MIGRATIONS=0041 for a fresh database — 0042, 0043, 0047,
+       0048, 0049, 0051, 0052, 0054, 0056 and 0059 depend on it.
+
+  Nothing was restarted; the previous build is still live and the schema is
+  unchanged. See docs/VPS_DEPLOYMENT.md §9."
+  fi
+  rm -f "${MIGRATE_OUT}"
+  die "Migration failed for a reason other than quarantine (see the SQL error above). Services were NOT restarted; the previous build is still live."
+fi
+rm -f "${MIGRATE_OUT}"
 sudo -u cloudhost247 bash -c "cd ${APP_ROOT} && npm run migrate:verify"
 
 log "Restarting systemd services"

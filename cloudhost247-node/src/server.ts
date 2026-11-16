@@ -1,11 +1,13 @@
 /**
- * Production/development server entry point (compiled to dist/src/server.js and loaded by the
- * repository-root server.js, which is what cPanel Passenger/Application Manager is configured
- * to start — see docs/CPANEL_DEPLOYMENT.md).
+ * Production/development server entry point. Compiled to dist/src/server.js, which is what the
+ * `cloudhost247-node` systemd unit starts on the VPS (see infrastructure/vps/systemd/).
  *
- * Port binding: cPanel's Node.js Application Manager (Passenger) assigns and injects PORT (or a
- * Unix domain socket) into the process environment and reverse-proxies Apache/LiteSpeed traffic to
- * it. We must always bind to whatever PORT/socket is provided and never hardcode a production port.
+ * It can also be loaded by the repository-root server.js, the legacy Passenger bootstrap used for
+ * the documented cPanel fallback (docs/CPANEL_DEPLOYMENT.md). systemd does not use that path.
+ *
+ * Port binding: the systemd unit injects PORT (default 3000; Nginx proxies 127.0.0.1:3000) or a
+ * unix domain socket into the process environment and reverse-proxies traffic to it. We must
+ * always bind to whatever PORT/socket is provided and never hardcode a production port.
  */
 import http from 'node:http';
 import path from 'node:path';
@@ -17,7 +19,7 @@ import type { Queryable } from './db/types';
 import { HttpError } from './lib/errors';
 
 // Load .env from <APP_ROOT>/.env first (regardless of cwd), then fallback to cwd/.env.
-// dotenv never overwrites variables already injected by cPanel / Passenger.
+// dotenv never overwrites variables already injected by the unit's Environment= entries.
 dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') });
 dotenv.config();
 
@@ -35,7 +37,7 @@ function escapeHtml(input: string): string {
 }
 
 /**
- * Explicit fail-closed database handle used when DATABASE_URL is not yet configured on cPanel.
+ * Explicit fail-closed database handle used when DATABASE_URL is not yet configured.
  * Public pages, navigation, legal docs, and stateless tools remain online (200 OK), while any
  * database-backed endpoint returns an honest 503 DATABASE_NOT_CONFIGURED JSON response rather than
  * crashing the entire Node worker with a host-level 503 error page.
@@ -134,7 +136,7 @@ function startConfigDiagnosticServer(err: EnvValidationError): Promise<http.Serv
       '<h1>Environment Configuration Invalid</h1>' +
       '<p>The Node.js process is running, but one or more environment variables failed validation:</p>' +
       `<div class="card"><ul>${issueItems}</ul></div>` +
-      '<p>Update these values in <strong>cPanel &rarr; Setup Node.js App &rarr; Environment variables</strong> (or <code>.env</code>), then click <strong>Restart</strong>.</p>' +
+      '<p>Update these values in <strong><code>/opt/cloudhost247/.env</code></strong>, then run <strong><code>sudo systemctl restart cloudhost247-node</code></strong>.</p>' +
       '</main></body></html>';
 
     res.writeHead(503, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -212,7 +214,7 @@ export async function startServer(): Promise<ServerHandle> {
     }
   };
 
-  // cPanel/Passenger sends SIGTERM on restart/deploy; handle it gracefully so in-flight requests
+  // systemd sends SIGTERM on restart/deploy; handle it gracefully so in-flight requests
   // finish and the DB pool is closed cleanly rather than the process being hard-killed.
   process.once('SIGTERM', () => void shutdown('SIGTERM'));
   process.once('SIGINT', () => void shutdown('SIGINT'));

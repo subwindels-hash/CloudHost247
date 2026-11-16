@@ -1,22 +1,33 @@
 # CloudHost247 — Node platform (Fastify API + SPA) under systemd.
-# Replaces cPanel Passenger/Application Manager on the VPS.
 # The app binds 0.0.0.0:$PORT (default 3000); Nginx proxies 127.0.0.1:3000.
 # __APP_ROOT__ / __APP_USER__ are rendered by setup-ubuntu-24.04.sh.
 [Unit]
 Description=CloudHost247 Node platform (Fastify API + SPA)
 After=network.target postgresql.service
 Wants=postgresql.service
+# Do not crash-loop forever on a bad build: systemd gives up after 5 starts in
+# 60s and leaves the unit failed, which healthcheck.sh and the operator can see.
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Service]
 Type=simple
 User=__APP_USER__
 Group=__APP_USER__
 WorkingDirectory=__APP_ROOT__
-# server.js is the Passenger-compatible entrypoint; it works identically under
-# systemd (it just starts the compiled Fastify app on $PORT). DISABLE_AUTO_BUILD
-# is set so a missing dist/ fails fast instead of attempting a server-side build
-# (builds happen in deploy.sh with full devDependencies).
-ExecStart=/usr/bin/node server.js
+# Run the compiled application directly.
+#
+# NOT ./server.js: that file is the cPanel Passenger / LiteSpeed bootstrap. It
+# binds an HTTP server before the app exists, then compiles TypeScript and Vite
+# in-process on first boot — machinery that only exists to survive Passenger's
+# startup timeout. Under systemd it is unnecessary and harmful: a missing dist/
+# would be silently rebuilt with production devDependencies absent (or reported
+# as "starting" on /health), and `npm ci && npm run build` already runs in
+# deploy.sh before this unit is restarted. Running the compiled entrypoint means
+# a broken build fails immediately and visibly instead of half-starting.
+ExecStartPre=/usr/bin/test -f __APP_ROOT__/dist/src/server.js
+ExecStart=/usr/bin/node dist/src/server.js
+
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=30
@@ -25,7 +36,6 @@ KillSignal=SIGTERM
 Environment=NODE_ENV=production
 Environment=PORT=3000
 Environment=HOST=0.0.0.0
-Environment=DISABLE_AUTO_BUILD=1
 EnvironmentFile=-__APP_ROOT__/.env
 
 # Hardening (the app needs no shell, no root, no extra capabilities).

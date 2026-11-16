@@ -45,6 +45,7 @@ required=(
   tests/smoke-test.sh
   tests/gate-test.sh
   tests/nginx-live-test.sh
+  tests/deploy-migrate-test.sh
   cron/cloudhost247.cron
   logrotate/cloudhost247
   fail2ban/jail.local
@@ -66,6 +67,7 @@ shell_scripts=(
   "${VPS_DIR}/tests/tls-check-test.sh"
   "${VPS_DIR}/tests/gate-test.sh"
   "${VPS_DIR}/tests/nginx-live-test.sh"
+  "${VPS_DIR}/tests/deploy-migrate-test.sh"
   "${VPS_DIR}/tests/setup-dry-run.sh"
   "${REPO_ROOT}/cloudhost247-node/scripts/package-vps.sh"
 )
@@ -106,8 +108,22 @@ grep -q 'X-Forwarded-Proto' "${VPS_DIR}/nginx/cloudhost247-node.conf" \
 
 echo
 echo "[6] systemd units are consistent with the deploy layout"
-grep -q 'ExecStart=/usr/bin/node server.js' "${VPS_DIR}/systemd/cloudhost247-node.service" \
-  && pass "node unit starts server.js" || fail "node unit does not start server.js"
+grep -q 'ExecStart=/usr/bin/node dist/src/server.js' "${VPS_DIR}/systemd/cloudhost247-node.service" \
+  && pass "node unit starts the compiled entrypoint (dist/src/server.js)" \
+  || fail "node unit does not start dist/src/server.js"
+# The cPanel Passenger bootstrap (./server.js) must not be the VPS entrypoint: it
+# binds a socket and compiles in-process before the app exists.
+if grep -qE 'ExecStart=/usr/bin/node (server\.js|\./server\.js)$' "${VPS_DIR}/systemd/cloudhost247-node.service"; then
+  fail "node unit still starts the cPanel Passenger bootstrap (server.js)"
+else
+  pass "node unit does not use the cPanel Passenger bootstrap"
+fi
+grep -q 'ExecStartPre=/usr/bin/test -f __APP_ROOT__/dist/src/server.js' "${VPS_DIR}/systemd/cloudhost247-node.service" \
+  && pass "node unit fails fast if the build is missing (ExecStartPre guard)" \
+  || fail "node unit has no ExecStartPre build guard"
+grep -q 'DISABLE_AUTO_BUILD' "${VPS_DIR}/systemd/cloudhost247-node.service" \
+  && fail "node unit still carries the Passenger auto-build flag" \
+  || pass "node unit carries no Passenger auto-build flag"
 grep -q 'dist/src/worker/main.js' "${VPS_DIR}/systemd/cloudhost247-worker.service" \
   && pass "worker unit runs the compiled worker" || fail "worker unit entrypoint wrong"
 for unit in cloudhost247-node cloudhost247-worker; do

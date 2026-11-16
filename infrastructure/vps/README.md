@@ -35,7 +35,7 @@ infrastructure/vps/
 │   ├── www.conf                 ← PHP-FPM pool (www-data)
 │   └── zz-cloudhost247.ini      ← WHMCS upload/memory/time limits
 ├── systemd/
-│   ├── cloudhost247-node.service    ← Fastify API + SPA (node server.js)
+│   ├── cloudhost247-node.service    ← Fastify API + SPA (node dist/src/server.js)
 │   └── cloudhost247-worker.service  ← deployment worker (persistent)
 ├── tests/
 │   ├── smoke-test.sh            ← offline validation of every artefact (run in CI)
@@ -109,13 +109,20 @@ Three offline harnesses run in CI (`.github/workflows/vps-stack.yml`):
 | Harness | Proves | Assertions |
 |---|---|---|
 | `tests/nginx-live-test.sh` | against a **running** nginx 1.24: secret denies, no PHP source disclosure, ACME reachable over HTTP, redirect keeps path+query, pretty-URL and `/tools/` routing, one `Cache-Control`, header inheritance, `X-Forwarded-*`, HTTP/2 | 43 |
-| `tests/smoke-test.sh` | every artefact exists/parses, PHP 8.2 not 8.3, proxy headers, systemd user+group, every placeholder rendered, backup auth, docs links | 76 |
+| `tests/deploy-migrate-test.sh` | a deploy actually **lands**: the migration runner refuses on a fresh production DB (quarantined 0041), the documented override applies all 104 migrations into 264 tables, a re-run is a no-op, `deploy.sh` diagnoses the refusal correctly, and the systemd entrypoint `node dist/src/server.js` boots over TCP, serves `/health`, 503s `/ready` without crashing, and exits on SIGTERM | 23 |
+| `tests/smoke-test.sh` | every artefact exists/parses, PHP 8.2 not 8.3, proxy headers, systemd user+group, compiled (not Passenger) entrypoint, every placeholder rendered, backup auth, docs links | 82 |
 | `tests/setup-dry-run.sh` | the provisioning script runs end to end with stubbed system commands and renders every template (incl. UFW ordering, ionCube fallback) | 33 |
 | `tests/gate-test.sh` | the provisioning gate **rejects** a host lacking ionCube, on PHP 8.3, or missing a required extension | 8 |
 | `tests/tls-check-test.sh` | `healthcheck.sh` classifies valid / expiring / missing / bootstrap-self-signed certificates correctly | 5 |
 
 `nginx-live-test.sh` needs root and is destructive to `/etc/nginx`, so it only
 runs in a disposable container/runner — never on a live host.
+
+`deploy-migrate-test.sh` needs `cloudhost247-node` built (`npm ci && npm run
+build`); without it, it SKIPs loudly rather than passing vacuously. It uses
+**PGlite** (PostgreSQL compiled to WASM) as the engine, so it proves the schema
+and the runner, not `pg`'s TCP transport — a real PostgreSQL 16 instance is
+still only exercised on a live host.
 
 `setup-dry-run.sh` rewrites only the paths and `SRC_DIR` in a **copy** of the
 script (nothing on the host is touched) and asserts the rendered output.

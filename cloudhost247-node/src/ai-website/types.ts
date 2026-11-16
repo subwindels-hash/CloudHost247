@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
  *
  * Everything in this module is deliberately dependency-free and deterministic: the crawler, the
  * indexer, the retriever and the answer composer all run it, and every one of them has to behave
- * identically in production (PostgreSQL on cPanel) and in the test suite (pglite). No network
+ * identically in production (PostgreSQL 16 on the VPS) and in the test suite (pglite). No network
  * access, no clock reads, no randomness.
  */
 

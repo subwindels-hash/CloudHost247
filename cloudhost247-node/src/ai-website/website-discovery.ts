@@ -20,7 +20,7 @@ import {
  * public websites are built from. That is a deliberate choice, documented in
  * docs/AI_WEBSITE_INTELLIGENCE.md §2 (D5): crawling the live site from the application would mean
  * the Node process HTTP-fetching its own domain hundreds of times per sync — unreliable behind
- * Passenger, wasteful, and impossible to run inside the worker's leased cycle.
+ * request, wasteful, and impossible to run inside the worker's leased cycle.
  *
  * What discovery adds on top of the raw projection:
  *   • crawl/publication policy — the registry's own `sitemap.exclude` / `excludePhp` rules, plus

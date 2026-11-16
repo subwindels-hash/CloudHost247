@@ -1,9 +1,9 @@
 /**
  * Standalone environment-validation CLI: `npm run env:check`.
  *
- * Intended to be run from a cPanel terminal (or "Run NPM/Node command" in Application Manager)
+ * Intended to be run over SSH on the VPS (or from the deploy script) so that a
  * right after configuring environment variables, and before starting/restarting the app, so
- * misconfiguration is caught with a clear message instead of a crash-looping Passenger process.
+ * misconfiguration is caught with a clear message instead of a crash-looping systemd unit.
  */
 import 'dotenv/config';
 import { loadEnv, EnvValidationError } from './env';

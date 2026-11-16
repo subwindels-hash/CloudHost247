@@ -31,11 +31,36 @@ server, PHP runtime, and process manager differ.
 >   will not boot.
 > - Backup/restore use Ubuntu-correct database auth; every placeholder is
 >   rendered; no recursive copy can leak repo files into the webroot.
+> - **A deploy actually lands.** The compiled Node app is built with the same
+>   `npm ci && npm run build` that `deploy.sh` runs, the real migration runner is
+>   executed against a real database, and the systemd entrypoint
+>   (`node dist/src/server.js`) is booted over TCP and probed — 23 assertions.
+>   This found and closed two genuine deploy blockers:
+>   1. `deploy.sh` applied **no migrations at all** on a fresh database, because
+>      quarantined migration `0041` has pending dependents and the runner fails
+>      closed. The schema stayed empty — see "First deploy: the quarantine gate"
+>      in §6. `deploy.sh` now diagnoses this instead of reporting "migration
+>      failed", and forwards `AUTHORIZED_MIGRATIONS`.
+>   2. The systemd unit started the cPanel Passenger bootstrap (`./server.js`),
+>      not the compiled app. Under systemd that bootstrap binds a port, then
+>      compiles TypeScript and Vite in-process before the app exists — machinery
+>      that exists only to survive Passenger's startup timeout, and a way to end
+>      up serving a build that never ran `npm ci`. The unit now runs
+>      `node dist/src/server.js` behind an `ExecStartPre` guard.
+> - `/ready` now verifies the **schema**, not just the connection. It previously
+>   ran `SELECT 1`, which succeeds against a completely empty database, so a
+>   deploy that skipped migrations reported ready while every real query failed.
 >
 > **NOT verified:** none of this has run on a real Ubuntu 24.04 VPS with a
 > licensed WHMCS. No `apt-get` install, `systemd` start, MySQL/PostgreSQL
-> creation, Certbot issuance, or WHMCS installer run has been executed. The
-> ionCube download host was unreachable from the verification environment, so
+> creation, Certbot issuance, or WHMCS installer run has been executed.
+> The database engine in the automated tests is PGlite (PostgreSQL compiled to
+> WASM), so the schema and the migration runner are covered but `pg`'s real TCP
+> transport to PostgreSQL 16 is not. The systemd unit was exercised by running
+> its exact `ExecStart` command line directly — **not** via `systemctl start` — so
+> unit semantics (`ProtectSystem`, `ReadWritePaths`, `EnvironmentFile`) are
+> unproven. The ionCube download host was unreachable from the verification
+> environment, so
 > that URL is unconfirmed (the script now has an offline fallback). **Complete
 > Appendix C on your real VPS before calling this production-ready.** WHMCS core
 > is commercial software and is **not** in this repo; download it from whmcs.com.
@@ -233,17 +258,64 @@ CREDENTIAL_ENCRYPTION_KEY=<node -e "console.log(require('crypto').randomBytes(32
 On the VPS, `PORT=3000` is set **explicitly** (unlike cPanel, where Passenger
 injects it). `DATABASE_SSL=false` is correct for localhost PostgreSQL.
 
-Then deploy:
+Then deploy. **On a fresh database the first run needs one extra variable** — see
+"First deploy: the quarantine gate" below:
 
 ```bash
 cd /opt/cloudhost247-src
-sudo bash infrastructure/vps/scripts/deploy.sh
+sudo AUTHORIZED_MIGRATIONS=0041 bash infrastructure/vps/scripts/deploy.sh
 ```
 
 This syncs `cloudhost247-node/` → `/opt/cloudhost247`, runs `npm ci` +
 `npm run build`, applies migrations with `CONFIRM_MIGRATION=yes`, verifies
 checksums, restarts `cloudhost247-node` + `cloudhost247-worker`, reloads
 Nginx, and runs the healthcheck.
+
+### First deploy: the quarantine gate
+
+Migration `0041` is **quarantined** by a standing restriction in
+`docs/NODE_PLATFORM_STATUS.md` ("prepared and tested only, NOT authorized for
+production execution"). The migration runner enforces that restriction rather
+than trusting the documentation: a production run skips quarantined artifacts,
+and if a *pending* migration depends on one it refuses the **entire** run
+before executing any DDL, so a production schema is never left half-upgraded.
+
+On a fresh database `0041` and its ten dependents (`0042`, `0043`, `0047`,
+`0048`, `0049`, `0051`, `0052`, `0054`, `0056`, `0059`) are all pending, so the
+first production migration would apply **nothing** and exit non-zero. The
+application would then start against an empty schema. `deploy.sh` detects that
+refusal specifically and stops with:
+
+```
+Migrations are blocked by a standing quarantine, not by a SQL error.
+  The pending quarantine rule(s) affect: 0041
+```
+
+To proceed you must authorize the quarantined artifact explicitly, for that run
+only:
+
+```bash
+sudo AUTHORIZED_MIGRATIONS=0041 bash infrastructure/vps/scripts/deploy.sh
+```
+
+Authorization is per-run and never persisted — a later `deploy.sh` without the
+variable asks again. Removing the quarantine itself is a **compliance decision,
+not a deployment step**: it means editing `QUARANTINED_MIGRATIONS` in
+`cloudhost247-node/database/migrate.ts` and documenting that the artifacts are
+authorized. Do not do that merely to make a deploy go green.
+
+Verify afterwards:
+
+```bash
+sudo -u cloudhost247 bash -c 'cd /opt/cloudhost247 && npm run migrate:status'
+curl -fsS localhost:3000/ready
+```
+
+`/ready` returns 200 only when the database is reachable *and* the migration
+ledger (`schema_migrations`) exists. A host that answers `/health` but returns
+503 from `/ready` with `{"checks":{"database":"ok","schema":"missing"}}` has a
+database that was never migrated — which is exactly what the quarantine gate
+above produces if it is ignored.
 
 Issue the Node certificate:
 
@@ -386,9 +458,11 @@ journalctl -u cloudhost247-worker -f
 
 ## Appendix B — cPanel → VPS differences
 
-- **Passenger → systemd:** `cloudhost247-node.service` runs `node server.js`
-  with `PORT=3000` and `DISABLE_AUTO_BUILD=1`. No Application Manager, no
-  `PassengerAppRoot`/`PassengerNodejs` directives.
+- **Passenger → systemd:** `cloudhost247-node.service` runs
+  `node dist/src/server.js` (the compiled app, not the `server.js` Passenger
+  bootstrap) with `PORT=3000`, an `ExecStartPre` guard that fails the unit if
+  `dist/` is missing, and `Restart=on-failure`. No Application Manager, no
+  `PassengerAppRoot`/`PassengerNodejs` directives, no in-process build.
 - **Apache `.htaccess` → Nginx:** WHMCS pretty URLs and `/tools/` rewrites are
   translated to `try_files` in the Nginx vhosts. `platform/.htaccess` and
   `infrastructure/litespeed/webroot-hardening.htaccess` are **not** used on
@@ -409,7 +483,11 @@ journalctl -u cloudhost247-worker -f
 - [ ] WHMCS installer completed; `install/` deleted; `SystemURL` = HTTPS
 - [ ] `crons/cron.php` and `templates/orderforms/standard_cart/` still present after the overlay
 - [ ] All §7 modules activated; payment gateways in test mode
-- [ ] Node `/health` + `/ready` = 200; WHMCS `/` = 200/302
+- [ ] Node `/health` = 200; `/ready` = 200 **with `"schema":"ok"`** (a 503 here means
+      migrations did not apply — see §6 "First deploy: the quarantine gate")
+- [ ] `npm run migrate:status` reports no pending migrations; any `AUTHORIZED_MIGRATIONS`
+      used on this host is recorded in the change log
+- [ ] WHMCS `/` = 200/302
 - [ ] `healthcheck.sh` = ALL CHECKS PASSED
 - [ ] WHMCS cron running (check `whmcs-cron.log`); worker service active
 - [ ] `backup.sh` created + `restore.sh` dry-run verified; restore tested on staging

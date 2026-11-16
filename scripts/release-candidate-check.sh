@@ -221,4 +221,8 @@ python3 scripts/audit-builder-widget-classes.py
 bash infrastructure/vps/tests/smoke-test.sh
 bash infrastructure/vps/tests/tls-check-test.sh
 bash infrastructure/vps/tests/gate-test.sh
+# Proves a deploy actually lands a schema and a serving process, not just that
+# the artefacts look right. Runs the compiled app if cloudhost247-node is built
+# (skips with a loud SKIP otherwise).
+bash infrastructure/vps/tests/deploy-migrate-test.sh
 echo 'Release-candidate source verification passed.'
