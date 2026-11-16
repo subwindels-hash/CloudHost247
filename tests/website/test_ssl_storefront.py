@@ -25,6 +25,7 @@ class SslStorefrontTest(unittest.TestCase):
             "orWhere('g.name', 'like', '%certificate%')",
             "orWhere('p.servertype', 'ssl')",
             'WhmcsDataSource',
+            '$catalog->available()',
             'CartLinks::product',
             "setTemplate('ssl-certificate')",
         ):

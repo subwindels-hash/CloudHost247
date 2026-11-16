@@ -70,6 +70,11 @@ try {
         ->get();
 
     $catalog = new WhmcsDataSource();
+    if (!$catalog->available()) {
+        // A catalogue that cannot be read is not an empty catalogue: say so
+        // instead of telling the visitor no certificate plan is published.
+        throw new \RuntimeException($catalog->unavailableReason());
+    }
 
     foreach ($rows as $row) {
         $productId = (int) $row->id;
