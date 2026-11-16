@@ -4,7 +4,7 @@
 # Unlike cPanel shared hosting (which can kill `npm run build` under CloudLinux
 # LVE limits), a VPS with root can build on the server. This script is for
 # operators who prefer to build locally/in CI and ship only runtime files —
-# the same pre-built philosophy as scripts/package-cpanel.sh, but with the VPS
+# a pre-built release layout intended for the Ubuntu 24.04 VPS target, with the
 # layout (systemd + Nginx, PORT=3000, no Passenger).
 #
 # Usage (from cloudhost247-node/):   bash scripts/package-vps.sh
@@ -32,7 +32,7 @@ cp -R dist public manifests config "${STAGE}/"
 cp -R database/migrations "${STAGE}/database/"
 cp server.js package.json package-lock.json .env.example "${STAGE}/"
 # The VPS guide ships with the package so server.js error links resolve on the server.
-cp ../docs/VPS_DEPLOYMENT.md "${STAGE}/docs/" 2>/dev/null || cp docs/CPANEL_DEPLOYMENT.md "${STAGE}/docs/" 2>/dev/null || true
+cp ../docs/VPS_DEPLOYMENT.md "${STAGE}/docs/" 2>/dev/null || true
 cat > "${STAGE}/DEPLOY.txt" <<'EOF'
 CloudHost247 VPS release package (Ubuntu 24.04 + Nginx + systemd)
 ================================================================

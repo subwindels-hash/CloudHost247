@@ -1,5 +1,11 @@
 # CloudHost247 — Operational Readiness Report (Phase 5, 2026-11-09)
 
+> **Historical record (2026-11-15).** The cPanel/Passenger deployment path described in this
+> document has been **retired**. This project deploys to an Ubuntu 24.04 VPS only — see
+> `docs/VPS_DEPLOYMENT.md`. The text below is preserved unchanged as the record of what was
+> measured at the time; do not follow it as instructions.
+
+
 Every row states **where** the capability is implemented and how it was verified this session —
 or explicitly what is missing. No secrets appear in any log or report (redaction is itself
 verified below).

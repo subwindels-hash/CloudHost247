@@ -1,5 +1,11 @@
 # CloudHost247 — Repository-Wide Verification & Completion Report (2026-11-09)
 
+> **Historical record (2026-11-15).** The cPanel/Passenger deployment path described in this
+> document has been **retired**. This project deploys to an Ubuntu 24.04 VPS only — see
+> `docs/VPS_DEPLOYMENT.md`. The text below is preserved unchanged as the record of what was
+> measured at the time; do not follow it as instructions.
+
+
 Branch: `arena/fe9b2088-cloudhost247`
 Baseline: `012106ded6a033f1ae7488394323b5f9fcb4907a` (Merge PR #109)
 Working tree at start: clean. Toolchain: Node 22.22.3 / npm 10.9.8 / Python 3.11.2;

@@ -1,5 +1,11 @@
 # CloudHost247 — Staging Database Backup & Recovery Report (2026-11-09)
 
+> **Historical record (2026-11-15).** The cPanel/Passenger deployment path described in this
+> document has been **retired**. This project deploys to an Ubuntu 24.04 VPS only — see
+> `docs/VPS_DEPLOYMENT.md`. The text below is preserved unchanged as the record of what was
+> measured at the time; do not follow it as instructions.
+
+
 Target: staging database = embedded Postgres (PGlite) backing the dev/staging stack —
 **221 tables, 92/92 migrations applied**. Exercise executed live; raw evidence:
 `docs/staging/db-recovery-evidence-2026-11-09.json` (runner: `scripts/staging/db-recovery-exercise.mjs`).

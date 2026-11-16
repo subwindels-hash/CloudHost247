@@ -15,18 +15,17 @@ Type=simple
 User=__APP_USER__
 Group=__APP_USER__
 WorkingDirectory=__APP_ROOT__
-# Run the compiled application directly.
-#
-# NOT ./server.js: that file is the cPanel Passenger / LiteSpeed bootstrap. It
-# binds an HTTP server before the app exists, then compiles TypeScript and Vite
-# in-process on first boot — machinery that only exists to survive Passenger's
-# startup timeout. Under systemd it is unnecessary and harmful: a missing dist/
-# would be silently rebuilt with production devDependencies absent (or reported
-# as "starting" on /health), and `npm ci && npm run build` already runs in
-# deploy.sh before this unit is restarted. Running the compiled entrypoint means
-# a broken build fails immediately and visibly instead of half-starting.
+# Runs the compiled application. deploy.sh builds it with `npm ci && npm run
+# build` before this unit is restarted, so a missing/partial build is a deploy
+# fault, and ExecStartPre makes it fail loudly instead of half-starting.
 ExecStartPre=/usr/bin/test -f __APP_ROOT__/dist/src/server.js
-ExecStart=/usr/bin/node dist/src/server.js
+# --max-old-space-size is the VPS equivalent of what the old Passenger bootstrap
+# did with UV_THREADPOOL_SIZE/GOMAXPROCS: bound memory so a leak triggers a
+# clean OOM restart (Restart=on-failure) instead of the kernel OOM-killer
+# taking down postgres or nginx alongside it. Sized for a 2 GB host; raise it on
+# a larger one. Node's default heap is derived from total system RAM, which on a
+# shared VPS can exceed what this service is actually allowed to use.
+ExecStart=/usr/bin/node --max-old-space-size=512 dist/src/server.js
 
 Restart=on-failure
 RestartSec=5

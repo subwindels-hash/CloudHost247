@@ -1,18 +1,17 @@
 # CloudHost247 — Ubuntu 24.04 VPS Deployment Guide (WHMCS 8.x + Node platform)
 
 **Target:** a plain Linux VPS running **Ubuntu 24.04 LTS (noble)** with root access.
-This guide replaces the cPanel/Passenger target (`docs/CPANEL_DEPLOYMENT.md`) with
-native VPS services. Both targets run the same application code; only the web
-server, PHP runtime, and process manager differ.
+This is the **only** supported deployment target. The cPanel/Passenger path was
+retired on 2026-11-15 (see Appendix B).
 
-| Layer | VPS (this guide) | cPanel (old guide) |
-|---|---|---|
-| Web server / TLS | **Nginx 1.24** + Certbot | Apache + cPanel AutoSSL |
-| WHMCS PHP | **PHP 8.2-FPM** (ondrej/php PPA) + ionCube | cPanel PHP Selector |
-| WHMCS DB | **MySQL 8.0** | cPanel MySQL |
-| Node runtime | **Node.js 22 LTS** + **systemd** | Passenger / Application Manager |
-| Node DB | **PostgreSQL 16** | cPanel PostgreSQL |
-| Firewall / IDS | **UFW** + **fail2ban** | cPHulk |
+| Layer | Choice |
+|---|---|
+| Web server / TLS | **Nginx 1.24** + Certbot |
+| WHMCS PHP | **PHP 8.2-FPM** (ondrej/php PPA) + ionCube |
+| WHMCS DB | **MySQL 8.0** |
+| Node runtime | **Node.js 22 LTS** + **systemd** |
+| Node DB | **PostgreSQL 16** |
+| Firewall / IDS | **UFW** + **fail2ban** |
 
 > **Status — what is verified, and what is not.**
 >
@@ -41,12 +40,13 @@ server, PHP runtime, and process manager differ.
 >      closed. The schema stayed empty — see "First deploy: the quarantine gate"
 >      in §6. `deploy.sh` now diagnoses this instead of reporting "migration
 >      failed", and forwards `AUTHORIZED_MIGRATIONS`.
->   2. The systemd unit started the cPanel Passenger bootstrap (`./server.js`),
->      not the compiled app. Under systemd that bootstrap binds a port, then
->      compiles TypeScript and Vite in-process before the app exists — machinery
->      that exists only to survive Passenger's startup timeout, and a way to end
->      up serving a build that never ran `npm ci`. The unit now runs
->      `node dist/src/server.js` behind an `ExecStartPre` guard.
+>   2. The systemd unit started `./server.js` — the cPanel Passenger bootstrap —
+>      instead of the compiled app. Under systemd that bootstrap binds a port,
+>      then compiles TypeScript and Vite in-process before the app exists:
+>      machinery that only makes sense under Passenger's startup timeout, and a
+>      way to end up serving a build that never ran `npm ci`. The unit now runs
+>      `node dist/src/server.js` behind an `ExecStartPre` guard, and the
+>      bootstrap itself has been deleted (Appendix B).
 >   3. **`npm run build` could not succeed on a VPS at all.** The build writes
 >      `modules/addons/cloudhost247_theme/resources/tools.json` and
 >      `assets/cloudhost247-tools/`, both at `../../` — repo-root paths.
@@ -99,8 +99,8 @@ Nginx (80/443, TLS via Let's Encrypt)
   (API + portal + deployment worker). It is a **separate application** with its
   own PostgreSQL database and `.env` — never copy it into the WHMCS root.
 - **Nginx** is the TLS edge and reverse proxy for both. The Node app binds
-  `0.0.0.0:$PORT` (default 3000) with `trustProxy: true`, so it works unchanged
-  behind Nginx (VPS) or Apache/Passenger (cPanel).
+  `0.0.0.0:$PORT` (default 3000) with `trustProxy: true`, so it expects to sit
+  behind the Nginx vhost shipped in `infrastructure/vps/nginx/`.
 
 ### Why PHP 8.2 and Node 22?
 
@@ -265,8 +265,9 @@ JWT_SECRET=<node -e "console.log(require('crypto').randomBytes(48).toString('hex
 CREDENTIAL_ENCRYPTION_KEY=<node -e "console.log(require('crypto').randomBytes(32).toString('hex'))">
 ```
 
-On the VPS, `PORT=3000` is set **explicitly** (unlike cPanel, where Passenger
-injects it). `DATABASE_SSL=false` is correct for localhost PostgreSQL.
+`PORT=3000` is set explicitly by the systemd unit (`Environment=PORT=3000`), and
+Nginx proxies `127.0.0.1:3000`. `DATABASE_SSL=false` is correct for localhost
+PostgreSQL.
 
 Then deploy. **On a fresh database the first run needs one extra variable** — see
 "First deploy: the quarantine gate" below:
@@ -478,23 +479,35 @@ journalctl -u cloudhost247-worker -f
 | `/var/www/whmcs` | WHMCS core + repo overlay (`install-whmcs.sh`) |
 | `/opt/cloudhost247` | `cloudhost247-node/` (`deploy.sh`) |
 
-## Appendix B — cPanel → VPS differences
+## Appendix B — What this stack replaced
+
+The cPanel/Passenger deployment path was **retired on 2026-11-15**. Removed:
+`docs/CPANEL_DEPLOYMENT.md`, `cloudhost247-node/docs/CPANEL_DEPLOYMENT.md`,
+`cloudhost247-node/scripts/package-cpanel.sh`,
+`infrastructure/litespeed/webroot-hardening.htaccess`, and the 922-line
+`cloudhost247-node/server.js` Passenger bootstrap (which bound a socket, then
+compiled TypeScript in-process to survive Passenger's startup timeout).
+
+The mapping for anyone migrating an existing cPanel install:
 
 - **Passenger → systemd:** `cloudhost247-node.service` runs
-  `node dist/src/server.js` (the compiled app, not the `server.js` Passenger
-  bootstrap) with `PORT=3000`, an `ExecStartPre` guard that fails the unit if
-  `dist/` is missing, and `Restart=on-failure`. No Application Manager, no
-  `PassengerAppRoot`/`PassengerNodejs` directives, no in-process build.
+  `node --max-old-space-size=512 dist/src/server.js` with `PORT=3000`, an
+  `ExecStartPre` guard that fails the unit if `dist/` is missing, and
+  `Restart=on-failure`. No Application Manager, no `PassengerAppRoot`/
+  `PassengerNodejs` directives, no in-process build.
 - **Apache `.htaccess` → Nginx:** WHMCS pretty URLs and `/tools/` rewrites are
-  translated to `try_files` in the Nginx vhosts. `platform/.htaccess` and
-  `infrastructure/litespeed/webroot-hardening.htaccess` are **not** used on
-  the VPS (Nginx ignores `.htaccess`).
+  translated to `try_files` in the Nginx vhosts. `.htaccess` is inert under
+  Nginx and no longer ships.
 - **cPanel PHP Selector → PHP 8.2-FPM:** ondrej/php PPA + ionCube Loader.
 - **cPanel Cron → system cron + systemd:** WHMCS cron every 5 min; Node worker
   as a persistent systemd service (plus a lease-guarded one-shot fallback).
 - **cPanel AutoSSL → Certbot:** `certbot certonly --webroot -w /var/www/letsencrypt`
   for both domains, then `systemctl reload nginx`. The webroot plugin only
   writes certificate files; the hand-tuned vhosts are never rewritten.
+
+> "cPanel hosting" still appears throughout the product catalogue, the pricing
+> pages and `src/control-panels/adapters/`. That is the **product CloudHost247
+> sells**, not the platform it runs on — it must not be removed.
 
 ## Appendix C — Go-live checklist (all must pass)
 

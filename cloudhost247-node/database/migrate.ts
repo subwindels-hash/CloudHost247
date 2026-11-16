@@ -7,7 +7,7 @@
  *   node dist/database/migrate.js up          # apply pending migrations (explicit, controlled)
  *   node dist/database/migrate.js create name # scaffold a new versioned migration file
  *
- * Design goals (docs/CPANEL_DEPLOYMENT.md "Database migrations"):
+ * Design goals (docs/VPS_DEPLOYMENT.md §6):
  *   - Never runs automatically on server startup.
  *   - Each migration runs inside its own transaction (BEGIN/COMMIT/ROLLBACK) so a failure never
  *     leaves the schema half-applied, and a retry after fixing the SQL is safe.

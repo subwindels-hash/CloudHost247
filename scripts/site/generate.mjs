@@ -144,9 +144,9 @@ export const PUBLISHED_DOCS = [
   { file: 'SERVER_PROVISIONING.md', section: 'Services', title: 'Server provisioning' },
   { file: 'SERVER_AGENT.md', section: 'Services', title: 'Server agent' },
   { file: 'PLATFORM_SERVICES_ARCHITECTURE.md', section: 'Services', title: 'Platform services architecture' },
+  { file: 'VPS_DEPLOYMENT.md', section: 'Operations', title: 'VPS deployment (Ubuntu 24.04)' },
   { file: 'PASSKEY.md', section: 'Accounts', title: 'Passkeys and WebAuthn' },
   { file: 'MRZ_DEVELOPER_TOOL.md', section: 'Accounts', title: 'Document tools (MRZ)' },
-  { file: 'CPANEL_DEPLOYMENT.md', section: 'Operations', title: 'cPanel deployment' },
   { file: 'integrations/GOOGLE-ADS.md', section: 'Operations', title: 'Google Ads integration' },
   // docs/NODE_PLATFORM_STATUS.md is deliberately NOT published: it is the internal phase-acceptance
   // ledger and references branch names, pull requests, commit hashes and unexecuted migrations.

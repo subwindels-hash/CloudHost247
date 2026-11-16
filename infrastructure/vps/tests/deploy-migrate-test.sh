@@ -291,9 +291,15 @@ echo
 echo "  systemd entrypoint"
 
 NODE_ENTRY="$(grep -m1 '^ExecStart=' "${REPO_ROOT}/infrastructure/vps/systemd/cloudhost247-node.service" | sed 's/^ExecStart=//')"
+# The unit hardcodes /usr/bin/node, which is where NodeSource puts it on Ubuntu
+# 24.04. Substitute this machine's node so the argv can be executed verbatim.
+NODE_ENTRY="${NODE_ENTRY/#\/usr\/bin\/node/$(command -v node)}"
 echo "${NODE_ENTRY}" | grep -q 'dist/src/server.js' \
   && pass "unit ExecStart points at the compiled entrypoint" \
   || fail "unit ExecStart is not the compiled entrypoint: ${NODE_ENTRY}"
+echo "${NODE_ENTRY}" | grep -q 'dist/src/server.js' \
+  && pass "the unit's real argv is what gets booted below (flags included)" \
+  || fail "cannot derive a bootable argv from the unit"
 
 PORT_UNDER_TEST="$(node -e 'const s=require("net").createServer();s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')"
 LOG="${WORK}/entry.log"
@@ -303,7 +309,7 @@ LOG="${WORK}/entry.log"
     PORT="${PORT_UNDER_TEST}" HOST=127.0.0.1 \
     DATABASE_URL='postgresql://cloudhost247:pw@127.0.0.1:1/cloudhost247' \
     JWT_SECRET="$(printf 'k%.0s' {1..64})" \
-    node dist/src/server.js > "${LOG}" 2>&1 &
+    ${NODE_ENTRY} > "${LOG}" 2>&1 &
   echo $! > "${WORK}/entry.pid"
 )
 

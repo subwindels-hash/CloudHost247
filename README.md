@@ -21,11 +21,13 @@ Nginx + PHP 8.2-FPM + MySQL 8.0 (WHMCS 8.x) and Node.js 22 + PostgreSQL 16
   then [`docs/INSTALLATION-GUIDE.md`](docs/INSTALLATION-GUIDE.md) for WHMCS
   activation/configuration.
 
-The older **cPanel/Apache target remains documented for reference** but is no
-longer the target: [`docs/CPANEL_DEPLOYMENT.md`](docs/CPANEL_DEPLOYMENT.md)
-(Passenger + Application Manager). Both targets run the same application code —
-only the web server, PHP runtime, and process manager differ (see the VPS guide's
-Appendix B migration table).
+**Deployment target: Ubuntu 24.04 VPS.** The cPanel/Passenger deployment path was
+retired on 2026-11-15 — the runbooks, the `package-cpanel.sh` release script and
+the `server.js` Passenger bootstrap have been removed. The only supported target
+is [`docs/VPS_DEPLOYMENT.md`](docs/VPS_DEPLOYMENT.md) (Nginx + PHP 8.2-FPM +
+MySQL 8 + PostgreSQL 16 under systemd). "cPanel hosting" still appears throughout
+the product catalogue and control-panel adapters: CloudHost247 *sells* cPanel
+hosting, it just does not *run on* it.
 
 The site customizations are arranged to match WHMCS paths, but every overlay must be
 reviewed against the target's existing files and operator-owned content. WHMCS core

@@ -1747,6 +1747,15 @@ sub-phase before the next one begins.
   cPanel/Passenger target without changing application code: `server.js` already
   binds `0.0.0.0:$PORT` (default 3000) with `trustProxy: true`, so the same build
   runs behind Nginx instead of Passenger.
+- **Deployment target: VPS only (2026-11-15).** The cPanel/Passenger path is retired
+  and removed from the tree: `docs/CPANEL_DEPLOYMENT.md`, the app-root copy,
+  `cloudhost247-node/scripts/package-cpanel.sh`, the `server.js` Passenger
+  bootstrap (922 lines), `infrastructure/litespeed/`, and the prebuilt cPanel
+  release ZIP. `npm start` now runs `dist/src/server.js`. The product still
+  *sells* cPanel hosting (`src/control-panels/adapters/`, the pricing pages, the
+  marketing copy) — that is commercial content, not deployment infrastructure,
+  and it is untouched. `smoke-test.sh` [11] fails the build if any retired
+  artefact returns.
 - **Artefacts:** `infrastructure/vps/` (provisioning script, Nginx vhosts,
   PHP-FPM pool/ini, systemd units `cloudhost247-node`/`cloudhost247-worker`,
   cron, logrotate, fail2ban jail, and `install-whmcs.sh` / `deploy.sh` /

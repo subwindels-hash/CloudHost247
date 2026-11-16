@@ -10,18 +10,16 @@ COPY cloudhost247-node/tsconfig.json ./
 COPY cloudhost247-node/src ./src
 COPY cloudhost247-node/database ./database
 COPY cloudhost247-node/frontend ./frontend
-COPY cloudhost247-node/server.js ./
 RUN npm run build && npm prune --omit=dev
 
 FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-# The Passenger shim (server.js) is the entrypoint; PORT is injected by the platform.
+# Run the compiled entrypoint. PORT defaults to 3000 and is overridable.
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/public ./public
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/server.js ./
 COPY --from=build /app/package.json ./
 COPY cloudhost247-node/manifests ./manifests
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "dist/src/server.js"]

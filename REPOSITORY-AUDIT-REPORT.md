@@ -1,5 +1,11 @@
 # CloudHost247 Repository Audit Report
 
+> **Historical record (2026-11-15).** The cPanel/Passenger deployment path described in this
+> document has been **retired**. This project deploys to an Ubuntu 24.04 VPS only — see
+> `docs/VPS_DEPLOYMENT.md`. The text below is preserved unchanged as the record of what was
+> measured at the time; do not follow it as instructions.
+
+
 **Date:** 2026-10-13  
 **Branch:** arena/e5e168c8-cloudhost247  
 **Commit:** 668a3523 (Merge PR #83)  

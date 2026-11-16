@@ -108,22 +108,20 @@ grep -q 'X-Forwarded-Proto' "${VPS_DIR}/nginx/cloudhost247-node.conf" \
 
 echo
 echo "[6] systemd units are consistent with the deploy layout"
-grep -q 'ExecStart=/usr/bin/node dist/src/server.js' "${VPS_DIR}/systemd/cloudhost247-node.service" \
+grep -qE 'ExecStart=/usr/bin/node (--[a-z-]+=[0-9]+ )?dist/src/server\.js' "${VPS_DIR}/systemd/cloudhost247-node.service" \
   && pass "node unit starts the compiled entrypoint (dist/src/server.js)" \
   || fail "node unit does not start dist/src/server.js"
-# The cPanel Passenger bootstrap (./server.js) must not be the VPS entrypoint: it
-# binds a socket and compiles in-process before the app exists.
-if grep -qE 'ExecStart=/usr/bin/node (server\.js|\./server\.js)$' "${VPS_DIR}/systemd/cloudhost247-node.service"; then
-  fail "node unit still starts the cPanel Passenger bootstrap (server.js)"
-else
-  pass "node unit does not use the cPanel Passenger bootstrap"
-fi
-grep -q 'ExecStartPre=/usr/bin/test -f __APP_ROOT__/dist/src/server.js' "${VPS_DIR}/systemd/cloudhost247-node.service" \
-  && pass "node unit fails fast if the build is missing (ExecStartPre guard)" \
-  || fail "node unit has no ExecStartPre build guard"
+# The cPanel Passenger bootstrap is retired: the deployment is VPS-only, so
+# there is no host left to run it on.
+[[ -f "${REPO_ROOT}/cloudhost247-node/server.js" ]] \
+  && fail "the retired cPanel Passenger bootstrap (server.js) is back" \
+  || pass "cPanel Passenger bootstrap is gone (VPS-only)"
 grep -q 'DISABLE_AUTO_BUILD' "${VPS_DIR}/systemd/cloudhost247-node.service" \
   && fail "node unit still carries the Passenger auto-build flag" \
   || pass "node unit carries no Passenger auto-build flag"
+grep -q 'ExecStartPre=/usr/bin/test -f __APP_ROOT__/dist/src/server.js' "${VPS_DIR}/systemd/cloudhost247-node.service" \
+  && pass "node unit fails fast if the build is missing (ExecStartPre guard)" \
+  || fail "node unit has no ExecStartPre build guard"
 grep -q 'dist/src/worker/main.js' "${VPS_DIR}/systemd/cloudhost247-worker.service" \
   && pass "worker unit runs the compiled worker" || fail "worker unit entrypoint wrong"
 for unit in cloudhost247-node cloudhost247-worker; do
@@ -209,6 +207,34 @@ if grep -q 'docs/VPS_DEPLOYMENT.md' "${REPO_ROOT}/README.md"; then
 else
   fail "root README does not reference docs/VPS_DEPLOYMENT.md"
 fi
+
+echo
+echo "[11] The cPanel/Passenger deployment path stays retired"
+# The deployment target is VPS-only. These artefacts must not come back: their
+# presence is how a cPanel deploy quietly becomes possible again.
+for gone in \
+  docs/CPANEL_DEPLOYMENT.md \
+  cloudhost247-node/docs/CPANEL_DEPLOYMENT.md \
+  cloudhost247-node/scripts/package-cpanel.sh \
+  cloudhost247-node/server.js \
+  infrastructure/litespeed/webroot-hardening.htaccess; do
+  [[ -e "${REPO_ROOT}/${gone}" ]] \
+    && fail "retired cPanel artefact is back: ${gone}" \
+    || pass "retired: ${gone}"
+done
+# `npm start` must run the compiled app, not a Passenger bootstrap.
+if grep -q '"start": "node dist/src/server.js"' "${REPO_ROOT}/cloudhost247-node/package.json"; then
+  pass "npm start runs the compiled app"
+else
+  fail "npm start does not run dist/src/server.js"
+fi
+grep -q 'Passenger' "${REPO_ROOT}/cloudhost247-node/package.json" \
+  && fail "package.json still describes a Passenger deployment" \
+  || pass "package.json describes no Passenger deployment"
+# The product still SELLS cPanel hosting — that is not infrastructure and must stay.
+[[ -d "${REPO_ROOT}/cloudhost247-node/src/control-panels/adapters" ]] \
+  && pass "cPanel hosting remains a sellable product (control-panel adapters intact)" \
+  || fail "control-panel adapters were deleted — that was product code, not deployment"
 
 echo
 echo "----------------------------------------"

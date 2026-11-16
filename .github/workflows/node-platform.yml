@@ -22,7 +22,7 @@ jobs:
       matrix:
         # Keep in sync with cloudhost247-node/package.json "engines.node" and with whatever LTS
         # versions the target cPanel host's Node.js Selector actually offers — see
-        # docs/CPANEL_DEPLOYMENT.md, section "Node.js version". As of this workflow's authoring
+        # docs/VPS_DEPLOYMENT.md, section "Why PHP 8.2 and Node 22?". As of this workflow's authoring
         # (Sept 2026): Node 22 is Maintenance LTS (EOL Apr 2027) and Node 24 is Active LTS
         # (EOL Apr 2028); Node 20 already reached EOL (Apr 2026) and Fastify v5 requires Node
         # >=20 at minimum, while the vitest 5 devDependency requires Node >=22.12 to run at all —
@@ -73,7 +73,7 @@ jobs:
       - name: Build server + frontend (production artifacts)
         run: npm run build
 
-      - name: Verify server.js can boot the compiled app (env validation only, no network)
+      - name: Verify the compiled app loads (env validation only, no network)
         run: |
           node -e "
             process.env.NODE_ENV='production';

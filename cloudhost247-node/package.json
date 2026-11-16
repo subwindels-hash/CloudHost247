@@ -2,14 +2,14 @@
   "name": "cloudhost247-node",
   "version": "0.1.0",
   "private": true,
-  "description": "CloudHost247 independent Node.js/TypeScript platform (cPanel Passenger deployable). Replaces the WHMCS-dependent stack incrementally per docs/CPANEL_DEPLOYMENT.md.",
+  "description": "CloudHost247 independent Node.js/TypeScript platform. Deploys to an Ubuntu 24.04 VPS under Nginx + systemd; see docs/VPS_DEPLOYMENT.md.",
   "license": "UNLICENSED",
   "engines": {
     "node": ">=20.9.0",
     "npm": ">=9.0.0"
   },
   "type": "commonjs",
-  "main": "server.js",
+  "main": "dist/src/server.js",
   "scripts": {
     "dev": "concurrently -k -n server,frontend -c blue,green \"npm:dev:server\" \"npm:dev:frontend\"",
     "dev:stack": "concurrently -k -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:frontend\"",
@@ -19,7 +19,7 @@
     "build": "npm run typecheck:scripts && npm run tools:catalog:check && npm run build:server && npm run build:frontend && npm run build:tools",
     "build:server": "tsc -p tsconfig.json",
     "build:frontend": "vite build --config frontend/vite.config.ts",
-    "start": "node server.js",
+    "start": "node dist/src/server.js",
     "worker": "node dist/src/worker/main.js",
     "worker:once": "node dist/src/worker/main.js --once",
     "typecheck": "tsc -p tsconfig.json --noEmit",
