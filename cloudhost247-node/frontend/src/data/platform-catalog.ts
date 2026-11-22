@@ -1,0 +1,37050 @@
+import type { ControlPanelSummary } from "../lib/control-panels-api";
+
+export const PLATFORM_CATALOG: ControlPanelSummary[] = [
+  {
+    "id": "os-almalinux",
+    "name": "AlmaLinux",
+    "slug": "almalinux",
+    "category": "OPERATING_SYSTEM",
+    "description": "AlmaLinux cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "AlmaLinux"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-debian",
+    "name": "Debian",
+    "slug": "debian",
+    "category": "OPERATING_SYSTEM",
+    "description": "Debian cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Debian"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-rocky-linux",
+    "name": "Rocky Linux",
+    "slug": "rocky-linux",
+    "category": "OPERATING_SYSTEM",
+    "description": "Rocky Linux cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-ubuntu",
+    "name": "Ubuntu",
+    "slug": "ubuntu",
+    "category": "OPERATING_SYSTEM",
+    "description": "Ubuntu cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-alpine-linux",
+    "name": "Alpine Linux",
+    "slug": "alpine-linux",
+    "category": "OPERATING_SYSTEM",
+    "description": "Alpine Linux cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Alpine Linux"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-arch-linux",
+    "name": "Arch Linux",
+    "slug": "arch-linux",
+    "category": "OPERATING_SYSTEM",
+    "description": "Arch Linux cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Arch Linux"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-centos",
+    "name": "CentOS",
+    "slug": "centos",
+    "category": "OPERATING_SYSTEM",
+    "description": "CentOS cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "CentOS"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-cloudlinux",
+    "name": "CloudLinux",
+    "slug": "cloudlinux",
+    "category": "OPERATING_SYSTEM",
+    "description": "CloudLinux cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "CloudLinux"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-fedora-cloud",
+    "name": "Fedora Cloud",
+    "slug": "fedora-cloud",
+    "category": "OPERATING_SYSTEM",
+    "description": "Fedora Cloud cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Fedora Cloud"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-kali-linux",
+    "name": "Kali Linux",
+    "slug": "kali-linux",
+    "category": "OPERATING_SYSTEM",
+    "description": "Kali Linux cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Kali Linux"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-nixos",
+    "name": "NixOS",
+    "slug": "nixos",
+    "category": "OPERATING_SYSTEM",
+    "description": "NixOS cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "NixOS"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "os-opensuse",
+    "name": "openSUSE",
+    "slug": "opensuse",
+    "category": "OPERATING_SYSTEM",
+    "description": "openSUSE cloud server operating system image with automated provisioning and security updates.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "IMAGE",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "openSUSE"
+    ],
+    "capabilities": {
+      "cloudInit": true,
+      "ssh": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-dokploy",
+    "name": "Dokploy",
+    "slug": "dokploy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "Open-source PaaS for deploying applications and databases with Docker.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-coolify",
+    "name": "Coolify",
+    "slug": "coolify",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "Self-hostable Heroku / Netlify / Vercel alternative for servers.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-cloudpanel",
+    "name": "CloudPanel",
+    "slug": "cloudpanel",
+    "category": "SERVER_PANEL",
+    "description": "Free, lightweight server control panel for PHP, Node.js, Python, and static sites.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-cpanel",
+    "name": "cPanel",
+    "slug": "cpanel",
+    "category": "SERVER_PANEL",
+    "description": "Industry-standard commercial web hosting control panel and WHM suite.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": true,
+    "licenseProvider": "cPanel",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "15.00",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-plesk",
+    "name": "Plesk",
+    "slug": "plesk",
+    "category": "SERVER_PANEL",
+    "description": "Commercial multi-OS web hosting and server management control panel.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": true,
+    "licenseProvider": "Plesk",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "15.00",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-adminbolt",
+    "name": "AdminBolt",
+    "slug": "adminbolt",
+    "category": "SERVER_PANEL",
+    "description": "Modern web hosting control panel built for speed and multi-tenant management.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": true,
+    "licenseProvider": "AdminBolt",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "15.00",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-1panel",
+    "name": "1Panel",
+    "slug": "1panel",
+    "category": "SERVER_PANEL",
+    "description": "Modern, open-source Linux server operation and maintenance management panel.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-serverkit",
+    "name": "ServerKit",
+    "slug": "serverkit",
+    "category": "SERVER_MANAGEMENT",
+    "description": "Streamlined server management and provisioning toolkit.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-hestiacp",
+    "name": "HestiaCP",
+    "slug": "hestiacp",
+    "category": "SERVER_PANEL",
+    "description": "Fast, lightweight open-source web, mail, DNS, and database control panel.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-fastpanel",
+    "name": "FASTPANEL",
+    "slug": "fastpanel",
+    "category": "SERVER_PANEL",
+    "description": "Simple and powerful server management panel for sites, mail, and databases.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-easypanel",
+    "name": "Easypanel",
+    "slug": "easypanel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "Modern server control panel based on Docker for deploying apps and databases.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-cosmos",
+    "name": "Cosmos",
+    "slug": "cosmos",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "Self-hosted home server & cloud platform with built-in reverse proxy and VPN.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-cloudron",
+    "name": "Cloudron",
+    "slug": "cloudron",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "Complete solution for running apps on your server with automatic updates and backups.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-aapanel",
+    "name": "aaPanel",
+    "slug": "aapanel",
+    "category": "SERVER_PANEL",
+    "description": "Simple but powerful control panel for managing web servers via web GUI.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-tinycp",
+    "name": "TinyCP",
+    "slug": "tinycp",
+    "category": "SERVER_PANEL",
+    "description": "Lightweight control panel for managing Linux servers with minimal footprint.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-webuzo",
+    "name": "Webuzo",
+    "slug": "webuzo",
+    "category": "SERVER_PANEL",
+    "description": "Multi-user control panel for shared hosting, VPS, and dedicated servers.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": true,
+    "licenseProvider": "Webuzo",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "15.00",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-webmin",
+    "name": "Webmin",
+    "slug": "webmin",
+    "category": "SERVER_MANAGEMENT",
+    "description": "Web-based system administration interface for Unix and Linux servers.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-kusanagi",
+    "name": "Kusanagi",
+    "slug": "kusanagi",
+    "category": "SERVER_MANAGEMENT",
+    "description": "High-performance virtual machine and web stack tuned for WordPress and PHP.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-directadmin",
+    "name": "DirectAdmin",
+    "slug": "directadmin",
+    "category": "SERVER_PANEL",
+    "description": "Fast, reliable commercial web hosting control panel for Linux.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": true,
+    "licenseProvider": "DirectAdmin",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "15.00",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "cp-cyberpanel",
+    "name": "CyberPanel",
+    "slug": "cyberpanel",
+    "category": "SERVER_PANEL",
+    "description": "Next-generation hosting control panel powered by OpenLiteSpeed.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "SCRIPT",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 2048,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "webHosting": true,
+      "ssl": true,
+      "backups": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-9router",
+    "name": "9router",
+    "slug": "9router",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click 9router deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-agent-zero",
+    "name": "Agent Zero",
+    "slug": "agent-zero",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Agent Zero deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-buzz",
+    "name": "Buzz",
+    "slug": "buzz",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Buzz deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dify",
+    "name": "Dify",
+    "slug": "dify",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dify deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-docker-and-traefik",
+    "name": "Docker and Traefik",
+    "slug": "docker-and-traefik",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Docker and Traefik deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hermes-agent",
+    "name": "Hermes Agent",
+    "slug": "hermes-agent",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hermes Agent deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-home-assistant",
+    "name": "Home Assistant",
+    "slug": "home-assistant",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Home Assistant deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-icewarp",
+    "name": "IceWarp",
+    "slug": "icewarp",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click IceWarp deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-immich",
+    "name": "Immich",
+    "slug": "immich",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Immich deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-n8n",
+    "name": "n8n",
+    "slug": "n8n",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click n8n deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nextcloud",
+    "name": "Nextcloud",
+    "slug": "nextcloud",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Nextcloud deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nod",
+    "name": "Nod",
+    "slug": "nod",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Nod deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openclaw",
+    "name": "OpenClaw",
+    "slug": "openclaw",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenClaw deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openlitespeed-and-node-js",
+    "name": "OpenLiteSpeed and Node.js",
+    "slug": "openlitespeed-and-node-js",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenLiteSpeed and Node.js deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-paperclip",
+    "name": "Paperclip",
+    "slug": "paperclip",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Paperclip deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-postgresql",
+    "name": "PostgreSQL",
+    "slug": "postgresql",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PostgreSQL deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-prometheus",
+    "name": "Prometheus",
+    "slug": "prometheus",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Prometheus deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-uptime-kuma",
+    "name": "Uptime Kuma",
+    "slug": "uptime-kuma",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Uptime Kuma deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-vaultwarden",
+    "name": "Vaultwarden",
+    "slug": "vaultwarden",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Vaultwarden deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-visual-studio-code-server",
+    "name": "Visual Studio Code Server",
+    "slug": "visual-studio-code-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Visual Studio Code Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-woocommerce",
+    "name": "WooCommerce",
+    "slug": "woocommerce",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WooCommerce deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wordpress",
+    "name": "WordPress",
+    "slug": "wordpress",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WordPress deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-1backend",
+    "name": "1Backend",
+    "slug": "1backend",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click 1Backend deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-2fauth",
+    "name": "2FAuth",
+    "slug": "2fauth",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click 2FAuth deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ackee",
+    "name": "Ackee",
+    "slug": "ackee",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ackee deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-activepieces",
+    "name": "Activepieces",
+    "slug": "activepieces",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Activepieces deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-actual-budget",
+    "name": "Actual Budget",
+    "slug": "actual-budget",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Actual Budget deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-adminer",
+    "name": "Adminer",
+    "slug": "adminer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Adminer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-adventurelog",
+    "name": "AdventureLog",
+    "slug": "adventurelog",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AdventureLog deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-affine",
+    "name": "AFFiNE",
+    "slug": "affine",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AFFiNE deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-agenta",
+    "name": "Agenta",
+    "slug": "agenta",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Agenta deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-agentmemory",
+    "name": "agentmemory",
+    "slug": "agentmemory",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click agentmemory deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-agentrun",
+    "name": "AgentRun",
+    "slug": "agentrun",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AgentRun deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-airsonic-advanced",
+    "name": "Airsonic Advanced",
+    "slug": "airsonic-advanced",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Airsonic Advanced deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-airtrail",
+    "name": "AirTrail",
+    "slug": "airtrail",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AirTrail deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-aitoearn",
+    "name": "AiToEarn",
+    "slug": "aitoearn",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AiToEarn deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-akaunting",
+    "name": "Akaunting",
+    "slug": "akaunting",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Akaunting deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-alerta",
+    "name": "Alerta",
+    "slug": "alerta",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Alerta deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-alexandrie",
+    "name": "Alexandrie",
+    "slug": "alexandrie",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Alexandrie deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-alist",
+    "name": "AList",
+    "slug": "alist",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AList deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-alltube",
+    "name": "AllTube",
+    "slug": "alltube",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AllTube deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ampache",
+    "name": "Ampache",
+    "slug": "ampache",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ampache deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-an-otter-wiki",
+    "name": "An Otter Wiki",
+    "slug": "an-otter-wiki",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click An Otter Wiki deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-anaconda",
+    "name": "Anaconda",
+    "slug": "anaconda",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Anaconda deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-anki-sync-server-enhanced",
+    "name": "Anki Sync Server Enhanced",
+    "slug": "anki-sync-server-enhanced",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Anki Sync Server Enhanced deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-annif",
+    "name": "Annif",
+    "slug": "annif",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Annif deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-anonupload",
+    "name": "AnonUpload",
+    "slug": "anonupload",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AnonUpload deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ant-media-server-ce",
+    "name": "Ant Media Server CE",
+    "slug": "ant-media-server-ce",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ant Media Server CE deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-anythingllm",
+    "name": "AnythingLLM",
+    "slug": "anythingllm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AnythingLLM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-airflow",
+    "name": "Apache Airflow",
+    "slug": "apache-airflow",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Airflow deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-amoro",
+    "name": "Apache Amoro",
+    "slug": "apache-amoro",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Amoro deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-answer",
+    "name": "Apache Answer",
+    "slug": "apache-answer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Answer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-apisix",
+    "name": "Apache APISIX",
+    "slug": "apache-apisix",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache APISIX deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-couchdb",
+    "name": "Apache CouchDB",
+    "slug": "apache-couchdb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache CouchDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-devlake",
+    "name": "Apache DevLake",
+    "slug": "apache-devlake",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache DevLake deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-dolphinscheduler",
+    "name": "Apache DolphinScheduler",
+    "slug": "apache-dolphinscheduler",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache DolphinScheduler deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-doris",
+    "name": "Apache Doris",
+    "slug": "apache-doris",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Doris deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-druid",
+    "name": "Apache Druid",
+    "slug": "apache-druid",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Druid deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-gravitino",
+    "name": "Apache Gravitino",
+    "slug": "apache-gravitino",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Gravitino deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-guacamole",
+    "name": "Apache Guacamole",
+    "slug": "apache-guacamole",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Guacamole deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-hertzbeat",
+    "name": "Apache HertzBeat",
+    "slug": "apache-hertzbeat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache HertzBeat deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-hop",
+    "name": "Apache Hop",
+    "slug": "apache-hop",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Hop deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-iotdb",
+    "name": "Apache IoTDB",
+    "slug": "apache-iotdb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache IoTDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-jspwiki",
+    "name": "Apache JSPWiki",
+    "slug": "apache-jspwiki",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache JSPWiki deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-kvrocks",
+    "name": "Apache Kvrocks",
+    "slug": "apache-kvrocks",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Kvrocks deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-pinot",
+    "name": "Apache Pinot",
+    "slug": "apache-pinot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Pinot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-shenyu",
+    "name": "Apache ShenYu",
+    "slug": "apache-shenyu",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache ShenYu deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-skywalking",
+    "name": "Apache SkyWalking",
+    "slug": "apache-skywalking",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache SkyWalking deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-solr",
+    "name": "Apache Solr",
+    "slug": "apache-solr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Solr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-streampark",
+    "name": "Apache StreamPark",
+    "slug": "apache-streampark",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache StreamPark deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-streampipes",
+    "name": "Apache StreamPipes",
+    "slug": "apache-streampipes",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache StreamPipes deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-superset",
+    "name": "Apache Superset",
+    "slug": "apache-superset",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Superset deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-tika",
+    "name": "Apache Tika",
+    "slug": "apache-tika",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Tika deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apache-zeppelin",
+    "name": "Apache Zeppelin",
+    "slug": "apache-zeppelin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apache Zeppelin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apollo",
+    "name": "Apollo",
+    "slug": "apollo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apollo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-appflowy",
+    "name": "AppFlowy",
+    "slug": "appflowy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AppFlowy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-apprise-api",
+    "name": "Apprise API",
+    "slug": "apprise-api",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Apprise API deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-appsmith",
+    "name": "Appsmith",
+    "slug": "appsmith",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Appsmith deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-appwrite",
+    "name": "Appwrite",
+    "slug": "appwrite",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Appwrite deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-aptabase",
+    "name": "Aptabase",
+    "slug": "aptabase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Aptabase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-arangodb",
+    "name": "ArangoDB",
+    "slug": "arangodb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ArangoDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-arcadedb",
+    "name": "ArcadeDB",
+    "slug": "arcadedb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ArcadeDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-archivebox",
+    "name": "ArchiveBox",
+    "slug": "archivebox",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ArchiveBox deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-archivesspace",
+    "name": "ArchivesSpace",
+    "slug": "archivesspace",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ArchivesSpace deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-argilla",
+    "name": "Argilla",
+    "slug": "argilla",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Argilla deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-artalk",
+    "name": "Artalk",
+    "slug": "artalk",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Artalk deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-asp-net",
+    "name": "ASP.NET",
+    "slug": "asp-net",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ASP.NET deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-astrbot",
+    "name": "AstrBot",
+    "slug": "astrbot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AstrBot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-atlas-cmms",
+    "name": "Atlas CMMS",
+    "slug": "atlas-cmms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Atlas CMMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-atomic-server",
+    "name": "Atomic Server",
+    "slug": "atomic-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Atomic Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-audiobookshelf",
+    "name": "Audiobookshelf",
+    "slug": "audiobookshelf",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Audiobookshelf deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-aureuserp",
+    "name": "AureusERP",
+    "slug": "aureuserp",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AureusERP deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-authentik",
+    "name": "Authentik",
+    "slug": "authentik",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Authentik deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-authorizer",
+    "name": "Authorizer",
+    "slug": "authorizer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Authorizer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-auto-ontology",
+    "name": "Auto Ontology",
+    "slug": "auto-ontology",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Auto Ontology deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-autobase",
+    "name": "Autobase",
+    "slug": "autobase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Autobase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-autobrr",
+    "name": "autobrr",
+    "slug": "autobrr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click autobrr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-automatisch",
+    "name": "Automatisch",
+    "slug": "automatisch",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Automatisch deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-azuracast",
+    "name": "AzuraCast",
+    "slug": "azuracast",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click AzuraCast deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-baby-buddy",
+    "name": "Baby Buddy",
+    "slug": "baby-buddy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Baby Buddy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-backrest",
+    "name": "Backrest",
+    "slug": "backrest",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Backrest deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bagisto",
+    "name": "Bagisto",
+    "slug": "bagisto",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bagisto deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-baikal",
+    "name": "Baikal",
+    "slug": "baikal",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Baikal deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bar-assistant",
+    "name": "Bar Assistant",
+    "slug": "bar-assistant",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bar Assistant deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-baserow",
+    "name": "Baserow",
+    "slug": "baserow",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Baserow deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bazarr",
+    "name": "Bazarr",
+    "slug": "bazarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bazarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-beaverhabits",
+    "name": "BeaverHabits",
+    "slug": "beaverhabits",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click BeaverHabits deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bentopdf",
+    "name": "BentoPDF",
+    "slug": "bentopdf",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click BentoPDF deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-beszel",
+    "name": "Beszel",
+    "slug": "beszel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Beszel deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-beszel-agent",
+    "name": "Beszel Agent",
+    "slug": "beszel-agent",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Beszel Agent deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bewcloud",
+    "name": "bewCloud",
+    "slug": "bewcloud",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click bewCloud deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bichon",
+    "name": "Bichon",
+    "slug": "bichon",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bichon deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-big-agi",
+    "name": "Big-AGI",
+    "slug": "big-agi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Big-AGI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bigcapital",
+    "name": "Bigcapital",
+    "slug": "bigcapital",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bigcapital deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bionic-gpt",
+    "name": "Bionic GPT",
+    "slug": "bionic-gpt",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bionic GPT deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bitwarden",
+    "name": "Bitwarden",
+    "slug": "bitwarden",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bitwarden deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bknd",
+    "name": "bknd",
+    "slug": "bknd",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click bknd deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-black-candy",
+    "name": "Black Candy",
+    "slug": "black-candy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Black Candy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-blender",
+    "name": "Blender",
+    "slug": "blender",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Blender deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-blinko",
+    "name": "Blinko",
+    "slug": "blinko",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Blinko deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bludit",
+    "name": "Bludit",
+    "slug": "bludit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bludit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bluesky-ozone",
+    "name": "Bluesky Ozone",
+    "slug": "bluesky-ozone",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bluesky Ozone deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bluesky-pds",
+    "name": "Bluesky PDS",
+    "slug": "bluesky-pds",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bluesky PDS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bolt-diy",
+    "name": "bolt.diy",
+    "slug": "bolt-diy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click bolt.diy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bookshelf",
+    "name": "Bookshelf",
+    "slug": "bookshelf",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bookshelf deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bookstack",
+    "name": "BookStack",
+    "slug": "bookstack",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click BookStack deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-broadcastchannel",
+    "name": "BroadcastChannel",
+    "slug": "broadcastchannel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click BroadcastChannel deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-browserless",
+    "name": "Browserless",
+    "slug": "browserless",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Browserless deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-budge",
+    "name": "Budge",
+    "slug": "budge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Budge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-budibase",
+    "name": "Budibase",
+    "slug": "budibase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Budibase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bugsink",
+    "name": "BugSink",
+    "slug": "bugsink",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click BugSink deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-buildbot",
+    "name": "Buildbot",
+    "slug": "buildbot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Buildbot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bunkerm",
+    "name": "BunkerM",
+    "slug": "bunkerm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click BunkerM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bytebase",
+    "name": "Bytebase",
+    "slug": "bytebase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Bytebase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bytechef",
+    "name": "ByteChef",
+    "slug": "bytechef",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ByteChef deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-bytestash",
+    "name": "ByteStash",
+    "slug": "bytestash",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ByteStash deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cal-com",
+    "name": "Cal.com",
+    "slug": "cal-com",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cal.com deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-calagopus",
+    "name": "Calagopus",
+    "slug": "calagopus",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Calagopus deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-calibre-web",
+    "name": "Calibre-Web",
+    "slug": "calibre-web",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Calibre-Web deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-canarytokens",
+    "name": "Canarytokens",
+    "slug": "canarytokens",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Canarytokens deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cap",
+    "name": "Cap",
+    "slug": "cap",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cap deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-casdoor",
+    "name": "Casdoor",
+    "slug": "casdoor",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Casdoor deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-casibase",
+    "name": "Casibase",
+    "slug": "casibase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Casibase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cassandra-reaper",
+    "name": "Cassandra Reaper",
+    "slug": "cassandra-reaper",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cassandra Reaper deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-castopod",
+    "name": "Castopod",
+    "slug": "castopod",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Castopod deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-centrifugo",
+    "name": "Centrifugo",
+    "slug": "centrifugo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Centrifugo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cerbos",
+    "name": "Cerbos",
+    "slug": "cerbos",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cerbos deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-changedetection-io",
+    "name": "changedetection.io",
+    "slug": "changedetection-io",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click changedetection.io deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-chartbrew",
+    "name": "Chartbrew",
+    "slug": "chartbrew",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Chartbrew deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-chartdb",
+    "name": "ChartDB",
+    "slug": "chartdb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ChartDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-chatpad-ai",
+    "name": "Chatpad AI",
+    "slug": "chatpad-ai",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Chatpad AI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-chatwoot",
+    "name": "Chatwoot",
+    "slug": "chatwoot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Chatwoot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-checkcle",
+    "name": "Checkcle",
+    "slug": "checkcle",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Checkcle deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-checkmate",
+    "name": "Checkmate",
+    "slug": "checkmate",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Checkmate deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-checkmk",
+    "name": "Checkmk",
+    "slug": "checkmk",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Checkmk deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-checkrr",
+    "name": "Checkrr",
+    "slug": "checkrr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Checkrr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cheshire-cat-ai",
+    "name": "Cheshire Cat AI",
+    "slug": "cheshire-cat-ai",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cheshire Cat AI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-chevereto",
+    "name": "Chevereto",
+    "slug": "chevereto",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Chevereto deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-chibisafe",
+    "name": "Chibisafe",
+    "slug": "chibisafe",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Chibisafe deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-chiefonboarding",
+    "name": "ChiefOnboarding",
+    "slug": "chiefonboarding",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ChiefOnboarding deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-chroma",
+    "name": "Chroma",
+    "slug": "chroma",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Chroma deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-chronoframe",
+    "name": "ChronoFrame",
+    "slug": "chronoframe",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ChronoFrame deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-citrineos",
+    "name": "CitrineOS",
+    "slug": "citrineos",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CitrineOS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-civicrm",
+    "name": "CiviCRM",
+    "slug": "civicrm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CiviCRM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ckan",
+    "name": "CKAN",
+    "slug": "ckan",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CKAN deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-classicpress",
+    "name": "ClassicPress",
+    "slug": "classicpress",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ClassicPress deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-classquiz",
+    "name": "ClassQuiz",
+    "slug": "classquiz",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ClassQuiz deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-classroomio",
+    "name": "ClassroomIO",
+    "slug": "classroomio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ClassroomIO deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-claude-code",
+    "name": "Claude Code",
+    "slug": "claude-code",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Claude Code deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cleanuparr",
+    "name": "Cleanuparr",
+    "slug": "cleanuparr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cleanuparr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-clickhouse",
+    "name": "ClickHouse",
+    "slug": "clickhouse",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ClickHouse deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cloudbeaver",
+    "name": "CloudBeaver",
+    "slug": "cloudbeaver",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CloudBeaver deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cloudflared",
+    "name": "Cloudflared",
+    "slug": "cloudflared",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cloudflared deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cloudreve",
+    "name": "Cloudreve",
+    "slug": "cloudreve",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cloudreve deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-clustercontrol",
+    "name": "ClusterControl",
+    "slug": "clustercontrol",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ClusterControl deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-coai",
+    "name": "Coai",
+    "slug": "coai",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Coai deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cockpit-cms",
+    "name": "Cockpit CMS",
+    "slug": "cockpit-cms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cockpit CMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cockroachdb",
+    "name": "CockroachDB",
+    "slug": "cockroachdb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CockroachDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-code-server",
+    "name": "Code-Server",
+    "slug": "code-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Code-Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-coder",
+    "name": "Coder",
+    "slug": "coder",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Coder deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-codimd",
+    "name": "CodiMD",
+    "slug": "codimd",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CodiMD deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cognee",
+    "name": "Cognee",
+    "slug": "cognee",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cognee deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-colanode",
+    "name": "Colanode",
+    "slug": "colanode",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Colanode deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-collabora-online",
+    "name": "Collabora Online",
+    "slug": "collabora-online",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Collabora Online deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-commafeed",
+    "name": "CommaFeed",
+    "slug": "commafeed",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CommaFeed deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-convertx",
+    "name": "ConvertX",
+    "slug": "convertx",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ConvertX deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-convex",
+    "name": "Convex",
+    "slug": "convex",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Convex deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-convos",
+    "name": "Convos",
+    "slug": "convos",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Convos deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-convoy",
+    "name": "Convoy",
+    "slug": "convoy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Convoy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cops",
+    "name": "COPS",
+    "slug": "cops",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click COPS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-copyparty",
+    "name": "Copyparty",
+    "slug": "copyparty",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Copyparty deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-coral-talk",
+    "name": "Coral Talk",
+    "slug": "coral-talk",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Coral Talk deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-corecontrol",
+    "name": "CoreControl",
+    "slug": "corecontrol",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CoreControl deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-corteza",
+    "name": "Corteza",
+    "slug": "corteza",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Corteza deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-countly",
+    "name": "Countly",
+    "slug": "countly",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Countly deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-crafty-controller",
+    "name": "Crafty Controller",
+    "slug": "crafty-controller",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Crafty Controller deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-crawl4ai",
+    "name": "Crawl4AI",
+    "slug": "crawl4ai",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Crawl4AI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cronicle",
+    "name": "Cronicle",
+    "slug": "cronicle",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cronicle deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-crontab-ui",
+    "name": "Crontab UI",
+    "slug": "crontab-ui",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Crontab UI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cross-seed",
+    "name": "Cross-seed",
+    "slug": "cross-seed",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cross-seed deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-crucix",
+    "name": "Crucix",
+    "slug": "crucix",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Crucix deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cryptgeon",
+    "name": "Cryptgeon",
+    "slug": "cryptgeon",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cryptgeon deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cryptpad",
+    "name": "CryptPad",
+    "slug": "cryptpad",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CryptPad deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cvat",
+    "name": "CVAT",
+    "slug": "cvat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CVAT deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cyberchef",
+    "name": "CyberChef",
+    "slug": "cyberchef",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click CyberChef deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-cypht",
+    "name": "Cypht",
+    "slug": "cypht",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Cypht deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dagu",
+    "name": "Dagu",
+    "slug": "dagu",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dagu deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-daptin",
+    "name": "Daptin",
+    "slug": "daptin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Daptin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dasharr",
+    "name": "Dasharr",
+    "slug": "dasharr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dasharr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dashdot",
+    "name": "dashdot",
+    "slug": "dashdot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click dashdot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dashy",
+    "name": "Dashy",
+    "slug": "dashy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dashy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-databag",
+    "name": "Databag",
+    "slug": "databag",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Databag deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-databasus",
+    "name": "Databasus",
+    "slug": "databasus",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Databasus deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dataline",
+    "name": "Dataline",
+    "slug": "dataline",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dataline deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-datasette",
+    "name": "Datasette",
+    "slug": "datasette",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Datasette deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dawarich",
+    "name": "Dawarich",
+    "slug": "dawarich",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dawarich deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-db-browser-for-sqlite",
+    "name": "DB Browser for SQLite",
+    "slug": "db-browser-for-sqlite",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DB Browser for SQLite deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dbgate",
+    "name": "DbGate",
+    "slug": "dbgate",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DbGate deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ddns-updater",
+    "name": "DDNS Updater",
+    "slug": "ddns-updater",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DDNS Updater deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-decidim",
+    "name": "Decidim",
+    "slug": "decidim",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Decidim deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-deepseek-harness",
+    "name": "DeepSeek Harness",
+    "slug": "deepseek-harness",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DeepSeek Harness deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-deepwiki-open",
+    "name": "DeepWiki Open",
+    "slug": "deepwiki-open",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DeepWiki Open deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-defguard",
+    "name": "Defguard",
+    "slug": "defguard",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Defguard deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-deluge",
+    "name": "Deluge",
+    "slug": "deluge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Deluge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-denokv",
+    "name": "DenoKV",
+    "slug": "denokv",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DenoKV deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dependency-track",
+    "name": "Dependency-Track",
+    "slug": "dependency-track",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dependency-Track deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-deskrpg",
+    "name": "DeskRPG",
+    "slug": "deskrpg",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DeskRPG deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dhis2",
+    "name": "DHIS2",
+    "slug": "dhis2",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DHIS2 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dialoqbase",
+    "name": "Dialoqbase",
+    "slug": "dialoqbase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dialoqbase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-directus",
+    "name": "Directus",
+    "slug": "directus",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Directus deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-discourse",
+    "name": "Discourse",
+    "slug": "discourse",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Discourse deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dittofeed",
+    "name": "Dittofeed",
+    "slug": "dittofeed",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dittofeed deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-diun",
+    "name": "Diun",
+    "slug": "diun",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Diun deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dkron",
+    "name": "Dkron",
+    "slug": "dkron",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dkron deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-docassemble",
+    "name": "docassemble",
+    "slug": "docassemble",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click docassemble deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-docker",
+    "name": "Docker",
+    "slug": "docker",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Docker deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-docker-registry",
+    "name": "Docker Registry",
+    "slug": "docker-registry",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Docker Registry deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dockge",
+    "name": "Dockge",
+    "slug": "dockge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dockge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-docmost",
+    "name": "Docmost",
+    "slug": "docmost",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Docmost deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-docspell",
+    "name": "Docspell",
+    "slug": "docspell",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Docspell deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-documenso",
+    "name": "Documenso",
+    "slug": "documenso",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Documenso deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-docuseal",
+    "name": "DocuSeal",
+    "slug": "docuseal",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DocuSeal deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dograh",
+    "name": "Dograh",
+    "slug": "dograh",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dograh deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dokku",
+    "name": "Dokku",
+    "slug": "dokku",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dokku deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dokuwiki",
+    "name": "DokuWiki",
+    "slug": "dokuwiki",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DokuWiki deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dolibarr",
+    "name": "Dolibarr",
+    "slug": "dolibarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dolibarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-domain-locker",
+    "name": "Domain Locker",
+    "slug": "domain-locker",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Domain Locker deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-domjudge",
+    "name": "DOMjudge",
+    "slug": "domjudge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DOMjudge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-domoticz",
+    "name": "Domoticz",
+    "slug": "domoticz",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Domoticz deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-donetick",
+    "name": "Donetick",
+    "slug": "donetick",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Donetick deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-downtify",
+    "name": "Downtify",
+    "slug": "downtify",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Downtify deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dozzle",
+    "name": "Dozzle",
+    "slug": "dozzle",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dozzle deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dragonfly",
+    "name": "Dragonfly",
+    "slug": "dragonfly",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dragonfly deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-draw-io",
+    "name": "draw.io",
+    "slug": "draw-io",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click draw.io deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-drawdb",
+    "name": "drawDB",
+    "slug": "drawdb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click drawDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dreamfactory",
+    "name": "DreamFactory",
+    "slug": "dreamfactory",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DreamFactory deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-drizzle-gateway",
+    "name": "Drizzle Gateway",
+    "slug": "drizzle-gateway",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Drizzle Gateway deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-drupal",
+    "name": "Drupal",
+    "slug": "drupal",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Drupal deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dspace",
+    "name": "DSpace",
+    "slug": "dspace",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DSpace deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-duckdns",
+    "name": "DuckDNS",
+    "slug": "duckdns",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DuckDNS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dufs",
+    "name": "Dufs",
+    "slug": "dufs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Dufs deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dumbdo",
+    "name": "DumbDo",
+    "slug": "dumbdo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DumbDo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dumbdrop",
+    "name": "DumbDrop",
+    "slug": "dumbdrop",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DumbDrop deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dumbpad",
+    "name": "DumbPad",
+    "slug": "dumbpad",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DumbPad deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-duplicati",
+    "name": "Duplicati",
+    "slug": "duplicati",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Duplicati deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-dvinyl",
+    "name": "DVinyl",
+    "slug": "dvinyl",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click DVinyl deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-eclipse-hawkbit",
+    "name": "Eclipse Hawkbit",
+    "slug": "eclipse-hawkbit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Eclipse Hawkbit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-eclipse-kura",
+    "name": "Eclipse Kura",
+    "slug": "eclipse-kura",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Eclipse Kura deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-eclipse-mosquitto",
+    "name": "Eclipse Mosquitto",
+    "slug": "eclipse-mosquitto",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Eclipse Mosquitto deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-edgedb",
+    "name": "EdgeDB",
+    "slug": "edgedb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click EdgeDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ekuiper",
+    "name": "eKuiper",
+    "slug": "ekuiper",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click eKuiper deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-elabftw",
+    "name": "eLabFTW",
+    "slug": "elabftw",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click eLabFTW deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-elasticsearch",
+    "name": "Elasticsearch",
+    "slug": "elasticsearch",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Elasticsearch deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-element",
+    "name": "Element",
+    "slug": "element",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Element deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-emailengine",
+    "name": "EmailEngine",
+    "slug": "emailengine",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click EmailEngine deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-emby",
+    "name": "Emby",
+    "slug": "emby",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Emby deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-embystat",
+    "name": "EmbyStat",
+    "slug": "embystat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click EmbyStat deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-emoncms",
+    "name": "EmonCMS",
+    "slug": "emoncms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click EmonCMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-emqx",
+    "name": "EMQX",
+    "slug": "emqx",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click EMQX deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-enclosed",
+    "name": "Enclosed",
+    "slug": "enclosed",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Enclosed deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ente",
+    "name": "Ente",
+    "slug": "ente",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ente deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-errbit",
+    "name": "Errbit",
+    "slug": "errbit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Errbit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ersatztv",
+    "name": "ErsatzTV",
+    "slug": "ersatztv",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ErsatzTV deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-erugo",
+    "name": "Erugo",
+    "slug": "erugo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Erugo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-esphome",
+    "name": "ESPHome",
+    "slug": "esphome",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ESPHome deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-espocrm",
+    "name": "EspoCRM",
+    "slug": "espocrm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click EspoCRM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-etherpad",
+    "name": "Etherpad",
+    "slug": "etherpad",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Etherpad deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-euro-office-documentserver",
+    "name": "Euro-Office DocumentServer",
+    "slug": "euro-office-documentserver",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Euro-Office DocumentServer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-evcc",
+    "name": "evcc",
+    "slug": "evcc",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click evcc deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-eve",
+    "name": "eve",
+    "slug": "eve",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click eve deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ever-gauzy",
+    "name": "Ever Gauzy",
+    "slug": "ever-gauzy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ever Gauzy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-evershop",
+    "name": "EverShop",
+    "slug": "evershop",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click EverShop deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-evolution-api",
+    "name": "Evolution API",
+    "slug": "evolution-api",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Evolution API deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-evolution-go",
+    "name": "Evolution Go",
+    "slug": "evolution-go",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Evolution Go deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-excalidash",
+    "name": "ExcaliDash",
+    "slug": "excalidash",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ExcaliDash deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-excalidraw",
+    "name": "Excalidraw",
+    "slug": "excalidraw",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Excalidraw deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-exelearning",
+    "name": "eXeLearning",
+    "slug": "exelearning",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click eXeLearning deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-expensave",
+    "name": "Expensave",
+    "slug": "expensave",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Expensave deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-expenseowl",
+    "name": "ExpenseOwl",
+    "slug": "expenseowl",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ExpenseOwl deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-explo",
+    "name": "Explo",
+    "slug": "explo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Explo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-faktory",
+    "name": "Faktory",
+    "slug": "faktory",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Faktory deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-falkordb",
+    "name": "FalkorDB",
+    "slug": "falkordb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FalkorDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-faraday",
+    "name": "Faraday",
+    "slug": "faraday",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Faraday deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fasten-healthfazer-ai-agents",
+    "name": "Fasten Healthfazer.ai agents",
+    "slug": "fasten-healthfazer-ai-agents",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Fasten Healthfazer.ai agents deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-featbit",
+    "name": "FeatBit",
+    "slug": "featbit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FeatBit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-feedcraft",
+    "name": "FeedCraft",
+    "slug": "feedcraft",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FeedCraft deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fenrus",
+    "name": "Fenrus",
+    "slug": "fenrus",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Fenrus deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fider",
+    "name": "Fider",
+    "slug": "fider",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Fider deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-file-browser",
+    "name": "File Browser",
+    "slug": "file-browser",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click File Browser deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fileflows",
+    "name": "FileFlows",
+    "slug": "fileflows",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FileFlows deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-filegator",
+    "name": "FileGator",
+    "slug": "filegator",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FileGator deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-filestash",
+    "name": "Filestash",
+    "slug": "filestash",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Filestash deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-firefly",
+    "name": "Firefly",
+    "slug": "firefly",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Firefly deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-firefly-iii",
+    "name": "Firefly III",
+    "slug": "firefly-iii",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Firefly III deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-firefox",
+    "name": "Firefox",
+    "slug": "firefox",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Firefox deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fireshare",
+    "name": "Fireshare",
+    "slug": "fireshare",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Fireshare deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fittrackee",
+    "name": "FitTrackee",
+    "slug": "fittrackee",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FitTrackee deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-flagsmith",
+    "name": "Flagsmith",
+    "slug": "flagsmith",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Flagsmith deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-flame",
+    "name": "Flame",
+    "slug": "flame",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Flame deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-flaresolverr",
+    "name": "FlareSolverr",
+    "slug": "flaresolverr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FlareSolverr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-flarum",
+    "name": "Flarum",
+    "slug": "flarum",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Flarum deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-flatnotes",
+    "name": "flatnotes",
+    "slug": "flatnotes",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click flatnotes deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fleet",
+    "name": "Fleet",
+    "slug": "fleet",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Fleet deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fleetbase",
+    "name": "Fleetbase",
+    "slug": "fleetbase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Fleetbase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-flexget",
+    "name": "FlexGet",
+    "slug": "flexget",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FlexGet deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-flipt",
+    "name": "Flipt",
+    "slug": "flipt",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Flipt deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-flowise",
+    "name": "Flowise",
+    "slug": "flowise",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Flowise deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fmd-find-my-device",
+    "name": "FMD (Find My Device)",
+    "slug": "fmd-find-my-device",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FMD (Find My Device) deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-focalboard",
+    "name": "Focalboard",
+    "slug": "focalboard",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Focalboard deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-forgejo",
+    "name": "Forgejo",
+    "slug": "forgejo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Forgejo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-form-io",
+    "name": "Form.io",
+    "slug": "form-io",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Form.io deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-formbricks",
+    "name": "Formbricks",
+    "slug": "formbricks",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Formbricks deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fossbilling",
+    "name": "FOSSBilling",
+    "slug": "fossbilling",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FOSSBilling deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fossflow",
+    "name": "FossFLOW",
+    "slug": "fossflow",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FossFLOW deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-foundry-vtt",
+    "name": "Foundry VTT",
+    "slug": "foundry-vtt",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Foundry VTT deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-foxel",
+    "name": "Foxel",
+    "slug": "foxel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Foxel deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-freecad",
+    "name": "FreeCAD",
+    "slug": "freecad",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FreeCAD deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-freellmapi",
+    "name": "FreeLLMAPI",
+    "slug": "freellmapi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FreeLLMAPI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-freshrss",
+    "name": "FreshRSS",
+    "slug": "freshrss",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FreshRSS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-friendica",
+    "name": "Friendica",
+    "slug": "friendica",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Friendica deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-frigate",
+    "name": "Frigate",
+    "slug": "frigate",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Frigate deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fusio",
+    "name": "Fusio",
+    "slug": "fusio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Fusio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fusion-rss",
+    "name": "Fusion RSS",
+    "slug": "fusion-rss",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Fusion RSS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fusionauth",
+    "name": "FusionAuth",
+    "slug": "fusionauth",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FusionAuth deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fusiondirectory",
+    "name": "FusionDirectory",
+    "slug": "fusiondirectory",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FusionDirectory deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fuxa",
+    "name": "FUXA",
+    "slug": "fuxa",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click FUXA deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-galaxy",
+    "name": "Galaxy",
+    "slug": "galaxy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Galaxy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gatus",
+    "name": "Gatus",
+    "slug": "gatus",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gatus deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gemini-cli",
+    "name": "Gemini CLI",
+    "slug": "gemini-cli",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gemini CLI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-geneac",
+    "name": "Geneac",
+    "slug": "geneac",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Geneac deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-geonetwork",
+    "name": "GeoNetwork",
+    "slug": "geonetwork",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GeoNetwork deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-geoserver",
+    "name": "GeoServer",
+    "slug": "geoserver",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GeoServer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gerrit",
+    "name": "Gerrit",
+    "slug": "gerrit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gerrit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ghost",
+    "name": "Ghost",
+    "slug": "ghost",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ghost deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ghostfolio",
+    "name": "Ghostfolio",
+    "slug": "ghostfolio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ghostfolio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gimp",
+    "name": "GIMP",
+    "slug": "gimp",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GIMP deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gitbucket",
+    "name": "GitBucket",
+    "slug": "gitbucket",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GitBucket deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gitea",
+    "name": "Gitea",
+    "slug": "gitea",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gitea deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gitingest",
+    "name": "GitIngest",
+    "slug": "gitingest",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GitIngest deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gitlab",
+    "name": "GitLab",
+    "slug": "gitlab",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GitLab deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-glance",
+    "name": "Glance",
+    "slug": "glance",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Glance deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-glances",
+    "name": "Glances",
+    "slug": "glances",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Glances deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-glitchtip",
+    "name": "GlitchTip",
+    "slug": "glitchtip",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GlitchTip deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-glpi",
+    "name": "GLPI",
+    "slug": "glpi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GLPI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gns3-server",
+    "name": "GNS3 Server",
+    "slug": "gns3-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GNS3 Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-goatcounter",
+    "name": "GoatCounter",
+    "slug": "goatcounter",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GoatCounter deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gocd",
+    "name": "GoCD",
+    "slug": "gocd",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GoCD deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gogs",
+    "name": "Gogs",
+    "slug": "gogs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gogs deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gokapi",
+    "name": "Gokapi",
+    "slug": "gokapi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gokapi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gonic",
+    "name": "Gonic",
+    "slug": "gonic",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gonic deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gopeed",
+    "name": "Gopeed",
+    "slug": "gopeed",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gopeed deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gotenberg",
+    "name": "Gotenberg",
+    "slug": "gotenberg",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gotenberg deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gotify",
+    "name": "Gotify",
+    "slug": "gotify",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gotify deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gowa",
+    "name": "GoWA",
+    "slug": "gowa",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GoWA deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gpt-researcher",
+    "name": "GPT-Researcher",
+    "slug": "gpt-researcher",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GPT-Researcher deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grafana",
+    "name": "Grafana",
+    "slug": "grafana",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grafana deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grafana-loki",
+    "name": "Grafana Loki",
+    "slug": "grafana-loki",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grafana Loki deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grafana-pyroscope",
+    "name": "Grafana Pyroscope",
+    "slug": "grafana-pyroscope",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grafana Pyroscope deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grafana-tempo",
+    "name": "Grafana Tempo",
+    "slug": "grafana-tempo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grafana Tempo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-gramps-web",
+    "name": "Gramps Web",
+    "slug": "gramps-web",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Gramps Web deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grav",
+    "name": "Grav",
+    "slug": "grav",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grav deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-greptimedb",
+    "name": "GreptimeDB",
+    "slug": "greptimedb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GreptimeDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grimmory",
+    "name": "Grimmory",
+    "slug": "grimmory",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grimmory deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grimoire",
+    "name": "Grimoire",
+    "slug": "grimoire",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grimoire deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grist",
+    "name": "Grist",
+    "slug": "grist",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grist deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grocy",
+    "name": "Grocy",
+    "slug": "grocy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grocy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-grok-build",
+    "name": "Grok Build",
+    "slug": "grok-build",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Grok Build deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-growthbook",
+    "name": "GrowthBook",
+    "slug": "growthbook",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click GrowthBook deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-habitica",
+    "name": "Habitica",
+    "slug": "habitica",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Habitica deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-halo",
+    "name": "Halo",
+    "slug": "halo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Halo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-handbrake",
+    "name": "HandBrake",
+    "slug": "handbrake",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click HandBrake deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hanko",
+    "name": "Hanko",
+    "slug": "hanko",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hanko deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-harness",
+    "name": "Harness",
+    "slug": "harness",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Harness deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hasura-graphql-engine",
+    "name": "Hasura GraphQL Engine",
+    "slug": "hasura-graphql-engine",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hasura GraphQL Engine deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-haven",
+    "name": "Haven",
+    "slug": "haven",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Haven deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-headroom",
+    "name": "Headroom",
+    "slug": "headroom",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Headroom deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-headscale",
+    "name": "Headscale",
+    "slug": "headscale",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Headscale deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-healthchecks",
+    "name": "Healthchecks",
+    "slug": "healthchecks",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Healthchecks deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hedgedoc",
+    "name": "HedgeDoc",
+    "slug": "hedgedoc",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click HedgeDoc deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-heimdall",
+    "name": "Heimdall",
+    "slug": "heimdall",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Heimdall deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hemmelig",
+    "name": "Hemmelig",
+    "slug": "hemmelig",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hemmelig deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-herdr",
+    "name": "Herdr",
+    "slug": "herdr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Herdr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hermes-webui",
+    "name": "Hermes WebUI",
+    "slug": "hermes-webui",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hermes WebUI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hermes-workspace",
+    "name": "Hermes Workspace",
+    "slug": "hermes-workspace",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hermes Workspace deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-heyform",
+    "name": "HeyForm",
+    "slug": "heyform",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click HeyForm deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hfs",
+    "name": "HFS",
+    "slug": "hfs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click HFS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hi-events",
+    "name": "Hi.Events",
+    "slug": "hi-events",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hi.Events deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hiccup",
+    "name": "Hiccup",
+    "slug": "hiccup",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hiccup deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hister",
+    "name": "Hister",
+    "slug": "hister",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hister deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hollama",
+    "name": "Hollama",
+    "slug": "hollama",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hollama deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-homarr",
+    "name": "Homarr",
+    "slug": "homarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Homarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-home-gallery",
+    "name": "Home Gallery",
+    "slug": "home-gallery",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Home Gallery deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-homebox",
+    "name": "Homebox",
+    "slug": "homebox",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Homebox deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-homebridge",
+    "name": "Homebridge",
+    "slug": "homebridge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Homebridge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-homehub",
+    "name": "HomeHub",
+    "slug": "homehub",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click HomeHub deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-homepage",
+    "name": "Homepage",
+    "slug": "homepage",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Homepage deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-homer",
+    "name": "Homer",
+    "slug": "homer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Homer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hoop",
+    "name": "Hoop",
+    "slug": "hoop",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hoop deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hoppscotch",
+    "name": "Hoppscotch",
+    "slug": "hoppscotch",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hoppscotch deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-horilla",
+    "name": "Horilla",
+    "slug": "horilla",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Horilla deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hortusfox",
+    "name": "HortusFox",
+    "slug": "hortusfox",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click HortusFox deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-huggingchat-chat-ui",
+    "name": "HuggingChat (Chat UI)",
+    "slug": "huggingchat-chat-ui",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click HuggingChat (Chat UI) deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-huginn",
+    "name": "Huginn",
+    "slug": "huginn",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Huginn deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hugo",
+    "name": "Hugo",
+    "slug": "hugo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Hugo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-humhub",
+    "name": "HumHub",
+    "slug": "humhub",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click HumHub deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-hyperdx",
+    "name": "HyperDX",
+    "slug": "hyperdx",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click HyperDX deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-iceshrimp",
+    "name": "Iceshrimp",
+    "slug": "iceshrimp",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Iceshrimp deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-icinga-2",
+    "name": "Icinga 2",
+    "slug": "icinga-2",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Icinga 2 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-illa-builder",
+    "name": "ILLA Builder",
+    "slug": "illa-builder",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ILLA Builder deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-imaginary",
+    "name": "Imaginary",
+    "slug": "imaginary",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Imaginary deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-imgproxy",
+    "name": "imgproxy",
+    "slug": "imgproxy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click imgproxy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-immudb",
+    "name": "ImmuDB",
+    "slug": "immudb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ImmuDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-indico",
+    "name": "Indico",
+    "slug": "indico",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Indico deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-infisical",
+    "name": "Infisical",
+    "slug": "infisical",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Infisical deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-influxdb-2",
+    "name": "InfluxDB 2",
+    "slug": "influxdb-2",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click InfluxDB 2 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-inkscape",
+    "name": "Inkscape",
+    "slug": "inkscape",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Inkscape deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-inngest",
+    "name": "Inngest",
+    "slug": "inngest",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Inngest deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-insforge",
+    "name": "InsForge",
+    "slug": "insforge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click InsForge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-inventree",
+    "name": "InvenTree",
+    "slug": "inventree",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click InvenTree deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-invidious",
+    "name": "Invidious",
+    "slug": "invidious",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Invidious deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-invio",
+    "name": "Invio",
+    "slug": "invio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Invio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-invoice-ninja",
+    "name": "Invoice Ninja",
+    "slug": "invoice-ninja",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Invoice Ninja deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-invoiceshelf",
+    "name": "InvoiceShelf",
+    "slug": "invoiceshelf",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click InvoiceShelf deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-isso",
+    "name": "Isso",
+    "slug": "isso",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Isso deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-it-tools",
+    "name": "IT Tools",
+    "slug": "it-tools",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click IT Tools deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-itflow",
+    "name": "ITFlow",
+    "slug": "itflow",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ITFlow deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-itop",
+    "name": "iTop",
+    "slug": "itop",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click iTop deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jackett",
+    "name": "Jackett",
+    "slug": "jackett",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jackett deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jaeger",
+    "name": "Jaeger",
+    "slug": "jaeger",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jaeger deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jelly-clipper",
+    "name": "Jelly-Clipper",
+    "slug": "jelly-clipper",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jelly-Clipper deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jellyfin",
+    "name": "Jellyfin",
+    "slug": "jellyfin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jellyfin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jellyseerr",
+    "name": "Jellyseerr",
+    "slug": "jellyseerr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jellyseerr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jellystat",
+    "name": "Jellystat",
+    "slug": "jellystat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jellystat deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jellyswarrm",
+    "name": "Jellyswarrm",
+    "slug": "jellyswarrm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jellyswarrm deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jenkins",
+    "name": "Jenkins",
+    "slug": "jenkins",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jenkins deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jfa-go",
+    "name": "jfa-go",
+    "slug": "jfa-go",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click jfa-go deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jitsi",
+    "name": "Jitsi",
+    "slug": "jitsi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jitsi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jitsi-meet",
+    "name": "Jitsi Meet",
+    "slug": "jitsi-meet",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jitsi Meet deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jobops",
+    "name": "JobOps",
+    "slug": "jobops",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click JobOps deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-joomla",
+    "name": "Joomla",
+    "slug": "joomla",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Joomla deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-joplin-server",
+    "name": "Joplin Server",
+    "slug": "joplin-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Joplin Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jotty",
+    "name": "Jotty",
+    "slug": "jotty",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jotty deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jsreport",
+    "name": "jsreport",
+    "slug": "jsreport",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click jsreport deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-judge0-ce",
+    "name": "Judge0 CE",
+    "slug": "judge0-ce",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Judge0 CE deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jump",
+    "name": "Jump",
+    "slug": "jump",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jump deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jumpserver",
+    "name": "JumpServer",
+    "slug": "jumpserver",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click JumpServer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jupyter-notebook",
+    "name": "Jupyter Notebook",
+    "slug": "jupyter-notebook",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Jupyter Notebook deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-jupyterlab",
+    "name": "JupyterLab",
+    "slug": "jupyterlab",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click JupyterLab deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-juxtapose",
+    "name": "Juxtapose",
+    "slug": "juxtapose",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Juxtapose deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kafbat-kafka-ui",
+    "name": "Kafbat Kafka UI",
+    "slug": "kafbat-kafka-ui",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kafbat Kafka UI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kan",
+    "name": "Kan",
+    "slug": "kan",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kan deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kanboard",
+    "name": "Kanboard",
+    "slug": "kanboard",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kanboard deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kaneo",
+    "name": "Kaneo",
+    "slug": "kaneo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kaneo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kapowarr",
+    "name": "Kapowarr",
+    "slug": "kapowarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kapowarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-karakeep",
+    "name": "Karakeep",
+    "slug": "karakeep",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Karakeep deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-karaoke-eternal",
+    "name": "Karaoke Eternal",
+    "slug": "karaoke-eternal",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Karaoke Eternal deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kasmvnc",
+    "name": "KasmVNC",
+    "slug": "kasmvnc",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click KasmVNC deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kavita",
+    "name": "Kavita",
+    "slug": "kavita",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kavita deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-keeweb",
+    "name": "KeeWeb",
+    "slug": "keeweb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click KeeWeb deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-keila",
+    "name": "Keila",
+    "slug": "keila",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Keila deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kener",
+    "name": "Kener",
+    "slug": "kener",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kener deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kestra",
+    "name": "Kestra",
+    "slug": "kestra",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kestra deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-keycloak",
+    "name": "Keycloak",
+    "slug": "keycloak",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Keycloak deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-khoj",
+    "name": "Khoj",
+    "slug": "khoj",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Khoj deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kibana",
+    "name": "Kibana",
+    "slug": "kibana",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kibana deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kill-bill",
+    "name": "Kill Bill",
+    "slug": "kill-bill",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kill Bill deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kimai",
+    "name": "Kimai",
+    "slug": "kimai",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kimai deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kitchenowl",
+    "name": "KitchenOwl",
+    "slug": "kitchenowl",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click KitchenOwl deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kiwix-serve",
+    "name": "Kiwix-serve",
+    "slug": "kiwix-serve",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kiwix-serve deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kodi",
+    "name": "Kodi",
+    "slug": "kodi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kodi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-koel",
+    "name": "Koel",
+    "slug": "koel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Koel deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-koffan",
+    "name": "Koffan",
+    "slug": "koffan",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Koffan deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-koillection",
+    "name": "Koillection",
+    "slug": "koillection",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Koillection deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-komari",
+    "name": "Komari",
+    "slug": "komari",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Komari deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-komga",
+    "name": "Komga",
+    "slug": "komga",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Komga deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kong",
+    "name": "Kong",
+    "slug": "kong",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kong deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kotaemon",
+    "name": "Kotaemon",
+    "slug": "kotaemon",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kotaemon deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-krayin-crm",
+    "name": "Krayin CRM",
+    "slug": "krayin-crm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Krayin CRM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kroki",
+    "name": "Kroki",
+    "slug": "kroki",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kroki deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-kutt",
+    "name": "Kutt",
+    "slug": "kutt",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Kutt deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-label-studio",
+    "name": "Label Studio",
+    "slug": "label-studio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Label Studio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lago",
+    "name": "Lago",
+    "slug": "lago",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Lago deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lakefs",
+    "name": "LakeFS",
+    "slug": "lakefs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LakeFS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lamp-stack-apache-mysql-php",
+    "name": "LAMP Stack (Apache, MySQL, PHP)",
+    "slug": "lamp-stack-apache-mysql-php",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LAMP Stack (Apache, MySQL, PHP) deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-langflow",
+    "name": "Langflow",
+    "slug": "langflow",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Langflow deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-langfuse",
+    "name": "Langfuse",
+    "slug": "langfuse",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Langfuse deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-languagetool",
+    "name": "LanguageTool",
+    "slug": "languagetool",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LanguageTool deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-laravel",
+    "name": "Laravel",
+    "slug": "laravel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Laravel deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lavinmq",
+    "name": "LavinMQ",
+    "slug": "lavinmq",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LavinMQ deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lazylibrarian",
+    "name": "LazyLibrarian",
+    "slug": "lazylibrarian",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LazyLibrarian deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ldap-account-manager",
+    "name": "LDAP Account Manager",
+    "slug": "ldap-account-manager",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LDAP Account Manager deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-leantime",
+    "name": "Leantime",
+    "slug": "leantime",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Leantime deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lemmy",
+    "name": "Lemmy",
+    "slug": "lemmy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Lemmy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lemp-stack-nginx-mysql-php",
+    "name": "LEMP Stack (Nginx, MySQL, PHP)",
+    "slug": "lemp-stack-nginx-mysql-php",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LEMP Stack (Nginx, MySQL, PHP) deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-letta",
+    "name": "Letta",
+    "slug": "letta",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Letta deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-librebooking",
+    "name": "LibreBooking",
+    "slug": "librebooking",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LibreBooking deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-librechat",
+    "name": "LibreChat",
+    "slug": "librechat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LibreChat deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-libredesk",
+    "name": "LibreDesk",
+    "slug": "libredesk",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LibreDesk deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-librenms",
+    "name": "LibreNMS",
+    "slug": "librenms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LibreNMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-librephotos",
+    "name": "LibrePhotos",
+    "slug": "librephotos",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LibrePhotos deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-librespeed",
+    "name": "LibreSpeed",
+    "slug": "librespeed",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LibreSpeed deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lidarr",
+    "name": "Lidarr",
+    "slug": "lidarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Lidarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lightdash",
+    "name": "Lightdash",
+    "slug": "lightdash",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Lightdash deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lightrag",
+    "name": "LightRAG",
+    "slug": "lightrag",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LightRAG deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-limesurvey",
+    "name": "LimeSurvey",
+    "slug": "limesurvey",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LimeSurvey deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-linkace",
+    "name": "LinkAce",
+    "slug": "linkace",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LinkAce deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-linkding",
+    "name": "Linkding",
+    "slug": "linkding",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Linkding deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-linkstack",
+    "name": "LinkStack",
+    "slug": "linkstack",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LinkStack deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-linkwarden",
+    "name": "Linkwarden",
+    "slug": "linkwarden",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Linkwarden deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-listmonk",
+    "name": "Listmonk",
+    "slug": "listmonk",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Listmonk deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-litellm",
+    "name": "LiteLLM",
+    "slug": "litellm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LiteLLM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-littlelink-server",
+    "name": "Littlelink-Server",
+    "slug": "littlelink-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Littlelink-Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-livebook",
+    "name": "Livebook",
+    "slug": "livebook",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Livebook deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lldap",
+    "name": "LLDAP",
+    "slug": "lldap",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LLDAP deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lms",
+    "name": "LMS",
+    "slug": "lms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lnbits",
+    "name": "LNbits",
+    "slug": "lnbits",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LNbits deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lobechat",
+    "name": "LobeChat",
+    "slug": "lobechat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LobeChat deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-local-deep-research",
+    "name": "Local Deep Research",
+    "slug": "local-deep-research",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Local Deep Research deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-localai",
+    "name": "LocalAI",
+    "slug": "localai",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LocalAI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-locust",
+    "name": "Locust",
+    "slug": "locust",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Locust deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-logseq",
+    "name": "Logseq",
+    "slug": "logseq",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Logseq deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-logto",
+    "name": "Logto",
+    "slug": "logto",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Logto deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-loomio",
+    "name": "Loomio",
+    "slug": "loomio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Loomio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lowcoder",
+    "name": "Lowcoder",
+    "slug": "lowcoder",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Lowcoder deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lubelogger",
+    "name": "LubeLogger",
+    "slug": "lubelogger",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click LubeLogger deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-lychee",
+    "name": "Lychee",
+    "slug": "lychee",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Lychee deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-m3db",
+    "name": "M3DB",
+    "slug": "m3db",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click M3DB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mafl",
+    "name": "Mafl",
+    "slug": "mafl",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mafl deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mage-ai",
+    "name": "Mage AI",
+    "slug": "mage-ai",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mage AI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-magento-2",
+    "name": "Magento 2",
+    "slug": "magento-2",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Magento 2 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mail-archiver",
+    "name": "Mail-Archiver",
+    "slug": "mail-archiver",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mail-Archiver deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mailpit",
+    "name": "Mailpit",
+    "slug": "mailpit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mailpit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mailtrain",
+    "name": "Mailtrain",
+    "slug": "mailtrain",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mailtrain deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-maintenant",
+    "name": "Maintenant",
+    "slug": "maintenant",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Maintenant deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-maloja",
+    "name": "Maloja",
+    "slug": "maloja",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Maloja deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-manageiq",
+    "name": "ManageIQ",
+    "slug": "manageiq",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ManageIQ deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-manticore-search",
+    "name": "Manticore Search",
+    "slug": "manticore-search",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Manticore Search deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mantisbt",
+    "name": "MantisBT",
+    "slug": "mantisbt",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MantisBT deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-many-notes",
+    "name": "Many Notes",
+    "slug": "many-notes",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Many Notes deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-manyfold",
+    "name": "Manyfold",
+    "slug": "manyfold",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Manyfold deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mapstore",
+    "name": "MapStore",
+    "slug": "mapstore",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MapStore deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-maputnik",
+    "name": "Maputnik",
+    "slug": "maputnik",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Maputnik deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mariadb",
+    "name": "MariaDB",
+    "slug": "mariadb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MariaDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-marimo",
+    "name": "Marimo",
+    "slug": "marimo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Marimo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-marreta",
+    "name": "Marreta",
+    "slug": "marreta",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Marreta deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mastodon",
+    "name": "Mastodon",
+    "slug": "mastodon",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mastodon deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mathesar",
+    "name": "Mathesar",
+    "slug": "mathesar",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mathesar deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-matomo",
+    "name": "Matomo",
+    "slug": "matomo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Matomo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-matrix-conduit",
+    "name": "Matrix Conduit",
+    "slug": "matrix-conduit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Matrix Conduit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-matrix-synapse",
+    "name": "Matrix Synapse",
+    "slug": "matrix-synapse",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Matrix Synapse deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mattermost",
+    "name": "Mattermost",
+    "slug": "mattermost",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mattermost deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mautic",
+    "name": "Mautic",
+    "slug": "mautic",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mautic deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-maxkb",
+    "name": "MaxKB",
+    "slug": "maxkb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MaxKB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-maxun",
+    "name": "Maxun",
+    "slug": "maxun",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Maxun deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mayan-edms",
+    "name": "Mayan EDMS",
+    "slug": "mayan-edms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mayan EDMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-maybe",
+    "name": "Maybe",
+    "slug": "maybe",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Maybe deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mazanoke",
+    "name": "Mazanoke",
+    "slug": "mazanoke",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mazanoke deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mbin",
+    "name": "Mbin",
+    "slug": "mbin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mbin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mcp-server",
+    "name": "MCP Server",
+    "slug": "mcp-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MCP Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mealie",
+    "name": "Mealie",
+    "slug": "mealie",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mealie deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mean-stack-mongodb-expressjs-angularjs-nodejs",
+    "name": "MEAN Stack (MongoDB, ExpressJS, AngularJS, NodeJS)",
+    "slug": "mean-stack-mongodb-expressjs-angularjs-nodejs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MEAN Stack (MongoDB, ExpressJS, AngularJS, NodeJS) deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mediago",
+    "name": "MediaGo",
+    "slug": "mediago",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MediaGo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mediawiki",
+    "name": "MediaWIKI",
+    "slug": "mediawiki",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MediaWIKI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-medusa",
+    "name": "Medusa",
+    "slug": "medusa",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Medusa deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-meilisearch",
+    "name": "Meilisearch",
+    "slug": "meilisearch",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Meilisearch deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-memgraph",
+    "name": "Memgraph",
+    "slug": "memgraph",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Memgraph deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-memos",
+    "name": "Memos",
+    "slug": "memos",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Memos deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mern-stack-mongodb-expressjs-reactjs-nodejs",
+    "name": "MERN Stack (MongoDB, ExpressJS, ReactJS, NodeJS)",
+    "slug": "mern-stack-mongodb-expressjs-reactjs-nodejs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MERN Stack (MongoDB, ExpressJS, ReactJS, NodeJS) deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-meshcentral",
+    "name": "MeshCentral",
+    "slug": "meshcentral",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MeshCentral deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-metabase",
+    "name": "Metabase",
+    "slug": "metabase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Metabase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-metamcp",
+    "name": "MetaMCP",
+    "slug": "metamcp",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MetaMCP deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-metatrader-5",
+    "name": "MetaTrader 5",
+    "slug": "metatrader-5",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MetaTrader 5 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-meteroid",
+    "name": "Meteroid",
+    "slug": "meteroid",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Meteroid deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-metube",
+    "name": "MeTube",
+    "slug": "metube",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MeTube deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mevn-stack-mongodb-expressjs-vuejs-nodejs",
+    "name": "MEVN Stack (MongoDB, ExpressJS, VueJS, NodeJS)",
+    "slug": "mevn-stack-mongodb-expressjs-vuejs-nodejs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MEVN Stack (MongoDB, ExpressJS, VueJS, NodeJS) deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-microbin",
+    "name": "MicroBin",
+    "slug": "microbin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MicroBin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-microcks",
+    "name": "Microcks",
+    "slug": "microcks",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Microcks deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-microrealestate",
+    "name": "MicroRealEstate",
+    "slug": "microrealestate",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MicroRealEstate deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-microweber",
+    "name": "Microweber",
+    "slug": "microweber",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Microweber deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-milvus",
+    "name": "Milvus",
+    "slug": "milvus",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Milvus deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mindsdb",
+    "name": "MindsDB",
+    "slug": "mindsdb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MindsDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mini-qr",
+    "name": "Mini QR",
+    "slug": "mini-qr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mini QR deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-miniflux",
+    "name": "Miniflux",
+    "slug": "miniflux",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Miniflux deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mirofish",
+    "name": "MiroFish",
+    "slug": "mirofish",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MiroFish deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mirotalk",
+    "name": "MiroTalk",
+    "slug": "mirotalk",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MiroTalk deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-misskey",
+    "name": "Misskey",
+    "slug": "misskey",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Misskey deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mistserver",
+    "name": "MistServer",
+    "slug": "mistserver",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MistServer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mitra",
+    "name": "Mitra",
+    "slug": "mitra",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mitra deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mixpost",
+    "name": "Mixpost",
+    "slug": "mixpost",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mixpost deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mlflow",
+    "name": "MLflow",
+    "slug": "mlflow",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MLflow deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mobilizon",
+    "name": "Mobilizon",
+    "slug": "mobilizon",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mobilizon deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mongo-express",
+    "name": "Mongo Express",
+    "slug": "mongo-express",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mongo Express deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mongodb-4",
+    "name": "MongoDB 4",
+    "slug": "mongodb-4",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MongoDB 4 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-monica",
+    "name": "Monica",
+    "slug": "monica",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Monica deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-moodist",
+    "name": "Moodist",
+    "slug": "moodist",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Moodist deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-moodle",
+    "name": "Moodle",
+    "slug": "moodle",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Moodle deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mopidy",
+    "name": "Mopidy",
+    "slug": "mopidy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mopidy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-morphic",
+    "name": "Morphic",
+    "slug": "morphic",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Morphic deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-movary",
+    "name": "Movary",
+    "slug": "movary",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Movary deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mqttx",
+    "name": "MQTTX",
+    "slug": "mqttx",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MQTTX deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mstream",
+    "name": "mStream",
+    "slug": "mstream",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click mStream deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-multi-scrobbler",
+    "name": "Multi-Scrobbler",
+    "slug": "multi-scrobbler",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Multi-Scrobbler deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-multica",
+    "name": "Multica",
+    "slug": "multica",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Multica deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mylar3",
+    "name": "Mylar3",
+    "slug": "mylar3",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Mylar3 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-myspeed",
+    "name": "MySpeed",
+    "slug": "myspeed",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MySpeed deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-mysql",
+    "name": "MySQL",
+    "slug": "mysql",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click MySQL deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-n8n-100-workflows",
+    "name": "n8n (+100 workflows)",
+    "slug": "n8n-100-workflows",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click n8n (+100 workflows) deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-n8n-queue-mode",
+    "name": "n8n (queue mode)",
+    "slug": "n8n-queue-mode",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click n8n (queue mode) deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-n8n-with-ai-assistant",
+    "name": "n8n with AI Assistant",
+    "slug": "n8n-with-ai-assistant",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click n8n with AI Assistant deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nango",
+    "name": "Nango",
+    "slug": "nango",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Nango deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nats",
+    "name": "NATS",
+    "slug": "nats",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NATS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-navidrome",
+    "name": "Navidrome",
+    "slug": "navidrome",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Navidrome deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-neko",
+    "name": "Neko",
+    "slug": "neko",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Neko deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nemoclaw",
+    "name": "NemoClaw",
+    "slug": "nemoclaw",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NemoClaw deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-neo4j",
+    "name": "Neo4j",
+    "slug": "neo4j",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Neo4j deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-netbird-client",
+    "name": "NetBird Client",
+    "slug": "netbird-client",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NetBird Client deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-netbox",
+    "name": "NetBox",
+    "slug": "netbox",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NetBox deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-netdata",
+    "name": "Netdata",
+    "slug": "netdata",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Netdata deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-new-api",
+    "name": "New API",
+    "slug": "new-api",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click New API deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nextchat",
+    "name": "NextChat",
+    "slug": "nextchat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NextChat deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nexterm",
+    "name": "Nexterm",
+    "slug": "nexterm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Nexterm deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nexus-repository-manager",
+    "name": "Nexus Repository Manager",
+    "slug": "nexus-repository-manager",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Nexus Repository Manager deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nightlio",
+    "name": "Nightlio",
+    "slug": "nightlio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Nightlio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nocobase",
+    "name": "NocoBase",
+    "slug": "nocobase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NocoBase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nocodb",
+    "name": "NocoDB",
+    "slug": "nocodb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NocoDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-node-red",
+    "name": "Node-RED",
+    "slug": "node-red",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Node-RED deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nodebb",
+    "name": "NodeBB",
+    "slug": "nodebb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NodeBB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nopcommerce",
+    "name": "nopCommerce",
+    "slug": "nopcommerce",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click nopCommerce deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-norish",
+    "name": "Norish",
+    "slug": "norish",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Norish deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-notediscovery",
+    "name": "NoteDiscovery",
+    "slug": "notediscovery",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NoteDiscovery deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-notifiarr",
+    "name": "Notifiarr",
+    "slug": "notifiarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Notifiarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-notifuse",
+    "name": "Notifuse",
+    "slug": "notifuse",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Notifuse deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-novu",
+    "name": "Novu",
+    "slug": "novu",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Novu deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nsq",
+    "name": "NSQ",
+    "slug": "nsq",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NSQ deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ntfy",
+    "name": "ntfy",
+    "slug": "ntfy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ntfy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nuclio",
+    "name": "Nuclio",
+    "slug": "nuclio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Nuclio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nzbget",
+    "name": "NZBGet",
+    "slug": "nzbget",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NZBGet deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-nzbhydra2",
+    "name": "NZBHydra2",
+    "slug": "nzbhydra2",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click NZBHydra2 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ocs-inventory-ng",
+    "name": "OCS Inventory NG",
+    "slug": "ocs-inventory-ng",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OCS Inventory NG deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-october-cms",
+    "name": "October CMS",
+    "slug": "october-cms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click October CMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-octobot",
+    "name": "OctoBot",
+    "slug": "octobot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OctoBot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-odoo",
+    "name": "Odoo",
+    "slug": "odoo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Odoo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-odysseus",
+    "name": "Odysseus",
+    "slug": "odysseus",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Odysseus deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-olivetin",
+    "name": "OliveTin",
+    "slug": "olivetin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OliveTin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ollama",
+    "name": "Ollama",
+    "slug": "ollama",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ollama deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ombi",
+    "name": "Ombi",
+    "slug": "ombi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ombi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-omero",
+    "name": "OMERO",
+    "slug": "omero",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OMERO deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-omniroute",
+    "name": "OmniRoute",
+    "slug": "omniroute",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OmniRoute deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-omnitools",
+    "name": "OmniTools",
+    "slug": "omnitools",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OmniTools deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-onedev",
+    "name": "OneDev",
+    "slug": "onedev",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OneDev deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-onetimesecret",
+    "name": "OneTimeSecret",
+    "slug": "onetimesecret",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OneTimeSecret deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-onlyoffice-docs",
+    "name": "ONLYOFFICE Docs",
+    "slug": "onlyoffice-docs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ONLYOFFICE Docs deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-onyx",
+    "name": "Onyx",
+    "slug": "onyx",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Onyx deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-open-agent",
+    "name": "Open Agent",
+    "slug": "open-agent",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Open Agent deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-open-archiver",
+    "name": "Open Archiver",
+    "slug": "open-archiver",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Open Archiver deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-open-dronelog",
+    "name": "Open Dronelog",
+    "slug": "open-dronelog",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Open Dronelog deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-open-journal-systems",
+    "name": "Open Journal Systems",
+    "slug": "open-journal-systems",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Open Journal Systems deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-open-monograph-press",
+    "name": "Open Monograph Press",
+    "slug": "open-monograph-press",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Open Monograph Press deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-open-notebook",
+    "name": "Open Notebook",
+    "slug": "open-notebook",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Open Notebook deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-open-source-pos",
+    "name": "Open Source POS",
+    "slug": "open-source-pos",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Open Source POS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-open-webui",
+    "name": "Open WebUI",
+    "slug": "open-webui",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Open WebUI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openai-codex",
+    "name": "OpenAI Codex",
+    "slug": "openai-codex",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenAI Codex deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openbao",
+    "name": "OpenBao",
+    "slug": "openbao",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenBao deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openbudgeteer",
+    "name": "OpenBudgeteer",
+    "slug": "openbudgeteer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenBudgeteer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-opencart",
+    "name": "OpenCart",
+    "slug": "opencart",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenCart deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-opencloud",
+    "name": "OpenCloud",
+    "slug": "opencloud",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenCloud deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openemr",
+    "name": "OpenEMR",
+    "slug": "openemr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenEMR deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openfga",
+    "name": "OpenFGA",
+    "slug": "openfga",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenFGA deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-opengist",
+    "name": "Opengist",
+    "slug": "opengist",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Opengist deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openhands",
+    "name": "OpenHands",
+    "slug": "openhands",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenHands deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openhuman",
+    "name": "OpenHuman",
+    "slug": "openhuman",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenHuman deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openlit",
+    "name": "OpenLIT",
+    "slug": "openlit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenLIT deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openlitespeed-and-django",
+    "name": "OpenLiteSpeed and Django",
+    "slug": "openlitespeed-and-django",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenLiteSpeed and Django deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openlitespeed-and-drupal",
+    "name": "OpenLiteSpeed and Drupal",
+    "slug": "openlitespeed-and-drupal",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenLiteSpeed and Drupal deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openlitespeed-and-joomla",
+    "name": "OpenLiteSpeed and Joomla",
+    "slug": "openlitespeed-and-joomla",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenLiteSpeed and Joomla deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openlitespeed-and-rails",
+    "name": "OpenLiteSpeed and Rails",
+    "slug": "openlitespeed-and-rails",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenLiteSpeed and Rails deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openlitespeed-and-wordpress",
+    "name": "OpenLiteSpeed and WordPress",
+    "slug": "openlitespeed-and-wordpress",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenLiteSpeed and WordPress deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openmausbot",
+    "name": "OpenMausBot",
+    "slug": "openmausbot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenMausBot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openobserve",
+    "name": "OpenObserve",
+    "slug": "openobserve",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenObserve deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openpanel",
+    "name": "OpenPanel",
+    "slug": "openpanel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenPanel deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openproject",
+    "name": "OpenProject",
+    "slug": "openproject",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenProject deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openremote",
+    "name": "OpenRemote",
+    "slug": "openremote",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenRemote deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openrouteservice",
+    "name": "openrouteservice",
+    "slug": "openrouteservice",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click openrouteservice deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-opensearch",
+    "name": "OpenSearch",
+    "slug": "opensearch",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenSearch deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openseo",
+    "name": "OpenSEO",
+    "slug": "openseo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenSEO deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-opensign",
+    "name": "OpenSign",
+    "slug": "opensign",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenSign deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openspeedtest",
+    "name": "OpenSpeedTest",
+    "slug": "openspeedtest",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenSpeedTest deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openttd",
+    "name": "OpenTTD",
+    "slug": "openttd",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenTTD deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openviking",
+    "name": "OpenViking",
+    "slug": "openviking",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenViking deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-openvpn-access-server",
+    "name": "OpenVPN Access Server",
+    "slug": "openvpn-access-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpenVPN Access Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-opnform",
+    "name": "OpnForm",
+    "slug": "opnform",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OpnForm deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-orangehrm",
+    "name": "OrangeHRM",
+    "slug": "orangehrm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OrangeHRM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-organizr",
+    "name": "Organizr",
+    "slug": "organizr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Organizr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-osrm",
+    "name": "OSRM",
+    "slug": "osrm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OSRM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-otobo",
+    "name": "OTOBO",
+    "slug": "otobo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OTOBO deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-outline",
+    "name": "Outline",
+    "slug": "outline",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Outline deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-overleaf",
+    "name": "Overleaf",
+    "slug": "overleaf",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Overleaf deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-overseerr",
+    "name": "Overseerr",
+    "slug": "overseerr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Overseerr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-owncast",
+    "name": "Owncast",
+    "slug": "owncast",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Owncast deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-owncloud",
+    "name": "ownCloud",
+    "slug": "owncloud",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ownCloud deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-owntracks-recorder",
+    "name": "OwnTracks Recorder",
+    "slug": "owntracks-recorder",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OwnTracks Recorder deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-oxicloud",
+    "name": "OxiCloud",
+    "slug": "oxicloud",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click OxiCloud deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pairdrop",
+    "name": "PairDrop",
+    "slug": "pairdrop",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PairDrop deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-paisa",
+    "name": "Paisa",
+    "slug": "paisa",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Paisa deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pangolin-newt",
+    "name": "Pangolin Newt",
+    "slug": "pangolin-newt",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pangolin Newt deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-paperless-ngx",
+    "name": "Paperless-ngx",
+    "slug": "paperless-ngx",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Paperless-ngx deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-papermerge",
+    "name": "Papermerge",
+    "slug": "papermerge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Papermerge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-papra",
+    "name": "Papra",
+    "slug": "papra",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Papra deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-para",
+    "name": "Para",
+    "slug": "para",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Para deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-parse-server",
+    "name": "Parse Server",
+    "slug": "parse-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Parse Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-parseable",
+    "name": "Parseable",
+    "slug": "parseable",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Parseable deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-passbolt",
+    "name": "Passbolt",
+    "slug": "passbolt",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Passbolt deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-password-pusher",
+    "name": "Password Pusher",
+    "slug": "password-pusher",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Password Pusher deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pastefy",
+    "name": "Pastefy",
+    "slug": "pastefy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pastefy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-patchmon",
+    "name": "PatchMon",
+    "slug": "patchmon",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PatchMon deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-paymenter",
+    "name": "Paymenter",
+    "slug": "paymenter",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Paymenter deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pdfding",
+    "name": "PdfDing",
+    "slug": "pdfding",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PdfDing deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-peertube",
+    "name": "PeerTube",
+    "slug": "peertube",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PeerTube deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-penpot",
+    "name": "Penpot",
+    "slug": "penpot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Penpot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-percona-pmm",
+    "name": "Percona PMM",
+    "slug": "percona-pmm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Percona PMM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-perplexica",
+    "name": "Perplexica",
+    "slug": "perplexica",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Perplexica deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pgadmin",
+    "name": "pgAdmin",
+    "slug": "pgadmin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click pgAdmin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pgbackweb",
+    "name": "pgBackWeb",
+    "slug": "pgbackweb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click pgBackWeb deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pghero",
+    "name": "PgHero",
+    "slug": "pghero",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PgHero deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pgweb",
+    "name": "Pgweb",
+    "slug": "pgweb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pgweb deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-phoenix",
+    "name": "Phoenix",
+    "slug": "phoenix",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Phoenix deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-photofield",
+    "name": "Photofield",
+    "slug": "photofield",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Photofield deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-photoprism",
+    "name": "PhotoPrism",
+    "slug": "photoprism",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PhotoPrism deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-photoview",
+    "name": "Photoview",
+    "slug": "photoview",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Photoview deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-phpbb",
+    "name": "phpBB",
+    "slug": "phpbb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click phpBB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-phpipam",
+    "name": "phpIPAM",
+    "slug": "phpipam",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click phpIPAM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-phpmyadmin",
+    "name": "phpMyAdmin",
+    "slug": "phpmyadmin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click phpMyAdmin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-picoclaw",
+    "name": "PicoClaw",
+    "slug": "picoclaw",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PicoClaw deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-picoshare",
+    "name": "PicoShare",
+    "slug": "picoshare",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PicoShare deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-picsur",
+    "name": "Picsur",
+    "slug": "picsur",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Picsur deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-piefed",
+    "name": "PieFed",
+    "slug": "piefed",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PieFed deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pigallery2",
+    "name": "PiGallery2",
+    "slug": "pigallery2",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PiGallery2 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pigeonpod",
+    "name": "PigeonPod",
+    "slug": "pigeonpod",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PigeonPod deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pinchflat",
+    "name": "Pinchflat",
+    "slug": "pinchflat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pinchflat deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pinepods",
+    "name": "PinePods",
+    "slug": "pinepods",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PinePods deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pingvin-share",
+    "name": "Pingvin Share",
+    "slug": "pingvin-share",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pingvin Share deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pinry",
+    "name": "Pinry",
+    "slug": "pinry",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pinry deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-piwigo",
+    "name": "Piwigo",
+    "slug": "piwigo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Piwigo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-plandex",
+    "name": "Plandex",
+    "slug": "plandex",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Plandex deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-plane",
+    "name": "Plane",
+    "slug": "plane",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Plane deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-plex",
+    "name": "Plex",
+    "slug": "plex",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Plex deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-plik",
+    "name": "Plik",
+    "slug": "plik",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Plik deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-plone",
+    "name": "Plone",
+    "slug": "plone",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Plone deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pocket-id",
+    "name": "Pocket ID",
+    "slug": "pocket-id",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pocket ID deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pocketbase",
+    "name": "PocketBase",
+    "slug": "pocketbase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PocketBase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-polaris",
+    "name": "Polaris",
+    "slug": "polaris",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Polaris deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-portainer",
+    "name": "Portainer",
+    "slug": "portainer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Portainer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-posterizarr",
+    "name": "Posterizarr",
+    "slug": "posterizarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Posterizarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-posterr",
+    "name": "Posterr",
+    "slug": "posterr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Posterr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-posthog",
+    "name": "PostHog",
+    "slug": "posthog",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PostHog deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-postiz",
+    "name": "Postiz",
+    "slug": "postiz",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Postiz deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-powerdns-admin",
+    "name": "PowerDNS-Admin",
+    "slug": "powerdns-admin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PowerDNS-Admin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-prefect",
+    "name": "Prefect",
+    "slug": "prefect",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Prefect deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-prestashop",
+    "name": "PrestaShop",
+    "slug": "prestashop",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PrestaShop deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pretix",
+    "name": "pretix",
+    "slug": "pretix",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click pretix deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-privatebin",
+    "name": "PrivateBin",
+    "slug": "privatebin",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PrivateBin deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-privategpt",
+    "name": "PrivateGPT",
+    "slug": "privategpt",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PrivateGPT deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-profilarr",
+    "name": "Profilarr",
+    "slug": "profilarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Profilarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-projectsend",
+    "name": "ProjectSend",
+    "slug": "projectsend",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ProjectSend deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-prowlarr",
+    "name": "Prowlarr",
+    "slug": "prowlarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Prowlarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-psitransfer",
+    "name": "PsiTransfer",
+    "slug": "psitransfer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PsiTransfer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pterodactyl",
+    "name": "Pterodactyl",
+    "slug": "pterodactyl",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pterodactyl deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pufferpanel",
+    "name": "PufferPanel",
+    "slug": "pufferpanel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click PufferPanel deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pulsarr",
+    "name": "Pulsarr",
+    "slug": "pulsarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pulsarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pulse",
+    "name": "Pulse",
+    "slug": "pulse",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pulse deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pycsw",
+    "name": "pycsw",
+    "slug": "pycsw",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click pycsw deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pydio-cells",
+    "name": "Pydio Cells",
+    "slug": "pydio-cells",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Pydio Cells deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-pygeoapi",
+    "name": "pygeoapi",
+    "slug": "pygeoapi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click pygeoapi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-qbittorrent",
+    "name": "qBittorrent",
+    "slug": "qbittorrent",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click qBittorrent deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-qdrant",
+    "name": "Qdrant",
+    "slug": "qdrant",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Qdrant deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-qloapps",
+    "name": "QloApps",
+    "slug": "qloapps",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click QloApps deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-quasarr",
+    "name": "Quasarr",
+    "slug": "quasarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Quasarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-quickwit",
+    "name": "Quickwit",
+    "slug": "quickwit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Quickwit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-r2r",
+    "name": "R2R",
+    "slug": "r2r",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click R2R deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rabbitmq",
+    "name": "RabbitMQ",
+    "slug": "rabbitmq",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RabbitMQ deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rackula",
+    "name": "Rackula",
+    "slug": "rackula",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Rackula deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-radarr",
+    "name": "Radarr",
+    "slug": "radarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Radarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-radicale",
+    "name": "Radicale",
+    "slug": "radicale",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Radicale deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ragflow",
+    "name": "RAGflow",
+    "slug": "ragflow",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RAGflow deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rallly",
+    "name": "Rallly",
+    "slug": "rallly",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Rallly deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ralph",
+    "name": "Ralph",
+    "slug": "ralph",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ralph deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-raneto",
+    "name": "Raneto",
+    "slug": "raneto",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Raneto deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-razzia",
+    "name": "Razzia",
+    "slug": "razzia",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Razzia deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-reactive-resume",
+    "name": "Reactive Resume",
+    "slug": "reactive-resume",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Reactive Resume deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-readeck",
+    "name": "Readeck",
+    "slug": "readeck",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Readeck deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-readur",
+    "name": "Readur",
+    "slug": "readur",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Readur deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-readyset",
+    "name": "Readyset",
+    "slug": "readyset",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Readyset deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-redaxo",
+    "name": "REDAXO",
+    "slug": "redaxo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click REDAXO deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-redis",
+    "name": "Redis",
+    "slug": "redis",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Redis deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-redis-commander",
+    "name": "Redis Commander",
+    "slug": "redis-commander",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Redis Commander deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-redmine",
+    "name": "Redmine",
+    "slug": "redmine",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Redmine deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-redpanda-console",
+    "name": "Redpanda Console",
+    "slug": "redpanda-console",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Redpanda Console deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-reitti",
+    "name": "Reitti",
+    "slug": "reitti",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Reitti deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-reiverr",
+    "name": "Reiverr",
+    "slug": "reiverr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Reiverr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-relaticle",
+    "name": "Relaticle",
+    "slug": "relaticle",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Relaticle deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-remark42",
+    "name": "Remark42",
+    "slug": "remark42",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Remark42 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-remmina",
+    "name": "Remmina",
+    "slug": "remmina",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Remmina deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-resilio-sync",
+    "name": "Resilio Sync",
+    "slug": "resilio-sync",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Resilio Sync deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-restreamer",
+    "name": "Restreamer",
+    "slug": "restreamer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Restreamer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-retroassembly",
+    "name": "RetroAssembly",
+    "slug": "retroassembly",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RetroAssembly deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rivet",
+    "name": "Rivet",
+    "slug": "rivet",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Rivet deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rocket-chat",
+    "name": "Rocket.Chat",
+    "slug": "rocket-chat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Rocket.Chat deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-romm",
+    "name": "RomM",
+    "slug": "romm",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RomM deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rosariosis",
+    "name": "RosarioSIS",
+    "slug": "rosariosis",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RosarioSIS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rotki",
+    "name": "Rotki",
+    "slug": "rotki",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Rotki deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-roundcube",
+    "name": "Roundcube",
+    "slug": "roundcube",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Roundcube deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rss-bridge",
+    "name": "RSS Bridge",
+    "slug": "rss-bridge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RSS Bridge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rsshub",
+    "name": "RSSHub",
+    "slug": "rsshub",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RSSHub deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rstudio-server",
+    "name": "RStudio Server",
+    "slug": "rstudio-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RStudio Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rundeck",
+    "name": "Rundeck",
+    "slug": "rundeck",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Rundeck deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rustdesk",
+    "name": "RustDesk",
+    "slug": "rustdesk",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RustDesk deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rustfs",
+    "name": "RustFS",
+    "slug": "rustfs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click RustFS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-rybbit",
+    "name": "Rybbit",
+    "slug": "rybbit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Rybbit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ryot",
+    "name": "Ryot",
+    "slug": "ryot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ryot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sabnzbd",
+    "name": "SABnzbd",
+    "slug": "sabnzbd",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SABnzbd deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-saltcorn",
+    "name": "Saltcorn",
+    "slug": "saltcorn",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Saltcorn deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-scada-lts",
+    "name": "Scada-LTS",
+    "slug": "scada-lts",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Scada-LTS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-scoold",
+    "name": "Scoold",
+    "slug": "scoold",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Scoold deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-screego",
+    "name": "Screego",
+    "slug": "screego",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Screego deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-scrypted",
+    "name": "Scrypted",
+    "slug": "scrypted",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Scrypted deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-scylladb",
+    "name": "ScyllaDB",
+    "slug": "scylladb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ScyllaDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-seafile",
+    "name": "Seafile",
+    "slug": "seafile",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Seafile deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-searxng",
+    "name": "SearXNG",
+    "slug": "searxng",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SearXNG deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-seaweedfs",
+    "name": "SeaweedFS",
+    "slug": "seaweedfs",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SeaweedFS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-seerr",
+    "name": "Seerr",
+    "slug": "seerr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Seerr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-semaphore",
+    "name": "Semaphore",
+    "slug": "semaphore",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Semaphore deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-senaite-lims",
+    "name": "SENAITE LIMS",
+    "slug": "senaite-lims",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SENAITE LIMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-serge",
+    "name": "Serge",
+    "slug": "serge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Serge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-serpbear",
+    "name": "SerpBear",
+    "slug": "serpbear",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SerpBear deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-serverstatus",
+    "name": "ServerStatus",
+    "slug": "serverstatus",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ServerStatus deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shaarli",
+    "name": "Shaarli",
+    "slug": "shaarli",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Shaarli deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shadowbroker",
+    "name": "Shadowbroker",
+    "slug": "shadowbroker",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Shadowbroker deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sharkey",
+    "name": "Sharkey",
+    "slug": "sharkey",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Sharkey deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shelfmark",
+    "name": "Shelfmark",
+    "slug": "shelfmark",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Shelfmark deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sherlock",
+    "name": "Sherlock",
+    "slug": "sherlock",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Sherlock deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shinyproxy",
+    "name": "ShinyProxy",
+    "slug": "shinyproxy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ShinyProxy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shiori",
+    "name": "Shiori",
+    "slug": "shiori",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Shiori deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shipshipship",
+    "name": "ShipShipShip",
+    "slug": "shipshipship",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ShipShipShip deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shlink",
+    "name": "Shlink",
+    "slug": "shlink",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Shlink deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shopware",
+    "name": "Shopware",
+    "slug": "shopware",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Shopware deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shoutrrr",
+    "name": "Shoutrrr",
+    "slug": "shoutrrr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Shoutrrr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-shynet",
+    "name": "Shynet",
+    "slug": "shynet",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Shynet deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sickgear",
+    "name": "SickGear",
+    "slug": "sickgear",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SickGear deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-signoz",
+    "name": "SigNoz",
+    "slug": "signoz",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SigNoz deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-silex",
+    "name": "Silex",
+    "slug": "silex",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Silex deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sillytavern",
+    "name": "SillyTavern",
+    "slug": "sillytavern",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SillyTavern deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-silverbullet",
+    "name": "SilverBullet",
+    "slug": "silverbullet",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SilverBullet deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sim-studio",
+    "name": "Sim Studio",
+    "slug": "sim-studio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Sim Studio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-siyuan",
+    "name": "SiYuan",
+    "slug": "siyuan",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SiYuan deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-skysend",
+    "name": "SkySend",
+    "slug": "skysend",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SkySend deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-skyvern",
+    "name": "Skyvern",
+    "slug": "skyvern",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Skyvern deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-slash",
+    "name": "Slash",
+    "slug": "slash",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Slash deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-slink",
+    "name": "Slink",
+    "slug": "slink",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Slink deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-slskd",
+    "name": "slskd",
+    "slug": "slskd",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click slskd deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-smocker",
+    "name": "Smocker",
+    "slug": "smocker",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Smocker deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-smokeping",
+    "name": "SmokePing",
+    "slug": "smokeping",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SmokePing deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-snac2",
+    "name": "Snac2",
+    "slug": "snac2",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Snac2 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-snapdrop",
+    "name": "Snapdrop",
+    "slug": "snapdrop",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Snapdrop deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-snapotter",
+    "name": "SnapOtter",
+    "slug": "snapotter",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SnapOtter deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-snappymail",
+    "name": "SnappyMail",
+    "slug": "snappymail",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SnappyMail deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-snipe-it",
+    "name": "Snipe-IT",
+    "slug": "snipe-it",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Snipe-IT deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-soketi",
+    "name": "Soketi",
+    "slug": "soketi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Soketi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-solidinvoice",
+    "name": "SolidInvoice",
+    "slug": "solidinvoice",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SolidInvoice deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-solidtime",
+    "name": "Solidtime",
+    "slug": "solidtime",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Solidtime deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sonarqube",
+    "name": "SonarQube",
+    "slug": "sonarqube",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SonarQube deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sonarr",
+    "name": "Sonarr",
+    "slug": "sonarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Sonarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-songloft",
+    "name": "Songloft",
+    "slug": "songloft",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Songloft deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-soulsync",
+    "name": "SoulSync",
+    "slug": "soulsync",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SoulSync deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-spacedrive",
+    "name": "Spacedrive",
+    "slug": "spacedrive",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Spacedrive deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-spacetimedb",
+    "name": "SpacetimeDB",
+    "slug": "spacetimedb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SpacetimeDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-speaches",
+    "name": "Speaches",
+    "slug": "speaches",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Speaches deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-speakr",
+    "name": "Speakr",
+    "slug": "speakr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Speakr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-speedtest-tracker",
+    "name": "Speedtest Tracker",
+    "slug": "speedtest-tracker",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Speedtest Tracker deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-spice-ai",
+    "name": "Spice AI",
+    "slug": "spice-ai",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Spice AI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-spliit",
+    "name": "Spliit",
+    "slug": "spliit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Spliit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-spoolman",
+    "name": "Spoolman",
+    "slug": "spoolman",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Spoolman deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-spree",
+    "name": "Spree",
+    "slug": "spree",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Spree deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sqlchat",
+    "name": "SQLChat",
+    "slug": "sqlchat",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SQLChat deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sqlpage",
+    "name": "SQLPage",
+    "slug": "sqlpage",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SQLPage deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-squidex",
+    "name": "Squidex",
+    "slug": "squidex",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Squidex deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sshwifty",
+    "name": "Sshwifty",
+    "slug": "sshwifty",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Sshwifty deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-starbase-80",
+    "name": "Starbase 80",
+    "slug": "starbase-80",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Starbase 80 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-starrocks",
+    "name": "StarRocks",
+    "slug": "starrocks",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click StarRocks deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-statistics-for-strava",
+    "name": "Statistics for Strava",
+    "slug": "statistics-for-strava",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Statistics for Strava deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-steel-browser",
+    "name": "Steel Browser",
+    "slug": "steel-browser",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Steel Browser deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-stirling-pdf",
+    "name": "Stirling PDF",
+    "slug": "stirling-pdf",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Stirling PDF deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-strapi",
+    "name": "Strapi",
+    "slug": "strapi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Strapi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-stump",
+    "name": "Stump",
+    "slug": "stump",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Stump deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-suggestarr",
+    "name": "SuggestArr",
+    "slug": "suggestarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SuggestArr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sun-panel",
+    "name": "Sun-Panel",
+    "slug": "sun-panel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Sun-Panel deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-super-productivity",
+    "name": "Super Productivity",
+    "slug": "super-productivity",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Super Productivity deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-supertokens",
+    "name": "SuperTokens",
+    "slug": "supertokens",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SuperTokens deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-sure",
+    "name": "Sure",
+    "slug": "sure",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Sure deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-surrealdb",
+    "name": "SurrealDB",
+    "slug": "surrealdb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SurrealDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-suwayomi",
+    "name": "Suwayomi",
+    "slug": "suwayomi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Suwayomi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-svix",
+    "name": "Svix",
+    "slug": "svix",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Svix deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-swing-music",
+    "name": "Swing Music",
+    "slug": "swing-music",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Swing Music deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-synclounge",
+    "name": "SyncLounge",
+    "slug": "synclounge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click SyncLounge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-syncthing",
+    "name": "Syncthing",
+    "slug": "syncthing",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Syncthing deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tandoor-recipes",
+    "name": "Tandoor Recipes",
+    "slug": "tandoor-recipes",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tandoor Recipes deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tasktrove",
+    "name": "TaskTrove",
+    "slug": "tasktrove",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TaskTrove deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tautulli",
+    "name": "Tautulli",
+    "slug": "tautulli",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tautulli deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-taxhacker",
+    "name": "TaxHacker",
+    "slug": "taxhacker",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TaxHacker deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tdarr",
+    "name": "Tdarr",
+    "slug": "tdarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tdarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-teable",
+    "name": "Teable",
+    "slug": "teable",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Teable deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-teammapper",
+    "name": "TeamMapper",
+    "slug": "teammapper",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TeamMapper deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-technitium-dns-server",
+    "name": "Technitium DNS Server",
+    "slug": "technitium-dns-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Technitium DNS Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-teedy",
+    "name": "Teedy",
+    "slug": "teedy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Teedy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-temporal",
+    "name": "Temporal",
+    "slug": "temporal",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Temporal deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tensorzero",
+    "name": "TensorZero",
+    "slug": "tensorzero",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TensorZero deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-teslamate",
+    "name": "TeslaMate",
+    "slug": "teslamate",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TeslaMate deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-text-generation-web-ui",
+    "name": "Text Generation Web UI",
+    "slug": "text-generation-web-ui",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Text Generation Web UI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-the-lounge",
+    "name": "The Lounge",
+    "slug": "the-lounge",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click The Lounge deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-thingsboard",
+    "name": "ThingsBoard",
+    "slug": "thingsboard",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ThingsBoard deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-thinkdashboard",
+    "name": "ThinkDashboard",
+    "slug": "thinkdashboard",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ThinkDashboard deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-thruk",
+    "name": "Thruk",
+    "slug": "thruk",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Thruk deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-thumbor",
+    "name": "Thumbor",
+    "slug": "thumbor",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Thumbor deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tianji",
+    "name": "Tianji",
+    "slug": "tianji",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tianji deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tiddlywiki",
+    "name": "TiddlyWiki",
+    "slug": "tiddlywiki",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TiddlyWiki deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-timescaledb",
+    "name": "TimescaleDB",
+    "slug": "timescaledb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TimescaleDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-timetagger",
+    "name": "TimeTagger",
+    "slug": "timetagger",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TimeTagger deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tinode",
+    "name": "Tinode",
+    "slug": "tinode",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tinode deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tiny-file-manager",
+    "name": "Tiny File Manager",
+    "slug": "tiny-file-manager",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tiny File Manager deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tiny-tiny-rss",
+    "name": "Tiny Tiny RSS",
+    "slug": "tiny-tiny-rss",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tiny Tiny RSS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tinyauth",
+    "name": "TinyAuth",
+    "slug": "tinyauth",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TinyAuth deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tinymediamanager",
+    "name": "tinyMediaManager",
+    "slug": "tinymediamanager",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click tinyMediaManager deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tolgee",
+    "name": "Tolgee",
+    "slug": "tolgee",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tolgee deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tooljet",
+    "name": "ToolJet",
+    "slug": "tooljet",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ToolJet deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-topola-genealogy-viewer",
+    "name": "Topola Genealogy Viewer",
+    "slug": "topola-genealogy-viewer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Topola Genealogy Viewer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-traccar",
+    "name": "Traccar",
+    "slug": "traccar",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Traccar deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tracearr",
+    "name": "Tracearr",
+    "slug": "tracearr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tracearr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tracktor",
+    "name": "Tracktor",
+    "slug": "tracktor",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tracktor deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-traduora",
+    "name": "Traduora",
+    "slug": "traduora",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Traduora deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-traggo",
+    "name": "Traggo",
+    "slug": "traggo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Traggo deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-trailarr",
+    "name": "Trailarr",
+    "slug": "trailarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Trailarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-trailbase",
+    "name": "TrailBase",
+    "slug": "trailbase",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TrailBase deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-transmission",
+    "name": "Transmission",
+    "slug": "transmission",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Transmission deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-transmute",
+    "name": "Transmute",
+    "slug": "transmute",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Transmute deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-trek",
+    "name": "Trek",
+    "slug": "trek",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Trek deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-triliumnext-notes",
+    "name": "TriliumNext Notes",
+    "slug": "triliumnext-notes",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TriliumNext Notes deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-trino",
+    "name": "Trino",
+    "slug": "trino",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Trino deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-trip",
+    "name": "Trip",
+    "slug": "trip",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Trip deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-trudesk",
+    "name": "Trudesk",
+    "slug": "trudesk",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Trudesk deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tubearchivist",
+    "name": "TubeArchivist",
+    "slug": "tubearchivist",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TubeArchivist deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tubesync",
+    "name": "TubeSync",
+    "slug": "tubesync",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TubeSync deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tududi",
+    "name": "Tududi",
+    "slug": "tududi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tududi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tunarr",
+    "name": "Tunarr",
+    "slug": "tunarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tunarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-twenty",
+    "name": "Twenty",
+    "slug": "twenty",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Twenty deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-twingate-connector",
+    "name": "Twingate Connector",
+    "slug": "twingate-connector",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Twingate Connector deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-tyk-gateway",
+    "name": "Tyk Gateway",
+    "slug": "tyk-gateway",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Tyk Gateway deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-typebot",
+    "name": "Typebot",
+    "slug": "typebot",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Typebot deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-typesense",
+    "name": "Typesense",
+    "slug": "typesense",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Typesense deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-typo3",
+    "name": "TYPO3",
+    "slug": "typo3",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click TYPO3 deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ubooquity",
+    "name": "Ubooquity",
+    "slug": "ubooquity",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ubooquity deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-ubuntu-with-xrdp",
+    "name": "Ubuntu with XRDP",
+    "slug": "ubuntu-with-xrdp",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Ubuntu with XRDP deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-umami-analytics",
+    "name": "Umami Analytics",
+    "slug": "umami-analytics",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Umami Analytics deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-universal-media-server",
+    "name": "Universal Media Server",
+    "slug": "universal-media-server",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Universal Media Server deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-unleash",
+    "name": "Unleash",
+    "slug": "unleash",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Unleash deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-unmanic",
+    "name": "Unmanic",
+    "slug": "unmanic",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Unmanic deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-unstructured",
+    "name": "Unstructured",
+    "slug": "unstructured",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Unstructured deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-uptrace",
+    "name": "Uptrace",
+    "slug": "uptrace",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Uptrace deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-usertour",
+    "name": "Usertour",
+    "slug": "usertour",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Usertour deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-usesend",
+    "name": "useSend",
+    "slug": "usesend",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click useSend deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-vane",
+    "name": "Vane",
+    "slug": "vane",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Vane deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-vault",
+    "name": "Vault",
+    "slug": "vault",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Vault deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-verdaccio",
+    "name": "Verdaccio",
+    "slug": "verdaccio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Verdaccio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-vert",
+    "name": "VERT",
+    "slug": "vert",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click VERT deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-viewtube",
+    "name": "ViewTube",
+    "slug": "viewtube",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ViewTube deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-vikunja",
+    "name": "Vikunja",
+    "slug": "vikunja",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Vikunja deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-vince-analytics",
+    "name": "Vince Analytics",
+    "slug": "vince-analytics",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Vince Analytics deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-vitess",
+    "name": "Vitess",
+    "slug": "vitess",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Vitess deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-vuetorrent",
+    "name": "VueTorrent",
+    "slug": "vuetorrent",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click VueTorrent deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-vvveb-cms",
+    "name": "Vvveb CMS",
+    "slug": "vvveb-cms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Vvveb CMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-waha",
+    "name": "WAHA",
+    "slug": "waha",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WAHA deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wakapi",
+    "name": "Wakapi",
+    "slug": "wakapi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wakapi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-waline",
+    "name": "Waline",
+    "slug": "waline",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Waline deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wallabag",
+    "name": "Wallabag",
+    "slug": "wallabag",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wallabag deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wallos",
+    "name": "Wallos",
+    "slug": "wallos",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wallos deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wanderer",
+    "name": "Wanderer",
+    "slug": "wanderer",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wanderer deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-warracker",
+    "name": "Warracker",
+    "slug": "warracker",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Warracker deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-watcharr",
+    "name": "Watcharr",
+    "slug": "watcharr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Watcharr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-watchstate",
+    "name": "WatchState",
+    "slug": "watchstate",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WatchState deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wavelog",
+    "name": "Wavelog",
+    "slug": "wavelog",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wavelog deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wbo",
+    "name": "WBO",
+    "slug": "wbo",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WBO deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wealthfolio",
+    "name": "Wealthfolio",
+    "slug": "wealthfolio",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wealthfolio deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-weaviate",
+    "name": "Weaviate",
+    "slug": "weaviate",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Weaviate deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-web-check",
+    "name": "Web-Check",
+    "slug": "web-check",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Web-Check deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-webcord",
+    "name": "WebCord",
+    "slug": "webcord",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WebCord deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-weblate",
+    "name": "Weblate",
+    "slug": "weblate",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Weblate deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-webthings-gateway",
+    "name": "WebThings Gateway",
+    "slug": "webthings-gateway",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WebThings Gateway deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-webtop",
+    "name": "WebTop",
+    "slug": "webtop",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WebTop deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wekan",
+    "name": "Wekan",
+    "slug": "wekan",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wekan deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-weknora",
+    "name": "WeKnora",
+    "slug": "weknora",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WeKnora deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wger",
+    "name": "wger",
+    "slug": "wger",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click wger deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-whishper",
+    "name": "Whishper",
+    "slug": "whishper",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Whishper deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-whodb",
+    "name": "WhoDB",
+    "slug": "whodb",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WhoDB deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-whoogle-search",
+    "name": "Whoogle Search",
+    "slug": "whoogle-search",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Whoogle Search deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wiki-js",
+    "name": "Wiki.js",
+    "slug": "wiki-js",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wiki.js deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-windmill",
+    "name": "Windmill",
+    "slug": "windmill",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Windmill deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wingfit",
+    "name": "Wingfit",
+    "slug": "wingfit",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wingfit deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wintercms",
+    "name": "WinterCMS",
+    "slug": "wintercms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WinterCMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wireguard-easy",
+    "name": "WireGuard Easy",
+    "slug": "wireguard-easy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WireGuard Easy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wiremock",
+    "name": "WireMock",
+    "slug": "wiremock",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WireMock deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-withoutbg",
+    "name": "withoutbg",
+    "slug": "withoutbg",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click withoutbg deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wizarr",
+    "name": "Wizarr",
+    "slug": "wizarr",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Wizarr deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-woodpecker-ci",
+    "name": "Woodpecker CI",
+    "slug": "woodpecker-ci",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Woodpecker CI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-workout-cool",
+    "name": "Workout Cool",
+    "slug": "workout-cool",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Workout Cool deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wps-office",
+    "name": "WPS Office",
+    "slug": "wps-office",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WPS Office deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-writefreely",
+    "name": "WriteFreely",
+    "slug": "writefreely",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WriteFreely deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-wud",
+    "name": "WUD",
+    "slug": "wud",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click WUD deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-xbackbone",
+    "name": "XBackBone",
+    "slug": "xbackbone",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click XBackBone deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-xibo-cms",
+    "name": "Xibo CMS",
+    "slug": "xibo-cms",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Xibo CMS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-xwiki",
+    "name": "XWiki",
+    "slug": "xwiki",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click XWiki deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yaade",
+    "name": "Yaade",
+    "slug": "yaade",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Yaade deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yacy",
+    "name": "YaCy",
+    "slug": "yacy",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click YaCy deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yamtrack",
+    "name": "Yamtrack",
+    "slug": "yamtrack",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Yamtrack deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yao",
+    "name": "Yao",
+    "slug": "yao",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Yao deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yarn",
+    "name": "Yarn",
+    "slug": "yarn",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Yarn deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yopass",
+    "name": "Yopass",
+    "slug": "yopass",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Yopass deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-your-spotify",
+    "name": "Your Spotify",
+    "slug": "your-spotify",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Your Spotify deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yourls",
+    "name": "YOURLS",
+    "slug": "yourls",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click YOURLS deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yt-dlp-web-ui",
+    "name": "yt-dlp Web UI",
+    "slug": "yt-dlp-web-ui",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click yt-dlp Web UI deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yucca",
+    "name": "Yucca",
+    "slug": "yucca",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Yucca deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-yuvomi",
+    "name": "Yuvomi",
+    "slug": "yuvomi",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Yuvomi deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-zabbix",
+    "name": "Zabbix",
+    "slug": "zabbix",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Zabbix deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-zen",
+    "name": "Zen",
+    "slug": "zen",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Zen deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-zenfeed",
+    "name": "Zenfeed",
+    "slug": "zenfeed",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Zenfeed deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-zensical",
+    "name": "Zensical",
+    "slug": "zensical",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Zensical deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-zeronote",
+    "name": "ZeroNote",
+    "slug": "zeronote",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ZeroNote deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-zincsearch",
+    "name": "ZincSearch",
+    "slug": "zincsearch",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ZincSearch deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-zipline",
+    "name": "Zipline",
+    "slug": "zipline",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Zipline deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-zitadel",
+    "name": "ZITADEL",
+    "slug": "zitadel",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ZITADEL deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-znc",
+    "name": "ZNC",
+    "slug": "znc",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click ZNC deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-zulip",
+    "name": "Zulip",
+    "slug": "zulip",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "One-click Zulip deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "logoUrl": null,
+    "websiteUrl": null,
+    "documentationUrl": null,
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  }
+];

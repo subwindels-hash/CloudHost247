@@ -229,6 +229,27 @@ export function isKnownPlatformSlug(slug: string | null | undefined): boolean {
   return Boolean(slug) && Object.prototype.hasOwnProperty.call(MARKS, String(slug));
 }
 
+const FALLBACK_PALETTES: Array<[string, string]> = [
+  ['#2563eb', '#1d4ed8'], // blue
+  ['#7c3aed', '#5b21b6'], // violet
+  ['#059669', '#047857'], // emerald
+  ['#d97706', '#b45309'], // amber
+  ['#dc2626', '#991b1b'], // red
+  ['#0891b2', '#0e7490'], // cyan
+  ['#db2777', '#9d174d'], // pink
+  ['#4f46e5', '#3730a3'], // indigo
+  ['#0d9488', '#115e59'], // teal
+  ['#ea580c', '#c2410c'], // orange
+];
+
+function hashSlug(slug: string): number {
+  let h = 0;
+  for (let i = 0; i < slug.length; i += 1) {
+    h = (h * 31 + slug.charCodeAt(i)) >>> 0;
+  }
+  return h;
+}
+
 export default function PlatformLogo({ slug, name, className }: PlatformLogoProps) {
   const initials = useMemo(() => {
     const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -238,10 +259,19 @@ export default function PlatformLogo({ slug, name, className }: PlatformLogoProp
 
   const mark = MARKS[slug];
   if (!mark) {
+    const [c1, c2] = FALLBACK_PALETTES[hashSlug(slug) % FALLBACK_PALETTES.length]!;
+    const gradId = `platform-fallback-${slug.replace(/[^a-z0-9]/gi, '') || 'x'}`;
     return (
       <svg viewBox="0 0 48 48" className={className} role="img" aria-label={`${name} logo`}>
-        <rect width="48" height="48" rx="10" fill="#eef2f6" />
-        <text x="24" y="30" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontWeight={800} fontSize="17" fill="#3f4b5c">{initials}</text>
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={c1} />
+            <stop offset="100%" stopColor={c2} />
+          </linearGradient>
+        </defs>
+        <rect width="48" height="48" rx="12" fill={`url(#${gradId})`} />
+        <rect x="1.5" y="1.5" width="45" height="45" rx="10.5" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1" />
+        <text x="24" y="30" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontWeight={800} fontSize="17" fill="#ffffff" letterSpacing="0.5">{initials}</text>
       </svg>
     );
   }

@@ -1,4 +1,5 @@
 import { apiFetch } from './api';
+import { PLATFORM_CATALOG } from '../data/platform-catalog';
 
 export interface ControlPanelSummary {
   id: string;
@@ -46,13 +47,45 @@ export interface ControlPanelDetail extends ControlPanelSummary {
 
 export async function fetchControlPanels(category?: string): Promise<ControlPanelSummary[]> {
   const query = category ? `?category=${encodeURIComponent(category)}` : '';
-  const data = await apiFetch<{ controlPanels: ControlPanelSummary[] }>(`/api/v1/control-panels${query}`);
-  return data.controlPanels;
+  try {
+    const data = await apiFetch<{ controlPanels: ControlPanelSummary[] }>(`/api/v1/control-panels${query}`);
+    const dbPanels = data.controlPanels ?? [];
+    const seen = new Set(dbPanels.map((p) => p.slug));
+    const extras = PLATFORM_CATALOG.filter((p) => !seen.has(p.slug) && (!category || p.category === category));
+    return [...dbPanels, ...extras];
+  } catch {
+    return category ? PLATFORM_CATALOG.filter((p) => p.category === category) : PLATFORM_CATALOG;
+  }
 }
 
 export async function fetchControlPanel(slug: string): Promise<ControlPanelDetail> {
-  const data = await apiFetch<{ controlPanel: ControlPanelDetail }>(`/api/v1/control-panels/${encodeURIComponent(slug)}`);
-  return data.controlPanel;
+  try {
+    const data = await apiFetch<{ controlPanel: ControlPanelDetail }>(`/api/v1/control-panels/${encodeURIComponent(slug)}`);
+    return data.controlPanel;
+  } catch {
+    const found = PLATFORM_CATALOG.find((p) => p.slug === slug);
+    if (!found) {
+      throw new Error(`Platform "${slug}" not found`);
+    }
+    return {
+      ...found,
+      plans: [
+        {
+          id: `${found.id}-standard`,
+          name: `${found.name} Standard`,
+          description: `Managed ${found.name} deployment on CloudHost247.`,
+          billingCycle: found.billingCycle,
+          price: found.startingPrice,
+          currency: found.currency,
+          setupFee: '0',
+          licenseType: found.requiresLicense ? 'COMMERCIAL' : 'OPEN_SOURCE',
+          includedDomains: null,
+          includedAccounts: null,
+          status: 'ACTIVE',
+        },
+      ],
+    };
+  }
 }
 
 export async function fetchAdminControlPanels(): Promise<{ controlPanels: any[]; plans: ControlPanelPlan[] }> {
