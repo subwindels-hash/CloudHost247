@@ -36,9 +36,10 @@ export default function ControlPanelsPage() {
   }, [panels, categoryFilter, licenseFilter, search]);
 
   const categoryCounts = useMemo(() => {
-    if (!panels) return { ALL: 0, SERVER_PANEL: 0, APPLICATION_DEPLOYMENT_PLATFORM: 0, SERVER_MANAGEMENT: 0 };
+    if (!panels) return { ALL: 0, OPERATING_SYSTEM: 0, SERVER_PANEL: 0, APPLICATION_DEPLOYMENT_PLATFORM: 0, SERVER_MANAGEMENT: 0 };
     return {
       ALL: panels.length,
+      OPERATING_SYSTEM: panels.filter((p) => p.category === 'OPERATING_SYSTEM').length,
       SERVER_PANEL: panels.filter((p) => p.category === 'SERVER_PANEL').length,
       APPLICATION_DEPLOYMENT_PLATFORM: panels.filter((p) => p.category === 'APPLICATION_DEPLOYMENT_PLATFORM').length,
       SERVER_MANAGEMENT: panels.filter((p) => p.category === 'SERVER_MANAGEMENT').length,
@@ -65,6 +66,7 @@ export default function ControlPanelsPage() {
             <div className="ch247-filter-tabs" role="tablist" aria-label="Control panel categories">
               {[
                 { id: 'ALL', label: 'All Platforms', count: categoryCounts.ALL },
+                { id: 'OPERATING_SYSTEM', label: 'Operating Systems', count: categoryCounts.OPERATING_SYSTEM },
                 { id: 'SERVER_PANEL', label: 'Web Hosting Panels', count: categoryCounts.SERVER_PANEL },
                 { id: 'APPLICATION_DEPLOYMENT_PLATFORM', label: 'App Deployment & PaaS', count: categoryCounts.APPLICATION_DEPLOYMENT_PLATFORM },
                 { id: 'SERVER_MANAGEMENT', label: 'Server Management', count: categoryCounts.SERVER_MANAGEMENT },
@@ -132,7 +134,13 @@ export default function ControlPanelsPage() {
                       <div>
                         <h2 className="ch247-panel-card__title">{panel.name}</h2>
                         <span className="ch247-badge ch247-badge--category">
-                          {panel.category === 'APPLICATION_DEPLOYMENT_PLATFORM' ? 'App Deployment' : panel.category === 'SERVER_MANAGEMENT' ? 'Management' : 'Server Panel'}
+                          {panel.category === 'OPERATING_SYSTEM'
+                            ? 'Operating System'
+                            : panel.category === 'APPLICATION_DEPLOYMENT_PLATFORM'
+                              ? 'App Deployment'
+                              : panel.category === 'SERVER_MANAGEMENT'
+                                ? 'Management'
+                                : 'Server Panel'}
                         </span>
                       </div>
                     </div>
