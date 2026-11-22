@@ -22,6 +22,7 @@
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import path from 'node:path';
 import { z } from 'zod';
+import { mapMatchesInstall } from '../whmcs/product-map';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
 import type { Queryable } from '../db/types';
@@ -140,8 +141,8 @@ export async function registerWhmcsPublicRoutes(
     const query = parseOrThrow(querySchema, rawQuery);
     const requested = keys ?? parseServiceKeys(query.services);
 
-    if (!map) {
-      const serviceKeys = requested ?? [];
+    if (!map || (configResult.enabled && !mapMatchesInstall(map, configResult.config.baseUrl))) {
+      const serviceKeys = requested ?? (map ? knownServiceKeys(map) : []);
       return {
         configured: configResult.enabled,
         mapValid: false,

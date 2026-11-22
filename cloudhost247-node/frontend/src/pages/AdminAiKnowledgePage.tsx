@@ -269,7 +269,8 @@ export default function AdminAiKnowledgePage() {
           <h2>Answer engine</h2>
           <p>
             <strong>Phrasing:</strong> {engine.phrasing}
-            {engine.modelConfigured ? ' — a configured model rewrites grounded evidence, and its output is validated against that evidence before it is used.' : ` — ${engine.modelReason ?? 'no model provider is configured'}. Answers are composed deterministically from retrieved evidence, prices are read live from the catalogue, and links are resolved against the site's route registry.`}
+            {' — support answers use deterministic retrieval. The optional model is not used for public support conversations.'}
+            {engine.modelConfigured ? ' A model is configured for other uses.' : ` ${engine.modelReason ?? 'No model provider is configured.'}`}
           </p>
           <p><strong>Retrieval:</strong> {engine.embedding}</p>
         </section>

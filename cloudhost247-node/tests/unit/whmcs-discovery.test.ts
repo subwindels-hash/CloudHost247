@@ -49,7 +49,7 @@ const PRODUCTS = {
       module: 'cpanel',
       paytype: 'recurring',
       hidden: '0',
-      pricing: { USD: { monthly: '12.50', quarterly: '-1', annually: '120.00', asetupfee: '5.00' } },
+      pricing: { USD: { monthly: '12.50', msetupfee: '0.00', quarterly: '-1', annually: '120.00', asetupfee: '5.00' } },
     },
     {
       pid: 12,
@@ -79,7 +79,7 @@ const PRODUCTS = {
       module: 'cpanel',
       paytype: 'recurring',
       hidden: '1',
-      pricing: { USD: { monthly: '7.00' } },
+      pricing: { USD: { monthly: '7.00', msetupfee: '0.00' } },
     },
   ],
 };
@@ -118,6 +118,13 @@ function scripted(options: { version?: string; currencies?: unknown; products?: 
 }
 
 describe('collectDiscovery', () => {
+  it('does not invent missing or malformed setup fees for hidden products', async () => {
+    const products = { products: [...PRODUCTS.products, { pid: 15, gid: 3, name: 'Hidden Unknown Fee', hidden: '1', pricing: { USD: { monthly: '8.00', annually: '80.00', asetupfee: 'bad' } } }] };
+    const { client } = scripted({ products });
+    const artifact = await collectDiscovery(client, { baseUrl: 'https://billing.example.com' });
+    expect(artifact.products.find((product) => product.pid === 15)).toMatchObject({ hidden: true, available: false, pricing: {} });
+  });
+
   it('reports groups, products, ids, prices and cycles without inventing any of them', async () => {
     const { client } = scripted();
     const artifact = await collectDiscovery(client, { baseUrl: 'https://billing.example.com', now: () => Date.parse('2026-11-08T09:00:00Z') });

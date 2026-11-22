@@ -75,6 +75,9 @@ const envSchema = z.object({
 
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 
+  // Read-only website-launch conversation; disabled unless explicitly enabled in that environment.
+  AI_WEBSITE_LAUNCH_ENABLED: boolFromString.optional().default(false),
+
   // --- Phase 5C: payment gateways (src/payments/*) -------------------------------------------
   // Free-text bank-transfer/cash payment instructions shown to a customer who chooses the manual/
   // offline gateway (src/payments/manual-gateway.ts). Deliberately optional with no fabricated

@@ -35,8 +35,8 @@ export const pricingSchema = z.looseObject({
 
 /**
  * `GetProducts` — one row per product. `pricing` is keyed by currency code in WHMCS 8.x; older
- * installs return a single object for the default currency, which `normalizeProducts` treats as the
- * default currency's prices.
+ * installs may return a single unkeyed object. Its currency cannot be established from the object,
+ * so `normalizeProducts` does not attribute its prices to a currency.
  */
 export const productSchema = z.looseObject({
   pid: numericString,

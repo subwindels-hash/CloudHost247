@@ -20,8 +20,10 @@
 import {
   WhmcsCycleNotOfferedError,
   WhmcsProductNotMappedError,
+  WhmcsMapInvalidError,
 } from './errors';
-import { resolveBinding, type ProductMapDocument } from './product-map';
+import { mapMatchesInstall, resolveBinding, type ProductMapDocument } from './product-map';
+import { normalizeBaseUrl } from './config';
 import type { BillingCycle } from './types';
 
 export interface CartUrlOptions {
@@ -34,10 +36,6 @@ export interface CartUrlOptions {
 export interface CartRequest {
   serviceKey: string;
   billingCycle: BillingCycle;
-}
-
-function trimBase(baseUrl: string): string {
-  return baseUrl.replace(/\/+$/, '');
 }
 
 /**
@@ -56,11 +54,12 @@ export function buildCartUrl(
   if (!offer.billingCycles.includes(request.billingCycle)) {
     throw new WhmcsCycleNotOfferedError(request.serviceKey, request.billingCycle);
   }
-  const base = trimBase(options.baseUrl);
-  if (!/^https?:\/\//i.test(base)) {
-    throw new Error('buildCartUrl requires an absolute base URL');
-  }
+  const base = normalizeBaseUrl(options.baseUrl);
+  if (!mapMatchesInstall(map, base)) throw new WhmcsMapInvalidError('map does not match configured installation');
   const cartPath = (options.cartPath ?? 'cart.php').replace(/^\/+/, '');
+  if (!/^[A-Za-z0-9._/-]+$/.test(cartPath) || cartPath.split('/').some((part) => !part || part === '.' || part === '..')) {
+    throw new Error('Invalid cart path');
+  }
   const params = new URLSearchParams({
     a: 'add',
     pid: String(offer.productId),
@@ -79,7 +78,7 @@ export function offeredCycles(map: ProductMapDocument, serviceKey: string): Bill
 
 /** The client-area entry point, for "manage my services" style links. */
 export function clientAreaUrl(options: CartUrlOptions, action?: string): string {
-  const base = trimBase(options.baseUrl);
+  const base = options.baseUrl.replace(/\/+$/, '');
   const path = (options.cartPath ?? 'cart.php').replace(/cart\.php$/, 'clientarea.php');
   return action ? `${base}/${path}?action=${encodeURIComponent(action)}` : `${base}/${path}`;
 }

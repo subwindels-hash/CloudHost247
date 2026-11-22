@@ -39,6 +39,17 @@ export interface ToolDefinition {
 }
 
 export const TOOL_CATALOG: readonly ToolDefinition[] = [
+  {
+    name: 'lookup_launch_orderability',
+    description: 'Read the live WHMCS orderability verdict for an allowlisted website hosting category. Never creates an order.',
+    category: 'catalog',
+    permission: 'ai.catalog.read',
+    riskLevel: 'low',
+    approval: 'none',
+    mutating: false,
+    customerUsable: true,
+    arguments: { serviceKey: { type: 'string', required: true, maxLength: 40, description: 'Allowlisted website hosting service key' } },
+  },
   // ---------------------------------------------------------------- reads: platform overview
   {
     name: 'get_platform_overview',
@@ -211,7 +222,7 @@ export const TOOL_CATALOG: readonly ToolDefinition[] = [
   },
   {
     name: 'list_expiring_ssl',
-    description: 'SSL certificates by real expiry timestamp (expired or expiring within the window).',
+    description: 'Up to 100 certificates in selected statuses with known recorded expiry before the cutoff, including past dates; excludes unknown expiry and revoked records. Not a live TLS check.',
     category: 'infrastructure',
     permission: 'ai.infrastructure.read',
     riskLevel: 'low',
@@ -222,7 +233,7 @@ export const TOOL_CATALOG: readonly ToolDefinition[] = [
   },
   {
     name: 'list_expiring_domains',
-    description: 'Customer domains by real expiry date (expired or expiring within the window).',
+    description: 'Up to 100 active, expired or pending-transfer domains with known recorded expiry before the cutoff, including past dates. Not a complete inventory or live registrar check.',
     category: 'infrastructure',
     permission: 'ai.infrastructure.read',
     riskLevel: 'low',
@@ -245,13 +256,13 @@ export const TOOL_CATALOG: readonly ToolDefinition[] = [
   // ---------------------------------------------------------------- reads: knowledge
   {
     name: 'search_knowledge',
-    description: 'Searches the registered CloudHost247 knowledge base; returns chunks with their source document + version so every answer stays citation-traceable. Returns nothing (never an invented answer) when there is no matching chunk.',
+    description: 'Searches the internal registered knowledge base with source citations. Customer access is disabled until source audience controls exist.',
     category: 'knowledge',
     permission: 'ai.knowledge.read',
     riskLevel: 'low',
     approval: 'none',
     mutating: false,
-    customerUsable: true,
+    customerUsable: false,
     arguments: {
       query: { type: 'string', required: true, description: 'Search query', maxLength: 400 },
       limit: { type: 'integer', description: 'Max chunks (default 5, max 10)' },
@@ -269,7 +280,7 @@ export const TOOL_CATALOG: readonly ToolDefinition[] = [
   },
   {
     name: 'get_ai_activity',
-    description: 'What the AI workforce did for one customer: tasks, findings and approvals touching them. Powers customer-facing AI transparency (/account/ai).',
+    description: 'Staff can view customer-attributed tasks, findings and approvals. Customer scope returns only a bounded list of the customer’s assistant request references.',
     category: 'customer',
     permission: 'ai.customer.read',
     riskLevel: 'low',

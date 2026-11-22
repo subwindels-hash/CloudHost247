@@ -24,7 +24,6 @@
 import type { WhmcsClient } from './client';
 import { WhmcsMalformedResponseError, WhmcsSchemaError } from './errors';
 import {
-  CYCLE_SETUP_KEY,
   currencySchema,
   getCurrenciesSchema,
   getProductGroupsSchema,
@@ -33,7 +32,7 @@ import {
   productSchema,
   toArray,
 } from './schemas';
-import { buildCatalogue } from './catalogue';
+import { buildCatalogue, normalizeProducts } from './catalogue';
 import { BILLING_CYCLES, type BillingCycle } from './types';
 import { fingerprintBaseUrl } from './product-map';
 import { z } from 'zod';
@@ -198,18 +197,13 @@ export async function collectDiscovery(
     if (products.some((product) => product.pid === id)) continue;
     if (hiddenById.get(id) !== true) continue;
     const pricing: Record<string, DiscoveryCyclePrice[]> = {};
-    const pricingRaw = row.pricing as Record<string, Record<string, unknown>> | undefined;
-    for (const [code, values] of Object.entries(pricingRaw ?? {})) {
-      const cycles = BILLING_CYCLES.filter((cycle) => {
-        const value = values?.[cycle];
-        if (value === undefined || value === null) return false;
-        const text = String(value).trim();
-        return text !== '' && text !== '-1' && text !== '-1.00' && Number.isFinite(Number(text));
-      }).map((cycle) => ({
-        cycle,
-        price: String(values[cycle]),
-        setupFee: String(values[CYCLE_SETUP_KEY[cycle]] ?? '0.00'),
-      }));
+    // Use the same monetary checks as visible products; missing setup is not zero.
+    const normalized = normalizeProducts([row], { currency: defaultCurrency ?? 'USD' }).products[0];
+    for (const [code, values] of Object.entries(normalized?.currencies ?? {})) {
+      const cycles = BILLING_CYCLES.flatMap((cycle) => {
+        const priced = values.cycles[cycle];
+        return priced ? [{ cycle, price: priced.price, setupFee: priced.setupFee }] : [];
+      });
       if (cycles.length > 0) pricing[code.toUpperCase()] = cycles;
     }
     hiddenProducts.push({

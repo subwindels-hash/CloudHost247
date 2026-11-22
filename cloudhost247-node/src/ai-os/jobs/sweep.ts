@@ -17,10 +17,12 @@ import { emitEvent } from '../repositories/events-repo';
 import { processPendingEvents } from '../workflows/engine';
 import { expireStaleApprovals } from '../repositories/approvals-repo';
 import { pruneExpiredMemories, getMemory, putMemory } from '../repositories/memory-knowledge-repo';
-import { createTask } from '../repositories/tasks-repo';
+import { prepareOrchestratedTask } from '../runtime/task-orchestrator';
 import { getAgentBySlug } from '../repositories/registry-repo';
 import { seedAgentRegistry } from '../registry/seed';
 import { generateExecutiveBriefing } from '../board/board-service';
+import { countSuspectedInterruptedTasks } from '../runtime/task-reconciliation';
+import { countStrandedEffects } from '../repositories/effect-outbox';
 import { runTask } from '../runtime/executor';
 import { recordAiAudit } from '../repositories/audit-repo';
 
@@ -138,15 +140,17 @@ async function runScheduledScan(db: Queryable, name: string, agentSlug: string, 
   }
   const agent = await getAgentBySlug(db, agentSlug);
   if (!agent || !agent.enabled) return false;
-  const { task, created } = await createTask(db, {
+  const { task, created } = await prepareOrchestratedTask(db, {
     agentId: agent.id,
     taskType,
     context: input,
+    entryPoint: 'schedule.scan',
     requestedByType: 'schedule',
     idempotencyKey: `scan:${name}:${bucket}`,
   });
   await putMemory(db, { scope: 'organizational', agentSlug: 'sweeps', key: `last:${name}`, value: { bucket } });
-  if (!created && task.status !== 'queued') return false;
+  // A queued duplicate may belong to another worker or an interrupted run; never blindly replay.
+  if (!created) return false;
   await runTask(db, task.id, {});
   return true;
 }
@@ -159,6 +163,10 @@ export interface AiSweepResult {
   memoriesPruned: number;
   scansLaunched: string[];
   briefing: { attempted: boolean; created?: boolean; runStatus?: string };
+  /** Running tasks with no observed progress for the suspicion window — detection only. */
+  suspectedInterrupted: number;
+  /** Effect intents stranded past the window: decided-but-never-started vs started-without-outcome. */
+  effectIntents: { pending: number; dispatched: number };
 }
 
 export async function runAiSweep(db: Queryable): Promise<AiSweepResult> {
@@ -204,6 +212,11 @@ export async function runAiSweep(db: Queryable): Promise<AiSweepResult> {
     });
   }
 
+  // Suspected-interrupted running tasks: counted for visibility, never changed or replayed.
+  const suspectedInterrupted = await countSuspectedInterruptedTasks(db);
+  // Stranded effect intents: counted for visibility, never claimed or replayed by the sweep.
+  const effectIntents = await countStrandedEffects(db);
+
   return {
     detected,
     eventsProcessed: queue.processed,
@@ -212,5 +225,7 @@ export async function runAiSweep(db: Queryable): Promise<AiSweepResult> {
     memoriesPruned,
     scansLaunched,
     briefing,
+    suspectedInterrupted,
+    effectIntents,
   };
 }

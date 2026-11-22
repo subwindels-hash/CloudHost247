@@ -101,7 +101,7 @@ export async function registerAiKnowledgeRoutes(app: FastifyInstance, env: Env, 
       runs: runs.rows,
       engine: {
         // Stated explicitly so an operator never has to guess why answers are phrased a certain way.
-        phrasing: model.configured ? 'retrieval+model' : 'retrieval',
+        phrasing: 'retrieval',
         modelConfigured: model.configured,
         modelReason: model.reason,
         embedding: 'not used — lexical retrieval (tsvector) with synonym expansion and reranking',

@@ -176,6 +176,55 @@ describe('WHMCS client', () => {
     ).rejects.toBeInstanceOf(WhmcsSchemaError);
   });
 
+  it('rejects unclassified or misclassified mutations before any network request in both modes', async () => {
+    const transport = transportOf(() => ({ status: 200, body: JSON.stringify({ result: 'success' }) }));
+    for (const mode of ['read-only', 'full'] as const) {
+      const { instance } = client(transport, { mode });
+      for (const [action, options] of [
+        ['AddOrder', {}], ['GetDangerousUnknown', {}], ['CreateSsoToken', {}],
+        ['AddOrder', { sessionAction: true }], ['GetProducts', { sessionAction: true }],
+        ['CreateSsoToken', { write: true }], ['CreateSsoToken', { write: true, sessionAction: true }],
+        ['GetProducts\nAddOrder', { write: true }],
+      ] as const) {
+        await expect(instance.call(action, {}, z.looseObject({}), options)).rejects.toBeInstanceOf(WhmcsInvalidConfigError);
+      }
+    }
+    expect(transport.requests).toHaveLength(0);
+  });
+
+  it.each(['action', 'Action', 'action[0]', 'action.foo', 'action ', 'identifier', 'SECRET', 'responsetype', 'username', 'password', 'accesskey'])('refuses reserved or ambiguous form key %s', async (key) => {
+    const transport = transportOf(() => ({ status: 200, body: JSON.stringify(SUCCESS_PRODUCTS) }));
+    const { instance } = client(transport, { mode: 'full' });
+    await expect(instance.call('GetProducts', { [key]: 'AddOrder' }, getProductsSchema)).rejects.toBeInstanceOf(WhmcsInvalidConfigError);
+    expect(transport.requests).toHaveLength(0);
+  });
+
+  it('snapshots parameters so mutation during backoff cannot change the retried action', async () => {
+    const params: Record<string, string> = { limitnum: '50' };
+    let calls = 0;
+    const transport = transportOf(() => {
+      calls++;
+      if (calls === 1) { params.action = 'AddOrder'; params.limitnum = '1'; return { status: 503, body: 'unavailable' }; }
+      return { status: 200, body: JSON.stringify(SUCCESS_PRODUCTS) };
+    });
+    const { instance } = client(transport);
+    await instance.call('GetProducts', params, getProductsSchema);
+    expect(transport.requests).toHaveLength(2);
+    for (const sent of transport.requests) {
+      const body = new URLSearchParams(sent.body);
+      expect(body.getAll('action')).toEqual(['GetProducts']);
+      expect(body.get('limitnum')).toBe('50');
+    }
+  });
+
+  it('never retries an explicitly classified session action even on timeout', async () => {
+    const transport = transportOf(() => { const err = new Error('timeout'); err.name = 'TimeoutError'; throw err; });
+    const { instance } = client(transport, { mode: 'read-only' });
+    await expect(instance.call('CreateSsoToken', { client_id: 1 }, z.looseObject({}), { sessionAction: true })).rejects.toBeInstanceOf(WhmcsTimeoutError);
+    expect(transport.requests).toHaveLength(1);
+    expect(new URLSearchParams(transport.requests[0]!.body).get('action')).toBe('CreateSsoToken');
+  });
+
   it('refuses a write action in read-only mode before contacting WHMCS', async () => {
     const transport = transportOf(() => ({ status: 200, body: JSON.stringify({ result: 'success' }) }));
     const { instance } = client(transport);

@@ -17,8 +17,16 @@ export interface MemoryRow {
 
 const UNSET = '00000000-0000-0000-0000-000000000000';
 
-/** Reads one memory. Tenant isolation is structural: scope+customerId are part of the key, so
- *  a caller can only ever read the exact tenant scope it names. */
+/** Scope keys are selectors, not authorization. Callers must separately authorize access. */
+function assertMemoryScope(scope: MemoryScope, customerId: string | null): void {
+  if (scope === 'customer') {
+    if (!customerId || customerId.toLowerCase() === UNSET) throw new Error('Customer memory requires a valid customer scope');
+  } else if (customerId !== null) {
+    throw new Error('Non-customer memory cannot carry a customer scope');
+  }
+}
+
+/** Reads the exact key; this function does not authenticate or authorize its caller. */
 export async function getMemory(
   db: Queryable,
   scope: MemoryScope,
@@ -26,6 +34,7 @@ export async function getMemory(
   agentSlug: string | null,
   key: string
 ): Promise<MemoryRow | null> {
+  assertMemoryScope(scope, customerId);
   const { rows } = await db.query<MemoryRow>(
     `SELECT * FROM ai_memories
      WHERE scope = $1
@@ -42,6 +51,7 @@ export async function putMemory(
   db: Queryable,
   input: { scope: MemoryScope; customerId?: string | null; agentSlug?: string | null; key: string; value: unknown; expiresAt?: string | null }
 ): Promise<void> {
+  assertMemoryScope(input.scope, input.customerId ?? null);
   await db.query(
     `INSERT INTO ai_memories (id, scope, customer_id, agent_slug, memory_key, value, expires_at)
      VALUES ($1,$2,$3,$4,$5,$6,$7)

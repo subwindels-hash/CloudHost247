@@ -645,7 +645,9 @@ async function main(): Promise<number> {
 
   const pool = new Pool({ ...CONN, database: DB, max: 20 });
   try {
-    await migrateUp(new PgClient(pool), { isProduction: false }, MIGRATIONS);
+    const migrationConnection = await pool.connect();
+    try { await migrateUp(new PgClient(migrationConnection), { isProduction: false }, MIGRATIONS); }
+    finally { migrationConnection.release(); }
     const result = await runFinancialInvariantChecks(pool, {
       log: (line) => console.log(line),
       canRunConcurrentQueries: true,

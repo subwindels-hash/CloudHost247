@@ -10,6 +10,8 @@ import type { AgentHandler } from '../runtime/types';
 import { resolveAdminCommand, resolveCustomerMessage } from '../copilot/intents';
 import { boardDepartmentDigestHandler } from '../board/departments';
 import { boardExecutiveBriefingHandler } from '../board/board-service';
+import { isLaunchServiceKey } from '../../whmcs/agent-orderability';
+import { launchOrderabilitySchema } from '../runtime/launch-orderability-contract';
 
 type Rec = Record<string, unknown>;
 const asRows = (data: unknown, key: string): Rec[] => ((data as Rec)?.[key] as Rec[] | undefined) ?? [];
@@ -764,7 +766,7 @@ const customerProfile: AgentHandler = async (ctx, input) => {
     subjectId: userId,
     recommendation: band === 'at_risk' ? 'Route to Customer Success for outreach.' : undefined,
   });
-  await ctx.putMemory('health_score', { score, band, factors, computedAt: new Date().toISOString() }, 'customer');
+  // Do not persist customer memory until its ownership, audience and retention policy is reviewed.
   return {
     summary: `Customer ${(data.customer as Rec).email}: health score ${score}/100 (${band}) with ${factors.length} explainable factor(s) — every factor cites its underlying records.`,
     result: { customer: data.customer, metrics: m, healthScore: { score, band, factors } },
@@ -1059,11 +1061,32 @@ const customerAssistantQuery: AgentHandler = async (ctx, input) => {
   };
 };
 
+// Public read-only launch lookup. Input is a category, never a customer-provided price or URL.
+const websiteLaunch: AgentHandler = async (ctx, input) => {
+  if (!isLaunchServiceKey(input.serviceKey)) throw new Error('Unsupported launch service category');
+  await ctx.step('plan', { action: 'check_whmcs_orderability', serviceKey: input.serviceKey });
+  const outcome = await ctx.callTool('lookup_launch_orderability', { serviceKey: input.serviceKey });
+  if (outcome.status !== 'executed') throw new Error('Live orderability could not be verified');
+  const parsed = launchOrderabilitySchema.safeParse(outcome.data);
+  if (!parsed.success || parsed.data.verdict.serviceKey !== input.serviceKey) throw new Error('Invalid orderability response');
+  const { verdict, checkedAt } = parsed.data;
+  if (verdict.orderable !== (verdict.state === 'orderable') || (verdict.orderable && (!verdict.productName || !verdict.cycles.length || verdict.reasonCode !== 'ORDERABLE'))) {
+    throw new Error('Contradictory orderability response');
+  }
+  await ctx.step('verify', { orderable: verdict.orderable, checkedAt });
+  return {
+    summary: verdict.orderable ? 'WHMCS orderability lookup completed (catalogue may be cached).'  : 'Online ordering could not be confirmed for this category.',
+    result: { verdict, checkedAt },
+    verification: { source: 'whmcs_orderability', checkedAt },
+  };
+};
+
 // ==============================================================================================
 // Registry
 // ==============================================================================================
 
 export const AGENT_HANDLERS: Record<string, AgentHandler> = {
+  'sales.website_launch': websiteLaunch,
   'support.ticket_triage': supportTicketTriage,
   'infrastructure.health_scan': infrastructureHealthScan,
   'infrastructure.server_report': infrastructureServerReport,

@@ -15,6 +15,14 @@ const BASE_ENV = {
 } as NodeJS.ProcessEnv;
 
 describe('WHMCS configuration', () => {
+  it('rejects traversal and empty segments in configured client paths', () => {
+    for (const name of ['WHMCS_CART_PATH', 'WHMCS_CLIENTAREA_PATH']) {
+      for (const value of ['../cart.php', 'nested/../cart.php', 'nested//cart.php', '/']) {
+        expect(() => loadWhmcsConfig({ ...BASE_ENV, [name]: value })).toThrow(WhmcsInvalidConfigError);
+      }
+    }
+  });
+
   it('reports a disabled layer — not a crash — when nothing is configured', () => {
     const result = loadWhmcsConfig({} as NodeJS.ProcessEnv);
     expect(result.enabled).toBe(false);

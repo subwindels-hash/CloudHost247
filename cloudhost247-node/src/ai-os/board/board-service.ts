@@ -9,7 +9,8 @@ import type { Queryable } from '../../db/types';
 import type { AgentRunContext, HandlerResult } from '../runtime/types';
 import { BOARD_SEAT_SLUGS, getSeatDigest } from './departments';
 import { getAgentBySlug } from '../repositories/registry-repo';
-import { createTask, getTask } from '../repositories/tasks-repo';
+import { getTask } from '../repositories/tasks-repo';
+import { prepareOrchestratedTask } from '../runtime/task-orchestrator';
 import { getExecutiveReport, insertExecutiveReport } from '../repositories/audit-repo';
 import { listFindings } from '../repositories/findings-repo';
 import type { ExecutiveReportRow, TaskRow } from '../types';
@@ -44,14 +45,18 @@ export const boardExecutiveBriefingHandler = async (ctx: AgentRunContext): Promi
     return { summary: `CEO briefing aborted: platform overview unreadable (${overview.message ?? overview.errorCode}) — a briefing from partial data is not produced.` };
   }
 
-  // Each seat reports UNDER ITS OWN identity via child tasks (spec §27).
+  // Each seat reports UNDER ITS OWN identity via child tasks (spec §27). The child key encodes
+  // the same actor scope `prepareOrchestratedTask` compares (requested_by): without it a
+  // scheduled briefing and a manual one on the same day collided on the shared daily key and
+  // failed closed with TaskIdentityConflict. Per-actor keys trade cross-actor digest sharing
+  // for conflict-free dispatch; legacy global-key rows are simply not reused.
   const sections: Rec[] = [];
   const failures: string[] = [];
   for (const slug of BOARD_SEAT_SLUGS) {
     const child = await ctx.runChildAgent(
       'board.department_digest',
       { reportType },
-      { agentSlug: slug, idempotencyKey: `board:${reportType}:${slug}:${new Date().toISOString().slice(0, 10)}` }
+      { agentSlug: slug, idempotencyKey: `board:${reportType}:${slug}:${new Date().toISOString().slice(0, 10)}:${ctx.task.requested_by ?? 'schedule'}` }
     );
     if (child.status === 'succeeded' && child.result) {
       sections.push((child.result as Rec).section as Rec);
@@ -83,7 +88,7 @@ export const boardExecutiveBriefingHandler = async (ctx: AgentRunContext): Promi
 };
 
 export interface BriefingOutcome {
-  report: ExecutiveReportRow;
+  report: ExecutiveReportRow | null;
   created: boolean;
   taskId: string | null;
   runStatus: string;
@@ -106,20 +111,28 @@ export async function generateExecutiveBriefing(
 
   const ceo = await getAgentBySlug(db, 'ai-ceo');
   if (!ceo) throw new Error('AI CEO agent is not registered — seed the registry first');
-  const { task } = await createTask(db, {
+  const { task, created } = await prepareOrchestratedTask(db, {
     agentId: ceo.id,
     taskType: 'board.executive_briefing',
     context: { reportType, periodStart: period.start, periodEnd: period.end },
     requestedBy: actorUserId,
     requestedByType: actorUserId ? 'staff' : 'schedule',
+    entryPoint: actorUserId ? 'admin.board.briefing' : 'schedule.board.briefing',
     idempotencyKey: `briefing:${reportType}:${period.end}:${actorUserId ?? 'schedule'}`,
   });
-  const outcome = await runTaskFn(db, task.id, { actorUserId });
+  // Never restart an existing queued/running/approval-pending task. Do not publish a saved
+  // success as a new report after its agent or task grant has been revoked.
+  if (!created && (!ceo.enabled || ceo.status !== 'active' || !Array.isArray(ceo.task_types) || !ceo.task_types.includes('board.executive_briefing'))) {
+    return { report: null, created: false, taskId: task.id, runStatus: 'refused' };
+  }
+  const outcome = created
+    ? await runTaskFn(db, task.id, { actorUserId })
+    : { task, runStatus: task.status, pendingApprovals: [] };
   const finished = await getTask(db, task.id);
   const result = (finished?.result ?? null) as Rec | null;
   if (outcome.runStatus !== 'succeeded' || !result) {
     return {
-      report: (await getExecutiveReport(db, reportType, period.start, period.end)) as ExecutiveReportRow,
+      report: await getExecutiveReport(db, reportType, period.start, period.end),
       created: false,
       taskId: task.id,
       runStatus: outcome.runStatus,
@@ -156,7 +169,8 @@ export async function getBoardOverview(db: Queryable): Promise<Record<string, un
   const { rows: digests } = await db.query<Rec>(
     `SELECT DISTINCT ON (agent_slug) agent_slug, value, updated_at
      FROM ai_memories
-     WHERE scope = 'executive' AND agent_slug IS NOT NULL AND memory_key LIKE 'digest:%'
+     WHERE scope = 'executive' AND customer_id IS NULL AND agent_slug IS NOT NULL AND memory_key LIKE 'digest:%'
+       AND (expires_at IS NULL OR expires_at > now())
      ORDER BY agent_slug, updated_at DESC`
   );
   const { rows: pendingApprovals } = await db.query<{ count: string }>(`SELECT count(*)::text AS count FROM ai_approvals WHERE status = 'pending'`);

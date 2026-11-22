@@ -18,7 +18,8 @@ export interface PgLikeQueryable {
   query(text: string, params?: unknown[]): Promise<{ rows: unknown[] }>;
 }
 
-/** Adapter for a real `pg` Pool or PoolClient. */
+/** Adapter for a real `pg` client. Migration transactions require a checked-out PoolClient;
+ * passing a Pool does not guarantee that BEGIN, SQL and COMMIT use the same connection. */
 export class PgClient implements DbClient {
   constructor(private readonly client: PgLikeQueryable) {}
 

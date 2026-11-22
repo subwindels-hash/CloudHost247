@@ -95,6 +95,17 @@ function catalogue(overrides: Partial<NormalizedCatalogue> = {}): NormalizedCata
 const CART = { baseUrl: BASE_URL, cartPath: 'cart.php' };
 
 describe('decideOrderability', () => {
+  it('fails closed when a valid map belongs to another WHMCS installation', () => {
+    const decision = decideOrderability({ map: mapFixture(), serviceKey: 'business-hosting', catalogue: catalogue(), cart: { baseUrl: 'https://other.example.com' } });
+    expect(decision).toMatchObject({ state: 'unavailable', reasonCode: 'MAP_INVALID', orderable: false, productId: null, cycles: [] });
+  });
+
+  it('does not offer a cart link when the cart path traverses the installation root', () => {
+    const decision = decideOrderability({ map: mapFixture(), serviceKey: 'business-hosting', catalogue: catalogue(), cart: { ...CART, cartPath: '../cart.php' } });
+    expect(decision.orderable).toBe(false);
+    expect(decision.cycles).toEqual([]);
+  });
+
   it('is orderable only with a binding, a live product and priced cycles', () => {
     const decision = decideOrderability({
       map: mapFixture(),

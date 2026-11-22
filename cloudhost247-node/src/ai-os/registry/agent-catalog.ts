@@ -604,6 +604,20 @@ export const AGENT_CATALOG: readonly AgentCatalogEntry[] = [
     approvalPolicy: 'standard',
   },
 
+  // A public, read-only launch coordinator; it has no account or write tools.
+  {
+    slug: 'website-launch-assistant',
+    name: 'Website Launch Assistant',
+    category: 'sales',
+    description: 'Checks a customer-selected hosting category against live WHMCS orderability; never creates an order.',
+    modelTier: 'native',
+    riskLevel: 'low',
+    permissions: ['ai.catalog.read'],
+    tools: ['lookup_launch_orderability'],
+    taskTypes: ['sales.website_launch'],
+    approvalPolicy: 'standard',
+  },
+
   // ============================================================== §17 — Customer assistant
   {
     slug: 'customer-cloud-assistant',
@@ -612,8 +626,8 @@ export const AGENT_CATALOG: readonly AgentCatalogEntry[] = [
     description: 'The customer-facing assistant: answers account/billing/service questions and opens support tickets — strictly within the asking customer\'s own workspace. It can never read another customer\'s data (server-side scoping).',
     modelTier: 'native',
     riskLevel: 'medium',
-    permissions: [...READ_CUSTOMER, ...READ_BILLING, ...READ_SUPPORT, ...READ_INFRA, ...READ_KB, 'ai.support.write'],
-    tools: ['get_customer_profile', 'list_invoices', 'get_invoice', 'get_ticket', 'list_subscriptions', 'list_expiring_domains', 'list_expiring_ssl', 'search_knowledge', 'create_ticket'],
+    permissions: [...READ_CUSTOMER, ...READ_BILLING, ...READ_SUPPORT, ...READ_INFRA, 'ai.support.write'],
+    tools: ['get_customer_profile', 'list_invoices', 'get_invoice', 'get_ticket', 'list_subscriptions', 'list_expiring_domains', 'list_expiring_ssl', 'get_ai_activity', 'create_ticket'],
     taskTypes: ['customer.assistant_query'],
     approvalPolicy: 'automatic',
   },

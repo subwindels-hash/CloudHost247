@@ -1,18 +1,22 @@
-import { FormEvent, Fragment, useEffect, useMemo, useState } from 'react';
+import { FormEvent, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { usePageMeta } from '../../lib/usePageMeta';
 import { useAuthState } from '../../layout/useAuthState';
 import {
   aiOsApi,
   AiAgent,
   AiApproval,
+  AiDelayedApproval,
+  AiAcknowledgedIncompleteRun,
   AiAuditEntry,
   AiEventRow,
+  AiHeldEventClaim,
   AiFinding,
   AiIncident,
   AiKnowledgeSource,
   AiModelConfig,
   AiTask,
   AiWorkflow,
+  AiWorkflowRun,
   BoardOverview,
   ExecutiveReport,
   OverviewResponse,
@@ -96,14 +100,15 @@ export default function AdminAiCommandPage() {
   usePageMeta('AI Command Center', 'Registry-gated AI workforce: agents, tasks, approvals, findings and briefings over real platform data.');
   const { user: authUser } = useAuthState();
   const [tab, setTab] = useState<TabId>('overview');
+  const [uncertainDecision, setUncertainDecision] = useState(false);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">AI Command Center</h1>
         <p className="mt-1 max-w-3xl text-sm text-slate-600">
-          Registry-gated AI workforce. Agents only read platform data through declared tools; every external-impact action is sealed
-          behind a human decision. The deterministic engine is the default — no external model is enabled until configured here.
+          Operational snapshots of AI tasks, approvals and workflows. Statuses are not independent proof of downstream outcomes;
+          investigate uncertain activity before taking further action.
         </p>
       </header>
 
@@ -125,10 +130,10 @@ export default function AdminAiCommandPage() {
       {tab === 'copilot' && <CopilotTab />}
       {tab === 'agents' && <AgentsTab />}
       {tab === 'tasks' && <TasksTab />}
-      {tab === 'approvals' && <ApprovalsTab authRole={authUser?.role} />}
+      {tab === 'approvals' && <ApprovalsTab authRole={authUser?.role} uncertainDecision={uncertainDecision} setUncertainDecision={setUncertainDecision} />}
       {tab === 'board' && <BoardTab />}
       {tab === 'findings' && <FindingsTab />}
-      {tab === 'ops' && <OpsTab />}
+      {tab === 'ops' && <OpsTab authRole={authUser?.role} />}
       {tab === 'knowledge' && <KnowledgeTab />}
       {tab === 'models' && <ModelsTab authRole={authUser?.role} />}
       {tab === 'audit' && <AuditTab />}
@@ -166,7 +171,7 @@ function OverviewTab() {
     ['Findings (open)', totals.findingsOpen, 'evidence-linked'],
     ['Incidents (open)', totals.incidentsOpen, 'timeline-fed'],
     ['Runs (all time)', totals.runs, `${totals.failedRuns} failed`],
-    ['Events awaiting dispatch', totals.eventsUnprocessed, 'sweep drains these'],
+    ['Unprocessed events', totals.eventsUnprocessed, 'may include held or incomplete work'],
   ];
 
   return (
@@ -181,9 +186,9 @@ function OverviewTab() {
         ))}
       </div>
 
-      <Card title="Tool calls (all audited)">
+      <Card title="Recorded tool calls">
         <p className="text-2xl font-bold text-slate-900">{totals.toolCalls}</p>
-        <p className="text-xs text-slate-500">Every call is admission-gated (registry + permissions + workspace) before it can read anything.</p>
+        <p className="text-xs text-slate-500">Recorded count only; it does not establish complete audit coverage or verify downstream effects.</p>
       </Card>
 
       {summary.recentErrors.length > 0 ? (
@@ -558,47 +563,64 @@ function TasksTab() {
 
 /* ----------------------------------------------------------------------------------- Approvals */
 
-function ApprovalsTab({ authRole }: { authRole?: string }) {
-  const [approvals, setApprovals] = useState<AiApproval[]>([]);
-  const [history, setHistory] = useState<AiApproval[]>([]);
+function ApprovalsTab({ authRole, uncertainDecision, setUncertainDecision }: { authRole?: string; uncertainDecision: boolean; setUncertainDecision: (value: boolean) => void }) {
+  const [approvals, setApprovals] = useState<AiApproval[] | null>(null);
+  const [history, setHistory] = useState<AiApproval[] | null>(null);
+  const [pendingError, setPendingError] = useState('');
+  const [historyError, setHistoryError] = useState('');
+  const generation = useRef(0);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [reviewed, setReviewed] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const canManage = authRole === 'admin' || authRole === 'super_admin';
 
   async function load() {
-    try {
-      setError('');
-      const [pending, done] = await Promise.all([aiOsApi.listApprovals('pending'), aiOsApi.listApprovals('executed').catch(() => ({ approvals: [] as AiApproval[] }))]);
-      setApprovals(pending.approvals);
-      setHistory(done.approvals.slice(0, 10));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Load failed');
-    }
+    const current = ++generation.current;
+    setApprovals(null);
+    setHistory(null);
+    setReviewed({});
+    setPendingError('');
+    setHistoryError('');
+    const pendingRequest = aiOsApi.listApprovals('pending').then((result) => {
+        if (current === generation.current) setApprovals(result.approvals);
+      }).catch(() => {
+        if (current === generation.current) setPendingError('Pending approvals unavailable. Refresh before making a decision.');
+      });
+    void aiOsApi.listApprovals('executed').then((result) => {
+        if (current === generation.current) setHistory(result.approvals.slice(0, 10));
+      }).catch(() => {
+        if (current === generation.current) setHistoryError('Executed approval history unavailable.');
+      });
+    await pendingRequest;
   }
 
   useEffect(() => {
     void load();
+    return () => { generation.current++; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function decide(id: string, decision: 'approved' | 'rejected') {
-    if (busyId || !canManage) return;
+  async function decide(approval: AiApproval, decision: 'approved' | 'rejected') {
+    const { id, reviewFingerprint } = approval;
+    if (busyId || !canManage || uncertainDecision || !reviewFingerprint || reviewed[id] !== reviewFingerprint || (decision === 'approved' && approval.arguments_verified !== true)) return;
     setBusyId(id);
     setError('');
     setInfo('');
     try {
-      const res = await aiOsApi.decideApproval(id, decision);
+      const res = await aiOsApi.decideApproval(id, decision, reviewFingerprint);
       setInfo(
         decision === 'approved'
           ? res.executed
-            ? 'Approved and executed — the sealed tool ran exactly as sealed. See the audit trail.'
-            : `Approved but execution reported an error: ${res.executionError ?? 'unknown'}. The sealed action did NOT silently succeed.`
-          : 'Rejected — the sealed action was never executed.'
+            ? 'The tool reported success. Review the audit trail; downstream outcomes may require separate verification.'
+            : `Approved but execution did not report success: ${res.executionError ?? 'unknown'}. Investigate before taking further action; effects may be uncertain.`
+          : 'Rejected. Review prior activity separately if the outcome is uncertain.'
       );
       await load();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Decision failed');
+      const detail = cause instanceof Error ? cause.message : 'Request failed';
+      setUncertainDecision(true);
+      setError(`${detail} — decision or execution outcome may be unknown. Reload the page and investigate before taking further action.`);
     } finally {
       setBusyId(null);
     }
@@ -606,13 +628,14 @@ function ApprovalsTab({ authRole }: { authRole?: string }) {
 
   return (
     <div className="space-y-6">
-      <Card title={`Decision Inbox — ${approvals.length} pending`}>
+      <Card title={approvals ? `Decision Inbox — ${approvals.length} shown` : "Decision Inbox"}>
         <p className="mb-4 text-xs text-slate-500">
-          Sealed actions are stored, not impressed. Approving EXECUTES the tool afterwards with you as the acting human; rejecting
-          seals it off permanently. Decisions are single-use. {!canManage ? 'You can view the inbox but only administrators may decide.' : ''}
+          This snapshot shows up to 100 pending proposals, newest first; it is not a complete queue. Approving attempts tool execution
+          after the decision. Rejection does not establish whether any earlier effect occurred. {!canManage ? 'You can view the inbox but only administrators may decide.' : ''}
         </p>
-        {approvals.length === 0 ? (
-          <Empty text="Nothing awaits a human decision. Every risky tool call stays here until someone decides." />
+        <button onClick={() => void load()} disabled={Boolean(busyId)} className="mb-3 rounded-lg border border-slate-300 px-3 py-1 text-sm disabled:opacity-40">Refresh decision inbox</button>
+        {pendingError ? <ErrorBox text={pendingError} /> : !approvals ? <p className="text-sm text-slate-500">Loading pending approvals…</p> : approvals.length === 0 ? (
+          <Empty text="No pending approvals in this snapshot." />
         ) : (
           <ul className="space-y-4">
             {approvals.map((a) => (
@@ -625,22 +648,26 @@ function ApprovalsTab({ authRole }: { authRole?: string }) {
                   <span className="ml-auto text-xs text-slate-400">expires {new Date(a.expires_at).toLocaleString()}</span>
                 </div>
                 <p className="mt-2 text-sm text-slate-700">{a.reason}</p>
-                {a.preview ? (
-                  <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-white p-3 text-xs text-slate-600 border border-amber-100">
-                    {JSON.stringify(a.preview, null, 2)}
-                  </pre>
-                ) : null}
+                <p className="mt-2 text-xs text-slate-600">Review the stored proposal below. {a.arguments_verified ? 'Arguments passed the local preservation check; it does not verify intent, authorization or sensitive content.' : 'Original arguments cannot be verified. Reject or investigate; approval is disabled.'}</p>
+                <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-white p-3 text-xs text-slate-600 border border-amber-100">
+                  {JSON.stringify({ action: a.action, arguments: a.arguments, affectedCustomerId: a.affected_customer_id, affectedResource: a.affected_resource, taskId: a.task_id, runId: a.run_id, evidence: a.evidence }, null, 2)}
+                </pre>
+                <label className="mt-3 flex items-center gap-2 text-sm text-slate-700">
+                  <input type="checkbox" checked={Boolean(a.reviewFingerprint && reviewed[a.id] === a.reviewFingerprint)} disabled={!canManage || Boolean(busyId) || uncertainDecision || !a.reviewFingerprint}
+                    onChange={(event) => setReviewed((current) => ({ ...current, [a.id]: event.target.checked ? a.reviewFingerprint : '' }))} />
+                  I reviewed this stored proposal and its scope.
+                </label>
                 <div className="mt-3 flex gap-2">
                   <button
-                    disabled={!canManage || busyId === a.id}
-                    onClick={() => void decide(a.id, 'approved')}
+                    disabled={!canManage || Boolean(busyId) || uncertainDecision || !a.reviewFingerprint || reviewed[a.id] !== a.reviewFingerprint || a.arguments_verified !== true}
+                    onClick={() => void decide(a, 'approved')}
                     className="rounded-lg bg-amber-600 px-4 py-1.5 text-sm font-medium text-white disabled:opacity-40"
                   >
                     {busyId === a.id ? '…' : 'Approve & execute'}
                   </button>
                   <button
-                    disabled={!canManage || busyId === a.id}
-                    onClick={() => void decide(a.id, 'rejected')}
+                    disabled={!canManage || Boolean(busyId) || uncertainDecision || !a.reviewFingerprint || reviewed[a.id] !== a.reviewFingerprint}
+                    onClick={() => void decide(a, 'rejected')}
                     className="rounded-lg border border-red-300 bg-white px-4 py-1.5 text-sm font-medium text-red-700 disabled:opacity-40"
                   >
                     Reject
@@ -650,12 +677,15 @@ function ApprovalsTab({ authRole }: { authRole?: string }) {
             ))}
           </ul>
         )}
-        <ErrorBox text={error} />
+        <ErrorBox text={error || (uncertainDecision ? 'A previous decision outcome may be unknown. Investigate before taking further action; decisions remain disabled in this page until reload.' : '')} />
         {info ? <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{info}</p> : null}
       </Card>
 
-      {history.length > 0 ? (
-        <Card title="Recently executed approvals">
+      <DelayedApprovalsPanel />
+
+      <Card title="Executed approval snapshot">
+        <p className="mb-3 text-xs text-slate-600">Up to 10 of the most recently created executed approvals returned by the API; this is not complete history or independent outcome verification.</p>
+        {historyError ? <ErrorBox text={historyError} /> : !history ? <p className="text-sm text-slate-500">Loading executed approvals…</p> : history.length === 0 ? <Empty text="No executed approvals in this snapshot." /> : (
           <ul className="divide-y divide-slate-100 text-sm">
             {history.map((a) => (
               <li key={a.id} className="flex items-center gap-3 py-2">
@@ -665,9 +695,64 @@ function ApprovalsTab({ authRole }: { authRole?: string }) {
               </li>
             ))}
           </ul>
-        </Card>
-      ) : null}
+        )}
+      </Card>
     </div>
+  );
+}
+
+function DelayedApprovalsPanel() {
+  const [items, setItems] = useState<AiDelayedApproval[] | null>(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const generation = useRef(0);
+
+  async function refresh() {
+    const current = ++generation.current;
+    setLoading(true);
+    setError('');
+    try {
+      const result = await aiOsApi.listDelayedApprovals();
+      if (current === generation.current) setItems(result.approvals);
+    } catch (cause) {
+      if (current === generation.current) {
+        setItems(null);
+        setError(cause instanceof Error ? cause.message : 'Delayed approvals unavailable');
+      }
+    } finally {
+      if (current === generation.current) setLoading(false);
+    }
+  }
+  useEffect(() => {
+    void refresh();
+    return () => { generation.current++; };
+  }, []);
+
+  return (
+    <Card title="Delayed approval activity">
+      <p className="mb-3 text-xs text-slate-600">
+        Approved or executing approvals unchanged for at least five minutes, oldest first (up to 100).
+        A worker may still be active; elapsed time does not prove failure or an effect's outcome.
+        Investigate the referenced task, run and audit trail. Do not replay or reset an uncertain action.
+        This is a bounded snapshot, not a complete history or a resolution queue.
+      </p>
+      <button onClick={() => void refresh()} className="mb-3 rounded-lg border border-slate-300 px-3 py-1 text-sm">Refresh delayed approvals</button>
+      {loading ? <p className="text-sm text-slate-500">Loading delayed approvals…</p> : null}
+      {!loading && error ? <ErrorBox text={error} /> : null}
+      {!loading && !error && items?.length === 0 ? <Empty text="No delayed approvals in this view." /> : null}
+      {!loading && !error && items && items.length > 0 ? (
+        <ul className="divide-y divide-slate-100 text-sm">
+          {items.map((item) => (
+            <li key={item.id} className="space-y-1 py-3">
+              <div className="flex flex-wrap items-center gap-2"><Pill text={item.status} tone={statusPill(item.status)} />
+                <span className="font-mono text-xs">{item.tool}</span>
+                <span className="text-xs text-slate-500">Last updated {new Date(item.updated_at).toLocaleString()}</span></div>
+              <p className="break-all text-xs text-slate-500">Approval {item.id}{item.task_id ? ` · task ${item.task_id}` : ''}{item.run_id ? ` · run ${item.run_id}` : ''}</p>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </Card>
   );
 }
 
@@ -956,31 +1041,205 @@ function FindingsTab() {
 
 /* -------------------------------------------------------------------------------------------- Ops */
 
-function OpsTab() {
-  const [events, setEvents] = useState<AiEventRow[]>([]);
-  const [workflows, setWorkflows] = useState<AiWorkflow[]>([]);
+function OpsTab({ authRole }: { authRole?: string }) {
+  const [events, setEvents] = useState<AiEventRow[] | null>(null);
+  const [workflows, setWorkflows] = useState<AiWorkflow[] | null>(null);
+  const [claims, setClaims] = useState<AiHeldEventClaim[] | null>(null);
+  const [eventsError, setEventsError] = useState('');
+  const [workflowsError, setWorkflowsError] = useState('');
+  const [claimsError, setClaimsError] = useState('');
+  const claimsRequest = useRef(0);
+  const eventsRequest = useRef(0);
+  const workflowsRequest = useRef(0);
+  const referencesRequest = useRef(0);
+  const referencesByEvent = useRef<Record<string, number>>({});
+  const [history, setHistory] = useState<AiAcknowledgedIncompleteRun[] | null>(null);
+  const [historyError, setHistoryError] = useState('');
+  const [historyInfo, setHistoryInfo] = useState('');
+  const [historyBusyId, setHistoryBusyId] = useState('');
+  const historyRequest = useRef(0);
+  const [runsByEvent, setRunsByEvent] = useState<Record<string, AiWorkflowRun[]>>({});
+  const [busyId, setBusyId] = useState('');
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
+  const canInvestigate = authRole === 'admin' || authRole === 'super_admin';
 
-  async function load() {
+  async function loadClaims() {
+    const request = ++claimsRequest.current;
+    referencesRequest.current++;
+    setRunsByEvent({});
+    setClaims(null);
+    setClaimsError('');
     try {
-      setError('');
-      const [e, w] = await Promise.all([aiOsApi.listEvents(), aiOsApi.listWorkflows()]);
-      setEvents(e.events);
-      setWorkflows(w.workflows);
+      const result = await aiOsApi.listHeldEventClaims();
+      if (request === claimsRequest.current) setClaims(result.claims);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Load failed');
+      if (request === claimsRequest.current) setClaimsError(cause instanceof Error ? cause.message : 'Held claims unavailable');
     }
   }
 
+  async function loadEvents() {
+    const request = ++eventsRequest.current;
+    setEvents(null);
+    setEventsError('');
+    try {
+      const result = await aiOsApi.listEvents();
+      if (request === eventsRequest.current) setEvents(result.events);
+    } catch (cause) {
+      if (request === eventsRequest.current) setEventsError(cause instanceof Error ? cause.message : 'Events unavailable');
+    }
+  }
+
+  async function loadWorkflows() {
+    const request = ++workflowsRequest.current;
+    setWorkflows(null);
+    setWorkflowsError('');
+    try {
+      const result = await aiOsApi.listWorkflows();
+      if (request === workflowsRequest.current) setWorkflows(result.workflows);
+    } catch (cause) {
+      if (request === workflowsRequest.current) setWorkflowsError(cause instanceof Error ? cause.message : 'Workflows unavailable');
+    }
+  }
+
+  async function loadHistory() {
+    const request = ++historyRequest.current;
+    setHistory(null);
+    setHistoryError('');
+    try {
+      const result = await aiOsApi.listAcknowledgedIncompleteRuns();
+      if (request === historyRequest.current) setHistory(result.runs);
+    } catch (cause) {
+      if (request === historyRequest.current) setHistoryError(cause instanceof Error ? cause.message : 'Could not load acknowledged incomplete runs');
+    }
+  }
+
+  async function openAcknowledgedInvestigation(run: AiAcknowledgedIncompleteRun) {
+    if (!window.confirm('Record attention for this acknowledged incomplete run? The worker may still be active. This does not verify an outcome, cancel, retry, assign or notify anyone.')) return;
+    setHistoryBusyId(run.run_id);
+    setHistoryError('');
+    setHistoryInfo('');
+    try {
+      const result = await aiOsApi.openAcknowledgedRunInvestigation(run);
+      setHistoryInfo(result.created ? 'Investigation recorded. No outcome was verified and no one was notified.' : 'An investigation was already recorded for this acknowledgement.');
+      await loadHistory();
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'Could not record investigation';
+      historyRequest.current++;
+      setHistory(null);
+      setHistoryError(`${message}. The result may be unknown. Refresh acknowledged runs and investigate before trying again.`);
+    } finally { setHistoryBusyId(''); }
+  }
+
+  async function showRunReferences(eventId: string) {
+    const generation = referencesRequest.current;
+    const request = (referencesByEvent.current[eventId] ?? 0) + 1;
+    referencesByEvent.current[eventId] = request;
+    const isCurrent = () => generation === referencesRequest.current && referencesByEvent.current[eventId] === request;
+    setRunsByEvent((current) => { const next = { ...current }; delete next[eventId]; return next; });
+    try {
+      setError('');
+      const result = await aiOsApi.listWorkflowRunsForEvent(eventId);
+      if (isCurrent()) setRunsByEvent((current) => ({ ...current, [eventId]: result.runs }));
+    } catch (cause) {
+      if (isCurrent()) setError(cause instanceof Error ? cause.message : 'Could not load workflow references');
+    }
+  }
+
+  async function openInvestigation(claim: AiHeldEventClaim) {
+    if (!window.confirm('Record an investigation for this delayed claim? The worker may still be active. This does not cancel, retry, assign, or notify anyone.')) return;
+    try {
+      setBusyId(claim.event_id);
+      setError('');
+      setInfo('');
+      const result = await aiOsApi.openEventInvestigation(claim.event_id);
+      setInfo(result.created ? 'Investigation recorded. No claim was released and no one was notified.' : 'This claim already has an investigation record.');
+      await loadClaims();
+    } catch (cause) {
+      claimsRequest.current++;
+      referencesRequest.current++;
+      setClaims(null);
+      setRunsByEvent({});
+      setClaimsError(`${cause instanceof Error ? cause.message : 'Could not record investigation'}. The result may be unknown. Refresh claims and investigate before trying again.`);
+    } finally { setBusyId(''); }
+  }
+
   useEffect(() => {
-    void load();
+    void loadClaims();
+    void loadEvents();
+    void loadWorkflows();
+    void loadHistory();
+    return () => { historyRequest.current++; claimsRequest.current++; eventsRequest.current++; workflowsRequest.current++; referencesRequest.current++; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="space-y-6">
+      <Card title="Held event claims — investigation">
+        <p className="mb-3 text-sm text-slate-600">A delayed claim may still have a live worker or an unknown external outcome. Incomplete workflows, including approval pauses, retain their claims; deciding an approval does not automatically resume or release the event. An approved action may still execute separately. Recording an investigation does not cancel, retry, assign, or notify anyone. Review the event, workflow runs and task audit before taking any further action. This view shows up to 100 oldest held claims.</p>
+        <button type="button" onClick={() => void loadClaims()} disabled={Boolean(busyId)} className="mb-3 rounded-lg border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50">Refresh claims</button>
+        {info ? <p role="status" className="mb-3 text-sm text-slate-700">{info}</p> : null}
+        <ErrorBox text={error} />
+        <ErrorBox text={claimsError} />
+        {claims === null ? (claimsError ? null : <p className="text-sm text-slate-500">Loading held claims…</p>) : claims.length === 0 ? <Empty text="No held event claims in this view." /> : (
+          <ul className="space-y-3">
+            {claims.map((claim) => (
+              <li key={claim.event_id} className="rounded-lg border border-slate-200 p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Pill text={claim.delayed ? 'Delayed — investigate' : 'Claim held'} tone={claim.delayed ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'} />
+                  <span className="font-mono text-xs text-slate-700">{claim.event_type}</span>
+                  <time className="ml-auto text-xs text-slate-500" dateTime={claim.claimed_at}>Claimed {new Date(claim.claimed_at).toLocaleString()}</time>
+                </div>
+                <p className="mt-2 break-all font-mono text-xs text-slate-500">Event {claim.event_id}</p>
+                <button type="button" onClick={() => void showRunReferences(claim.event_id)} className="mt-2 rounded-lg border border-slate-300 px-3 py-1.5 text-sm">Show workflow references</button>
+                {runsByEvent[claim.event_id] ? (
+                  <div className="mt-2 text-xs text-slate-600">
+                    {runsByEvent[claim.event_id]!.length === 0 ? <p>No run recorded; this does not establish whether work occurred.</p> : runsByEvent[claim.event_id]!.map((run) => (
+                      <div key={run.id} className="mb-2 break-all">
+                        <p>Workflow {run.workflow_slug} · {run.status} · run {run.id}</p>
+                        {(Array.isArray(run.steps) ? run.steps : []).map((step, index) => <p key={index}>Step {typeof step?.step === 'string' ? step.step : 'unknown'} · {typeof step?.status === 'string' ? step.status : 'unknown'} · task {typeof step?.taskId === 'string' ? step.taskId : 'not recorded'}</p>)}
+                      </div>
+                    ))}
+                    <p>Recorded state is not proof of an external outcome. At most 50 recent runs are shown.</p>
+                  </div>
+                ) : null}
+                {claim.investigation_id ? (
+                  <p className="mt-2 text-xs text-slate-600">Investigation recorded {claim.investigation_opened_at ? new Date(claim.investigation_opened_at).toLocaleString() : ''}. No outcome has been verified.</p>
+                ) : canInvestigate && claim.delayed ? (
+                  <button type="button" disabled={Boolean(busyId)} onClick={() => void openInvestigation(claim)} className="mt-2 rounded-lg border border-amber-600 px-3 py-1.5 text-sm text-amber-800 disabled:opacity-50">{busyId === claim.event_id ? 'Recording…' : 'Record investigation'}</button>
+                ) : <p className="mt-2 text-xs text-slate-500">A claim becomes eligible for an investigation record after five minutes; age is not proof of interruption.</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card title="Acknowledged events with incomplete workflow runs">
+        <p className="mb-3 text-sm text-slate-600">An acknowledged event may still have incomplete or uncertain work. This view shows up to 100 recent incomplete runs whose event still exists; it is not a complete history or a list of unresolved cases. Empty results do not prove that no action needs review. An acknowledgement does not verify an external outcome. Recording attention does not cancel, retry, assign, notify or verify anything.</p>
+        <button type="button" onClick={() => void loadHistory()} disabled={Boolean(historyBusyId)} className="mb-3 rounded-lg border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50">Refresh acknowledged runs</button>
+        {historyInfo ? <p role="status" className="mb-3 text-sm text-slate-700">{historyInfo}</p> : null}
+        <ErrorBox text={historyError} />
+        {history === null ? (historyError ? null : <p className="text-sm text-slate-500">Loading acknowledged runs…</p>) : history.length === 0 ? <Empty text="No matching runs in this view." /> : (
+          <ul className="space-y-3">
+            {history.map((run) => (
+              <li key={run.run_id} className="rounded-lg border border-slate-200 p-3 text-xs text-slate-600">
+                <p><span className="font-medium">{run.workflow_slug}</span> · {run.status} · {run.event_type}</p>
+                <p className="mt-1 break-all font-mono">Event {run.event_id} · run {run.run_id}</p>
+                <p className="mt-1">Started {new Date(run.started_at).toLocaleString()} · event acknowledged {new Date(run.processed_at).toLocaleString()}</p>
+                {run.investigation_id ? (
+                  <p className="mt-2">Investigation recorded {run.investigation_opened_at ? new Date(run.investigation_opened_at).toLocaleString() : ''} when status was {run.investigation_observed_status}. No outcome has been verified.</p>
+                ) : canInvestigate ? (
+                  <button type="button" disabled={Boolean(historyBusyId)} onClick={() => void openAcknowledgedInvestigation(run)} className="mt-2 rounded-lg border border-amber-600 px-3 py-1.5 text-sm text-amber-800 disabled:opacity-50">{historyBusyId === run.run_id ? 'Recording…' : 'Record run investigation'}</button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
       <Card title="Workflows — event → agent chains">
-        {workflows.length === 0 ? <Empty text="No workflows registered." /> : (
+        <button type="button" onClick={() => void loadWorkflows()} className="mb-3 rounded-lg border border-slate-300 px-3 py-1.5 text-sm">Refresh workflows</button>
+        {workflowsError ? <ErrorBox text={workflowsError} /> : workflows === null ? <p className="text-sm text-slate-500">Loading workflows…</p> : workflows.length === 0 ? <Empty text="No workflows in this view." /> : (
           <ul className="space-y-3">
             {workflows.map((w) => (
               <li key={w.id} className="rounded-lg border border-slate-200 p-3">
@@ -995,11 +1254,12 @@ function OpsTab() {
             ))}
           </ul>
         )}
-        <ErrorBox text={error} />
       </Card>
 
-      <Card title={`Platform events — fingerprint-deduplicated, ${events.length} recent`}>
-        {events.length === 0 ? <Empty text="No events yet. Detectors emit events only for rows that actually exist." /> : (
+      <Card title="Platform events — recent snapshot">
+        <p className="mb-3 text-xs text-slate-600">Up to 100 events; fingerprint deduplication is best-effort. Processing status is not proof of an external outcome.</p>
+        <button type="button" onClick={() => void loadEvents()} className="mb-3 rounded-lg border border-slate-300 px-3 py-1.5 text-sm">Refresh events</button>
+        {eventsError ? <ErrorBox text={eventsError} /> : events === null ? <p className="text-sm text-slate-500">Loading events…</p> : events.length === 0 ? <Empty text="No events in this snapshot." /> : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead><tr className="text-left text-xs uppercase tracking-wide text-slate-400">
@@ -1011,8 +1271,8 @@ function OpsTab() {
                     <td className="py-2 pr-4 font-mono text-xs text-slate-700">{e.event_type}</td>
                     <td className="py-2 pr-4 text-xs text-slate-500">{e.source}</td>
                     <td className="max-w-xs truncate py-2 pr-4 font-mono text-xs text-slate-400">{e.fingerprint}</td>
-                    <td className="whitespace-nowrap py-2 pr-4 text-xs text-slate-400">{new Date(e.emitted_at).toLocaleString()}</td>
-                    <td className="py-2 text-xs">{e.processed_at ? <span className="text-amber-600">✓</span> : <span className="text-amber-500">pending</span>}</td>
+                    <td className="whitespace-nowrap py-2 pr-4 text-xs text-slate-400">{new Date(e.occurred_at).toLocaleString()}</td>
+                    <td className="py-2 text-xs">{e.processed_at ? <span className="text-amber-600">acknowledged</span> : <span className="text-amber-500">pending</span>}</td>
                   </tr>
                 ))}
               </tbody>

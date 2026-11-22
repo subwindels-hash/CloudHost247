@@ -106,10 +106,11 @@ function boolSetting(raw: string | undefined, fallback: boolean, name: string): 
 
 function pathSetting(raw: string | undefined, fallback: string, name: string): string {
   const value = (raw ?? '').trim() || fallback;
-  if (!/^[A-Za-z0-9._/-]+$/.test(value)) {
-    throw new WhmcsInvalidConfigError(`${name} must be a relative path`);
+  const relative = value.replace(/^\/+/, '');
+  if (!/^[A-Za-z0-9._/-]+$/.test(relative) || relative.split('/').some((part) => !part || part === '.' || part === '..')) {
+    throw new WhmcsInvalidConfigError(`${name} must be a relative path without traversal`);
   }
-  return value.replace(/^\/+/, '');
+  return relative;
 }
 
 export function loadWhmcsConfig(env: NodeJS.ProcessEnv = process.env): WhmcsConfigResult {

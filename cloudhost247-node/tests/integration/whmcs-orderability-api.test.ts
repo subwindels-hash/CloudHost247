@@ -111,7 +111,7 @@ function whmcs(scenario: Scenario = {}) {
       name: 'Business Hosting',
       module: 'cpanel',
       paytype: 'recurring',
-      pricing: { USD: { monthly: '12.50', annually: '120.00', quarterly: '-1' } },
+      pricing: { USD: { monthly: '12.50', msetupfee: '0.00', annually: '120.00', asetupfee: '0.00', quarterly: '-1' } },
     },
   ];
   const currencies = scenario.currencies ?? [{ id: 1, code: 'USD', default: '1' }];
@@ -149,6 +149,31 @@ function app(deps: Parameters<typeof buildApp>[1]['whmcsPublic']) {
 }
 
 describe('GET /api/v1/whmcs/orderability', () => {
+  it('does not relabel an unkeyed price as a requested currency', async () => {
+    const fake = whmcs({ currencies: [{ id: 1, code: 'USD', default: '1' }, { id: 2, code: 'EUR', default: '0' }], products: [{ pid: 101, gid: 3, name: 'Business Hosting', module: 'cpanel', paytype: 'recurring', pricing: { monthly: '12.50', msetupfee: '0.00' } }] });
+    for (const query of ['', '?currency=EUR']) {
+      const response = await app(fake.deps).inject({ method: 'GET', url: `/api/v1/whmcs/orderability/business-hosting${query}` });
+      expect(response.statusCode).toBe(200);
+      expect(response.json().services[0]).toMatchObject({ orderable: false, cycles: [], productId: null });
+    }
+  });
+
+  it('does not publish a price or cart link when setup fees are missing or malformed', async () => {
+    const fake = whmcs({ products: [{ pid: 101, gid: 3, name: 'Business Hosting', module: 'cpanel', paytype: 'recurring', pricing: { USD: { monthly: '12.50', annually: '120.00', asetupfee: 'not a fee' } } }] });
+    const response = await app(fake.deps).inject({ method: 'GET', url: '/api/v1/whmcs/orderability/business-hosting' });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().services[0]).toMatchObject({ orderable: false, cycles: [] });
+  });
+
+  it('rejects a checksummed map from another installation without contacting WHMCS', async () => {
+    const fake = whmcs();
+    const config = { ...fake.deps.whmcsConfig.config, baseUrl: 'https://other.example.com' };
+    const response = await app({ ...fake.deps, whmcsConfig: { enabled: true, config, reason: null } }).inject({ method: 'GET', url: '/api/v1/whmcs/orderability' });
+    expect(response.json()).toMatchObject({ mapValid: false });
+    expect(response.json().services.find((s: { serviceKey: string }) => s.serviceKey === 'business-hosting')).toMatchObject({ reasonCode: 'MAP_INVALID', orderable: false, cycles: [] });
+    expect(fake.requests).toHaveLength(0);
+  });
+
   it('is public and reports a bound, live, priced service as orderable', async () => {
     const fake = whmcs();
     const response = await app(fake.deps).inject({ method: 'GET', url: '/api/v1/whmcs/orderability' });

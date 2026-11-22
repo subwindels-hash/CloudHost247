@@ -45,6 +45,15 @@ export interface AiTask {
   created_at: string;
 }
 
+export interface AiDelayedApproval {
+  id: string;
+  status: 'approved' | 'executing';
+  tool: string;
+  task_id: string | null;
+  run_id: string | null;
+  updated_at: string;
+}
+
 export interface AiApproval {
   id: string;
   agent_id: string;
@@ -53,9 +62,17 @@ export interface AiApproval {
   tool: string;
   risk_level: string;
   reason: string;
+  action: string;
+  arguments: Record<string, unknown>;
+  arguments_verified: boolean;
+  evidence: unknown;
+  affected_customer_id: string | null;
+  affected_resource: string | null;
+  task_id: string | null;
+  run_id: string | null;
+  reviewFingerprint: string;
   status: 'pending' | 'approved' | 'rejected' | 'expired' | 'executed' | 'failed';
   expires_at: string;
-  preview?: Record<string, unknown>;
   requested_at?: string;
   created_at: string;
 }
@@ -91,9 +108,51 @@ export interface AiEventRow {
   event_type: string;
   source: string;
   payload: Record<string, unknown>;
-  fingerprint: string;
-  emitted_at: string;
+  fingerprint: string | null;
+  occurred_at: string;
   processed_at: string | null;
+  dispatch_claimed_at: string | null;
+}
+
+export interface AiHeldEventClaim {
+  event_id: string;
+  event_type: string;
+  claimed_at: string;
+  delayed: boolean;
+  investigation_id: string | null;
+  investigation_opened_at: string | null;
+  investigation_opened_by: string | null;
+}
+
+export interface AiAcknowledgedIncompleteRun {
+  run_id: string;
+  workflow_slug: string;
+  status: 'running' | 'failed' | 'partial';
+  started_at: string;
+  event_id: string;
+  event_type: string;
+  processed_at: string;
+  acknowledgement_key: string;
+  investigation_id: string | null;
+  investigation_opened_at: string | null;
+  investigation_observed_status: 'running' | 'failed' | 'partial' | null;
+}
+
+export interface AiEventInvestigation {
+  id: string;
+  event_id: string;
+  claim_observed_at: string;
+  opened_by: string | null;
+  opened_at: string;
+}
+
+export interface AiWorkflowRun {
+  id: string;
+  event_id: string | null;
+  workflow_slug: string;
+  status: string;
+  started_at: string;
+  steps: Array<{ step?: string; status?: string; taskId?: string }>;
 }
 
 export interface AiWorkflow {
@@ -291,10 +350,13 @@ export const aiOsApi = {
   listApprovals: (status = 'pending') =>
     apiFetch<{ count: number; approvals: AiApproval[] }>(`${ADMIN}/approvals?status=${encodeURIComponent(status)}&limit=100`),
 
-  decideApproval: (id: string, decision: 'approved' | 'rejected', note?: string) =>
+  listDelayedApprovals: () =>
+    apiFetch<{ count: number; approvals: AiDelayedApproval[] }>(`${ADMIN}/approvals/delayed?limit=100`),
+
+  decideApproval: (id: string, decision: 'approved' | 'rejected', reviewFingerprint: string, note?: string) =>
     apiFetch<{ approval: AiApproval; executed: boolean; executionError: string | null }>(
       `${ADMIN}/approvals/${id}/decision`,
-      { method: 'POST', body: JSON.stringify({ decision, ...(note ? { note } : {}) }) }
+      { method: 'POST', body: JSON.stringify({ decision, reviewFingerprint, ...(note ? { note } : {}) }) }
     ),
 
   listFindings: (opts: { status?: string; severity?: string } = {}) => {
@@ -318,6 +380,24 @@ export const aiOsApi = {
 
   listEvents: (limit = 100) =>
     apiFetch<{ count: number; events: AiEventRow[]; knownTypes: string[] }>(`${ADMIN}/events?limit=${limit}`),
+
+  listHeldEventClaims: () => apiFetch<{ count: number; claims: AiHeldEventClaim[]; note: string }>(`${ADMIN}/event-claims`),
+
+  listAcknowledgedIncompleteRuns: () =>
+    apiFetch<{ count: number; runs: AiAcknowledgedIncompleteRun[]; note: string }>(`${ADMIN}/acknowledged-incomplete-workflows`),
+
+  openAcknowledgedRunInvestigation: (run: AiAcknowledgedIncompleteRun) =>
+    apiFetch<{ created: boolean; note: string }>(`${ADMIN}/workflow-runs/${encodeURIComponent(run.run_id)}/acknowledged-investigations`, {
+      method: 'POST', body: JSON.stringify({ confirmed: true, eventId: run.event_id, acknowledgementKey: run.acknowledgement_key, observedStatus: run.status }),
+    }),
+
+  openEventInvestigation: (eventId: string) =>
+    apiFetch<{ investigation: AiEventInvestigation; created: boolean; note: string }>(`${ADMIN}/events/${eventId}/investigations`, {
+      method: 'POST', body: JSON.stringify({ confirmed: true }),
+    }),
+
+  listWorkflowRunsForEvent: (eventId: string) =>
+    apiFetch<{ count: number; runs: AiWorkflowRun[] }>(`${ADMIN}/workflow-runs?eventId=${encodeURIComponent(eventId)}&limit=50`),
 
   listWorkflows: () => apiFetch<{ count: number; workflows: AiWorkflow[] }>(`${ADMIN}/workflows`),
 

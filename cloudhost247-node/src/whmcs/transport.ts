@@ -39,9 +39,9 @@ export const MAX_RESPONSE_BYTES = 1024 * 1024;
 
 export class FetchTransport implements Transport {
   async send(request: TransportRequest): Promise<TransportResponse> {
-    let response: Response;
+    const signal = AbortSignal.timeout(request.timeoutMs);
     try {
-      response = await fetch(request.url, {
+      const response = await fetch(request.url, {
         method: 'POST',
         redirect: 'manual',
         headers: {
@@ -51,27 +51,44 @@ export class FetchTransport implements Transport {
           ...request.headers,
         },
         body: request.body,
-        signal: AbortSignal.timeout(request.timeoutMs),
+        signal,
       });
+      const declared = Number(response.headers.get('content-length') ?? '0');
+      if (Number.isFinite(declared) && declared > MAX_RESPONSE_BYTES) {
+        // Do not await cancellation: a broken stream must not hold the caller indefinitely.
+        void response.body?.cancel().catch(() => undefined);
+        throw new WhmcsUnreachableError(request.url, 'response larger than the 1 MiB cap');
+      }
+      if (!response.body) return { status: response.status, body: '' };
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      const parts: string[] = [];
+      let bytes = 0;
+      try {
+        for (;;) {
+          const chunk = await reader.read();
+          if (chunk.done) break;
+          bytes += chunk.value.byteLength;
+          if (bytes > MAX_RESPONSE_BYTES) {
+            void reader.cancel().catch(() => undefined);
+            throw new WhmcsUnreachableError(request.url, 'response larger than the 1 MiB cap');
+          }
+          parts.push(decoder.decode(chunk.value, { stream: true }));
+        }
+        parts.push(decoder.decode());
+        return { status: response.status, body: parts.join('') };
+      } finally {
+        reader.releaseLock();
+      }
     } catch (error) {
+      if (error instanceof WhmcsTimeoutError || error instanceof WhmcsUnreachableError) throw error;
       const name = (error as { name?: string } | null)?.name;
-      if (name === 'TimeoutError' || name === 'AbortError') {
+      if (signal.aborted || name === 'TimeoutError' || name === 'AbortError') {
         throw new WhmcsTimeoutError(request.url, request.timeoutMs);
       }
-      throw new WhmcsUnreachableError(request.url, String((error as Error | null)?.message ?? 'network error'));
+      // Do not retain raw transport/body exception messages, which can contain untrusted data.
+      throw new WhmcsUnreachableError(request.url, 'network or response stream error');
     }
-
-    const declared = Number(response.headers.get('content-length') ?? '0');
-    if (Number.isFinite(declared) && declared > MAX_RESPONSE_BYTES) {
-      // Drain nothing: refusing early keeps a hostile/huge body out of memory.
-      throw new WhmcsUnreachableError(request.url, 'response larger than the 1 MiB cap');
-    }
-
-    const text = await response.text();
-    if (text.length > MAX_RESPONSE_BYTES) {
-      throw new WhmcsUnreachableError(request.url, 'response larger than the 1 MiB cap');
-    }
-    return { status: response.status, body: text };
   }
 }
 

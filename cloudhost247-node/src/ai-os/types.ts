@@ -17,7 +17,7 @@ export type AgentCategory =
 export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 export type TaskStatus = 'queued' | 'running' | 'awaiting_approval' | 'succeeded' | 'failed' | 'cancelled';
 export type RunStatus = 'running' | 'succeeded' | 'failed' | 'awaiting_approval' | 'cancelled';
-export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'expired' | 'cancelled' | 'executed' | 'failed';
+export type ApprovalStatus = 'pending' | 'approved' | 'executing' | 'rejected' | 'expired' | 'cancelled' | 'executed' | 'failed';
 export type FindingSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 export type MemoryScope = 'short' | 'customer' | 'operational' | 'organizational' | 'executive';
 export type RunPhase = 'observe' | 'understand' | 'plan' | 'authorize' | 'act' | 'verify' | 'report' | 'learn';
@@ -60,6 +60,8 @@ export interface TaskRow {
   error_code: string | null;
   error_message: string | null;
   idempotency_key: string | null;
+  /** Which authorized entry point created the task; NULL only for pre-0116 legacy rows. */
+  entry_point: string | null;
   run_after: string;
   created_at: string;
   updated_at: string;
@@ -124,6 +126,7 @@ export interface ApprovalRow {
   affected_customer_id: string | null;
   affected_resource: string | null;
   arguments: Record<string, unknown>;
+  arguments_verified: boolean;
   status: ApprovalStatus;
   decision_by: string | null;
   decision_at: string | null;
@@ -161,6 +164,7 @@ export interface EventRow {
   payload: Record<string, unknown>;
   occurred_at: string;
   processed_at: string | null;
+  dispatch_claimed_at: string | null;
   created_at: string;
 }
 

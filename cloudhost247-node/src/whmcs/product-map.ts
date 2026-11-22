@@ -111,6 +111,11 @@ export function fingerprintBaseUrl(baseUrl: string): string {
   return createHash('sha256').update(normalized).digest('hex');
 }
 
+/** Checks install provenance, not authenticity: the checksum/fingerprint is not a signature. */
+export function mapMatchesInstall(map: ProductMapDocument, baseUrl: string): boolean {
+  return map.baseUrlFingerprint === fingerprintBaseUrl(baseUrl);
+}
+
 /** Checksum of the product snapshot and its provenance — the identity bindings are stamped with. */
 export function computeSnapshotChecksum(snapshot: SnapshotBody): string {
   return createHash('sha256')

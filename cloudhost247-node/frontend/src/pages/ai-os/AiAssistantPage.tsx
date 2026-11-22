@@ -21,8 +21,8 @@ const SUGGESTIONS = [
   'show my invoices',
   'what is my billing status',
   'my subscriptions and services',
-  'my domain dns records',
-  'my ssl certificate status',
+  'my domains with upcoming expiry',
+  'my certificates with upcoming expiry',
 ];
 
 export default function AiAssistantPage() {
@@ -74,7 +74,7 @@ export default function AiAssistantPage() {
         <h1 className="text-2xl font-bold text-slate-900">Cloud Assistant</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-600">
           Ask about your CloudHost247 account — invoices, payments, services, subscriptions, domains, SSL and support tickets.
-          The assistant reads only your own account data; every query is recorded and visible to you under AI Activity.
+          The assistant reads your own account data. AI Activity shows a limited list of your recent assistant requests.
         </p>
       </header>
 
@@ -85,7 +85,7 @@ export default function AiAssistantPage() {
               {turns.length === 0 ? (
                 <div className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
                   <p className="font-medium text-slate-800">How can I help with your account?</p>
-                  <p className="mt-1">I answer from your real records. If something isn't in your account or our documentation, I'll say so plainly instead of guessing.</p>
+                  <p className="mt-1">I answer supported questions from your account records. Knowledge search is currently unavailable; I won't guess.</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {SUGGESTIONS.map((s) => (
                       <button key={s} onClick={() => setMessage(s)} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-600 hover:bg-slate-50">
@@ -127,15 +127,10 @@ export default function AiAssistantPage() {
           <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <h2 className="text-sm font-semibold text-slate-900">AI transparency</h2>
             <p className="mt-1 text-xs text-slate-500">
-              What the AI has done on your account — nothing happens outside this register.
+              Recent assistant requests only (up to 25). This is not a complete record of AI activity on your account.
             </p>
-            <p className="mt-3 text-2xl font-bold text-slate-900">{taskCount}</p>
-            <p className="text-xs text-slate-500">task(s) recorded for your account</p>
-            {activity && (activity.approvals?.length ?? 0) > 0 ? (
-              <p className="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-800">
-                {activity.approvals.length} action request(s) about your account required a human decision before execution.
-              </p>
-            ) : null}
+            {activity ? <><p className="mt-3 text-2xl font-bold text-slate-900">{taskCount}</p>
+              <p className="text-xs text-slate-500">request(s) shown</p></> : <p className="mt-3 text-xs text-slate-500">Activity unavailable.</p>}
           </section>
 
           {profile ? (

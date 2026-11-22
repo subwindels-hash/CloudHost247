@@ -24,8 +24,13 @@ async function main() {
 
   evidence.postgresVersion = (await client.query<{ version: string }>('SELECT version()')).rows[0].version;
 
-  // 1) Full migration run against real PostgreSQL (quarantined migrations stay skipped).
-  const migrated = await migrateUp(client, { isProduction: false, confirmedForProduction: false, authorizedQuarantined: [] });
+  // 1) Full migration run on a single checked-out session. This is an isolated local test DB.
+  const migrateOnOneConnection = async () => {
+    const connection = await pool.connect();
+    try { return await migrateUp(new PgClient(connection), { isProduction: false, confirmedForProduction: false, authorizedQuarantined: [] }); }
+    finally { connection.release(); }
+  };
+  const migrated = await migrateOnOneConnection();
   evidence.migrations = {
     applied: migrated.applied.length,
     quarantined: migrated.quarantined ?? [],
@@ -152,7 +157,7 @@ async function main() {
 
   // Migration idempotency marker: a second migrateUp must apply nothing.
   await run('migrateUp is a no-op on an up-to-date database', 'applied: 0', async () => {
-    const again = await migrateUp(client, { isProduction: false, confirmedForProduction: false, authorizedQuarantined: [] });
+    const again = await migrateOnOneConnection();
     return `applied: ${again.applied.length}`;
   });
 

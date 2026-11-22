@@ -56,6 +56,14 @@ function mapWith(cycles: Array<'monthly' | 'annually'> = ['monthly', 'annually']
 }
 
 describe('WHMCS cart hand-off', () => {
+  it('rejects a mismatched installation and unsafe paths directly', () => {
+    const request = { serviceKey: 'hosting-vps', billingCycle: 'monthly' as const };
+    expect(() => buildCartUrl(mapWith(), { baseUrl: 'https://other.example.com' }, request)).toThrow();
+    for (const cartPath of ['../cart.php', 'nested/../cart.php', 'cart.php?redirect=evil', 'nested//cart.php']) {
+      expect(() => buildCartUrl(mapWith(), { baseUrl: BASE, cartPath }, request)).toThrow();
+    }
+  });
+
   it('builds the cart URL from the verified binding', () => {
     const url = buildCartUrl(mapWith(), { baseUrl: BASE }, { serviceKey: 'hosting-vps', billingCycle: 'annually' });
     expect(url).toBe('https://billing.example.com/cart.php?a=add&pid=12&billingcycle=annually');
