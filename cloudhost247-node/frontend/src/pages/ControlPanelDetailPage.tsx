@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { fetchControlPanel, type ControlPanelDetail } from '../lib/control-panels-api';
+import PlatformLogo from '../components/PlatformLogo';
 
 export default function ControlPanelDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -65,11 +66,7 @@ export default function ControlPanelDetailPage() {
 
       <header className="ch247-panel-detail-header">
         <div className="ch247-panel-detail-header__logo-wrap">
-          {panel.logoUrl ? (
-            <img src={panel.logoUrl} alt={`${panel.name} logo`} className="ch247-panel-detail-header__logo" />
-          ) : (
-            <span className="ch247-panel-card__logo-fallback">{panel.name.slice(0, 2).toUpperCase()}</span>
-          )}
+          <PlatformLogo slug={panel.slug} name={panel.name} className="ch247-panel-detail-header__logo" />
         </div>
         <div className="ch247-panel-detail-header__info">
           <div className="ch247-badge-row">

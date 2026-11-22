@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchControlPanels, type ControlPanelSummary } from '../lib/control-panels-api';
+import PlatformLogo from '../components/PlatformLogo';
 import StatusBadge from '../components/StatusBadge';
 import './control-panels-page.css';
 
@@ -126,11 +127,7 @@ export default function ControlPanelsPage() {
                   <article key={panel.id} className="ch247-card ch247-panel-card">
                     <div className="ch247-panel-card__header">
                       <div className="ch247-panel-card__logo-wrap">
-                        {panel.logoUrl ? (
-                          <img src={panel.logoUrl} alt={`${panel.name} logo`} className="ch247-panel-card__logo" />
-                        ) : (
-                          <span className="ch247-panel-card__logo-fallback">{panel.name.slice(0, 2).toUpperCase()}</span>
-                        )}
+                        <PlatformLogo slug={panel.slug} name={panel.name} className="ch247-panel-card__logo" />
                       </div>
                       <div>
                         <h2 className="ch247-panel-card__title">{panel.name}</h2>

@@ -7,6 +7,7 @@ import {
   patchAdminControlPanelPlan,
 } from '../lib/control-panels-api';
 import StatusBadge from '../components/StatusBadge';
+import PlatformLogo from '../components/PlatformLogo';
 
 export default function AdminControlPanelsPage() {
   const [data, setData] = useState<{ controlPanels: any[]; plans: any[] } | null>(null);
@@ -20,7 +21,6 @@ export default function AdminControlPanelsPage() {
     slug: '',
     description: '',
     category: 'SERVER_PANEL',
-    logoUrl: '',
     websiteUrl: '',
     documentationUrl: '',
     status: 'ACTIVE',
@@ -61,7 +61,6 @@ export default function AdminControlPanelsPage() {
       slug: panel.slug,
       description: panel.description ?? '',
       category: panel.category,
-      logoUrl: panel.logo_url ?? '',
       websiteUrl: panel.website_url ?? '',
       documentationUrl: panel.documentation_url ?? '',
       status: panel.status,
@@ -171,10 +170,6 @@ export default function AdminControlPanelsPage() {
                 <option value="SERVER_MANAGEMENT">Server Management</option>
                 <option value="OTHER">Other</option>
               </select>
-            </label>
-            <label className="ch247-field">
-              <span>Logo URL</span>
-              <input value={panelForm.logoUrl} onChange={(e) => setPanelForm({ ...panelForm, logoUrl: e.target.value })} placeholder="/panel-logos/name.svg" />
             </label>
             <label className="ch247-field">
               <span>Website URL</span>
@@ -294,11 +289,9 @@ export default function AdminControlPanelsPage() {
                     <tr key={panel.id}>
                       <td>
                         <div className="ch247-os-table-name">
-                          {panel.logo_url ? (
-                            <img src={panel.logo_url} alt="" style={{ width: 28, height: 28, borderRadius: 6 }} />
-                          ) : (
-                            <span className="ch247-os-card__fallback">{panel.name.slice(0, 2)}</span>
-                          )}
+                          <span className="ch247-admin-panel-logo">
+                            <PlatformLogo slug={panel.slug} name={panel.name} className="ch247-admin-panel-logo__svg" />
+                          </span>
                           <div>
                             <strong>{panel.name}</strong>
                             <small>{panel.slug}</small>
