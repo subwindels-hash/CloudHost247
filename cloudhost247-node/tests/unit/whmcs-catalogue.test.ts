@@ -23,7 +23,7 @@ const PRODUCTS = [
     paytype: 'recurring',
     pricing: {
       USD: { prefix: '$', suffix: ' USD', monthly: '4.95', quarterly: '-1', annually: '49.50', msetupfee: '0.00', asetupfee: '5.00' },
-      EUR: { prefix: '€', suffix: ' EUR', monthly: '4.50', annually: '-1' },
+      EUR: { prefix: '€', suffix: ' EUR', monthly: '4.50', msetupfee: '0.00', annually: '-1' },
     },
   },
   {
@@ -40,6 +40,17 @@ const PRODUCTS = [
 ];
 
 describe('WHMCS catalogue normalisation', () => {
+  it('does not invent a setup fee or quote malformed monetary values', () => {
+    for (const fee of [undefined, null, '', '-1', '-0.01', 'nonsense', '1e2', '0x10', 'Infinity', '0.1234567']) {
+      const { products } = normalizeProducts([{ pid: '30', gid: '1', name: 'Plan', pricing: { USD: { monthly: '5.00', msetupfee: fee } } }], { currency: 'USD' });
+      expect(cyclesFor(products[0]!, 'USD')).toEqual([]);
+    }
+    for (const price of ['1e2', '0x10', 'Infinity', '-1', '0.1234567']) {
+      const { products } = normalizeProducts([{ pid: '30', gid: '1', name: 'Plan', pricing: { USD: { monthly: price, msetupfee: '0.00' } } }], { currency: 'USD' });
+      expect(cyclesFor(products[0]!, 'USD')).toEqual([]);
+    }
+  });
+
   it('offers only the cycles WHMCS configured (-1 means not offered)', () => {
     const { products } = normalizeProducts(PRODUCTS, { currency: 'USD' });
     const starter = products.find((product) => product.id === 10);
@@ -82,10 +93,21 @@ describe('WHMCS catalogue normalisation', () => {
     expect(() => buildCatalogue(GROUPS, PRODUCTS, { currency: 'NGN' })).toThrow(WhmcsCurrencyUnavailableError);
   });
 
-  it('accepts the legacy single-pricing shape as the requested currency', () => {
-    const legacy = [{ pid: '20', gid: '1', name: 'Legacy', pricing: { monthly: '12.00', annually: '-1' } }];
-    const { products } = normalizeProducts(legacy, { currency: 'GBP' });
-    expect(cyclesFor(products[0]!, 'GBP')).toEqual(['monthly']);
+  it('does not assign an unkeyed legacy amount to a requested or assumed currency', () => {
+    const legacy = [{ pid: '20', gid: '1', name: 'Legacy', pricing: { monthly: '12.00', msetupfee: '0.00', annually: '-1' } }];
+    for (const currency of [undefined, 'GBP', 'USD']) {
+      const result = normalizeProducts(legacy, { currency });
+      expect(result.products[0]!.currencies).toEqual({});
+      expect(result.currency).toBeNull();
+    }
+  });
+
+  it('discards case-colliding or malformed currency keys without affecting distinct currencies', () => {
+    const pricing = { USD: { monthly: '5.00', msetupfee: '0.00' }, usd: { monthly: '9.00', msetupfee: '0.00' }, EUR: { monthly: '4.00', msetupfee: '1.00' }, USDOLLAR: { monthly: '1', msetupfee: '0' } };
+    const { products } = normalizeProducts([{ pid: 20, gid: 1, name: 'Plan', pricing }]);
+    expect(products[0]!.currencies.USD).toBeUndefined();
+    expect(products[0]!.currencies.USDOLLAR).toBeUndefined();
+    expect(products[0]!.currencies.EUR?.cycles.monthly).toEqual({ price: '4.00', setupFee: '1.00' });
   });
 
   it('tolerates collections returned as objects with string keys', () => {
@@ -106,7 +128,7 @@ describe('WHMCS catalogue normalisation', () => {
   });
 
   it('treats free (0.00) as a real price, not as missing', () => {
-    const free = [{ pid: '30', gid: '1', name: 'Free', paytype: 'free', pricing: { USD: { monthly: '0.00' } } }];
+    const free = [{ pid: '30', gid: '1', name: 'Free', paytype: 'free', pricing: { USD: { monthly: '0.00', msetupfee: '0.00' } } }];
     const { products, unpricedProductIds } = normalizeProducts(free, { currency: 'USD' });
     expect(cyclesFor(products[0]!, 'USD')).toEqual(['monthly']);
     expect(products[0]!.currencies.USD?.cycles.monthly?.price).toBe('0.00');

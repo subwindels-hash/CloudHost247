@@ -29,6 +29,7 @@ import {
   WhmcsError,
   WhmcsTimeoutError,
   WhmcsUnreachableError,
+  WhmcsInvalidConfigError,
 } from './errors';
 import { errorEnvelopeSchema } from './schemas';
 import { defaultTransport, type Transport } from './transport';
@@ -82,6 +83,33 @@ export const CIRCUIT_FAILURE_THRESHOLD = 5;
 export const CIRCUIT_COOLDOWN_MS = 30_000;
 const BASE_BACKOFF_MS = 150;
 
+// Only these implemented actions are implicitly retryable reads. New reads require an explicit
+// code review here; prefixes like "Get" do not establish upstream behavior.
+const RETRYABLE_READ_ACTIONS = new Set(['GetProducts', 'GetProductGroups', 'GetCurrencies', 'GetClients', 'WhmcsDetails']);
+const RESERVED_FORM_KEYS = new Set(['identifier', 'secret', 'action', 'responsetype', 'username', 'password', 'accesskey']);
+
+function validateActionAndParams(action: string, params: Record<string, unknown>, options: CallOptions): boolean {
+  const write = options.write === true;
+  const session = options.sessionAction === true;
+  if (!/^[A-Za-z][A-Za-z0-9]{0,63}$/.test(action)) throw new WhmcsInvalidConfigError('Invalid WHMCS action');
+  if (write && session) throw new WhmcsInvalidConfigError('Invalid WHMCS action classification');
+  if (action === 'CreateSsoToken') {
+    if (!session || write) throw new WhmcsInvalidConfigError('Invalid WHMCS action classification');
+  } else if (session || (!write && !RETRYABLE_READ_ACTIONS.has(action))) {
+    throw new WhmcsInvalidConfigError('WHMCS action is not authorized as a read or session action');
+  }
+  for (const [key, value] of Object.entries(params)) {
+    // PHP can normalize dots, spaces and bracket syntax into alternate form keys. Restrict names
+    // and prevent overriding authentication, action and response fields in the request envelope.
+    if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(key) || RESERVED_FORM_KEYS.has(key.toLowerCase()) ||
+        (value !== undefined && typeof value !== 'string' && typeof value !== 'boolean' &&
+          !(typeof value === 'number' && Number.isFinite(value)))) {
+      throw new WhmcsInvalidConfigError('Invalid WHMCS action parameter');
+    }
+  }
+  return write || session;
+}
+
 const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export class WhmcsClient {
@@ -121,11 +149,14 @@ export class WhmcsClient {
     schema: z.ZodType<T>,
     options: CallOptions = {},
   ): Promise<T> {
-    if (options.write) assertWriteAllowed(this.deps.config, action);
+    // Snapshot once so a caller cannot change the action envelope or retry parameters while an
+    // asynchronous attempt/backoff is in progress.
+    const safeParams = Object.fromEntries(Object.entries(params));
+    const singleShot = validateActionAndParams(action, safeParams, options);
+    if (options.write === true) assertWriteAllowed(this.deps.config, action);
 
-    // A session action changes server-side state (it mints a token), so it is never retried even
-    // though it is permitted while the deployment is in read-only mode. See `CallOptions`.
-    const singleShot = Boolean(options.write || options.sessionAction);
+    // Sessions and explicitly classified writes are never automatically retried. Full mode and
+    // write classification do not themselves establish business authorization or idempotency.
 
     const nowMs = this.now();
     if (nowMs < this.circuitOpenUntil) {
@@ -139,7 +170,7 @@ export class WhmcsClient {
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       const startedAt = this.now();
       try {
-        const payload = await this.attempt(action, params, requestId);
+        const payload = await this.attempt(action, safeParams, requestId);
         const parsed = schema.safeParse(payload);
         if (!parsed.success) {
           throw new WhmcsSchemaError(

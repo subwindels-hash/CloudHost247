@@ -626,6 +626,17 @@ describe('AI support endpoints', () => {
     return signAuthToken(env, { sub: id, role: 'customer', email: `${label}-${id.slice(0, 8)}@example.test` });
   }
 
+  it('reports deterministic support phrasing even when a model is configured for other uses', async () => {
+    const app = buildApp({ ...env, AI_LLM_BASE_URL: 'https://model.example.test/v1', AI_LLM_API_KEY: 'test-key-not-real', AI_LLM_MODEL: 'test-model' }, { serveFrontend: false, pool: db });
+    try {
+      const token = await adminToken('staff');
+      const response = await app.inject({ method: 'GET', url: '/api/v1/admin/ai-support/knowledge/overview', headers: { authorization: `Bearer ${token}` } });
+      expect(response.statusCode).toBe(200);
+      expect(response.json().engine).toMatchObject({ modelConfigured: true, phrasing: 'retrieval' });
+      expect(response.body).not.toContain('test-key-not-real');
+    } finally { await app.close(); }
+  });
+
   it('serves the admin knowledge centre under RBAC and audits a reindex', async () => {
     const app = buildApp(env, { serveFrontend: false, pool: db });
 

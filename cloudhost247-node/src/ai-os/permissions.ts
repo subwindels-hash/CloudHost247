@@ -23,6 +23,7 @@ export const AI_PERMISSIONS = [
   'ai.view',
   'ai.agents.manage',
   'ai.tasks.run',
+  'ai.tasks.retry',
   'ai.approvals.view',
   'ai.approvals.manage',
   'ai.board.view',

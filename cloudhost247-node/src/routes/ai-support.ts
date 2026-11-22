@@ -6,17 +6,22 @@ import type { Queryable } from '../db/types';
 import { getPool } from '../db/pool';
 import { authenticate, type AuthenticatedRequestContext } from '../lib/require-auth';
 import { requireRole, type AuthorizedRequestContext } from '../lib/require-role';
-import { NotFoundError, ValidationError } from '../lib/errors';
+import { ConflictError, NotFoundError, ValidationError } from '../lib/errors';
 import { auditRequest } from '../lib/audit';
 import { createTicket } from '../db/support-tickets';
 import { createNotification } from '../services/notification-service';
 import { recordTikTokServerConversion } from '../tiktok/event-service';
 import { decideSupportResponse, listSupportKnowledge, type EscalationReason } from '../services/ai-support-operator';
 import { recordUnansweredQuestion, questionKey, resolveUnansweredQuestion } from '../ai-website/unanswered';
+import { checkLaunchOption, isLaunchRequest, launchChoice, requirementsPrompt } from '../services/ai-website-launch';
+import { beginLaunch, claimLaunchChoice, finishLaunch, latestLaunch, launchProgress, reconcileDelayedLaunch, stopLaunch } from '../ai-os/workflows/launch-orchestrator';
+import { publishWhileAiActive, withConversationLock } from '../ai-os/workflows/conversation-publication';
 
 const id = z.string().uuid('conversation id must be a valid UUID');
 const email = z.string().trim().email().max(320);
 const messageSchema = z.object({ message: z.string().trim().min(1).max(10000) });
+// Optional for compatibility with older clients. Only requests with a stable key are deduplicated.
+const customerMessageSchema = messageSchema.extend({ requestId: z.string().uuid().optional() });
 const statusSchema = z.enum(['AI_ACTIVE', 'WAITING_FOR_HUMAN', 'ASSIGNED', 'IN_PROGRESS', 'WAITING_FOR_CUSTOMER', 'RESOLVED', 'CLOSED']);
 const hash = (token: string) => createHash('sha256').update(token).digest('hex');
 
@@ -327,7 +332,8 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
          FROM ai_support_messages WHERE conversation_id = $1 ORDER BY created_at ASC`,
       [row.id]
     );
-    return { conversation: { ...row, access_token_hash: undefined }, messages: messages.rows };
+    const progress = env.AI_WEBSITE_LAUNCH_ENABLED ? launchProgress(await latestLaunch(db, row.id)) : null;
+    return { conversation: { ...row, access_token_hash: undefined }, messages: messages.rows, launchProgress: progress };
   });
 
   app.post<{ Params: { id: string } }>('/api/v1/ai-support/conversations/:id/messages', {
@@ -335,32 +341,100 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
     // the cost one client can impose.
     config: { rateLimit: { max: 30, timeWindow: '1 minute', keyGenerator: aiRateKey } },
   }, async (request) => {
-    const input = parse(messageSchema, request.body);
+    const input = parse(customerMessageSchema, request.body);
     const { row, auth } = await getCustomerConversation(db, request, env, request.params.id);
 
-    if (row.status !== 'AI_ACTIVE') {
-      if (['RESOLVED', 'CLOSED'].includes(row.status)) throw new ValidationError('This conversation is closed');
-      await addMessage(db, row.id, 'CUSTOMER', input.message, auth?.userId ?? null);
-      await db.query(
-        `UPDATE ai_support_conversations
-            SET status = CASE WHEN assigned_agent_id IS NULL THEN 'WAITING_FOR_HUMAN' ELSE 'IN_PROGRESS' END,
-                updated_at = now()
-          WHERE id = $1`,
-        [row.id]
-      );
-      return { accepted: true, humanActive: true };
-    }
-
-    const previous = await db.query<{ author_type: string; body: string }>(
-      `SELECT author_type, body FROM ai_support_messages WHERE conversation_id = $1 ORDER BY created_at DESC LIMIT 8`,
-      [row.id]
-    );
-    await addMessage(db, row.id, 'CUSTOMER', input.message, auth?.userId ?? null);
-    const { trustTrace, ...decision } = await decideSupportResponse(db, input.message, {
+    // Serialize keyed identity, the customer insert and the prior-message window with all
+    // handoff/publication operations. A repeated key never starts processing again, even if the
+    // first request crashed after intake. Transcript presence does not prove an AI effect finished.
+    const intake = await withConversationLock(db, row.id, async (tx, status) => {
+      if (input.requestId) {
+        const prior = await tx.query<{ body: string }>(
+          `SELECT m.body FROM ai_support_message_requests r
+           JOIN ai_support_messages m ON m.id = r.message_id AND m.conversation_id = r.conversation_id
+           WHERE r.conversation_id = $1 AND r.request_id = $2`, [row.id, input.requestId],
+        );
+        if (prior.rows[0]) {
+          if (prior.rows[0].body !== input.message) throw new ConflictError('Message request key already used for different content');
+          return { duplicate: true as const };
+        }
+      }
+      if (['RESOLVED', 'CLOSED'].includes(status)) throw new ValidationError('This conversation is closed');
+      const previous = row.status === 'AI_ACTIVE' ? await tx.query<{ author_type: string; body: string; intent: string | null }>(
+        `SELECT author_type, body, intent FROM ai_support_messages WHERE conversation_id = $1 ORDER BY created_at DESC LIMIT 8`,
+        [row.id],
+      ) : { rows: [] as Array<{ author_type: string; body: string; intent: string | null }> };
+      const message = await addMessage(tx, row.id, 'CUSTOMER', input.message, auth?.userId ?? null);
+      if (input.requestId) {
+        await tx.query(`INSERT INTO ai_support_message_requests (conversation_id, request_id, message_id) VALUES ($1,$2,$3)`,
+          [row.id, input.requestId, message.id]);
+      }
+      if (row.status !== 'AI_ACTIVE') {
+        if (status !== 'AI_ACTIVE') {
+          await tx.query(
+            `UPDATE ai_support_conversations
+                SET status = CASE WHEN assigned_agent_id IS NULL THEN 'WAITING_FOR_HUMAN' ELSE 'IN_PROGRESS' END,
+                    updated_at = now()
+              WHERE id = $1`, [row.id],
+          );
+        }
+        return { duplicate: false as const, previous: previous.rows, aiActive: false, humanActive: status !== 'AI_ACTIVE' };
+      }
+      return { duplicate: false as const, previous: previous.rows, aiActive: status === 'AI_ACTIVE', humanActive: status !== 'AI_ACTIVE' };
+    });
+    if (intake.duplicate) return { accepted: true, duplicate: true, outcomeUnknown: true };
+    if (!intake.aiActive) return { accepted: true, humanActive: intake.humanActive };
+    const previous = { rows: intake.previous };
+    const { trustTrace, ...baseDecision } = await decideSupportResponse(db, input.message, {
       previousMessages: previous.rows,
       currentPath: typeof request.headers['x-cloudhost-page'] === 'string' ? request.headers['x-cloudhost-page'] : null,
+      // Configuring the website-builder model does not authorize sending support transcripts.
+      allowModel: false,
     });
+    let decision = baseDecision;
+    let launchResponse: Awaited<ReturnType<typeof addMessage>> | null = null;
+    // Existing human/security/billing/account guardrails always win. Only a narrowly matched
+    // public launch request or an explicit category choice reaches the read-only coordinator.
+    const eligible = baseDecision.kind !== 'NEWSLETTER' && (baseDecision.kind !== 'ESCALATE' || baseDecision.reason === 'AI_UNABLE_TO_ANSWER');
+    if (env.AI_WEBSITE_LAUNCH_ENABLED) {
+      // A visitor token can authorize the conversation without authorizing a different signed-in
+      // account. Never attribute the task to an unrelated account presented alongside that token.
+      const actor: string | null = row.user_id && row.user_id === auth?.userId ? row.user_id : null;
+      if (eligible && /^(?:cancel|cancel launch|cancel website launch)[.!?]*$/i.test(input.message.trim())) {
+        const stopped = await stopLaunch(db, row.id, 'cancelled', actor);
+        if (stopped) decision = { kind: 'ANSWER', intent: 'website_launch_cancelled', confidence: 1, sources: [], body: 'I have cancelled the launch request. A read-only lookup already in progress may still finish; one that has not started will not begin. No order has been placed.', followUps: [] };
+      } else if (eligible) {
+        const choice = launchChoice(input.message);
+        const active = choice ? await claimLaunchChoice(db, row.id, choice, actor) : null;
+        if (active && choice) {
+          const checked = await checkLaunchOption(db, { serviceKey: choice, conversationId: row.id, workflowId: active.id, userId: actor });
+          const completed = await finishLaunch(
+            db, active.id, row.id, checked.intent === 'website_launch_options' ? 'options_ready' : 'needs_support', actor,
+            (tx) => addMessage(tx, row.id, 'AI', checked.body, null, checked.intent, checked.confidence, checked.sources,
+              { links: checked.links, evidence: checked.evidence, grounded: checked.origin === 'website' || checked.engine === 'reviewed' }),
+          );
+          // Publication and state are atomic; a stop or non-AI conversation winning the race suppresses the result.
+          if (!completed) return { accepted: true, launchStopped: true };
+          launchResponse = completed.response;
+          decision = checked;
+        } else if (isLaunchRequest(input.message) || choice) {
+          const workflow = isLaunchRequest(input.message) ? await beginLaunch(db, row.id, actor) : null;
+          if (workflow?.status === 'awaiting_choice') {
+            decision = requirementsPrompt();
+          } else {
+            const progress = launchProgress(await latestLaunch(db, row.id));
+            if (progress?.status === 'checking') {
+              decision = { kind: 'ANSWER', intent: 'website_launch_checking', confidence: 1, sources: [], body: progress.attentionRequired ? 'The lookup is taking longer than expected and may have been interrupted. Please ask support for help. No order has been placed.' : 'A hosting lookup is already in progress. No order has been placed.', followUps: progress.attentionRequired ? ['Talk to a human'] : [] };
+            }
+          }
+        }
+      }
+    }
 
+    if (env.AI_WEBSITE_LAUNCH_ENABLED && decision.kind === 'ESCALATE') {
+      const actor: string | null = row.user_id && row.user_id === auth?.userId ? row.user_id : null;
+      await stopLaunch(db, row.id, 'escalated', actor);
+    }
     await auditRequest(db, request, auth?.userId ?? null, {
       action: decision.kind === 'ESCALATE' ? 'AI_ESCALATION_TRIGGERED' : decision.kind === 'NEWSLETTER' ? 'NEWSLETTER_SUBSCRIPTION_REQUESTED' : 'AI_RESPONSE_GENERATED',
       resourceType: 'ai_support_conversation',
@@ -389,19 +463,24 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
     if (decision.kind === 'ESCALATE') {
       // The assistant's own wording is part of the transcript. Without it a handed-off conversation
       // shows the customer's question followed by silence, and the agent cannot see what the
-      // customer was already told.
-      await addMessage(
-        db,
-        row.id,
-        'AI',
-        decision.body,
-        null,
-        decision.intent,
-        decision.confidence,
-        decision.sources,
-        { links: decision.links, evidence: decision.evidence, grounded: false }
-      );
-      const transfer = await escalate(db, row, decision.reason ?? 'OTHER');
+      // customer was already told. The message, the status transition and the handoff record
+      // commit under one conversation lock; a concurrent takeover or closure suppresses all of
+      // them together instead of publishing an AI reply after the handoff.
+      const transfer = await publishWhileAiActive(db, row.id, async (tx) => {
+        await addMessage(
+          tx,
+          row.id,
+          'AI',
+          decision.body,
+          null,
+          decision.intent,
+          decision.confidence,
+          decision.sources,
+          { links: decision.links, evidence: decision.evidence, grounded: false }
+        );
+        return escalate(tx, row, decision.reason ?? 'OTHER');
+      });
+      if (!transfer) return { accepted: true, humanActive: true };
       await auditRequest(db, request, auth?.userId ?? null, {
         action: transfer.assignedAgentId ? 'HUMAN_TRANSFER_COMPLETED' : 'SUPPORT_TICKET_CREATED',
         resourceType: 'ai_support_conversation',
@@ -426,17 +505,25 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
 
     // Newsletter is an AI answer plus a distinct, explicit form. Persisting it as an AI message
     // fixes the important visitor experience where the form appeared with no explanatory reply.
-    const response = await addMessage(
-      db,
-      row.id,
-      'AI',
-      decision.body,
-      null,
-      decision.intent,
-      decision.confidence,
-      decision.sources,
-      { links: decision.links, evidence: decision.evidence, grounded: decision.origin === 'website' || decision.engine === 'reviewed' }
-    );
+    // Publication rechecks AI_ACTIVE under the conversation lock: a concurrent handoff, staff
+    // takeover or closure suppresses the reply instead of publishing it after the new state.
+    // (finishLaunch results are already atomic and are published as-is.)
+    let response = launchResponse;
+    if (!response) {
+      const published = await publishWhileAiActive(db, row.id, (tx) => addMessage(
+        tx,
+        row.id,
+        'AI',
+        decision.body,
+        null,
+        decision.intent,
+        decision.confidence,
+        decision.sources,
+        { links: decision.links, evidence: decision.evidence, grounded: decision.origin === 'website' || decision.engine === 'reviewed' }
+      ));
+      if (!published) return { accepted: true, humanActive: true };
+      response = published;
+    }
     return { decision: { ...decision, followUps: decision.followUps ?? [] }, response };
   });
 
@@ -565,7 +652,28 @@ export async function registerAiSupportRoutes(app: FastifyInstance, env: Env, ov
       `SELECT * FROM ai_support_messages WHERE conversation_id = $1 ORDER BY created_at ASC`,
       [conversationId]
     );
-    return { conversation: result.rows[0], messages: messages.rows };
+    const workflow = env.AI_WEBSITE_LAUNCH_ENABLED ? await latestLaunch(db, conversationId) : null;
+    const task = workflow?.lookup_task_id ? await db.query<{ id: string; status: string; updated_at: string }>(
+      `SELECT id, status, updated_at FROM ai_tasks WHERE id = $1 AND subject_type = 'ai_support_conversation' AND subject_id = $2`,
+      [workflow.lookup_task_id, conversationId],
+    ) : null;
+    return {
+      conversation: result.rows[0], messages: messages.rows,
+      launch: workflow ? { id: workflow.id, progress: launchProgress(workflow), updatedAt: workflow.updated_at, task: task?.rows[0] ?? null } : null,
+    };
+  });
+
+  // This does not retry a task, contact WHMCS, change customer accounts, or claim the lookup
+  // was cancelled. It only fences publication for one delayed, explicitly identified workflow.
+  app.post<{ Params: { id: string; workflowId: string } }>('/api/v1/admin/ai-support/conversations/:id/launch-workflows/:workflowId/reconcile', async (request) => {
+    const auth = await requireRole(request, env, db, ['admin', 'super_admin']);
+    if (!env.AI_WEBSITE_LAUNCH_ENABLED) throw new NotFoundError('Launch workflow not available');
+    const conversationId = parse(id, request.params.id);
+    const workflowId = parse(z.string().uuid('workflow id must be a valid UUID'), request.params.workflowId);
+    parse(z.object({ confirmed: z.literal(true), disposition: z.literal('needs_support') }).strict(), request.body);
+    const workflow = await reconcileDelayedLaunch(db, conversationId, workflowId, auth.userId);
+    if (!workflow) throw new ConflictError('Workflow is not eligible for reconciliation; refresh and investigate its current state.');
+    return { launchProgress: launchProgress(workflow), lookupMayStillComplete: true };
   });
 
   app.post<{ Params: { id: string } }>('/api/v1/admin/ai-support/conversations/:id/reply', async (request) => {

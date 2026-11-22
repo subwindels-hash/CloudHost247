@@ -236,7 +236,7 @@ const CUSTOMER_SUPPORTED = [
   'my support tickets / ticket status',
   'open a support ticket',
   'what has the AI done on my account',
-  'help: <question> (knowledge base)',
+  'help: <question> (support guidance; knowledge search unavailable)',
 ] as const;
 
 export function resolveCustomerMessage(raw: string): IntentResolution {
@@ -249,11 +249,11 @@ export function resolveCustomerMessage(raw: string): IntentResolution {
       async execute(ctx) {
         const out = await ctx.callTool('get_ai_activity', { userId: ctx.customerScopeUserId ?? '' });
         if (out.status !== 'executed') return { answer: outcomeFailure(out), toolOutcomes: [out] };
-        const d = out.data as { tasks: Array<Record<string, unknown>>; findings: Array<Record<string, unknown>>; approvals: Array<Record<string, unknown>> };
+        const d = out.data as { tasks: Array<Record<string, unknown>> };
         return {
           answer: [
-            `AI activity on your account: ${d.tasks.length} task(s), ${d.findings.length} finding(s), ${d.approvals.length} approval-gated action request(s).`,
-            ...d.tasks.slice(0, 8).map((t) => `· [${t.status}] ${t.agent_name}: ${t.result_summary ?? t.task_type} (${String(t.created_at).slice(0, 10)})`),
+            `Recent assistant requests shown: ${d.tasks.length} (up to 20). This is not a complete record of AI activity on your account.`,
+            ...d.tasks.slice(0, 8).map((t) => `· [${t.status}] Assistant request (${String(t.created_at).slice(0, 10)})`),
           ].join('\n'),
           toolOutcomes: [out],
         };
@@ -302,7 +302,7 @@ export function resolveCustomerMessage(raw: string): IntentResolution {
       },
     };
   }
-  if (has('subscription', 'service status', 'my services', 'my service', 'renewal')) {
+  if (has('subscription', 'service status', 'my services', 'my service', 'renewal') && !has('domain', 'dns', 'ssl', 'certificate', 'https')) {
     return {
       intent: 'customer.subscriptions', confidence: 'exact',
       async execute(ctx) {
@@ -333,8 +333,12 @@ export function resolveCustomerMessage(raw: string): IntentResolution {
         const out = await ctx.callTool('list_expiring_domains', { days: 90, userId: ctx.customerScopeUserId ?? '' });
         if (out.status !== 'executed') return { answer: outcomeFailure(out), toolOutcomes: [out] };
         const d = out.data as { domains: Array<Record<string, unknown>> };
-        if (d.domains.length === 0) return { answer: 'None of your domains expire within the next 90 days (checked against the recorded expiry dates).', toolOutcomes: [out] };
-        return { answer: [`Your domains expiring within 90 days:`, ...d.domains.slice(0, 10).map((d2) => `· ${d2.domainName} — expires ${String(d2.expiresAt).slice(0, 10)} (${d2.daysUntilExpiry} day(s))`)].join('\n'), toolOutcomes: [out] };
+        const lines = [
+          'Recorded domain expiry matches: active, expired or pending-transfer records with a known expiry before the 90-day cutoff, including past dates. Showing up to 10 of at most 100 matches.',
+          ...(d.domains.length ? d.domains.slice(0, 10).map((d2) => `· ${d2.domainName} — recorded status ${d2.status} — expiry ${String(d2.expiresAt).slice(0, 10)} (${d2.daysUntilExpiry} day(s))`) : ['No matching records were returned.']),
+          'Records with unknown expiry or other statuses are not included. This is not a complete domain inventory or a live registrar check. I cannot inspect DNS records here.',
+        ];
+        return { answer: lines.join('\n'), toolOutcomes: [out] };
       },
     };
   }
@@ -345,8 +349,12 @@ export function resolveCustomerMessage(raw: string): IntentResolution {
         const out = await ctx.callTool('list_expiring_ssl', { days: 90, userId: ctx.customerScopeUserId ?? '' });
         if (out.status !== 'executed') return { answer: outcomeFailure(out), toolOutcomes: [out] };
         const d = out.data as { certificates: Array<Record<string, unknown>> };
-        if (d.certificates.length === 0) return { answer: 'No certificates on your account expire within 90 days or are in a failed state (checked recorded expiry data).', toolOutcomes: [out] };
-        return { answer: [`Your certificates needing attention:`, ...d.certificates.slice(0, 10).map((c) => `· ${c.domainName} — ${c.status} — ${c.daysUntilExpiry} day(s) — auto-renew ${c.autoRenew}`)].join('\n'), toolOutcomes: [out] };
+        const lines = [
+          'Recorded certificate expiry matches: selected statuses with a known expiry before the 90-day cutoff, including past dates. Showing up to 10 of at most 100 matches.',
+          ...(d.certificates.length ? d.certificates.slice(0, 10).map((c) => `· ${c.domainName} — recorded status ${c.status} — expiry ${c.expiresAt} — ${c.daysUntilExpiry} day(s) — auto-renew ${c.autoRenew}`) : ['No matching records were returned.']),
+          'Certificates with unknown expiry, expiry after the cutoff or other statuses are not included, even if failed or revoked. This is not a complete certificate inventory or a live TLS check.',
+        ];
+        return { answer: lines.join('\n'), toolOutcomes: [out] };
       },
     };
   }
@@ -393,23 +401,15 @@ export function resolveCustomerMessage(raw: string): IntentResolution {
     };
   }
 
-  // Knowledge-base fallback for genuine questions.
+  // The control-plane knowledge store includes internal material and has no audience boundary.
+  // Do not query it or claim that a search returned no results; offer the existing human route.
   if (q.length >= 8 && (has('how', 'what', 'why', 'where', 'can i', 'do you', 'help', '?') || q.split(/\s+/).length >= 3)) {
     return {
       intent: 'customer.knowledge', confidence: 'exact',
-      async execute(ctx) {
-        const out = await ctx.callTool('search_knowledge', { query: raw, limit: 3 });
-        if (out.status !== 'executed') return { answer: outcomeFailure(out), toolOutcomes: [out] };
-        const d = out.data as { count: number; results: Array<{ content: string; citation: { source: string; version: string } }>; note?: string };
-        if (d.count === 0) {
-          return {
-            answer: `I couldn't find documentation answering that in our knowledge base, so I won't guess. You can open a support ticket ("open ticket: <your issue>") and the team will help — or browse Help Center articles.`,
-            toolOutcomes: [out],
-          };
-        }
+      async execute() {
         return {
-          answer: [`Based on CloudHost247 documentation:`, ...d.results.map((r) => `${r.content}\n— Source: ${r.citation.source} (v${r.citation.version})`)].join('\n\n'),
-          toolOutcomes: [out],
+          answer: 'I cannot search the knowledge base from this assistant right now. I will not guess. You can ask the support team by opening a ticket ("open ticket: <your issue>").',
+          toolOutcomes: [],
         };
       },
     };
@@ -417,7 +417,7 @@ export function resolveCustomerMessage(raw: string): IntentResolution {
 
   return {
     intent: 'unsupported', confidence: 'none',
-    unsupportedReason: 'I can help with your CloudHost247 account — invoices, payments, services, subscriptions, domains, SSL, tickets, or opening a support ticket — plus questions covered by our documentation. I will not guess outside that.',
+    unsupportedReason: 'I can help with your CloudHost247 account — invoices, payments, services, subscriptions, domains, SSL, tickets, or opening a support ticket. Knowledge search is currently unavailable; I will not guess.',
     supported: CUSTOMER_SUPPORTED,
   };
 }

@@ -15,7 +15,7 @@ import { z } from 'zod';
 import type { Env } from '../../config/env';
 import { getPool } from '../../db/pool';
 import type { Queryable } from '../../db/types';
-import { ValidationError, NotFoundError } from '../../lib/errors';
+import { ValidationError, NotFoundError, ConflictError, ForbiddenError } from '../../lib/errors';
 import { authenticate } from '../../lib/require-auth';
 import { recordAudit, requestAuditContext } from '../../lib/audit';
 import { requireAiPermission, type AiPermission, type AiRequestContext } from '../permissions';
@@ -32,7 +32,6 @@ import {
   upsertModelConfig,
 } from '../repositories/registry-repo';
 import {
-  createTask,
   getTask,
   listRunsForTask,
   listStepsForRun,
@@ -41,9 +40,9 @@ import {
 } from '../repositories/tasks-repo';
 import {
   countPendingApprovals,
-  decideApproval,
   getApproval,
   listApprovals,
+  listDelayedApprovals,
 } from '../repositories/approvals-repo';
 import { listEvents, listWorkflowRuns, listWorkflows, setWorkflowEnabled, emitEvent } from '../repositories/events-repo';
 import {
@@ -62,8 +61,16 @@ import {
   searchKnowledge,
 } from '../repositories/memory-knowledge-repo';
 import { getBoardOverview, generateExecutiveBriefing } from '../board/board-service';
-import { runTask, executeApprovedApproval } from '../runtime/executor';
+import { runTask, executeApprovedApproval, TaskFailedError } from '../runtime/executor';
+import { decideAuthorizedApproval } from '../runtime/approval-decision';
+import { approvalReviewFingerprint } from '../runtime/approval-review';
+import { dispatchCustomerIntent } from '../runtime/customer-orchestrator';
+import { prepareOrchestratedTask } from '../runtime/task-orchestrator';
 import { processPendingEvents } from '../workflows/engine';
+import { listAcknowledgedIncompleteRuns, listHeldEventClaims, openAcknowledgedRunInvestigation, openHeldEventInvestigation } from '../workflows/event-investigations';
+import { listSuspectedInterruptedTasks, openTaskInvestigation } from '../runtime/task-reconciliation';
+import { readonlyRetryRefusal } from '../runtime/read-only-retry';
+import { listStrandedEffects } from '../repositories/effect-outbox';
 import { AI_EVENT_TYPES } from '../types';
 import { executeToolImplementation } from '../tools/implementations';
 
@@ -229,9 +236,10 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     if (!declared.includes(body.taskType)) {
       throw new ValidationError(`Agent ${body.agentSlug} does not declare task type '${body.taskType}' — it cannot be asked to do something outside its registry contract`);
     }
-    const { task } = await createTask(pool, {
+    const { task } = await prepareOrchestratedTask(pool, {
       agentId: agent.id,
       taskType: body.taskType,
+      entryPoint: 'admin.task',
       context: body.input ?? {},
       subjectType: body.subjectType ?? null,
       subjectId: body.subjectId ?? null,
@@ -255,6 +263,47 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     return { task, runs, steps: runs.length > 1 ? undefined : steps, stepsByRun: Object.fromEntries(await Promise.all(runs.map(async (r) => [r.id, await listStepsForRun(db(), r.id)]))), toolCalls };
   });
 
+  // Operator retry of a READ-ONLY task, per the Phase 2 safe-retry specification: dedicated
+  // permission, server-declared read-only type, proof the task was never claimed, identity /
+  // grant / scope re-verification, mutating tools refused inside the run, audited decision.
+  instance.post(`${ADMIN_BASE}/tasks/:id/retry`, async (request) => {
+    const auth = await authorize(request, 'ai.tasks.retry');
+    const { id } = parseOrThrow(idParam, request.params);
+    parseOrThrow(z.object({ confirmed: z.literal(true) }).strict(), request.body);
+    const pool = db();
+    const task = await getTask(pool, id);
+    if (!task) throw new NotFoundError('Task not found');
+    const refusal = await readonlyRetryRefusal(pool, task);
+    if (refusal) throw new ConflictError(refusal);
+    // Decision audit precedes dispatch so a crash after approval of the retry cannot lose it;
+    // the run's own step/tool/audit records capture the observed outcome.
+    await recordAudit(
+      pool,
+      {
+        actorId: auth.userId,
+        action: 'ai.task.readonly_retry',
+        resourceType: 'ai_task',
+        resourceId: task.id,
+        metadata: { taskType: task.task_type, agentId: task.agent_id },
+      },
+      requestAuditContext(request)
+    );
+    // Bind the claim to the task snapshot used for eligibility and audit. The executor rechecks
+    // the never-claimed conditions atomically at claim and refuses a changed retry identity.
+    try {
+      const outcome = await runTask(pool, task.id, { readOnlyRetry: true, retryExpectedTask: task, retryOperatorUserId: auth.userId });
+      return { task: outcome.task, runStatus: outcome.runStatus, pendingApprovals: outcome.pendingApprovals };
+    } catch (error) {
+      if (error instanceof TaskFailedError && error.code === 'RETRY_CLAIM_UNAVAILABLE') {
+        throw new ConflictError('Retry eligibility changed; execution refused');
+      }
+      if (error instanceof TaskFailedError && error.code === 'RETRY_OPERATOR_UNAUTHORIZED') {
+        throw new ForbiddenError('Retry operator is no longer authorized');
+      }
+      throw error;
+    }
+  });
+
   // ==============================================================================================
   // Human Decision Inbox (approvals)
   // ==============================================================================================
@@ -263,6 +312,14 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     await authorize(request, 'ai.approvals.view');
     const query = parseOrThrow(paginationSchema.extend({ status: z.string().max(16).optional(), customerId: z.string().uuid().optional() }), request.query ?? {});
     const approvals = await listApprovals(db(), query);
+    return { count: approvals.length, approvals: approvals.map((approval) => ({ ...approval, reviewFingerprint: approvalReviewFingerprint(approval) })) };
+  });
+
+  // Age alone cannot establish a failed or stopped worker. No action/replay is exposed here.
+  instance.get(`${ADMIN_BASE}/approvals/delayed`, async (request) => {
+    await authorize(request, 'ai.approvals.view');
+    const query = parseOrThrow(z.object({ limit: z.coerce.number().int().positive().max(200).default(100) }).strict(), request.query);
+    const approvals = await listDelayedApprovals(db(), query.limit);
     return { count: approvals.length, approvals };
   });
 
@@ -270,29 +327,39 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     const auth = await authorize(request, 'ai.approvals.manage');
     const { id } = parseOrThrow(idParam, request.params);
     const body = parseOrThrow(
-      z.object({ decision: z.enum(['approved', 'rejected'] as const), note: z.string().max(2000).optional() }),
+      z.object({ decision: z.enum(['approved', 'rejected'] as const), reviewFingerprint: z.string().regex(/^[a-f0-9]{64}$/), note: z.string().max(2000).optional() }).strict(),
       request.body
     );
     const pool = db();
-    // Atomic claim: only one decider can ever win the row.
-    const decided = await decideApproval(pool, id, body.decision, auth.userId, body.note ?? null);
+    // Recheck the actor and commit the one-winner decision together with its audit record.
+    // If COMMIT acknowledgement is lost, do not proceed to execution on this request.
+    const decided = await decideAuthorizedApproval(pool, {
+      id, decision: body.decision, actorId: auth.userId, note: body.note ?? null, reviewFingerprint: body.reviewFingerprint, auditContext: requestAuditContext(request),
+    });
     if (!decided) {
       const existing = await getApproval(pool, id);
       if (!existing) throw new NotFoundError('Approval not found');
       throw new ValidationError(`Approval is already '${existing.status}' (or expired) — decisions are single-use`);
     }
-    await recordAudit(
-      pool,
-      { actorId: auth.userId, action: `ai.approval.${body.decision}`, resourceType: 'ai_approval', resourceId: id, metadata: { tool: decided.tool, agentId: decided.agent_id } },
-      requestAuditContext(request)
-    );
     if (body.decision === 'rejected') {
       return { approval: decided, executed: false, note: 'Rejected. The sealed action was never executed.' };
     }
     // Approved: execute the sealed tool call now, with the approver as the acting human.
-    const execution = await executeApprovedApproval(pool, id, auth.userId);
+    const execution = await executeApprovedApproval(pool, id, auth.userId, body.reviewFingerprint);
     const finalApproval = await getApproval(pool, id);
     return { approval: finalApproval, executed: execution.ok, executionError: execution.error ?? null };
+  });
+
+  // External-effect outbox: bounded visibility only. No operator action replays or changes an intent.
+  instance.get(`${ADMIN_BASE}/effect-outbox`, async (request) => {
+    await authorize(request, 'ai.approvals.view');
+    const query = parseOrThrow(z.object({ limit: z.coerce.number().int().positive().max(200).default(100) }).strict(), request.query);
+    const intents = await listStrandedEffects(db(), { limit: query.limit });
+    return {
+      count: intents.length,
+      intents,
+      note: 'Stranded means an intent past the detection window: pending = decided but never started; dispatched = started with no recorded outcome. Neither is proof that an effect happened, and nothing here is replayed automatically.',
+    };
   });
 
   // ==============================================================================================
@@ -304,6 +371,65 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     const query = parseOrThrow(z.object({ eventType: z.string().max(64).optional(), limit: z.coerce.number().int().positive().max(500).optional() }), request.query ?? {});
     const events = await listEvents(db(), query);
     return { count: events.length, events, knownTypes: AI_EVENT_TYPES };
+  });
+
+  instance.get(`${ADMIN_BASE}/event-claims`, async (request) => {
+    await authorize(request, 'ai.events.view');
+    const query = parseOrThrow(z.object({ limit: z.coerce.number().int().positive().max(200).optional() }).strict(), request.query ?? {});
+    const claims = await listHeldEventClaims(db(), query.limit);
+    return { count: claims.length, claims, note: 'A delayed claim may still be active. Investigation does not cancel or replay it.' };
+  });
+
+  instance.get(`${ADMIN_BASE}/acknowledged-incomplete-workflows`, async (request) => {
+    await authorize(request, 'ai.events.view');
+    const query = parseOrThrow(z.object({ limit: z.coerce.number().int().positive().max(200).optional() }).strict(), request.query ?? {});
+    const runs = await listAcknowledgedIncompleteRuns(db(), query.limit);
+    return { count: runs.length, runs, note: 'Recent incomplete workflow runs on acknowledged events. An acknowledgement is not evidence of an external outcome.' };
+  });
+
+  instance.get(`${ADMIN_BASE}/suspected-interrupted-tasks`, async (request) => {
+    await authorize(request, 'ai.events.view');
+    const query = parseOrThrow(z.object({ limit: z.coerce.number().int().positive().max(200).optional() }).strict(), request.query ?? {});
+    const tasks = await listSuspectedInterruptedTasks(db(), query.limit);
+    return {
+      count: tasks.length,
+      tasks,
+      note: 'A stale heartbeat is an observation, not proof the worker stopped or that any effect is missing. Investigation does not change the task, cancel work or authorize a retry.',
+    };
+  });
+
+  instance.post(`${ADMIN_BASE}/tasks/:id/interrupted-investigations`, async (request) => {
+    const auth = await authorize(request, 'ai.workflows.manage');
+    const { id } = parseOrThrow(idParam, request.params);
+    const body = parseOrThrow(z.object({
+      confirmed: z.literal(true),
+      observedHeartbeat: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/),
+    }).strict(), request.body);
+    const result = await openTaskInvestigation(db(), id, body.observedHeartbeat, auth.userId);
+    if (!result) throw new ConflictError('Task is not a suspected-interrupted running task with that observed heartbeat');
+    return { ...result, note: 'Recorded for investigation only; the task is unchanged and no retry, replay or verified outcome is implied.' };
+  });
+
+  instance.post(`${ADMIN_BASE}/workflow-runs/:id/acknowledged-investigations`, async (request) => {
+    const auth = await authorize(request, 'ai.workflows.manage');
+    const { id } = parseOrThrow(idParam, request.params);
+    const body = parseOrThrow(z.object({
+      confirmed: z.literal(true), eventId: z.string().uuid(),
+      acknowledgementKey: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/),
+      observedStatus: z.enum(['running', 'failed', 'partial']),
+    }).strict(), request.body);
+    const result = await openAcknowledgedRunInvestigation(db(), id, body.eventId, body.acknowledgementKey, body.observedStatus, auth.userId);
+    if (!result) throw new ConflictError('Run is not an acknowledged incomplete workflow');
+    return { ...result, note: 'Recorded for investigation only; no notification, cancellation, retry or verified outcome is implied.' };
+  });
+
+  instance.post(`${ADMIN_BASE}/events/:id/investigations`, async (request) => {
+    const auth = await authorize(request, 'ai.workflows.manage');
+    const { id } = parseOrThrow(idParam, request.params);
+    parseOrThrow(z.object({ confirmed: z.literal(true) }).strict(), request.body);
+    const result = await openHeldEventInvestigation(db(), id, auth.userId);
+    if (!result) throw new ConflictError('Event has no held claim eligible for investigation');
+    return { ...result, note: 'Recorded for investigation only; no notification, cancellation, retry or verified outcome is implied.' };
   });
 
   instance.post(`${ADMIN_BASE}/events`, async (request) => {
@@ -348,7 +474,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
 
   instance.get(`${ADMIN_BASE}/workflow-runs`, async (request) => {
     await authorize(request, 'ai.view');
-    const query = parseOrThrow(paginationSchema.extend({ workflowId: z.string().uuid().optional() }), request.query ?? {});
+    const query = parseOrThrow(paginationSchema.extend({ workflowId: z.string().uuid().optional(), eventId: z.string().uuid().optional() }), request.query ?? {});
     const runs = await listWorkflowRuns(db(), query);
     return { count: runs.length, runs };
   });
@@ -605,9 +731,10 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     const pool = db();
     const agent = await getAgentBySlug(pool, 'admin-copilot');
     if (!agent) throw new NotFoundError('Admin Copilot agent is not registered');
-    const { task } = await createTask(pool, {
+    const { task } = await prepareOrchestratedTask(pool, {
       agentId: agent.id,
       taskType: 'copilot.command',
+      entryPoint: 'admin.copilot',
       context: { command: body.command },
       requestedBy: auth.userId,
       requestedByType: 'staff',
@@ -633,21 +760,10 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
     const auth = await authenticate(request, env, db());
     const body = parseOrThrow(z.object({ message: z.string().min(2).max(2000) }), request.body);
     const pool = db();
-    // Authenticated first, then the registry: without this the assistant would answer
-    // "agent is not registered" for the whole lifetime of a process whose boot seed failed.
-    await ensureAgentRegistrySeeded(pool);
-    const agent = await getAgentBySlug(pool, 'customer-cloud-assistant');
-    if (!agent) throw new NotFoundError('Customer Cloud Assistant agent is not registered');
-    const { task } = await createTask(pool, {
-      agentId: agent.id,
-      taskType: 'customer.assistant_query',
-      context: { message: body.message },
-      requestedBy: auth.userId,
-      requestedByType: 'customer',
-      customerId: auth.userId,
+    // The route authenticates first and constructs the scope from that identity, never the body.
+    const outcome = await dispatchCustomerIntent(pool, {
+      operation: 'account_assistant', actorUserId: auth.userId, message: body.message,
     });
-    // HARD scoping: the run is bound to the caller's own account regardless of any payload.
-    const outcome = await runTask(pool, task.id, { actorUserId: auth.userId, customerScopeUserId: auth.userId });
     const result = (outcome.task.result ?? {}) as Record<string, unknown>;
     return {
       taskId: outcome.task.id,
@@ -655,7 +771,7 @@ async function registerAiControlPlaneRoutesInContext(instance: FastifyInstance, 
       answer: typeof result.answer === 'string' ? result.answer : outcome.task.result_summary,
       intent: result.intent ?? null,
       supported: result.supported ?? null,
-      note: 'This assistant reads only your own account data; every query is recorded and visible to you under AI Activity.',
+      note: 'This assistant reads your own account data. AI Activity shows a bounded list of your assistant requests, not a complete history.',
     };
   });
 

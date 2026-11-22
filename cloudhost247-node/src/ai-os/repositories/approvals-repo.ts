@@ -15,6 +15,8 @@ export interface CreateApprovalInput {
   affectedCustomerId?: string | null;
   affectedResource?: string | null;
   arguments: Record<string, unknown>;
+  /** Trusted runtime attestation after lossless input checks; not a database signature. */
+  argumentsVerified?: boolean;
   expiresInHours?: number;
 }
 
@@ -22,8 +24,8 @@ export async function createApproval(db: Queryable, input: CreateApprovalInput):
   const hours = Math.min(Math.max(input.expiresInHours ?? 72, 1), 24 * 30);
   const { rows } = await db.query<ApprovalRow>(
     `INSERT INTO ai_approvals (id, agent_id, task_id, run_id, tool, action, reason, evidence, risk_level,
-                               affected_customer_id, affected_resource, arguments, expires_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, now() + ($13 || ' hours')::interval)
+                               affected_customer_id, affected_resource, arguments, expires_at, arguments_verified)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, now() + ($13 || ' hours')::interval, $14)
      RETURNING *`,
     [
       randomUUID(),
@@ -39,6 +41,7 @@ export async function createApproval(db: Queryable, input: CreateApprovalInput):
       input.affectedResource ?? null,
       JSON.stringify(input.arguments ?? {}),
       String(hours),
+      input.argumentsVerified === true,
     ]
   );
   if (!rows[0]) throw new Error('ai_approvals: insert returned no row');
@@ -79,6 +82,26 @@ export async function listApprovals(
   return rows;
 }
 
+export interface DelayedApproval {
+  id: string;
+  status: 'approved' | 'executing';
+  tool: string;
+  task_id: string | null;
+  run_id: string | null;
+  updated_at: string;
+}
+
+/** Bounded operator visibility, not a failure detector or a claim on these rows. */
+export async function listDelayedApprovals(db: Queryable, limit = 100): Promise<DelayedApproval[]> {
+  const { rows } = await db.query<DelayedApproval>(
+    `SELECT id, status, tool, task_id, run_id, updated_at FROM ai_approvals
+     WHERE status IN ('approved', 'executing') AND updated_at <= now() - interval '5 minutes'
+     ORDER BY updated_at ASC, id ASC LIMIT $1`,
+    [Math.min(Math.max(limit, 1), 200)],
+  );
+  return rows;
+}
+
 export async function countPendingApprovals(db: Queryable): Promise<number> {
   const { rows } = await db.query<{ count: string }>(`SELECT count(*)::text AS count FROM ai_approvals WHERE status = 'pending'`);
   return Number(rows[0]?.count ?? 0);
@@ -104,11 +127,24 @@ export async function decideApproval(
   return rows[0] ?? null;
 }
 
+/** Claim a decision once, before running any action. A crashed claim is never auto-retried. */
+export async function claimApprovalExecution(db: Queryable, id: string, decidedBy: string): Promise<ApprovalRow | null> {
+  const { rows } = await db.query<ApprovalRow>(
+    `UPDATE ai_approvals SET status = 'executing', updated_at = now()
+     WHERE id = $1 AND status = 'approved' AND decision_by = $2 AND expires_at > now()
+     RETURNING *`,
+    [id, decidedBy]
+  );
+  return rows[0] ?? null;
+}
+
 export async function markApprovalExecuted(db: Queryable, id: string, success: boolean, result: unknown): Promise<void> {
-  await db.query(
-    `UPDATE ai_approvals SET status = $2, executed_at = now(), execution_result = $3, updated_at = now() WHERE id = $1`,
+  const { rows } = await db.query<{ id: string }>(
+    `UPDATE ai_approvals SET status = $2, executed_at = now(), execution_result = $3, updated_at = now()
+     WHERE id = $1 AND status = 'executing' RETURNING id`,
     [id, success ? 'executed' : 'failed', result === undefined ? null : JSON.stringify(result)]
   );
+  if (!rows[0]) throw new Error('Approval execution claim was lost; reconciliation required');
 }
 
 export async function expireStaleApprovals(db: Queryable): Promise<number> {

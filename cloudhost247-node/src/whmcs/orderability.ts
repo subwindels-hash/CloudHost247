@@ -30,7 +30,8 @@
 import { WhmcsError } from './errors';
 import { cyclesFor, fetchCatalogue } from './catalogue';
 import { buildCartUrl } from './cart';
-import { resolveBinding, type ProductMapDocument } from './product-map';
+import { mapMatchesInstall, resolveBinding, type ProductMapDocument } from './product-map';
+import { normalizeBaseUrl } from './config';
 import type { WhmcsClient } from './client';
 import type { NormalizedCatalogue } from './types';
 import type { BillingCycle } from './types';
@@ -140,6 +141,13 @@ export function decideOrderability(input: DecideInput): ServiceOrderability {
     });
   }
 
+  // A valid checksum does not bind a product id to the configured WHMCS installation.
+  // Never quote or create a cart link from a snapshot taken against a different base URL.
+  try {
+    if (!mapMatchesInstall(map, normalizeBaseUrl(cart.baseUrl))) return notOrderable(serviceKey, 'MAP_INVALID');
+  } catch {
+    return notOrderable(serviceKey, 'MAP_INVALID');
+  }
   const currency = catalogue.currency;
   const product = catalogue.products.find((candidate) => candidate.id === binding.productId);
   if (!product) {
@@ -228,9 +236,9 @@ export interface CatalogueLoader {
  * calls. Sixty seconds of sharing turns a busy page into one refresh per minute, and single-flight
  * means ten simultaneous visitors cost one refresh rather than ten.
  *
- * Why it is this small: caching is only safe because a stale answer can at worst show yesterday's
- * *price*, never a wrong *verdict* — WHMCS re-validates the product and price again in the cart.
- * Failures are never cached.
+ * Cached prices and apparent availability can both be stale. Consumers must not treat the cached
+ * verdict as proof of current checkout eligibility, and must check the WHMCS cart; its behavior has
+ * not been independently verified here. Failures are never cached.
  */
 export function createCatalogueLoader(
   client: WhmcsClient,

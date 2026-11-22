@@ -1,9 +1,9 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { PgliteClient } from '../../database/db-client';
+import { PgliteClient, type DbClient } from '../../database/db-client';
 import { getAppliedMigrations, listMigrationFiles, QUARANTINED_MIGRATIONS, migrateUp, status, verify } from '../../database/migrate';
 
 /**
@@ -172,7 +172,35 @@ describe('migration runner against the real database/migrations SQL files', () =
     // is the primary key, so two files sharing a prefix is a hard collision, not a merge nuisance.
     '0106_create_support_ticket_attachments.sql',
     '0107_create_acme_accounts_and_challenges.sql',
+    '0108_ai_approval_execution_claim.sql',
+    '0109_ai_launch_orchestration.sql',
+    '0110_ai_event_dispatch_claim.sql',
+    '0111_ai_event_investigations.sql',
+    '0112_ai_incomplete_workflow_runs_index.sql',
+    '0113_ai_acknowledged_run_investigations.sql',
+    '0114_ai_approval_argument_integrity.sql',
+    '0115_ai_task_heartbeat_and_reconciliation.sql',
+    '0116_ai_task_entry_point.sql',
+    '0117_ai_effect_outbox.sql',
+    '0118_ai_support_message_requests.sql',
   ];
+
+  it('quarantines legacy unprocessed events with workflow history on claim upgrade', async () => {
+    await db.exec(`CREATE TABLE ai_events (id uuid PRIMARY KEY, processed_at timestamptz, occurred_at timestamptz NOT NULL DEFAULT now());
+      CREATE TABLE ai_workflow_runs (event_id uuid, started_at timestamptz NOT NULL DEFAULT now());
+      INSERT INTO ai_events (id, processed_at) VALUES
+        ('00000000-0000-4000-8000-000000000001', NULL),
+        ('00000000-0000-4000-8000-000000000002', NULL),
+        ('00000000-0000-4000-8000-000000000003', now());
+      INSERT INTO ai_workflow_runs (event_id) VALUES
+        ('00000000-0000-4000-8000-000000000001'),
+        ('00000000-0000-4000-8000-000000000003');`);
+    const sql = readFileSync(path.join(process.cwd(), 'database/migrations/0110_ai_event_dispatch_claim.sql'), 'utf8');
+    await db.exec(sql);
+    const rows = await db.query<{ id: string; claimed: boolean; dated: boolean }>(
+      `SELECT id, dispatch_claim_token IS NOT NULL AS claimed, dispatch_claimed_at IS NOT NULL AS dated FROM ai_events ORDER BY id`);
+    expect(rows.rows.map(({ claimed, dated }) => [claimed, dated])).toEqual([[true, true], [false, false], [false, false]]);
+  });
 
   it('finds the committed migration files in order', () => {
     const files = listMigrationFiles();
@@ -346,6 +374,33 @@ describe('migration runner against the real database/migrations SQL files', () =
     await client.query("UPDATE schema_migrations SET checksum = repeat('0', 64) WHERE version = '0001'");
 
     await expect(migrateUp(client, { isProduction: false })).rejects.toThrow(/checksum drift/i);
+  });
+
+  it('reports an unknown commit outcome if the commit acknowledgement is lost', async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'ch247-migrations-'));
+    try {
+      writeFileSync(path.join(dir, '0001_local.sql'), 'CREATE TABLE committed_despite_disconnect (id int);');
+      const lostAck: DbClient = {
+        exec: async (sql) => {
+          await client.exec(sql);
+          if (sql === 'COMMIT') throw new Error('simulated lost acknowledgement');
+        },
+        query: <T = Record<string, unknown>>(sql: string, params?: unknown[]) => client.query<T>(sql, params),
+      };
+      await expect(migrateUp(lostAck, { isProduction: false }, dir)).rejects.toThrow(/commit outcome unknown/i);
+      expect((await getAppliedMigrations(client)).map((row) => row.version)).toEqual(['0001']);
+      expect((await client.query(`SELECT to_regclass('committed_despite_disconnect') AS name`)).rows[0]).toMatchObject({ name: 'committed_despite_disconnect' });
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+
+  it('refuses to rewrite unrecognized historical 0048 content', async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'ch247-migrations-'));
+    try {
+      const original = readFileSync(path.join(process.cwd(), 'database/migrations/0048_operating_system_logo_assets.sql'), 'utf8');
+      writeFileSync(path.join(dir, '0048_operating_system_logo_assets.sql'), original + '\n-- unreviewed alteration\n');
+      await expect(migrateUp(client, { isProduction: false }, dir)).rejects.toThrow(/unrecognized historical 0048/i);
+      expect(await getAppliedMigrations(client)).toEqual([]);
+    } finally { rmSync(dir, { recursive: true, force: true }); }
   });
 
   it('rolls back a failing migration file cleanly (no partial schema left behind)', async () => {

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { apiFetch } from '../lib/api';
 import { useAuthState } from '../layout/useAuthState';
 import { usePageMeta } from '../lib/usePageMeta';
@@ -22,6 +22,7 @@ type Conversation = {
   updated_at: string;
 };
 
+type LaunchInfo = { id: string; progress: { status: string; label: string; attentionRequired: boolean }; updatedAt: string; task: { id: string; status: string } | null };
 type Message = { id: string; author_type: string; body: string; created_at: string; confidence?: number | null; knowledge_sources?: string[] };
 type Agent = { id: string; full_name: string; email: string; role: string; presence_status: string; capacity: number };
 type Overview = { counts: Record<string, number>; newsletterSubscriptions: number; aiHandledConversations: number; humanHandledConversations: number; humanEscalations: number; byReason: Record<string, number> };
@@ -36,6 +37,8 @@ export default function AdminAiSupportPage() {
   const [items, setItems] = useState<Conversation[]>([]);
   const [selected, setSelected] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [launch, setLaunch] = useState<LaunchInfo | null>(null);
+  const detailRequest = useRef(0);
   const [reply, setReply] = useState('');
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -77,14 +80,36 @@ export default function AdminAiSupportPage() {
   }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function open(conversation: Conversation) {
+    const request = ++detailRequest.current;
     setSelected(conversation);
+    setMessages([]);
+    setLaunch(null);
     try {
-      const data = await apiFetch<{ conversation: Conversation; messages: Message[] }>(`/api/v1/admin/ai-support/conversations/${conversation.id}`);
+      const data = await apiFetch<{ conversation: Conversation; messages: Message[]; launch: LaunchInfo | null }>(`/api/v1/admin/ai-support/conversations/${conversation.id}`);
+      if (request !== detailRequest.current) return;
       setSelected(data.conversation);
       setMessages(data.messages);
+      setLaunch(data.launch);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not load conversation');
+      if (request === detailRequest.current) setError(cause instanceof Error ? cause.message : 'Could not load conversation');
     }
+  }
+
+  async function reconcileLaunch() {
+    if (!selected || !launch?.progress.attentionRequired || busy) return;
+    if (!window.confirm('Mark this delayed lookup as needing support? A lookup already in progress may still finish, but its result will not be published. This will not retry the task or cancel a provider request.')) return;
+    const conversation = selected;
+    const workflowId = launch.id;
+    const detailVersion = detailRequest.current;
+    setBusy(true);
+    try {
+      await apiFetch(`/api/v1/admin/ai-support/conversations/${conversation.id}/launch-workflows/${workflowId}/reconcile`, {
+        method: 'POST', body: JSON.stringify({ confirmed: true, disposition: 'needs_support' }),
+      });
+      if (detailVersion === detailRequest.current) await open(conversation);
+    } catch (cause) {
+      if (detailVersion === detailRequest.current) setError(cause instanceof Error ? cause.message : 'Reconciliation failed');
+    } finally { setBusy(false); }
   }
 
   async function send(event: FormEvent) {
@@ -184,6 +209,7 @@ export default function AdminAiSupportPage() {
         <section className="ch247-card">
           <div className="ch247-admin-heading"><div><h2>Conversation</h2><p className="ch247-page__hint">{selected.id} · {selected.source} · created {new Date(selected.created_at).toLocaleString()}</p></div><span className="ch247-badge">{selected.status}</span></div>
           <div className="ch247-support-meta"><strong>{selected.customer_account_name ?? selected.visitor_name ?? 'Visitor'}</strong><span>{selected.customer_account_email ?? selected.visitor_email ?? 'Email not provided'}</span><span>Reason: {selected.escalation_reason ?? 'AI conversation'}</span><span>Ticket: {selected.support_ticket_id ?? 'Conversation queue'}</span></div>
+          {launch && <div className="ch247-support-meta"><strong>Website launch</strong><span>{launch.progress.label}</span><span>Workflow: {launch.id}</span><span>Task: {launch.task ? `${launch.task.id} (${launch.task.status})` : 'Not linked'}</span>{launch.progress.attentionRequired && <><span>Investigate before any retry; status may be uncertain.</span>{(user?.role === 'admin' || user?.role === 'super_admin') && <button type="button" disabled={busy} onClick={() => void reconcileLaunch()}>Mark lookup as needing support</button>}</>}</div>}
           <div className="ch247-ticket-thread">{messages.map((message) => <article key={message.id} className="ch247-ticket-message"><strong>{message.author_type === 'AGENT' ? 'CloudHost247 Support' : message.author_type === 'AI' ? 'AI Assistant' : message.author_type}</strong><p>{message.body}</p><small>{new Date(message.created_at).toLocaleString()}</small>{message.knowledge_sources && message.knowledge_sources.length > 0 && <small>Verified sources: {message.knowledge_sources.join(', ')}</small>}</article>)}</div>
           {!['RESOLVED', 'CLOSED'].includes(selected.status) && <form onSubmit={send} className="ch247-form ch247-form--wide"><label className="ch247-field-label">Reply to customer<textarea required rows={4} value={reply} onChange={(event) => setReply(event.target.value)} /></label><button disabled={busy}>Reply as support</button></form>}
           <div className="ch247-actions"><label className="ch247-field-label">Assign

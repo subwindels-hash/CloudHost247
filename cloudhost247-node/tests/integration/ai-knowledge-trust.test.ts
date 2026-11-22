@@ -19,11 +19,14 @@ describe('knowledge outage handoff with real SQL persistence', () => {
   afterEach(async () => { await db.close(); });
 
   it('audits a retrieval outage and preserves the conversation without inventing a content gap', async () => {
-    const brokenSearch: Queryable = {
+    // Query-only injection for retrieval failures; transactions must still forward to PGlite
+    // because support-message publication takes a conversation row lock inside a transaction.
+    const brokenSearch = {
       async query<T>(sql: string, params?: unknown[]) {
         if (sql.includes('ts_rank(')) throw new Error('private-dsn-password');
         return db.query<T>(sql, params);
       },
+      transaction: <T>(fn: (tx: Queryable) => Promise<T>) => db.transaction((tx) => fn(tx)),
     };
     const app = buildApp(env, { serveFrontend: false, pool: brokenSearch });
     try {

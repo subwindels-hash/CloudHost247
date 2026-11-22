@@ -380,7 +380,9 @@ async function main(): Promise<number> {
 
   const pool = new Pool({ ...CONN, database: DB, max: 10 });
   try {
-    await migrateUp(new PgClient(pool), { isProduction: false }, MIGRATIONS);
+    const migrationConnection = await pool.connect();
+    try { await migrateUp(new PgClient(migrationConnection), { isProduction: false }, MIGRATIONS); }
+    finally { migrationConnection.release(); }
     const env = loadEnv({
       NODE_ENV: 'test',
       DATABASE_URL: 'postgresql://ch:ch@127.0.0.1:55432/' + DB,

@@ -301,7 +301,9 @@ export async function decideSupportResponse(
     facts,
     resolveRoute,
     currentPath: context.currentPath ?? null,
-    allowModel: context.allowModel !== false,
+    // Do not transmit a support question to a model merely because credentials exist. An
+    // explicit caller opt-in is required; the public conversation route does not opt in.
+    allowModel: context.allowModel === true,
     previousTopic: previousAi || null,
   });
 

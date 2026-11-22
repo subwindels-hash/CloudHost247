@@ -33,7 +33,16 @@ type Message = {
   pending?: boolean;
 };
 type SupportSession = { conversationId: string; accessToken: string };
+type LaunchProgress = { status: string; label: string; attentionState?: 'none' | 'suspected_interrupted' };
 const SESSION_KEY = 'ch247_ai_support_session';
+// Contains only an opaque submission marker, never the message or conversation token.
+const messageMarkerKey = (conversationId: string) => `ch247_ai_support_pending_message:${conversationId}`;
+
+function safeAssistantLink(link: Link): boolean {
+  if (link.url.startsWith('/') && !link.url.startsWith('//')) return true;
+  if (link.kind !== 'whmcs_cart') return false;
+  try { return new URL(link.url).protocol === 'https:'; } catch { return false; }
+}
 
 function headers(token?: string): Record<string, string> {
   const auth = getToken();
@@ -77,11 +86,18 @@ export default function AiSupportWidget() {
   const [contact, setContact] = useState({ name: '', email: '' });
   const [status, setStatus] = useState('AI_ACTIVE');
   const [followUps, setFollowUps] = useState<string[]>([]);
+  const [launchProgress, setLaunchProgress] = useState<LaunchProgress | null>(null);
+  const [transcriptState, setTranscriptState] = useState<'loading' | 'current' | 'unavailable'>('loading');
+  const [messageUncertain, setMessageUncertain] = useState(false);
+  const [uncertaintyReviewed, setUncertaintyReviewed] = useState(false);
   const [rated, setRated] = useState<Record<string, 'up' | 'down'>>({});
   const [pending, setPending] = useState(false);
   const scroller = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
+  // Polling and post-send refreshes can overlap; only the latest request may publish a snapshot.
+  const transcriptRequest = useRef(0);
+  const submissionInFlight = useRef(false);
 
   useEffect(() => {
     if (user) setContact({ name: user.fullName, email: user.email });
@@ -96,6 +112,21 @@ export default function AiSupportWidget() {
       try { localStorage.removeItem(SESSION_KEY); } catch { /* no stored session available */ }
     }
   }, []);
+
+  // A submitted message with no observed response remains uncertain across reloads and tabs.
+  useEffect(() => {
+    if (!session) { setMessageUncertain(false); return undefined; }
+    const key = messageMarkerKey(session.conversationId);
+    const update = () => {
+      try { setMessageUncertain(Boolean(localStorage.getItem(key))); }
+      catch { setMessageUncertain(true); }
+      setUncertaintyReviewed(false);
+    };
+    update();
+    const onStorage = (event: StorageEvent) => { if (event.key === key || event.key === null) update(); };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [session]);
 
   // Newest message stays in view without the customer having to scroll a live region.
   useEffect(() => {
@@ -115,32 +146,33 @@ export default function AiSupportWidget() {
   }, [open]);
 
   const loadTranscript = useCallback(async (current: SupportSession) => {
-    const response = await fetch(toolsApiPath(`/api/v1/ai-support/conversations/${current.conversationId}`), {
-      headers: headers(current.accessToken),
-    });
-    if (!response.ok) throw new Error('Session expired');
-    const data = await response.json();
-    setMessages(data.messages as Message[]);
-    setStatus(data.conversation.status);
-    if (data.conversation.visitor_email) setShowContact(false);
+    const requestId = ++transcriptRequest.current;
+    try {
+      const response = await fetch(toolsApiPath(`/api/v1/ai-support/conversations/${current.conversationId}`), {
+        headers: headers(current.accessToken),
+      });
+      if (!response.ok) throw new Error('Transcript unavailable');
+      const data = await response.json();
+      if (requestId !== transcriptRequest.current) return;
+      setMessages(data.messages as Message[]);
+      setStatus(data.conversation.status);
+      setLaunchProgress(data.launchProgress ?? null);
+      setTranscriptState('current');
+      if (data.conversation.visitor_email) setShowContact(false);
+    } catch {
+      // A failed read does not establish that a conversation is gone or its token is invalid.
+      // Retain the session, mark the snapshot stale, and pause actions until a read succeeds.
+      if (requestId === transcriptRequest.current) setTranscriptState('unavailable');
+    }
   }, []);
 
   useEffect(() => {
     if (!session || !open) return undefined;
-    let active = true;
-    const refresh = () =>
-      loadTranscript(session).catch(() => {
-        if (!active) return;
-        // A conversation that cannot be read is not silently shown as empty: drop the session so the
-        // customer can start a new one deliberately.
-        try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
-        setSession(null);
-        setMessages([]);
-      });
-    void refresh();
-    const timer = window.setInterval(() => void refresh(), 5000);
+    setTranscriptState('loading');
+    void loadTranscript(session);
+    const timer = window.setInterval(() => void loadTranscript(session), 5000);
     return () => {
-      active = false;
+      ++transcriptRequest.current;
       window.clearInterval(timer);
     };
   }, [session, open, loadTranscript]);
@@ -155,6 +187,7 @@ export default function AiSupportWidget() {
       const next = { conversationId: data.conversationId, accessToken: data.accessToken } as SupportSession;
       try { localStorage.setItem(SESSION_KEY, JSON.stringify(next)); } catch { /* storage blocked */ }
       setSession(next);
+      setLaunchProgress(null);
       setMessages([data.message ?? { author_type: 'AI', body: 'Hello! How can CloudHost247 help?' }]);
       setStatus('AI_ACTIVE');
       setFollowUps(STARTERS.slice(0, 3));
@@ -167,22 +200,48 @@ export default function AiSupportWidget() {
 
   async function send(event: FormEvent) {
     event.preventDefault();
-    if (!session || !text.trim()) return;
+    if (!session || transcriptState !== 'current' || messageUncertain || submissionInFlight.current || !text.trim()) return;
     const body = text.trim();
+    const key = messageMarkerKey(session.conversationId);
+    // A stable cryptographically random request ID binds the server's durable intake record.
+    // Refuse dispatch if secure UUID generation or persistent storage is unavailable.
+    let marker: string;
+    try {
+      marker = crypto.randomUUID();
+      if (localStorage.getItem(key)) { setMessageUncertain(true); return; }
+      localStorage.setItem(key, marker);
+      if (localStorage.getItem(key) !== marker) throw new Error('Unable to retain submission marker');
+    } catch {
+      setMessageUncertain(true);
+      setError('Cannot safely send while browser storage is unavailable.');
+      return;
+    }
+    submissionInFlight.current = true;
+    setMessageUncertain(true);
+    setUncertaintyReviewed(false);
     setText('');
     setBusy(true);
     setPending(true);
     setError('');
     setFollowUps([]);
-    setMessages((current) => [...current, { author_type: 'CUSTOMER', body }]);
     try {
       const response = await fetch(toolsApiPath(`/api/v1/ai-support/conversations/${session.conversationId}/messages`), {
         method: 'POST',
         headers: headers(session.accessToken),
-        body: JSON.stringify({ message: body }),
+        body: JSON.stringify({ message: body, requestId: marker }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message ?? 'Message failed');
+      if (!response.ok || !data || typeof data !== 'object' || data.outcomeUnknown === true ||
+          !(data.accepted === true || (data.decision && typeof data.decision === 'object' &&
+            ((data.response && typeof data.response === 'object') || (data.transfer && typeof data.transfer === 'object'))))) {
+        throw new Error('Submission outcome unknown');
+      }
+      // Only clear our own marker after an observed successful response. A concurrent tab's
+      // marker is not ours to clear. Never infer acceptance from matching transcript text.
+      try {
+        if (localStorage.getItem(key) === marker) localStorage.removeItem(key);
+        setMessageUncertain(Boolean(localStorage.getItem(key)));
+      } catch { setMessageUncertain(true); }
       if (data.decision?.kind === 'NEWSLETTER') setShowSubscribe(true);
       if (data.decision?.followUps?.length) setFollowUps(data.decision.followUps);
       if (data.transfer) {
@@ -192,31 +251,36 @@ export default function AiSupportWidget() {
       } else if (data.response) {
         setMessages((current) => [...current, data.response]);
       }
-      // Re-read from the server rather than trusting the local echo: the transcript is the record.
-      void loadTranscript(session).catch(() => undefined);
-    } catch (cause) {
-      // Do not present an unsent message as delivered. Keep it available for a retry.
-      setMessages((current) => {
-        const next = [...current];
-        for (let index = next.length - 1; index >= 0; index -= 1) {
-          if (next[index]!.author_type === 'CUSTOMER' && next[index]!.body === body) {
-            next.splice(index, 1);
-            break;
-          }
-        }
-        return next;
-      });
+      // The transcript, not an optimistic echo, is the record of the customer message.
+      void loadTranscript(session);
+    } catch {
+      // Even a 4xx/5xx, invalid response or lost connection may follow a committed intake.
+      // Keep the marker and draft; never resend automatically or claim it was unsent.
       setText((current) => current || body);
-      setError(cause instanceof Error ? cause.message : 'Message failed');
+      setMessageUncertain(true);
     } finally {
+      submissionInFlight.current = false;
       setPending(false);
       setBusy(false);
       inputRef.current?.focus();
     }
   }
 
+  function acknowledgeUncertainMessage() {
+    if (!session || !uncertaintyReviewed || busy || transcriptState !== 'current') return;
+    try {
+      localStorage.removeItem(messageMarkerKey(session.conversationId));
+      if (localStorage.getItem(messageMarkerKey(session.conversationId))) throw new Error('Marker still present');
+      setMessageUncertain(false);
+      setUncertaintyReviewed(false);
+      setError('');
+    } catch {
+      setError('Cannot clear the warning while browser storage is unavailable.');
+    }
+  }
+
   async function rate(messageId: string, rating: 'up' | 'down') {
-    if (!session) return;
+    if (!session || transcriptState !== 'current') return;
     setRated((current) => ({ ...current, [messageId]: rating }));
     try {
       await fetch(
@@ -237,7 +301,7 @@ export default function AiSupportWidget() {
 
   async function saveContact(event: FormEvent) {
     event.preventDefault();
-    if (!session) return;
+    if (!session || transcriptState !== 'current') return;
     setBusy(true);
     setError('');
     try {
@@ -258,7 +322,7 @@ export default function AiSupportWidget() {
 
   async function subscribe(event: FormEvent) {
     event.preventDefault();
-    if (!session) return;
+    if (!session || transcriptState !== 'current') return;
     setBusy(true);
     setError('');
     try {
@@ -329,14 +393,14 @@ export default function AiSupportWidget() {
                   <p>{message.body}</p>
                   {message.links && message.links.length > 0 && (
                     <ul className="ch247-ai-links">
-                      {message.links.map((link) => (
+                      {message.links.filter(safeAssistantLink).map((link) => (
                         <li key={link.url}>
                           <a
                             href={link.url}
                             onClick={(event) => {
-                              // Same-origin internal path only: the server resolved it against the
-                              // route registry, so this is a real page and not an arbitrary URL.
-                              if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+                              // WHMCS cart URLs are verified server-side and navigate normally;
+                              // internal paths continue using the SPA router.
+                              if (link.kind === 'whmcs_cart' || event.metaKey || event.ctrlKey || event.shiftKey) return;
                               event.preventDefault();
                               navigate(link.url);
                             }}
@@ -355,7 +419,7 @@ export default function AiSupportWidget() {
                         aria-pressed={rated[message.id!] === 'up'}
                         aria-label="This answer was useful"
                         onClick={() => void rate(message.id!, 'up')}
-                        disabled={Boolean(rated[message.id!])}
+                        disabled={transcriptState !== 'current' || Boolean(rated[message.id!])}
                       >
                         👍 Helpful
                       </button>
@@ -364,7 +428,7 @@ export default function AiSupportWidget() {
                         aria-pressed={rated[message.id!] === 'down'}
                         aria-label="This answer was not useful"
                         onClick={() => void rate(message.id!, 'down')}
-                        disabled={Boolean(rated[message.id!])}
+                        disabled={transcriptState !== 'current' || Boolean(rated[message.id!])}
                       >
                         👎 Not helpful
                       </button>
@@ -385,6 +449,25 @@ export default function AiSupportWidget() {
               </div>
             )}
           </div>
+          {session && transcriptState === 'loading' && <p role="status">Loading the conversation…</p>}
+          {session && transcriptState === 'unavailable' && (
+            <div className="ch247-ai-handoff" role="alert">
+              <p>Conversation unavailable. Displayed messages and launch status may be out of date. Your session is kept; new actions are paused until it can be loaded. Actions already in progress may still finish.</p>
+              <button type="button" onClick={() => void loadTranscript(session)}>Refresh conversation</button>
+            </div>
+          )}
+          {session && messageUncertain && !pending && (
+            <div className="ch247-ai-handoff" role="alert">
+              <p>A previous message may have been received or may still be processing. Its outcome is unknown; refreshing the conversation cannot prove it was not received. Check the transcript and ask support for help before sending again.</p>
+              <label><input type="checkbox" checked={uncertaintyReviewed} onChange={(event) => setUncertaintyReviewed(event.target.checked)} /> I understand the previous message may still be processed, and another message may duplicate it.</label>
+              <button type="button" onClick={acknowledgeUncertainMessage} disabled={!uncertaintyReviewed || busy || transcriptState !== 'current'}>Continue with this uncertainty</button>
+            </div>
+          )}
+          {session && launchProgress && (
+            <p className="ch247-ai-handoff" role="status">
+              Website launch{launchProgress.attentionState === 'suspected_interrupted' ? ' — may need attention' : ''}: {launchProgress.label}
+            </p>
+          )}
           {followUps.length > 0 && session && !closed && (
             <div className="ch247-ai-followups" aria-label="Suggested questions">
               {followUps.map((suggestion) => (
@@ -401,7 +484,7 @@ export default function AiSupportWidget() {
               <p>Our team needs your name and email to follow up. This is separate from newsletter subscription.</p>
               <input required minLength={2} placeholder="Full name" value={contact.name} onChange={(event) => setContact({ ...contact, name: event.target.value })} />
               <input required type="email" placeholder="Email address" value={contact.email} onChange={(event) => setContact({ ...contact, email: event.target.value })} />
-              <button disabled={busy}>Save contact details</button>
+              <button disabled={busy || transcriptState !== 'current'}>Save contact details</button>
             </form>
           )}
           {showSubscribe && (
@@ -410,7 +493,7 @@ export default function AiSupportWidget() {
               <p>Subscribe to CloudHost247 updates, offers and service announcements.</p>
               <input required minLength={2} placeholder="Full name" value={contact.name} onChange={(event) => setContact({ ...contact, name: event.target.value })} />
               <input required type="email" placeholder="Email address" value={contact.email} onChange={(event) => setContact({ ...contact, email: event.target.value })} />
-              <button disabled={busy}>Subscribe</button>
+              <button disabled={busy || transcriptState !== 'current'}>Subscribe</button>
             </form>
           )}
           {session && !closed && (
@@ -423,7 +506,7 @@ export default function AiSupportWidget() {
                 value={text}
                 onChange={(event) => setText(event.target.value)}
               />
-              <button disabled={busy || !text.trim()}>Send</button>
+              <button disabled={busy || transcriptState !== 'current' || messageUncertain || !text.trim()}>Send</button>
             </form>
           )}
           {humanActive && <p className="ch247-ai-handoff">A CloudHost247 support representative is handling this conversation. The AI will not reply unless support explicitly returns it.</p>}

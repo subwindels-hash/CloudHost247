@@ -1,11 +1,14 @@
 /** Tasks / runs / steps / tool-call persistence — the observable execution spine. */
 import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../../db/types';
+import type { OrchestrationEntryPoint } from '../runtime/orchestration-contract';
 import type { RunPhase, RunRow, RunStatus, RunStepRow, TaskRow, ToolCallRow } from '../types';
 
 export interface CreateTaskInput {
   agentId: string;
   taskType: string;
+  /** Server-derived entry point that authorized this task — see runtime/orchestration-contract. */
+  entryPoint: OrchestrationEntryPoint;
   subjectType?: string | null;
   subjectId?: string | null;
   context?: Record<string, unknown>;
@@ -20,15 +23,16 @@ export interface CreateTaskInput {
 export async function createTask(db: Queryable, input: CreateTaskInput): Promise<{ task: TaskRow; created: boolean }> {
   const id = randomUUID();
   const { rows } = await db.query<TaskRow>(
-    `INSERT INTO ai_tasks (id, agent_id, task_type, subject_type, subject_id, context, priority,
+    `INSERT INTO ai_tasks (id, agent_id, task_type, entry_point, subject_type, subject_id, context, priority,
                            requested_by, requested_by_type, customer_id, idempotency_key)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
      ON CONFLICT (idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING
      RETURNING *`,
     [
       id,
       input.agentId,
       input.taskType,
+      input.entryPoint,
       input.subjectType ?? null,
       input.subjectId ?? null,
       JSON.stringify(input.context ?? {}),

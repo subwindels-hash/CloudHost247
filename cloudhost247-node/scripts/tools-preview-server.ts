@@ -45,6 +45,13 @@ async function main(): Promise<void> {
   // be reviewed end to end against the real catalog API (see scripts/seed-preview-catalog.ts).
   const demoPlans = await seedPreviewCatalog(client);
 
+  // The opt-in launch demo needs an in-memory knowledge index so the existing trust guardrails can
+  // run. This operates only on the disposable preview database; never a production reindex.
+  if (env.AI_WEBSITE_LAUNCH_ENABLED) {
+    const { syncWebsiteKnowledge } = await import('../src/ai-website/knowledge-sync');
+    await syncWebsiteKnowledge(db, { trigger: 'manual' });
+  }
+
   const accounts = [
     { email: 'demo@cloudhost247.test', password: 'demo-tools-247', name: 'Demo Customer', role: 'customer' },
     { email: 'admin@cloudhost247.test', password: 'admin-tools-247', name: 'Demo Administrator', role: 'super_admin' },

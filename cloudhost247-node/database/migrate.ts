@@ -20,7 +20,7 @@ import 'dotenv/config';
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
-import { Pool } from 'pg';
+import { Pool, type PoolClient } from 'pg';
 import { loadEnv } from '../src/config/env';
 import { buildPoolConfig } from '../src/db/pool';
 import { DbClient, PgClient } from './db-client';
@@ -187,6 +187,24 @@ export interface MigrateUpResult {
   quarantined?: QuarantinedMigration[];
 }
 
+// This historical file was shipped with its own transaction wrapper. Do not change the file:
+// deployed databases record its original checksum. For this exact reviewed content only, remove
+// the two wrapper statements in memory so DML and migration bookkeeping share the runner's single
+// transaction. An unexpected checksum fails closed rather than rewriting unreviewed SQL.
+const LEGACY_0048_NAME = '0048_operating_system_logo_assets.sql';
+const LEGACY_0048_SHA256 = 'e1eab5212a584d07025a9540d3e1ff18a86797d1b75927680ef52ffd4062c298';
+
+function migrationSqlForExecution(file: MigrationFile, sql: string): string {
+  const actualChecksum = createHash('sha256').update(sql).digest('hex');
+  if (actualChecksum !== file.checksum) throw new Error('Migration changed during execution; review and retry');
+  if (file.name !== LEGACY_0048_NAME) return sql;
+  if (actualChecksum !== LEGACY_0048_SHA256 || (sql.match(/^BEGIN;[\t ]*$/gm) ?? []).length !== 1 || (sql.match(/^COMMIT;[\t ]*$/gm) ?? []).length !== 1) {
+    throw new Error('Unrecognized historical 0048 migration; refusing to rewrite its transaction');
+  }
+  return sql.replace(/^BEGIN;[\t ]*$/m, '-- Runner owns the transaction (legacy BEGIN omitted).')
+    .replace(/^COMMIT;[\t ]*$/m, '-- Runner owns the transaction (legacy COMMIT omitted).');
+}
+
 /**
  * Applies all pending migrations, each in its own transaction. Stops at the first failure
  * (leaving that migration's transaction rolled back) so re-running after a fix is always safe.
@@ -253,19 +271,26 @@ export async function migrateUp(client: DbClient, opts: MigrateUpOptions, dir: s
   const appliedNow: string[] = [];
   for (const file of runnable) {
     const sql = readFileSync(file.filePath, 'utf8');
+    let commitAttempted = false;
     try {
+      const executableSql = migrationSqlForExecution(file, sql);
       await client.exec('BEGIN');
-      await client.exec(sql);
+      await client.exec(executableSql);
       await client.query('INSERT INTO schema_migrations (version, name, checksum) VALUES ($1, $2, $3)', [
         file.version,
         file.name,
         file.checksum,
       ]);
+      commitAttempted = true;
       await client.exec('COMMIT');
       appliedNow.push(file.name);
     } catch (err) {
-      await client.exec('ROLLBACK').catch(() => undefined);
-      throw new Error(`Migration ${file.name} failed and was rolled back: ${(err as Error).message}`);
+      let rollbackConfirmed = false;
+      try { await client.exec('ROLLBACK'); rollbackConfirmed = true; } catch { /* connection may be lost */ }
+      const state = commitAttempted
+        ? 'commit outcome unknown; inspect schema and migration record before retrying'
+        : rollbackConfirmed ? 'rollback requested; verify database state before retrying' : 'rollback could not be confirmed; inspect database before retrying';
+      throw new Error(`Migration ${file.name} failed: ${state}: ${(err as Error).message}`);
     }
   }
 
@@ -307,11 +332,14 @@ async function main() {
 
   const env = loadEnv();
   const pool = new Pool(buildPoolConfig(env));
-  const client = new PgClient(pool);
+  let connection: PoolClient | undefined;
 
   try {
-    // Always verify the connection first — never run DDL against an unreachable/misconfigured DB.
-    await pool.query('SELECT 1');
+    // Keep every migration statement and its bookkeeping on one physical session. Pool.query()
+    // cannot provide transaction affinity when another pool user checks out a connection.
+    connection = await pool.connect();
+    const client = new PgClient(connection);
+    await connection.query('SELECT 1');
 
     if (command === 'status' || !command) {
       const rows = await status(client);
@@ -376,6 +404,7 @@ async function main() {
     console.error(`Unknown command: ${command}. Use one of: status, verify, up, create <name>.`);
     process.exitCode = 1;
   } finally {
+    connection?.release();
     await pool.end();
   }
 }

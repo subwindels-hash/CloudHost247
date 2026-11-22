@@ -23,6 +23,8 @@ import { insertEvaluation } from '../repositories/audit-repo';
 import { createNotification } from '../../services/notification-service';
 import { enqueueDeployment } from '../../db/deployments';
 import { emitEvent } from '../repositories/events-repo';
+import { isLaunchServiceKey, lookupLaunchOrderability } from '../../whmcs/agent-orderability';
+import { launchOrderabilitySchema } from '../runtime/launch-orderability-contract';
 
 export interface ToolContext {
   db: Queryable;
@@ -175,7 +177,7 @@ async function toolGetCustomerProfile(ctx: ToolContext, args: Record<string, unk
         subscriptionsAtRisk: num(r.subscriptions_at_risk),
         ticketsTotal: num(r.tickets_total),
         ticketsOpen: num(r.tickets_open),
-        aiTasksForCustomer: num(r.ai_tasks_for_customer),
+        ...(!ctx.customerScopeUserId ? { aiTasksForCustomer: num(r.ai_tasks_for_customer) } : {}),
       },
       methodology: "Every metric is a live COUNT/SUM over the customer's own rows in the platform tables. Nothing is estimated.",
     },
@@ -719,7 +721,7 @@ async function toolListExpiringSsl(ctx: ToolContext, args: Record<string, unknow
         daysUntilExpiry: r.days_until_expiry === null ? null : num(r.days_until_expiry),
       })),
     },
-    [{ table: 'ssl_certificates', description: `${rows.length} certificate(s) expiring within ${days}d or already expired/failed` }]
+    [{ table: 'ssl_certificates', description: `${rows.length} certificate(s) with a known expiry before the ${days}d cutoff in selected statuses (up to 100)` }]
   );
 }
 
@@ -791,6 +793,9 @@ async function toolListAuthAnomalies(ctx: ToolContext, args: Record<string, unkn
 }
 
 async function toolSearchKnowledge(ctx: ToolContext, args: Record<string, unknown>): Promise<ToolResult> {
+  // The existing source schema has no audience classification. Even a direct scoped tool call
+  // must not read internal chunks until a separately reviewed publication boundary exists.
+  if (ctx.customerScopeUserId) return FAIL('NOT_CUSTOMER_USABLE', 'Knowledge search is unavailable in a customer workspace');
   const query = typeof args.query === 'string' ? args.query : '';
   const hits = await searchKnowledge(ctx.db, query, limitOf(args, 5, 10));
   if (hits.length === 0) {
@@ -840,6 +845,21 @@ async function toolGetAiActivity(ctx: ToolContext, args: Record<string, unknown>
   const userId = resolveScopedUserId(ctx, args);
   if (!userId) return FAIL('VALIDATION', 'userId is required');
   const limit = limitOf(args, 20, 100);
+  if (ctx.customerScopeUserId) {
+    // Customer attribution is not a publication grant: staff tasks, findings and approval
+    // actions may contain internal information. Historical customer results are also unclassified.
+    const { rows: tasks } = await ctx.db.query<Record<string, unknown>>(
+      `SELECT t.id, t.status, t.created_at::text, t.completed_at::text
+       FROM ai_tasks t JOIN ai_agents a ON a.id = t.agent_id
+       WHERE t.customer_id = $1 AND t.requested_by = $1 AND t.requested_by_type = 'customer'
+         AND t.task_type = 'customer.assistant_query' AND a.slug = 'customer-cloud-assistant'
+       ORDER BY t.created_at DESC, t.id DESC LIMIT $2`,
+      [userId, limit],
+    );
+    return OK({ customerId: userId, tasks, findings: [], approvals: [],
+      visibility: 'recent_customer_assistant_tasks_only',
+    }, [{ table: 'ai_tasks', description: 'Recent customer assistant task references (bounded)' }]);
+  }
   const { rows: tasks } = await ctx.db.query<Record<string, unknown>>(
     `SELECT t.id, t.task_type, t.status, t.result_summary, t.created_at::text, t.completed_at::text,
             a.slug AS agent_slug, a.name AS agent_name
@@ -1074,6 +1094,20 @@ export async function executeToolImplementation(
   args: Record<string, unknown>
 ): Promise<ToolResult> {
   switch (name) {
+    case 'lookup_launch_orderability': {
+      if (!isLaunchServiceKey(args.serviceKey)) return FAIL('INVALID_SERVICE', 'This hosting category is not supported.');
+      try {
+        const verdict = await lookupLaunchOrderability(args.serviceKey);
+        // Validate and minimize before the executor persists a tool result or audit record.
+        const parsed = launchOrderabilitySchema.safeParse({ verdict, checkedAt: new Date().toISOString() });
+        if (!parsed.success || parsed.data.verdict.serviceKey !== args.serviceKey) {
+          return FAIL('INVALID_CATALOG_RESPONSE', 'Orderability response could not be verified.');
+        }
+        return OK(parsed.data);
+      } catch {
+        return FAIL('CATALOG_UNAVAILABLE', 'Live orderability could not be verified.');
+      }
+    }
     case 'get_platform_overview': return toolGetPlatformOverview(ctx);
     case 'get_customer': return toolGetCustomer(ctx, args);
     case 'get_customer_profile': return toolGetCustomerProfile(ctx, args);

@@ -47,9 +47,9 @@ function isHidden(value: unknown): boolean {
 function cyclePrice(raw: unknown): string | null {
   if (raw === undefined || raw === null) return null;
   const text = String(raw).trim();
-  if (text === '' || text === '-1' || text === '-1.00') return null;
-  const numeric = Number(text);
-  if (!Number.isFinite(numeric) || numeric < 0) return null;
+  // Accept only bounded, non-negative decimal amounts, not JavaScript number syntax such as
+  // hexadecimal, exponent notation, Infinity, or the WHMCS unavailable sentinel (-1).
+  if (text.length > 32 || !/^\d+(?:\.\d{1,6})?$/.test(text)) return null;
   return text;
 }
 
@@ -64,9 +64,11 @@ function normalizePricing(raw: RawPricing, defaultCurrency: string): Record<stri
   for (const cycle of BILLING_CYCLES) {
     const price = cyclePrice(parsed[cycle]);
     if (price === null) continue;
-    const setupRaw = parsed[CYCLE_SETUP_KEY[cycle]];
-    const setup = setupRaw === undefined || setupRaw === null ? '0.00' : String(setupRaw).trim();
-    cycles[cycle] = { price, setupFee: setup === '' || Number(setup) < 0 ? '0.00' : setup };
+    // Missing or malformed setup fees are unknown, not evidence of a free setup. Without a
+    // provider value the full displayed quote cannot be verified, so omit this cycle.
+    const setup = cyclePrice(parsed[CYCLE_SETUP_KEY[cycle]]);
+    if (setup === null) continue;
+    cycles[cycle] = { price, setupFee: setup };
   }
   out[defaultCurrency] = {
     code: defaultCurrency,
@@ -108,15 +110,24 @@ export function normalizeProducts(
     const pricingRaw = data.pricing as unknown;
     let byCurrency: Record<string, CurrencyPricing>;
     if (pricingRaw && typeof pricingRaw === 'object' && !Array.isArray(pricingRaw) && looksLikeSinglePricingObject(pricingRaw as RawPricing)) {
-      // Legacy single-currency shape: prices belong to the requested/default currency.
-      byCurrency = normalizePricing(pricingRaw as RawPricing, options.currency ?? 'USD');
+      // An unkeyed amount has no independently verified currency. The requested currency (or
+      // the install default) is not evidence of its denomination. Do not relabel it.
+      byCurrency = {};
     } else if (pricingRaw && typeof pricingRaw === 'object') {
       const entries = Object.entries(pricingRaw as Record<string, unknown>).filter(
         ([, value]) => value && typeof value === 'object' && !Array.isArray(value),
       );
       byCurrency = {};
+      const counts = new Map<string, number>();
+      for (const [code] of entries) {
+        const normalized = code.toUpperCase();
+        counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
+      }
       for (const [code, value] of entries) {
-        Object.assign(byCurrency, normalizePricing(value as RawPricing, code.toUpperCase()));
+        const normalized = code.toUpperCase();
+        // Case-variant duplicate currency keys are ambiguous; neither value wins.
+        if (!/^[A-Z]{3}$/.test(normalized) || counts.get(normalized) !== 1) continue;
+        Object.assign(byCurrency, normalizePricing(value as RawPricing, normalized));
       }
     } else {
       byCurrency = {};
