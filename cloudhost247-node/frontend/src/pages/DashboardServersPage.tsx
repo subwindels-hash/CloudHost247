@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import OsLifecycleNotice from '../components/OsLifecycleNotice';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
+import PlatformLogo from '../components/PlatformLogo';
 import { fetchCustomerServers, readServerCancellation, type CustomerServer } from '../lib/infrastructure-api';
 import { usePageMeta } from '../lib/usePageMeta';
 
@@ -21,8 +22,10 @@ export default function DashboardServersPage() {
       <div className="ch247-server-card__top">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {server.os_logo_url?<img src={server.os_logo_url} alt=""/>:<span className="ch247-os-card__fallback">OS</span>}
-          {server.control_panel_logo_url && (
-            <img src={server.control_panel_logo_url} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} />
+          {server.control_panel_name && (
+            <span className="ch247-panel-logo-sm" title={server.control_panel_name}>
+              <PlatformLogo slug={server.control_panel_slug ?? ''} name={server.control_panel_name} className="ch247-panel-logo-sm__svg" />
+            </span>
           )}
         </div>
         <StatusBadge status={server.status}/>

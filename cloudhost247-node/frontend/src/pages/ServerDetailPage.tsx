@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import StatusBadge from '../components/StatusBadge';
+import PlatformLogo from '../components/PlatformLogo';
 import OsLifecycleNotice from '../components/OsLifecycleNotice';
 import { apiFetch } from '../lib/api';
 import {
@@ -395,17 +396,9 @@ export default function ServerDetailPage() {
         <section className="ch247-card ch247-panel-status-card">
           <div className="ch247-section-heading">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              {server.control_panel_logo_url ? (
-                <img
-                  src={server.control_panel_logo_url}
-                  alt=""
-                  style={{ width: 44, height: 44, objectFit: 'contain' }}
-                />
-              ) : (
-                <span className="ch247-os-card__fallback">
-                  {server.control_panel_name.slice(0, 2).toUpperCase()}
-                </span>
-              )}
+              <span className="ch247-panel-logo-md">
+                <PlatformLogo slug={server.control_panel_slug ?? ''} name={server.control_panel_name} className="ch247-panel-logo-md__svg" />
+              </span>
               <div>
                 <span className="ch247-eyebrow">Installed Control Panel</span>
                 <h2 style={{ margin: 0 }}>{server.control_panel_name}</h2>
