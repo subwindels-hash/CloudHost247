@@ -66,6 +66,7 @@ const updateStoreSchema = z.object({
   paymentMode: z.enum(['order_intake', 'provider'] as const).optional(),
   settings: z.record(z.string(), z.unknown()).optional(),
   theme: z.record(z.string(), z.unknown()).optional(),
+  custom_domain: z.string().min(1).max(253).optional().nullable(),
 });
 
 const downloadSchema = z.object({
@@ -147,7 +148,18 @@ export async function registerStoreRoutes(app: FastifyInstance, env: Env, overri
     const auth = await authenticate(request, env, pool);
     const { id } = parseOrThrow(idParam, request.params);
     const patch = parseOrThrow(updateStoreSchema, request.body);
-    return { store: await updateStore(pool, auth.userId, id, patch) };
+    // The Zod schema uses snake_case `custom_domain`; map to camelCase for the service layer.
+    return {
+      store: await updateStore(pool, auth.userId, id, {
+        name: patch.name,
+        description: patch.description,
+        status: patch.status,
+        paymentMode: patch.paymentMode,
+        settings: patch.settings,
+        theme: patch.theme,
+        customDomain: patch.custom_domain,
+      }),
+    };
   });
 
   app.get<{ Params: { id: string } }>('/api/v1/store/stores/:id/products', async (request) => {
