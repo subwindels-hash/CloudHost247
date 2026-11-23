@@ -59,10 +59,12 @@ writes them. A test fails the build if a vendor brand hex or a mismatched copy r
 - `social/`: 1200 × 630 social preview in SVG, PNG and WebP. OG uses PNG for crawler
   compatibility.
 
-Application/OS cards use the neutral `ApplicationLogo` text badge in `site.js`
-and `includes/application-logo.tpl`. No third-party logos are fabricated, bundled
-without a license, or used to imply affiliation. The public platform API, not this
-asset directory, determines what may be shown in the catalog.
+Application/OS cards in the WHMCS site use the neutral `ApplicationLogo` text badge
+in `site.js` and `includes/application-logo.tpl`. No third-party logos are fabricated,
+bundled without a license, or used to imply affiliation. The independent Node SPA now
+uses a separate set of code-rendered, attributed vectors for a subset of its catalogue;
+its coverage and explicit gaps are documented in `docs/platform-logo-coverage.md`.
+Neither set of assets determines what the public platform API may show in the catalog.
 
 `tests/website/test_static.py` enforces this over every tree the project serves —
 this directory, `assets/cloudhost247-tools/` and the platform's two logo

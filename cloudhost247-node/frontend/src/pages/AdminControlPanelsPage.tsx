@@ -153,6 +153,7 @@ export default function AdminControlPanelsPage() {
       {showCreate && (
         <form className="ch247-card ch247-form" onSubmit={savePanel}>
           <h2>{editingPanel ? `Edit: ${editingPanel.name}` : 'New Control Panel'}</h2>
+          <p>Logos are reviewed, code-rendered vectors. A new panel shows “No logo” until its vector is added to the source registry.</p>
           <div className="ch247-form-grid">
             <label className="ch247-field">
               <span>Platform Name</span>
@@ -290,7 +291,7 @@ export default function AdminControlPanelsPage() {
                       <td>
                         <div className="ch247-os-table-name">
                           <span className="ch247-admin-panel-logo">
-                            <PlatformLogo slug={panel.slug} name={panel.name} className="ch247-admin-panel-logo__svg" />
+                            <PlatformLogo slug={panel.slug} name={panel.name} className="ch247-admin-panel-logo__svg" compact />
                           </span>
                           <div>
                             <strong>{panel.name}</strong>

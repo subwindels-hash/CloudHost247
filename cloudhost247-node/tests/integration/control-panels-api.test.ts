@@ -103,6 +103,39 @@ describe('Control Panels API & Catalog Integration', () => {
     });
   });
 
+  describe('GET /api/v1/control-panels/catalog', () => {
+    it('paginates the complete directory, merging live rows without duplicate slugs', async () => {
+      const first = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?offset=0&limit=24' });
+      const second = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?offset=24&limit=24' });
+      expect(first.statusCode).toBe(200);
+      expect(second.statusCode).toBe(200);
+      const a = JSON.parse(first.payload);
+      const b = JSON.parse(second.payload);
+      expect(a.total).toBe(1091);
+      expect(a.categoryCounts.ALL).toBe(1091);
+      expect(a.controlPanels).toHaveLength(24);
+      expect(b.controlPanels).toHaveLength(24);
+      expect(new Set([...a.controlPanels, ...b.controlPanels].map((p: any) => p.slug)).size).toBe(48);
+      expect(a.controlPanels[0].slug).toBe('cpanel'); // the seeded DB row overrides its static listing
+      const tail = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?offset=1085&limit=24' });
+      expect(JSON.parse(tail.payload).controlPanels).toHaveLength(6);
+    });
+
+    it('searches and filters beyond the first page and validates page sizes', async () => {
+      const filtered = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?search=galaxy&license=FREE&limit=24' });
+      const result = JSON.parse(filtered.payload);
+      expect(filtered.statusCode).toBe(200);
+      expect(result.controlPanels.some((p: any) => p.slug === 'galaxy')).toBe(true);
+      expect(result.controlPanels.every((p: any) => !p.requiresLicense)).toBe(true);
+      expect(result.categoryCounts.ALL).toBe(1091);
+
+      const osOnly = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?category=OPERATING_SYSTEM&limit=8' });
+      expect(JSON.parse(osOnly.payload).controlPanels.every((p: any) => p.category === 'OPERATING_SYSTEM')).toBe(true);
+      const oversized = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?limit=1091' });
+      expect(oversized.statusCode).toBe(400);
+    });
+  });
+
   describe('GET /api/v1/control-panels/:slug', () => {
     it('returns detail view including commercial plans for cPanel', async () => {
       const res = await app.inject({

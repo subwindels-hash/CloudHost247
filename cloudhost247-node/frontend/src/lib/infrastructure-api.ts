@@ -66,6 +66,7 @@ export interface CustomerServer {
   region_name: string | null;
   datacenter_name: string | null;
   os_name: string | null;
+  os_slug: string | null;
   os_logo_url: string | null;
   os_display_name: string | null;
   os_version_status?: string | null;

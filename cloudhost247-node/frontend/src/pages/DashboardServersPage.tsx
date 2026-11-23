@@ -21,10 +21,10 @@ export default function DashboardServersPage() {
     {servers&&servers.length>0&&<div className="ch247-server-grid">{servers.map((server)=><Link className="ch247-card ch247-server-card" to={`/dashboard/servers/${server.id}`} key={server.id}>
       <div className="ch247-server-card__top">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {server.os_logo_url?<img src={server.os_logo_url} alt=""/>:<span className="ch247-os-card__fallback">OS</span>}
+          <PlatformLogo slug={server.os_slug ?? ''} name={server.os_name ?? 'Unknown operating system'} className="ch247-server-card__os-mark" />
           {server.control_panel_name && (
             <span className="ch247-panel-logo-sm" title={server.control_panel_name}>
-              <PlatformLogo slug={server.control_panel_slug ?? ''} name={server.control_panel_name} className="ch247-panel-logo-sm__svg" />
+              <PlatformLogo slug={server.control_panel_slug ?? ''} name={server.control_panel_name} className="ch247-panel-logo-sm__svg" compact />
             </span>
           )}
         </div>

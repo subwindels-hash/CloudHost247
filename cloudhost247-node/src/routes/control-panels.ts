@@ -21,6 +21,7 @@ import { requireRole } from '../lib/require-role';
 import { NotFoundError, ValidationError } from '../lib/errors';
 import { catalogIdSchema } from '../lib/identifier-contract';
 import { auditRequest } from '../lib/audit';
+import platformCatalog from '../../shared/platform-catalog.json';
 
 // Control-panel rows are seeded deterministic catalogue ids (see identifier-contract.ts).
 const idSchema = catalogIdSchema;
@@ -65,6 +66,26 @@ const createPlanSchema = z.object({
 
 const patchPlanSchema = createPlanSchema.omit({ controlPanelId: true }).partial();
 
+// The legacy /control-panels endpoint remains database-only. The catalogue
+// endpoint merges its live rows with the shared static project directory and
+// transfers just one requested slice to the browser at a time.
+const catalogPageSchema = z.object({
+  offset: z.coerce.number().int().min(0).max(100_000).default(0),
+  limit: z.coerce.number().int().min(1).max(48).default(24),
+  category: z.enum(['OPERATING_SYSTEM', 'SERVER_PANEL', 'APPLICATION_DEPLOYMENT_PLATFORM', 'SERVER_MANAGEMENT', 'OTHER']).optional(),
+  license: z.enum(['FREE', 'COMMERCIAL']).optional(),
+  search: z.string().max(160).optional(),
+}).strict();
+
+type CatalogSearchItem = {
+  slug: string;
+  name: string;
+  category: string;
+  description: string | null;
+  requiresLicense: boolean;
+  supportedOs: string[];
+};
+
 function parseOrThrow<T>(schema: z.ZodType<T>, value: unknown): T {
   const result = schema.safeParse(value);
   if (!result.success) throw new ValidationError(result.error.issues.map((i) => i.message).join(', '));
@@ -77,6 +98,46 @@ export async function registerControlPanelsRoutes(
   overridePool?: Queryable
 ) {
   const pool = overridePool ?? getPool(env);
+
+  const listPublicPanelSummaries = async (category?: string) => {
+    const panels = await listControlPanels(pool, { status: 'ACTIVE', category });
+    const plans = panels.length ? await listControlPanelPlans(pool, { status: 'ACTIVE' }) : [];
+    const plansByPanel = new Map<string, typeof plans>();
+    for (const plan of plans) {
+      const list = plansByPanel.get(plan.control_panel_id) ?? [];
+      list.push(plan);
+      plansByPanel.set(plan.control_panel_id, list);
+    }
+    return panels.map((panel) => {
+      const panelPlans = plansByPanel.get(panel.id) ?? [];
+      const startingPrice = panelPlans.length ? Math.min(...panelPlans.map((p) => Number(p.price))) : 0;
+      return {
+        id: panel.id,
+        name: panel.name,
+        slug: panel.slug,
+        category: panel.category,
+        description: panel.description,
+        logoUrl: panel.logo_url,
+        websiteUrl: panel.website_url,
+        documentationUrl: panel.documentation_url,
+        status: panel.status,
+        installationMethod: panel.installation_method,
+        requiresLicense: panel.requires_license,
+        licenseProvider: panel.license_provider,
+        minimumRequirements: {
+          ramMb: panel.minimum_ram_mb,
+          cpuCores: panel.minimum_cpu_cores,
+          diskGb: panel.minimum_disk_gb,
+        },
+        supportedOs: panel.supported_os,
+        capabilities: panel.capabilities,
+        startingPrice,
+        currency: panelPlans[0]?.currency ?? 'USD',
+        billingCycle: panelPlans[0]?.billing_cycle ?? 'monthly',
+        planCount: panelPlans.length,
+      };
+    });
+  };
 
   const registerHandlers = (prefix: string) => {
     // --- Public Marketplace Endpoints -----------------------------------------------------------
@@ -96,46 +157,7 @@ export async function registerControlPanelsRoutes(
         deploymentType?: string;
       };
 
-      const panels = await listControlPanels(pool, { status: 'ACTIVE', category: query.category });
-      const panelIds = panels.map((p) => p.id);
-      const plans = panelIds.length ? await listControlPanelPlans(pool, { status: 'ACTIVE' }) : [];
-
-      const plansByPanel = new Map<string, typeof plans>();
-      for (const plan of plans) {
-        const list = plansByPanel.get(plan.control_panel_id) ?? [];
-        list.push(plan);
-        plansByPanel.set(plan.control_panel_id, list);
-      }
-
-      let items = panels.map((panel) => {
-        const panelPlans = plansByPanel.get(panel.id) ?? [];
-        const startingPrice = panelPlans.length
-          ? Math.min(...panelPlans.map((p) => Number(p.price)))
-          : 0;
-        return {
-          id: panel.id,
-          name: panel.name,
-          slug: panel.slug,
-          category: panel.category,
-          description: panel.description,
-          logoUrl: panel.logo_url,
-          websiteUrl: panel.website_url,
-          documentationUrl: panel.documentation_url,
-          status: panel.status,
-          installationMethod: panel.installation_method,
-          requiresLicense: panel.requires_license,
-          licenseProvider: panel.license_provider,
-          minimumRequirements: {
-            ramMb: panel.minimum_ram_mb,
-            cpuCores: panel.minimum_cpu_cores,
-            diskGb: panel.minimum_disk_gb,
-          },
-          supportedOs: panel.supported_os,
-          capabilities: panel.capabilities,
-          startingPrice,
-          billingCycle: panelPlans[0]?.billing_cycle ?? 'monthly',
-        };
-      });
+      let items = await listPublicPanelSummaries(query.category);
 
       // Apply extra filtering if specified
       if (query.os) {
@@ -163,6 +185,36 @@ export async function registerControlPanelsRoutes(
       }
 
       return { controlPanels: items };
+    });
+
+    /** Return a single catalogue slice; filters and counts cover the *whole* directory. */
+    app.get(`${prefix}/control-panels/catalog`, async (request) => {
+      const query = parseOrThrow(catalogPageSchema, request.query);
+      const dbPanels = await listPublicPanelSummaries();
+      const seen = new Set(dbPanels.map((panel) => panel.slug));
+      // DB rows override the corresponding static listing without duplicating it.
+      // This is the same order previously used by the browser's full-list merge.
+      const all: CatalogSearchItem[] = [...dbPanels, ...platformCatalog.filter((panel) => !seen.has(panel.slug))];
+      const categoryCounts = {
+        ALL: all.length,
+        OPERATING_SYSTEM: all.filter((panel) => panel.category === 'OPERATING_SYSTEM').length,
+        SERVER_PANEL: all.filter((panel) => panel.category === 'SERVER_PANEL').length,
+        APPLICATION_DEPLOYMENT_PLATFORM: all.filter((panel) => panel.category === 'APPLICATION_DEPLOYMENT_PLATFORM').length,
+        SERVER_MANAGEMENT: all.filter((panel) => panel.category === 'SERVER_MANAGEMENT').length,
+      };
+      const search = query.search?.trim().toLowerCase();
+      const matches = all.filter((panel) =>
+        (!query.category || panel.category === query.category) &&
+        (!query.license || (query.license === 'FREE' ? !panel.requiresLicense : panel.requiresLicense)) &&
+        (!search || panel.name.toLowerCase().includes(search) ||
+          (panel.description ?? '').toLowerCase().includes(search) ||
+          panel.supportedOs.some((os) => os.toLowerCase().includes(search)))
+      );
+      return {
+        controlPanels: matches.slice(query.offset, query.offset + query.limit),
+        total: matches.length,
+        categoryCounts,
+      };
     });
 
     /**
