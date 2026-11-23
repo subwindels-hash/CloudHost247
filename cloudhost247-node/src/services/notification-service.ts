@@ -140,6 +140,50 @@ export async function notifySecurityPinRotated(
   });
 }
 
+/**
+ * Tells a customer someone signed in from a browser/device this account had not used before.
+ *
+ * Keyed on the session row (`resourceType: 'auth_session'`, `resourceId: sessionId`), so the
+ * idempotent unique index makes a redelivered login job a no-op instead of a second alert — one
+ * alert per session, never one per retry. The caller decides *whether* this sign-in is unfamiliar
+ * (see `hasActiveSessionWithUserAgent`); this function only renders and records the decision.
+ *
+ * The wording states what was recorded and what the customer can do. It does not claim the address
+ * belongs to the visitor: `ipAddress` is the peer the app saw, which is a reverse proxy wherever
+ * one terminates TLS in front of the app. It also never asserts the sign-in was unauthorized.
+ */
+export async function notifyUnfamiliarLogin(
+  db: Queryable,
+  input: {
+    userId: string;
+    sessionId: string;
+    userAgent?: string | null;
+    ipAddress?: string | null;
+    signedInAt: Date;
+  }
+): Promise<string | null> {
+  const agent = input.userAgent?.trim();
+  const address = input.ipAddress?.trim();
+  const when = input.signedInAt.toISOString();
+  const lines = [
+    'A sign-in to your CloudHost247 account came from a browser or device this account had not used before.',
+    `Recorded time (UTC): ${when}`,
+    agent ? `Browser/device: ${agent}` : 'Browser/device: not recorded by the signing-in client.',
+    address
+      ? `Address the server saw: ${address} (this is the immediate peer, so where a proxy serves the site it is the proxy, not necessarily the visitor).`
+      : 'Address the server saw: not recorded.',
+    'If this was you, no action is needed. If it was not, revoke the session from Account Security and change your password.',
+  ];
+  return createNotification(db, {
+    userId: input.userId,
+    type: 'SECURITY_LOGIN_NEW_DEVICE',
+    title: 'New sign-in to your account',
+    message: lines.join('\n'),
+    resourceType: 'auth_session',
+    resourceId: input.sessionId,
+  });
+}
+
 export async function listNotifications(db: Queryable, userId: string) {
   const { rows } = await db.query(
     `SELECT * FROM user_notifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100`, [userId]

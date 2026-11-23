@@ -19,10 +19,16 @@ import {
   revealMySecurityNumber,
   updateMyAccount,
   uploadMyProfileImage,
+  getMySessions,
+  revokeMySession,
+  revokeMyOtherSessions,
+  getMySecurityEvents,
 } from '../lib/account-api';
 import type {
   AccountProfile,
   AccountSecurityPayload,
+  AccountSession,
+  AccountSecurityEvent,
   SecurityNumberStatus,
 } from '../lib/account-types';
 import { clearSession, getSupportOrigin, setSession, type StoredUser } from '../lib/auth';
@@ -34,6 +40,40 @@ interface MeResponse {
 
 interface MfaStatusResponse {
   mfa: { enabled: boolean; recoveryCodesRemaining: number };
+}
+
+/**
+ * Human labels for the authentication events this account can see. Anything unmapped renders as
+ * the raw event type rather than being hidden or relabelled into something it is not.
+ */
+const SECURITY_EVENT_LABELS: Record<string, string> = {
+  register: 'Account created',
+  login_success: 'Signed in',
+  login_failure: 'Failed sign-in attempt',
+  logout: 'Signed out',
+  password_change: 'Password changed',
+  password_reset_requested: 'Password reset requested',
+  password_reset_completed: 'Password reset completed',
+  mfa_enabled: 'Two-factor authentication enabled',
+  mfa_disabled: 'Two-factor authentication disabled',
+  mfa_login_challenge: 'Two-factor challenge issued',
+  mfa_login_failure: 'Two-factor challenge failed',
+  mfa_recovery_code_used: 'Recovery code used',
+  passkey_added: 'Passkey added',
+  passkey_removed: 'Passkey removed',
+  passkey_renamed: 'Passkey renamed',
+  security_pin_rotated: 'Security PIN rotated',
+  security_pin_viewed: 'Security PIN viewed',
+  username_changed: 'Username changed',
+  auth_session_revoked: 'Session revoked',
+  auth_sessions_revoked: 'Other sessions revoked',
+};
+
+/** Local date/time for an event row. Falls back to the raw string if the value is not a date. */
+function formatSessionDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
 }
 
 /**
@@ -125,6 +165,39 @@ export default function AccountPage() {
   const [hasImage, setHasImage] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+  // --- Sessions & security events (Phase 6 — security) -----------------------------------------
+  // `'loading' | 'ready' | 'error'` rather than a bare list: a failed load must render "could not
+  // load", never an empty list that reads as "you have no other sessions".
+  const [sessions, setSessions] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [sessionRows, setSessionRows] = useState<AccountSession[]>([]);
+  const [sessionMessage, setSessionMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
+  const [sessionBusy, setSessionBusy] = useState(false);
+  const [events, setEvents] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [eventRows, setEventRows] = useState<AccountSecurityEvent[]>([]);
+
+  async function loadSessions() {
+    try {
+      const res = await getMySessions();
+      // A malformed or older response must not blank the page: an absent list renders as "none",
+      // and the card's own wording still says the list is only what the server recorded.
+      setSessionRows(Array.isArray(res.sessions) ? res.sessions : []);
+      setSessions('ready');
+    } catch {
+      // Kept as an explicit state: the card says it could not load instead of showing nothing.
+      setSessions('error');
+    }
+  }
+
+  async function loadEvents() {
+    try {
+      const res = await getMySecurityEvents(20);
+      setEventRows(Array.isArray(res.events) ? res.events : []);
+      setEvents('ready');
+    } catch {
+      setEvents('error');
+    }
+  }
+
   useEffect(() => {
     let cancelled = false;
     apiFetch<MeResponse>('/api/auth/me')
@@ -179,6 +252,9 @@ export default function AccountPage() {
       .catch(() => {
         /* Non-fatal — the Security PIN card shows its unavailable state. */
       });
+
+    void loadSessions();
+    void loadEvents();
 
     apiFetch<MfaStatusResponse>('/api/auth/mfa/status')
       .then((res) => { if (!cancelled) setMfaStatus(res.mfa); })
@@ -601,6 +677,46 @@ export default function AccountPage() {
     }
   }
 
+  async function onRevokeSession(sessionId: string) {
+    setSessionBusy(true);
+    setSessionMessage(null);
+    try {
+      const res = await revokeMySession(sessionId);
+      setSessionMessage({
+        kind: 'ok',
+        text: res.current
+          ? 'That was this session, so you are now signed out here. Log in again to continue.'
+          : 'That session has been revoked and can no longer act on your account.',
+      });
+      await loadSessions();
+      await loadEvents();
+    } catch (err) {
+      setSessionMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Could not revoke that session.' });
+    } finally {
+      setSessionBusy(false);
+    }
+  }
+
+  async function onRevokeOtherSessions() {
+    setSessionBusy(true);
+    setSessionMessage(null);
+    try {
+      const res = await revokeMyOtherSessions();
+      setSessionMessage({
+        kind: 'ok',
+        text: res.revoked === 0
+          ? 'There were no other sessions to revoke.'
+          : `${res.revoked} other session${res.revoked === 1 ? '' : 's'} revoked. This session stays signed in.`,
+      });
+      await loadSessions();
+      await loadEvents();
+    } catch (err) {
+      setSessionMessage({ kind: 'error', text: err instanceof Error ? err.message : 'Could not revoke the other sessions.' });
+    } finally {
+      setSessionBusy(false);
+    }
+  }
+
   async function onRemoveImage() {
     setImageBusy(true);
     setImageMessage(null);
@@ -734,6 +850,81 @@ export default function AccountPage() {
         )}
         {passkeys.length > 0 && <ul>{passkeys.map((passkey) => <li key={passkey.id}><strong>{passkey.name}</strong> — {passkey.device_type === 'multiDevice' ? 'synced passkey' : 'device passkey'} <button type="button" className="ch247-button ch247-button--outline" onClick={() => removePasskey(passkey.id)} disabled={passkeyBusy || inSupportMode}>Remove</button></li>)}</ul>}
         {passkeyMessage && <p className={passkeyMessage.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>{passkeyMessage.text}</p>}
+      </div>
+
+      <div className="ch247-card" data-testid="sessions-card">
+        <h2>Sessions</h2>
+        <p className="ch247-page__hint">
+          Browsers and devices that can act on your account. Revoking one ends it immediately — it is
+          not cleaned up later. This list shows the sessions CloudHost247 has recorded; a login from
+          before session recording existed, or from a client that records none, cannot appear here.
+        </p>
+        {sessions === 'loading' && <p className="ch247-page__hint">Loading your sessions…</p>}
+        {sessions === 'error' && <p className="ch247-status-error">Couldn&apos;t load your sessions right now.</p>}
+        {sessions === 'ready' && sessionRows.length === 0 && (
+          <p className="ch247-page__hint">No sessions have been recorded for your account yet.</p>
+        )}
+        {sessions === 'ready' && sessionRows.length > 0 && (
+          <ul className="ch247-thread">
+            {sessionRows.map((session) => (
+              <li key={session.id} className="ch247-inline-actions">
+                <span>
+                  <strong>{session.userAgent ?? 'Unknown browser'}</strong>
+                  {session.current ? ' (this device)' : ''}
+                  <br />
+                  <small>
+                    Signed in {formatSessionDate(session.createdAt)}
+                    {session.ipAddress ? ` · saw ${session.ipAddress}` : ''}
+                  </small>
+                </span>
+                <button
+                  type="button"
+                  className="ch247-button ch247-button--outline"
+                  onClick={() => onRevokeSession(session.id)}
+                  disabled={sessionBusy}
+                >
+                  Revoke
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {sessions === 'ready' && sessionRows.length > 1 && (
+          <button type="button" className="ch247-button ch247-button--outline" onClick={onRevokeOtherSessions} disabled={sessionBusy}>
+            Sign out every other device
+          </button>
+        )}
+        {sessionMessage && (
+          <p className={sessionMessage.kind === 'ok' ? 'ch247-status-ok' : 'ch247-status-error'}>
+            {sessionMessage.text}
+          </p>
+        )}
+      </div>
+
+      <div className="ch247-card" data-testid="security-events-card">
+        <h2>Recent security events</h2>
+        <p className="ch247-page__hint">
+          Your own sign-ins and account-security actions, most recent first. A sign-in from a browser
+          or device this account had not used before also raises a notification.
+        </p>
+        {events === 'loading' && <p className="ch247-page__hint">Loading your security events…</p>}
+        {events === 'error' && <p className="ch247-status-error">Couldn&apos;t load your security events right now.</p>}
+        {events === 'ready' && eventRows.length === 0 && (
+          <p className="ch247-page__hint">No security events are recorded for your account yet.</p>
+        )}
+        {events === 'ready' && eventRows.length > 0 && (
+          <ul className="ch247-thread">
+            {eventRows.map((event) => (
+              <li key={event.id}>
+                <span>
+                  <strong>{SECURITY_EVENT_LABELS[event.type] ?? event.type}</strong>
+                  <br />
+                  <small>{formatSessionDate(event.createdAt)}</small>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="ch247-card">

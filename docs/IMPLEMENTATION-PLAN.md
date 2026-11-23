@@ -174,6 +174,23 @@ P0-1..P0-5 ─────────────┤                           
 
 **Entry:** P0-1 fixed; **D3** for provider acceptance.
 
+> **Status 2026-11-22 — the security sub-row's session work is COMPLETE and verified.** `src/routes/security.ts`
+> is built and registered, with migration `0119_create_auth_sessions.sql`: one `auth_sessions` row per login
+> token; `GET /api/v1/account/security/sessions` (list, `?includeRevoked=true`), `DELETE …/sessions/:id`
+> (revoke one) and `POST …/sessions/revoke-others`. Revocation writes the `jti` to the existing
+> `revoked_tokens` table, so a revoked session stops working on its next request rather than at a sweep —
+> pinned by an integration test that calls the revoked token immediately afterwards and gets 401. A
+> sign-in from a browser/device the account has not used before raises a `SECURITY_LOGIN_NEW_DEVICE`
+> in-app notification (email copy queued through the existing outbox); the first recorded sign-in and a
+> repeat from a known browser stay silent. Both are scoped by the authenticated user id, and a
+> delegated support session is refused (403) on all four routes. AccountPage gains a **Sessions** card
+> (list / revoke / sign out every other device) and a **Recent security events** list reading
+> `auth_audit_log`. Evidence: `tests/integration/security-sessions.test.ts` 9/9,
+> `frontend/tests/unit/account-sessions.test.tsx` 5/5, `tests/unit/jwt.test.ts` 6/6, plus a live run
+> against the dev stack (register → list → unfamiliar-browser alert → revoke → 401). Still open in this
+> sub-row: malware scanning, DDoS/CDN rule management, and a pruning sweep for expired `auth_sessions`
+> rows (the table grows by one row per login; `expires_at` is indexed for that future sweep).
+
 | Work | Exact paths |
 | --- | --- |
 | Fix OS selection → order → payment → provisioning → provider confirmation chain (never simulate success) | `src/routes/servers.ts`, `src/infrastructure/services/server-provisioner.ts`, `src/infrastructure/providers/**`, `src/db/servers.ts`, `database/migrations/0041*`, `0048*`, `0051*` |

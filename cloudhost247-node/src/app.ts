@@ -16,6 +16,7 @@ import { registerAccountRoutes } from './routes/account';
 import { registerAdminCustomerRoutes } from './routes/admin-customers';
 import { registerAccountIdentityRoutes } from './routes/account-identity';
 import { registerAccountSecurityRoutes } from './routes/account-security';
+import { registerSecurityRoutes } from './routes/security';
 import { registerWhmcsAccountRoutes, type WhmcsAccountRouteDeps } from './routes/account-whmcs';
 import { registerWhmcsPublicRoutes, type WhmcsPublicRouteDeps } from './routes/whmcs-public';
 import { registerAdminAccountSecurityRoutes } from './routes/admin-account-security';
@@ -212,6 +213,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // Username, the rotating Security PIN and its six-digit email-verification gate, plus account
     // recovery (customer side) and staff oversight of recovery + PIN policy (admin side).
     await registerAccountSecurityRoutes(instance, env, pool);
+    // Phase 6 (security) — the account's own session inventory and authentication event history.
+    // Customer-only and scoped by the authenticated user id; see src/routes/security.ts.
+    await registerSecurityRoutes(instance, env, pool);
     // B5.1 — one customer identity. Links the signed-in account to its WHMCS client (verified email
     // match) and mints single-use session hand-offs into the billing client area. Answers
     // `configured: false` until WHMCS credentials are supplied, and never touches the SPA cart.

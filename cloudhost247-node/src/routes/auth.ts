@@ -1,7 +1,7 @@
 import { recordServerConversion } from '../marketing/conversion-service';
 import { recordTikTokServerConversion } from '../tiktok/event-service';
 import { randomUUID } from 'node:crypto';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import type { Env } from '../config/env';
 import { getPool } from '../db/pool';
@@ -34,6 +34,7 @@ import {
 import { pinKeyOrNull } from '../lib/pin-key';
 import { beginPasskeyRegistration, finishPasskeyRegistration, listPasskeys, removePasskey, renamePasskey } from '../services/passkey-service';
 import { beginPasskeyAuthentication, finishPasskeyAuthentication } from '../services/passkey-authentication-service';
+import { recordLoginSessionAndNotify } from '../services/login-session-service';
 import {
   expiryFromNow,
   generateSecurityNumber,
@@ -42,6 +43,7 @@ import {
 } from '../services/security-number-service';
 import { recordAuditBestEffort, requestAuditContext } from '../lib/audit';
 import { revokeToken } from '../db/revoked-tokens';
+import { revokeAuthSessionByJti } from '../db/auth-sessions';
 import { hashPassword, verifyPassword } from '../lib/password';
 import { signAuthToken } from '../lib/jwt';
 import { authenticate } from '../lib/require-auth';
@@ -152,6 +154,23 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
   // live TCP connection — see tests/integration/auth-flow.test.ts. Production always uses the
   // real singleton pg Pool.
   const pool = overridePool ?? getPool(env);
+
+  /**
+   * Records the session a just-issued token represents and, when the sign-in is from a browser or
+   * device this account has not used before, tells the customer (Phase 6 — security).
+   *
+   * This is bookkeeping added to a successful login, never a condition of it: the service reports
+   * its own failures here so a session-table problem degrades the security inventory instead of
+   * locking a customer out of an otherwise valid sign-in.
+   */
+  const recordSession = (request: FastifyRequest, userId: string, token: string): Promise<void> =>
+    recordLoginSessionAndNotify({
+      db: pool,
+      request,
+      userId,
+      token,
+      onError: (message, error) => request.log.warn({ err: error }, message),
+    });
 
   app.post(
     '/api/auth/register',
@@ -265,6 +284,8 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
       await recordTikTokServerConversion(pool, request, env.APP_URL, { name: 'CompleteRegistration', id: `registration:${user.id}`, data: { content_name: 'CloudHost247 account', content_category: 'registration' } }).catch(() => null);
 
       const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: user.auth_session_version });
+      // A brand-new account has no other session, so this records the row and never alerts.
+      await recordSession(request, user.id, token);
       reply.code(201);
       // The plaintext Security Number is returned exactly once, here, to the person who just
       // created the account — it is never stored in plaintext and cannot be recovered later
@@ -296,7 +317,9 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
     const user=await findUserById(pool,assertion.userId); if(!user||user.status!=='active') throw new UnauthorizedError('This account is not active');
     const mfa=await getMfaStatus(pool,user.id); if(mfa.enabled){const mfaToken=await issueMfaLoginChallenge(pool,env.JWT_SECRET,user.id,user.auth_session_version);reply.code(202);return {mfaRequired:true,mfaToken};}
     await recordAuthEvent(pool,{id:randomUUID(),userId:user.id,eventType:'login_success',ipAddress:request.ip,userAgent:request.headers['user-agent']??null,metadata:{passkey:true}});
-    return {user:publicUser(user),token:signAuthToken(env,{sub:user.id,role:user.role,email:user.email,sv:assertion.sessionVersion})};
+    const token=signAuthToken(env,{sub:user.id,role:user.role,email:user.email,sv:assertion.sessionVersion});
+    await recordSession(request,user.id,token);
+    return {user:publicUser(user),token};
   });
 
   app.post('/api/auth/login', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (request, reply) => {
@@ -359,6 +382,7 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
     });
 
     const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: user.auth_session_version });
+    await recordSession(request, user.id, token);
     reply.code(200);
     return { user: publicUser(user), token };
   });
@@ -412,9 +436,11 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
           userAgent: request.headers['user-agent'] ?? null,
         });
       }
+      const token = signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: result.sessionVersion });
+      await recordSession(request, user.id, token);
       return {
         user: publicUser(user),
-        token: signAuthToken(env, { sub: user.id, role: user.role, email: user.email, sv: result.sessionVersion }),
+        token,
       };
     }
   );
@@ -691,6 +717,14 @@ export async function registerAuthRoutes(app: FastifyInstance, env: Env, overrid
         userId: auth.userId,
         expiresAt: new Date(auth.exp * 1000),
       });
+      // Keep the inventory honest: the token above is what actually ends the session, and this stamp
+      // stops the row from still reading as an active device. No row (a token issued before
+      // migration 0119) is normal and must not fail the logout.
+      await revokeAuthSessionByJti(pool, {
+        userId: auth.userId,
+        jti: auth.jti,
+        reason: 'logout',
+      }).catch(() => undefined);
 
       await recordAuthEvent(pool, {
         id: randomUUID(),

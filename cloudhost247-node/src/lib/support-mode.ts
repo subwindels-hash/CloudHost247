@@ -34,6 +34,11 @@ export const SUPPORT_MODE_RESTRICTED_ACTIONS = [
   'passkey.enroll',
   'passkey.manage',
   'role.change',
+  // Session enumeration and revocation are the account owner's view of "what can still act as me".
+  // An impersonated session must not be able to read that inventory, nor to kill the customer's
+  // other sessions, so both stay blocked in support mode (see src/routes/security.ts).
+  'session.enumerate',
+  'session.revoke',
 ] as const;
 
 export type SupportModeRestrictedAction = (typeof SUPPORT_MODE_RESTRICTED_ACTIONS)[number];

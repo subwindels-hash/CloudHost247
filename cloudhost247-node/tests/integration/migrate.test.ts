@@ -183,6 +183,7 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0116_ai_task_entry_point.sql',
     '0117_ai_effect_outbox.sql',
     '0118_ai_support_message_requests.sql',
+    '0119_create_auth_sessions.sql',
   ];
 
   it('quarantines legacy unprocessed events with workflow history on claim upgrade', async () => {
