@@ -17,6 +17,7 @@ import { registerWordPressRoutes } from './routes/wordpress';
 import { registerIpAddressRoutes } from './routes/ip-addresses';
 import { registerLiveChatRoutes } from './routes/live-chat';
 import { registerPhpConfigRoutes } from './routes/php-config';
+import { registerWebsiteAccessShareRoutes } from './routes/website-access-shares';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
 import { registerVisitorIpRoute } from './routes/visitor-ip';
@@ -234,6 +235,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // Agency / reseller hosting (W10, J Agency core): staff-managed agencies, clients and
     // reseller packages. Display-only under the D2 financial freeze.
     await registerAgencyRoutes(instance, env, pool);
+    // Website access sharing (J03 — J Agency): agency clients share builder site access.
+    await registerWebsiteAccessShareRoutes(instance, env, pool);
     await registerAuthRoutes(instance, env, pool);
     await registerPublicCatalogRoutes(instance, env, pool);
     // B2.4 — the public orderability verdict. Anonymous, and the only place a hosting page may learn
