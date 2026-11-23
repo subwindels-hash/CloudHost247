@@ -8,6 +8,7 @@ import { registerSecurityPlugins } from './plugins/security';
 import { registerHealthRoutes } from './routes/health';
 import { registerIncidentRoutes } from './routes/incidents';
 import { registerAbuseReportRoutes } from './routes/abuse-reports';
+import { registerAgencyRoutes } from './routes/agency';
 import { registerAuthRoutes } from './routes/auth';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
@@ -205,6 +206,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerIncidentRoutes(instance, env, pool);
     // Public abuse-report intake (F13): submission is open to anyone, staff review is gated.
     await registerAbuseReportRoutes(instance, env, pool);
+    // Agency / reseller hosting (W10, J Agency core): staff-managed agencies, clients and
+    // reseller packages. Display-only under the D2 financial freeze.
+    await registerAgencyRoutes(instance, env, pool);
     await registerAuthRoutes(instance, env, pool);
     await registerPublicCatalogRoutes(instance, env, pool);
     // B2.4 — the public orderability verdict. Anonymous, and the only place a hosting page may learn
