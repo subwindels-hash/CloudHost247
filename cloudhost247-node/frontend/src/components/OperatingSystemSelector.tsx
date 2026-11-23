@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'react';
 import type { AvailableOperatingSystem, AvailableOsVersion } from '../lib/infrastructure-api';
+import PlatformLogo from './PlatformLogo';
+
+const INITIAL_OS_COUNT = 8;
 
 interface Props {
   operatingSystems: AvailableOperatingSystem[];
@@ -13,9 +16,12 @@ interface Props {
 
 export default function OperatingSystemSelector(props: Props) {
   const [search,setSearch] = useState('');
+  const [visibleCount, setVisibleCount] = useState(INITIAL_OS_COUNT);
   const systems = useMemo(() => props.operatingSystems.filter((os) =>
     `${os.name} ${os.vendor ?? ''}`.toLowerCase().includes(search.trim().toLowerCase())
   ),[props.operatingSystems,search]);
+  // Pin an out-of-page selection without rendering every intervening OS.
+  const visibleSystems = systems.filter((os, index) => index < visibleCount || os.id === props.selectedOsId);
   const selected = props.operatingSystems.find((os) => os.id === props.selectedOsId) ?? null;
   const version = selected?.versions.find((item) => item.id === props.selectedVersionId) ?? null;
 
@@ -44,15 +50,16 @@ export default function OperatingSystemSelector(props: Props) {
         </div>
         <label className="ch247-field ch247-os-search">
           <span>Search operating systems</span>
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search Ubuntu, Debian…" />
+          <input value={search} onChange={(event) => { setSearch(event.target.value); setVisibleCount(INITIAL_OS_COUNT); }} placeholder="Search Ubuntu, Debian…" />
         </label>
       </div>
 
       {systems.length === 0 ? (
         <p className="ch247-banner ch247-banner--warning">No operating systems match this search and configuration.</p>
       ) : (
-        <div className="ch247-os-grid" role="listbox" aria-label="Operating systems">
-          {systems.map((os) => (
+        <>
+        <div id="available-operating-systems" className="ch247-os-grid" role="listbox" aria-label="Operating systems">
+          {visibleSystems.map((os) => (
             <button
               key={os.id}
               type="button"
@@ -61,7 +68,7 @@ export default function OperatingSystemSelector(props: Props) {
               className={`ch247-os-card ${os.id === props.selectedOsId ? 'is-selected' : ''}`}
               onClick={() => chooseOs(os)}
             >
-              {os.logoUrl ? <img src={os.logoUrl} alt="" /> : <span className="ch247-os-card__fallback" aria-hidden="true">{os.name.slice(0,2).toUpperCase()}</span>}
+              <PlatformLogo slug={os.slug} name={os.name} className="ch247-os-card__mark" />
               <span className="ch247-os-card__copy">
                 <strong>{os.name}</strong>
                 <small>{os.vendor ?? 'Linux'} · {os.versions.length} {os.versions.length === 1 ? 'version' : 'versions'}</small>
@@ -70,6 +77,17 @@ export default function OperatingSystemSelector(props: Props) {
             </button>
           ))}
         </div>
+        {visibleSystems.length < systems.length && (
+          <button
+            type="button"
+            className="ch247-os-show-more"
+            aria-controls="available-operating-systems"
+            onClick={() => setVisibleCount((count) => Math.min(count + INITIAL_OS_COUNT, systems.length))}
+          >
+            Show more <span className="sr-only">operating systems ({systems.length - visibleSystems.length} remaining)</span>
+          </button>
+        )}
+        </>
       )}
 
       {selected && (

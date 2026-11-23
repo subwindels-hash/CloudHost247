@@ -361,11 +361,7 @@ export default function ServerDetailPage() {
     <div className="ch247-stack">
       <section className="ch247-card ch247-server-hero">
         <div className="ch247-server-hero__identity">
-          {server.os_logo_url ? (
-            <img src={server.os_logo_url} alt="" />
-          ) : (
-            <span className="ch247-os-card__fallback">OS</span>
-          )}
+          <PlatformLogo slug={server.os_slug ?? ''} name={server.os_name ?? 'Unknown operating system'} className="ch247-server-hero__os-mark" />
           <div>
             <span className="ch247-eyebrow">
               {server.server_type} · {server.region_name ?? 'Region pending'}
@@ -397,7 +393,7 @@ export default function ServerDetailPage() {
           <div className="ch247-section-heading">
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <span className="ch247-panel-logo-md">
-                <PlatformLogo slug={server.control_panel_slug ?? ''} name={server.control_panel_name} className="ch247-panel-logo-md__svg" />
+                <PlatformLogo slug={server.control_panel_slug ?? ''} name={server.control_panel_name} className="ch247-panel-logo-md__svg" compact />
               </span>
               <div>
                 <span className="ch247-eyebrow">Installed Control Panel</span>

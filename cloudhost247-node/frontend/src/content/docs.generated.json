@@ -71,7 +71,7 @@
       "title": "Server provisioning",
       "summary": "CloudHost247 keeps the customer-facing operating-system catalog separate from provider image identifiers:",
       "source": "docs/SERVER_PROVISIONING.md",
-      "bytes": 55609
+      "bytes": 56244
     },
     {
       "slug": "server-agent",
