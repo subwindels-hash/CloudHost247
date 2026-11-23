@@ -7,6 +7,7 @@ import type { Env } from './config/env';
 import { registerSecurityPlugins } from './plugins/security';
 import { registerHealthRoutes } from './routes/health';
 import { registerIncidentRoutes } from './routes/incidents';
+import { registerAbuseReportRoutes } from './routes/abuse-reports';
 import { registerAuthRoutes } from './routes/auth';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
@@ -202,6 +203,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerHealthRoutes(instance, env, pool);
     // Public incident notifications (K07) sit next to the public status surface.
     await registerIncidentRoutes(instance, env, pool);
+    // Public abuse-report intake (F13): submission is open to anyone, staff review is gated.
+    await registerAbuseReportRoutes(instance, env, pool);
     await registerAuthRoutes(instance, env, pool);
     await registerPublicCatalogRoutes(instance, env, pool);
     // B2.4 — the public orderability verdict. Anonymous, and the only place a hosting page may learn
