@@ -39,6 +39,7 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 // that used to duplicate them were removed rather than left unrouted.
 const DomainsMarketingPage = lazy(() => import('./pages/DomainsMarketingPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+const StatusPage = lazy(() => import('./pages/StatusPage'));
 const FaqPage = lazy(() => import('./pages/FaqPage'));
 // /legal and every /legal/* document are rendered by pages/marketing/LegalPages.tsx, which reads
 // the real policies extracted from the live site (frontend/src/content/legal.generated.json).
@@ -296,6 +297,7 @@ export default function App() {
         <Route path="/domains/bulk-search" element={<DomainBulkSearchPage />} />
         <Route path="/domains/broker" element={<DomainBrokerPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/status" element={<StatusPage />} />
         <Route path="/faq" element={<FaqPage />} />
 
         {/* Public, database-driven application marketplace. These routes intentionally sit
