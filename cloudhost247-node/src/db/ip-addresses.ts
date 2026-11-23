@@ -151,3 +151,90 @@ export async function releaseIpAddress(
   );
   return rows[0] ?? null;
 }
+
+/**
+ * Reconciliation result for a single IP address.
+ */
+export interface IpReconciliationIssue {
+  id: string;
+  address: string;
+  version: 'ipv4' | 'ipv6';
+  status: 'free' | 'assigned' | 'reserved';
+  server_id: string | null;
+  customer_id: string | null;
+  issue: 'orphaned_server' | 'orphaned_customer' | 'stale_assignment';
+  description: string;
+}
+
+export interface IpReconciliationReport {
+  total: number;
+  free: number;
+  assigned: number;
+  reserved: number;
+  issues: IpReconciliationIssue[];
+}
+
+/**
+ * Reconcile the IP address inventory. Detects:
+ *  - IPs assigned to servers that no longer exist (orphaned_server)
+ *  - IPs assigned to customers that no longer exist (orphaned_customer)
+ * Honest about the absence of provider-backed provisioning — this only
+ * audits the internal inventory.
+ */
+export async function reconcileIpAddresses(db: Queryable): Promise<IpReconciliationReport> {
+  const { rows: allRows } = await db.query<IpAddressRow>(
+    `SELECT id, address, version, status, server_id, customer_id, assigned_at, created_at, updated_at
+     FROM ip_addresses
+     ORDER BY address`,
+  );
+
+  const total = allRows.length;
+  const free = allRows.filter((r) => r.status === 'free').length;
+  const assigned = allRows.filter((r) => r.status === 'assigned').length;
+  const reserved = allRows.filter((r) => r.status === 'reserved').length;
+
+  const issues: IpReconciliationIssue[] = [];
+
+  for (const row of allRows) {
+    if (row.status === 'assigned' || row.status === 'reserved') {
+      if (row.server_id) {
+        const { rows: serverRows } = await db.query<{ id: string }>(
+          `SELECT id FROM servers WHERE id = $1`,
+          [row.server_id],
+        );
+        if (!serverRows[0]) {
+          issues.push({
+            id: row.id,
+            address: row.address,
+            version: row.version,
+            status: row.status,
+            server_id: row.server_id,
+            customer_id: row.customer_id,
+            issue: 'orphaned_server',
+            description: `IP ${row.address} is assigned to server ${row.server_id} which does not exist`,
+          });
+        }
+      }
+      if (row.customer_id) {
+        const { rows: customerRows } = await db.query<{ id: string }>(
+          `SELECT id FROM users WHERE id = $1`,
+          [row.customer_id],
+        );
+        if (!customerRows[0]) {
+          issues.push({
+            id: row.id,
+            address: row.address,
+            version: row.version,
+            status: row.status,
+            server_id: row.server_id,
+            customer_id: row.customer_id,
+            issue: 'orphaned_customer',
+            description: `IP ${row.address} is assigned to customer ${row.customer_id} which does not exist`,
+          });
+        }
+      }
+    }
+  }
+
+  return { total, free, assigned, reserved, issues };
+}

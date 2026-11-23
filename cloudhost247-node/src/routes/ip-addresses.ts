@@ -2,6 +2,7 @@
  * IP address inventory (E12 — E VPS).
  *
  *   GET    /api/v1/ip-addresses              — list IP addresses (optional filters: status, version, server_id, customer_id)
+ *   GET    /api/v1/ip-addresses/reconcile    — IP reconciliation audit (staff only)
  *   POST   /api/v1/ip-addresses              — register a new IP address in the inventory
  *   POST   /api/v1/ip-addresses/:id/assign   — assign a free IP to a server + customer
  *   DELETE /api/v1/ip-addresses/:id          — release an assigned IP back to the pool
@@ -25,8 +26,10 @@ import {
   getIpAddressByAddress,
   listIpAddresses,
   releaseIpAddress,
+  reconcileIpAddresses,
   type CreateIpAddressInput,
   type IpAddressRow,
+  type IpReconciliationReport,
   type ListIpAddressesFilters,
 } from '../db/ip-addresses';
 import { authenticate } from '../lib/require-auth';
@@ -114,6 +117,20 @@ export async function registerIpAddressRoutes(app: FastifyInstance, env: Env, po
       return { ip_addresses: rows.map(toIpAddressDto) };
     },
   );
+
+  // --- Reconcile IP address inventory ----------------------------------------
+
+  app.get('/api/v1/ip-addresses/reconcile', async (request, reply) => {
+    const auth = await authenticate(request, env, db);
+    const isStaff = STAFF_ROLES.includes(auth.role as (typeof STAFF_ROLES)[number]);
+    if (!isStaff) {
+      reply.code(403);
+      return { error: 'FORBIDDEN', message: 'Only staff can reconcile IP addresses' };
+    }
+
+    const report = await reconcileIpAddresses(db);
+    return { reconciliation: report };
+  });
 
   // --- Register a new IP address ---------------------------------------------
 

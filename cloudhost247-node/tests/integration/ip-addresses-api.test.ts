@@ -306,4 +306,60 @@ describe('ip addresses API (E12)', () => {
 
     await app.close();
   });
+
+  it('staff can reconcile IP addresses', async () => {
+    const app = buildTestApp();
+    const { token } = await createUserAccount('ip-reconcile@example.com', 'staff');
+    await createIpAddress('192.0.2.80', 'ipv4', 'free');
+    await createIpAddress('192.0.2.81', 'ipv4', 'assigned');
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/ip-addresses/reconcile',
+      headers: { Authorization: token },
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as { reconciliation: { total: number; free: number; assigned: number; reserved: number; issues: Array<{ issue: string }> } };
+    expect(body.reconciliation.total).toBeGreaterThanOrEqual(2);
+    expect(body.reconciliation.free).toBeGreaterThanOrEqual(1);
+    expect(body.reconciliation.assigned).toBeGreaterThanOrEqual(1);
+    expect(Array.isArray(body.reconciliation.issues)).toBe(true);
+
+    await app.close();
+  });
+
+  it('customer cannot reconcile IP addresses (403)', async () => {
+    const app = buildTestApp();
+    const { token } = await createUserAccount('ip-reconcile-cust@example.com', 'customer');
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/ip-addresses/reconcile',
+      headers: { Authorization: token },
+    });
+    expect(res.statusCode).toBe(403);
+
+    await app.close();
+  });
+
+  it('reconciliation returns no issues when all references are valid', async () => {
+    const app = buildTestApp();
+    const { token } = await createUserAccount('ip-clean@example.com', 'staff');
+    const serverId = await createServer();
+    const { userId: customerId } = await createUserAccount('ip-clean-cust@example.com', 'customer');
+    await createIpAddress('192.0.2.90', 'ipv4', 'assigned', serverId, customerId);
+    await createIpAddress('192.0.2.91', 'ipv4', 'free');
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/ip-addresses/reconcile',
+      headers: { Authorization: token },
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as { reconciliation: { total: number; issues: Array<{ issue: string }> } };
+    expect(body.reconciliation.issues).toEqual([]);
+    expect(body.reconciliation.total).toBeGreaterThanOrEqual(2);
+
+    await app.close();
+  });
 });
