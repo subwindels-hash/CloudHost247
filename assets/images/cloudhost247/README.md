@@ -25,20 +25,22 @@ customer logos, awards or location assertions. The mint / ink palette matches
   servers and deliberately has no public mark. Each distribution has its own prompt
   glyph and its own display name, because `slug.replace('-',' ').title()` renders
   "Nixos" and "Opensuse" for two projects that spell themselves NixOS and openSUSE.
-- `catalogue-marks.json`: generated index of the marks above and the platform paths
-  they are served from. `tests/website/test_static.py` reads it.
+- `catalogue-marks.json`: generated inventory of the neutral marks above. Only legacy
+  OS entries have a `served` URL. `tests/website/test_static.py` reads it.
 
-### These two families are also served by the platform
+### Legacy OS URL copies; no public panel-logo copies
 
-The platform's catalogue stores one logo URL per row, so the marks are served from
-`cloudhost247-node/frontend/public/{panel-logos,os-logos}` as well — the paths its
-seed data and its tests reference. Those two directories previously held **genuine
-vendor artwork**: the Ubuntu roundel, the cPanel wordmark, Debian's `#A80030`,
-openSUSE's `#73BA25`. That contradicted the policy in the paragraph below and, on a
-catalogue whose rows are mostly `DISABLED`, implied an endorsement no vendor gave.
-Both directories now hold copies of the first-party marks defined here, byte-identical
-to the canonical files, and `scripts/generate-catalog-assets.py --emit-served` is what
-writes them. A test fails the build if a vendor brand hex or a mismatched copy returns.
+The platform retains `/os-logos/` copies of the neutral distribution art for legacy
+URL consumers. They are byte-identical to the canonical OS files and refreshed by
+`scripts/generate-catalog-assets.py --emit-served`. The former `/panel-logos/`
+image directory was removed: rack illustrations are **not** project-specific panel
+logos, and publishing them under panel names misidentified the actual projects.
+The Node SPA uses separate, sourced inline SVG paths for both panel and OS cards;
+it ignores the legacy API `logo_url` fields. Running `--emit-served` cannot recreate
+panel copies. The older directories once held **genuine vendor artwork** (including
+cPanel's wordmark and Ubuntu's roundel); that also violated this library's neutral
+illustration policy. Tests keep the legacy OS copies and neutral palette in sync,
+without treating their art as the projects' trademarks.
 - `website/`, `platforms/`, `backgrounds/`, `network/`: reserved families for future
   artwork. No page falls back to them, and none falls back to a sibling's artwork
   either: every registered page resolves its own illustration key and its own
@@ -59,14 +61,17 @@ writes them. A test fails the build if a vendor brand hex or a mismatched copy r
 - `social/`: 1200 × 630 social preview in SVG, PNG and WebP. OG uses PNG for crawler
   compatibility.
 
-Application/OS cards use the neutral `ApplicationLogo` text badge in `site.js`
-and `includes/application-logo.tpl`. No third-party logos are fabricated, bundled
-without a license, or used to imply affiliation. The public platform API, not this
-asset directory, determines what may be shown in the catalog.
+Application/OS cards in the WHMCS site use the neutral `ApplicationLogo` text badge
+in `site.js` and `includes/application-logo.tpl`. No third-party logos are fabricated,
+bundled without a license, or used to imply affiliation. The independent Node SPA now
+uses a separate set of code-rendered, attributed vectors for a subset of its catalogue;
+its coverage and explicit gaps are documented in `docs/platform-logo-coverage.md`.
+Neither set of assets determines what the public platform API may show in the catalog.
 
-`tests/website/test_static.py` enforces this over every tree the project serves —
-this directory, `assets/cloudhost247-tools/` and the platform's two logo
-directories — by rejecting the vendors' own brand colours.
+`tests/website/test_static.py` enforces the neutral-art palette over this library,
+`assets/cloudhost247-tools/` and the legacy OS URL copies, and prevents the removed
+panel-logo directory from returning. The separate, sourced inline project marks
+retain the projects' own colours; their provenance is audited independently.
 
 **One exemption, and it is not ours to change:** `templates/orderforms/ovh_cart/`
 is a vendor order-form skin that ships its own distribution icons. It is listed in
@@ -128,7 +133,7 @@ Two flags opt into rewriting, and neither touches any other family:
 | flag | effect |
 | --- | --- |
 | `--refresh-marks` | rewrite the panel and distribution marks this script owns. This is how the original four-glyph banks — which made five distributions render the same icon — became one distinct glyph per catalogue entry. |
-| `--emit-served` | also write the copies the platform serves under `cloudhost247-node/frontend/public/{panel-logos,os-logos}`, from the same definition, and refresh `catalogue-marks.json`. |
+| `--emit-served` | refresh only the legacy `cloudhost247-node/frontend/public/os-logos/` copies and `catalogue-marks.json`; never create substitute panel logos. |
 
 A glyph bank smaller than the catalogue it covers, a duplicated glyph, or a colour
 outside the mint/ink palette makes the script exit non-zero rather than emit a

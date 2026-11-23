@@ -1,0 +1,4849 @@
+{
+  "note": "Code-rendered paths pinned to immutable, attributed artwork. Product identities are checked against the marketplace listing and original project where possible. A name match in a collection alone is not proof. See docs/platform-logo-coverage.md.",
+  "collections": {
+    "selfhst": {
+      "repository": "selfhst/icons",
+      "revision": "995fdddffce4078b2670319133c8ca1983a2c508",
+      "folder": "svg",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://github.com/selfhst/icons/blob/995fdddffce4078b2670319133c8ca1983a2c508/LICENSE"
+    },
+    "dashboard": {
+      "repository": "homarr-labs/dashboard-icons",
+      "revision": "d4b500dc40a8e1043b1581cabb7208892cf35472",
+      "folder": "svg",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/homarr-labs/dashboard-icons/blob/d4b500dc40a8e1043b1581cabb7208892cf35472/LICENSE"
+    },
+    "jabber": {
+      "repository": "JabberLabs/awesome-dashboard-icons",
+      "revision": "154613183d12e0e68263c92b17c125f1d90a4f1d",
+      "folder": "icons",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://github.com/JabberLabs/awesome-dashboard-icons/blob/154613183d12e0e68263c92b17c125f1d90a4f1d/LICENSE"
+    },
+    "logos": {
+      "package": "@iconify-json/logos",
+      "version": "1.2.20",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://github.com/gilbarbara/logos/blob/master/LICENSE.txt"
+    },
+    "simple-icons": {
+      "package": "@iconify-json/simple-icons",
+      "version": "1.2.103",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md"
+    },
+    "devicon": {
+      "package": "@iconify-json/devicon",
+      "version": "1.2.84",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/devicons/devicon/blob/master/LICENSE"
+    },
+    "selfhst-png": {
+      "repository": "selfhst/icons",
+      "revision": "995fdddffce4078b2670319133c8ca1983a2c508",
+      "folder": "png",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://github.com/selfhst/icons/blob/995fdddffce4078b2670319133c8ca1983a2c508/LICENSE",
+      "traced": true,
+      "generator": "vtracer==0.6.15"
+    },
+    "official": {
+      "license": "Individual upstream project license; see each pinned entry",
+      "licenseUrl": "https://github.com/"
+    },
+    "thesvg": {
+      "repository": "glincker/thesvg",
+      "revision": "551229c188b4ab6e2d8b5763b9633ec91206d04c",
+      "folder": "public/icons",
+      "license": "Individual brand-asset terms; see each pinned entry",
+      "licenseUrl": "https://github.com/glincker/thesvg/blob/551229c188b4ab6e2d8b5763b9633ec91206d04c/LICENSING.md"
+    },
+    "official-png": {
+      "license": "Individual upstream project license; see each pinned entry",
+      "licenseUrl": "https://github.com/",
+      "traced": true,
+      "generator": "vtracer==0.6.15"
+    }
+  },
+  "icons": {
+    "1backend": {
+      "source": "official",
+      "icon": "1backend",
+      "sha256": "19a64b80c84d59220a3bc11b6d55d9d68c8cd06a72292c973f5de238a98760f8",
+      "repository": "1backend/1backend",
+      "revision": "65ffb46ae9fc39cc285b0be8773c3b1e159b32d9",
+      "file": "docs-source/1b_logo.svg",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://www.hostinger.com/applications/1backend"
+    },
+    "1panel": {
+      "source": "selfhst",
+      "icon": "1panel",
+      "sha256": "c56575bef359a8b96699ba4cdb3d3628c2c271964615cbd477174eaa15221c02"
+    },
+    "2fauth": {
+      "source": "selfhst",
+      "icon": "2fauth",
+      "sha256": "bd18245f402682972f7958d0957f0db0a2ed8dbc18138aa3ba966c1ea4e41826"
+    },
+    "9router": {
+      "source": "selfhst",
+      "icon": "9router",
+      "sha256": "bc41fc98f12f4908eed18290951e6fcbcf52f97d003b2ae821cb473e7b373224"
+    },
+    "ackee": {
+      "source": "selfhst",
+      "icon": "ackee",
+      "sha256": "77ec5fb2a6963274a134767eb4b5cd948f7d817ede8bc928e386bfbca1f53ae0"
+    },
+    "activepieces": {
+      "source": "selfhst",
+      "icon": "activepieces",
+      "sha256": "e5309aab09803b1616543bad73a2e86747783769adfe990eb9189a210b0b8bb5"
+    },
+    "actual-budget": {
+      "source": "selfhst",
+      "icon": "actual-budget",
+      "sha256": "fa08f05dfde03ce65ec4312885fe4f1be3982ceed348c1bff1943a3fdda6c139"
+    },
+    "adminer": {
+      "source": "selfhst",
+      "icon": "adminer",
+      "sha256": "1fccf457081aa45c6c9ca0758019bf6b6b3a0ef4a818d8d4df3e50a795704c71"
+    },
+    "adventurelog": {
+      "source": "selfhst",
+      "icon": "adventurelog",
+      "sha256": "6e7f923d2d9fe08b4326a9478ed991800a9620dd1d0557c198d0e5ac7fd1ec1e"
+    },
+    "affine": {
+      "source": "selfhst",
+      "icon": "affine",
+      "sha256": "89ca1d23ee442102601245426c7fe067b7818b41a7a2e5a005e302e07013e8d8"
+    },
+    "agent-zero": {
+      "source": "selfhst",
+      "icon": "agent-zero",
+      "sha256": "1cb2fc32915130ad12869465d2c0a1158aa27f52e7154fe6da57b286a5c58c30"
+    },
+    "agenta": {
+      "source": "official",
+      "icon": "agenta",
+      "sha256": "f25b39b19446c9dc7fa5bde4c4368d2437a51142738cc00b4a132c720f9412b8",
+      "repository": "Agenta-AI/agenta",
+      "revision": "b0a53f816efd0af89fc0d1c539463f470538ef10",
+      "file": "web/oss/public/assets/logos/Agenta-symbol-light.svg",
+      "license": "MIT (web/oss; website materials are separately restricted)",
+      "identityUrl": "https://github.com/Agenta-AI/agenta"
+    },
+    "agentmemory": {
+      "source": "official",
+      "icon": "agentmemory",
+      "sha256": "44a228de9254a8852a19d6701e45fa7322cc615a914763d65b208d705e12ac38",
+      "repository": "rohitg00/agentmemory",
+      "revision": "5c9e2e698bda138dcb7de50ee4dd3260ee4fb8eb",
+      "file": "assets/icon.svg",
+      "license": "Apache-2.0 (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/rohitg00/agentmemory",
+      "referenceUrl": "https://www.hostinger.com/applications"
+    },
+    "airsonic-advanced": {
+      "source": "selfhst",
+      "icon": "airsonic",
+      "sha256": "1d0e0cb8488c05f3131e86a548574928c0a3050021a64029e95deff74ad4c579",
+      "identityUrl": "https://www.hostinger.com/applications/airsonic-advanced",
+      "referenceUrl": "https://github.com/airsonic-advanced/airsonic-advanced/blob/68d11bfbfe051b0acaca2770c3c1f47f8d59201c/airsonic-main/src/main/resources/org/airsonic/player/service/logo-512.png",
+      "brandOf": "airsonic"
+    },
+    "airtrail": {
+      "source": "selfhst",
+      "icon": "airtrail",
+      "sha256": "e5d6ac0c7a80257533fe584644680c10197587d3ab87cc300cf79eb3f5c6638c"
+    },
+    "akaunting": {
+      "source": "selfhst",
+      "icon": "akaunting",
+      "sha256": "304e8e991724dfa9ad6f94e3c41a906c6cfc32e11fb8c57f50a8034a27d4fd07"
+    },
+    "alexandrie": {
+      "source": "selfhst",
+      "icon": "alexandrie",
+      "sha256": "49a92bd86b70b3f6e2d02ed533acd5d56ad69f9512f18897bd8f1749e5ad6277"
+    },
+    "alist": {
+      "source": "selfhst",
+      "icon": "alist",
+      "sha256": "362e64b8f785faa0e89e52516ed39bf1a4085ea7e3ee7b9e7bf75d699cdb47f6"
+    },
+    "almalinux": {
+      "source": "selfhst",
+      "icon": "almalinux",
+      "sha256": "bbed1f859e733ce8b0e44506874e017750f0f7b42d2623bb0bb551cc946c0f04"
+    },
+    "alpine-linux": {
+      "source": "selfhst",
+      "icon": "alpine-linux",
+      "sha256": "fdb4d6d4e46ad6cc05139c5e60786e2106dc43e15b478855db18b8c0a3499bc0"
+    },
+    "ampache": {
+      "source": "selfhst-png",
+      "icon": "ampache",
+      "sha256": "a97c65ebcac67c11f1613d53157e40b17bd24af1e2096ae8243d7c81766bf514",
+      "originGitSha": "41e44d07b0bb0c31999c2ea1b90c0c9f56dbac2a",
+      "originSha256": "1839a3c24f798712638cd302abd79f2afa893eddd76579c6a4188257c4dfce46"
+    },
+    "an-otter-wiki": {
+      "source": "selfhst",
+      "icon": "an-otter-wiki",
+      "sha256": "09a91af48dd6e3f04e864a8f7b7ec12cc5b05280815a35ea8231be02ad2d848a"
+    },
+    "anaconda": {
+      "source": "dashboard",
+      "icon": "anaconda",
+      "sha256": "2851c02544dfa2d890810e4870c124d1d31230ac476c83eba4ac5e6adccaeac8"
+    },
+    "anythingllm": {
+      "source": "selfhst",
+      "icon": "anythingllm",
+      "sha256": "df8f05d49248077bb44964e587c1cff7e2f81ed6b79ff0d9138bf42e56e00db8"
+    },
+    "apache-airflow": {
+      "source": "dashboard",
+      "icon": "apache-airflow",
+      "sha256": "a8a656e6334b1436c486c4a22b70b9939b3137e400d8bc0813ae9d5ae77efa77"
+    },
+    "apache-amoro": {
+      "source": "official",
+      "icon": "apache-amoro",
+      "sha256": "3d8266d235257621aad2b61e4b55ed74a8f4722292586dac672d53971220b289",
+      "repository": "apache/amoro",
+      "revision": "7e9a5ca938ba28fd428b3026c331464b9f522b12",
+      "file": "amoro-web/src/assets/images/logo.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://amoro.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines"
+    },
+    "apache-answer": {
+      "source": "selfhst",
+      "icon": "apache-answer",
+      "sha256": "f5f6bae3fc36a219c8c09c17446423154707c09f51102d474647d7c0e07a07b1"
+    },
+    "apache-apisix": {
+      "source": "official",
+      "icon": "apache-apisix",
+      "sha256": "398dbfb6a113cd5633405dff22b88dadce29164ea8225563b8cd9341a70ddfc0",
+      "repository": "apache/apisix-website",
+      "revision": "b1882a541e1d7ad751ac612e5bddbadb4a13e293",
+      "file": "website/static/img/logo2.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://apisix.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines"
+    },
+    "apache-couchdb": {
+      "source": "simple-icons",
+      "icon": "apachecouchdb",
+      "sha256": "1a961b5ae4ef48607cac0099eda70c740a991f8ab3a63d4b4204f9b9abe9776c"
+    },
+    "apache-devlake": {
+      "source": "official",
+      "icon": "apache-devlake",
+      "sha256": "a38fdd45db0aab710696d75db71293004ec988c03b6196f5b34ce937162f1cb4",
+      "repository": "apache/incubator-devlake",
+      "revision": "652d7da9323fd4447d3c2d3705f482ff5a9f54d8",
+      "file": "resources/img/logo.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://devlake.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines"
+    },
+    "apache-dolphinscheduler": {
+      "source": "simple-icons",
+      "icon": "apachedolphinscheduler",
+      "sha256": "dbe85ad92f63a918e38e6fb3deda1ba26802eff2f4ec3e2b4e9dd6637a623310"
+    },
+    "apache-doris": {
+      "source": "simple-icons",
+      "icon": "apachedoris",
+      "sha256": "9318929ca9c9fd4724efb42eafcf00b90ce615aa429a0b5a0afbe74fbc5ee4f5"
+    },
+    "apache-druid": {
+      "source": "dashboard",
+      "icon": "apache-druid",
+      "sha256": "d52925a6271d1a9339d4389174cf1edb334deb0681d180fe82910a5e1a49c1e3"
+    },
+    "apache-gravitino": {
+      "source": "official",
+      "icon": "apache-gravitino",
+      "sha256": "afa48a7a790641a0e47c711fed35d25b858a05a806df4130caaa6cdce0112cc7",
+      "repository": "apache/gravitino-site",
+      "revision": "6d2d07612e5809f93e2aa45a64f82e11680c7434",
+      "file": "static/img/logo.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://gravitino.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines"
+    },
+    "apache-guacamole": {
+      "source": "selfhst",
+      "icon": "apache-guacamole",
+      "sha256": "33439e27fd04211cf36628a8b525abbf0e97d39e91523b7fdba4446fd01b238a"
+    },
+    "apache-hertzbeat": {
+      "source": "official",
+      "icon": "apache-hertzbeat",
+      "sha256": "41c1abcfa14543a5fdcc78673223a37024632c84d617bb16948fe89d834aca0f",
+      "repository": "apache/hertzbeat",
+      "revision": "86cdb04d79fea65d4bd3f83b7be19bdc6e8e9dfe",
+      "file": "home/static/img/hertzbeat-logo.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://hertzbeat.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines"
+    },
+    "apache-hop": {
+      "source": "official",
+      "icon": "apache-hop",
+      "sha256": "ddcf8a8a71a0fd74ce9d941eaf989e911141b42be890ce498b8bdc3bcbc7ee68",
+      "repository": "apache/hop",
+      "revision": "df1000bc8af4118dd4f31dffd2ac0af150bd4914",
+      "file": "ui/src/main/resources/ui/images/logo_icon.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://hop.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines"
+    },
+    "apache-iotdb": {
+      "source": "official",
+      "icon": "apache-iotdb",
+      "sha256": "98c85175ee7e63b33206ef56843de15c573390f67c031a1f5acdbbbba3701f30",
+      "repository": "apache/iotdb-website",
+      "revision": "32131b7222b8c50ec5ecf30ec78fba42fb5ebbfb",
+      "file": "img/logo.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://iotdb.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines"
+    },
+    "apache-pinot": {
+      "source": "official",
+      "icon": "apache-pinot",
+      "sha256": "21221132794a6ce692866ec4c217e6af821c035254825805b0aad0b4aa1f7408",
+      "repository": "apache/pinot-site",
+      "revision": "aed999a58d998467cca736cb2b9b9bbe49a93de3",
+      "file": "static/images/logomark.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://pinot.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines"
+    },
+    "apache-shenyu": {
+      "source": "official",
+      "icon": "apache-shenyu",
+      "sha256": "f59ab644773c14a25bf15e0934c47fd23a311a171577f9167246e4913c204e16",
+      "repository": "apache/shenyu-website",
+      "revision": "dbad8415900e4eaee998e8a6e5e467da27f9e01f",
+      "file": "static/img/favicon.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://shenyu.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines"
+    },
+    "apache-skywalking": {
+      "source": "official-png",
+      "icon": "apache-skywalking",
+      "sha256": "4cc3cdd875dbcc5b0c929956fe795bb54095f7f8939130c1be9e3535f6f22cc0",
+      "repository": "apache/skywalking-website",
+      "revision": "5fbb9183899ae974de44739293ee35316b2fc4c3",
+      "file": "static/favicons/apple-touch-icon.png",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://skywalking.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines",
+      "originGitSha": "0d499a17cd233abf5f87ad63d8b21e2b359e04f3",
+      "originSha256": "e26c2311c60cac80110667ae6f9b734a7d067dcd48f39e2fcbd8d6e80a8007d8",
+      "referenceUrl": "https://skywalking.apache.org/"
+    },
+    "apache-solr": {
+      "source": "dashboard",
+      "icon": "apache-solr",
+      "sha256": "c94ede28e354214127e443ec261600db9dbca03a37d964a42b2f63d5d0b4d005"
+    },
+    "apache-streampipes": {
+      "source": "official",
+      "icon": "apache-streampipes",
+      "sha256": "fe2d0513e3647562c4eefa2f6c2f5df5aaa47da652205736fb3948c26e986c3a",
+      "repository": "apache/streampipes",
+      "revision": "fb8d01157064a72acffe97e7f1d55830e8003e0e",
+      "file": "streampipes-client-go/docs/assets/icons/logo.svg",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://streampipes.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines",
+      "modifications": "ViewBox cropped to the actual S-shaped graphic from the project wordmark, preserving its paths and colours"
+    },
+    "apache-superset": {
+      "source": "selfhst",
+      "icon": "apache-superset",
+      "sha256": "6cb31d77d1326db1518dd6bf4dc58b2827a0a8321dc470742abceb520f89d4dd"
+    },
+    "apache-tika": {
+      "source": "selfhst",
+      "icon": "apache-tika",
+      "sha256": "36034c58a626ca95cc7bebf7b16e7a4b26e8133f1cebe61583fe6bccc1dab42b"
+    },
+    "apache-zeppelin": {
+      "source": "official-png",
+      "icon": "apache-zeppelin",
+      "sha256": "fcba453746867e7d55c454bb1b6afc69464de30a14f2daa48c62128037fcc659",
+      "repository": "apache/zeppelin",
+      "revision": "26015455d2ee421a4975fd9cdfb81ca006c0e151",
+      "file": "zeppelin-web-angular/src/assets/images/zeppelin.png",
+      "license": "Apache-2.0 (ASF project trademark; website link-back only)",
+      "identityUrl": "https://zeppelin.apache.org/",
+      "termsUrl": "https://www.apache.org/foundation/marks/#guidelines",
+      "originGitSha": "aeb0b605654222edd20285b6211efec34f4682b0",
+      "originSha256": "562604c03f109555e90c95025bb8a7b76000ac07b73af4ceaf3d448c2580c3dc",
+      "referenceUrl": "https://zeppelin.apache.org/"
+    },
+    "appflowy": {
+      "source": "selfhst",
+      "icon": "appflowy",
+      "sha256": "660ee67a11ce70917e781008ff84d693cb4a8a78eebf569ff2199a953a08b821"
+    },
+    "apprise-api": {
+      "source": "official",
+      "icon": "apprise-api",
+      "sha256": "448b004e894a519da5cef5843db4ef29c859fdb5127222b40c6121e9cf4a7cbd",
+      "repository": "caronc/apprise-api",
+      "revision": "4d98ab7548c38eafc45c779f358212ab6f8c2688",
+      "file": "apprise_api/api/templates/icons/apprise-logo.svg",
+      "license": "MIT",
+      "identityUrl": "https://www.hostinger.com/applications/apprise-api"
+    },
+    "appsmith": {
+      "source": "simple-icons",
+      "icon": "appsmith",
+      "sha256": "d8e905b94ed123fd290ed07eb4710caca178a4e516cb493be3782d8c4374e52d"
+    },
+    "appwrite": {
+      "source": "selfhst",
+      "icon": "appwrite",
+      "sha256": "7e13d9f8d66395e429f1ca3de36c38372b9b46b7b4b2f0180ddee05d5bcf9e27"
+    },
+    "aptabase": {
+      "source": "selfhst",
+      "icon": "aptabase",
+      "sha256": "305f98d9182972c5a54e36825b9f62d42ce7caace914fd9b8e95a067958e5988"
+    },
+    "arangodb": {
+      "source": "logos",
+      "icon": "arangodb",
+      "sha256": "f66d52703f6959549df52b0ddbd4091d6576c63997577bcec19099f80d36be59"
+    },
+    "arch-linux": {
+      "source": "selfhst",
+      "icon": "arch-linux",
+      "sha256": "c61606b5d6aeab565cc096b53afcf4c0b8eed28e8957b055b242d4d2c00acd03"
+    },
+    "archivebox": {
+      "source": "selfhst",
+      "icon": "archivebox",
+      "sha256": "653567e1299336d90e822d8451b0e708e842fbffa1414678f2f0baca61aa1e88"
+    },
+    "archivesspace": {
+      "source": "official",
+      "icon": "archivesspace",
+      "sha256": "413d91c1a7bb88dbcd8d44f1863daeb36bbb73abafdad82e2325e85c7dbe0019",
+      "repository": "archivesspace/archivesspace",
+      "revision": "a3cec9627cd474ad6a017ef67f4c09b4153a86be",
+      "file": "frontend/app/assets/images/archivesspace/favicon-AS.svg",
+      "license": "ECL-2.0 (ArchivesSpace COPYING) (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/archivesspace/archivesspace",
+      "referenceUrl": "https://www.hostinger.com/applications",
+      "attribution": "ArchivesSpace community, incl. New York University, University of California and University of Illinois (COPYING)"
+    },
+    "argilla": {
+      "source": "official",
+      "icon": "argilla",
+      "sha256": "5ad5e8d7e8ccd9cb50e961f593029e62c39573939fe8960cfd9e69a013ec23ef",
+      "repository": "argilla-io/argilla",
+      "revision": "5338519accb13ae422f8bf9c0642651c249c49af",
+      "file": "argilla/docs/assets/logo.svg",
+      "license": "Apache-2.0 (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/argilla-io/argilla",
+      "referenceUrl": "https://www.hostinger.com/applications/argilla"
+    },
+    "astrbot": {
+      "source": "official",
+      "icon": "astrbot",
+      "sha256": "5f17f2a86bbee1f6e0751c138f4b4bf7eed65ecef93a4bfecdf14982224e26cb",
+      "repository": "AstrBotDevs/AstrBot",
+      "revision": "22834e6277fedef68914582947abf2e134092169",
+      "file": "dashboard/src/assets/images/icon-no-shadow.svg",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://www.hostinger.com/applications/astrbot"
+    },
+    "audiobookshelf": {
+      "source": "selfhst",
+      "icon": "audiobookshelf",
+      "sha256": "9777f60160273203e73efb7a47734de40b7a5774d074076004885b013ef41466"
+    },
+    "aureuserp": {
+      "source": "official",
+      "icon": "aureuserp",
+      "sha256": "df65ed454db6b880572eee6effc9b18ee1ab3902ad22075646d38311e78e2a45",
+      "repository": "aureuserp/aureuserp",
+      "revision": "34bf04cb4c46b7963948cc89c57a26990ce5510f",
+      "file": "public/images/logo.svg",
+      "license": "MIT (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/aureuserp/aureuserp",
+      "referenceUrl": "https://www.hostinger.com/applications/aureuserp"
+    },
+    "authentik": {
+      "source": "selfhst",
+      "icon": "authentik",
+      "sha256": "13e04b3be51f3c0541d376b768ef2d0b25d92fc47d6020a8f65cfe1605a448d5"
+    },
+    "authorizer": {
+      "source": "jabber",
+      "icon": "authorizer",
+      "sha256": "18a9cbd3eacced0e25a9717f3c1eaf8fc517b870e8435a0dc903a6e724e42844"
+    },
+    "autobrr": {
+      "source": "selfhst",
+      "icon": "autobrr",
+      "sha256": "b627034d252ecef5f447a073842571db80ee170f78c7e701491dcd5484fe1913"
+    },
+    "azuracast": {
+      "source": "selfhst",
+      "icon": "azuracast",
+      "sha256": "2ed963e6cf017ee188468e51f332421139fc7866509ff1a7d8709c8dc8fa16a0"
+    },
+    "baby-buddy": {
+      "source": "selfhst",
+      "icon": "baby-buddy",
+      "sha256": "9857196f6e161c97eb1d70f5c5c4db1ab7f7fae30b59040f7a2415c7443fe38d"
+    },
+    "backrest": {
+      "source": "selfhst",
+      "icon": "backrest",
+      "sha256": "885dfe01be72d9d35e48f9340033611341493358d418ce2f69d4ea2a1e512ee4"
+    },
+    "bagisto": {
+      "source": "selfhst",
+      "icon": "bagisto",
+      "sha256": "99978419b3dd94b654bb5eda43539ef366b7160322a86574af5b048e65168ef8"
+    },
+    "baikal": {
+      "source": "selfhst",
+      "icon": "baikal",
+      "sha256": "f5abb57e17acc4e504eaab8d9261eebe8a312b6d7035c32730453d059eb8a560"
+    },
+    "bar-assistant": {
+      "source": "selfhst",
+      "icon": "bar-assistant",
+      "sha256": "ab87025a8b33ecced53cc85ac70617941f9d92657fe433df79d9eadabda0b024"
+    },
+    "baserow": {
+      "source": "selfhst",
+      "icon": "baserow",
+      "sha256": "e866d87fb3e8b751d7a32a846d4f0ca8e3bcee7a43e7ac44c2f14c164f98e53e"
+    },
+    "bazarr": {
+      "source": "selfhst",
+      "icon": "bazarr",
+      "sha256": "ebedf73bdf3f570150b1b59d6ef98bf399984c11d5b68359ce4f8e873e829934"
+    },
+    "beaverhabits": {
+      "source": "official",
+      "icon": "beaverhabits",
+      "sha256": "c17ed905faa44f8a21600f9330bf2342794c25e1e8026f3755ebc76177338d15",
+      "repository": "daya0576/beaverhabits",
+      "revision": "178f9800f2f6b52a8207be8bf010d7d6b97daf46",
+      "file": "statics/images/favicon.svg",
+      "license": "BSD-3-Clause (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/daya0576/beaverhabits",
+      "referenceUrl": "https://www.hostinger.com/applications"
+    },
+    "bentopdf": {
+      "source": "selfhst",
+      "icon": "bentopdf",
+      "sha256": "7251bb7134979d57d10e40fe8d7874bc57bba28c44a09f325bb464f4228e09dc"
+    },
+    "beszel": {
+      "source": "selfhst",
+      "icon": "beszel",
+      "sha256": "4b4d8d09883c9db7a21ebaff503214a99ff631229345a70af5ddcefc5b7e57b7"
+    },
+    "beszel-agent": {
+      "source": "selfhst",
+      "icon": "beszel",
+      "sha256": "4b4d8d09883c9db7a21ebaff503214a99ff631229345a70af5ddcefc5b7e57b7",
+      "identityUrl": "https://www.hostinger.com/applications/beszel-agent",
+      "brandOf": "beszel"
+    },
+    "bewcloud": {
+      "source": "selfhst",
+      "icon": "bewcloud",
+      "sha256": "7955ea70b70152c47af5beee11ecca2a89a72f46361814408aaf0e84fe11226f"
+    },
+    "bichon": {
+      "source": "selfhst",
+      "icon": "bichon",
+      "sha256": "fbfc1ff840d7acbeb6eb6cc2f6d45fe34d26c2f27adb73b4ff68ea5a3cefdb14"
+    },
+    "bigcapital": {
+      "source": "selfhst",
+      "icon": "bigcapital",
+      "sha256": "a57fe701c47f2b5b4e6e89ffbe5798aab0e29c6789613a0bedc05911f3f39b5a"
+    },
+    "bitwarden": {
+      "source": "selfhst",
+      "icon": "bitwarden",
+      "sha256": "38bbd4cbf0c622db58efa8fc77c56cdc19dd389989f6726eba32818affc7f81f"
+    },
+    "bknd": {
+      "source": "selfhst",
+      "icon": "bknd",
+      "sha256": "9c332ddc2927ba29f525544855a1d644782d3aaef09a43f77ea03492b1c4ad0b"
+    },
+    "black-candy": {
+      "source": "selfhst",
+      "icon": "black-candy",
+      "sha256": "2aaa350fb9a9eb6993c88564c440a47b9c6e8a69f9458fd5ccb183c201b74f5f"
+    },
+    "blender": {
+      "source": "selfhst",
+      "icon": "blender",
+      "sha256": "2a30c0a7f0e1e3fc353f665fe70426813c3f2f336f8be3260a2db9db7798d536"
+    },
+    "blinko": {
+      "source": "selfhst",
+      "icon": "blinko",
+      "sha256": "f781d159ec32c1b34de1905cf72c1b549c9f2be8881b0d185a2194e02e973bd1"
+    },
+    "bludit": {
+      "source": "selfhst",
+      "icon": "bludit",
+      "sha256": "e54b82152bda52814d435b3266bbc5b7cb924f6f12b676439f3420da3868261f"
+    },
+    "bluesky-ozone": {
+      "source": "selfhst",
+      "icon": "bluesky",
+      "sha256": "55f5d4020ebcb72e19c03c93ad8dc2e96c48c18b5f3fccffa8db628cf0597735",
+      "identityUrl": "https://www.hostinger.com/applications/bluesky-ozone",
+      "brandOf": "bluesky"
+    },
+    "bluesky-pds": {
+      "source": "selfhst",
+      "icon": "bluesky",
+      "sha256": "55f5d4020ebcb72e19c03c93ad8dc2e96c48c18b5f3fccffa8db628cf0597735",
+      "identityUrl": "https://www.hostinger.com/applications/bluesky-pds",
+      "brandOf": "bluesky"
+    },
+    "bolt-diy": {
+      "source": "selfhst",
+      "icon": "bolt-diy",
+      "sha256": "5ed211639aba133600b903c106b2e61b4f26bd099231bfa0ce18b7b809c6c94f"
+    },
+    "bookstack": {
+      "source": "selfhst",
+      "icon": "bookstack",
+      "sha256": "eed3005a138a0b7d9ec9bf64ab365bb78fd3345591db9ee123e8a46e46bd132e"
+    },
+    "broadcastchannel": {
+      "source": "selfhst",
+      "icon": "broadcastchannel",
+      "sha256": "5409c20f518e9d8603972eb57f49e66b9c8a90b5862b12030a88d105b22fd42c"
+    },
+    "browserless": {
+      "source": "dashboard",
+      "icon": "browserless",
+      "sha256": "6134469fcdd045e1c05a17cc24f05124d4c7e4a6f08500e4282b5fc60bd26fc5"
+    },
+    "budibase": {
+      "source": "selfhst",
+      "icon": "budibase",
+      "sha256": "90a0c0a5c38dd35eb9a3777debb05edb261d05ccf2ce596cf987e431949e930b"
+    },
+    "bugsink": {
+      "source": "selfhst-png",
+      "icon": "bugsink",
+      "sha256": "7ff81c2056c253049ec3d6b67fd499ac6646bae1a0e29a79c6f21e5de7f65cc9",
+      "originGitSha": "52ca47f9cac32922de6d86f2818fef5d3a32608a",
+      "originSha256": "5a92220454a0797519b4365dc24a4df6e130ff7560158d51edb9e2626e9f51c6"
+    },
+    "buildbot": {
+      "source": "selfhst",
+      "icon": "buildbot",
+      "sha256": "5cae85fa3eccfe3a1c926c39a65cf485ff3f1fb1df31941c4810ff3bc02cbe47"
+    },
+    "bunkerm": {
+      "source": "selfhst-png",
+      "icon": "bunkerm",
+      "sha256": "22c23c3a2e7327f08a4dfa9b97115597a6ec516f9a58f1431a480832423e32b3",
+      "originGitSha": "d7396fc9d7bf005d0906b0caf02272c0c9156c9c",
+      "originSha256": "34fc856eac8adfcf2ee01ed57602813704cfee999281a17e8bded0cc2f58e4f3"
+    },
+    "buzz": {
+      "source": "dashboard",
+      "icon": "buzz",
+      "sha256": "fec75caa1f60d0e1011f0325f01b1b65b62a99bb3a276d4de5f9a48e6492853e"
+    },
+    "bytebase": {
+      "source": "thesvg",
+      "icon": "bytebase/default",
+      "sha256": "298528c4ba44db8546b81dce5cebc98e684ce2d578e0164888027103bbc19562",
+      "license": "Trademark of Bytebase. Used for identification under nominative fair use.",
+      "identityUrl": "https://www.hostinger.com/applications/bytebase",
+      "projectUrl": "https://www.bytebase.com"
+    },
+    "bytechef": {
+      "source": "selfhst",
+      "icon": "bytechef",
+      "sha256": "0a4cf7877f161321b3a683e05f7ba7b10a8059652318ae121ed61615d9859555"
+    },
+    "bytestash": {
+      "source": "selfhst",
+      "icon": "bytestash",
+      "sha256": "67788138251ad4dcff343beff1fbad78760f2c30e9977f59fe7d473f85716368"
+    },
+    "cal-com": {
+      "source": "selfhst",
+      "icon": "cal-com",
+      "sha256": "708380e911b76d9d7260361bf475892c6c8d34744d9e58c194df8526afbd7a33"
+    },
+    "calagopus": {
+      "source": "selfhst",
+      "icon": "calagopus",
+      "sha256": "88da7809d915f346ef849cc06f7e6b75573609f1ee27fcbc8dd1d57495cbafbb"
+    },
+    "calibre-web": {
+      "source": "selfhst",
+      "icon": "calibre-web",
+      "sha256": "914a8c131735883a1aa07e6cd5e476ba22a0a354f7391ad330dcb8339648ca7e"
+    },
+    "cap": {
+      "source": "official-png",
+      "icon": "cap",
+      "sha256": "47290cf968c2cd5db4e04d87f2521fdc7cb2ca983729e9c06bdd95bd99d00162",
+      "repository": "tiagozip/cap",
+      "revision": "67005c58d7fd2d196fc07451f78aa0463a26c777",
+      "file": "docs/public/logo.png",
+      "license": "Apache-2.0",
+      "identityUrl": "https://www.hostinger.com/applications/cap",
+      "originGitSha": "f6e67dc3d0fe8acac6ed446748dcf01c7d024eee",
+      "originSha256": "6fa3264ee850131a8acd68a7a313b7878f00b5e67b854c3eb4377e9f5d869d5d"
+    },
+    "casdoor": {
+      "source": "selfhst-png",
+      "icon": "casdoor",
+      "sha256": "267dafb3961afc1deeba26b9b4b371944e490a1285d860eac09c1b2bdfb04b44",
+      "originGitSha": "211148377989a895019f6d1082778aa9ec630fc8",
+      "originSha256": "708946828401ef738b4a10cc63029d94e835307c094974b129ead5f4dc48d6ec"
+    },
+    "castopod": {
+      "source": "selfhst",
+      "icon": "castopod",
+      "sha256": "81420798109428b8401db43f5febd78420d63b1ac8bb633a7f2f7c8346d9d91d"
+    },
+    "centos": {
+      "source": "selfhst",
+      "icon": "centos",
+      "sha256": "7a644f48b795df635b81e39528d4c68340af7dd2a166ff196f2612c3b3285df3"
+    },
+    "cerbos": {
+      "source": "selfhst",
+      "icon": "cerbos",
+      "sha256": "978466f52d6a3cb1e530a5cde038d61f2c786fa37df8d2f156a694287b744c50"
+    },
+    "changedetection-io": {
+      "source": "selfhst",
+      "icon": "changedetection",
+      "sha256": "26512ca7a93950edc3e3cb7ba547ff575f1bbb40a49e4efd488ca7810f6b0b83",
+      "identityUrl": "https://github.com/dgtlmoon/changedetection.io",
+      "referenceUrl": "https://github.com/dgtlmoon/changedetection.io/blob/master/changedetectionio/static/favicons/android-chrome-192x192.png",
+      "brandOf": "changedetection"
+    },
+    "chartbrew": {
+      "source": "selfhst",
+      "icon": "chartbrew",
+      "sha256": "bcdb94710662ccd385c30a62bd5e5995064d79dbe947a9d5bb225ac76b909ad1"
+    },
+    "chartdb": {
+      "source": "selfhst-png",
+      "icon": "chartdb",
+      "sha256": "d1edf2851634449902c435f3c1d38594083d35bf82e8c7db4035656b87dbc706",
+      "originGitSha": "e560abab4e740b618b59a57f05c8d3b17e9635d9",
+      "originSha256": "9e0de3c42571e7c743871afd160b0705393655b7da3f029ea0b63e18f2fa012f"
+    },
+    "chatpad-ai": {
+      "source": "dashboard",
+      "icon": "chatpad-ai",
+      "sha256": "8bc7114ceba28dd57b6dfd9bd662e70aaab4dcb5cf21c85113d517f54e86eb5e"
+    },
+    "chatwoot": {
+      "source": "selfhst",
+      "icon": "chatwoot",
+      "sha256": "d0ba31d7954efe468c5d7cebb684788e27c8cf8f2b739e059e254a35137ccdb4"
+    },
+    "checkcle": {
+      "source": "selfhst",
+      "icon": "checkcle",
+      "sha256": "774eb4fb555585374c217346faf4a78822c4f5ab37ac5f42e39f0fbd7eada451"
+    },
+    "checkmate": {
+      "source": "selfhst",
+      "icon": "checkmate",
+      "sha256": "b5c5d0b7a244d6022f3c5c8b4ca25c11e448a649d13e2f9cb7fb81f8ed953280"
+    },
+    "checkmk": {
+      "source": "selfhst",
+      "icon": "checkmk",
+      "sha256": "990ef8ee51e96841cf640bbbe0eed25b2762c07c9aef4a78c7133109d67f7d9e"
+    },
+    "chevereto": {
+      "source": "selfhst",
+      "icon": "chevereto",
+      "sha256": "1ee61be8642eb06e25ed52689802579a3039205c8b14218acb7e1064b4285df3"
+    },
+    "chibisafe": {
+      "source": "selfhst",
+      "icon": "chibisafe",
+      "sha256": "2e84a57199ed432ada9a3e7e7535e94730e7534aa5eb4feddef386ac09c48705"
+    },
+    "chroma": {
+      "source": "dashboard",
+      "icon": "chroma",
+      "sha256": "c691eb1a2efb774cd785541fde9986c4dc605672e30f3528580471c2e8561705"
+    },
+    "chronoframe": {
+      "source": "selfhst-png",
+      "icon": "chronoframe",
+      "sha256": "a8105ca826a2287ae6b26999e31e637fde1c5f1fb1c47815311b26790bf7551d",
+      "originGitSha": "49eb8d4d5b53562078ed76affa6fb970e85ba510",
+      "originSha256": "33fada387ea17b55fdc1b2030c829badfc6f8b280edc81bfac7fc7cde77f4bf1"
+    },
+    "civicrm": {
+      "source": "simple-icons",
+      "icon": "civicrm",
+      "sha256": "9f9e105b7c3c7c658d7c5daf8d401b923357b12f7073b5fab84773d0c3d466fd"
+    },
+    "classicpress": {
+      "source": "official",
+      "icon": "classicpress",
+      "sha256": "d92e6cce03f558c2b037e29a6a0058297f00a77c79809cc18d00349834a4d366",
+      "repository": "ClassicPress/ClassicPress",
+      "revision": "9e364102e8e0090650dedd1e685c12b18e061bf2",
+      "file": "src/wp-admin/images/classicpress-logo.svg",
+      "license": "GPL-2.0 (first-party repository)",
+      "identityUrl": "https://www.classicpress.net/"
+    },
+    "claude-code": {
+      "source": "logos",
+      "icon": "claude-code",
+      "sha256": "6e27c5392f181ac0843652094c3b53299e9eb9c50b34c644eaa87e9b4d646b60"
+    },
+    "cleanuparr": {
+      "source": "selfhst-png",
+      "icon": "cleanuparr",
+      "sha256": "3558b83f404a53244dd83d4504741a9cce24892cccaf4f1d343f5677ad4301be",
+      "originGitSha": "783b74f848cd70784234c0007f872fc620c78812",
+      "originSha256": "02f93478dfe1b39378dfbd65001b95c047ec556e66a7dc7450aaf6b8701792bf"
+    },
+    "clickhouse": {
+      "source": "selfhst",
+      "icon": "clickhouse",
+      "sha256": "20587b8fad87fc8b4df75b9abb889520b7537048ddc3af9cc1f6dca469dcab9e"
+    },
+    "cloudbeaver": {
+      "source": "selfhst",
+      "icon": "cloudbeaver",
+      "sha256": "ec5b4449ff9275832b81b79e62417918e012041936ccfc990648ef54c57bb566"
+    },
+    "cloudflared": {
+      "source": "dashboard",
+      "icon": "cloudflared",
+      "sha256": "32876bda81542203316d67b9623818ac60986897cac79f70e03e8f31f7b7f160"
+    },
+    "cloudlinux": {
+      "source": "logos",
+      "icon": "cloudlinux",
+      "sha256": "4004a27940272e6d2628e14d26b65b2b36755b197c391a9f21a1e538909a28fe"
+    },
+    "cloudreve": {
+      "source": "selfhst",
+      "icon": "cloudreve",
+      "sha256": "d9258406fe1dee76cbcdda98aba665d3f7d79e077adec84e6ced33c5faafda83"
+    },
+    "cockpit-cms": {
+      "source": "dashboard",
+      "icon": "cockpit-cms",
+      "sha256": "9fd5d864698e4089b241a16098800a299a80a3120f6eebac625fd5c535d4958a"
+    },
+    "cockroachdb": {
+      "source": "thesvg",
+      "icon": "cockroachdb/default",
+      "sha256": "dcb0ae94e6b28dbd8e0f366e58a51672c90139e104701289ee205cf4e1da262e",
+      "license": "brand-use",
+      "identityUrl": "https://www.hostinger.com/applications/cockroachdb",
+      "projectUrl": "https://cockroachlabs.com"
+    },
+    "code-server": {
+      "source": "official",
+      "icon": "code-server",
+      "sha256": "179196a5ec3f20e1e41839722880924d858633810aa5a14b7e34e72733844258",
+      "repository": "coder/code-server",
+      "revision": "c094099c1516e578cb3b0976175e4e75a552e6d1",
+      "file": "src/browser/media/favicon.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://coder.com/docs/code-server/"
+    },
+    "coder": {
+      "source": "selfhst",
+      "icon": "coder",
+      "sha256": "e94549ed48bc9464893278117fb0b77df9d467682054862f7c007ba2db8cbea7"
+    },
+    "cognee": {
+      "source": "official",
+      "icon": "cognee",
+      "sha256": "127d1191616b4406f417a0b7805f39b7c66d16fa03e72d1fedda076f49ec385e",
+      "repository": "topoteretes/cognee",
+      "revision": "1961133d0c68b450fe8e71941a756371e94f7c04",
+      "file": "cognee-frontend/public/visuals/logos/cognee.svg",
+      "license": "Apache-2.0 (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/topoteretes/cognee",
+      "referenceUrl": "https://www.hostinger.com/applications"
+    },
+    "colanode": {
+      "source": "selfhst",
+      "icon": "colanode",
+      "sha256": "b5d150c661abf15ccdb099e4a31bbf48f3c3675f900ac3b80b62ebd2cb4be1ca"
+    },
+    "collabora-online": {
+      "source": "dashboard",
+      "icon": "collabora-online",
+      "sha256": "fb619f40d742a23a3d521e7206884a61afe7eb6ce154615dcf13fcc0313e38cf"
+    },
+    "commafeed": {
+      "source": "selfhst",
+      "icon": "commafeed",
+      "sha256": "885e9de6d0c21c7dc27076a68b1777596fc9d33ed2a77ba4c0c948fe3f3cebfd"
+    },
+    "convertx": {
+      "source": "selfhst-png",
+      "icon": "convertx",
+      "sha256": "1fd1277c6fbd6a8665a945c1a3e46f4049d74a7e3f7300b1d06541ea86a8c398",
+      "originGitSha": "320d6ec555974989d91c0a5b25aecb4bad47ea44",
+      "originSha256": "cc7d4390314ac82c21a0939297bf525604ea2d5fc2cb6b1473f2cad012d10bf8"
+    },
+    "convex": {
+      "source": "dashboard",
+      "icon": "convex",
+      "sha256": "c8634bfe2cffabb71add7ce81375c543f44c71d2e2eb4f28c35e822b28d23535"
+    },
+    "convos": {
+      "source": "selfhst",
+      "icon": "convos",
+      "sha256": "effcdcfa482c18b3ed25e21135df15e40b2d7705fb10885cdf84e442270c746d"
+    },
+    "convoy": {
+      "source": "selfhst",
+      "icon": "convoy",
+      "sha256": "fd36232e9a53e8db61a526cf33ae1258e4f7411b8b7591370f17f1dd84cbfa94"
+    },
+    "copyparty": {
+      "source": "selfhst",
+      "icon": "copyparty",
+      "sha256": "2ef993e1446e90cee5f8584706bbfa512f0f01a4d9dd4b755e2d387aefd2724d"
+    },
+    "corecontrol": {
+      "source": "selfhst",
+      "icon": "corecontrol",
+      "sha256": "c59e43cbc1eceb49f748a650ef3cd73f35ea03c01583420b3af6abf541da3671"
+    },
+    "corteza": {
+      "source": "official",
+      "icon": "corteza",
+      "sha256": "19e4fedfa5c4274da61550dee98ff90da0cfdb07c2870534d89fbab3c4a5141c",
+      "repository": "cortezaproject/corteza",
+      "revision": "229ac38e0ac164e554a9763d98a35a5dff658c98",
+      "file": ".github/assets/corteza_logo.svg",
+      "license": "Apache-2.0 (first-party repository)",
+      "identityUrl": "https://github.com/cortezaproject/corteza"
+    },
+    "countly": {
+      "source": "selfhst",
+      "icon": "countly",
+      "sha256": "e1ab698cdccc279f41cd015cb8ac1b1f825b1aa5f8a8c67ea590123fd354b3b0"
+    },
+    "crafty-controller": {
+      "source": "selfhst",
+      "icon": "crafty-controller",
+      "sha256": "8d073e9308cb706b068ee00b036ee5fc7f77bcc5ab7ea182b47a78835a6721b0"
+    },
+    "cronicle": {
+      "source": "selfhst",
+      "icon": "cronicle",
+      "sha256": "b6aa512ab8fc1244105bfb8a01f6e594f4ad0dbe1c9ad6ecd257496907a8638d"
+    },
+    "cross-seed": {
+      "source": "selfhst",
+      "icon": "cross-seed",
+      "sha256": "ef32bd5ec18591f6ba4be879cc68fec2497accb6f17951a9c72b53c5a780d411"
+    },
+    "cryptgeon": {
+      "source": "selfhst",
+      "icon": "cryptgeon",
+      "sha256": "899533cd7dd6e501af71591754d2341bd4eb19f2b0db7d269193ed47aa293c40"
+    },
+    "cryptpad": {
+      "source": "selfhst",
+      "icon": "cryptpad",
+      "sha256": "f664d59ce84b961e963016df903f844e559691e89fd3a68fd2fe5b4238bf2f34"
+    },
+    "cvat": {
+      "source": "official",
+      "icon": "cvat",
+      "sha256": "57c5db9f2c7e82918f2967899a826f19cf393e7ac32150339be67b70cbd6b3a0",
+      "repository": "cvat-ai/cvat",
+      "revision": "d4d08dedb5ad7c5e980c0bc7319a7f5587365dad",
+      "file": "cvat-ui/src/assets/cvat-icon.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://www.cvat.ai/"
+    },
+    "cyberchef": {
+      "source": "selfhst",
+      "icon": "cyberchef",
+      "sha256": "3eeb65ec957b166da55c8f11e09fb5597082eef3aa683639cf7e0b1a2a0ea6d4"
+    },
+    "cypht": {
+      "source": "selfhst",
+      "icon": "cypht",
+      "sha256": "dc78a2032f2220b60c3f96782b468f35a054f5ce85706f6bca69e911f44debb7"
+    },
+    "dagu": {
+      "source": "selfhst",
+      "icon": "dagu",
+      "sha256": "3f7d6d985add1af9fb4091a83d849b6d4939de8b8e905cc1cfb192b53b86a460"
+    },
+    "dasharr": {
+      "source": "selfhst",
+      "icon": "dasharr",
+      "sha256": "bbaa442938092754caa1fd5fea437635e37ee6628d325508aa5e9b825df7f3e7"
+    },
+    "dashdot": {
+      "source": "selfhst-png",
+      "icon": "dashdot",
+      "sha256": "3f27d95e9c9fb9f8e6f0d170d3ed75470db114252bcbc2da58aef037319ec92c",
+      "originGitSha": "d3ad6b7121af9924703426279776d63de6992ecc",
+      "originSha256": "b49a427bcb553937b049aee778b8bca5461899a378c8f209adbc522f94e70f4e"
+    },
+    "dashy": {
+      "source": "selfhst-png",
+      "icon": "dashy",
+      "sha256": "c3d0ddce112848fa7bdd51f30c99139097c12723a3682d84780e07528ee87a2c",
+      "originGitSha": "3124389b6c51b88f2011c9b27e112ea25a0a3ad6",
+      "originSha256": "5eb50fae178836622ba01784c9f410491f02f2017009b96c16900954923a002c"
+    },
+    "databag": {
+      "source": "selfhst-png",
+      "icon": "databag",
+      "sha256": "eed9181ad5de92f64f84ad40a9b7ca9c98936f1c36717613e7cd9751cadd3b5a",
+      "originGitSha": "b779c33267a1866285011aaf2036b99799527611",
+      "originSha256": "5175e33bca3004e00f25c615e80125f5cb48afd3c4b483a67822f8a4a195c850"
+    },
+    "databasus": {
+      "source": "selfhst",
+      "icon": "databasus",
+      "sha256": "4f345ee34171a6e01f1d82bd2865677b5d5fc0516d5a47cfb09c1a0dacd1d9e5"
+    },
+    "datasette": {
+      "source": "selfhst",
+      "icon": "datasette",
+      "sha256": "e67e8ad01418895be6c8ca15e07effdfb96395f42b126b5bcf1cd18ea9ed5a31"
+    },
+    "dawarich": {
+      "source": "selfhst",
+      "icon": "dawarich",
+      "sha256": "4d5e884c6f7364c33cd1be70d97a755a52c54be14f27476dbe7ebd2c99a28296"
+    },
+    "db-browser-for-sqlite": {
+      "source": "official",
+      "icon": "db-browser-for-sqlite",
+      "sha256": "62a00ab4ca904775999884d6f0446ff69eb31cbd22862f4f735c0a8e9fc80c04",
+      "repository": "sqlitebrowser/sqlitebrowser",
+      "revision": "2206215d21123c09a4a6c24d9332ce5d051379a8",
+      "file": "images/logo.svg",
+      "license": "MPL-2.0 or GPL-3.0 (first-party repository)",
+      "identityUrl": "https://sqlitebrowser.org/"
+    },
+    "dbgate": {
+      "source": "dashboard",
+      "icon": "dbgate",
+      "sha256": "714be878db78d10a9691ab1fcd27d756bb85de0ec76f7afb82626ca987744083"
+    },
+    "ddns-updater": {
+      "source": "selfhst",
+      "icon": "ddns-updater",
+      "sha256": "9039226c5bce9567ad137bde7bfd02faabda966c896a95345f1bb5b8f56e2a36"
+    },
+    "debian": {
+      "source": "selfhst",
+      "icon": "debian",
+      "sha256": "8f2f53a56b4dfa9e12396c9e42b8acb7f45ed57055110f7830cb7e0b9678d2e1"
+    },
+    "defguard": {
+      "source": "selfhst",
+      "icon": "defguard",
+      "sha256": "55880a7fb11c825eb4f0dfe2ca77293ba439091e993fb8219760fa71261049d5"
+    },
+    "deluge": {
+      "source": "selfhst",
+      "icon": "deluge",
+      "sha256": "93168a1c6301f7d2fa401453e9ae36a09ed2e6f1e7e35879f803957960fa7ad9"
+    },
+    "denokv": {
+      "source": "dashboard",
+      "icon": "deno",
+      "sha256": "4d6bfc3f8dc7ad4c7ad040540e019f16d3d1238fc0c6b4c34bb6a4654f6fb1ec",
+      "identityUrl": "https://www.hostinger.com/applications/denokv",
+      "brandOf": "deno"
+    },
+    "dependency-track": {
+      "source": "dashboard",
+      "icon": "dependency-track",
+      "sha256": "b5ee0aeab19cc4e5d376dbe0f37a5612e3f6073c2be535911cc880976369b331"
+    },
+    "dhis2": {
+      "source": "official",
+      "icon": "dhis2",
+      "sha256": "4224a4d5832730a1c79f59c2af0338c6bdd0906792ca3f1f166ede6df474a48d",
+      "repository": "dhis2/dhis2-core",
+      "revision": "7665dc66b98f153b9357d636ef7cec7cc71cce2b",
+      "file": "dhis-2/dhis-support/dhis-support-system/src/main/resources/SVGs/dhis2_logo_positive.svg",
+      "license": "BSD-3-Clause (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/dhis2/dhis2-core",
+      "referenceUrl": "https://www.hostinger.com/applications/dhis2"
+    },
+    "dify": {
+      "source": "selfhst",
+      "icon": "dify",
+      "sha256": "c1c17ee51db59efc4f946090490a45fc639984d57426dc62737e582db23ac4c3"
+    },
+    "directus": {
+      "source": "selfhst",
+      "icon": "directus",
+      "sha256": "b8e485aeba9b0f986933777ac10dd04cfb008615ce2f8b94e5f5001eecc44902"
+    },
+    "discourse": {
+      "source": "selfhst",
+      "icon": "discourse",
+      "sha256": "f94ad4ea13ce28a64ab9b4154f5ed5febe020ee0c9eeeb5f198f941775ad2116"
+    },
+    "dittofeed": {
+      "source": "selfhst-png",
+      "icon": "dittofeed",
+      "sha256": "2b796512810a7963742c2ed9a2ec5d74fcfbeae4b9fb0c5cf00a38715f29db62",
+      "originGitSha": "fc1c973a765afcffa10deb7f7a4306183764555b",
+      "originSha256": "1ca0fa8cf1560d14e6054c7b3475ebf6f2b92adc4b6f57798a9dedf73e0e912b"
+    },
+    "diun": {
+      "source": "selfhst-png",
+      "icon": "diun",
+      "sha256": "38a57fa4d2ac49e95b3a2634446827d3f8db9df0d8402a8517bce178472757b3",
+      "originGitSha": "08373132281a8ba29956ab581e09b4e2d200aaa4",
+      "originSha256": "e17504927ed951da5d88c9047f9c64b6624d3862f157ebfb4429e82eefa9f983"
+    },
+    "docassemble": {
+      "source": "selfhst",
+      "icon": "docassemble",
+      "sha256": "e59ac1d5f19c101019040f0b0d2d93894046c360f5fe3cc7d83b09dd854cbc98"
+    },
+    "docker": {
+      "source": "selfhst",
+      "icon": "docker",
+      "sha256": "a5e4fe5e9d9121e08f523f06ea5ca2585b84f5ecc7e09704d273096e1d3d3ada"
+    },
+    "docker-registry": {
+      "source": "selfhst",
+      "icon": "docker",
+      "sha256": "a5e4fe5e9d9121e08f523f06ea5ca2585b84f5ecc7e09704d273096e1d3d3ada",
+      "identityUrl": "https://www.hostinger.com/applications/docker-registry",
+      "brandOf": "docker"
+    },
+    "dockge": {
+      "source": "selfhst",
+      "icon": "dockge",
+      "sha256": "50734ee02d52afc3a3cda0c13e8045694b5aa478617c85470abce52b55f7b2a5"
+    },
+    "docmost": {
+      "source": "selfhst",
+      "icon": "docmost",
+      "sha256": "94036d805583480b036b5d1d22a83ad71b3d0064e835db455f6dcff8497d0ecf"
+    },
+    "docspell": {
+      "source": "selfhst",
+      "icon": "docspell",
+      "sha256": "45dc7597e26840906cb39b0e79073a537c1aab164b8638747ecd7c9875ff61ab"
+    },
+    "documenso": {
+      "source": "selfhst",
+      "icon": "documenso",
+      "sha256": "d5393e7c79bc9a1f027c427b279a4f33740837f8412d9dab680e55d241cd28e5"
+    },
+    "docuseal": {
+      "source": "selfhst",
+      "icon": "docuseal",
+      "sha256": "390bc32db77a25caca0963dd2cf3252637ff4ffce22c8ac8cfb0d88c68e46637"
+    },
+    "dokku": {
+      "source": "selfhst",
+      "icon": "dokku",
+      "sha256": "849aaba6dc06bb5f648280fa37bbdae10355c4bf069a32a03a91d61ce5e9f4d3"
+    },
+    "dokuwiki": {
+      "source": "selfhst",
+      "icon": "dokuwiki",
+      "sha256": "cd1055d5edfcc70f9ec2ca6813aef28ca3a7b0c337ddbc38a4d30a06cff992d5"
+    },
+    "dolibarr": {
+      "source": "selfhst",
+      "icon": "dolibarr",
+      "sha256": "41ebf09b3414163ba24e322fd096abeb071bcbbfbdfde25c89fb3b6436b7b1d4"
+    },
+    "domain-locker": {
+      "source": "selfhst",
+      "icon": "domain-locker",
+      "sha256": "cedd02aa5c6a296f1c7bbbca8a85761ab7ded38cb2840dd215450fc3f67f7fe2"
+    },
+    "donetick": {
+      "source": "selfhst",
+      "icon": "donetick",
+      "sha256": "b5771ca736007ebb7559928fe992c14d2f82bfc12ab8db597295e70145e9dbbc"
+    },
+    "downtify": {
+      "source": "selfhst",
+      "icon": "downtify",
+      "sha256": "7b92100c475ffa4ab489ec7d46713a152a74ec446a80558c179ecd4752b28453"
+    },
+    "dozzle": {
+      "source": "selfhst",
+      "icon": "dozzle",
+      "sha256": "5c84eb699a8968f6bb5b22d2c8b66aa588f823cc02ea60ee571116a310bca9dd"
+    },
+    "dragonfly": {
+      "source": "thesvg",
+      "icon": "dragonfly/default",
+      "sha256": "d7ba86e30fb1189bdf8cf51c76a4f17bdd88dd3ee3f0fafe881cf276f7786cb0",
+      "license": "Apache-2.0",
+      "identityUrl": "https://www.hostinger.com/applications/dragonfly",
+      "projectUrl": "https://www.dragonflydb.io"
+    },
+    "draw-io": {
+      "source": "selfhst",
+      "icon": "draw-io",
+      "sha256": "f3897472724a563d3f3b385f10dbcf3bf3145f0cbb3d19ae355ab748b5d0de6d"
+    },
+    "drawdb": {
+      "source": "selfhst-png",
+      "icon": "drawdb",
+      "sha256": "5b08bde8b808fea09c35827b7c5bed9e934318474ae29daafaa243d00ed062d2",
+      "originGitSha": "dd4e572531a2e47918354e0ccb97c71cdb1f108e",
+      "originSha256": "b5ab9f87db2485874d459e2f04a491b4d0cc12f7da22ad878238e5fac57dbfe7"
+    },
+    "dreamfactory": {
+      "source": "logos",
+      "icon": "dreamfactory",
+      "sha256": "3c0969a2b26b5117f5d13372f8826c26d36ef858a5b2c43c16e8f65d924c70d2"
+    },
+    "drupal": {
+      "source": "selfhst",
+      "icon": "drupal",
+      "sha256": "134226bb3422f05cbd52e5200cd9dd2fe569ba63ff55560feaa3bf830774178b"
+    },
+    "duckdns": {
+      "source": "selfhst",
+      "icon": "duckdns",
+      "sha256": "d1c3da4720c2b5ce90cff2560648c32f90f2f9750895da5ef7b32da58b57eddc"
+    },
+    "dufs": {
+      "source": "selfhst-png",
+      "icon": "dufs",
+      "sha256": "45ad66ba6bed43b0d26360804a8dc2421e054fcc1624412295e6e53796dc95f6",
+      "originGitSha": "182a0c915603d7ef5f258a21e76515e5cd38a307",
+      "originSha256": "b8d017f64e2051c62ca1fe0bbc409a61284dff8e1c0afbb38b4fa76a22c522cd"
+    },
+    "dumbdo": {
+      "source": "selfhst",
+      "icon": "dumbdo",
+      "sha256": "07af250802dfda1476e5a653e9ce206cc2255403e8d659f64f55bd496331abb4"
+    },
+    "dumbdrop": {
+      "source": "selfhst",
+      "icon": "dumbdrop",
+      "sha256": "f056de107f4f899a0352048205a47fc00c3510ad3388efe475013e3a8a2f8faf"
+    },
+    "dumbpad": {
+      "source": "selfhst",
+      "icon": "dumbpad",
+      "sha256": "5631961194719783f18c92768cb85dfb18a5eff0b609a648787ad7736e11a0ac"
+    },
+    "duplicati": {
+      "source": "selfhst",
+      "icon": "duplicati",
+      "sha256": "677557616efda08e0c07cb35cb3d9f0b11df53f94b1a6d77de83c616040156f5"
+    },
+    "dvinyl": {
+      "source": "selfhst-png",
+      "icon": "dvinyl",
+      "sha256": "2cfe241cd7cd3cf365201cc1f6d6d43b36ac2aaa1e0397bdce408767f75f3919",
+      "originGitSha": "04ff2af322e5f71e9f0d212c25a1795a85570637",
+      "originSha256": "558391e6142689b53944a3e0dcc7d1323288652b1a290a73532fef41897808b7"
+    },
+    "eclipse-mosquitto": {
+      "source": "simple-icons",
+      "icon": "eclipsemosquitto",
+      "sha256": "2e13d54fd5a8494bf60046894371dd7d1fcffc802512dcb990c9dd72b4b777aa"
+    },
+    "edgedb": {
+      "source": "logos",
+      "icon": "edgedb",
+      "sha256": "99662d28248aa62d03da417cd3a1ca6de0ea55657105c44715db0515cc36fd57"
+    },
+    "elabftw": {
+      "source": "dashboard",
+      "icon": "elabftw",
+      "sha256": "58d0fedb9097cc91717f197b5fc0b89bb64bfc9a0e5b00548d2a6e58a7585f03"
+    },
+    "elasticsearch": {
+      "source": "selfhst",
+      "icon": "elasticsearch",
+      "sha256": "86d79fe4d4ec607bf5656b0901405a7b42d357ae10a7a17a848da4bb9cbf0ea2"
+    },
+    "element": {
+      "source": "selfhst",
+      "icon": "element",
+      "sha256": "6191ee44172be2d62be1d48a9da41ba99e3eabe93a9c7dc170097cd9952e2f06"
+    },
+    "emby": {
+      "source": "selfhst",
+      "icon": "emby",
+      "sha256": "cf1d35e9fabdcab6b0a6f348cc13c7438bdbf161fbf5347ed86dbabee3edecaa"
+    },
+    "emoncms": {
+      "source": "selfhst",
+      "icon": "emoncms",
+      "sha256": "8e3cf7310d0ad20699051bf50723a8e03dcf31509ed3d07c7872425edbf56f35"
+    },
+    "emqx": {
+      "source": "selfhst",
+      "icon": "emqx",
+      "sha256": "f2e2c06502958e4ab914c199671adfff40f40236a4caf672f79002c62c897c2c"
+    },
+    "enclosed": {
+      "source": "selfhst",
+      "icon": "enclosed",
+      "sha256": "06100be33ee5818a0301a85e5c4a3e9a8368425b9967cde8567e80e98eb0a5b2"
+    },
+    "ente": {
+      "source": "simple-icons",
+      "icon": "ente",
+      "sha256": "bf6bd70f000ab3eb30bb5d93f56830dc7951c448abcb101d9fa800822eb49daf"
+    },
+    "ersatztv": {
+      "source": "selfhst",
+      "icon": "ersatztv",
+      "sha256": "a749e44395a5cf617efcd68ef758c39d2a90081147f1e83c7fd6437153d87ddd"
+    },
+    "erugo": {
+      "source": "selfhst",
+      "icon": "erugo",
+      "sha256": "75b7570c64b63a4755fb59ac1d59c79cdfb51bae9d2dcc6bd7bf109512fab03f"
+    },
+    "esphome": {
+      "source": "selfhst",
+      "icon": "esphome",
+      "sha256": "e304693887d1d7d527d9128b90ec2e6dcdd2f42c455873c47ccb9419796c9fa5"
+    },
+    "espocrm": {
+      "source": "selfhst",
+      "icon": "espocrm",
+      "sha256": "3257d0d80c8fc3ec3aee88563ccbb1eb85a2c4b4b3ee7b64e72245ccc4831ba6"
+    },
+    "etherpad": {
+      "source": "selfhst",
+      "icon": "etherpad",
+      "sha256": "684e6cd9e138fe8768cfdccdc2ec25fe317bfd269974908b85832011b220661e"
+    },
+    "evcc": {
+      "source": "selfhst",
+      "icon": "evcc",
+      "sha256": "4a8847de7d4d68e3bc07cc33bd4bebc51eb9e07ceaeda01454ce326b1fb36779"
+    },
+    "evershop": {
+      "source": "selfhst-png",
+      "icon": "evershop",
+      "sha256": "7676e29d4deb9b77c761d61a71beaafd6d6a44229a67fd82534a9b4727e394a4",
+      "originGitSha": "74277ae24d3cd40d77024f4180df6cbc0c631edd",
+      "originSha256": "471dc99433abe864cf165cb11ac76a515dacf4004df5471fe128b78102b4f496"
+    },
+    "excalidash": {
+      "source": "selfhst",
+      "icon": "excalidash",
+      "sha256": "582efaa5cd365958916a0e0c287999c097b4775859b895a8b06d40f4d478976a"
+    },
+    "excalidraw": {
+      "source": "selfhst",
+      "icon": "excalidraw",
+      "sha256": "cab66baab7f5bd828e68079b6d26749e916a7ca83039e1969431df86a5894019"
+    },
+    "exelearning": {
+      "source": "official",
+      "icon": "exelearning",
+      "sha256": "a3615ae038cd52ce4dd58089e262532062151f45e5d310c10a5cdd8a49005707",
+      "repository": "exelearning/exelearning",
+      "revision": "d22b032965d4e85866cc1487f003ac99131be735",
+      "file": "public/icon.svg",
+      "license": "AGPL-3.0 (first-party repository)",
+      "identityUrl": "https://exelearning.net/"
+    },
+    "expenseowl": {
+      "source": "selfhst-png",
+      "icon": "expenseowl",
+      "sha256": "1c42ea3cb61472cd7fb480d505382f13b6e7d67419f3ab7a82ee5c6c4b5f9de6",
+      "originGitSha": "7e3888731c891ca2e565392b54f10ad569850e16",
+      "originSha256": "07c0ad6d44929be665e0b4adc7b7ee2cddae9b2772e295adf7b70e53231ea3fd"
+    },
+    "falkordb": {
+      "source": "logos",
+      "icon": "falkordb",
+      "sha256": "58db9bed4e057e5a9f023c3696d9b2ef7796138d0abebc328e94dde99b24dddf"
+    },
+    "featbit": {
+      "source": "official",
+      "icon": "featbit",
+      "sha256": "27685aa1b60a9588f13de482e32568f5b7a0d3b94bfc8f4bf37155b38cc38722",
+      "repository": "featbit/featbit",
+      "revision": "0bc48dc1e9c63f51290480530f248f604057de97",
+      "file": "modules/front-end/public/assets/featbit-logo.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://www.featbit.co/"
+    },
+    "fedora-cloud": {
+      "source": "selfhst",
+      "icon": "fedora",
+      "sha256": "833db91e52eeda6e5d366260f460142c300b4c76d0c9b07c4c5f1479af8e55af"
+    },
+    "fenrus": {
+      "source": "selfhst",
+      "icon": "fenrus",
+      "sha256": "ca97650054e376ab8474d8d1c85f971be3e3a12536808bb077e392dc7b8e1b21"
+    },
+    "fider": {
+      "source": "selfhst",
+      "icon": "fider",
+      "sha256": "2aa4384cfb11d7179f7a4d5a69e3798bed567eb29a7385145333a5a12adcc6da"
+    },
+    "file-browser": {
+      "source": "selfhst",
+      "icon": "file-browser",
+      "sha256": "647b8e9864370608a82b4ce5554681296a6fc7abf61e37c437d3e9c94ea7ca81"
+    },
+    "fileflows": {
+      "source": "selfhst",
+      "icon": "fileflows",
+      "sha256": "72ea7cea3f1cb429941e9ca88c0398f017e22ec852ee69798a758052b85f743e"
+    },
+    "filegator": {
+      "source": "selfhst",
+      "icon": "filegator",
+      "sha256": "e4d15923365fb72e8b7fc8575c4395144edb206ac2368639fbcd5543b5a613c7"
+    },
+    "filestash": {
+      "source": "selfhst",
+      "icon": "filestash",
+      "sha256": "23e3b1136762695ecbc03a50900971702fac41ae5793809567a019264d9744a6"
+    },
+    "firefly-iii": {
+      "source": "selfhst",
+      "icon": "firefly-iii",
+      "sha256": "6a9952ff4ea6c3f4b287964fcb798b1f8044f46f979476bf7278015c1dbcf1bf"
+    },
+    "firefox": {
+      "source": "selfhst",
+      "icon": "firefox",
+      "sha256": "39f4d7141d836d82de29340fe9674c7d92b27ec643b7fa2b7e8e9c1dfc17db37"
+    },
+    "fireshare": {
+      "source": "selfhst",
+      "icon": "fireshare",
+      "sha256": "1b0a752899dae7e56a3c32649ee45e5b11eae497ba9d0444248aa00ae605ce8c"
+    },
+    "fittrackee": {
+      "source": "selfhst",
+      "icon": "fittrackee",
+      "sha256": "39f1a3821daee8ed95e4163bf648be44ca889bf856e2bbb25813093b9951a95a"
+    },
+    "flagsmith": {
+      "source": "official",
+      "icon": "flagsmith",
+      "sha256": "56125b842ee807ef8c3d6b46cfaa31286556eee8b7768c79b3719d27640ac995",
+      "repository": "Flagsmith/flagsmith",
+      "revision": "be2bd72f1f61f3903704ba9eec9fb8c92fe98568",
+      "file": "docs/static/img/logo.svg",
+      "license": "BSD-3-Clause",
+      "identityUrl": "https://www.hostinger.com/applications/flagsmith"
+    },
+    "flame": {
+      "source": "selfhst-png",
+      "icon": "flame",
+      "sha256": "6a08664372755a901a8303a99b56f06b620b500ecc9e316b649d39a5c30c2ccc",
+      "originGitSha": "473084e6612337251281fe68192d1824352bf967",
+      "originSha256": "9edb4cb1944188c78543f9a1e132c8af1a8628be896467b9141cb422847c9e96"
+    },
+    "flaresolverr": {
+      "source": "selfhst",
+      "icon": "flaresolverr",
+      "sha256": "cb4d419976e826ab9db7b161a5a3e89404ae418d1bd944d48bf2d0f191debca1"
+    },
+    "flarum": {
+      "source": "selfhst",
+      "icon": "flarum",
+      "sha256": "58e6384f2045f0fcbb51ca2da9b9e4c3a638a5b4805855f151f0eb2e883337b1"
+    },
+    "flatnotes": {
+      "source": "selfhst",
+      "icon": "flatnotes",
+      "sha256": "6a8445881c2cbbad5a8bd23ddbf1748add558299e00acf11b64604b252575e24"
+    },
+    "fleet": {
+      "source": "official",
+      "icon": "fleet",
+      "sha256": "dacacfcb76c712586c837c77e456723a54779cdc0925245be7784bdba955c362",
+      "repository": "fleetdm/fleet",
+      "revision": "0701a3a4503c57959c966d439766a29dc4765ab6",
+      "file": "assets/images/fleet-logo.svg",
+      "license": "MIT (assets directory)",
+      "identityUrl": "https://www.hostinger.com/applications/fleet"
+    },
+    "flexget": {
+      "source": "official",
+      "icon": "flexget",
+      "sha256": "36d8b99510aa086a5ce51284c2fbf67c64be14dc923690295e3217dee89a054e",
+      "repository": "Flexget/Flexget",
+      "revision": "1202694e86e6708fb8e9be32c4779915177863d2",
+      "file": "docs/_static/logo.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://github.com/Flexget/Flexget"
+    },
+    "flipt": {
+      "source": "thesvg",
+      "icon": "flipt/default",
+      "sha256": "36e6184f1d2bebd06bd063b2278377f2b120b170cca355f517df49d9c2c8e648",
+      "license": "GPL-3.0",
+      "identityUrl": "https://www.hostinger.com/applications/flipt",
+      "projectUrl": "https://flipt.io"
+    },
+    "flowise": {
+      "source": "selfhst",
+      "icon": "flowise",
+      "sha256": "e9999f9df90ae7412590e3590d44d487a3f141443aa9794170484e2053cdbeac"
+    },
+    "focalboard": {
+      "source": "selfhst",
+      "icon": "focalboard",
+      "sha256": "d811ece172cf27dd79a348bc4ad60ccb80043ca4545b0a82f08a35df345a4e56"
+    },
+    "forgejo": {
+      "source": "selfhst",
+      "icon": "forgejo",
+      "sha256": "9f4a51a8d193266a865597d47bb5b6bfc6e9b84813b1e048ccd1ff0bf58bcd5b"
+    },
+    "formbricks": {
+      "source": "selfhst",
+      "icon": "formbricks",
+      "sha256": "8eff5ce078d59192b26b5ce214417989526ec46abd0eef9663ab6f5162ebdb0e"
+    },
+    "fossbilling": {
+      "source": "official",
+      "icon": "fossbilling",
+      "sha256": "ad14818d7507fee7b44ac1060f9a49a65669d14a1d023e873029182fad28dce8",
+      "repository": "FOSSBilling/FOSSBilling",
+      "revision": "99ab75ffdf1b679f7632b1f62328015551f41613",
+      "file": "src/public/branding/favicon.svg",
+      "license": "Apache-2.0 (upstream repository)",
+      "identityUrl": "https://fossbilling.org/"
+    },
+    "foxel": {
+      "source": "official",
+      "icon": "foxel",
+      "sha256": "f171651f9ecce8ed4fd9ccda365236900b067afd8f360782009b93b3fb37eaa9",
+      "repository": "DrizzleTime/Foxel",
+      "revision": "5717425d7ade8724f6fad5d7d3a2ce10c4ffb1cc",
+      "file": "web/public/logo.svg",
+      "license": "MIT (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/DrizzleTime/Foxel",
+      "referenceUrl": "https://www.hostinger.com/applications"
+    },
+    "freecad": {
+      "source": "selfhst",
+      "icon": "freecad",
+      "sha256": "df70a32a1d9fc3c8977d72f8299026c6bb2e3d47a3cf130c14821b19211d620c"
+    },
+    "freellmapi": {
+      "source": "official",
+      "icon": "freellmapi",
+      "sha256": "2e03899abef98f9172a7c7d0462a77424422d1ff87c29ae185b0b4961ff4e290",
+      "repository": "tashfeenahmed/freellmapi",
+      "revision": "ef97f50501e6dd959b41275b453e56113fa225a0",
+      "file": "client/public/favicon.svg",
+      "license": "MIT (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/tashfeenahmed/freellmapi",
+      "referenceUrl": "https://www.hostinger.com/applications/freellmapi"
+    },
+    "freshrss": {
+      "source": "selfhst",
+      "icon": "freshrss",
+      "sha256": "557aa37299f72c49d19e5463519f5fe9088498d69ac89777b526317b6be82a51"
+    },
+    "friendica": {
+      "source": "selfhst",
+      "icon": "friendica",
+      "sha256": "79445ca6c7bf80faed74378061117fba9869b176668afb0f3d58ba757fe381a0"
+    },
+    "frigate": {
+      "source": "selfhst",
+      "icon": "frigate",
+      "sha256": "184fa4dabaa5e97fdb1a17ba8e5debf7c2d61ddfb33d00eaeedc33aba82d084b"
+    },
+    "fusion-rss": {
+      "source": "selfhst-png",
+      "icon": "fusion-rss",
+      "sha256": "c3642e0c608257c6c84b8b9a807151920923b7f8d265865e6d771208d9db008d",
+      "originGitSha": "f97d23684ef363ebb07b56d5185090f6ab48ddfa",
+      "originSha256": "193698880aae4007449f6ede3963542e06a58768911530ecd854a838ad26882a"
+    },
+    "fusionauth": {
+      "source": "selfhst",
+      "icon": "fusionauth",
+      "sha256": "ddb1c389e0954fb58e22a6b296efe825352dcde01d9f0756b523d79822413e42"
+    },
+    "fuxa": {
+      "source": "official",
+      "icon": "fuxa",
+      "sha256": "356241943c6c5b835b768c1c7e0de5aea85ac9222357ec1964406a69f5065aa5",
+      "repository": "frangoteam/FUXA",
+      "revision": "56f9703520a5983b1d446c4e587e1c74ae2b97d7",
+      "file": "docs/assets/logo.svg",
+      "license": "MIT (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/frangoteam/FUXA",
+      "referenceUrl": "https://www.hostinger.com/applications/fuxa"
+    },
+    "galaxy": {
+      "source": "official",
+      "icon": "galaxy",
+      "sha256": "fd552e5b3def12fd96f9e412896fb1befd4536ce4f7364cb57d0cb7b264cc996",
+      "repository": "galaxyproject/galaxy",
+      "revision": "618c137d53c796dfa756b57d79ca5a57849386f7",
+      "file": "static/favicon.svg",
+      "license": "CC-BY-3.0 (Galaxy project images; see LICENSE.txt)",
+      "identityUrl": "https://galaxyproject.org/",
+      "attribution": "Galaxy Project Contributors, Galaxy logo; CC BY 3.0"
+    },
+    "gatus": {
+      "source": "selfhst",
+      "icon": "gatus",
+      "sha256": "1a39f0c6dd5c7addd38465f2cfbce7fe0f7c409c7bacb108f0e1db1d5c845f16"
+    },
+    "gerrit": {
+      "source": "dashboard",
+      "icon": "gerrit",
+      "sha256": "828230b1a3b2fcb198c63085ae124e4c878393ab66d15310970000facf248ceb"
+    },
+    "ghost": {
+      "source": "logos",
+      "icon": "ghost",
+      "sha256": "942d4bcadeb9fb891000981211e62ab87dda6ad969a81514ad15c3903416c9d7"
+    },
+    "ghostfolio": {
+      "source": "selfhst",
+      "icon": "ghostfolio",
+      "sha256": "778e499dfcddd42a7eb6586d826e70b30de879ec59af0bf04687ba2d27ee14b0"
+    },
+    "gimp": {
+      "source": "selfhst",
+      "icon": "gimp",
+      "sha256": "a032e740fd99a746e4f1c88873822279e2d861d66ddfcf543f85f2ca92674278"
+    },
+    "gitbucket": {
+      "source": "dashboard",
+      "icon": "gitbucket",
+      "sha256": "b63743470217fe90123ae4bc28a539e42fd81771c0079c5c498d7e765584d0bd"
+    },
+    "gitea": {
+      "source": "selfhst",
+      "icon": "gitea",
+      "sha256": "88ca72e144b2ed1c3e59aa18a66062ca6a134fd21cffef9c9d8a47579e5ac03e"
+    },
+    "gitingest": {
+      "source": "official",
+      "icon": "gitingest",
+      "sha256": "c882c27167fecc6a78547f4c72e3098cc713dd436e559cba80edb048631d2330",
+      "repository": "coderamp-labs/gitingest",
+      "revision": "4e259a02fe72115bee538271622f1234a81c8e1a",
+      "file": "src/static/favicons/favicon.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://gitingest.com/"
+    },
+    "gitlab": {
+      "source": "selfhst",
+      "icon": "gitlab",
+      "sha256": "83287273de59af60123a4cf4560cf615456c26fa2534e7d17491d57eb838fb26"
+    },
+    "glance": {
+      "source": "selfhst",
+      "icon": "glance",
+      "sha256": "ecf1e117fe3ac5796910116fc1fbda61a203f4bd9f04d9871b0d82b86d42914b"
+    },
+    "glances": {
+      "source": "selfhst",
+      "icon": "glances",
+      "sha256": "389458e512b16d36b1f1b69766329e88c724af02a5eb82538b3da79d90ff643f"
+    },
+    "glitchtip": {
+      "source": "selfhst",
+      "icon": "glitchtip",
+      "sha256": "77fa61559ebc8fcf79a811bc838e51cecec84701f96cac30f9368b04153898e7"
+    },
+    "glpi": {
+      "source": "selfhst",
+      "icon": "glpi",
+      "sha256": "659746b3ca7e8d73e7c649cff5eac5875ee0ad72352d4a67117597bbce93d058"
+    },
+    "gns3-server": {
+      "source": "selfhst",
+      "icon": "gns3",
+      "sha256": "109e50ebc2619c824b472b03135ef2fc6cd2b0bbd138411111de2b393d82f928",
+      "identityUrl": "https://www.hostinger.com/applications/gns3-server",
+      "referenceUrl": "https://github.com/GNS3/gns3-gui/blob/master/resources/images/gns3_logo.png",
+      "brandOf": "gns3"
+    },
+    "goatcounter": {
+      "source": "selfhst",
+      "icon": "goatcounter",
+      "sha256": "7d747730109d428e20e4c36ea78fc0512c7b51817429be9658b385c2f8204327"
+    },
+    "gocd": {
+      "source": "dashboard",
+      "icon": "gocd",
+      "sha256": "dc49175a761739bbbf25a5688a689727ec8d1de4d6b94cafefc4f1f003fa7f31"
+    },
+    "gogs": {
+      "source": "jabber",
+      "icon": "gogs",
+      "sha256": "955269103fb0c5132baf102e157057475b2c998242593194705fc0970f3dac23"
+    },
+    "gokapi": {
+      "source": "selfhst-png",
+      "icon": "gokapi",
+      "sha256": "31a9efb018c1d1a6876d0a1cbaeec61996bbe1a12ec479dc79617d04bd40a6b5",
+      "originGitSha": "54a0fa0fa88684383d39ce5d0fd42470ff1b6ac0",
+      "originSha256": "4dceb8a3b7bbaf11e90321b9289821fb398a30c649a96ff6a4e9e17cd2dae401"
+    },
+    "gonic": {
+      "source": "dashboard",
+      "icon": "gonic",
+      "sha256": "155669a833ca5b270f8ed2ba35ec66441536c3c843bfb265ffccc17dff8d8e4a"
+    },
+    "gopeed": {
+      "source": "selfhst",
+      "icon": "gopeed",
+      "sha256": "9f8dd8252a4d6a1290e1b05db355b372befc9dad49ac5ee9eaba922af3db6ab2"
+    },
+    "gotify": {
+      "source": "selfhst",
+      "icon": "gotify",
+      "sha256": "d97b0c073d6513574d2ee1dff90aa06895d855c91872ed0f5bd78dffd706e7a3"
+    },
+    "grafana": {
+      "source": "selfhst",
+      "icon": "grafana",
+      "sha256": "6d555b2326d8281958c3047dcd154f8f69ac6992d53871dd1a4b4840d6528b70"
+    },
+    "grafana-loki": {
+      "source": "devicon",
+      "icon": "grafanaloki",
+      "sha256": "2b0c840184836f4dc13f11e8aa963fc3a398cc48b04dd4e1c177767a767b3abc"
+    },
+    "grafana-pyroscope": {
+      "source": "selfhst",
+      "icon": "grafana-pyroscope",
+      "sha256": "77c7f53a66102764202dc5ad7a6e8fc051c668931805ccd1b6de6711d0b3ea5d"
+    },
+    "grafana-tempo": {
+      "source": "selfhst",
+      "icon": "grafana-tempo",
+      "sha256": "79b2b3a872f9ea3f996f4df258bc2783d650c3ff7cb2e82a3180928fb8c3855c"
+    },
+    "gramps-web": {
+      "source": "dashboard",
+      "icon": "gramps-web",
+      "sha256": "bd4d1a4c174c1c632105a6939608c50abcd976cb1d6f7fa81521d2dc07aa75ef"
+    },
+    "grav": {
+      "source": "selfhst",
+      "icon": "grav",
+      "sha256": "2a0c740c5d68114292fdff64b6bc63d56cde51967361c239c7a596b20cf43e60"
+    },
+    "greptimedb": {
+      "source": "simple-icons",
+      "icon": "greptimedb",
+      "sha256": "471843c7e11c4cc3c29bd3c6eed7959b4ee147ce76ebb1c4b279a3ef8162af8a"
+    },
+    "grimmory": {
+      "source": "selfhst",
+      "icon": "grimmory",
+      "sha256": "090a41b5b936b1c74b89dcefa0f3802dd918d84f193a133a11b0d48cbc2f3042"
+    },
+    "grimoire": {
+      "source": "selfhst",
+      "icon": "grimoire",
+      "sha256": "701c00df11828de08a02452fcafdcc21d180ab340a3ef12c116bf3055149263e"
+    },
+    "grist": {
+      "source": "selfhst",
+      "icon": "grist",
+      "sha256": "4f0d7b125c7b88368458d1a87f14e8fab963cc4142b0811e0281450f25569505"
+    },
+    "grocy": {
+      "source": "selfhst",
+      "icon": "grocy",
+      "sha256": "5a733e8c081a13e828345e3866d2885b4b9e2eb247fd49ab64e4c7de0af52a34"
+    },
+    "growthbook": {
+      "source": "logos",
+      "icon": "growth-book",
+      "sha256": "bb7db73a0ddd5942917826889741838baa9c1da04bed016b6982677d00e075b2"
+    },
+    "habitica": {
+      "source": "selfhst",
+      "icon": "habitica",
+      "sha256": "81166dc35bfc5cbb8a2f95cf8bd1302204bd3c71442485b5903a969fb96b300d"
+    },
+    "halo": {
+      "source": "thesvg",
+      "icon": "halo/default",
+      "sha256": "c75383cddf0d6dc3057ba0e89221ffd75a805477edd38b71ef6559164138b566",
+      "license": "Trademark of Halo contributors (FIT2CLOUD). Used for identification under nominative fair use.",
+      "identityUrl": "https://www.hostinger.com/applications/halo",
+      "projectUrl": "https://halo.run"
+    },
+    "handbrake": {
+      "source": "dashboard",
+      "icon": "handbrake",
+      "sha256": "018f7ac7b8e3210bd0888a93160c91f025a3b32b8e6099b9ff294dc0a196a91e"
+    },
+    "hanko": {
+      "source": "selfhst",
+      "icon": "hanko",
+      "sha256": "db44035b1cccb9b3ef307370ca654221ab87fa37df7722b5bcf8b9c229945fcf"
+    },
+    "harness": {
+      "source": "logos",
+      "icon": "harness",
+      "sha256": "6f316ffa3ed17cc218bfac29d4f79cc61f8853aa1d9b7f71ee2e13c96e3cde57"
+    },
+    "hasura-graphql-engine": {
+      "source": "official",
+      "icon": "hasura-graphql-engine",
+      "sha256": "37b7c50e8dd70a5d59c90e7d77415e420659748ea110cc235b4016cfed947657",
+      "repository": "hasura/graphql-engine",
+      "revision": "96f68d0a35a2b3ee153ce67585d37efb3cfa6598",
+      "file": "assets/brand/hasura_icon_colour.svg",
+      "license": "Apache-2.0 (first-party repository)",
+      "identityUrl": "https://hasura.io/"
+    },
+    "haven": {
+      "source": "selfhst",
+      "icon": "haven",
+      "sha256": "687fb4a7ee9b1769aacce09c916576e82b839dec013de8d6592a4bd700e7210c"
+    },
+    "headscale": {
+      "source": "selfhst",
+      "icon": "headscale",
+      "sha256": "98d28a5dc9fd63b9625790b01b493a62789f55b10c3406b031e3e572cc03c721"
+    },
+    "healthchecks": {
+      "source": "selfhst",
+      "icon": "healthchecks",
+      "sha256": "df27bd280f2c7bda9b3d4bd8093ce5f5e2da3471d91d2d19a90fa50ea41d8ac4"
+    },
+    "hedgedoc": {
+      "source": "selfhst",
+      "icon": "hedgedoc",
+      "sha256": "984ff57ead441ce5a0dc5f51aaf32e011c5c7e3f2e7031fb13a88dd7fc1ee2a8"
+    },
+    "heimdall": {
+      "source": "selfhst",
+      "icon": "heimdall",
+      "sha256": "274596599716d136b50ef688d7c9d4f03bcdde329207db0d712f4da8422597e0"
+    },
+    "hemmelig": {
+      "source": "selfhst",
+      "icon": "hemmelig",
+      "sha256": "b351e5813ba0b117bf38592d0f86fa3f1da85c2c378efd50d7c30d5d585653d4"
+    },
+    "herdr": {
+      "source": "dashboard",
+      "icon": "herdr",
+      "sha256": "e954993c7758c4513a0fddd243297764630d1e1d24ee0b18613e6f04eff886b8"
+    },
+    "hermes-agent": {
+      "source": "selfhst",
+      "icon": "hermes-agent",
+      "sha256": "7596682ac2c3fed92efc76e02c5fa63077e6b4501a9ef9d030f91139ac6892f6"
+    },
+    "hermes-webui": {
+      "source": "dashboard",
+      "icon": "hermes-webui",
+      "sha256": "e3e2d580912fb08a61d69faed4fbbfab81b6e981a6918a36e60c3b3c617beaee"
+    },
+    "heyform": {
+      "source": "selfhst",
+      "icon": "heyform",
+      "sha256": "b326c2f606a94303da7bf23306ca7ba06a23e1d95a506792456be6b7b807aa0d"
+    },
+    "hfs": {
+      "source": "official",
+      "icon": "hfs",
+      "sha256": "93b3a8da4fe1853e17d9770d6efadc2a6244e55c92e7e9d5a3fe333a1fe9c2a5",
+      "repository": "rejetto/hfs",
+      "revision": "528086e24718413dd14e2031834e2d26203def5a",
+      "file": "admin/public/hfs-logo-icon.svg",
+      "license": "GPL-3.0 (first-party repository)",
+      "identityUrl": "https://github.com/rejetto/hfs"
+    },
+    "hi-events": {
+      "source": "selfhst",
+      "icon": "hi-events",
+      "sha256": "e32423c17c73f6728d50c3198312f0504cceefbd391a82e65fb64a74953d6026"
+    },
+    "hister": {
+      "source": "selfhst",
+      "icon": "hister",
+      "sha256": "7211ef88c1959ce1f635fac38aa078ca9bdf9fc8a7db469fa817c93b5cebe5b6"
+    },
+    "homarr": {
+      "source": "selfhst",
+      "icon": "homarr",
+      "sha256": "e19be5b5e8e02e78154750eeb9ab1909539dc3da864fe75b715b5d7fef6f6a11"
+    },
+    "home-assistant": {
+      "source": "selfhst",
+      "icon": "home-assistant",
+      "sha256": "10bc1f8bd1c713990aae342482f6cb1c0a48804d058c86c1d7df015618ddbc09"
+    },
+    "home-gallery": {
+      "source": "official",
+      "icon": "home-gallery",
+      "sha256": "26bbf1e4094965235a13ef2b462be82bdb53c38ff00f606966f01477b6b3e635",
+      "repository": "xemle/home-gallery",
+      "revision": "7bef4087db8435f79abfd3d6e2ccdcc2a3115ef3",
+      "file": "packages/webapp/public/logo.svg",
+      "license": "MIT (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/xemle/home-gallery",
+      "referenceUrl": "https://www.hostinger.com/applications"
+    },
+    "homebox": {
+      "source": "selfhst",
+      "icon": "homebox",
+      "sha256": "a788f1d0f4dec6548b2c05687218956a91936f61edcfe869f241bb87a2a22fdd"
+    },
+    "homebridge": {
+      "source": "selfhst",
+      "icon": "homebridge",
+      "sha256": "9a44a3c523d0d96e22bbec7b7fd726a627982731c085e3beaa368b104c58fc12"
+    },
+    "homehub": {
+      "source": "dashboard",
+      "icon": "homehub",
+      "sha256": "b7fc041453ab13b1b23eec3c6b5568177eafa08a11fd53ca3ef931d715f8b33c"
+    },
+    "homepage": {
+      "source": "selfhst",
+      "icon": "homepage",
+      "sha256": "69653678f31b4365780177612b22ed0d491870ffc169cdf6c9f2645e8649645b"
+    },
+    "homer": {
+      "source": "selfhst",
+      "icon": "homer",
+      "sha256": "bb56c255ca6f6d8f162c3a62358b1d4ccdc928feee785d0832a6ae2b32d13c09"
+    },
+    "hoop": {
+      "source": "official",
+      "icon": "hoop",
+      "sha256": "d9c04d648173c831181789f6bc346c5868052adfb1a50c1cd8c98f8978788923",
+      "repository": "hoophq/hoop",
+      "revision": "1091749cfa44a5fc9afa8ac7dde2ac3222e06162",
+      "file": "webapp_v2/public/favicon.svg",
+      "license": "MIT (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/hoophq/hoop",
+      "referenceUrl": "https://www.hostinger.com/applications"
+    },
+    "hoppscotch": {
+      "source": "selfhst",
+      "icon": "hoppscotch",
+      "sha256": "2219f303c37491b0f38197b3a1a986a7769358253b9ba4aa09b63242982f92f1"
+    },
+    "horilla": {
+      "source": "official",
+      "icon": "horilla",
+      "sha256": "1d4d2ed8eebcb35234fd51277e1486ba32a27077cdd2b90690adbb649ab843b2",
+      "repository": "horilla/horilla-hr",
+      "revision": "6c15617b8297b7a6775daa6c29aefcc48b1eb29f",
+      "file": "horilla_theme/static/horilla_theme/assets/img/logo.svg",
+      "license": "LGPL-2.1 (first-party repository)",
+      "identityUrl": "https://github.com/horilla/horilla-hr"
+    },
+    "hortusfox": {
+      "source": "selfhst",
+      "icon": "hortusfox",
+      "sha256": "6cb7aafd22e150cc6119f7bce0aac8f6aa9d97446b137fe54e684024de6faa2e"
+    },
+    "huggingchat-chat-ui": {
+      "source": "official",
+      "icon": "huggingchat-chat-ui",
+      "sha256": "7524c026448f4f767ae399a68da74afe2352485dd117ffc7b9a47aca14bb0dfe",
+      "repository": "huggingface/chat-ui",
+      "revision": "f7d31e81c6e36796a8b6ef3512d0fdb74c32c3f2",
+      "file": "static/huggingchat/icon.svg",
+      "license": "Apache-2.0 (Hugging Face chat-ui repository) (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/huggingface/chat-ui",
+      "referenceUrl": "https://www.hostinger.com/applications"
+    },
+    "huginn": {
+      "source": "selfhst",
+      "icon": "huginn",
+      "sha256": "3ab1af51dff300b30cb58dccf746ad0d27febd90d4d39b575608dfc5093adc0b"
+    },
+    "hugo": {
+      "source": "selfhst",
+      "icon": "hugo",
+      "sha256": "39b4574cdd1bb998f78ad37ad54d5cdd49aadfea73d2689f4d60e139b09280a1"
+    },
+    "humhub": {
+      "source": "selfhst",
+      "icon": "humhub",
+      "sha256": "4303a93f71bf96c02c346cc2698b7ded4f756e031270b279f49b3c9b001bc04c"
+    },
+    "hyperdx": {
+      "source": "selfhst",
+      "icon": "hyperdx",
+      "sha256": "cae40b23c322ddb51aa0c1c769ce931ec456a22a6f92ec25b5508cf9dea97091"
+    },
+    "icewarp": {
+      "source": "dashboard",
+      "icon": "icewarp",
+      "sha256": "1982260ba64f9ce6ed4949779558cbf32269b6be0cd4877ccf342ac0aa5b001f"
+    },
+    "icinga-2": {
+      "source": "selfhst",
+      "icon": "icinga",
+      "sha256": "a40f5289917e093ee51679d1d2b3e131a720266362d6768151205c7d97a2d74f",
+      "identityUrl": "https://www.hostinger.com/applications/icinga-2",
+      "brandOf": "icinga"
+    },
+    "illa-builder": {
+      "source": "official",
+      "icon": "illa-builder",
+      "sha256": "c70f0363e27136147eb36f30f8ac87344cceda99f7667391e9216025621bf312",
+      "repository": "illacloud/illa-builder",
+      "revision": "a468660903e2a17b1778ba97dd17a375181a72e0",
+      "file": "apps/builder/src/assets/illa-logo.svg",
+      "license": "Apache-2.0 (first-party repository)",
+      "identityUrl": "https://github.com/illacloud/illa-builder"
+    },
+    "imgproxy": {
+      "source": "thesvg",
+      "icon": "imgproxy/default",
+      "sha256": "0db9380d1b2bcd653aa51ab97f09790dfda2d5dea13961cbda4d1cc6ca0d5434",
+      "license": "Apache-2.0",
+      "identityUrl": "https://www.hostinger.com/applications/imgproxy",
+      "projectUrl": "https://github.com/imgproxy/imgproxy"
+    },
+    "immich": {
+      "source": "selfhst",
+      "icon": "immich",
+      "sha256": "b550a94b445df2f3b0de405c653c3dc94aeba02110b4f56424ff583ec07aa45c"
+    },
+    "indico": {
+      "source": "official",
+      "icon": "indico",
+      "sha256": "dd472f93b703a8ed97816337dde1480d00f80cb0f4f730ec9434a957162ec108",
+      "repository": "indico/indico",
+      "revision": "f20ab92e19c6ded1880965679e4149513dc50daa",
+      "file": "indico/web/static/images/logo_indico.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://getindico.io/"
+    },
+    "infisical": {
+      "source": "selfhst",
+      "icon": "infisical",
+      "sha256": "26f8875122493801de4836710875b7b964ed7f7a7a2307fdf1caa3316b8eed8c"
+    },
+    "influxdb-2": {
+      "source": "selfhst",
+      "icon": "influxdb",
+      "sha256": "ef6f2ddef165751883a651e1bc62fd1102940a81f3d7e6b2964c551e189766ce",
+      "identityUrl": "https://www.hostinger.com/applications/influxdb-2",
+      "brandOf": "influxdb"
+    },
+    "inkscape": {
+      "source": "selfhst",
+      "icon": "inkscape",
+      "sha256": "d86d3312d4444ea3ddf48eda06d018c82398c24a668a65c8d4f6608cab9818b3"
+    },
+    "inngest": {
+      "source": "thesvg",
+      "icon": "inngest/light",
+      "sha256": "aec2d2b5c6055baca8c57a8e171352e97af5e56891ef5aa3bf0f6f593e8aa09e",
+      "license": "MIT",
+      "identityUrl": "https://www.hostinger.com/applications/inngest",
+      "projectUrl": "https://inngest.com/"
+    },
+    "insforge": {
+      "source": "official",
+      "icon": "insforge",
+      "sha256": "6819f8e15e705235c82795270d7f602416124777adc5c14e87546de66c3a5a1b",
+      "repository": "InsForge/InsForge",
+      "revision": "4c7e5c2699d8ed5635fbba4299902741f85e71ec",
+      "file": "docs/favicon.svg",
+      "license": "Apache-2.0 (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/InsForge/InsForge",
+      "referenceUrl": "https://www.hostinger.com/applications/insforge"
+    },
+    "inventree": {
+      "source": "selfhst",
+      "icon": "inventree",
+      "sha256": "f2a86a42b06b8e9af443db3c80097b26111744184a5576de1198f1776f310847"
+    },
+    "invidious": {
+      "source": "selfhst",
+      "icon": "invidious",
+      "sha256": "871039636eeb1efe6bd63bb276b2736e5b6189a6d54dd2b5ba79bbbbadcf46a7"
+    },
+    "invio": {
+      "source": "selfhst",
+      "icon": "invio",
+      "sha256": "f024542a17f81d60de39c3fd83010243bd171e26f337ea925bb59d43f68a55cd"
+    },
+    "invoice-ninja": {
+      "source": "selfhst",
+      "icon": "invoice-ninja",
+      "sha256": "d3a2dd41e44fd4bccfdb44486db8646bf70aa7072ec5f75471b498adc41abf1c"
+    },
+    "invoiceshelf": {
+      "source": "selfhst",
+      "icon": "invoiceshelf",
+      "sha256": "d7aeda397ea0d702854069aea18c686059199e87156eed838ef5d56b2d502f39"
+    },
+    "it-tools": {
+      "source": "selfhst",
+      "icon": "it-tools",
+      "sha256": "d64a7811fc785c7efbba9c45bc32c19a9ab9c443db7c9f10613b3b0f8cc08805"
+    },
+    "itop": {
+      "source": "dashboard",
+      "icon": "itop",
+      "sha256": "24b55d7d84fb1584c7bc4b7cb30f274fa6c835ab2739d3e2898179832420cf6f"
+    },
+    "jackett": {
+      "source": "selfhst",
+      "icon": "jackett",
+      "sha256": "d211792c782439121240f82bf1e1c61cd11a3f58bdb3cbe7fce6de8e40756017"
+    },
+    "jaeger": {
+      "source": "dashboard",
+      "icon": "jaeger",
+      "sha256": "182763896d8bd83fc155f42b40b176a76bad1e94a43104bdd174154279da4252"
+    },
+    "jellyfin": {
+      "source": "selfhst",
+      "icon": "jellyfin",
+      "sha256": "12c8414ebb6f82254febeed091044f90e1f7d179ed5344d19cef45eb518df31f"
+    },
+    "jellyseerr": {
+      "source": "selfhst",
+      "icon": "jellyseerr",
+      "sha256": "9caa49be6351c88c442cf24e45aebcea977676c7397900570015de0c89783410"
+    },
+    "jellystat": {
+      "source": "selfhst-png",
+      "icon": "jellystat",
+      "sha256": "b134b1846c923669e89c798bde6cd58d641aa9742eb058bffb1dc006640942f9",
+      "originGitSha": "9f3c5cab21a3fd2a2a0a4ef4012b45b88d439e19",
+      "originSha256": "80da496f423f1ade5828695914474546e08830c1acd661258ab8aa3483c5b857"
+    },
+    "jellyswarrm": {
+      "source": "selfhst",
+      "icon": "jellyswarrm",
+      "sha256": "64e3f34e7070378799cd1f4229d1e2e7e478c97638243b3a62c3e7da386ab527"
+    },
+    "jenkins": {
+      "source": "selfhst",
+      "icon": "jenkins",
+      "sha256": "57e72c80a26873209b464aa0f55c06c2a7790737ef70894898c561ea1e46089f"
+    },
+    "jfa-go": {
+      "source": "selfhst",
+      "icon": "jfa-go",
+      "sha256": "f1c0a3848a5eee84a6064c352398d1f9784d35149eb32e0d5b51c6baf9c52998"
+    },
+    "jitsi": {
+      "source": "dashboard",
+      "icon": "jitsi",
+      "sha256": "582088faeb2170153ecde1404d4c9107bd7f546d3b9e0236ec85080a178536ac"
+    },
+    "jitsi-meet": {
+      "source": "selfhst",
+      "icon": "jitsi-meet",
+      "sha256": "e50501a23f6d5fe0780969b8ecfb79bd17c0b11e1d19aa583a38dc859f0e5a22"
+    },
+    "joomla": {
+      "source": "selfhst",
+      "icon": "joomla",
+      "sha256": "0004bc388dc4d41dc68a421926ddcf0228fda0c0d8297bfd106fa87ccb72bb12"
+    },
+    "joplin-server": {
+      "source": "selfhst",
+      "icon": "joplin",
+      "sha256": "390e34d2501a15c92615f2363f65c06da7e31635483a2d85dd237b1140297d90",
+      "identityUrl": "https://www.hostinger.com/applications/joplin-server",
+      "brandOf": "joplin"
+    },
+    "jotty": {
+      "source": "selfhst",
+      "icon": "jotty",
+      "sha256": "537ae08141c68b538be8b6189a4f71a2d597a52a3056d42b05a5d7357fce395f"
+    },
+    "jsreport": {
+      "source": "selfhst",
+      "icon": "jsreport",
+      "sha256": "87f445c134ff4d388b2d01ff7594c91aac405c9ca4f9dd06b553c0ce5d9ab7da"
+    },
+    "jump": {
+      "source": "selfhst",
+      "icon": "jump",
+      "sha256": "c2d4c658d68c8fcb27c35794f9adc9f73ba0af19b14a21bded8191db5a59191b"
+    },
+    "jumpserver": {
+      "source": "selfhst",
+      "icon": "jumpserver",
+      "sha256": "ef14adc9f8a23ae6819bc2d886167abb205591d84c80db9842c019d174e43735"
+    },
+    "jupyter-notebook": {
+      "source": "selfhst",
+      "icon": "jupyter",
+      "sha256": "d74de2ac5d6474b2f1b7bc56385fc39dc677e158f400a3a2c7974b8597ae15c2",
+      "identityUrl": "https://www.hostinger.com/applications/jupyter-notebook",
+      "brandOf": "jupyter"
+    },
+    "jupyterlab": {
+      "source": "selfhst",
+      "icon": "jupyter",
+      "sha256": "d74de2ac5d6474b2f1b7bc56385fc39dc677e158f400a3a2c7974b8597ae15c2",
+      "identityUrl": "https://www.hostinger.com/applications/jupyterlab",
+      "brandOf": "jupyter"
+    },
+    "kafbat-kafka-ui": {
+      "source": "official",
+      "icon": "kafbat-kafka-ui",
+      "sha256": "443204dd29a033eff98f0f3ff29cdbd292b28a099294c50c560cedd4f677d281",
+      "repository": "kafbat/kafka-ui",
+      "revision": "ec18a2c8167674b92d08fab0c37a924f33008640",
+      "file": "frontend/public/favicon/favicon.svg",
+      "license": "Apache-2.0 (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/kafbat/kafka-ui",
+      "referenceUrl": "https://www.hostinger.com/applications/kafbat-kafka-ui"
+    },
+    "kali-linux": {
+      "source": "selfhst",
+      "icon": "kali-linux",
+      "sha256": "976ad347cb9d7f77f1970c265d9a130f6ca7b2bf2bc844574b26aabea8cd5de2"
+    },
+    "kan": {
+      "source": "selfhst",
+      "icon": "kan",
+      "sha256": "b0e3de214f61a596654914e4ce20b693c027d3e771af74cdaddcc7d2ef284fd8"
+    },
+    "kanboard": {
+      "source": "selfhst",
+      "icon": "kanboard",
+      "sha256": "91cfe588cab2ab405e72788b5755758b4b409f357a09fc07e64512848bee9330"
+    },
+    "kaneo": {
+      "source": "selfhst",
+      "icon": "kaneo",
+      "sha256": "93d99d84ccd4c18bd6450eaf047cc351b80029de44d8438134e37bc1f2065a50"
+    },
+    "kapowarr": {
+      "source": "selfhst",
+      "icon": "kapowarr",
+      "sha256": "443a7aa2e7b27f7d8db4d818c6ea6bdc4a03facb718b030ffbe3f9751303348e"
+    },
+    "karakeep": {
+      "source": "selfhst",
+      "icon": "karakeep",
+      "sha256": "53bff821919b55de1530a39c25045ee25d6464c8693312624e748abc18ae3227"
+    },
+    "kavita": {
+      "source": "selfhst",
+      "icon": "kavita",
+      "sha256": "8563f9adad432846badb23c2f0e021434812a30120db7d928483ef2e0f469593"
+    },
+    "keeweb": {
+      "source": "simple-icons",
+      "icon": "keeweb",
+      "sha256": "417f1ef2d2e9c30448215df95902ae1d18596ff6130945e6842c5d9cf6b5fc61"
+    },
+    "keila": {
+      "source": "selfhst",
+      "icon": "keila",
+      "sha256": "a0de2f20f3991fa531b3fe7c96c3a34f342ec0f47e6277f23855379246a66a73"
+    },
+    "kener": {
+      "source": "selfhst",
+      "icon": "kener",
+      "sha256": "e29d488090d616f73be2c43ad5164e5d7704382930e720f3e24246998c348385"
+    },
+    "kestra": {
+      "source": "selfhst",
+      "icon": "kestra",
+      "sha256": "676088d9a4889cfe6f47c17f33f74ae30bde8f1460988faaee7dc481a07898c2"
+    },
+    "keycloak": {
+      "source": "selfhst",
+      "icon": "keycloak",
+      "sha256": "49f908491bb87cfa9faf0047ff7539405e3ac709eee173f97e10e1c5a54e060e"
+    },
+    "khoj": {
+      "source": "selfhst",
+      "icon": "khoj",
+      "sha256": "34d2d005d4360cac741f91d8227f19509b8c50e1cd6db932352f7b63cee421bf"
+    },
+    "kibana": {
+      "source": "selfhst",
+      "icon": "kibana",
+      "sha256": "e34efb9a337022bcd70f55fbdb70fdb1fc621cb7d89abece01241b3191d26f66"
+    },
+    "kimai": {
+      "source": "selfhst",
+      "icon": "kimai",
+      "sha256": "46a49325120cb3fd0361954260249c017f3ff5ec4ecbfb9bca3f981c0c83e19e"
+    },
+    "kitchenowl": {
+      "source": "selfhst",
+      "icon": "kitchenowl",
+      "sha256": "f674701892335d1ade2540b9716557754ecb43c2e3aa19b7e44d202a8bc737a3"
+    },
+    "kodi": {
+      "source": "selfhst",
+      "icon": "kodi",
+      "sha256": "8e238ca2fc9debbc3e46723811883f04b0f7a76769455329144269983d299de4"
+    },
+    "koel": {
+      "source": "selfhst",
+      "icon": "koel",
+      "sha256": "f59b5bf6dbc1d0e19f4cd4ac28925ecc7df2f4ceec203daf0b95f8d0eb4bcf37"
+    },
+    "koillection": {
+      "source": "dashboard",
+      "icon": "koillection",
+      "sha256": "26e87c682b4b881f908cab0547da25081e92a6ca3d82bbd5888cbaa5c71b97d9"
+    },
+    "komga": {
+      "source": "selfhst",
+      "icon": "komga",
+      "sha256": "b334ec7427216025d5f05d4d9bf56379adf8750119287b2547e31ed1c907d5e6"
+    },
+    "kong": {
+      "source": "dashboard",
+      "icon": "kong",
+      "sha256": "f367990c60513b13638fd50e887c5e30c32417d70959033d09b5e57a6045ffde"
+    },
+    "kotaemon": {
+      "source": "official",
+      "icon": "kotaemon",
+      "sha256": "6805c8c2dd5142902e68071736ecba7f20ca988235cdc3c8a15de74ddcd25e87",
+      "repository": "Cinnamon/kotaemon",
+      "revision": "9ad3e4e49aa35b8acddd235918a5d9753c1cfdf9",
+      "file": "libs/ktem/ktem/assets/img/favicon.svg",
+      "license": "Apache-2.0 (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/Cinnamon/kotaemon",
+      "referenceUrl": "https://www.hostinger.com/applications"
+    },
+    "krayin-crm": {
+      "source": "official",
+      "icon": "krayin-crm",
+      "sha256": "7c6b48fcb3076b84979566d62f22f17148782cbc10cdae758c473b73e26b5d0a",
+      "repository": "krayin/laravel-crm",
+      "revision": "64ef70505c5d4320231420bb21adf99dd1698e4e",
+      "file": "packages/Webkul/Admin/src/Resources/assets/images/mobile-light-logo.svg",
+      "license": "MIT (repository source; mark rights require independent review)",
+      "identityUrl": "https://github.com/krayin/laravel-crm",
+      "referenceUrl": "https://www.hostinger.com/applications"
+    },
+    "kroki": {
+      "source": "thesvg",
+      "icon": "kroki/default",
+      "sha256": "eef7d263444fbfe71737d7b67f1d225a919d82e008934f7ec4357df7f60e685d",
+      "license": "MIT",
+      "identityUrl": "https://www.hostinger.com/applications/kroki",
+      "projectUrl": "https://github.com/yuzutech/kroki"
+    },
+    "kutt": {
+      "source": "selfhst-png",
+      "icon": "kutt",
+      "sha256": "3d602172f25abffd210630852f08ddb5355869000fb0920d5f87b2b5d2342aaf",
+      "originGitSha": "1051af3eec994f0a562cbb8b8f4bc208ec48f862",
+      "originSha256": "589f1757bc5350cd1c72f8d443138030a25c3c65aa545e0609d6912aa0c3933b"
+    },
+    "label-studio": {
+      "source": "thesvg",
+      "icon": "label-studio/default",
+      "sha256": "16637a698c1b9ddea7be50c7c3fe637bf5e663f0d4a503f0f5fb57d1f36172b4",
+      "license": "Apache-2.0",
+      "identityUrl": "https://www.hostinger.com/applications/label-studio",
+      "projectUrl": "https://labelstud.io"
+    },
+    "lakefs": {
+      "source": "dashboard",
+      "icon": "lakefs",
+      "sha256": "4ceed482374b4d7b3b9c02e13c8c17d016f2e18f4e1e6395129e02caf7739550"
+    },
+    "langflow": {
+      "source": "selfhst",
+      "icon": "langflow",
+      "sha256": "35e7719271bcd55a073d4a3ee11ad2c9abfa4d89007ad9e69c65be9997b697be"
+    },
+    "langfuse": {
+      "source": "selfhst",
+      "icon": "langfuse",
+      "sha256": "ba41cb63e5129981ef98905b40747f29856cbe51c053104ee39f9a6dab986021"
+    },
+    "languagetool": {
+      "source": "selfhst",
+      "icon": "languagetool",
+      "sha256": "badd339d0503f803beb95e7e0f41cae83f3b7560efb34fef8db8748890fde0ea"
+    },
+    "laravel": {
+      "source": "dashboard",
+      "icon": "laravel",
+      "sha256": "c190d7f32d06de98d71efd10330d01ba875565383efb0bdecb59d6319524024b"
+    },
+    "lavinmq": {
+      "source": "official",
+      "icon": "lavinmq",
+      "sha256": "8262f352ebc64af05d04355df0355b554f18747d06d0b0e0ea20fadd62063ed0",
+      "repository": "cloudamqp/lavinmq",
+      "revision": "ab6082be2b74a3fed852b734f293ace922c0c093",
+      "file": "static/img/logo-lavinmq.svg",
+      "license": "Apache-2.0; LavinMQ is a trademark of 84codes AB (NOTICE) (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/cloudamqp/lavinmq",
+      "referenceUrl": "https://www.hostinger.com/applications/lavinmq",
+      "modifications": "ViewBox cropped to the untouched 84codes LavinMQ app mark (first 80 of 394 units)",
+      "attribution": "LavinMQ logo © 84codes AB; LavinMQ is a trademark of 84codes AB"
+    },
+    "lazylibrarian": {
+      "source": "selfhst-png",
+      "icon": "lazylibrarian",
+      "sha256": "dbe0f081b8478086bd867ae4979a86a8cd0f6930f7c35c266eb1881ac2e45476",
+      "originGitSha": "b8eab00820e15b62e4c59817d73ecba32e0cc676",
+      "originSha256": "cc6e7ee2fb894985ccee99fe1d767ad08670dd66c8c9da6c65e34cf2a25e2204"
+    },
+    "leantime": {
+      "source": "selfhst",
+      "icon": "leantime",
+      "sha256": "64f06a1b87d114110d01e8afdf1be75c11e0af4654997467b7dc96723a667445"
+    },
+    "lemmy": {
+      "source": "selfhst",
+      "icon": "lemmy",
+      "sha256": "dc8bfcfbacd9b474c35cb2e5f78628bc50fb9d5d7f98b3f5bfeed99bc6ae6ebf"
+    },
+    "librechat": {
+      "source": "selfhst",
+      "icon": "librechat",
+      "sha256": "276652dae9a0579e1e58f0ef976477f6afc7c8f4b155f0667db2b788b2ddb6c8"
+    },
+    "librenms": {
+      "source": "selfhst",
+      "icon": "librenms",
+      "sha256": "84fa46ff26fd9f29ec6c15fbae28798db4c093c1651545af3b6f2323ab7f52a4"
+    },
+    "librephotos": {
+      "source": "selfhst",
+      "icon": "librephotos",
+      "sha256": "62fa0fbb4f2525b9b8de382486aea83b77cdc9c7436357fd8a0313c065d6700a"
+    },
+    "librespeed": {
+      "source": "selfhst",
+      "icon": "librespeed",
+      "sha256": "9dbf3636f6f1878a3b4800286c8e96874b5699c39ffaa0a2f6bcd8fc33aadfde"
+    },
+    "lidarr": {
+      "source": "selfhst",
+      "icon": "lidarr",
+      "sha256": "6d4d2c1f2a9b255f5fc744276bd78fcadfc3b95a0e35d9b1b4aa6b43a692f5ea"
+    },
+    "lightdash": {
+      "source": "official",
+      "icon": "lightdash",
+      "sha256": "0ba44b62a6b73588eab41ee570e183eb5b01811ba63e143d5a22d73b42439340",
+      "repository": "lightdash/lightdash",
+      "revision": "f553c1e1a6555fb3c725095fe9d14eab95ce5029",
+      "file": "packages/frontend/public/logo-icon.svg",
+      "license": "MIT (non-EE frontend source)",
+      "identityUrl": "https://lightdash.com/"
+    },
+    "lightrag": {
+      "source": "official",
+      "icon": "lightrag",
+      "sha256": "14772b665128754a221bc0b304bfe34336a86232833a858bf7c4ffcbb2825934",
+      "repository": "HKUDS/LightRAG",
+      "revision": "be85024359affeeb77479ac0c666fca418bd9e08",
+      "file": "lightrag_webui/src/assets/logo.svg",
+      "license": "MIT (upstream repository)",
+      "identityUrl": "https://github.com/HKUDS/LightRAG",
+      "referenceUrl": "https://github.com/HKUDS/LightRAG/blob/be85024359affeeb77479ac0c666fca418bd9e08/assets/logo.png"
+    },
+    "limesurvey": {
+      "source": "selfhst",
+      "icon": "limesurvey",
+      "sha256": "33ce09c6863ef4e25f10b157ab0202de7eac60938ef6400d882b692d194fcb55"
+    },
+    "linkace": {
+      "source": "selfhst",
+      "icon": "linkace",
+      "sha256": "709091e4349ea2c83166d89bf274db762e0eb586721596a15a9450eed8d1a033"
+    },
+    "linkding": {
+      "source": "selfhst",
+      "icon": "linkding",
+      "sha256": "e2b12145906916ff3fa8541c180c76eb1521575a8ed05efbf1f093dad85df768"
+    },
+    "linkstack": {
+      "source": "selfhst",
+      "icon": "linkstack",
+      "sha256": "c7e904fd710ac4437f39ddca3cae945670346998bf4f5284e8e3492b1ce32bbb"
+    },
+    "linkwarden": {
+      "source": "selfhst",
+      "icon": "linkwarden",
+      "sha256": "09e7fe4479996e50bee7ec3953447e6c165da63fc746132ffe153db36ac03d79"
+    },
+    "listmonk": {
+      "source": "selfhst",
+      "icon": "listmonk",
+      "sha256": "f266951cc1828d3d52d11c5519cfc61526c2c12051c0a64ab67eb0c5459292d6"
+    },
+    "litellm": {
+      "source": "selfhst",
+      "icon": "litellm",
+      "sha256": "89e6130703ce114734267cc77e8c1c36d26f935f6247d027ad428055b2c2789e"
+    },
+    "livebook": {
+      "source": "selfhst",
+      "icon": "livebook",
+      "sha256": "4f223fb23f03a93cc5482a51b39a70d60b99d2a61b712d69ebfc4c207cab0f0a"
+    },
+    "lldap": {
+      "source": "selfhst",
+      "icon": "lldap",
+      "sha256": "4d44d8edb36225205c7960537dbe775b73b4f6801525749b60b3458cd87e515e"
+    },
+    "lnbits": {
+      "source": "dashboard",
+      "icon": "lnbits",
+      "sha256": "0d3e92755f3b5f6ed495de4ff3f35a9ef0dbed75a370cf6af6667494ebfa523f"
+    },
+    "lobechat": {
+      "source": "selfhst",
+      "icon": "lobe-chat",
+      "sha256": "a21a58b704aa18a6893aa80fd9ba3445c6c8b00a39e879368a25a32a5ceae349"
+    },
+    "localai": {
+      "source": "dashboard",
+      "icon": "localai",
+      "sha256": "b169a6930ee68b2ab2c59fd9b16177c7668d9dbc4647e168a4e307c3c1e3006e"
+    },
+    "locust": {
+      "source": "simple-icons",
+      "icon": "locust",
+      "sha256": "d23246aa38e818a5866b3a654390e30abc010f20aacf2775334d6f4666675019"
+    },
+    "logseq": {
+      "source": "selfhst",
+      "icon": "logseq",
+      "sha256": "3c20233b2b256c935c6c19b6f37ce5513031b830fd99c575a1b390c8fd973566"
+    },
+    "logto": {
+      "source": "selfhst",
+      "icon": "logto",
+      "sha256": "c961c65dd662e8d5c45170db8dc7a7501f7c5271fa0d5a3119055c7982ad0ef8"
+    },
+    "loomio": {
+      "source": "official",
+      "icon": "loomio",
+      "sha256": "ea61d64fb2d8e75cbad3ac346a48eacd05fa5e6c01a980351596ca6b2a6e7df7",
+      "repository": "loomio/loomio",
+      "revision": "53dd1b0a3b09fe2ac81f5845f2ffe005ae412446",
+      "file": "public/brand/logo-current-color.svg",
+      "license": "AGPL-3.0 (first-party repository)",
+      "identityUrl": "https://github.com/loomio/loomio"
+    },
+    "lowcoder": {
+      "source": "selfhst",
+      "icon": "lowcoder",
+      "sha256": "d6c3923be637cdf6d340e79965a9a0a0eae12e5bb15b6acf283735ee8ba529c2"
+    },
+    "lubelogger": {
+      "source": "selfhst-png",
+      "icon": "lubelogger",
+      "sha256": "3d699f80312c4b3c1d3d6295add8bee0ca1a45dd0026bc256dcbed63beb81069",
+      "originGitSha": "e83fa3ecf9712e1bcfeae74db147858156c9c5c3",
+      "originSha256": "0baf80bf3c3ff3d66b6aa96fee75f85d33e176d78e17c313830e860c0f8f387f"
+    },
+    "lychee": {
+      "source": "official",
+      "icon": "lychee",
+      "sha256": "a4781492c83fb5aecab889b16316aab167c66b7afcfd758f3bff900a205d761a",
+      "repository": "LycheeOrg/Lychee",
+      "revision": "495ced7364afe1027c08579da1b9eddec9f89c96",
+      "file": "public/img/logo4.svg",
+      "license": "MIT",
+      "identityUrl": "https://www.hostinger.com/applications/lychee"
+    },
+    "mafl": {
+      "source": "selfhst",
+      "icon": "mafl",
+      "sha256": "4b2cf7c6df46f9d7ee3726737653eda6fe8f5263978eb453013cdc275cbd2763"
+    },
+    "mage-ai": {
+      "source": "thesvg",
+      "icon": "mage-ai/default",
+      "sha256": "ed8e14b20d547de41ef39286c88c8af710344a518512bddfccc09469fb7a14eb",
+      "license": "Apache-2.0",
+      "identityUrl": "https://www.hostinger.com/applications/mage-ai",
+      "projectUrl": "https://www.mage.ai"
+    },
+    "magento-2": {
+      "source": "thesvg",
+      "icon": "magento/default",
+      "sha256": "24c228541199247cfdedbce632e6d80116825fe97d912d686e5fa0759259e80e",
+      "license": "MIT",
+      "identityUrl": "https://www.hostinger.com/applications/magento-2",
+      "projectUrl": "https://www.hostinger.com/applications/magento-2"
+    },
+    "mail-archiver": {
+      "source": "selfhst",
+      "icon": "mail-archiver",
+      "sha256": "8774f75b6401bfa789a38d6c0f62ed85d16832e4ce827abef4c454fe1d5690c2"
+    },
+    "mailpit": {
+      "source": "selfhst",
+      "icon": "mailpit",
+      "sha256": "7d0f82147720fdf14e0bdd72618397a4cfac186b734ace9b41509e43bd0c1559"
+    },
+    "maintenant": {
+      "source": "selfhst",
+      "icon": "maintenant",
+      "sha256": "5ec12cff47ae7d4f5e0a087dab059d415c9d7cb6155a7ffacac0504b9bce9aa9"
+    },
+    "maloja": {
+      "source": "selfhst",
+      "icon": "maloja",
+      "sha256": "07e67f726760fbfd4f656164125a65b54d5bb07d07dd927a40f7361a111f24d5"
+    },
+    "manageiq": {
+      "source": "simple-icons",
+      "icon": "manageiq",
+      "sha256": "804f898871b9e0eb2af13336f35e36b41dd2d0c44b9cf0fed4ec0035168c4078"
+    },
+    "mantisbt": {
+      "source": "selfhst-png",
+      "icon": "mantisbt",
+      "sha256": "892ae376c71ec0274eb086818ef2a59f8cca4e69e83d50b568892f6cb5e50af6",
+      "originGitSha": "910d4cdb39a7711c3edd0df84c89d4c3e20d34bc",
+      "originSha256": "b7e8b4b848fdac7a73e1280441247089df849f156373ec29eff0175fe83e9919"
+    },
+    "many-notes": {
+      "source": "selfhst",
+      "icon": "many-notes",
+      "sha256": "c84771d504108c6ec40977cd646790fa945fe3339158f2113efddcdfedf019c3"
+    },
+    "manyfold": {
+      "source": "dashboard",
+      "icon": "manyfold",
+      "sha256": "583854bfec5a85d712e4dce69f98622b96ceb251f0c9607d420414965f5b4bd0"
+    },
+    "mariadb": {
+      "source": "selfhst",
+      "icon": "mariadb",
+      "sha256": "bb8877ee492da7e34226efa8ce98991ffde84d9c950acb1c29a09fbb00070491"
+    },
+    "marimo": {
+      "source": "dashboard",
+      "icon": "marimo",
+      "sha256": "49d3feac9c73248b42932e9cd70c93139806adc34467c596547f425f93095500"
+    },
+    "marreta": {
+      "source": "selfhst",
+      "icon": "marreta",
+      "sha256": "0274b720fe837edc5c2c82531dbf1bdca3f06dce132fdbe693c87a428f991eaa"
+    },
+    "mastodon": {
+      "source": "selfhst",
+      "icon": "mastodon",
+      "sha256": "25e700d3470caeaf88c8aa70aad584f955b6c6d07a8bab5d192e6a9bf661e766"
+    },
+    "mathesar": {
+      "source": "selfhst",
+      "icon": "mathesar",
+      "sha256": "1fc6e52ceb69d652f4bfa96bc55d153ee01eb192885c11e230e6a480dab86da7"
+    },
+    "matomo": {
+      "source": "selfhst",
+      "icon": "matomo",
+      "sha256": "f6dd4bc6d2398109bbe8205eae6e9ea1fe13dd74dd864a13aa64b2721d3cc3aa"
+    },
+    "matrix-synapse": {
+      "source": "dashboard",
+      "icon": "matrix-synapse",
+      "sha256": "64932bce113e7fa61b5998ff9c83225183a929babef398bfd5b8d398fbc616a8"
+    },
+    "mattermost": {
+      "source": "selfhst",
+      "icon": "mattermost",
+      "sha256": "b32ce4197e6b0c70493756c1af6c4bbc02d73fc2b965162c942a24ce51f049bc"
+    },
+    "mautic": {
+      "source": "selfhst",
+      "icon": "mautic",
+      "sha256": "cb31c6a0ad6658a9839f1f7b750217d492a3a0abb018d577827e9a528f88403d"
+    },
+    "maxun": {
+      "source": "selfhst",
+      "icon": "maxun",
+      "sha256": "1f0d9f77d9f7571746efcc8f9c226952fd16f04988fc5fc19ed0cd2608d6b9fc"
+    },
+    "mayan-edms": {
+      "source": "selfhst",
+      "icon": "mayan-edms",
+      "sha256": "8339cff4d62137aa643eb6189c39cedf52aa576fee9b12e06abe02c98c714609"
+    },
+    "maybe": {
+      "source": "selfhst",
+      "icon": "maybe",
+      "sha256": "4786243a23241beac233c74a2aa1ccb62ac5bca11969586a2dbdae73189708f9"
+    },
+    "mazanoke": {
+      "source": "selfhst",
+      "icon": "mazanoke",
+      "sha256": "5ff433be85f86d5b75590a2a80122ea22fc96b718966e1f0aa0d706a047f1739"
+    },
+    "mbin": {
+      "source": "selfhst",
+      "icon": "mbin",
+      "sha256": "81abc7e0322a46519bc03c8aab6fb59608ddc8b31a2f65eb31bfa308f5d507fd"
+    },
+    "mealie": {
+      "source": "selfhst",
+      "icon": "mealie",
+      "sha256": "2871c909b3f0f4ba4ce8640a81691ace4f359df00bf8ddd73e122cef435724b7"
+    },
+    "mediawiki": {
+      "source": "dashboard",
+      "icon": "mediawiki",
+      "sha256": "f3d37f56fc61e1105f7adc912b74c182a97c0d955436db9b207513225a679386"
+    },
+    "medusa": {
+      "source": "selfhst",
+      "icon": "medusa",
+      "sha256": "8c4d1b8d277aa6fa08260fce7efba8e23f30e65eac4497632e287a8b74104c9a"
+    },
+    "meilisearch": {
+      "source": "selfhst",
+      "icon": "meilisearch",
+      "sha256": "1194868a998991307fc840591938bbf147105af0fee16a251583e9edcbd852e3"
+    },
+    "memgraph": {
+      "source": "logos",
+      "icon": "memgraph",
+      "sha256": "fb5d257d305a1bb8a7bfc66a4f20f92252dd2c8e1d2e29cfb21f8a396017d4fe"
+    },
+    "memos": {
+      "source": "dashboard",
+      "icon": "memos",
+      "sha256": "6dfc53a3ec35389c8377dc593ff83d8d466aa539ad11027a3eaf0b1991213f58"
+    },
+    "metabase": {
+      "source": "selfhst",
+      "icon": "metabase",
+      "sha256": "3f360350f76e972daf17adf31867bfa0ae8f1d91caea0251b5ac1729a84a2879"
+    },
+    "metamcp": {
+      "source": "thesvg",
+      "icon": "metamcp/default",
+      "sha256": "42bafaa2cdf35c72e2e0bf12840f222f6a430b24dac14c48feef49f61ed14e65",
+      "license": "MIT",
+      "identityUrl": "https://www.hostinger.com/applications/metamcp",
+      "projectUrl": "https://docs.metamcp.com"
+    },
+    "metube": {
+      "source": "selfhst",
+      "icon": "metube",
+      "sha256": "a3f62df808f2e1a607515b89afeebcc61aba0cfe20553c67c6416a2dda5709f7"
+    },
+    "microbin": {
+      "source": "selfhst",
+      "icon": "microbin",
+      "sha256": "5af167ecafe493c4d6c44fbbbc76cd4821179669fab5ae86fa917f7a4ae87746"
+    },
+    "milvus": {
+      "source": "logos",
+      "icon": "milvus",
+      "sha256": "9bda77083cc20db5c256c2de83b0abd81431277a4ad2c1b2964dd1901edba30a"
+    },
+    "mindsdb": {
+      "source": "logos",
+      "icon": "mindsdb",
+      "sha256": "eb3b9e5d0533602cb3c41c93bcbd64cfd2eb93ff53857e2960df14a7e78615d9"
+    },
+    "mini-qr": {
+      "source": "selfhst",
+      "icon": "mini-qr",
+      "sha256": "81a045df4bc78e25b27206913dbf4d607ed8f059b04d362aaae4eab58a381433"
+    },
+    "miniflux": {
+      "source": "selfhst",
+      "icon": "miniflux",
+      "sha256": "9a5c00b1be4f1a6a085b70008b436f6dffd43d4244f19ba4205f12afb86ecb8e"
+    },
+    "mirotalk": {
+      "source": "selfhst",
+      "icon": "mirotalk",
+      "sha256": "e879156c1f9994d61cdbf229028d3047782d52dc696f6a9a36aebe99db534748"
+    },
+    "misskey": {
+      "source": "selfhst",
+      "icon": "misskey",
+      "sha256": "aa837f618acccafeea1cd43d7ab3e7c6be9d970c4028f42a88438007ed2c44e7"
+    },
+    "mitra": {
+      "source": "selfhst",
+      "icon": "mitra",
+      "sha256": "cc4defa646e6ce537e90bfeb0dabf0dbb7697f3311a5fec2a1a922141af9e960"
+    },
+    "mixpost": {
+      "source": "selfhst",
+      "icon": "mixpost",
+      "sha256": "0dd1477279aef91919b55122873e288cbfdaa5fd354e9dc54856d186360fa61e"
+    },
+    "mlflow": {
+      "source": "simple-icons",
+      "icon": "mlflow",
+      "sha256": "6f035ccc32592c2e4025b32536cde897f0cb34101342c6c28a9ec7c9f7464645"
+    },
+    "mobilizon": {
+      "source": "selfhst",
+      "icon": "mobilizon",
+      "sha256": "10fc29a9dfa610dc5e6f19de1e9cc101e308b958e43d7d21ac09504fa793d1a6"
+    },
+    "mongo-express": {
+      "source": "dashboard",
+      "icon": "mongo-express",
+      "sha256": "59e60badf63de642a502c06df5479d9ad60a920c4b480629d81a10edd8074d38"
+    },
+    "mongodb-4": {
+      "source": "selfhst",
+      "icon": "mongodb",
+      "sha256": "02c3b8e9f6e73741988d66f0f0dda6b08ffa8f0d6d7b654a069d918413a5a81c",
+      "identityUrl": "https://www.hostinger.com/applications/mongodb-4",
+      "brandOf": "mongodb"
+    },
+    "monica": {
+      "source": "selfhst",
+      "icon": "monica",
+      "sha256": "2233d40792a7bf59582f8b89b3bb14b43a0680678ed0491cb5c7cf7f30667e98"
+    },
+    "moodist": {
+      "source": "selfhst",
+      "icon": "moodist",
+      "sha256": "c642a794aec67743d029e217062a152b359fcf7a7c87c4ec433aa48df3f8f73f"
+    },
+    "moodle": {
+      "source": "selfhst",
+      "icon": "moodle",
+      "sha256": "6a14ac48e5e2c307c918fdb72ff7973dbdf0f59b498cdeee8d1bab48a309a942"
+    },
+    "movary": {
+      "source": "selfhst",
+      "icon": "movary",
+      "sha256": "a69d4b771ac366c9f99cd3f570c1a878009fcb93587da9593897fac4f594f9fa"
+    },
+    "mqttx": {
+      "source": "selfhst",
+      "icon": "mqttx",
+      "sha256": "5062d97150d450322e8bc9d567c24654d1bee81b40ca28408467a2a0559a2b9d"
+    },
+    "mstream": {
+      "source": "dashboard",
+      "icon": "mstream",
+      "sha256": "26dc8b2b31e0651513c0fd4463af7f6aac84e4f4a55086c36dec44c4f01dfd19"
+    },
+    "multi-scrobbler": {
+      "source": "selfhst",
+      "icon": "multi-scrobbler",
+      "sha256": "47e5dbb1f1833ba5d60c74e9640ceeda0c7815cc159b7ef7047928d79a97c344"
+    },
+    "mylar3": {
+      "source": "selfhst-png",
+      "icon": "mylar3",
+      "sha256": "5bd8c11c9382e66904f3af881eefde3d9b8d526e782d71e96d4d3941c85be639",
+      "originGitSha": "f3c489867c21d4b015142ae568d0c7a073be688b",
+      "originSha256": "c9c85205e4d4c12171e14efe9da54af134ed6e7a6ab87e248c48ca0ff4447063"
+    },
+    "myspeed": {
+      "source": "dashboard",
+      "icon": "myspeed",
+      "sha256": "ec65850749df589bb65e2f1c2bcad88179017471bf0178213133dd912ec8dcdb"
+    },
+    "mysql": {
+      "source": "selfhst",
+      "icon": "mysql",
+      "sha256": "0feb8757d327d0a1fee6ef95fcd103dd56b206ab38ab41c6ce8f62f7a4bea447"
+    },
+    "n8n": {
+      "source": "selfhst",
+      "icon": "n8n",
+      "sha256": "8503ca12b471ab32d38d6638791a0b0092ec34d7022d140a8b278aceae3a3eef"
+    },
+    "n8n-100-workflows": {
+      "source": "selfhst",
+      "icon": "n8n",
+      "sha256": "8503ca12b471ab32d38d6638791a0b0092ec34d7022d140a8b278aceae3a3eef",
+      "identityUrl": "https://www.hostinger.com/applications/n8n-100-workflows",
+      "brandOf": "n8n"
+    },
+    "n8n-queue-mode": {
+      "source": "selfhst",
+      "icon": "n8n",
+      "sha256": "8503ca12b471ab32d38d6638791a0b0092ec34d7022d140a8b278aceae3a3eef",
+      "identityUrl": "https://www.hostinger.com/applications/n8n-queue-mode",
+      "brandOf": "n8n"
+    },
+    "n8n-with-ai-assistant": {
+      "source": "selfhst",
+      "icon": "n8n",
+      "sha256": "8503ca12b471ab32d38d6638791a0b0092ec34d7022d140a8b278aceae3a3eef",
+      "identityUrl": "https://www.hostinger.com/applications/n8n-with-ai-assistant",
+      "brandOf": "n8n"
+    },
+    "nats": {
+      "source": "logos",
+      "icon": "nats",
+      "sha256": "23e813419b9771577099feffa645a0fa64b762fcbc5c60c3bc76309c1d1f590f"
+    },
+    "navidrome": {
+      "source": "selfhst",
+      "icon": "navidrome",
+      "sha256": "62b9ce988d19cfa1ecc05f72fc9717a7dc5af7342a7cc2504e39d5796b0ab2e8"
+    },
+    "neko": {
+      "source": "selfhst",
+      "icon": "neko",
+      "sha256": "e3a2747ac9db14cf2b070fca1ee29c1bbe2f417025c36c5c4bb5d692872f6432"
+    },
+    "neo4j": {
+      "source": "selfhst",
+      "icon": "neo4j",
+      "sha256": "212437d0f27c0d481577e58b2be6810949b116c564eb2defa42b11cb0eda0877"
+    },
+    "netbird-client": {
+      "source": "selfhst",
+      "icon": "netbird",
+      "sha256": "f9f4b7f8b3113e6822ce310db3235abf19e6a63e5f728453c2143cd9f788d771",
+      "identityUrl": "https://www.hostinger.com/applications/netbird-client",
+      "brandOf": "netbird"
+    },
+    "netbox": {
+      "source": "selfhst",
+      "icon": "netbox",
+      "sha256": "adfe5aa574b8674b0e806898abc8a311fd0b958d01fa437d5ef043b90ad60389"
+    },
+    "netdata": {
+      "source": "selfhst",
+      "icon": "netdata",
+      "sha256": "d944a1131a09de1224cad7a56531027d3f485b257c9301c236349948dfaa4645"
+    },
+    "new-api": {
+      "source": "simple-icons",
+      "icon": "newapi",
+      "sha256": "84c26d7b049b70d73187734c4c2c5f20591365c5d2fced67109e37d19d521ee2"
+    },
+    "nextchat": {
+      "source": "official",
+      "icon": "nextchat",
+      "sha256": "ba79b49936eb0cb733ea536fe5f9323908ba215ea1886cdc9e5c3f59e3bf7859",
+      "repository": "ChatGPTNextWeb/NextChat",
+      "revision": "1d3dc331512929a4b1d3e82354e72acce33b5c7a",
+      "file": "app/icons/logo.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://github.com/ChatGPTNextWeb/NextChat"
+    },
+    "nextcloud": {
+      "source": "selfhst",
+      "icon": "nextcloud",
+      "sha256": "f19349cfd04fdd966900b6f2f8961158dcd4a65fd54cc3203f666dcc85927240"
+    },
+    "nexterm": {
+      "source": "selfhst",
+      "icon": "nexterm",
+      "sha256": "0fb7702a70f53fa1d2b8b945e86851eb69b5626d8ae45fd1aee7f6563507182d"
+    },
+    "nexus-repository-manager": {
+      "source": "selfhst",
+      "icon": "sonatype-nexus-repository",
+      "sha256": "22bdeb6debe9fa437f13ad0112a9c156d0e68190d8216cf81e8588c758190f5c",
+      "identityUrl": "https://www.hostinger.com/applications/nexus-repository-manager",
+      "brandOf": "sonatype-nexus-repository"
+    },
+    "nightlio": {
+      "source": "selfhst",
+      "icon": "nightlio",
+      "sha256": "428831b3ef4a17b1923fc6d62e5e1bda5d836505c7d95b6bd030d592cde9e046"
+    },
+    "nixos": {
+      "source": "selfhst",
+      "icon": "nixos",
+      "sha256": "1bb9f7458adf78c23ae40f61f2ad1c9e39afab0d25cecd94672300252b6afca3"
+    },
+    "nocobase": {
+      "source": "selfhst",
+      "icon": "nocobase",
+      "sha256": "8957efd45f477144806e718045e1d0a81d6a6834fced1b82d2504594e058155b"
+    },
+    "nocodb": {
+      "source": "selfhst",
+      "icon": "nocodb",
+      "sha256": "b70f22ea8c6227e9db5bca79934bcd84d16069e50fd70ddf7c6a9c19c0d3bd2e"
+    },
+    "node-red": {
+      "source": "selfhst",
+      "icon": "node-red",
+      "sha256": "e463d4c059acdd6119412d67c04b07fc295663b0d7758309c0660596d532e4e9"
+    },
+    "nodebb": {
+      "source": "selfhst",
+      "icon": "nodebb",
+      "sha256": "5a2489e25c2ed0bf89a476fbec02657b1b7d0db8c1adc4d35284bc4f115bb21b"
+    },
+    "norish": {
+      "source": "selfhst",
+      "icon": "norish",
+      "sha256": "da0276e4b8b5e3b3e7394ff14a0b79f900e8a3ac7325f53b73972d7e1cab9165"
+    },
+    "notediscovery": {
+      "source": "selfhst",
+      "icon": "notediscovery",
+      "sha256": "d7ebec9c42cf4327283e947f0d701604bf3756b3b4c678294dcf07b014067647"
+    },
+    "notifiarr": {
+      "source": "selfhst",
+      "icon": "notifiarr",
+      "sha256": "942de28f19bb73b7ec5a18619483fe3a1a8672c6651f2208c59c4d8c55680e55"
+    },
+    "notifuse": {
+      "source": "selfhst",
+      "icon": "notifuse",
+      "sha256": "b7ad31ef1dec0defe3c254b29cb4b0fbef451978bab152995760f0d67327272c"
+    },
+    "novu": {
+      "source": "selfhst",
+      "icon": "novu",
+      "sha256": "efc199d663d73b44bb6975224ac1a20d61568b9a56fdb87722fd132e59d7cab9"
+    },
+    "ntfy": {
+      "source": "selfhst",
+      "icon": "ntfy",
+      "sha256": "7f3234c391348074942b6b349b8734031b4f13ae79b7f128811c346ac095f9af"
+    },
+    "nuclio": {
+      "source": "official",
+      "icon": "nuclio",
+      "sha256": "1fd4e77b76a4a96bbd9d87ecc060bed55691243d91b5994004b84d53a793cf69",
+      "repository": "nuclio/nuclio",
+      "revision": "8b70e8a0e5a1efe07b005e7110768669a9a01819",
+      "file": "pkg/dashboard/ui/src/images/favicon/safari-pinned-tab.svg",
+      "license": "Apache-2.0 (first-party repository)",
+      "identityUrl": "https://github.com/nuclio/nuclio"
+    },
+    "nzbget": {
+      "source": "selfhst",
+      "icon": "nzbget",
+      "sha256": "461144e4efa4c9b438af1c8723c35c50aa4ca1788cebec9a6acc882d6a233da7"
+    },
+    "nzbhydra2": {
+      "source": "dashboard",
+      "icon": "nzbhydra2",
+      "sha256": "03ed6a9d8ee1fc82fd75ab87c749a26deddc01f2e2e4467898a2e4368db83839"
+    },
+    "october-cms": {
+      "source": "simple-icons",
+      "icon": "octobercms",
+      "sha256": "e815b64cddbbd4b9d3fa45bdab96da46ae5cd216939b48e1fa6e0182645a834d"
+    },
+    "octobot": {
+      "source": "selfhst",
+      "icon": "octobot",
+      "sha256": "f4153242b1aa4a308297a82c7c158a3997f7dfbf86d1a9f92857027250c1e954"
+    },
+    "odoo": {
+      "source": "selfhst",
+      "icon": "odoo",
+      "sha256": "072248045a39c446b43a7949dc6ebd279f541e3714d115cd331b91d144bf39c7"
+    },
+    "odysseus": {
+      "source": "dashboard",
+      "icon": "odysseus",
+      "sha256": "49af3eae6e107aa425e8d3148d1c1363e1397821428200b0d0879489da0df236"
+    },
+    "olivetin": {
+      "source": "selfhst",
+      "icon": "olivetin",
+      "sha256": "72dfaada395155c0f3cd7667235561965edd443ee014ab22d0d4c9f36c2f738f"
+    },
+    "ollama": {
+      "source": "selfhst",
+      "icon": "ollama",
+      "sha256": "e754e18a590beaf205c1d1d4004c63c42db326c8e3169766a87a1f9077f67fec"
+    },
+    "ombi": {
+      "source": "selfhst",
+      "icon": "ombi",
+      "sha256": "3ffecb3cd1009e375ffbf6187aeca22dfc5cbf3155ed128aa28d3ffa67f34b04"
+    },
+    "omniroute": {
+      "source": "selfhst",
+      "icon": "omniroute",
+      "sha256": "d5c0368435f2211ce90ce1bf9bf093c676569fa39e1f30599978eb69b06d27a3"
+    },
+    "omnitools": {
+      "source": "selfhst-png",
+      "icon": "omnitools",
+      "sha256": "3f026e108dc13d6858b311a59b351f0d7262703fd81baee221e90c6cbd57bfa5",
+      "originGitSha": "444775390f87c381cf4836b77e0f7bcd3f894ef3",
+      "originSha256": "4c4de7cb9340f593a9b6141e25e3dfa0eafc8fa3fe639949c382fa4331224f31"
+    },
+    "onedev": {
+      "source": "selfhst",
+      "icon": "onedev",
+      "sha256": "8aea7e62ccc5d8d58c5e1505047a83c30890e9a09741b07e08c3590306e3b529"
+    },
+    "onetimesecret": {
+      "source": "selfhst",
+      "icon": "onetime-secret",
+      "sha256": "d45678734335bc6d9d5c9fcf3048c9c1f4c9bb37a044e64c34b7aaa0677906bb"
+    },
+    "onlyoffice-docs": {
+      "source": "selfhst",
+      "icon": "onlyoffice",
+      "sha256": "33840e7385a2d0131f1d4723f2d039b330c3881461f89815f80ac0b7bdbb0b32",
+      "identityUrl": "https://www.hostinger.com/applications/onlyoffice-docs",
+      "brandOf": "onlyoffice"
+    },
+    "onyx": {
+      "source": "selfhst",
+      "icon": "onyx",
+      "sha256": "f1a1e67675edd2d7d55bc2f7248eb1b0ca90cc030ed3a9af99b061cd0f58743c"
+    },
+    "open-dronelog": {
+      "source": "selfhst",
+      "icon": "open-dronelog",
+      "sha256": "cf1aa2a31de509c28c5ea57f8e609d96bea7142352244a9460645d7071de6df3"
+    },
+    "open-notebook": {
+      "source": "dashboard",
+      "icon": "open-notebook",
+      "sha256": "a53a4d9a8fab0e1fd90fb8fb229bc3c94f8badbf4875f256f0cb91f3ab8f3c70"
+    },
+    "open-webui": {
+      "source": "selfhst",
+      "icon": "open-webui",
+      "sha256": "6e921f36853eac239f653fe23ea457abc9e0973403751eebe8b86cf2e756dc08"
+    },
+    "openbao": {
+      "source": "selfhst",
+      "icon": "openbao",
+      "sha256": "6b9d36e58cb4b545489025815c5d15e76b871b15e243a3fde8dd472397a3803c"
+    },
+    "openbudgeteer": {
+      "source": "selfhst-png",
+      "icon": "openbudgeteer",
+      "sha256": "815743b00a7a2f023b396a83734f03881c008c03de3df370210f734e9abd600d",
+      "originGitSha": "156167bc687dc0a877b3ca446349cda46849e17f",
+      "originSha256": "f8894ad1aab45b87bff8438403610def73629c7027fa9db589a3b15a9216a4fe"
+    },
+    "opencart": {
+      "source": "logos",
+      "icon": "opencart",
+      "sha256": "ffee463d7a524086b8445b72727cd715d44c4fe34532c7c48afe2c801af235fe"
+    },
+    "openclaw": {
+      "source": "selfhst",
+      "icon": "openclaw",
+      "sha256": "74706ebdf7a40dd7e09fe2db1be36fa838df50edb98c520b9f6481471c82e9cc"
+    },
+    "opencloud": {
+      "source": "selfhst",
+      "icon": "opencloud",
+      "sha256": "757a119bde20a2fb921fe073551aeb2a294467c074a2461e79fd320a4ab25ad3"
+    },
+    "openemr": {
+      "source": "selfhst",
+      "icon": "openemr",
+      "sha256": "ebe2da4de3ab6502357fca5c1bbe284711fd5654d6bffc2b225162525b3eb11d"
+    },
+    "openfga": {
+      "source": "selfhst",
+      "icon": "openfga",
+      "sha256": "7ee8acc28d5e8f24e73243bf3ead5a67fd0a618105438db5ce34347dae8d257c"
+    },
+    "opengist": {
+      "source": "selfhst",
+      "icon": "opengist",
+      "sha256": "aca2158df83ff87b394e0c32389289701e5591104d49eab5310c399b57a4552a"
+    },
+    "openhands": {
+      "source": "selfhst",
+      "icon": "openhands",
+      "sha256": "e3d52c0762ce433d265360410419160d72a2d9d0035365faaff35208aa469a4e"
+    },
+    "openmausbot": {
+      "source": "official",
+      "icon": "openmausbot",
+      "sha256": "795ff4327fd42c8c9a9256e48f073229b68a4d59caf6214230bc89b87f9a7aba",
+      "repository": "milind-soni/OpenMausBot",
+      "revision": "3aec210054cdbafec0701100796335f0de1a5b8e",
+      "file": "public/app-icon.svg",
+      "license": "Apache-2.0 (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/milind-soni/OpenMausBot",
+      "referenceUrl": "https://www.hostinger.com/applications/openmausbot"
+    },
+    "openobserve": {
+      "source": "selfhst",
+      "icon": "openobserve",
+      "sha256": "3163f43a95fbe0322c462d4f64a05e7e22a4087d99615c44797a8ec8af15b4ee"
+    },
+    "openpanel": {
+      "source": "selfhst",
+      "icon": "openpanel",
+      "sha256": "69169f00bbfec5db3a5d83938865ef77aec839b0a5ff0cfc59dc1bb6ca8897fc"
+    },
+    "openproject": {
+      "source": "selfhst",
+      "icon": "openproject",
+      "sha256": "68385369173f1caeebd40bf0aa08acb4918c734937b1bbfc3b630b5add47eb6b"
+    },
+    "openremote": {
+      "source": "official",
+      "icon": "openremote",
+      "sha256": "25e2ca943f35260af11ab8ee696bcb36a29a217fd93c8dba464c3491e3e6a154",
+      "repository": "openremote/core",
+      "revision": "973c86ee2e53a9c09fbbd00114dacb4563a87880",
+      "file": "ui/component/or-app/src/images/logo-mobile.svg",
+      "license": "AGPL-3.0-or-later (first-party repository)",
+      "identityUrl": "https://openremote.io/"
+    },
+    "opensearch": {
+      "source": "selfhst",
+      "icon": "opensearch",
+      "sha256": "5dfdbba82e5a41742808eeed4e313b56266beee18c32df2bfd6dc7a456d52f60"
+    },
+    "opensign": {
+      "source": "selfhst-png",
+      "icon": "opensign",
+      "sha256": "efd4cc421eeaeb6e465578d2c514c66d30a3fb3d059bd955dfebcba8b03b9d70",
+      "originGitSha": "3e247e10f6719a0e7ec00f48ef7a87b6113b4775",
+      "originSha256": "dd80c27045e196b65fd6a95ed65b573d940d1111b431382224a93db806b20ba9"
+    },
+    "openspeedtest": {
+      "source": "selfhst",
+      "icon": "openspeedtest",
+      "sha256": "9083653f5d9a4664c58d6cb2ba9784c4f94150c29b3a43f69b83bf4e8bda3eab"
+    },
+    "opensuse": {
+      "source": "selfhst",
+      "icon": "opensuse",
+      "sha256": "b5fb95a086c468a21841f1125edd5cf8bac41b12b007236b432d41e859ad72d8"
+    },
+    "openttd": {
+      "source": "selfhst",
+      "icon": "openttd",
+      "sha256": "abca2c663e74b95dcf7ab4525cd42e54647bf10410b2bb1f70ffa19857a1b840"
+    },
+    "openvpn-access-server": {
+      "source": "selfhst",
+      "icon": "openvpn",
+      "sha256": "59e45d093963cab92e4224c4ffbc3a28f45e6cff11ac069571ede2f15935c590",
+      "identityUrl": "https://www.hostinger.com/applications/openvpn-access-server",
+      "brandOf": "openvpn"
+    },
+    "opnform": {
+      "source": "selfhst",
+      "icon": "opnform",
+      "sha256": "a142c2301366172652bf7d982ac2898a3aba8a3e3b057cae9116100fe25373a9"
+    },
+    "orangehrm": {
+      "source": "thesvg",
+      "icon": "orangehrm/default",
+      "sha256": "40c7217c855d6886500cc1406a7a10e969dcc9855094d947ead5b4396acefb1f",
+      "license": "Trademark of OrangeHRM Inc. Used for identification under nominative fair use.",
+      "identityUrl": "https://www.hostinger.com/applications/orangehrm",
+      "projectUrl": "https://www.orangehrm.com"
+    },
+    "organizr": {
+      "source": "selfhst-png",
+      "icon": "organizr",
+      "sha256": "75b02fe7083b3f0cdf7baf1484efcbd463f7e42a2f71d3fab2032aef1ee5602a",
+      "originGitSha": "e88c96b1cba4ca24b397cc55eb969fa88bd6a96f",
+      "originSha256": "e4584f21d20ed600860f762500064dcae2e25fbcab134f2c86475aed6ffec1b7"
+    },
+    "outline": {
+      "source": "selfhst",
+      "icon": "outline",
+      "sha256": "6db433906c588c0d93ba86da24641eba3eb98f29de5272184cc9ee2f03425aa0"
+    },
+    "overleaf": {
+      "source": "selfhst",
+      "icon": "overleaf",
+      "sha256": "98ae62bbc3fa62a19b9207dccd45baf74963f98fdc5b864ec41a6a298285ff6c"
+    },
+    "overseerr": {
+      "source": "selfhst",
+      "icon": "overseerr",
+      "sha256": "57ac9f789e8257eec0aed658224170cafb5ba884c4ba2e0a01c32ffb6b0ad15f"
+    },
+    "owncast": {
+      "source": "selfhst",
+      "icon": "owncast",
+      "sha256": "c347da2062e1442d601d56136549ae0e3459078cf5471decda117d22e6433708"
+    },
+    "owncloud": {
+      "source": "selfhst",
+      "icon": "owncloud",
+      "sha256": "822e153e4586d953b19d6f40f50b0fae8c42aa51988c67b25233e6bde7152a2e"
+    },
+    "oxicloud": {
+      "source": "selfhst",
+      "icon": "oxicloud",
+      "sha256": "d8eaaa3c6cb96eaaf079f10bec9bfd5fba78d44455abf22eb1932686b9d82b47"
+    },
+    "pairdrop": {
+      "source": "selfhst",
+      "icon": "pairdrop",
+      "sha256": "426eea8936836e6d1cbc3a6aad8903ef7970aaacc9997fb6e40e5b1d5ba6279c"
+    },
+    "pangolin-newt": {
+      "source": "dashboard",
+      "icon": "pangolin",
+      "sha256": "42109798fc74f800c17693f46aa35489217ed8a87bc208bc394858d7446782d2",
+      "identityUrl": "https://www.hostinger.com/applications/pangolin-newt",
+      "brandOf": "pangolin"
+    },
+    "paperless-ngx": {
+      "source": "selfhst",
+      "icon": "paperless-ngx",
+      "sha256": "665a6a8323c3267a477caa674bb0acfd5f4a568344026e44a17bcbbab58f2db8"
+    },
+    "papermerge": {
+      "source": "selfhst",
+      "icon": "papermerge",
+      "sha256": "54bfc4f3068e281a25f6c49c61dd4cf2a02f4ec7c77d3f95dede9d08fc704bff"
+    },
+    "papra": {
+      "source": "selfhst",
+      "icon": "papra",
+      "sha256": "b00c370b4070eb5c15598aeabc15c84ccc7b98c69088c2b73bfd976ababba632"
+    },
+    "parseable": {
+      "source": "selfhst",
+      "icon": "parseable",
+      "sha256": "db2118fa21dc5e38f8e27288c33e3f1ce2ff188bd65f647657a8960e52d3a5c2"
+    },
+    "passbolt": {
+      "source": "selfhst",
+      "icon": "passbolt",
+      "sha256": "d8382119ea9d6830248e0f8e77fa7a2707ee571c41923ecfc34d24d7b9b362cf"
+    },
+    "password-pusher": {
+      "source": "selfhst",
+      "icon": "password-pusher",
+      "sha256": "c2d89c50a1877a2aebc70852a8817cf75dd950fe8dfaa315e0bbe77113e1a7b7"
+    },
+    "pastefy": {
+      "source": "selfhst",
+      "icon": "pastefy",
+      "sha256": "ee3f78f0af3eaf66972e4f2ab6ed505beeb441cf49d6e65e9daa7ac88d14f23a"
+    },
+    "patchmon": {
+      "source": "selfhst",
+      "icon": "patchmon",
+      "sha256": "650020c69572c60b13f6d6f11a3afc6ee7c09430620f1a53cc5023ac786f8584"
+    },
+    "paymenter": {
+      "source": "selfhst",
+      "icon": "paymenter",
+      "sha256": "83c41fa9378e1d5c02b6c9656701c43e181ff95648b3c817c0aa43cde7d76786"
+    },
+    "pdfding": {
+      "source": "selfhst",
+      "icon": "pdfding",
+      "sha256": "aa58427acc18b00d28706581c5e0076abd36103c1eb81aa1470f23119361c7af"
+    },
+    "peertube": {
+      "source": "selfhst",
+      "icon": "peertube",
+      "sha256": "4e1bc93ee1ea565ec1a7d2d0539b4be708b3e5acea44d3414070cab03b7cad62"
+    },
+    "penpot": {
+      "source": "selfhst",
+      "icon": "penpot",
+      "sha256": "8320223cddb8b6c4e24c330a8415552048395452d24b5d817288026d12b4bc76"
+    },
+    "pgadmin": {
+      "source": "selfhst",
+      "icon": "pgadmin",
+      "sha256": "08da22cd882f16eb9c34fad60261bd47d906ddeb54f01178740a6d10d0717bfe"
+    },
+    "pgbackweb": {
+      "source": "dashboard",
+      "icon": "pgbackweb",
+      "sha256": "a2055c12465a3471b76bfca1ccf2405500ca8c9ae2d2742d2e9977b4495b3f10"
+    },
+    "phoenix": {
+      "source": "official",
+      "icon": "phoenix",
+      "sha256": "0fa24ff2fd3e86dd5434c79bc30f49b5f35461391bd101fd43311156a75b621f",
+      "repository": "Arize-ai/phoenix",
+      "revision": "acc593773e8d85cf0b605aae65bb9d192a92bacd",
+      "file": "assets/brand/arize-phoenix-logo-light.svg",
+      "license": "Elastic License 2.0 (ELv2); trademark identification",
+      "identityUrl": "https://www.hostinger.com/applications/phoenix",
+      "brandUrl": "https://arize.com/brand/#sub-brands",
+      "modifications": "Isolated the unmodified blue bird paths from the official current lockup for small square slots"
+    },
+    "photofield": {
+      "source": "selfhst-png",
+      "icon": "photofield",
+      "sha256": "421b7d09d39559f760f47ef6438838219ae3a1aeb0de6a2060997320c3474108",
+      "originGitSha": "34ca30fd0ef64b92c07ff86ef320a150f615604e",
+      "originSha256": "958a1b0788224c8a43907a6160683f617ddf1f8074c6791e7405147cbd2bbe10"
+    },
+    "photoprism": {
+      "source": "selfhst",
+      "icon": "photoprism",
+      "sha256": "1d0c3160a5610d6eabdff81da36c9bf67927a03e092ba1f64cf0def9fa912ad0"
+    },
+    "photoview": {
+      "source": "official-png",
+      "icon": "photoview",
+      "sha256": "ee52b3dd5ef0b56adeb01f531a2d0814aee97effb81e2812f777f4c9c83e296e",
+      "repository": "photoview/photoview",
+      "revision": "7cd83fb845d5af0ef98792e8c8094894f489773f",
+      "file": "ui/public/logo192.png",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://www.hostinger.com/applications/photoview",
+      "originGitSha": "0550eb957aaa3aa0185734a184d801789bc59849",
+      "originSha256": "576291fd6dc6d409ec7d14810e29f7d2a8d71a23046fb1d293ad391f6fe0c8ff",
+      "traceProfile": "gradient-detail",
+      "referenceUrl": "https://github.com/photoview/photoview/blob/7cd83fb845d5af0ef98792e8c8094894f489773f/ui/src/favicon.svg"
+    },
+    "phpbb": {
+      "source": "simple-icons",
+      "icon": "phpbb",
+      "sha256": "bf90b9ba3bdf173233177290f811234758e8bed9748afba7a06380de26cb4b2b"
+    },
+    "phpipam": {
+      "source": "selfhst-png",
+      "icon": "phpipam",
+      "sha256": "6e823d09b3bf8c4cc24115dae97bbc6f21bc94ddda4e450e3eceade48e7c1cce",
+      "originGitSha": "3ea19131d644fa9b8596dfe33ac6db5e684321f8",
+      "originSha256": "aee8ae3439e33e73c95d2fe022617efb325bfe0a781879c6dbfe91b055555d81"
+    },
+    "phpmyadmin": {
+      "source": "selfhst",
+      "icon": "phpmyadmin",
+      "sha256": "f0bd87e516120b3bd9cd4d0d42358df5af7977edc0f79985fe544472d00fb5f9"
+    },
+    "picoshare": {
+      "source": "selfhst",
+      "icon": "picoshare",
+      "sha256": "b5c854aa36a9b2e44f537c00e88a386592326916c213fcc42dedff7f046d4bf0"
+    },
+    "picsur": {
+      "source": "dashboard",
+      "icon": "picsur",
+      "sha256": "7a5c935cd7a835e307c7e6229c4d1d1287069295cb0feb22ecda3cf13a0aa2b5"
+    },
+    "piefed": {
+      "source": "selfhst",
+      "icon": "piefed",
+      "sha256": "c7f445587d9dd83084a023295a8d35fccb7469ab2cbd41df4155b304ce44401a"
+    },
+    "pigallery2": {
+      "source": "selfhst",
+      "icon": "pigallery2",
+      "sha256": "22f2deb5e6dcb2d3277494e01c1ccecfe06491f47b3ef942a44d81fb3e675b2c"
+    },
+    "pigeonpod": {
+      "source": "selfhst",
+      "icon": "pigeonpod",
+      "sha256": "0c20b1f7e68a4ce48cc8a5bddfc24c5fc83f91ce9e68561d7a0ba205c80866d8"
+    },
+    "pinchflat": {
+      "source": "selfhst-png",
+      "icon": "pinchflat",
+      "sha256": "5a535cc62a03770b83d653cf28e30e42cc148036c170704761516060b0076137",
+      "originGitSha": "e77bf9e415e2748f53f97df162f54101679f3953",
+      "originSha256": "e843762d9f5eb55236c365445b855c91ba644d7f99b4613802f4204e02690d0d"
+    },
+    "pinepods": {
+      "source": "selfhst",
+      "icon": "pinepods",
+      "sha256": "62c292f469a60dec23eab740b03ef2e954d1d60eb732a84fdba732e0a59b1fb1"
+    },
+    "pingvin-share": {
+      "source": "selfhst",
+      "icon": "pingvin-share",
+      "sha256": "f142aa5872c5a44e39268d82d13ca11539815c90f727697e4468b5c8f5822a41"
+    },
+    "pinry": {
+      "source": "selfhst-png",
+      "icon": "pinry",
+      "sha256": "e5669b29017cd484ac56e98f8018ef1093ae932c7a1ebcf9ec85eeed2fbc8034",
+      "originGitSha": "703e9d71b1bb20459381505b5192302568f83a6b",
+      "originSha256": "2a793608cb4005f83352b9d14000ebd2dceb76d62ef21b5171e9cf15415d9828"
+    },
+    "piwigo": {
+      "source": "selfhst",
+      "icon": "piwigo",
+      "sha256": "5f45a0fa5564a89736c93acaddc4cfd2d650af5b0c1dd2506882de60e622321c"
+    },
+    "plane": {
+      "source": "selfhst",
+      "icon": "plane",
+      "sha256": "3be52e9bcdd3cf3a7de401ae99f3591bc529075cc98b9cc5d36dcdce825b6692"
+    },
+    "plex": {
+      "source": "selfhst",
+      "icon": "plex",
+      "sha256": "249ba7aff8364d119ed776f8c80dffd855d86a39392da27a546c08382f2cff64"
+    },
+    "pocket-id": {
+      "source": "selfhst",
+      "icon": "pocket-id",
+      "sha256": "617dd18cf283825a8eb01b2de216c039ee4a7599a95928443c2a32f5e16dea50"
+    },
+    "pocketbase": {
+      "source": "selfhst",
+      "icon": "pocketbase",
+      "sha256": "2c48432d4df9265dd7535a4dbc5bffb5d07b64da736bb1e5b1f2be27ccebee53"
+    },
+    "polaris": {
+      "source": "selfhst",
+      "icon": "polaris",
+      "sha256": "c31a6fd97ed5b8ac138623879912bfb78e2ff88713cf8d54f5e312af64719b23"
+    },
+    "portainer": {
+      "source": "selfhst",
+      "icon": "portainer",
+      "sha256": "3bfe178447378466fc3d779c8d127947ccd697f9a8efe914905fbdc3bb30d67a"
+    },
+    "posterizarr": {
+      "source": "selfhst",
+      "icon": "posterizarr",
+      "sha256": "5a8b4ffc37d7b1b71f196d718db85d96bc15dbcfa181164d31a6bbd3b62c42de"
+    },
+    "postgresql": {
+      "source": "selfhst",
+      "icon": "postgresql",
+      "sha256": "4acab7d9be1c642fb06be3835b05ad33781e9a6497a58e23058a187bbfe29116"
+    },
+    "posthog": {
+      "source": "selfhst",
+      "icon": "posthog",
+      "sha256": "0752b602470866c9d1b2b235ba4fa6e537a82fe90ec1336d5ce81c998dae8b2b"
+    },
+    "postiz": {
+      "source": "selfhst",
+      "icon": "postiz",
+      "sha256": "041767050a250be745e9e9a2003e07924cba898cf6eaf0673c05f865d55a770e"
+    },
+    "prefect": {
+      "source": "simple-icons",
+      "icon": "prefect",
+      "sha256": "977c412cee7a7521bb744d66b3bca40f0ef089295dffadc075a9c9e3188b4cf6"
+    },
+    "prestashop": {
+      "source": "selfhst",
+      "icon": "prestashop",
+      "sha256": "3f230a7ba686797159033e7604d3e7974ca2305a24820e1528a55b129c80377a"
+    },
+    "pretix": {
+      "source": "dashboard",
+      "icon": "pretix",
+      "sha256": "35946760f3f10fef5e04b023eaad79d8cd57f4090f79b9ac81bd0f8e52ed4011"
+    },
+    "privatebin": {
+      "source": "selfhst",
+      "icon": "privatebin",
+      "sha256": "f4d28867c80a24a4c3606c57b6dd258b7bedee90d72a7575c62a6f9ad526f509"
+    },
+    "profilarr": {
+      "source": "selfhst",
+      "icon": "profilarr",
+      "sha256": "ce31aaf6a530820717d3060aa4384da22b0bdbc0d7a7b888f1c1b596b4ce3e55"
+    },
+    "projectsend": {
+      "source": "selfhst",
+      "icon": "projectsend",
+      "sha256": "bcdcc3303d6581ef77f7cad675a71ae5fb3de2802fc34224312789ba22b5cefa"
+    },
+    "prometheus": {
+      "source": "selfhst",
+      "icon": "prometheus",
+      "sha256": "d3c00afcbb6104195e146360df434cc28c428b6a9ef7cd379ced57861f598080"
+    },
+    "prowlarr": {
+      "source": "selfhst",
+      "icon": "prowlarr",
+      "sha256": "8f068c0ec674d106c8f61c3146a2a59c34f52c7f012adc209143f0975970f892"
+    },
+    "psitransfer": {
+      "source": "selfhst",
+      "icon": "psitransfer",
+      "sha256": "a82b008b28deb8af190d7a9db1174201d367d427717b93cd85e18614e5374124"
+    },
+    "pterodactyl": {
+      "source": "selfhst",
+      "icon": "pterodactyl",
+      "sha256": "e77d4ddacda430b33804b4fe1f6acb6a1c8754857b2ea6ec50bd54e413d75dc9"
+    },
+    "pufferpanel": {
+      "source": "selfhst",
+      "icon": "pufferpanel",
+      "sha256": "14aca84d952e8ccc22640b2b69cd70d5fbdc338be43705f9cba2c736a365314c"
+    },
+    "pulsarr": {
+      "source": "selfhst",
+      "icon": "pulsarr",
+      "sha256": "1fd915f51ed1fafb811b835747b0f963d85871a39e75d88070c67bc131713e69"
+    },
+    "pulse": {
+      "source": "selfhst",
+      "icon": "pulse",
+      "sha256": "f2c36ce4f0a027f6867afa5f02c49fa22474cc15fc0821388b0527bd1dbccec1"
+    },
+    "qbittorrent": {
+      "source": "selfhst",
+      "icon": "qbittorrent",
+      "sha256": "7a6a50d13bff73282878f1b2a94e3562efaa5d0e558041591a9f1f77fe2f3088"
+    },
+    "qdrant": {
+      "source": "selfhst",
+      "icon": "qdrant",
+      "sha256": "60d7dff084f7c408802e213c0307161655801be9958754351fc83c271fb71edb"
+    },
+    "quickwit": {
+      "source": "selfhst",
+      "icon": "quickwit",
+      "sha256": "2022348e954b07e53774be0e434b91cb04907fc31dd91111043155e4ab72e62a"
+    },
+    "rabbitmq": {
+      "source": "selfhst",
+      "icon": "rabbitmq",
+      "sha256": "aec650822a90e03b11fa8bb3d34ad20c567fd29195cc8cc69a4462d8fee10714"
+    },
+    "rackula": {
+      "source": "selfhst",
+      "icon": "rackula",
+      "sha256": "65367ae0d8f7a2a128ad610acb7c68264a9d0d46bf29a3beefedf088c49649dd"
+    },
+    "radarr": {
+      "source": "selfhst",
+      "icon": "radarr",
+      "sha256": "c582fa78f34907ea8ae90480f1941c806903216287247a6fd638808534bcc11f"
+    },
+    "radicale": {
+      "source": "selfhst",
+      "icon": "radicale",
+      "sha256": "81ae79d0b6728378d969aa263fb8ca31d206f6e223a24792f61043890703b19f"
+    },
+    "ragflow": {
+      "source": "logos",
+      "icon": "ragflow",
+      "sha256": "778f5e15d7ab6e1141d59f3ed7cf6516cc1877c2ea20f1e11684fc3cd968e99e"
+    },
+    "rallly": {
+      "source": "selfhst",
+      "icon": "rallly",
+      "sha256": "a9faf5016c622954b04499d2aafe5ff120329ccd966eeaa68d6a0039afc61fb9"
+    },
+    "raneto": {
+      "source": "selfhst",
+      "icon": "raneto",
+      "sha256": "71dabda853fb1d9b8681fb9e8365a7b81ad5bf4f153feab4fa52f2fa06e2ab06"
+    },
+    "reactive-resume": {
+      "source": "selfhst",
+      "icon": "reactive-resume",
+      "sha256": "8b364b922d8b457be6971c06187f11305561c381bc1026b22050226dcc6d8b65"
+    },
+    "readeck": {
+      "source": "selfhst",
+      "icon": "readeck",
+      "sha256": "7604440eea4968dd30ed81530b17c14950af402a8ef151fdd492b5d33775bde7"
+    },
+    "redis": {
+      "source": "selfhst",
+      "icon": "redis",
+      "sha256": "faccb827f96ec32e8a3cb96135fbd1ea67b4dae82361fc12dea0a9b6fe2a7dc6"
+    },
+    "redis-commander": {
+      "source": "selfhst-png",
+      "icon": "redis-commander",
+      "sha256": "e354fd6510810816d90f94fad37a60a7a4a11b4318fb7847edc6af659d1e1462",
+      "originGitSha": "d7a27b45ed4895d3b64c19f51a030623293ac9df",
+      "originSha256": "f7441a9be1f06b34dfb0abd65480dab59ce31b76efdb6d8d7f97d310ba1e888c"
+    },
+    "redmine": {
+      "source": "selfhst",
+      "icon": "redmine",
+      "sha256": "f2fae59482daf7883c7ebf4daa2281b16d0c247102ff482c19070bb21e2e214a"
+    },
+    "reitti": {
+      "source": "selfhst",
+      "icon": "reitti",
+      "sha256": "b696a9bcd0fbaa83397da31d45b9b9bee62ee5d252b7fbd9919c332276edd573"
+    },
+    "relaticle": {
+      "source": "selfhst",
+      "icon": "relaticle",
+      "sha256": "f978c386b9590a6bfa84e5f49e2a8a3875a5a220553d12f43526a9e3458bdbd4"
+    },
+    "remmina": {
+      "source": "selfhst",
+      "icon": "remmina",
+      "sha256": "9b23b69d2740ba91a89bc7f7a09b248764d6e51aa2e23e4e609fe48f3d824e3a"
+    },
+    "resilio-sync": {
+      "source": "selfhst",
+      "icon": "resilio-sync",
+      "sha256": "a52c3e874cbb3feeadd7e6f59d969be28806ed86485f02fb0f7b96454a494d59"
+    },
+    "restreamer": {
+      "source": "selfhst",
+      "icon": "restreamer",
+      "sha256": "0dc65eb6996cf2c016bc478ff422543bc3444ebfc6a7ee38e162105a1142b0a5"
+    },
+    "retroassembly": {
+      "source": "selfhst",
+      "icon": "retroassembly",
+      "sha256": "a1fc80f278941babd5034581eb71bc77404f86b676b47a76c5bd6aa69015f103"
+    },
+    "rivet": {
+      "source": "official",
+      "icon": "rivet",
+      "sha256": "071cc0c38d807547ff6c4b93c51b30af7a867be4ef1c406a8b9540fecfdd23ec",
+      "repository": "Ironclad/rivet",
+      "revision": "b783278bda72e8eca7431702a532fcf02e35f367",
+      "file": "packages/docs/static/img/logo.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://github.com/Ironclad/rivet"
+    },
+    "rocket-chat": {
+      "source": "selfhst",
+      "icon": "rocket-chat",
+      "sha256": "13721bf759bd742db8c7c24e70436d80f506d5e865682bd5e2f9bdd6e27df544"
+    },
+    "rocky-linux": {
+      "source": "selfhst",
+      "icon": "rocky-linux",
+      "sha256": "98c8193b334115ffc0481d45600b3d33e1ff5c3fa6c7f2121b96b4edf8a68ec5"
+    },
+    "romm": {
+      "source": "selfhst",
+      "icon": "romm",
+      "sha256": "1171c71e42f4b8c1e3954c55092c620122d6e2a066928a6018db240a14cb1e15"
+    },
+    "rotki": {
+      "source": "selfhst",
+      "icon": "rotki",
+      "sha256": "071a5a1aa2681c9f253c17508f1a058326907ef7437fb8b16e7850c8a3892bb1"
+    },
+    "roundcube": {
+      "source": "selfhst",
+      "icon": "roundcube",
+      "sha256": "33f775551155784650db002cc1e9d87ecc93592f9104eed683330b80aaa55e0c"
+    },
+    "rss-bridge": {
+      "source": "selfhst",
+      "icon": "rss-bridge",
+      "sha256": "b58fa1334b55dba93ee912ef143f10ae6093e4e1399fdab03663f33cbd4dd93c"
+    },
+    "rsshub": {
+      "source": "selfhst",
+      "icon": "rsshub",
+      "sha256": "5bcdce61952a726247b0a30731557f95df390772e039b9df612e16f5b688fe8d"
+    },
+    "rstudio-server": {
+      "source": "dashboard",
+      "icon": "rstudioserver",
+      "sha256": "5bab6252369081786f0c7a22c15eddcedf02eada94d1cf7a20a2eae9ea26f0e3"
+    },
+    "rundeck": {
+      "source": "selfhst",
+      "icon": "rundeck",
+      "sha256": "4830a1d09b9058a49a4daae2f69975a4511df46f1f3c545dd79f17371b3e23d0"
+    },
+    "rustdesk": {
+      "source": "selfhst",
+      "icon": "rustdesk",
+      "sha256": "3d01457d7f4f562bc744ab4dde37a0e2c5fbe3e0bada112a1893c3c8625d37e7"
+    },
+    "rustfs": {
+      "source": "selfhst",
+      "icon": "rustfs",
+      "sha256": "7a29870438c32392abdf508b30b09d461143f4f3dfcf5f9f2b17b5614a9ea469"
+    },
+    "rybbit": {
+      "source": "selfhst",
+      "icon": "rybbit",
+      "sha256": "243579633d565d01b41f846bce10d0afb9f9c6478b750511cdacfbc63717e8ce"
+    },
+    "ryot": {
+      "source": "selfhst-png",
+      "icon": "ryot",
+      "sha256": "859cd049dab60aedbac6cbf207dd977d30e58820f218c53e6356ae0e5360419f",
+      "originGitSha": "2f1eac850ba72136bd6b44151f0cdbc698050f7f",
+      "originSha256": "74e673bc1a2ee20715a601348ad744455cf777dba83d67932b828c29fa301af8"
+    },
+    "sabnzbd": {
+      "source": "selfhst",
+      "icon": "sabnzbd",
+      "sha256": "3915427ac926260e5d3f9213bbb63b627dca35783f1d08544072deaa7a4ad381"
+    },
+    "saltcorn": {
+      "source": "selfhst",
+      "icon": "saltcorn",
+      "sha256": "5c5d30c122569e09cb547339f1f17da808a0236ba2e16694cf0c0b3d85378ef4"
+    },
+    "scrypted": {
+      "source": "selfhst",
+      "icon": "scrypted",
+      "sha256": "ea655841853ce010e6838be83951e2a7b5aea79cf9c3327349ade4dbf6730f4d"
+    },
+    "scylladb": {
+      "source": "simple-icons",
+      "icon": "scylladb",
+      "sha256": "aff584683f699ecfc2fed0440c0cd358b9aeaa4f3ed6123a5de2b4e0509cff8f"
+    },
+    "seafile": {
+      "source": "selfhst",
+      "icon": "seafile",
+      "sha256": "1e555bf0da01375e36e3dc47fa66d6e582154f14106f74413ad246c931af9ba1"
+    },
+    "searxng": {
+      "source": "selfhst",
+      "icon": "searxng",
+      "sha256": "9b118043705d54579d8a179e457ab6600544cdfcf7772c95ff3425d1003bb907"
+    },
+    "seaweedfs": {
+      "source": "selfhst",
+      "icon": "seaweedfs",
+      "sha256": "bb2f8adf040ed20f8c81129c9f8f0b32690002337cee5e115016f28266576973"
+    },
+    "seerr": {
+      "source": "selfhst",
+      "icon": "seerr",
+      "sha256": "1df703c7c9a1f49c097376d29b85fc2ef69685cb8f51e613a9efb3cc7494a1c6"
+    },
+    "semaphore": {
+      "source": "selfhst",
+      "icon": "semaphore",
+      "sha256": "9531c8d351ba836f1afecec06e68bd86bb4a1b3ffa617407588112900d65bbea"
+    },
+    "serpbear": {
+      "source": "selfhst-png",
+      "icon": "serpbear",
+      "sha256": "79581123e489c927d99b1bd2ece2c58d45b8acc4a2e9a933e9460d833c5b6fb3",
+      "originGitSha": "c1469a00d786dde0ec322156b48f4fab501f6323",
+      "originSha256": "12da7f46df0694caca6d6557469f6e3d04889535e9752ed052ce2256a21f31ec"
+    },
+    "serverstatus": {
+      "source": "official",
+      "icon": "serverstatus",
+      "sha256": "a7965fbc7de4b17bc0011f714d286f7fab37ddb2969b6bc4271d489db8dc4355",
+      "repository": "cppla/ServerStatus",
+      "revision": "c4075ec18f1bcf447d54d576a2c4a34c5e24c334",
+      "file": "web/favicon.svg",
+      "license": "MIT (repository source; trademark rights require independent review)",
+      "identityUrl": "https://github.com/cppla/ServerStatus",
+      "referenceUrl": "https://www.hostinger.com/applications/serverstatus"
+    },
+    "shaarli": {
+      "source": "selfhst",
+      "icon": "shaarli",
+      "sha256": "4555f1f627dd02e46963664b70b1ec9bfde16e130daf70734cf6c72ef656fb84"
+    },
+    "shadowbroker": {
+      "source": "dashboard",
+      "icon": "shadowbroker",
+      "sha256": "2c102c1fbb97538c6596d1ab0d37ba8eb47bd043227100309dc4ba292506f7a8"
+    },
+    "shelfmark": {
+      "source": "selfhst",
+      "icon": "shelfmark",
+      "sha256": "392052123565a6984defacbcd12a368be2dba46f5dd2335027d17cb458a2520d"
+    },
+    "shiori": {
+      "source": "dashboard",
+      "icon": "shiori",
+      "sha256": "1c8aed9c89866a8ebf11c562e8dc70e178c7bb498ad4cc5719bac4bded317c1a"
+    },
+    "shlink": {
+      "source": "selfhst",
+      "icon": "shlink",
+      "sha256": "934c6f86c6b9eee5dcf5c0eff89c65aebcfd09c8312bf047419270ecf76857d7"
+    },
+    "shopware": {
+      "source": "selfhst",
+      "icon": "shopware",
+      "sha256": "9884e5f086ced6738fa72fdfe9f0db35d65c01b78cfb08225b7335f2eca18c20"
+    },
+    "shoutrrr": {
+      "source": "official-png",
+      "icon": "shoutrrr",
+      "sha256": "31dffd802bc2d0d39821e6a8d1835e00994287ce11375e911d9715ba59ef1a27",
+      "repository": "containrrr/shoutrrr",
+      "revision": "660a36d4805d23f5677193fc0360b5fa1e0bbd05",
+      "file": "docs/shoutrrr-logotype.png",
+      "license": "MIT (upstream repository)",
+      "identityUrl": "https://containrrr.dev/shoutrrr/",
+      "originGitSha": "f901ff019ec9841650eae7e33db00c648ad253ad",
+      "originSha256": "0be3a4fa76ac036a09cad18fe18e0586fe505db6be815a7bcbe25b821cb6cd1d",
+      "referenceUrl": "https://github.com/containrrr/shoutrrr/blob/660a36d4805d23f5677193fc0360b5fa1e0bbd05/docs/shoutrrr-logotype.svg"
+    },
+    "signoz": {
+      "source": "selfhst",
+      "icon": "signoz",
+      "sha256": "df13d9ec13353d4b88d2bb5ba9837546e8b9f4305515d1faa437781aa713e88d"
+    },
+    "silex": {
+      "source": "selfhst",
+      "icon": "silex",
+      "sha256": "7d7d9b47772e19f49bd0f1a4d8b37be662b5213eb142b0a76fcb992ce79b8956"
+    },
+    "sillytavern": {
+      "source": "official",
+      "icon": "sillytavern",
+      "sha256": "f781779749f4903d20380a1d957b0bad679e57c76c392ee83282bda844d5dba0",
+      "repository": "SillyTavern/SillyTavern",
+      "revision": "82b64a45c34facbc98ff4b9f33c067d3ccab6a17",
+      "file": "public/img/logo.svg",
+      "license": "AGPL-3.0 (upstream repository)",
+      "identityUrl": "https://sillytavern.app/"
+    },
+    "silverbullet": {
+      "source": "selfhst-png",
+      "icon": "silverbullet",
+      "sha256": "58495f1cfe7371e7c90d7468bbe65459ee53ded3c5165d098f9d137fa6dd9102",
+      "originGitSha": "178a2075c95a5603df269b9d996f7fa16501913a",
+      "originSha256": "d20ed1ec7ba490a8d7b8fa3520a5e391a8d9d99b120ca9402e9282ffb91bcf13"
+    },
+    "sim-studio": {
+      "source": "official",
+      "icon": "sim-studio",
+      "sha256": "c4750b27730a017b50af3cfaadf03b487ccc37d6e8fc61c05b944c4a7fb79a58",
+      "repository": "simstudioai/sim",
+      "revision": "1814ccd70e21906216bca2a08f95d6a2841db406",
+      "file": "apps/sim/public/brandbook/icon/green.svg",
+      "license": "Apache-2.0 (first-party repository)",
+      "identityUrl": "https://github.com/simstudioai/sim"
+    },
+    "siyuan": {
+      "source": "selfhst",
+      "icon": "siyuan",
+      "sha256": "dbc7981154a49c173c1ccef35130e66e12761466b3f78d73bf80f8f7f058364e"
+    },
+    "skysend": {
+      "source": "selfhst",
+      "icon": "skysend",
+      "sha256": "68d06bee01927315871c71c37e377b9e0477b867627c6405dc1dffe1637e2184"
+    },
+    "slash": {
+      "source": "selfhst",
+      "icon": "slash",
+      "sha256": "23e9461f0604444bc99d476cef0ab3e0343c042a2c60f84af2e0c7ce43ce2866"
+    },
+    "slink": {
+      "source": "selfhst-png",
+      "icon": "slink",
+      "sha256": "71f44f35001be3b299208d45f756f7a7f48f47fa28cb67a4d3f862d40d749967",
+      "originGitSha": "7a60ba54fc42023c0ffd8eee22694b12550220bd",
+      "originSha256": "88c0b06dd86b470060d5457592d956c2c1eb009a32a5c2a2a8dd6fff27bc37bd"
+    },
+    "slskd": {
+      "source": "selfhst",
+      "icon": "slskd",
+      "sha256": "ab9296211e174cd3bc0347157505e3fd206b4151e351e95e4aea26df648e2d5d"
+    },
+    "smokeping": {
+      "source": "selfhst-png",
+      "icon": "smokeping",
+      "sha256": "20b3cf69505dc06fdcb8c21bfb1e145aa01964b014271a19055ce4b4d51d11f5",
+      "originGitSha": "7cf0276d4a25a4b1995d231754041e0c870a6758",
+      "originSha256": "fb037811d44f535cd7f396dcdb21b784f25665a76959d0d4c18a2f84e5a465ff"
+    },
+    "snapdrop": {
+      "source": "selfhst",
+      "icon": "snapdrop",
+      "sha256": "ed0624c9fa9d9df49469ccc9f326d2afb06d3d45a9c35a8f31c70e793c5d7f1a"
+    },
+    "snappymail": {
+      "source": "selfhst",
+      "icon": "snappymail",
+      "sha256": "793ac0f6e616c2d5f25e56d02093d40099e9509b31079f31f125b7b59b53fee8"
+    },
+    "snipe-it": {
+      "source": "selfhst-png",
+      "icon": "snipe-it",
+      "sha256": "69412eff9ba85869df855f65681027775a7635cdbdef1c4460763906cded2102",
+      "originGitSha": "50a7b6ea5d91cfe7c66b8326d278bbf78a7bb2e4",
+      "originSha256": "e79a1bc6f9511fe3f2e8c7d7d11386f237575ce4ba8ee02909f724833bf84eb9"
+    },
+    "soketi": {
+      "source": "thesvg",
+      "icon": "soketi/default",
+      "sha256": "8118b11e3f30d2052c3fed3a7bf921621c0fde1222e4134f1182979f77c4eecf",
+      "license": "Trademark of Soketi. Used for identification under nominative fair use.",
+      "identityUrl": "https://www.hostinger.com/applications/soketi",
+      "projectUrl": "https://soketi.app"
+    },
+    "solidinvoice": {
+      "source": "selfhst-png",
+      "icon": "solidinvoice",
+      "sha256": "a03184c7f4ba3558b2a12d885c2bc53e1db3b416c389aa6c707b0b1e61c98a50",
+      "originGitSha": "a5150eda0f1427e91cf88ce0da7e849db2ad854e",
+      "originSha256": "f88ccf50ca9b89d44078e3e8a65559a2f4b22516e3d4b13ab5f5d0fde071b03c"
+    },
+    "solidtime": {
+      "source": "selfhst",
+      "icon": "solidtime",
+      "sha256": "98d533fbab53c84fb8bd29d6a53a7259a3093832d88718b41479b33a9b316d49"
+    },
+    "sonarqube": {
+      "source": "selfhst",
+      "icon": "sonarqube",
+      "sha256": "381f8d9916a3e66f690d764c8ca3c2339667d07ddbc4f984dd72f958f4b101f8"
+    },
+    "sonarr": {
+      "source": "selfhst",
+      "icon": "sonarr",
+      "sha256": "e2768070dea49719b4311cf514ee08d4e2f56e3a7e710ed0aea5efaf9ebae48b"
+    },
+    "speaches": {
+      "source": "selfhst",
+      "icon": "speaches",
+      "sha256": "245c09747e3e3c7209857df5fbde8906485f3dfb32cda13e8658d9797a6e5922"
+    },
+    "speedtest-tracker": {
+      "source": "selfhst",
+      "icon": "speedtest-tracker",
+      "sha256": "106f6530c46298721238559c933048e0a33f63e23e1fbfdfd50fb9204b22e691"
+    },
+    "spice-ai": {
+      "source": "official",
+      "icon": "spice-ai",
+      "sha256": "5e2ce4833ca8b450812348ec1bce4e74fe8189b52da9a9b66a8fa94bc36ed4c9",
+      "repository": "spiceai/spiceai",
+      "revision": "85d36930ff4e1aeb2ef0c06a0a89d9b45e4a6f0c",
+      "file": "media/Logo - Orange on Transparant.svg",
+      "license": "Apache-2.0 (first-party repository)",
+      "identityUrl": "https://docs.spiceai.org/"
+    },
+    "spliit": {
+      "source": "selfhst",
+      "icon": "spliit",
+      "sha256": "15915805b6854e5dc9e3607db2e91ef8fa86d144306173cc32e51c1f6020f028"
+    },
+    "spoolman": {
+      "source": "selfhst",
+      "icon": "spoolman",
+      "sha256": "89877e3e057bc3ce7c3e2b1212959bf2f471698fb85e24ead79d4c066388ee25"
+    },
+    "spree": {
+      "source": "dashboard",
+      "icon": "spree",
+      "sha256": "c8c5b6fc73138054e04b58c05ee03538fc9638bb22c847b91def964eb75fe6f8"
+    },
+    "sqlpage": {
+      "source": "official",
+      "icon": "sqlpage",
+      "sha256": "205238b85f0d6755b192a63c070ac599727ce9b350498d54ad2ff8ad035e596b",
+      "repository": "lovasoa/SQLpage",
+      "revision": "ccd3cd5ef2200dcb8146652df7461bc1e00a57af",
+      "file": "frontend/src/favicon.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://github.com/lovasoa/SQLpage"
+    },
+    "squidex": {
+      "source": "dashboard",
+      "icon": "squidex",
+      "sha256": "b0fb2a0e0f61e60c59c921a9f549d7cf9e3878837d52995e380173ac997d0d05"
+    },
+    "sshwifty": {
+      "source": "selfhst",
+      "icon": "sshwifty",
+      "sha256": "6c6e1d3109e7ac3306224d18746e043ff14d067914a35fc4d383c476cb03f0ef"
+    },
+    "starrocks": {
+      "source": "official",
+      "icon": "starrocks",
+      "sha256": "d858020733c75f51c32f55f1b5785cf12dc7c7d3729bb641148f0d8094574b1b",
+      "repository": "StarRocks/starrocks",
+      "revision": "f8415aaa694af28e12bd43f41b03d11ed4d6d758",
+      "file": "docs/docusaurus/static/img/logo.svg",
+      "license": "Apache-2.0 (first-party repository)",
+      "identityUrl": "https://www.starrocks.io/"
+    },
+    "statistics-for-strava": {
+      "source": "dashboard",
+      "icon": "statistics-for-strava",
+      "sha256": "e6d8994b0f5efe7f6c43b9ae8fd45c5e6936bd98db56a5c92608c9111117740e"
+    },
+    "steel-browser": {
+      "source": "official",
+      "icon": "steel-browser",
+      "sha256": "6bcc221024284ef923daed9e5ba44ccf0db0db3d992c1325c901a22df1b3a6d2",
+      "repository": "steel-dev/steel-browser",
+      "revision": "cfc3ca6c23c4e0fcf4371a8d7397ca30de0a25d1",
+      "file": ".github/assets/steel-logo.svg",
+      "license": "Apache-2.0 (first-party repository)",
+      "identityUrl": "https://steel.dev/"
+    },
+    "stirling-pdf": {
+      "source": "selfhst",
+      "icon": "stirling-pdf",
+      "sha256": "daf40dd4d3472ed0442e63694baa2ac782c5aa87ea92fb4e9487f3c16c13f013"
+    },
+    "strapi": {
+      "source": "selfhst",
+      "icon": "strapi",
+      "sha256": "717ee61505139fd2998e0b5436f38e16e353849deea70a571599f77dbc328d3f"
+    },
+    "stump": {
+      "source": "selfhst",
+      "icon": "stump",
+      "sha256": "243469f66b89c7a9c325c1d05dc2a295902762e9020d69e3a0f3d77c6eecb7fc"
+    },
+    "suggestarr": {
+      "source": "selfhst",
+      "icon": "suggestarr",
+      "sha256": "0b87a2e05742937188a71dbebdcbde420be57b0d826dc117a6f83669c25bad60"
+    },
+    "sun-panel": {
+      "source": "dashboard",
+      "icon": "sun-panel",
+      "sha256": "e15c32d0eeafcdb37aac35a57e0d302fdf21406f51ef37780b1852549fed1939"
+    },
+    "super-productivity": {
+      "source": "selfhst",
+      "icon": "super-productivity",
+      "sha256": "1e024b9d53bfa6dcf177602516d46be92c3bd40d3e7d502e6a7ed4695c7a186d"
+    },
+    "supertokens": {
+      "source": "logos",
+      "icon": "supertokens",
+      "sha256": "3861eecfa9ca9e1e0c4c579307f0fa6719f57422c02201a6a85f4cdf5d73fd13"
+    },
+    "sure": {
+      "source": "dashboard",
+      "icon": "sure",
+      "sha256": "a96ba80a80625104aae09e271bf20f356a32207bfbc660b04f880b10e1a91956"
+    },
+    "surrealdb": {
+      "source": "selfhst",
+      "icon": "surrealdb",
+      "sha256": "20f0df1053395fdfde32099ef4ae83538e565d97f41ea090957ec6db6f3e7b86"
+    },
+    "suwayomi": {
+      "source": "selfhst",
+      "icon": "suwayomi",
+      "sha256": "637d9e049adeb8f9f646bbe36c57589703a7125a65381a5141388acf0d8d69c3"
+    },
+    "swing-music": {
+      "source": "selfhst",
+      "icon": "swing-music",
+      "sha256": "ec5db6b14d5408bf5610e7e447d572086e92647a05ee3e7c672a985b0225c16e"
+    },
+    "syncthing": {
+      "source": "selfhst",
+      "icon": "syncthing",
+      "sha256": "e954aff5187c054d87825e786bc5cd9fc5ef6ada493e7d6dcf164ce97b1ba19c"
+    },
+    "tandoor-recipes": {
+      "source": "selfhst",
+      "icon": "tandoor-recipes",
+      "sha256": "3969617adeef12bfa1ec6e4a7589ddaa5366189d978c6121dfe5f83ee7f320de"
+    },
+    "tasktrove": {
+      "source": "selfhst",
+      "icon": "tasktrove",
+      "sha256": "3eb8b8d2290a50605c94faff68ee0a16c1ddd9a020bc21abd23e30846d0b4907"
+    },
+    "tautulli": {
+      "source": "selfhst",
+      "icon": "tautulli",
+      "sha256": "82bfa77ea6705a4aa70e363f95249ee294abc8db41e8516f75ad2fa1e9ff4af2"
+    },
+    "tdarr": {
+      "source": "dashboard",
+      "icon": "tdarr",
+      "sha256": "f9debe4eca48b60e90e06ac61ccee1054742261d62dc9145012b37621ddce469"
+    },
+    "teable": {
+      "source": "selfhst-png",
+      "icon": "teable",
+      "sha256": "fa866907cacd8b8a2bbe5bf7c109f1c023d3747a37f7ee198127c4f4220fbdce",
+      "originGitSha": "2a88abc720799b1282bf65f7486e2aed6c5ec61e",
+      "originSha256": "0b33952da10a1734bb029ef2dbe4dde81a22120328a2f02d3884a5ba29778b55"
+    },
+    "technitium-dns-server": {
+      "source": "thesvg",
+      "icon": "technitium-dns-server/default",
+      "sha256": "3077b1e682850ec6353662fac6a85f899bfea5417c144736cd397988dec601de",
+      "license": "Trademark of Technitium. Used for identification under nominative fair use.",
+      "identityUrl": "https://www.hostinger.com/applications/technitium-dns-server",
+      "projectUrl": "https://technitium.com/dns/"
+    },
+    "temporal": {
+      "source": "logos",
+      "icon": "temporal",
+      "sha256": "608bbcf8811a8bac054bb33385a31bf772d7c306c7c45fbc3ee99a5ab1bd580e"
+    },
+    "tensorzero": {
+      "source": "official",
+      "icon": "tensorzero",
+      "sha256": "91556dcc5e43c7acbd7f9e3dbb3b04cfe9a5d8515e5edb4967a30d3b0f03ee51",
+      "repository": "tensorzero/tensorzero",
+      "revision": "62eb8f63e8ec62018d70420dbf1a8c5d1c026315",
+      "file": "docs/favicon.svg",
+      "license": "Apache-2.0 (first-party repository)",
+      "identityUrl": "https://www.tensorzero.com/"
+    },
+    "teslamate": {
+      "source": "selfhst",
+      "icon": "teslamate",
+      "sha256": "4717e9b88033dc04cfb8211cc1b6d9abbee0bfd0e913c934d4924be92f9d91d8"
+    },
+    "the-lounge": {
+      "source": "selfhst",
+      "icon": "the-lounge",
+      "sha256": "46e613bb0d9e3668e6d4f55c2cfe178d8ee8ec9d194f089477b3101bbd733346"
+    },
+    "thingsboard": {
+      "source": "selfhst",
+      "icon": "thingsboard",
+      "sha256": "e494b9282d43072e4b9463de41afab13b6f822e83ce9630d14e865434e388347"
+    },
+    "tianji": {
+      "source": "selfhst",
+      "icon": "tianji",
+      "sha256": "26564e1c370e948441f8e869ba94e3a5f5c3c91df9c160169e233bd223556eff"
+    },
+    "tiddlywiki": {
+      "source": "selfhst",
+      "icon": "tiddlywiki",
+      "sha256": "3da7b85d606612c846b5dd9798ad98b2aa819c3673154b368a70c6bd68048f68"
+    },
+    "timescaledb": {
+      "source": "thesvg",
+      "icon": "timescale/default",
+      "sha256": "f31eb0630d79c70a6f8cd1756c297ff9f4998e06e065be11d6d8719537839b09",
+      "license": "CC0-1.0",
+      "identityUrl": "https://www.hostinger.com/applications/timescaledb",
+      "projectUrl": "https://www.timescale.com"
+    },
+    "timetagger": {
+      "source": "selfhst",
+      "icon": "timetagger",
+      "sha256": "7b771111ed39b49efbf29cb9e9367463ff2ad9035160174b0ec8c85ea10f6194"
+    },
+    "tiny-tiny-rss": {
+      "source": "selfhst",
+      "icon": "tiny-tiny-rss",
+      "sha256": "b5e3ffd4a225603d1fd257bce4b202098166903b741428982fee39787ff83359"
+    },
+    "tinyauth": {
+      "source": "dashboard",
+      "icon": "tinyauth",
+      "sha256": "47866ddc294246f75bf87a0128ba94f62a213fdae5b08dd5f4f68cb00fb67683"
+    },
+    "tinymediamanager": {
+      "source": "dashboard",
+      "icon": "tiny-media-manager",
+      "sha256": "a7de8cde3decf58588d11eb644ebc3f3516175a999feeb18c3b0b726c4994130"
+    },
+    "tolgee": {
+      "source": "selfhst",
+      "icon": "tolgee",
+      "sha256": "40e7777ef96f40bf296fb672b02e076e523fc2160581204a398fa483dd1aeb1d"
+    },
+    "tooljet": {
+      "source": "selfhst",
+      "icon": "tooljet",
+      "sha256": "24db4fc5dc86f3fe59fe0cda368f2b04ef50a0da835363c3028e8cc3b1b6a1e1"
+    },
+    "traccar": {
+      "source": "selfhst",
+      "icon": "traccar",
+      "sha256": "75a75c59226f783ee5a3bfa782217d4f58f154471ac11fb5be438b6fff30a6b3"
+    },
+    "tracearr": {
+      "source": "selfhst",
+      "icon": "tracearr",
+      "sha256": "add304e9647f14a8371777f18d4d2e1b791ae66d629f14c7056f721410ae2ed8"
+    },
+    "tracktor": {
+      "source": "selfhst",
+      "icon": "tracktor",
+      "sha256": "f63fb90774f44aed92f0615007b3e83e7030049f1670b5d1340fd9eb38013415"
+    },
+    "traggo": {
+      "source": "dashboard",
+      "icon": "traggo",
+      "sha256": "91a3b27636fa793a97015521724ac9e7753ba92a7444f9a6719b0238c128c041"
+    },
+    "trailarr": {
+      "source": "selfhst",
+      "icon": "trailarr",
+      "sha256": "3b0a25b814636829bed1e238029c8a5971305de926e921a4bac8ac22cbc450eb"
+    },
+    "trailbase": {
+      "source": "official",
+      "icon": "trailbase",
+      "sha256": "a5188a59c2e76c4582a17e2336013098991551961f410a848f333ad495c3a45d",
+      "repository": "trailbaseio/trailbase",
+      "revision": "b9e8acb79196117b8f33530368f57c9775a9e939",
+      "file": "assets/logo.svg",
+      "license": "OSL-3.0 (upstream repository)",
+      "identityUrl": "https://trailbase.io/"
+    },
+    "transmission": {
+      "source": "selfhst",
+      "icon": "transmission",
+      "sha256": "0b16dc2f378d20d645a40275178913b50bb5cfead6913787ed36c2be356e63bb"
+    },
+    "transmute": {
+      "source": "selfhst",
+      "icon": "transmute",
+      "sha256": "1a450d1190adba6c9ccf56f8c4a65567976416d01fba8e653954ca3b3d1fb821"
+    },
+    "trek": {
+      "source": "selfhst",
+      "icon": "trek",
+      "sha256": "0ddf29275eb825be1449ac9c6c3269b96aa7eb99ff51d789ba713bc0e5b5f763"
+    },
+    "triliumnext-notes": {
+      "source": "dashboard",
+      "icon": "triliumnext",
+      "sha256": "9192cae27dbe5417e1014bb93ceb9e1bbafb6a8d9b3b81b8ee9eb6921d0abc68",
+      "identityUrl": "https://www.hostinger.com/applications/triliumnext-notes",
+      "brandOf": "triliumnext"
+    },
+    "trino": {
+      "source": "simple-icons",
+      "icon": "trino",
+      "sha256": "70c94c1dda910730576ccc831f3d4dd9cfcd649792b82015b691453f3b50f6ad"
+    },
+    "tubearchivist": {
+      "source": "thesvg",
+      "icon": "tube-archivist/default",
+      "sha256": "ac18d85fe188633d9091c6dd16d05aab1c84362310f3aeddc856bc1cd97d6962",
+      "license": "GPL-3.0",
+      "identityUrl": "https://www.hostinger.com/applications/tubearchivist",
+      "projectUrl": "https://tubearchivist.com"
+    },
+    "tubesync": {
+      "source": "selfhst",
+      "icon": "tubesync",
+      "sha256": "34bfdf022b595bc80f6abe4a1a67b55ebbe16ab5b10479e5e077e5b01f69d038"
+    },
+    "tududi": {
+      "source": "selfhst",
+      "icon": "tududi",
+      "sha256": "db7b03c61190b1923a0c26e9751c83c8d25f8766912ffd8ef1dd245d5488502a"
+    },
+    "tunarr": {
+      "source": "dashboard",
+      "icon": "tunarr",
+      "sha256": "2b11f6ea339723a7dc8bd7c090d7f639da14c9700b6f7ba63dfdb1fc0d1df7e7"
+    },
+    "twenty": {
+      "source": "simple-icons",
+      "icon": "twenty",
+      "sha256": "e796bc66edfcad4ec12d20efb052f1f2171a4023a6b514118ee9b14c47790760"
+    },
+    "typebot": {
+      "source": "selfhst",
+      "icon": "typebot",
+      "sha256": "d2eac1762a8148e5154d9ef11e8e125edea003b459819ea38803a542232271ed"
+    },
+    "typesense": {
+      "source": "selfhst",
+      "icon": "typesense",
+      "sha256": "c1aa11368b3e23bcc668308e242c475d7f536c9f58f0ce56921d9b9be2cecdc5"
+    },
+    "typo3": {
+      "source": "selfhst",
+      "icon": "typo3",
+      "sha256": "6c228ae703e7f7dd9850dc7d76911a485eef5a2931d51c8ee1183e6c739ad684"
+    },
+    "ubuntu": {
+      "source": "selfhst",
+      "icon": "ubuntu",
+      "sha256": "59595d3c446b01c19af4527967c59e7f9012a3c2ee1df07bc3760be5cc5c918e"
+    },
+    "ubuntu-with-xrdp": {
+      "source": "selfhst",
+      "icon": "ubuntu",
+      "sha256": "59595d3c446b01c19af4527967c59e7f9012a3c2ee1df07bc3760be5cc5c918e",
+      "identityUrl": "https://www.hostinger.com/applications/ubuntu-with-xrdp",
+      "brandOf": "ubuntu"
+    },
+    "umami-analytics": {
+      "source": "selfhst",
+      "icon": "umami",
+      "sha256": "93056e40d834721e7201225221abc78199b3bb3ed04bf41d798ea1c40de66c2e"
+    },
+    "universal-media-server": {
+      "source": "official",
+      "icon": "universal-media-server",
+      "sha256": "452d8c17df69297be57a69f29ce539aeab431deaea4623b1767648a5ddef7fcb",
+      "repository": "UniversalMediaServer/UniversalMediaServer",
+      "revision": "cffd18b8c02aaf457c05312e52f7972cfea6df2b",
+      "file": "src/main/resources/images/icon-square.svg",
+      "license": "GPL-2.0 (first-party repository)",
+      "identityUrl": "https://www.universalmediaserver.com/",
+      "attribution": "Universal Media Server logo created by Surf@ceS; per original SVG description"
+    },
+    "unleash": {
+      "source": "thesvg",
+      "icon": "unleash/default",
+      "sha256": "ea7c0c600877ea7f56c1a540eec19255ea9f612ff4e9115f0212eed099fa042d",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://www.hostinger.com/applications/unleash",
+      "projectUrl": "https://www.getunleash.io"
+    },
+    "unmanic": {
+      "source": "selfhst-png",
+      "icon": "unmanic",
+      "sha256": "b5462bc8ce00267886864e0739763a6c7aeb943f245e2f52c0f5bebcbc4958cb",
+      "originGitSha": "3e3ed86b9a8b1d3e0115c2e6dd71e9b889143756",
+      "originSha256": "e79a6066287fac762cbd9e8207e65785b761de668d6e68d452a5ced4d4fb5e39"
+    },
+    "unstructured": {
+      "source": "thesvg",
+      "icon": "unstructured/default",
+      "sha256": "af2253643fc7b85d54c9406a657509baf69d4d8ac641005ae53bba6fff3b1ce2",
+      "license": "MIT",
+      "identityUrl": "https://www.hostinger.com/applications/unstructured",
+      "projectUrl": "https://unstructured.io"
+    },
+    "uptime-kuma": {
+      "source": "selfhst",
+      "icon": "uptime-kuma",
+      "sha256": "0ad14a111a7e26d7e06e7a291ff59195687c72c0b891d25dbbdd6b6ddfb1a065"
+    },
+    "uptrace": {
+      "source": "official",
+      "icon": "uptrace",
+      "sha256": "c4e178c6a39a66185fd8a9de58b2ab684a19b7f2779f76e50c8be1a8c5697144",
+      "repository": "uptrace/uptrace",
+      "revision": "eb76ac05f7c78fccf23b4760c97532218fbe3bf0",
+      "file": "vue/public/uptrace/logo-small.svg",
+      "license": "AGPL-3.0 (upstream repository)",
+      "identityUrl": "https://uptrace.dev/"
+    },
+    "usertour": {
+      "source": "selfhst",
+      "icon": "usertour",
+      "sha256": "10143ff6e2b8df92e403483860e4e3d6013f504445fb2e3102a856e6b12fd75c"
+    },
+    "usesend": {
+      "source": "official",
+      "icon": "usesend",
+      "sha256": "f1acbabfa467125282e52a49c2d275bb3b95a5a33953a0ee94467fc60bc2b535",
+      "repository": "usesend/useSend",
+      "revision": "e98f21111a31cd11f1d9a5aec794a966f590c5d7",
+      "file": "apps/docs/logo/logo-wordmark.svg",
+      "license": "AGPL-3.0 (upstream repository)",
+      "identityUrl": "https://usesend.com/",
+      "modifications": "Cropped the official useSend wordmark viewBox to its integral square app symbol without redrawing the mark"
+    },
+    "vault": {
+      "source": "selfhst",
+      "icon": "hashicorp-vault",
+      "sha256": "e0a9f5ab16f937cec85c63bdcdccb9759269dc7f24e8fd987f7be1fca8329284",
+      "identityUrl": "https://www.hostinger.com/applications/vault",
+      "trademarkPolicyUrl": "https://www.hashicorp.com/en/trademark-policy"
+    },
+    "vaultwarden": {
+      "source": "selfhst",
+      "icon": "vaultwarden",
+      "sha256": "38164bfeaf5bc7b4fc2e288c0eceada4393165c442014ad2551d637bf5f18486"
+    },
+    "verdaccio": {
+      "source": "selfhst",
+      "icon": "verdaccio",
+      "sha256": "6e8b0a2038466b70201e0acb780ffaf24004d1970b90529996029ffbb2dc8502"
+    },
+    "vert": {
+      "source": "selfhst",
+      "icon": "vert",
+      "sha256": "add0ddf75ba55b24b0fba3bf9923564bdf8866a576d10fb12f5f264123201187"
+    },
+    "viewtube": {
+      "source": "dashboard",
+      "icon": "viewtube",
+      "sha256": "f14a75a2e872dd503f7c1c98a75379ae815d9247fa35438520fd249f501ad47e"
+    },
+    "vikunja": {
+      "source": "selfhst",
+      "icon": "vikunja",
+      "sha256": "a1f0e468acdd9e2bccf07d723634e261d2775013659656a606bc9d8d33a7d978"
+    },
+    "visual-studio-code-server": {
+      "source": "selfhst",
+      "icon": "visual-studio-code",
+      "sha256": "03db4f39d189b256183a769d3a4a62a27ac8f91186adfd0b6365d52334116f16"
+    },
+    "vitess": {
+      "source": "logos",
+      "icon": "vitess",
+      "sha256": "02dbc8297df15629d2f4b2e95318520d3a96efed826d9f1e4f9b0d6715f35576"
+    },
+    "vuetorrent": {
+      "source": "selfhst",
+      "icon": "vuetorrent",
+      "sha256": "e28522532c240e5c24564e60bd62d12a0c7048d12eef2e1d5fa9ed065cc0c999"
+    },
+    "vvveb-cms": {
+      "source": "thesvg",
+      "icon": "vvveb-cms/default",
+      "sha256": "1f3d766f3dd5ca5f742eb0f83b183932b590f470ee8fffff5e6ce74c29a89f68",
+      "license": "Trademark of Vvveb. Used for identification under nominative fair use.",
+      "identityUrl": "https://www.hostinger.com/applications/vvveb-cms",
+      "projectUrl": "https://www.vvveb.com"
+    },
+    "wakapi": {
+      "source": "selfhst",
+      "icon": "wakapi",
+      "sha256": "35ca56fe705261064a444c8797819f07f32dfb1d876f654e77cd76aa56b63fb6"
+    },
+    "wallabag": {
+      "source": "selfhst",
+      "icon": "wallabag",
+      "sha256": "523f6ceaf341d80ea6af92b8c72cfdfd9d33dde30aecc8be00cdd91932f626b5"
+    },
+    "wallos": {
+      "source": "selfhst",
+      "icon": "wallos",
+      "sha256": "daf7994fd7677956d937a28fb01e149e81d180d74df36fd16e167371bc48c930"
+    },
+    "wanderer": {
+      "source": "selfhst",
+      "icon": "wanderer",
+      "sha256": "6f8ea08957ec69bcb9775a7ae697dda6d430ffde4f61486911a5883f9000ef9f"
+    },
+    "warracker": {
+      "source": "selfhst",
+      "icon": "warracker",
+      "sha256": "3890ef66d6c2b6438ef5ebc5717fa92fdaa44e51d6c74f3479da50946791e975"
+    },
+    "watcharr": {
+      "source": "dashboard",
+      "icon": "watcharr",
+      "sha256": "053de0bcddb8f521c0dae185985660080128e2c88a6db744d109d206feedf629"
+    },
+    "watchstate": {
+      "source": "selfhst-png",
+      "icon": "watchstate",
+      "sha256": "91bc5720dece165462660116cc3dbeb311227a0cb16b9a33c04d9a9f714bea12",
+      "originGitSha": "38e37120af954fa97ab619d6117d1953a74b299e",
+      "originSha256": "f936523c4b9e79277048123a32521d4e81d7bb4b39822fa8074d8dceb149d6ff"
+    },
+    "wavelog": {
+      "source": "selfhst",
+      "icon": "wavelog",
+      "sha256": "a4d32cbd379f03e1a55562372b92118b940a951c0fcf78f53ce0160fb31ba01c"
+    },
+    "wealthfolio": {
+      "source": "selfhst",
+      "icon": "wealthfolio",
+      "sha256": "7c4f66c51b648793c6743daa6b83ed873a7f6ad0d04b6420af7130078695a239"
+    },
+    "weaviate": {
+      "source": "selfhst",
+      "icon": "weaviate",
+      "sha256": "02d157796bed0f5738749ab05f50b9eb0b5789512a2d484c38079e342638ed6e"
+    },
+    "web-check": {
+      "source": "selfhst",
+      "icon": "web-check",
+      "sha256": "3ffae021d7f2a273c687d533b1797652b722e68961bc883e68d1fbd0ebf817ba"
+    },
+    "weblate": {
+      "source": "selfhst",
+      "icon": "weblate",
+      "sha256": "b4594993e2e25d603a6698ca708bcdddfc7dc2ccabfd27350e3503dc8800d786"
+    },
+    "webthings-gateway": {
+      "source": "official",
+      "icon": "webthings-gateway",
+      "sha256": "cde93f814f514bf8a52e5fa433ff7989112dc249995a21cae96a99c10b100679",
+      "repository": "WebThingsIO/gateway",
+      "revision": "cec41bc3fc9b3549aa1c9d7ada91d373d93290ef",
+      "file": "static/images/icon.svg",
+      "license": "MPL-2.0 (first-party repository)",
+      "identityUrl": "https://webthings.io/gateway/"
+    },
+    "webtop": {
+      "source": "selfhst-png",
+      "icon": "webtop",
+      "sha256": "501b836b75e3b00868554bcbba27a80d2072288f4be2d2f37aa2abf5c7b4b043",
+      "originGitSha": "af82af35b5144a2149f7b5aaa355844a77b10b8d",
+      "originSha256": "d1bbf0d813d97ce04a283c8905590e9c3229f00c68267ec0ef795f42006f9241"
+    },
+    "wekan": {
+      "source": "selfhst",
+      "icon": "wekan",
+      "sha256": "7ce4f2260d6beadd6a39ceee2555fa89098a7d652e6466fd363c4611856368fb"
+    },
+    "wger": {
+      "source": "selfhst",
+      "icon": "wger",
+      "sha256": "cde80f45aaefad3bc6fa54c6dede89f53c7259b80b0934f28f44651585e94fbf"
+    },
+    "whishper": {
+      "source": "dashboard",
+      "icon": "whishper",
+      "sha256": "4f3153e39f414b9d0b94ce17fb2bcc8df8383aea7330610146241af875d04461"
+    },
+    "whodb": {
+      "source": "selfhst",
+      "icon": "whodb",
+      "sha256": "17bcf64a05412125d03701b804b6a512a31b761d079d357a2d7a2bb5a6cc4990"
+    },
+    "whoogle-search": {
+      "source": "official-png",
+      "icon": "whoogle-search",
+      "sha256": "a16fbc57f1c83ee21e4bd75b61f100b9e0ebc0429d786c5c18fbccc6dc55e810",
+      "repository": "benbusby/whoogle-search",
+      "revision": "0543f86528678ab60a20b3049483975add6b6e40",
+      "file": "app/static/img/logo.png",
+      "license": "MIT",
+      "identityUrl": "https://github.com/benbusby/whoogle-search",
+      "originGitSha": "0d89d25f24480a0ea6469267f570898e9f244a9c",
+      "originSha256": "e321ec7f5347323f2d855b1a3fa7df8e8163b9ac1fecb3abc3887113137c3ff9"
+    },
+    "wiki-js": {
+      "source": "selfhst",
+      "icon": "wiki-js",
+      "sha256": "a2c4876ff8c88110fecb47c970d633ddbc9bb832f85d1950cb48c3c363e55973"
+    },
+    "windmill": {
+      "source": "selfhst",
+      "icon": "windmill",
+      "sha256": "db0be341e89edc0c90af9adf75dead92af1f77ce12bd4bb7b9eb50b72d3a46c5"
+    },
+    "wingfit": {
+      "source": "selfhst-png",
+      "icon": "wingfit",
+      "sha256": "8476105107cfcc065bda46a6be86530b9c17224947af230cbdb5a4eee7c02e2c",
+      "originGitSha": "6e3d05b251d3053943aefd21ce6ae336c642f6f6",
+      "originSha256": "4a06977d6cbc542e880fd7102a1b2a4406460ccd85783292cb280f91cb526ed2"
+    },
+    "wintercms": {
+      "source": "official",
+      "icon": "wintercms",
+      "sha256": "3eed14fe684c0319cb3b515ed4690a4075088e0e84700afab441e7d5f1e10511",
+      "repository": "wintercms/winter",
+      "revision": "f9bc2047c4ecbeb8c4b00d88a726344afc6d702b",
+      "file": "modules/backend/assets/images/icon.svg",
+      "license": "MIT (first-party repository)",
+      "identityUrl": "https://github.com/wintercms/winter"
+    },
+    "wiremock": {
+      "source": "thesvg",
+      "icon": "wiremock/default",
+      "sha256": "2486289b26e3b7568bbbdf9c80e80c04413ee9a8dab24d34338f78cd1b61cd39",
+      "license": "Apache-2.0",
+      "identityUrl": "https://www.hostinger.com/applications/wiremock",
+      "projectUrl": "https://github.com/wiremock/wiremock"
+    },
+    "withoutbg": {
+      "source": "selfhst",
+      "icon": "withoutbg",
+      "sha256": "c470f5e263a0c8bce202f4f3e29a7eef4856bb137e4e12c434948982c00f8eaa"
+    },
+    "wizarr": {
+      "source": "selfhst",
+      "icon": "wizarr",
+      "sha256": "fce9bb480a693102dff158b6a2a25c771fddbd42cd5fbf2b0fe33c349813b233"
+    },
+    "woocommerce": {
+      "source": "selfhst",
+      "icon": "woocommerce",
+      "sha256": "c744f5f4cb0ba37fb79dd2007926d0600373b7ec3cd55d0dcd725749aa71b3ab"
+    },
+    "woodpecker-ci": {
+      "source": "selfhst",
+      "icon": "woodpecker-ci",
+      "sha256": "d6ce6476839d3ffccd9fe0e298cfbc6d9ee72c863bea12947bf6e2edda925e48"
+    },
+    "wordpress": {
+      "source": "selfhst",
+      "icon": "wordpress",
+      "sha256": "656c305952afe7ce41899b9d22e6b49e6844e1ff1b2086ee5b4f2cb3cd8ce013"
+    },
+    "workout-cool": {
+      "source": "selfhst-png",
+      "icon": "workout-cool",
+      "sha256": "0f54c0470e16e38b3d241dd2078621924697d1028b0390bb858e14e2c495a066",
+      "originGitSha": "27621e559b15f065856a3b750dc5973ccaebd263",
+      "originSha256": "23c38d43a2347317edf36db7ccd8651e08a17d86eb3c61ae95397769735ef97d"
+    },
+    "wps-office": {
+      "source": "jabber",
+      "icon": "wps-office",
+      "sha256": "247a4a149461136bea409033cc56f923b388b49f1795fb874c9907ead6f63b77"
+    },
+    "writefreely": {
+      "source": "selfhst",
+      "icon": "writefreely",
+      "sha256": "647e3e11621de4bbc01887d66a4a5d5a9f262522393b96c2fa924e55c65b3a9b"
+    },
+    "wud": {
+      "source": "selfhst",
+      "icon": "wud",
+      "sha256": "ed0f3139ce125a8268c6094b1ca239ed1565f3f1220d377d5a07d81b4a89600a"
+    },
+    "xbackbone": {
+      "source": "selfhst",
+      "icon": "xbackbone",
+      "sha256": "5d7becc317a3090971b11a6dc599f6e941a05e98569f0e23d30875ce380c3535"
+    },
+    "xibo-cms": {
+      "source": "official-png",
+      "icon": "xibo",
+      "sha256": "71335e243506054b9bc92b1d200e54473121a9c6929e14e00c0254e0b067a347",
+      "repository": "xibosignage/xibo",
+      "revision": "b043514d1b98136daa7aa01857d24853379611fb",
+      "file": "xibologo-blue.png",
+      "license": "Xibo Signage Ltd logo: website link permitted under Xibo logo policy (not AGPL for artwork)",
+      "identityUrl": "https://xibosignage.com/",
+      "originGitSha": "73ba6b07816376166d6dcbf1b6205699d0f4db58",
+      "originSha256": "fa5bcc821f52fc0e2d89af7de91c852fcdee727698d248e3e03ce9427948a59f",
+      "termsUrl": "https://docs.xibosignage.com/kb/readme/can-i-use-the-xibo-name-logo"
+    },
+    "xwiki": {
+      "source": "selfhst",
+      "icon": "xwiki",
+      "sha256": "8411aa81d6a547272709c6ec616ab3cf1d29d2d7d4e684547eae4329d6e6f215"
+    },
+    "yaade": {
+      "source": "selfhst-png",
+      "icon": "yaade",
+      "sha256": "c3a9673d712410d4c69837ee1b92961daa5be182a439a385e48401f3c4b70c72",
+      "originGitSha": "d56a95abeecc648f3345cf13f3370aa2bcf391bc",
+      "originSha256": "305d30b99c502a65a5a61eca3e260dc09fc5b9800257044c82fa50b23bb3c8c8"
+    },
+    "yamtrack": {
+      "source": "selfhst",
+      "icon": "yamtrack",
+      "sha256": "dc4ac5130c311a7fd740b5fdc80353b97a65f20e19000823e86307bf00c37b00"
+    },
+    "yarn": {
+      "source": "official",
+      "icon": "yarn",
+      "sha256": "cbdc2d67fd7e012ad4ad7f85150cc162d0f7ae51fc35478e7330e8481fcda7f3",
+      "repository": "gotamer/yarn",
+      "revision": "a8dd58fd0bd33f1b95cc273c5dc5812254eced81",
+      "file": "internal/logo.svg",
+      "license": "MIT (Yarn.social project)",
+      "identityUrl": "https://yarn.social/",
+      "referenceUrl": "https://yarn.social/logo.png",
+      "modifications": "Removed pod-name template and cropped unused text region; kept official icon paths and brand blue #55acee"
+    },
+    "yopass": {
+      "source": "selfhst",
+      "icon": "yopass",
+      "sha256": "81cb299c90e4251d838f69216595d72df9d053153a85b89181e819203ebec517"
+    },
+    "your-spotify": {
+      "source": "selfhst",
+      "icon": "your-spotify",
+      "sha256": "bd1759855a942ab87ca0422d165aa70d96154b0124d448b5f973c6a82d5e9a6b"
+    },
+    "yourls": {
+      "source": "selfhst",
+      "icon": "yourls",
+      "sha256": "6ce62d38d8bbca62f6cd98da4e32d9239e1a896725ea791c2fa288a4c4b5177e"
+    },
+    "yuvomi": {
+      "source": "selfhst",
+      "icon": "yuvomi",
+      "sha256": "037d9ed9ae1ab7d385dedb29d9bb731b5021d9dab095d743c97606c274f88e0a"
+    },
+    "zabbix": {
+      "source": "selfhst",
+      "icon": "zabbix",
+      "sha256": "d2504440282f2e795c81e289b494829d8c6cf74eaf0b25bd65d04a08f2acc001"
+    },
+    "zensical": {
+      "source": "selfhst",
+      "icon": "zensical",
+      "sha256": "e629d772ba487c3c5058190b2794daa5fcf3e1cd3375c6d945d2ac9a873007c5"
+    },
+    "zincsearch": {
+      "source": "simple-icons",
+      "icon": "zincsearch",
+      "sha256": "277982bf364a38a573dcae776b14218046353494c404b0d35e5908298071f078"
+    },
+    "zipline": {
+      "source": "selfhst-png",
+      "icon": "zipline",
+      "sha256": "58e36a4b902ca25163941ac3f4e73f142c65c61b9a21dcecd8bd4ff020953a6d",
+      "originGitSha": "c52ca4f08ea60da275f344d0a11eae47a2c42f35",
+      "originSha256": "3cfe2a24876d6aa5ed2c312ea827380c171ebbb65d1aa868dfb9b2aa7d94999a"
+    },
+    "zitadel": {
+      "source": "selfhst",
+      "icon": "zitadel",
+      "sha256": "b077181b4610f6178b147ccfca56bbcf710552ccf39dada4c509787f55b68528"
+    },
+    "zulip": {
+      "source": "selfhst",
+      "icon": "zulip",
+      "sha256": "52065d8d617b6a9faf634bb6221431226246af59be309dde1f7f48b68c266659"
+    }
+  }
+}

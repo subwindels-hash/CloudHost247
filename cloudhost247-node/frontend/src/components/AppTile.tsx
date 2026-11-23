@@ -1,33 +1,11 @@
-import { useState } from 'react';
 import type { MarketplaceApp } from '../lib/marketplace-api';
+import PlatformLogo from './PlatformLogo';
 
-/**
- * Deterministic "letter tile" logo. Most catalog apps have no bundled logo asset, and loading
- * third-party images leaks browsing data to external CDNs — instead, every app gets a stable,
- * brand-colored tile derived from its slug. Admins can set a real logo_url later; this tile is
- * the honest, self-contained default.
- */
-const PALETTE = ['#101e2c', '#5f450a', '#183646', '#2b2415'];
-const MARKS = new Set(Object.keys(import.meta.glob('../../../../manifests/*/manifest.yaml', { query: '?raw', import: 'default' })).map(path => path.split('/').slice(-2)[0]));
-
+/** The marketplace and platform catalogue use the same code-rendered logo registry. */
 export default function AppTile({ name, slug, size = 44 }: { name: string; slug: string; size?: number }) {
-  const [failed, setFailed] = useState(false);
-  if (MARKS.has(slug) && !failed) return <img src={`/media/cloudhost247/applications/marks/${encodeURIComponent(slug)}.svg`} width={size} height={size} alt="" loading="lazy" onError={() => setFailed(true)} />;
-  const colorIndex = [...slug].reduce((acc, char) => acc + char.charCodeAt(0), 0) % PALETTE.length;
-  const initials = name
-    .replace(/[^a-zA-Z0-9 ]/g, '')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase() ?? '')
-    .join('');
   return (
-    <span
-      className="ch247-app-tile"
-      aria-hidden="true"
-      style={{ width: size, height: size, background: PALETTE[colorIndex], fontSize: Math.round(size * 0.38) }}
-    >
-      {initials || '?'}
+    <span className="ch247-app-tile" style={{ width: size, height: size }}>
+      <PlatformLogo slug={slug} name={name} className="ch247-app-tile__mark" />
     </span>
   );
 }

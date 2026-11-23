@@ -771,7 +771,7 @@ is what the live run above is for.
 
 ## Control Panel & Application Platform Catalog (Phase 3)
 
-The centralized platform supports all 18 hosting control panels and PaaS platforms across 3 primary categories:
+The platform defines 18 control-panel and PaaS adapters across 3 primary categories. The separate read-only directory lists 1,091 software projects; inclusion in that directory does **not** establish deployability or availability:
 
 1. **Web Hosting Panels (`SERVER_PANEL`)**: cPanel & WHM, Plesk Obsidian, DirectAdmin, CyberPanel, HestiaCP, CloudPanel, aaPanel, FASTPANEL, Webuzo, Webmin, TinyCP, Kusanagi.
 2. **Application Deployment & PaaS (`APPLICATION_DEPLOYMENT_PLATFORM`)**: Dokploy, Coolify, Easypanel, Cloudron, Cosmos Cloud.
@@ -780,9 +780,10 @@ The centralized platform supports all 18 hosting control panels and PaaS platfor
 ### Architecture & APIs
 
 - **Catalog & Plans Schema**: Migration `0043_create_control_panels_and_plans.sql` stores normalized platform capabilities, hardware requirements (min CPU, RAM, disk), compatible operating systems, and commercial licensing tiers (`control_panel_plans`).
-- **Brand Assets**: Official SVG vectors located in `/panel-logos/`.
+- **Brand Assets**: The Node SPA renders project-identifying SVG paths in code (`frontend/src/components/PlatformLogo.tsx`); the former `/panel-logos/` image directory was removed. Currently 831 of the 1,091 directory entries have provisional source-matched marks; the other 260 explicitly show “SVG pending”. Artwork coverage is not commercial trademark clearance. See `docs/platform-logo-coverage.md`.
 - **Public Endpoints**:
-  - `GET /api/v1/control-panels` — Filterable marketplace catalog with starting prices and supported OSes.
+  - `GET /api/v1/control-panels` — Database-backed marketplace catalog with starting prices and supported OSes.
+  - `GET /api/v1/control-panels/catalog` — Paged public project directory with global search and category/licence filters; directory entries do not imply installation support.
   - `GET /api/v1/control-panels/:slug` — Platform detail specification with native capabilities checklist and commercial licensing tiers.
   - `GET /api/v1/control-panel-plans` — Available commercial plans per platform.
 - **Admin Endpoints**:

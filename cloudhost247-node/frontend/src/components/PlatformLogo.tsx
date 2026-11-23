@@ -1,21 +1,20 @@
 /**
- * Inline brand marks for the 18 supported control panels & application platforms.
- *
- * The catalog (`ControlPanelsPage` / `ControlPanelDetailPage`) renders every logo as
- * **inline SVG authored in code** — no `<img>` and no external logo files. Marks are the
- * vendors' official artwork (paths collected from the vendors' own repositories / sites) or,
- * where no vector asset exists, faithful vector tracings of the official raster artwork.
- * Unknown slugs fall back to a deterministic initials tile, also drawn in code.
+ * Vendor-identifying artwork is always rendered as SVG paths in React code, never
+ * fetched as an image. Fourteen earlier project-specific panel vectors remain inline below;
+ * remaining sourced vectors live in lazily loaded generated TSX chunks. Unknown
+ * slugs display an explicit "SVG pending" state, not a made-up branded monogram.
+ * See docs/platform-logo-coverage.md for per-slug provenance and gaps.
  */
 import type { JSX } from 'react';
-import { useMemo } from 'react';
+import { Suspense } from 'react';
+import InlineCatalogueLogo, { hasCodeRenderedLogo, isWideCodeRenderedLogo } from '../data/generated-platform-icons/registry';
 
 export interface PlatformLogoProps {
-  /** Catalogue slug, e.g. `cpanel`, `dokploy`. */
   slug: string;
-  /** Display name used for the accessible label and the fallback initials. */
   name: string;
   className?: string;
+  /** Reserved for compact layout; never switches to a generic/image replacement. */
+  compact?: boolean;
 }
 
 interface Mark {
@@ -97,35 +96,6 @@ const MARKS: Record<string, Mark> = {
       <path fill="#006ad0" d="M15.676 13.634a4.96 4.96 0 0 0-2.363-1.649v-.06c0-2.823-2.208-5.124-4.93-5.124-2.724 0-4.933 2.296-4.933 5.125v.07C1.456 12.649 0 14.591 0 16.882c0 2.823 2.21 5.125 4.932 5.125a4.83 4.83 0 0 0 3.465-1.475 4.82 4.82 0 0 0 3.461 1.475c2.717 0 4.933-2.296 4.933-5.125 0-1.18-.4-2.334-1.115-3.248m-3.818 7.077c-2.031 0-3.685-1.718-3.685-3.83a.637.637 0 0 0-.623-.646.634.634 0 0 0-.624.647c0 .957.257 1.855.696 2.622a3.6 3.6 0 0 1-2.69 1.213c-2.032 0-3.687-1.719-3.687-3.83s1.655-3.829 3.687-3.829c.44 0 .868.082 1.278.234.005 0 .009.005.014.005.142.05.342.147.404.201a.6.6 0 0 0 .874-.07.66.66 0 0 0-.068-.91c-.272-.239-.696-.402-.8-.44a4.8 4.8 0 0 0-1.697-.31q-.118-.001-.236.005c.084-2.04 1.702-3.671 3.687-3.671 2.031 0 3.685 1.718 3.685 3.83a3.9 3.9 0 0 1-1.55 3.122.663.663 0 0 0-.147.898c.12.174.315.272.509.272.125 0 .25-.038.361-.12a5.16 5.16 0 0 0 1.895-2.812c1.424.549 2.413 1.979 2.413 3.595-.005 2.106-1.659 3.824-3.696 3.824" />
     ),
   },
-  aapanel: {
-    viewBox: '0 0 180 180',
-    content: (
-      <>
-        <defs>
-          <linearGradient id="aapanelA" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#36d04a"/><stop offset="1" stopColor="#20a53a"/>
-          </linearGradient>
-        </defs>
-        <rect x="0" y="0" width="180" height="180" rx="40" fill="url(#aapanelA)" />
-        <text x="90" y="118" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontSize="88" fill="#ffffff">aa</text>
-      </>
-    ),
-  },
-  fastpanel: {
-    viewBox: '0 0 48 48',
-    content: (
-      <>
-        <defs>
-          <linearGradient id="platform-logo-fastpanel" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#1fa9e5" />
-            <stop offset="1" stopColor="#155fbe" />
-          </linearGradient>
-        </defs>
-        <circle cx="24" cy="24" r="21.5" fill="url(#platform-logo-fastpanel)" />
-        <text x="24" y="33.4" textAnchor="middle" fontFamily="'Arial Black', Arial, Helvetica, sans-serif" fontWeight={900} fontStyle="italic" fontSize="26" fill="#ffffff">F</text>
-      </>
-    ),
-  },
   webuzo: {
     viewBox: '0 0 232 246',
     content: (
@@ -135,22 +105,6 @@ const MARKS: Record<string, Mark> = {
         <path fill="#FEC144" fillRule="evenodd" d="M 217 110.068 C 200.326 114.422, 180.307 123.845, 143.071 144.866 C 131.284 151.520, 116.884 158.969, 111.071 161.420 C 85.139 172.350, 56.297 177.618, 26.589 176.850 L 12.042 176.474 16.771 181.318 C 23.794 188.512, 36.095 197.490, 44.404 201.486 C 65.973 211.860, 85.860 211.582, 115.500 200.489 C 136.492 192.633, 152.890 183.369, 192.787 156.828 C 206.758 147.534, 221.296 138.365, 225.094 136.452 L 232 132.975 232 120.487 L 232 108 228.250 108.055 C 226.188 108.085, 221.125 108.991, 217 110.068" />
         <path fill="#5643C2" fillRule="evenodd" d="M 224.408 164.883 C 221.058 166.468, 209.808 173.525, 199.408 180.566 C 160.561 206.864, 156.362 209.597, 150.500 212.400 C 127.894 223.209, 98.034 228.897, 70.500 227.640 L 57.500 227.046 66.500 231.661 C 117.003 257.560, 177.122 246.182, 214.888 203.579 C 217.852 200.235, 222.915 193.463, 226.138 188.529 L 232 179.558 232 170.779 C 232 165.950, 231.662 162, 231.250 162.001 C 230.838 162.001, 227.759 163.298, 224.408 164.883" />
       </>
-    ),
-  },
-  tinycp: {
-    viewBox: '0 0 48 48',
-    content: (
-      <>
-        <rect x="3" y="3" width="42" height="42" rx="9" fill="#0b8e4e" />
-        <polyline points="13,16.5 22,24 13,31.5" fill="none" stroke="#ffffff" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round" />
-        <line x1="25.5" y1="32" x2="34" y2="32" stroke="#ffffff" strokeWidth="4.4" strokeLinecap="round" />
-      </>
-    ),
-  },
-  kusanagi: {
-    viewBox: '0 0 320 64',
-    content: (
-      <text x="160" y="46" textAnchor="middle" fontFamily="'Arial Black', Arial, Helvetica, sans-serif" fontWeight={900} fontStyle="italic" fontSize="38" letterSpacing="1.5" fill="#17171c">KUSANAGI</text>
     ),
   },
   dokploy: {
@@ -229,57 +183,53 @@ export function isKnownPlatformSlug(slug: string | null | undefined): boolean {
   return Boolean(slug) && Object.prototype.hasOwnProperty.call(MARKS, String(slug));
 }
 
-const FALLBACK_PALETTES: Array<[string, string]> = [
-  ['#2563eb', '#1d4ed8'], // blue
-  ['#7c3aed', '#5b21b6'], // violet
-  ['#059669', '#047857'], // emerald
-  ['#d97706', '#b45309'], // amber
-  ['#dc2626', '#991b1b'], // red
-  ['#0891b2', '#0e7490'], // cyan
-  ['#db2777', '#9d174d'], // pink
-  ['#4f46e5', '#3730a3'], // indigo
-  ['#0d9488', '#115e59'], // teal
-  ['#ea580c', '#c2410c'], // orange
-];
+/** Let wordmarks breathe instead of squeezing them into a 38px square. */
+export function isWidePlatformLogo(slug: string): boolean {
+  return slug === 'plesk' || isWideCodeRenderedLogo(slug);
+}
 
-function hashSlug(slug: string): number {
-  let h = 0;
-  for (let i = 0; i < slug.length; i += 1) {
-    h = (h * 31 + slug.charCodeAt(i)) >>> 0;
-  }
-  return h;
+function LogoUnavailable({ name, className, loading = false }: { name: string; className?: string; loading?: boolean }) {
+  return (
+    <span
+      className={`${className ?? ''} ch247-platform-logo-unavailable`}
+      role="status"
+      aria-label={loading ? `Loading ${name} logo` : `Verified SVG logo pending for ${name}`}
+      title={loading ? undefined : `The ${name} project has a logo; a verified SVG rendition is pending`}
+    >
+      {loading ? '…' : 'SVG pending'}
+    </span>
+  );
 }
 
 export default function PlatformLogo({ slug, name, className }: PlatformLogoProps) {
-  const initials = useMemo(() => {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    const letters = (parts.length === 1 ? parts[0]!.slice(0, 2) : parts[0]![0]! + parts[1]![0]!).toUpperCase();
-    return letters || '?';
-  }, [name]);
-
   const mark = MARKS[slug];
-  if (!mark) {
-    const [c1, c2] = FALLBACK_PALETTES[hashSlug(slug) % FALLBACK_PALETTES.length]!;
-    const gradId = `platform-fallback-${slug.replace(/[^a-z0-9]/gi, '') || 'x'}`;
-    return (
-      <svg viewBox="0 0 48 48" className={className} role="img" aria-label={`${name} logo`}>
-        <defs>
-          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={c1} />
-            <stop offset="100%" stopColor={c2} />
-          </linearGradient>
-        </defs>
-        <rect width="48" height="48" rx="12" fill={`url(#${gradId})`} />
-        <rect x="1.5" y="1.5" width="45" height="45" rx="10.5" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1" />
-        <text x="24" y="30" textAnchor="middle" fontFamily="Arial, Helvetica, sans-serif" fontWeight={800} fontSize="17" fill="#ffffff" letterSpacing="0.5">{initials}</text>
-      </svg>
-    );
+  if (mark) {
+    return <svg viewBox={mark.viewBox} className={className} role="img" aria-label={`${name} logo`} preserveAspectRatio="xMidYMid meet">{mark.content}</svg>;
   }
-  return (
-    <svg viewBox={mark.viewBox} className={className} role="img" aria-label={`${name} logo`} preserveAspectRatio="xMidYMid meet">
-      {mark.content}
-    </svg>
-  );
+  if (hasCodeRenderedLogo(slug)) {
+    const logo = (
+      <Suspense fallback={<LogoUnavailable name={name} className={className} loading />}>
+        <InlineCatalogueLogo slug={slug} className={`${className ?? ''}${slug === 'galaxy' ? ' ch247-platform-logo--dark-ground' : ''}`.trim()} role="img" aria-label={`${slug === 'vault' ? 'HashiCorp Vault' : name} logo`} preserveAspectRatio="xMidYMid meet" />
+      </Suspense>
+    );
+    // The ASF permits website use of project graphic marks as links to the
+    // corresponding project. Xibo likewise permits its mark as a link to Xibo;
+    // HashiCorp requires a link for permitted Vault project identification.
+    // Linking does NOT authorize use of these marks as CloudHost247 service badges.
+    const officialProject = /^apache-[a-z0-9-]+$/.test(slug)
+      ? { url: `https://${slug.slice(7)}.apache.org/`, label: `Official ${name} project website` }
+      : slug === 'vault'
+        ? { url: 'https://developer.hashicorp.com/vault', label: 'HashiCorp Vault project website' }
+        : slug === 'xibo-cms'
+          ? { url: 'https://xibosignage.com/', label: 'Xibo official website' }
+          : null;
+    return officialProject ? (
+      <a className="ch247-platform-logo-link" href={officialProject.url} target="_blank" rel="noopener noreferrer" aria-label={officialProject.label}>
+        {logo}
+      </a>
+    ) : logo;
+  }
+  return <LogoUnavailable name={name} className={className} />;
 }
 
 export { KNOWN as KNOWN_PLATFORM_SLUGS };

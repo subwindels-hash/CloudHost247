@@ -20,6 +20,9 @@
 .ch247-panel-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(15,23,42,.08);border-color:#cbd5e1}
 .ch247-panel-card__header{display:flex;align-items:center;gap:1rem;margin-bottom:.85rem}
 .ch247-panel-card__logo-wrap{width:52px;height:52px;border-radius:10px;background:#f5f5f3;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;padding:6px;flex-shrink:0}
+/* Wordmarks need a horizontal slot: at 38px square Kusanagi was unreadable. */
+.ch247-panel-card__logo-wrap--wide{width:112px;max-width:40%}
+.ch247-panel-card__header>div:last-child{min-width:0}
 .ch247-panel-card__logo{width:100%;height:100%;object-fit:contain}
 .ch247-panel-card__logo-fallback{font-weight:800;color:var(--ch247-primary, #5f450a);font-size:1.1rem}
 .ch247-panel-card__title{font-size:1.2rem;font-weight:700;color:#0f172a;margin:0 0 .25rem}
@@ -47,6 +50,7 @@
 /* Panel Detail Page */
 .ch247-panel-detail-header{display:grid;grid-template-columns:auto 1fr auto;gap:2rem;align-items:center;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:2rem;margin-bottom:1.5rem}
 .ch247-panel-detail-header__logo-wrap{width:88px;height:88px;border-radius:14px;background:#f5f5f3;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;padding:12px}
+.ch247-panel-detail-header__logo-wrap--wide{width:168px}
 .ch247-panel-detail-header__logo{width:100%;height:100%;object-fit:contain}
 .ch247-panel-detail-header__desc{color:#475569;font-size:1rem;line-height:1.5;margin:.5rem 0}
 .ch247-panel-detail-header__links{display:flex;gap:1.25rem;font-size:.88rem;margin-top:.5rem}
@@ -148,6 +152,55 @@
   font-size: 0.82rem;
   font-weight: 600;
   color: #b45309;
+}
+
+/* SVG code replaces old OS-image slots in the selector, admin, and server pages. */
+.ch247-os-card__mark, .ch247-os-table-name__mark { width: 44px; height: 44px; object-fit: contain; flex: none; }
+.ch247-os-show-more {
+  display: block;
+  margin: 1rem auto 0;
+  min-height: 44px;
+  padding: .6rem 1.4rem;
+  border: 1px solid #94a3b8;
+  border-radius: 999px;
+  background: #fff;
+  color: #17202a;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ch247-os-show-more:hover { border-color: #475569; background: #f5f5f3; }
+.ch247-os-show-more:focus-visible { outline: 3px solid #a67c00; outline-offset: 2px; }
+.ch247-server-card__os-mark { width: 48px; height: 48px; object-fit: contain; flex: none; }
+.ch247-server-hero__os-mark { width: 64px; height: 64px; object-fit: contain; flex: none; }
+
+/* Galaxy's first-party white-and-gold wordmark is intended for a dark ground.
+   Give it contrast in every logo slot without changing its vector paths. */
+.ch247-platform-logo--dark-ground { background: #182448; border-radius: 4px; }
+
+/* Marks subject to a link-back policy point to the official project everywhere. */
+.ch247-platform-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* An unsourced SVG means only that our rendition is pending, not that the
+   project's actual logo does not exist. Never invent a vendor badge. */
+.ch247-platform-logo-unavailable {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  color: #475569;
+  font: 600 9px/1.1 system-ui, sans-serif;
+  text-align: center;
+  overflow: hidden;
 }
 
 /* Admin control-panels table: inline PlatformLogo render slot */

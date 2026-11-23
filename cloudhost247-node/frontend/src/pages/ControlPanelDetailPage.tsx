@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { fetchControlPanel, type ControlPanelDetail } from '../lib/control-panels-api';
-import PlatformLogo from '../components/PlatformLogo';
+import PlatformLogo, { isWidePlatformLogo } from '../components/PlatformLogo';
 
 export default function ControlPanelDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -65,7 +65,7 @@ export default function ControlPanelDetailPage() {
       </nav>
 
       <header className="ch247-panel-detail-header">
-        <div className="ch247-panel-detail-header__logo-wrap">
+        <div className={`ch247-panel-detail-header__logo-wrap${isWidePlatformLogo(panel.slug) ? ' ch247-panel-detail-header__logo-wrap--wide' : ''}`}>
           <PlatformLogo slug={panel.slug} name={panel.name} className="ch247-panel-detail-header__logo" />
         </div>
         <div className="ch247-panel-detail-header__info">
