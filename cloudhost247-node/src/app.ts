@@ -15,6 +15,7 @@ import { registerEmailAuthenticationRoutes } from './routes/email-authentication
 import { registerEmailForwarderRoutes } from './routes/email-forwarders';
 import { registerWordPressRoutes } from './routes/wordpress';
 import { registerIpAddressRoutes } from './routes/ip-addresses';
+import { registerLiveChatRoutes } from './routes/live-chat';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
 import { registerVisitorIpRoute } from './routes/visitor-ip';
@@ -221,6 +222,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // IP address inventory (E12 — E VPS): internal free/assigned/reserved pool; no
     // external provider allocation yet.
     await registerIpAddressRoutes(instance, env, pool);
+    // Live chat (K03 — K Support): internal customer↔staff conversations; no
+    // third-party chat provider configured.
+    await registerLiveChatRoutes(instance, env, pool);
     // Automatic renewal controls (I12): auto-renew toggle for customer domains.
     await registerDomainAutoRenewRoutes(instance, env, pool);
     // Agency / reseller hosting (W10, J Agency core): staff-managed agencies, clients and
