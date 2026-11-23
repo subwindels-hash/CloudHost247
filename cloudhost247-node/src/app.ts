@@ -10,6 +10,7 @@ import { registerIncidentRoutes } from './routes/incidents';
 import { registerAbuseReportRoutes } from './routes/abuse-reports';
 import { registerAgencyRoutes } from './routes/agency';
 import { registerAuthRoutes } from './routes/auth';
+import { registerDomainAutoRenewRoutes } from './routes/domain-auto-renew';
 import { registerEmailAuthenticationRoutes } from './routes/email-authentication';
 import { registerEmailForwarderRoutes } from './routes/email-forwarders';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
@@ -212,6 +213,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerEmailAuthenticationRoutes(instance, env, pool);
     // Email forwarding rules (G06): tenant-scoped forwarders; no mail provider activated.
     await registerEmailForwarderRoutes(instance, env, pool);
+    // Automatic renewal controls (I12): auto-renew toggle for customer domains.
+    await registerDomainAutoRenewRoutes(instance, env, pool);
     // Agency / reseller hosting (W10, J Agency core): staff-managed agencies, clients and
     // reseller packages. Display-only under the D2 financial freeze.
     await registerAgencyRoutes(instance, env, pool);
