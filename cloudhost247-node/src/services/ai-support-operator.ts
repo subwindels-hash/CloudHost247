@@ -62,6 +62,14 @@ export interface OperatorDecision {
   origin?: 'reviewed' | 'website';
   /** Suggested next questions, built from what was retrieved. */
   followUps?: string[];
+  /** Structured handoff context for human agents when kind === 'ESCALATE'. */
+  escalationSummary?: {
+    reason: EscalationReason;
+    intent: string;
+    queryPreview: string;
+    turnCount: number;
+    currentPath?: string | null;
+  };
 }
 
 export interface OperatorContext {
@@ -90,13 +98,26 @@ const ACCOUNT_ACTION = /\b(?:transfer|delete|cancel|renew)\s+my\s+|\b(?:can you|
 const PRICE_REQUEST = /\b(?:price|pricing|cost|how much|fee|fees|cheapest|cheap|affordable|budget|plan|plans)\b/i;
 const LOST_ACCESS = /\b(?:cannot|can't|unable to|forgot|lost)\b.{0,40}\b(?:log ?in|sign ?in|access (?:my )?account|password|account)\b|\b(?:locked out|account locked)\b/i;
 
-const noAnswer = (intent: string, reason: EscalationReason, body: string, confidence = 0.1): OperatorDecision => ({
+const noAnswer = (
+  intent: string,
+  reason: EscalationReason,
+  body: string,
+  confidence = 0.1,
+  meta?: { query?: string; turnCount?: number; currentPath?: string | null },
+): OperatorDecision => ({
   kind: 'ESCALATE',
   body,
   intent,
   confidence,
   sources: [],
   reason,
+  escalationSummary: {
+    reason,
+    intent,
+    queryPreview: (meta?.query ?? '').trim().slice(0, 160),
+    turnCount: meta?.turnCount ?? 1,
+    ...(meta?.currentPath !== undefined ? { currentPath: meta.currentPath } : {}),
+  },
 });
 
 /** Catalogue product names, used only to cite what the reviewed answer refers to. */
