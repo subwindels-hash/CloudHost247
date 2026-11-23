@@ -1,0 +1,35 @@
+/**
+ * @package RosarioSIS
+ * @version 13.0.3 - October, 2026
+ * @copyright (C) 2004-2009 The Miller Group
+ * @copyright (C) 2006 Andrew Schmadeke (Discipline & Student Billing modules)
+ * @copyright (C) 2009 Glenn-Abbey Software
+ * @copyright (C) 2009 Learners Circle
+ * @copyright (C) 2012-2026 François Jacquet
+ * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU/GPLv2 or later
+ *
+ * Dependencies included in this package:
+ * @see their respective files for version, copyright and license
+ * Javascript, under assets/js/:
+ * - Charts.js
+ * - Colorbox
+ * - DOMPurify
+ * - jquery-minicolors
+ * - jquery-select2
+ * - jscalendar
+ * - marked
+ * - zxcvbn
+ * - jQuery
+ *
+ * PHP, under classes/:
+ * - Markdownify
+ * - PhpMyAdmin\MoTranslator
+ * - Symfony\Polyfill: Mbstring, Iconv, Ctype
+ * - XML-RPC
+ * - Services_JSON
+ * - PHPMailer\PHPMailer
+ * - phpwkhtmltopdf
+ * - Shuchkin\SimpleXLSXGen
+ * - Parsedown
+ * - Security
+ */

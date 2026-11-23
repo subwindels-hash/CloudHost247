@@ -25,8 +25,8 @@ describe('Control Panels & Application Platforms: code-rendered marks', () => {
   it('has one auditable, pinned vector per sourced slug, without pretending every entry is covered', () => {
     expect(catalogue.size).toBe(1_091);
     expect(KNOWN_PLATFORM_SLUGS).toHaveLength(14);
-    expect(referenced).toHaveLength(817);
-    expect(new Set([...KNOWN_PLATFORM_SLUGS, ...referenced]).size).toBe(831);
+    expect(referenced).toHaveLength(965);
+    expect(new Set([...KNOWN_PLATFORM_SLUGS, ...referenced]).size).toBe(979);
     for (const slug of referenced) {
       expect(catalogue.has(slug), slug).toBe(true);
       expect(KNOWN_PLATFORM_SLUGS, slug).not.toContain(slug);
@@ -36,11 +36,11 @@ describe('Control Panels & Application Platforms: code-rendered marks', () => {
       expect(logoSources.collections[source.source as keyof typeof logoSources.collections], slug).toHaveProperty('license');
     }
     const missing = PLATFORM_CATALOG.filter(({ slug }) => !hasSourcedMark(slug));
-    expect(missing).toHaveLength(260);
+    expect(missing).toHaveLength(112);
     expect(missing.map(({ slug }) => slug)).toContain('budge'); // upstream file is the React boilerplate atom, not a project logo
     expect(missing.map(({ slug }) => slug)).toContain('auto-ontology'); // NVIDIA's mark is not project-specific
     expect(missing.map(({ slug }) => slug)).toContain('canarytokens'); // first-party asset has special GPL terms; clarify before embedding
-    expect(missing.map(({ slug }) => slug)).toContain('apollo'); // first-party PNG trace damages its letters
+    expect(missing.map(({ slug }) => slug)).not.toContain('apollo'); // reviewed GMOD wordmark, not Apollo GraphQL
     expect(missing.map(({ slug }) => slug)).toContain('znc'); // available PNG trace distorts its distinctive wordmark
     expect(missing.map(({ slug }) => slug)).toContain('firefly'); // first-party graphic is personal-use only
     expect(missing.map(({ slug }) => slug)).toContain('plone'); // commercial mark use requires an agreement
@@ -63,7 +63,7 @@ describe('Control Panels & Application Platforms: code-rendered marks', () => {
   });
 
   it('loads real SVG paths as React code from each pinned source collection', async () => {
-    for (const slug of ['almalinux', 'debian', 'rocky-linux', 'ubuntu', 'alpine-linux', 'arch-linux', 'centos', 'cloudlinux', 'wordpress', 'apache-airflow', 'gogs', 'apache-couchdb', 'grafana-loki', 'dashy', 'zipline', 'lychee', 'apprise-api', 'flagsmith', 'fleet', 'phoenix', 'yarn', 'photoview', 'cap', 'n8n-queue-mode', 'airsonic-advanced', 'changedetection-io', 'gns3-server', 'xibo-cms', 'apache-hop', 'apache-pinot', 'apache-zeppelin', 'lightdash', 'lightrag', 'usesend', 'sillytavern', 'shoutrrr', 'galaxy', 'indico', 'code-server', 'starrocks', 'tensorzero', 'hasura-graphql-engine', 'corteza', 'illa-builder', 'loomio', 'nuclio', 'rivet', 'sim-studio', 'sqlpage', 'wintercms', 'nextchat', 'agenta', 'classicpress', 'cvat', 'db-browser-for-sqlite', 'exelearning', 'featbit', 'flexget', 'gitingest', 'hfs', 'horilla', 'openremote', 'spice-ai', 'steel-browser', 'universal-media-server', 'webthings-gateway', 'aureuserp', 'argilla', 'dhis2', 'fuxa', 'insforge', 'kafbat-kafka-ui', 'lavinmq', 'openmausbot', 'freellmapi', 'serverstatus', 'agentmemory', 'archivesspace', 'beaverhabits', 'cognee', 'foxel', 'home-gallery', 'hoop', 'huggingchat-chat-ui', 'kotaemon', 'krayin-crm']) {
+    for (const slug of ['almalinux', 'debian', 'rocky-linux', 'ubuntu', 'alpine-linux', 'arch-linux', 'centos', 'cloudlinux', 'wordpress', 'apache-airflow', 'gogs', 'apache-couchdb', 'grafana-loki', 'dashy', 'zipline', 'lychee', 'apprise-api', 'flagsmith', 'fleet', 'phoenix', 'yarn', 'photoview', 'cap', 'n8n-queue-mode', 'airsonic-advanced', 'changedetection-io', 'gns3-server', 'xibo-cms', 'apache-hop', 'apache-pinot', 'apache-zeppelin', 'lightdash', 'lightrag', 'usesend', 'sillytavern', 'shoutrrr', 'galaxy', 'indico', 'code-server', 'starrocks', 'tensorzero', 'hasura-graphql-engine', 'corteza', 'illa-builder', 'loomio', 'nuclio', 'rivet', 'sim-studio', 'sqlpage', 'wintercms', 'nextchat', 'agenta', 'classicpress', 'cvat', 'db-browser-for-sqlite', 'exelearning', 'featbit', 'flexget', 'gitingest', 'hfs', 'horilla', 'openremote', 'spice-ai', 'steel-browser', 'universal-media-server', 'webthings-gateway', 'aureuserp', 'argilla', 'dhis2', 'fuxa', 'insforge', 'kafbat-kafka-ui', 'lavinmq', 'openmausbot', 'freellmapi', 'serverstatus', 'agentmemory', 'archivesspace', 'beaverhabits', 'cognee', 'foxel', 'home-gallery', 'hoop', 'huggingchat-chat-ui', 'kotaemon', 'krayin-crm', 'decidim', 'maxkb', 'otobo', 'quasarr', 'ekuiper', 'immudb', 'open-monograph-press', 'open-journal-systems', 'readyset', 'tyk-gateway', 'sherlock', 'thinkdashboard', 'coral-talk', 'kiwix-serve', 'casibase', 'judge0-ce', 'fusio', 'crawl4ai', 'autobase', 'osrm', 'apache-streampark', 'alerta', 'traduora', 'daptin', 'vane', 'centrifugo', 'annif', 'eve', 'isso', 'synclounge', 'ldap-account-manager', 'dspace', 'microcks', 'openlit', 'dograh', 'reiverr', 'trudesk', 'sickgear', 'mopidy', 'nsq', 'aitoearn', 'kill-bill', 'parse-server', 'senaite-lims', 'starbase-80', 'thumbor', 'scada-lts', 'ckan', 'dialoqbase', 'domoticz', 'embystat', 'gpt-researcher', 'libredesk', 'owntracks-recorder', 'para', 'posterr', 'smocker', 'speakr', 'dataline', 'expensave', 'readur', 'remark42', 'shynet', 'waline', 'bionic-gpt', 'cheshire-cat-ai', 'domjudge', 'headroom', 'meteroid', 'microweber', 'nod', 'percona-pmm', 'teammapper', 'zeronote', 'faktory', 'redaxo', 'thruk', 'alltube', 'arcadedb', 'artalk', 'big-agi', 'teedy', 'mediago', 'bookshelf', 'classroomio', 'eclipse-hawkbit', 'ever-gauzy', 'faraday', 'feedcraft', 'fleetbase', 'form-io', 'hermes-workspace', 'itflow', 'librebooking', 'lms', 'mistserver', 'openhuman', 'openseo', 'openviking', 'paisa', 'paperclip', 'privategpt', 'pycsw', 'ralph', 'razzia', 'scoold', 'serverkit', 'shipshipship', 'songloft', 'tinode', 'vince-analytics', 'wbo']) {
       const name = catalogue.get(slug)!;
       const { unmount } = render(<PlatformLogo slug={slug} name={name} className="test-icon" />);
       const logo = await screen.findByRole('img', { name: `${name} logo` });
@@ -74,6 +74,73 @@ describe('Control Panels & Application Platforms: code-rendered marks', () => {
       expect(document.querySelector('img, image'), slug).toBeNull();
       unmount();
     }
+  });
+
+  it('keeps white PMM artwork visible and nested FeedCraft geometry independent of tile props', async () => {
+    const { unmount } = render(<PlatformLogo slug="percona-pmm" name="Percona PMM" />);
+    const pmm = await screen.findByRole('img', { name: 'Percona PMM logo' });
+    expect(pmm.classList.contains('ch247-platform-logo--dark-ground')).toBe(true);
+    unmount();
+    for (const slug of ['libredesk', 'dataline', 'reiverr', 'synclounge', 'daptin', 'crawl4ai', 'open-monograph-press', 'open-journal-systems', 'ocs-inventory-ng']) {
+      const view = render(<PlatformLogo slug={slug} name={slug} />);
+      const mark = await screen.findByRole('img', { name: `${slug} logo` });
+      expect(mark.classList.contains('ch247-platform-logo--dark-ground')).toBe(true);
+      view.unmount();
+    }
+    const { default: Group } = await import('../../src/data/generated-platform-icons/f');
+    const { container } = render(<Group slug="feedcraft" width={44} height={44} aria-label="FeedCraft logo" />);
+    const nested = container.querySelector('svg svg');
+    expect(nested?.getAttribute('width')).toBe('288');
+    expect(nested?.hasAttribute('aria-label')).toBe(false);
+    expect(container.querySelectorAll('[aria-label="FeedCraft logo"]')).toHaveLength(1);
+  });
+
+  it('clips publishing taglines without replacing their original wordmark paths', async () => {
+    const { default: Group } = await import('../../src/data/generated-platform-icons/o');
+    for (const [slug, viewBox] of [['open-monograph-press', '0 0 289 128'], ['open-journal-systems', '0 0 231 138']]) {
+      const { container, unmount } = render(<Group slug={slug} width={96} height={64} />);
+      expect(container.querySelector('svg')?.getAttribute('viewBox')).toBe(viewBox);
+      const [, , width, height] = viewBox.split(' ');
+      expect(container.querySelector('clipPath path')?.getAttribute('d')).toBe(`M0 0h${width}v${height}H0z`);
+      expect(container.querySelector('g[clip-path] path')).not.toBeNull();
+      unmount();
+    }
+  });
+
+  it('renders the large reviewed Pydio trace as paths without leftover module boilerplate', async () => {
+    const { default: Group } = await import('../../src/data/generated-platform-icons/p');
+    const { container } = render(<Group slug="pydio-cells" />);
+    expect(container.querySelector('svg')).not.toBeNull();
+    expect(container.querySelectorAll('path').length).toBeGreaterThan(0);
+    expect(container.querySelector('image, script, foreignObject')).toBeNull();
+    expect(container.textContent).not.toMatch(/import |export default/);
+  });
+
+  it('preserves Morphic’s upstream static body and eyes without executing its animation', async () => {
+    const { default: Group } = await import('../../src/data/generated-platform-icons/m');
+    const { container } = render(<Group slug="morphic" />);
+    const svg = container.querySelector('svg')!;
+    expect(svg.getAttribute('viewBox')).toBe('0 0 256 256');
+    expect([...svg.querySelectorAll('circle')].map((circle) =>
+      ['cx', 'cy', 'r'].map((attribute) => circle.getAttribute(attribute))
+    )).toEqual([['128', '128', '128'], ['102', '128', '18'], ['154', '128', '18']]);
+    expect(svg.querySelector('circle')?.getAttribute('fill')).toBe('#000');
+    expect(svg.querySelector('g')?.getAttribute('fill')).toBe('#fff');
+    expect(svg.querySelector('[class], script, image, animate')).toBeNull();
+  });
+
+  it('retains MaxKB gradients and resolves their scoped references', async () => {
+    const { default: Group } = await import('../../src/data/generated-platform-icons/m');
+    const { container } = render(<Group slug="maxkb" />);
+    const svg = container.querySelector('svg')!;
+    expect(svg.querySelectorAll('linearGradient').length).toBeGreaterThan(0);
+    const ids = new Set([...svg.querySelectorAll('[id]')].map((element) => element.id));
+    const refs = [...svg.querySelectorAll('path')]
+      .map((element) => (element.style.fill || element.getAttribute('fill') || '').match(/url\(["']?#([^"')]+)["']?\)/)?.[1])
+      .filter((id): id is string => Boolean(id));
+    expect(refs.length).toBeGreaterThan(0);
+    for (const id of refs) expect(ids.has(id), id).toBe(true);
+    expect(svg.querySelector('stop[stop-color="#3370FF"]')).not.toBeNull();
   });
 
   it('uses the same inline paths on marketplace cards and on the platform catalogue', async () => {
@@ -126,7 +193,7 @@ describe('Control Panels & Application Platforms: code-rendered marks', () => {
   });
 
   it('does not mislabel an initial, generic icon, URL, or embedded raster as a vendor logo', () => {
-    for (const slug of ['apollo', 'firefly', 'znc', 'plone', 'wireguard-easy', 'atomic-server', 'aapanel', 'fastpanel', 'tinycp', 'kusanagi', 'sherlock', 'not-in-the-catalogue']) {
+    for (const slug of ['firefly', 'znc', 'plone', 'wireguard-easy', 'atomic-server', 'aapanel', 'fastpanel', 'tinycp', 'kusanagi', 'hiccup', 'not-in-the-catalogue']) {
       const name = catalogue.get(slug) ?? 'My Panel';
       const markup = renderToStaticMarkup(<PlatformLogo slug={slug} name={name} />);
       expect(markup, slug).toContain(`Verified SVG logo pending for ${name}`);
@@ -143,6 +210,14 @@ describe('Control Panels & Application Platforms: code-rendered marks', () => {
     expect(source.yarn.repository).toBe('gotamer/yarn');
     expect(source.yarn.file).toBe('internal/logo.svg'); // Yarn.social, not yarnpkg
     expect(source.phoenix.repository).toBe('Arize-ai/phoenix'); // not the Elixir framework
+    expect(source['yt-dlp-web-ui'].source).toBe('official-ico');
+    expect(source['yt-dlp-web-ui'].file).toBe('frontend/src/assets/favicon.ico');
+    expect(source['yt-dlp-web-ui'].icoSize).toBe(128);
+    expect(source.codimd.repository).toBe('hackmdio/codimd'); // not HedgeDoc
+    expect(source.pghero.repository).toBe('ankane/pghero');
+    expect(source.pghero.file).toBe('app/assets/images/pghero/favicon.png');
+    expect(source.pgweb.repository).toBe('sosedoff/pgweb');
+    expect(source.pgweb.file).toBe('static/img/icon.png');
     expect(source.photoview.source).toBe('official-png'); // not the flattened third-party diamond
     expect(source.photoview).toHaveProperty('traceProfile', 'gradient-detail');
     expect(source.cap.repository).toBe('tiagozip/cap'); // CAPTCHA, not the Cap.so screen recorder
@@ -196,5 +271,5 @@ describe('Control Panels & Application Platforms: code-rendered marks', () => {
     }
   });
 
-  it.todo('source, review and code-render verified logos for the remaining 260 catalogue entries');
+  it.todo('source, review and code-render verified logos for the remaining 112 catalogue entries');
 });

@@ -209,7 +209,7 @@ export default function PlatformLogo({ slug, name, className }: PlatformLogoProp
   if (hasCodeRenderedLogo(slug)) {
     const logo = (
       <Suspense fallback={<LogoUnavailable name={name} className={className} loading />}>
-        <InlineCatalogueLogo slug={slug} className={`${className ?? ''}${slug === 'galaxy' ? ' ch247-platform-logo--dark-ground' : ''}`.trim()} role="img" aria-label={`${slug === 'vault' ? 'HashiCorp Vault' : name} logo`} preserveAspectRatio="xMidYMid meet" />
+        <InlineCatalogueLogo slug={slug} className={`${className ?? ''}${['galaxy', 'percona-pmm', 'libredesk', 'dataline', 'reiverr', 'synclounge', 'daptin', 'crawl4ai', 'open-monograph-press', 'open-journal-systems', 'ocs-inventory-ng'].includes(slug) ? ' ch247-platform-logo--dark-ground' : ''}`.trim()} role="img" aria-label={`${slug === 'vault' ? 'HashiCorp Vault' : name} logo`} preserveAspectRatio="xMidYMid meet" />
       </Suspense>
     );
     // The ASF permits website use of project graphic marks as links to the

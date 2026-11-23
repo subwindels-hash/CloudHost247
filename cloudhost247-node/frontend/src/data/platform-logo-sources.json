@@ -65,6 +65,13 @@
       "licenseUrl": "https://github.com/",
       "traced": true,
       "generator": "vtracer==0.6.15"
+    },
+    "official-ico": {
+      "license": "Individual upstream project license; see each pinned entry",
+      "licenseUrl": "https://github.com/",
+      "traced": true,
+      "generator": "vtracer==0.6.15",
+      "decoder": "Pillow==13.0.0; explicitly pinned ICO frame"
     }
   },
   "icons": {
@@ -149,6 +156,18 @@
       "identityUrl": "https://github.com/rohitg00/agentmemory",
       "referenceUrl": "https://www.hostinger.com/applications"
     },
+    "agentrun": {
+      "source": "official-png",
+      "icon": "agentrun",
+      "repository": "Parcha-ai/agentrun",
+      "revision": "47fd2ec113ece79fbd59cc1ebff9198e2c15d22e",
+      "file": "docs/assets/readme/wordmark.png",
+      "originGitSha": "67f76b87445978a0749dc21d4dba1e4b9f23c933",
+      "originSha256": "fea2df761f9484e3c4d896ab59cfb88ed8e92ede61fe50ed4eaa6f59deed9ea9",
+      "sha256": "72498eb09aadb5d0109f1b34bb6057470406302bdc030a98cac7227e07416f36",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/Parcha-ai/agentrun"
+    },
     "airsonic-advanced": {
       "source": "selfhst",
       "icon": "airsonic",
@@ -162,10 +181,35 @@
       "icon": "airtrail",
       "sha256": "e5d6ac0c7a80257533fe584644680c10197587d3ab87cc300cf79eb3f5c6638c"
     },
+    "aitoearn": {
+      "source": "official-png",
+      "icon": "aitoearn",
+      "repository": "yikart/AiToEarn",
+      "revision": "11dd1957d0c69ae2b27a0b8a47acdf6675715558",
+      "file": "project/aitoearn-web/public/logo.png",
+      "originGitSha": "c1af481a7179187d7c96ca63d7bb3c9026ddb1c2",
+      "originSha256": "5d1f6dab795f8cf7b0137a653cb769cf8455e80bca9ebe451d06ab7f851ac892",
+      "sha256": "0c0841bd1ba3eacb1bc6dcaf426209c2f1efbfdd75d4a80fe2f171de4f265123",
+      "license": "MIT",
+      "identityUrl": "https://github.com/yikart/AiToEarn"
+    },
     "akaunting": {
       "source": "selfhst",
       "icon": "akaunting",
       "sha256": "304e8e991724dfa9ad6f94e3c41a906c6cfc32e11fb8c57f50a8034a27d4fd07"
+    },
+    "alerta": {
+      "source": "official-png",
+      "icon": "alerta",
+      "repository": "alerta/alerta-webui",
+      "revision": "e6eb99e90901a32e63ee96588ac4dd8804d6831a",
+      "file": "public/favicon-196x196.png",
+      "sha256": "b0951c1bbad001c6b589a365c4fc49a1c77b3728fc20492c5f545caef665bf18",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/alerta/alerta-webui",
+      "originGitSha": "1e8c03abe7df725e18656ab3f225772fe0e041b1",
+      "originSha256": "3460f5f6a89bb18caae9dabde292662eb28932bec113b4f5f40d9436eaa5d2b8",
+      "traceProfile": "light-ground-detail"
     },
     "alexandrie": {
       "source": "selfhst",
@@ -176,6 +220,18 @@
       "source": "selfhst",
       "icon": "alist",
       "sha256": "362e64b8f785faa0e89e52516ed39bf1a4085ea7e3ee7b9e7bf75d699cdb47f6"
+    },
+    "alltube": {
+      "source": "official-png",
+      "icon": "alltube",
+      "repository": "Rudloff/alltube",
+      "revision": "ec95a8f1b7bb0e8862c9a4ba83b2a00a50897d28",
+      "file": "img/logo_app.png",
+      "originGitSha": "6fc6f377c04fbd31f51b3ef86b4edaced3c65d39",
+      "originSha256": "6104da451d0857b02be15724d5e1ed146c92aa6e7aa4bb371724ea511682b2ca",
+      "sha256": "c446e96593f8301e887c3c5c59504c56c8d4a33175038c4cd5a2fd800a8b0599",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/Rudloff/alltube"
     },
     "almalinux": {
       "source": "selfhst",
@@ -203,6 +259,29 @@
       "source": "dashboard",
       "icon": "anaconda",
       "sha256": "2851c02544dfa2d890810e4870c124d1d31230ac476c83eba4ac5e6adccaeac8"
+    },
+    "annif": {
+      "source": "official",
+      "icon": "annif",
+      "repository": "NatLibFi/Annif",
+      "revision": "dabdf6b396a8c5c0c21cb62c7d09b6691da5a680",
+      "file": "annif/static/img/annif-RGB.svg",
+      "sha256": "0352eaf2c6b78d5a31fa105b236cd9c12e61fd469d5a3a31f2661be4f6d5523e",
+      "license": "Apache-2.0 (see Annif-LICENSE.txt)",
+      "identityUrl": "https://github.com/NatLibFi/Annif"
+    },
+    "anonupload": {
+      "source": "official-png",
+      "icon": "anonupload",
+      "repository": "Supernova3339/anonupload",
+      "revision": "11a47b262b70be94eddc8896abc482afa86e5a2a",
+      "file": "assets/images/logo.png",
+      "originGitSha": "d919a687995f30f6e9b4602606c9e16da75624aa",
+      "originSha256": "bedf09c79d85117eed86eb367f6aaae6ef696ac27a13b626e2e70fd266f8c36c",
+      "sha256": "c3c7b51a5da9c345271948d4a6f520c2d9671f938dc27c2e99b124f68ab483e7",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/Supernova3339/anonupload",
+      "traceProfile": "light-ground-upscaled"
     },
     "anythingllm": {
       "source": "selfhst",
@@ -362,6 +441,18 @@
       "icon": "apache-solr",
       "sha256": "c94ede28e354214127e443ec261600db9dbca03a37d964a42b2f63d5d0b4d005"
     },
+    "apache-streampark": {
+      "source": "official-png",
+      "icon": "apache-streampark",
+      "repository": "apache/streampark-website",
+      "revision": "24c0ff6ca47046239a03a5d76ef354d364b2f08f",
+      "file": "static/image/logo.png",
+      "sha256": "ab072e55af64c93a21ad20e270d9378d75e13fc305cb243a669dabd3212afce3",
+      "license": "Apache-2.0",
+      "identityUrl": "https://streampark.apache.org/",
+      "originGitSha": "1bb845979ee634c86dfbe8acf08f3c0f55828dee",
+      "originSha256": "a9edf7c1f1c1b734443c04ed442106519cef97c0288950d1e3a5274a05037d27"
+    },
     "apache-streampipes": {
       "source": "official",
       "icon": "apache-streampipes",
@@ -398,6 +489,19 @@
       "originSha256": "562604c03f109555e90c95025bb8a7b76000ac07b73af4ceaf3d448c2580c3dc",
       "referenceUrl": "https://zeppelin.apache.org/"
     },
+    "apollo": {
+      "source": "official-png",
+      "icon": "apollo",
+      "repository": "GMOD/Apollo",
+      "revision": "eb0b574ae5b5498ce49eaff573db5181c9df8a73",
+      "file": "docs/images/ApolloLogo400px.png",
+      "originGitSha": "98eb327bb0c91c6158c5b7bf2044d9f898bbe30b",
+      "originSha256": "a8b88e9553bc7f9ae782827740cfa376c87d0fcdc7b270f7e9406f49949f956f",
+      "sha256": "18e67d6ebbd36bdd192901c502046e011953e81bb122213a15a9d2dfb465f51c",
+      "traceProfile": "light-ground-upscaled",
+      "license": "BSD-3-Clause",
+      "identityUrl": "https://github.com/GMOD/Apollo"
+    },
     "appflowy": {
       "source": "selfhst",
       "icon": "appflowy",
@@ -433,6 +537,19 @@
       "icon": "arangodb",
       "sha256": "f66d52703f6959549df52b0ddbd4091d6576c63997577bcec19099f80d36be59"
     },
+    "arcadedb": {
+      "source": "official-png",
+      "icon": "arcadedb",
+      "repository": "ArcadeData/arcadedb",
+      "revision": "f691a70afa67a065529195d08783a5fef6194900",
+      "file": "studio/src/main/resources/static/images/arcadedb-logo-square.png",
+      "originGitSha": "4fe49c85912690bf0f907c81d0f5a247572ce740",
+      "originSha256": "f807179de4c092956b1bf782fc9e7cdb559e00a6c81eedb621aa165e6bb5daa8",
+      "sha256": "f235129fec2631c4c1eaf7d82c5d537b6bc7fe60915ee777335867d499f6284b",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/ArcadeData/arcadedb",
+      "traceProfile": "gradient-detail"
+    },
     "arch-linux": {
       "source": "selfhst",
       "icon": "arch-linux",
@@ -465,6 +582,18 @@
       "license": "Apache-2.0 (repository source; trademark rights require independent review)",
       "identityUrl": "https://github.com/argilla-io/argilla",
       "referenceUrl": "https://www.hostinger.com/applications/argilla"
+    },
+    "artalk": {
+      "source": "official-png",
+      "icon": "artalk",
+      "repository": "ArtalkJS/Artalk",
+      "revision": "d284efa60c47835ef50798dadc63543fb85c360b",
+      "file": "docs/docs/images/artalk-logo.png",
+      "originGitSha": "919c6813fb63734f0d33c5aa96b698cc433af2b7",
+      "originSha256": "6896282f57e91898260a91048cd76b604bf8ff39139f48f94d2e4345d2bcdb8c",
+      "sha256": "2a0f043a3467dc29a86cf44a4a6431225fda00ee37097efe8d9cb50734ec643a",
+      "license": "MIT",
+      "identityUrl": "https://github.com/ArtalkJS/Artalk"
     },
     "astrbot": {
       "source": "official",
@@ -501,6 +630,16 @@
       "source": "jabber",
       "icon": "authorizer",
       "sha256": "18a9cbd3eacced0e25a9717f3c1eaf8fc517b870e8435a0dc903a6e724e42844"
+    },
+    "autobase": {
+      "source": "official",
+      "icon": "autobase",
+      "repository": "autobase-tech/docs",
+      "revision": "1250d73e25b6cba6fba3de6a892aedcf346c0e63",
+      "file": "static/img/navbar/logo-icon.svg",
+      "sha256": "35a992af2f031670f2a68e17cefed5352002e32061974962d405f549dea66945",
+      "license": "MIT",
+      "identityUrl": "https://github.com/autobase-tech/docs"
     },
     "autobrr": {
       "source": "selfhst",
@@ -585,10 +724,32 @@
       "icon": "bichon",
       "sha256": "fbfc1ff840d7acbeb6eb6cc2f6d45fe34d26c2f27adb73b4ff68ea5a3cefdb14"
     },
+    "big-agi": {
+      "source": "official-png",
+      "icon": "big-agi",
+      "repository": "enricoros/big-AGI",
+      "revision": "39fad0a0dde0efbcc4d7dea6d4d7340646e6fd10",
+      "file": "public/icons/icon-512x512.png",
+      "originGitSha": "6d77fa40c3478bb8d7075a52926f182110e1e6bd",
+      "originSha256": "6ee8328bfe169b9dfba4b92e563d87778f0b70ca5616924ea11d458494361f79",
+      "sha256": "4fb01877292e71135da744605e1e4a5103c360419ebdb0e673691db8c95882a8",
+      "license": "MIT",
+      "identityUrl": "https://github.com/enricoros/big-AGI"
+    },
     "bigcapital": {
       "source": "selfhst",
       "icon": "bigcapital",
       "sha256": "a57fe701c47f2b5b4e6e89ffbe5798aab0e29c6789613a0bedc05911f3f39b5a"
+    },
+    "bionic-gpt": {
+      "source": "official",
+      "icon": "bionic-gpt",
+      "repository": "bionic-gpt/bionic-gpt",
+      "revision": "a558221bbc22892b77cc1a30684656b1bacc34a8",
+      "file": "crates/web-assets/images/bionic-logo.svg",
+      "sha256": "831b8af1cf56cc37117b8df13fc81ca0fd4376d1167b4786920c04661717359b",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/bionic-gpt/bionic-gpt"
     },
     "bitwarden": {
       "source": "selfhst",
@@ -638,6 +799,16 @@
       "source": "selfhst",
       "icon": "bolt-diy",
       "sha256": "5ed211639aba133600b903c106b2e61b4f26bd099231bfa0ce18b7b809c6c94f"
+    },
+    "bookshelf": {
+      "source": "official",
+      "icon": "bookshelf",
+      "repository": "pennydreadful/bookshelf",
+      "revision": "3ac41f7e31427684a37138e8e539b7e6c7b73869",
+      "file": "frontend/src/Content/Images/logo.svg",
+      "sha256": "bb2748b6adf431c5f7cbf946836d660d75602389df505620241c28d0abad3b24",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/pennydreadful/bookshelf"
     },
     "bookstack": {
       "source": "selfhst",
@@ -735,6 +906,18 @@
       "originGitSha": "211148377989a895019f6d1082778aa9ec630fc8",
       "originSha256": "708946828401ef738b4a10cc63029d94e835307c094974b129ead5f4dc48d6ec"
     },
+    "casibase": {
+      "source": "official-png",
+      "icon": "casibase",
+      "repository": "casibase/casibase-website",
+      "revision": "5a482bc42db22064621f7f14d47ed8c8abadeb85",
+      "file": "static/img/favicon.png",
+      "sha256": "b90570875e81008a37e2946dbb0be0d118a7259a28832871713851c7251d4567",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/casibase/casibase-website",
+      "originGitSha": "20b69730a2c6e1820b016297026a973dc2b6d69c",
+      "originSha256": "3202557a356fd50e888c4b95709f7fb3ff3ad78c9f64a7e6a2cbd5bbb5e354bf"
+    },
     "castopod": {
       "source": "selfhst",
       "icon": "castopod",
@@ -744,6 +927,16 @@
       "source": "selfhst",
       "icon": "centos",
       "sha256": "7a644f48b795df635b81e39528d4c68340af7dd2a166ff196f2612c3b3285df3"
+    },
+    "centrifugo": {
+      "source": "official",
+      "icon": "centrifugo",
+      "repository": "centrifugal/web",
+      "revision": "325685d146829be2ce530634a9e59dbfb9faf34f",
+      "file": "public/logo.svg",
+      "sha256": "ff6122709b8f335ba2bad68b855aed95d3488c3c3bf075c0d6b4c9986a8d9074",
+      "license": "MIT",
+      "identityUrl": "https://github.com/centrifugal/web"
     },
     "cerbos": {
       "source": "selfhst",
@@ -795,6 +988,16 @@
       "icon": "checkmk",
       "sha256": "990ef8ee51e96841cf640bbbe0eed25b2762c07c9aef4a78c7133109d67f7d9e"
     },
+    "cheshire-cat-ai": {
+      "source": "official",
+      "icon": "cheshire-cat-ai",
+      "repository": "cheshire-cat-ai/core",
+      "revision": "1493ce31301c4e6f14008d5e410ff7dcc3654eb7",
+      "file": "readme/logo.svg",
+      "sha256": "2c7fff9aa4f8674e876092b0d7f0cc3fff0461b4b7191d2a6029e63af39446f7",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/cheshire-cat-ai/core"
+    },
     "chevereto": {
       "source": "selfhst",
       "icon": "chevereto",
@@ -804,6 +1007,19 @@
       "source": "selfhst",
       "icon": "chibisafe",
       "sha256": "2e84a57199ed432ada9a3e7e7535e94730e7534aa5eb4feddef386ac09c48705"
+    },
+    "chiefonboarding": {
+      "source": "official-png",
+      "icon": "chiefonboarding",
+      "repository": "chiefonboarding/ChiefOnboarding",
+      "revision": "4da52a98bf6e481371646f25d8e784e1f9f989fa",
+      "file": "docs/public/header/logo.png",
+      "originGitSha": "433ceadb7e769d344671cfa42a81e34476dd4692",
+      "originSha256": "86f4a6a055d007f02b2e1659b93adee381e23baef1d8ee4fb92a7c44ba12458f",
+      "sha256": "b3a9bc0405558bbbe88eb56d8d3a2db221db963ee07ecb532b9c5ebcb8583f4e",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/chiefonboarding/ChiefOnboarding",
+      "traceProfile": "light-ground-upscaled"
     },
     "chroma": {
       "source": "dashboard",
@@ -817,10 +1033,32 @@
       "originGitSha": "49eb8d4d5b53562078ed76affa6fb970e85ba510",
       "originSha256": "33fada387ea17b55fdc1b2030c829badfc6f8b280edc81bfac7fc7cde77f4bf1"
     },
+    "citrineos": {
+      "source": "official",
+      "icon": "citrineos",
+      "repository": "citrineos/citrineos-operator-ui",
+      "revision": "5db96fc43e9d78b966dafa3a7655748579f23289",
+      "file": "public/logo-collapsed.svg",
+      "sha256": "e50b1f3ef430c18e1352a7b48f24ad9a1c522c019b9e41986aa42ec8caf8c417",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/citrineos/citrineos-core"
+    },
     "civicrm": {
       "source": "simple-icons",
       "icon": "civicrm",
       "sha256": "9f9e105b7c3c7c658d7c5daf8d401b923357b12f7073b5fab84773d0c3d466fd"
+    },
+    "ckan": {
+      "source": "official-png",
+      "icon": "ckan",
+      "repository": "ckan/ckan",
+      "revision": "0cbb565f66e374943d84b91415bc3bc81b1473f4",
+      "file": "ckan/public/base/images/ckan-logo-boat.png",
+      "originGitSha": "85b12c937543bd390ca198e24e4ecae7ede8bbcf",
+      "originSha256": "b5c1e41aad29cb609a91c49e60e481d9e2bc03349ad18739e8e6abaf86adc14f",
+      "sha256": "14d36d719b4954f4ea7e2903887aaf212f75359491447b1cf954e1d0261429dd",
+      "license": "AGPL-3.0-or-later (see CKAN-LICENSE.txt)",
+      "identityUrl": "https://github.com/ckan/ckan"
     },
     "classicpress": {
       "source": "official",
@@ -831,6 +1069,16 @@
       "file": "src/wp-admin/images/classicpress-logo.svg",
       "license": "GPL-2.0 (first-party repository)",
       "identityUrl": "https://www.classicpress.net/"
+    },
+    "classroomio": {
+      "source": "official",
+      "icon": "classroomio",
+      "repository": "classroomio/classroomio",
+      "revision": "75cde7fe2c20f8d85de1e21ae509b6395f98e164",
+      "file": "apps/docs/public/logo.svg",
+      "sha256": "81955f70c5745459afc4b7a797afa32c6a3637c62e5785fd974c72500b400b2b",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/classroomio/classroomio"
     },
     "claude-code": {
       "source": "logos",
@@ -897,6 +1145,19 @@
       "icon": "coder",
       "sha256": "e94549ed48bc9464893278117fb0b77df9d467682054862f7c007ba2db8cbea7"
     },
+    "codimd": {
+      "source": "official-png",
+      "icon": "codimd",
+      "repository": "hackmdio/codimd",
+      "revision": "b1188a5648a23d970b9ad58612376e6602431f6f",
+      "file": "public/favicon.png",
+      "originGitSha": "1600e49c2802667cb4c202c981e50cd999ea8413",
+      "originSha256": "d8b6d5022c9036bee6da38436db7dba4b1551ad1e0baf9c79f9facf9d8c98abd",
+      "sha256": "d25b7c1abf77a427a3f64c868ddf4d50cf8cc69aa0904935303fb6ba10b7fe14",
+      "traceProfile": "light-ground-pixel",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/hackmdio/codimd"
+    },
     "cognee": {
       "source": "official",
       "icon": "cognee",
@@ -945,10 +1206,35 @@
       "icon": "convoy",
       "sha256": "fd36232e9a53e8db61a526cf33ae1258e4f7411b8b7591370f17f1dd84cbfa94"
     },
+    "cops": {
+      "source": "official-png",
+      "icon": "cops",
+      "repository": "seblucas/cops",
+      "revision": "7828cc600e904941583227071b8f4efd3b9385fb",
+      "file": "images/icons/icon144.png",
+      "originGitSha": "facdfe1e72dde17f4a574d44204b3bc5e3159f9e",
+      "originSha256": "222a46730dc62521ab9e608b6a8be34a7cab3fa5d87e16d6982c6c37782362f0",
+      "sha256": "0098aa4918f9fbe81630c73ef6b64606e482375b9bfa24eb491fb1a6e0ff0897",
+      "license": "GPL-2.0",
+      "identityUrl": "https://github.com/seblucas/cops",
+      "traceProfile": "light-ground-upscaled"
+    },
     "copyparty": {
       "source": "selfhst",
       "icon": "copyparty",
       "sha256": "2ef993e1446e90cee5f8584706bbfa512f0f01a4d9dd4b755e2d387aefd2724d"
+    },
+    "coral-talk": {
+      "source": "official-png",
+      "icon": "coral-talk",
+      "repository": "coralproject/talk",
+      "revision": "a66f385cc6c06ce7fb02907f471eb58b9344d934",
+      "file": "client/src/core/client/admin/assets/favicon228.png",
+      "originGitSha": "19916eed38cbf41131ef6a3a3b9af3c38127174e",
+      "originSha256": "4bd3fbe080da92712f66d3a21b55b5b03d76091428fe3cde28fc42cf64a99e1b",
+      "sha256": "a5ebecd03479c8a7b947c87e4ec0cde28fd8c1741719e920eec7048b2f2be25a",
+      "license": "Apache-2.0 (see Coral-Talk-LICENSE.txt)",
+      "identityUrl": "https://github.com/coralproject/talk"
     },
     "corecontrol": {
       "source": "selfhst",
@@ -974,6 +1260,18 @@
       "source": "selfhst",
       "icon": "crafty-controller",
       "sha256": "8d073e9308cb706b068ee00b036ee5fc7f77bcc5ab7ea182b47a78835a6721b0"
+    },
+    "crawl4ai": {
+      "source": "official-png",
+      "icon": "crawl4ai",
+      "repository": "unclecode/crawl4ai",
+      "revision": "4e4bab5d44a7557eb403f137ec589833368a3e38",
+      "file": "deploy/docker/static/assets/logo.png",
+      "originGitSha": "259118536616e6ac142775c6b9b9d02cd546eb9d",
+      "originSha256": "ed2c2e05e76508a33b6bff457668fa4aad6f877af30f6c0bddd22c86dd349536",
+      "sha256": "f4c95f0a6bc432506940a2bc1e9a1f101bc64bf96f17f6110c86d651c8d4df78",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/unclecode/crawl4ai"
     },
     "cronicle": {
       "source": "selfhst",
@@ -1020,6 +1318,16 @@
       "icon": "dagu",
       "sha256": "3f7d6d985add1af9fb4091a83d849b6d4939de8b8e905cc1cfb192b53b86a460"
     },
+    "daptin": {
+      "source": "official",
+      "icon": "daptin",
+      "repository": "daptin/daptin",
+      "revision": "1a48a8294266b8cc7e7d658e079aaea8eda6bcee",
+      "file": "images/abstract logos 2112.svg",
+      "sha256": "722e1a78525ef189c136bb81b8e41c7db5a0c5867e263a6d79d0d48c7b20c01f",
+      "license": "LGPL-3.0",
+      "identityUrl": "https://github.com/daptin/daptin"
+    },
     "dasharr": {
       "source": "selfhst",
       "icon": "dasharr",
@@ -1050,6 +1358,18 @@
       "source": "selfhst",
       "icon": "databasus",
       "sha256": "4f345ee34171a6e01f1d82bd2865677b5d5fc0516d5a47cfb09c1a0dacd1d9e5"
+    },
+    "dataline": {
+      "source": "official-png",
+      "icon": "dataline",
+      "repository": "RamiAwar/dataline",
+      "revision": "803919936b43b680cdbde063d4a5192f0357e59a",
+      "file": "frontend/src/assets/images/logo_xl.png",
+      "originGitSha": "f5a14b07f5c0ebb5fe5f3246ed7c168a37e0468e",
+      "originSha256": "788ce0923ac33caf8057cc386ea87b37cf5ae99560e48bf0069d25272d6066e6",
+      "sha256": "1a3538da940be2d20ded70dabee2fb04916721247bdaf5b6115dcc3ffb7ab95b",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/RamiAwar/dataline"
     },
     "datasette": {
       "source": "selfhst",
@@ -1086,6 +1406,16 @@
       "icon": "debian",
       "sha256": "8f2f53a56b4dfa9e12396c9e42b8acb7f45ed57055110f7830cb7e0b9678d2e1"
     },
+    "decidim": {
+      "source": "official",
+      "icon": "decidim",
+      "repository": "decidim/decidim",
+      "revision": "58d3cd2919d37a0a09f216b253f4662453eb1c26",
+      "file": "logo.svg",
+      "sha256": "ea995e2ba06aede836f0a0a94f4107e9d13057eebc6367a0335ae0e6a70b8bed",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/decidim/decidim"
+    },
     "defguard": {
       "source": "selfhst",
       "icon": "defguard",
@@ -1118,6 +1448,18 @@
       "license": "BSD-3-Clause (repository source; trademark rights require independent review)",
       "identityUrl": "https://github.com/dhis2/dhis2-core",
       "referenceUrl": "https://www.hostinger.com/applications/dhis2"
+    },
+    "dialoqbase": {
+      "source": "official-png",
+      "icon": "dialoqbase",
+      "repository": "n4ze3m/dialoqbase",
+      "revision": "79320da7f45cc4940eff58caef6fedd3c7994f53",
+      "file": "app/ui/public/logo.png",
+      "originGitSha": "248adde0728d8547524708968bbff08905670f9c",
+      "originSha256": "0ed7118b3dd2c86227583c390ba068349b388fea76613fa855ddc6f14f20e9c0",
+      "sha256": "5b387f65b857541f3fd5b9bd1df558bd5dc4a69eb2413c29a56212a700728eb2",
+      "license": "MIT",
+      "identityUrl": "https://github.com/n4ze3m/dialoqbase"
     },
     "dify": {
       "source": "selfhst",
@@ -1190,6 +1532,18 @@
       "icon": "docuseal",
       "sha256": "390bc32db77a25caca0963dd2cf3252637ff4ffce22c8ac8cfb0d88c68e46637"
     },
+    "dograh": {
+      "source": "official-png",
+      "icon": "dograh",
+      "repository": "dograh-hq/dograh",
+      "revision": "b5e30bd65d75ce6487ca40f5af60a284fe585146",
+      "file": "ui/public/dograh-logo.png",
+      "originGitSha": "40165da853c14597649f84b001dc3ff8a4670292",
+      "originSha256": "e36dcdef7a287bd29243a8e8e54c4ceb34535ab29a99a8c78e35833d1ddc5bb8",
+      "sha256": "7f5c952c490d2123b0b6da2ca6ab28d523a36862380a512cd058cf553574c0c5",
+      "license": "BSD-2-Clause",
+      "identityUrl": "https://github.com/dograh-hq/dograh"
+    },
     "dokku": {
       "source": "selfhst",
       "icon": "dokku",
@@ -1209,6 +1563,29 @@
       "source": "selfhst",
       "icon": "domain-locker",
       "sha256": "cedd02aa5c6a296f1c7bbbca8a85761ab7ded38cb2840dd215450fc3f67f7fe2"
+    },
+    "domjudge": {
+      "source": "official",
+      "icon": "domjudge",
+      "repository": "DOMjudge/domjudge",
+      "revision": "6b11cb1f4ba5bcebc3b5ff9539da37dea777ee67",
+      "file": "doc/logos/DOMjudgelogo.svg",
+      "sha256": "55ad33b71c6c1c78c65a93ce14bdab77465f435bc0436116d5daac4bad2b9d4b",
+      "license": "GPL-2.0",
+      "identityUrl": "https://github.com/DOMjudge/domjudge"
+    },
+    "domoticz": {
+      "source": "official-png",
+      "icon": "domoticz",
+      "repository": "domoticz/domoticz",
+      "revision": "52457bd41447557b1aeaf27a64a1dbc63df07da0",
+      "file": "www/images/logo/180.png",
+      "originGitSha": "780b2efaacaa4103138f5b3368308eb94e232b76",
+      "originSha256": "a65cb0b6593e9effd8c2179b449c39072751718f14870cd86bfdd9638045f394",
+      "sha256": "81fa2303ae77909a030d6099d7570e0a68f44cfb8178267af8b2ed51ea49dcbe",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/domoticz/domoticz",
+      "traceProfile": "gradient-detail"
     },
     "donetick": {
       "source": "selfhst",
@@ -1255,6 +1632,18 @@
       "icon": "drupal",
       "sha256": "134226bb3422f05cbd52e5200cd9dd2fe569ba63ff55560feaa3bf830774178b"
     },
+    "dspace": {
+      "source": "official-png",
+      "icon": "dspace",
+      "repository": "DSpace/DSpace",
+      "revision": "7ad52048c3143f161f6cb8ad93b15243aad3913f",
+      "file": "dspace-api/src/main/resources/dspace_logo.png",
+      "originGitSha": "2c7bd5764bce7dde7cc388aa4ecb0ebe41cf6eee",
+      "originSha256": "19571f7810405648d277ac3eec7c119703f640e9319c1cd198696bcf561735ad",
+      "sha256": "1ba3e77d58d59c16a958fff444007d271ea5ec00f26bcca85d9e922a214e6e98",
+      "license": "BSD-3-Clause",
+      "identityUrl": "https://github.com/DSpace/DSpace"
+    },
     "duckdns": {
       "source": "selfhst",
       "icon": "duckdns",
@@ -1294,6 +1683,29 @@
       "originGitSha": "04ff2af322e5f71e9f0d212c25a1795a85570637",
       "originSha256": "558391e6142689b53944a3e0dcc7d1323288652b1a290a73532fef41897808b7"
     },
+    "eclipse-hawkbit": {
+      "source": "official",
+      "icon": "eclipse-hawkbit",
+      "repository": "eclipse-hawkbit/hawkbit",
+      "revision": "4fe928653931922ddb273fccd67fde991a6ad21b",
+      "file": "docs/images/hawkbit_logo.svg",
+      "sha256": "32d846d5fa29991089ddfe6f1c4f1c35af8f9e47ac30718964a529f122d75b07",
+      "license": "EPL-2.0",
+      "identityUrl": "https://github.com/eclipse-hawkbit/hawkbit"
+    },
+    "eclipse-kura": {
+      "source": "official-png",
+      "icon": "eclipse-kura",
+      "repository": "eclipse-kura/kura-management-ui",
+      "revision": "79659e4b7381dfd1f21747b545e157cb2a098d19",
+      "file": "org.eclipse.kura.web2/src/main/webapp/eclipse/kura/icons/kura_login_logo.png",
+      "originGitSha": "21fdec71b581ed90e9df9f19ca65cdecc6ed7a53",
+      "originSha256": "4ae6de959ff5bda8d862523937f1a61422f4ccf1c671b16e8cb6b75fdb47f9f3",
+      "sha256": "82c2c4fb816579f39fbb94f275dcf5134a1dc071a3692f4e38cf5af0542e50da",
+      "license": "EPL-2.0",
+      "identityUrl": "https://github.com/eclipse-kura/kura",
+      "traceProfile": "dark-ground-upscaled"
+    },
     "eclipse-mosquitto": {
       "source": "simple-icons",
       "icon": "eclipsemosquitto",
@@ -1303,6 +1715,16 @@
       "source": "logos",
       "icon": "edgedb",
       "sha256": "99662d28248aa62d03da417cd3a1ca6de0ea55657105c44715db0515cc36fd57"
+    },
+    "ekuiper": {
+      "source": "official",
+      "icon": "ekuiper",
+      "repository": "lf-edge/artwork",
+      "revision": "f0231ab2d7a748c771a8943d69310141f28b8e57",
+      "file": "ekuiper/icon/color/colored icon only version.svg",
+      "sha256": "5f403e031692807ae84102ffdcf6a8d3a8c0b33ff2c938cedb7c9270a6e086ff",
+      "license": "Linux Foundation trademark usage guidelines (see LF-Edge-Artwork-LICENSE.md)",
+      "identityUrl": "https://github.com/lf-edge/ekuiper"
     },
     "elabftw": {
       "source": "dashboard",
@@ -1324,6 +1746,18 @@
       "icon": "emby",
       "sha256": "cf1d35e9fabdcab6b0a6f348cc13c7438bdbf161fbf5347ed86dbabee3edecaa"
     },
+    "embystat": {
+      "source": "official-png",
+      "icon": "embystat",
+      "repository": "mregni/EmbyStat",
+      "revision": "be617783dafaaa27d3a1b3524fbbc9fc9470795f",
+      "file": "branding/logo-color.png",
+      "originGitSha": "20b926a46e9f4a9ce85a726726f76600f18b0108",
+      "originSha256": "94f3472a88ee0a9305bc4ccceecedcd53ee87b6bb3f08bdabc2dd9ed1bcb79dc",
+      "sha256": "3618fcad336369777ed383611a2f005d082c606a0176d1e78ae858c3591fa5db",
+      "license": "MIT",
+      "identityUrl": "https://github.com/mregni/EmbyStat"
+    },
     "emoncms": {
       "source": "selfhst",
       "icon": "emoncms",
@@ -1343,6 +1777,19 @@
       "source": "simple-icons",
       "icon": "ente",
       "sha256": "bf6bd70f000ab3eb30bb5d93f56830dc7951c448abcb101d9fa800822eb49daf"
+    },
+    "errbit": {
+      "source": "official-png",
+      "icon": "errbit",
+      "repository": "errbit/errbit",
+      "revision": "14655aef50e53ebb4e4d30b3be627a4a0d52740f",
+      "file": "docs/notifications/slack/errbit.png",
+      "originGitSha": "786d20969005e45133733442ce9caa4ee96992e3",
+      "originSha256": "835ad31987fa91efd3803ebc9c95e139a90a5183c49a04c1e532ee6bc97bf587",
+      "sha256": "9391e78a30f1ed5c197b7e7f1ac2da0450fe7ec009ddad33a93c13ddacd28095",
+      "traceProfile": "light-ground-upscaled",
+      "license": "MIT",
+      "identityUrl": "https://github.com/errbit/errbit"
     },
     "ersatztv": {
       "source": "selfhst",
@@ -1374,6 +1821,26 @@
       "icon": "evcc",
       "sha256": "4a8847de7d4d68e3bc07cc33bd4bebc51eb9e07ceaeda01454ce326b1fb36779"
     },
+    "eve": {
+      "source": "official",
+      "icon": "eve",
+      "repository": "vercel/eve",
+      "revision": "e254c0ff805dbe126fefc011defe23f057fefacf",
+      "file": ".github/assets/eve.svg",
+      "sha256": "7591422e688c56ec2f0973af4c39ecbe70fd551db2f0f0de56b2345fc3afdbb3",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/vercel/eve"
+    },
+    "ever-gauzy": {
+      "source": "official",
+      "icon": "ever-gauzy",
+      "repository": "ever-co/ever-gauzy",
+      "revision": "3d2029be0345d7d5aba3b616a42d3f68e26207b5",
+      "file": "apps/agent/src/assets/images/logos/logo_Gauzy.svg",
+      "sha256": "c8461852584c0b0f8e39285eb567e45b698e3554975c7c31c1894ebf2abb1f79",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/ever-co/ever-gauzy"
+    },
     "evershop": {
       "source": "selfhst-png",
       "icon": "evershop",
@@ -1401,6 +1868,19 @@
       "license": "AGPL-3.0 (first-party repository)",
       "identityUrl": "https://exelearning.net/"
     },
+    "expensave": {
+      "source": "official-png",
+      "icon": "expensave",
+      "repository": "algirdasc/expensave",
+      "revision": "5305cee55487e058e5a80ad7e719d11f1ef89a5e",
+      "file": "frontend/src/assets/favicon/android-chrome-256x256.png",
+      "originGitSha": "6bc86a9f22c4f994a697a91799e1de425adefba2",
+      "originSha256": "d00b7758436572f8d80017117c7b98f916de528ece250692d8f52c25ff0ea358",
+      "sha256": "b3f26fbae7f07f0e70b6db7f8b0f25e11467120a1996a4dad74801e521c99b47",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/algirdasc/expensave",
+      "traceProfile": "gradient-detail"
+    },
     "expenseowl": {
       "source": "selfhst-png",
       "icon": "expenseowl",
@@ -1408,10 +1888,30 @@
       "originGitSha": "7e3888731c891ca2e565392b54f10ad569850e16",
       "originSha256": "07c0ad6d44929be665e0b4adc7b7ee2cddae9b2772e295adf7b70e53231ea3fd"
     },
+    "faktory": {
+      "source": "official",
+      "icon": "faktory",
+      "repository": "contribsys/faktory",
+      "revision": "1a36b1ef2fb403eb805b1a2609ef709b33b65df2",
+      "file": "webui/static/img/favicon.svg",
+      "sha256": "3a7fcf3a24f1f215f6ec3a4be16d95d7685c08d23c7b5e9533844ef3762ce18e",
+      "license": "AGPL-3.0 (see Faktory-LICENSE.txt)",
+      "identityUrl": "https://github.com/contribsys/faktory"
+    },
     "falkordb": {
       "source": "logos",
       "icon": "falkordb",
       "sha256": "58db9bed4e057e5a9f023c3696d9b2ef7796138d0abebc328e94dde99b24dddf"
+    },
+    "faraday": {
+      "source": "official",
+      "icon": "faraday",
+      "repository": "infobyte/faraday",
+      "revision": "d00e81cd9c0279e9fa7cc48d80e52f5ced820cb1",
+      "file": "docs/images/faraday_logo.svg",
+      "sha256": "995e3e0052f83af36b97ac90c084e97b7594c1e3875cc03181023206f762fe9c",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/infobyte/faraday"
     },
     "featbit": {
       "source": "official",
@@ -1427,6 +1927,16 @@
       "source": "selfhst",
       "icon": "fedora",
       "sha256": "833db91e52eeda6e5d366260f460142c300b4c76d0c9b07c4c5f1479af8e55af"
+    },
+    "feedcraft": {
+      "source": "official",
+      "icon": "feedcraft",
+      "repository": "Colin-XKL/FeedCraft",
+      "revision": "e392675468d1f6c57791ed82677de622cfc07ca3",
+      "file": "web/admin/src/assets/logo.svg",
+      "sha256": "551bc35f7b60137fbb33901719f7de41115104d9f6fe58a03d2dae2783006cfa",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/Colin-XKL/FeedCraft"
     },
     "fenrus": {
       "source": "selfhst",
@@ -1520,6 +2030,16 @@
       "license": "MIT (assets directory)",
       "identityUrl": "https://www.hostinger.com/applications/fleet"
     },
+    "fleetbase": {
+      "source": "official",
+      "icon": "fleetbase",
+      "repository": "fleetbase/fleetbase",
+      "revision": "90f11f0e0ca1264c5561fdfc6ba94950520aa08a",
+      "file": "console/public/images/icon.svg",
+      "sha256": "93bb5032b9c4747da5153e4aa0673feb0c29540e68bb384cc50f975be467cd7a",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/fleetbase/fleetbase"
+    },
     "flexget": {
       "source": "official",
       "icon": "flexget",
@@ -1552,6 +2072,16 @@
       "source": "selfhst",
       "icon": "forgejo",
       "sha256": "9f4a51a8d193266a865597d47bb5b6bfc6e9b84813b1e048ccd1ff0bf58bcd5b"
+    },
+    "form-io": {
+      "source": "official",
+      "icon": "form-io",
+      "repository": "formio/formio",
+      "revision": "8b9fe9a29dfcd452f1ab7385b8921b06b70eb6dc",
+      "file": "portal/public/icon-formio-small.svg",
+      "sha256": "bfed43fd02453683e9e454e0fe83ef99868a660899f964e8d82fdec1f8bef4ad",
+      "license": "OSL-3.0",
+      "identityUrl": "https://github.com/formio/formio"
     },
     "formbricks": {
       "source": "selfhst",
@@ -1610,6 +2140,16 @@
       "icon": "frigate",
       "sha256": "184fa4dabaa5e97fdb1a17ba8e5debf7c2d61ddfb33d00eaeedc33aba82d084b"
     },
+    "fusio": {
+      "source": "official",
+      "icon": "fusio",
+      "repository": "apioo/fusio-website",
+      "revision": "5f155e553655eb8de89297ec0ea4239a330dea25",
+      "file": "public/img/logo.svg",
+      "sha256": "b1edad5f47f2b17cbeb546a02959900e3f48564333e09044434339a5caf7f698",
+      "license": "MIT",
+      "identityUrl": "https://github.com/apioo/fusio-website"
+    },
     "fusion-rss": {
       "source": "selfhst-png",
       "icon": "fusion-rss",
@@ -1621,6 +2161,19 @@
       "source": "selfhst",
       "icon": "fusionauth",
       "sha256": "ddb1c389e0954fb58e22a6b296efe825352dcde01d9f0756b523d79822413e42"
+    },
+    "fusiondirectory": {
+      "source": "official-png",
+      "icon": "fusiondirectory",
+      "repository": "fusiondirectory/fusiondirectory",
+      "revision": "1efe63dab1b99ba57f553cae6d529021cf1e4c52",
+      "file": "html/themes/breezy/icons/scalable/apps/fusiondirectory.png",
+      "originGitSha": "955ac6b4cbb87497f80ddd8985a7648b648e8b2f",
+      "originSha256": "441f263f12c53c617b848416220f0b107d9a117eb1124e5069a66cecaad88e3f",
+      "sha256": "64593a1dd56faab370266a3574973d486e805ef7acf3b69329f0d06759b81a97",
+      "license": "GPL-2.0",
+      "identityUrl": "https://github.com/fusiondirectory/fusiondirectory",
+      "traceProfile": "light-ground-upscaled"
     },
     "fuxa": {
       "source": "official",
@@ -1648,6 +2201,26 @@
       "source": "selfhst",
       "icon": "gatus",
       "sha256": "1a39f0c6dd5c7addd38465f2cfbce7fe0f7c409c7bacb108f0e1db1d5c845f16"
+    },
+    "geonetwork": {
+      "source": "official",
+      "icon": "geonetwork",
+      "repository": "geonetwork/core-geonetwork",
+      "revision": "04bcf23d1fe7de1e34a3651d0ce71c088e8c19c2",
+      "file": "docs/manual/overrides/assets/images/geonetwork-logo.svg",
+      "sha256": "a7c29e67e54eac23252765c66836ed3a7228d6cc63cea52039521eb538fac772",
+      "license": "CC-BY-3.0",
+      "identityUrl": "https://github.com/geonetwork/core-geonetwork"
+    },
+    "geoserver": {
+      "source": "official",
+      "icon": "geoserver",
+      "repository": "geoserver/geoserver",
+      "revision": "b8ace984a36637ff44745cfca4d65466149ae738",
+      "file": "doc/en/docguide/img/logo-icon.svg",
+      "sha256": "5cbad9d7d248add4daabf261dd3dd22cdb4673f7c12fe4cac02bcc412df149ce",
+      "license": "CC-BY-4.0",
+      "identityUrl": "https://geoserver.org/"
     },
     "gerrit": {
       "source": "dashboard",
@@ -1759,6 +2332,18 @@
       "icon": "gotify",
       "sha256": "d97b0c073d6513574d2ee1dff90aa06895d855c91872ed0f5bd78dffd706e7a3"
     },
+    "gpt-researcher": {
+      "source": "official-png",
+      "icon": "gpt-researcher",
+      "repository": "assafelovic/gpt-researcher",
+      "revision": "8b474fe7d92aca112601cb87e1ec0999103bc01a",
+      "file": "docs/static/img/gptr-logo-tile.png",
+      "originGitSha": "0a402cb57328d9549b5e29119123061d9a302681",
+      "originSha256": "fc2620738722e43b847c794e7b4a2e33e0c3c882788776ea53aaebd9acb2a98e",
+      "sha256": "f7150913670c4ba4b202656ad35236d9b83d623c1fd34c6d3065ec7bc168a24d",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/assafelovic/gpt-researcher"
+    },
     "grafana": {
       "source": "selfhst",
       "icon": "grafana",
@@ -1862,6 +2447,16 @@
       "icon": "haven",
       "sha256": "687fb4a7ee9b1769aacce09c916576e82b839dec013de8d6592a4bd700e7210c"
     },
+    "headroom": {
+      "source": "official",
+      "icon": "headroom",
+      "repository": "headroomlabs-ai/headroom",
+      "revision": "ce0460cfa8598dc939243dbc7aec4b2d35f4e44a",
+      "file": "docs/public/assets/headroom-logomark.svg",
+      "sha256": "fa89480f785197a28f0fcfe34f23dcbf522bde04f349d67f759ecf4ee8be580d",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/headroomlabs-ai/headroom"
+    },
     "headscale": {
       "source": "selfhst",
       "icon": "headscale",
@@ -1902,6 +2497,16 @@
       "icon": "hermes-webui",
       "sha256": "e3e2d580912fb08a61d69faed4fbbfab81b6e981a6918a36e60c3b3c617beaee"
     },
+    "hermes-workspace": {
+      "source": "official",
+      "icon": "hermes-workspace",
+      "repository": "outsourc-e/hermes-workspace",
+      "revision": "c631425d8baa933f8c61d8447040f4ec8b5f571c",
+      "file": "src/logo.svg",
+      "sha256": "b5324798cbb1a2745775faa0538bbf409706e9e12e431d4f015420d10444f7a1",
+      "license": "MIT",
+      "identityUrl": "https://github.com/outsourc-e/hermes-workspace"
+    },
     "heyform": {
       "source": "selfhst",
       "icon": "heyform",
@@ -1926,6 +2531,19 @@
       "source": "selfhst",
       "icon": "hister",
       "sha256": "7211ef88c1959ce1f635fac38aa078ca9bdf9fc8a7db469fa817c93b5cebe5b6"
+    },
+    "hollama": {
+      "source": "official-png",
+      "icon": "hollama",
+      "repository": "fmaclen/hollama",
+      "revision": "a6614a2e0c6f0634f75e6b1605dcae28b8628bb1",
+      "file": "electron/resources/icons/png/1024x1024.png",
+      "originGitSha": "de0d68be11086874bbe998855962f271948a7af0",
+      "originSha256": "5f1c8f225f3570a5187dcd731b4674fe423adb0ae9d31b76692d058e231de9c0",
+      "sha256": "f52e48262b9605f8ca17a0d2ea0cd9a1f570ea5f7072ac8bbc00bf734bd9ef17",
+      "traceProfile": "light-ground-detail",
+      "license": "MIT",
+      "identityUrl": "https://github.com/fmaclen/hollama"
     },
     "homarr": {
       "source": "selfhst",
@@ -2070,6 +2688,16 @@
       "icon": "immich",
       "sha256": "b550a94b445df2f3b0de405c653c3dc94aeba02110b4f56424ff583ec07aa45c"
     },
+    "immudb": {
+      "source": "official",
+      "icon": "immudb",
+      "repository": "codenotary/immudb-webconsole",
+      "revision": "fb964ebbd99154ad194af227403d0d142a869c89",
+      "file": "src/static/images/immudb/logo_light.svg",
+      "sha256": "309e2fc10c103a6a5ec4ebfd9d0094d2d0f98e4ae1baa62d4129efcc386050ab",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/codenotary/immudb-webconsole"
+    },
     "indico": {
       "source": "official",
       "icon": "indico",
@@ -2141,10 +2769,30 @@
       "icon": "invoiceshelf",
       "sha256": "d7aeda397ea0d702854069aea18c686059199e87156eed838ef5d56b2d502f39"
     },
+    "isso": {
+      "source": "official",
+      "icon": "isso",
+      "repository": "isso-comments/isso",
+      "revision": "13f7a9357708584a87704c099168e9c1bb90624a",
+      "file": "isso/img/isso.svg",
+      "sha256": "c7382c69e776e027cc69cb167a597c51b4f1d011223c56a5bd87843a8153d90e",
+      "license": "MIT",
+      "identityUrl": "https://github.com/isso-comments/isso"
+    },
     "it-tools": {
       "source": "selfhst",
       "icon": "it-tools",
       "sha256": "d64a7811fc785c7efbba9c45bc32c19a9ab9c443db7c9f10613b3b0f8cc08805"
+    },
+    "itflow": {
+      "source": "official",
+      "icon": "itflow",
+      "repository": "itflow-org/itflow",
+      "revision": "0ebd83ff56eb61ffbae1e75b4772c48fb5860c62",
+      "file": ".github/readme/logo-light.svg",
+      "sha256": "60095af20ded13271648316f6278d5911102426997eb06f8d82fdc8aaa12f4ba",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/itflow-org/itflow"
     },
     "itop": {
       "source": "dashboard",
@@ -2225,6 +2873,16 @@
       "icon": "jsreport",
       "sha256": "87f445c134ff4d388b2d01ff7594c91aac405c9ca4f9dd06b553c0ce5d9ab7da"
     },
+    "judge0-ce": {
+      "source": "official",
+      "icon": "judge0-ce",
+      "repository": "judge0/ide",
+      "revision": "4e0e7a4bfe3217e07f4a88967bc7d4837b8e38c0",
+      "file": "images/logo_black.svg",
+      "sha256": "fd9fc1d0c099080f462e34aaa5386789722e313e20579313a3cea98a4c901c65",
+      "license": "MIT",
+      "identityUrl": "https://github.com/judge0/ide"
+    },
     "jump": {
       "source": "selfhst",
       "icon": "jump",
@@ -2290,6 +2948,16 @@
       "icon": "karakeep",
       "sha256": "53bff821919b55de1530a39c25045ee25d6464c8693312624e748abc18ae3227"
     },
+    "kasmvnc": {
+      "source": "official",
+      "icon": "kasmvnc",
+      "repository": "kasmtech/noVNC",
+      "revision": "9283f38cf57d1b6844157c3a9d538ee2672235bd",
+      "file": "app/images/icons/kasm_logo.svg",
+      "sha256": "d999b7f879f1a7821b8a62a8b6cb74c4499d64de87b2edc3ec1e62cb9c6cf5db",
+      "license": "CC-BY-SA-3.0",
+      "identityUrl": "https://github.com/kasmtech/KasmVNC"
+    },
     "kavita": {
       "source": "selfhst",
       "icon": "kavita",
@@ -2330,6 +2998,18 @@
       "icon": "kibana",
       "sha256": "e34efb9a337022bcd70f55fbdb70fdb1fc621cb7d89abece01241b3191d26f66"
     },
+    "kill-bill": {
+      "source": "official-png",
+      "icon": "kill-bill",
+      "repository": "killbill/killbill",
+      "revision": "8881b6617a7ef2d0bd5e1dd354d37405eb1362d6",
+      "file": "profiles/killbill/src/main/webapp/images/KillBillLogo400x400.png",
+      "originGitSha": "610f58a1b8d4f46713fd48e834005dfb85440195",
+      "originSha256": "59606d057694f9ff0a4b491619cfebd09b09be5df485dcaf30bdbf6977fe4e1f",
+      "sha256": "2c39c1b352e67993e7b663e5f0e3ef70f9f5dedeb877060b83a19d97ce101380",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/killbill/killbill"
+    },
     "kimai": {
       "source": "selfhst",
       "icon": "kimai",
@@ -2339,6 +3019,16 @@
       "source": "selfhst",
       "icon": "kitchenowl",
       "sha256": "f674701892335d1ade2540b9716557754ecb43c2e3aa19b7e44d202a8bc737a3"
+    },
+    "kiwix-serve": {
+      "source": "official",
+      "icon": "kiwix-serve",
+      "repository": "kiwix/libkiwix",
+      "revision": "f083381c28cdf25de4ddb2eca91ca9bc7c5eb0ff",
+      "file": "static/skin/favicon/safari-pinned-tab.svg",
+      "sha256": "2a396d0462f364a5bfe7df1af39114b977ab1a14ad3dc66b992a233c424b8793",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/kiwix/libkiwix"
     },
     "kodi": {
       "source": "selfhst",
@@ -2410,6 +3100,16 @@
       "identityUrl": "https://www.hostinger.com/applications/label-studio",
       "projectUrl": "https://labelstud.io"
     },
+    "lago": {
+      "source": "official",
+      "icon": "lago",
+      "repository": "getlago/lago-front",
+      "revision": "33f905f6714cd8513aa053295f1ad5b4be035806",
+      "file": "packages/configs/brand/lago-logo.svg",
+      "sha256": "a67c612250042ac762f233c4394eafcb66967b0d51ea44e9bb62ef2521c21045",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/getlago/lago"
+    },
     "lakefs": {
       "source": "dashboard",
       "icon": "lakefs",
@@ -2446,7 +3146,7 @@
       "identityUrl": "https://github.com/cloudamqp/lavinmq",
       "referenceUrl": "https://www.hostinger.com/applications/lavinmq",
       "modifications": "ViewBox cropped to the untouched 84codes LavinMQ app mark (first 80 of 394 units)",
-      "attribution": "LavinMQ logo © 84codes AB; LavinMQ is a trademark of 84codes AB"
+      "attribution": "LavinMQ logo \u00a9 84codes AB; LavinMQ is a trademark of 84codes AB"
     },
     "lazylibrarian": {
       "source": "selfhst-png",
@@ -2454,6 +3154,16 @@
       "sha256": "dbe0f081b8478086bd867ae4979a86a8cd0f6930f7c35c266eb1881ac2e45476",
       "originGitSha": "b8eab00820e15b62e4c59817d73ecba32e0cc676",
       "originSha256": "cc6e7ee2fb894985ccee99fe1d767ad08670dd66c8c9da6c65e34cf2a25e2204"
+    },
+    "ldap-account-manager": {
+      "source": "official",
+      "icon": "ldap-account-manager",
+      "repository": "LDAPAccountManager/lam",
+      "revision": "c92dc527dfe540c97f243cd9f0fa6847d2054813",
+      "file": "lam/graphics/logo.svg",
+      "sha256": "df2d150a9087332d7c591b488153820def671025eebe5fb6359ccc4165b5b20b",
+      "license": "GPL-3.0-or-later (see LDAP-Account-Manager-copyright.txt)",
+      "identityUrl": "https://github.com/LDAPAccountManager/lam"
     },
     "leantime": {
       "source": "selfhst",
@@ -2465,10 +3175,32 @@
       "icon": "lemmy",
       "sha256": "dc8bfcfbacd9b474c35cb2e5f78628bc50fb9d5d7f98b3f5bfeed99bc6ae6ebf"
     },
+    "librebooking": {
+      "source": "official",
+      "icon": "librebooking",
+      "repository": "LibreBooking/librebooking",
+      "revision": "839e323fbd7de15a4861c1a64aef2e0f980a4589",
+      "file": "docs/branding/favicon.svg",
+      "sha256": "1d0e6fb94d9323ea78f7fc2b6fa26627ffe63a7615b64af0a693ac3df0506b16",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/LibreBooking/librebooking"
+    },
     "librechat": {
       "source": "selfhst",
       "icon": "librechat",
       "sha256": "276652dae9a0579e1e58f0ef976477f6afc7c8f4b155f0667db2b788b2ddb6c8"
+    },
+    "libredesk": {
+      "source": "official-png",
+      "icon": "libredesk",
+      "repository": "abhinavxd/libredesk",
+      "revision": "1b6ecc0a5f05d22ee32ebc99efa4f962647be65a",
+      "file": "frontend/public/images/pwa-icon-512.png",
+      "originGitSha": "51e9b15a1738cd2a18dbd0ae240ae3250af36981",
+      "originSha256": "53f098719508adc4fc3e2f813c6f57474774b94c24ffce262c17b14c7a824e9d",
+      "sha256": "1cdb6c485d599043a012d93f7caad42ef65643d3f9ac859059d27b8234d83e31",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/abhinavxd/libredesk"
     },
     "librenms": {
       "source": "selfhst",
@@ -2556,6 +3288,16 @@
       "icon": "lldap",
       "sha256": "4d44d8edb36225205c7960537dbe775b73b4f6801525749b60b3458cd87e515e"
     },
+    "lms": {
+      "source": "official",
+      "icon": "lms",
+      "repository": "epoupon/lms",
+      "revision": "9542d92f417d89fdd03cdfac3b728a444c2bf3a7",
+      "file": "docroot/images/favicon.svg",
+      "sha256": "0e02087d7bb7f4dba076f9da198cf62a4267d7d5ccf38ceb4e7dd793d6cae914",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/epoupon/lms"
+    },
     "lnbits": {
       "source": "dashboard",
       "icon": "lnbits",
@@ -2618,6 +3360,18 @@
       "license": "MIT",
       "identityUrl": "https://www.hostinger.com/applications/lychee"
     },
+    "m3db": {
+      "source": "official-png",
+      "icon": "m3db",
+      "repository": "m3db/m3",
+      "revision": "ea708d3a685f613af7dd0a39571f98d0802c4105",
+      "file": "site/static/images/logo-square.png",
+      "originGitSha": "d10c4af195749048c715c88b9df311cd06ce620a",
+      "originSha256": "e12b1cb58790996ba35ac1d12c059a30bdf032fa53e2101cf775dc40f074569d",
+      "sha256": "ef7ce8a77ae381f4e58f3479b0f347b76a481332cd0ea2253b7dde410a45b3c1",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/m3db/m3"
+    },
     "mafl": {
       "source": "selfhst",
       "icon": "mafl",
@@ -2648,6 +3402,19 @@
       "source": "selfhst",
       "icon": "mailpit",
       "sha256": "7d0f82147720fdf14e0bdd72618397a4cfac186b734ace9b41509e43bd0c1559"
+    },
+    "mailtrain": {
+      "source": "official-png",
+      "icon": "mailtrain",
+      "repository": "Mailtrain-org/mailtrain",
+      "revision": "89b189d0f5fcb3bb069dde7c2da72d5acd071dd5",
+      "file": "client/static/mailtrain-notext.png",
+      "originGitSha": "47978c0afdc4a4a152f277c6d7ae5500c33429df",
+      "originSha256": "402eea3d1a54f12182e835ac512f839fdf6b7a0b94c123cf4fcd81b20e867f0b",
+      "sha256": "0b8f47a05b9593076a1989b023db5cbf28449d062c61a79e7b9001c6dc63f28d",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/Mailtrain-org/mailtrain",
+      "traceProfile": "light-ground-upscaled"
     },
     "maintenant": {
       "source": "selfhst",
@@ -2680,6 +3447,31 @@
       "source": "dashboard",
       "icon": "manyfold",
       "sha256": "583854bfec5a85d712e4dce69f98622b96ceb251f0c9607d420414965f5b4bd0"
+    },
+    "mapstore": {
+      "source": "official-png",
+      "icon": "mapstore",
+      "repository": "geosolutions-it/MapStore2",
+      "revision": "cacb8452dbe145267ad3b67b692ff24a8c3feb4b",
+      "file": "web/client/product/assets/img/favicon.png",
+      "originGitSha": "679ee3c5b298c2dda654fd1535881475591bf66b",
+      "originSha256": "035e34da0f3ab68b231657879cf169f176b55aecf10c3282aacf1c8dffc7d4d6",
+      "sha256": "3d285e365e6d7acb922732025c0084a75e4fb2b53ca16bc319c14c8aac6f89f1",
+      "license": "BSD-2-Clause",
+      "identityUrl": "https://github.com/geosolutions-it/MapStore2",
+      "traceProfile": "light-ground-pixel"
+    },
+    "maputnik": {
+      "source": "official-png",
+      "icon": "maputnik",
+      "repository": "maplibre/maputnik",
+      "revision": "b6db2ff9e823f4f2156d54c73dcf469c844e57c4",
+      "file": "src/img/maputnik.png",
+      "originGitSha": "894d0289c22d3e09ad4519679ed7a169614afa03",
+      "originSha256": "b4322a82c0cab1bc4872d963d73ed6666e6333dab28d22cd789280e462b7bc49",
+      "sha256": "4f7d3207d4586c7d039a1947356a0d369374cb6faa2d6a412aab991c104a2bae",
+      "license": "MIT",
+      "identityUrl": "https://github.com/maplibre/maputnik"
     },
     "mariadb": {
       "source": "selfhst",
@@ -2726,6 +3518,16 @@
       "icon": "mautic",
       "sha256": "cb31c6a0ad6658a9839f1f7b750217d492a3a0abb018d577827e9a528f88403d"
     },
+    "maxkb": {
+      "source": "official",
+      "icon": "maxkb",
+      "repository": "1Panel-dev/MaxKB",
+      "revision": "5290738e7fe8bea2ce42d7c173e8f04604af595d",
+      "file": "ui/src/assets/logo/logo.svg",
+      "sha256": "b3f92752fe93a5f3e5f61354a7fd0cd3d4f7941ef8f8833a073a66d7b1b74e59",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/1Panel-dev/MaxKB"
+    },
     "maxun": {
       "source": "selfhst",
       "icon": "maxun",
@@ -2755,6 +3557,19 @@
       "source": "selfhst",
       "icon": "mealie",
       "sha256": "2871c909b3f0f4ba4ce8640a81691ace4f359df00bf8ddd73e122cef435724b7"
+    },
+    "mediago": {
+      "source": "official-png",
+      "icon": "mediago",
+      "repository": "mediago-dev/mediago",
+      "revision": "c4a1cac40800b9754cf4305283442031ea835ba0",
+      "file": "apps/ui/public/icon-512.png",
+      "originGitSha": "185d6a0141a65b6772d2640ef61f9d60489c3ffc",
+      "originSha256": "9a55510b0637e81e7c8a00e4718f283c19b1f5909a27109f34ff7d534cfe5dd2",
+      "sha256": "2e9eccc752e1900ed7bddfeaab5672e48e1a8c22ca4ca6f0fc94dd76af2ab289",
+      "license": "MIT",
+      "identityUrl": "https://github.com/mediago-dev/mediago",
+      "traceProfile": "gradient-detail"
     },
     "mediawiki": {
       "source": "dashboard",
@@ -2794,6 +3609,16 @@
       "identityUrl": "https://www.hostinger.com/applications/metamcp",
       "projectUrl": "https://docs.metamcp.com"
     },
+    "meteroid": {
+      "source": "official",
+      "icon": "meteroid",
+      "repository": "meteroid-oss/meteroid",
+      "revision": "034d44633d49545b052ed754e19f7455ebdfdb97",
+      "file": "assets/meteroid-logo-icon--light.svg",
+      "sha256": "c3bcf49bfee8382dbc82b1195bf0225512e85920dc82753748a45a5886961270",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/meteroid-oss/meteroid"
+    },
     "metube": {
       "source": "selfhst",
       "icon": "metube",
@@ -2803,6 +3628,28 @@
       "source": "selfhst",
       "icon": "microbin",
       "sha256": "5af167ecafe493c4d6c44fbbbc76cd4821179669fab5ae86fa917f7a4ae87746"
+    },
+    "microcks": {
+      "source": "official-png",
+      "icon": "microcks",
+      "repository": "microcks/microcks",
+      "revision": "1c38f795e1a9c45024faa0f527c4986931ff47f3",
+      "file": "webapp/src/main/webapp/src/assets/microcks-logo-blue-baseline-tweet.png",
+      "originGitSha": "aa97216c7db0fa964aa79d5f3be1c9c325609b15",
+      "originSha256": "138fc606690d04073b20dfa1233774d657f7b4d4f1cad9b3383b7edb1d639ab3",
+      "sha256": "a9ca9ef9cf00f6ac850dd55f8751d7d3bde4b6bc7c91af6a9ea408482698e60d",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/microcks/microcks"
+    },
+    "microweber": {
+      "source": "official",
+      "icon": "microweber",
+      "repository": "microweber/microweber",
+      "revision": "585df2adb20c536f43a66508cf8ab1f9d0b3f787",
+      "file": "userfiles/modules/logo/logo.svg",
+      "sha256": "27866aa4b9487f9b31edc044c152f3ed36495a3d263fd525495e8e9af956ca8c",
+      "license": "MIT",
+      "identityUrl": "https://github.com/microweber/microweber"
     },
     "milvus": {
       "source": "logos",
@@ -2824,6 +3671,19 @@
       "icon": "miniflux",
       "sha256": "9a5c00b1be4f1a6a085b70008b436f6dffd43d4244f19ba4205f12afb86ecb8e"
     },
+    "mirofish": {
+      "source": "official-png",
+      "icon": "mirofish",
+      "repository": "666ghj/MiroFish",
+      "revision": "7657031ac01184afe2cb220f5ee3545573b5e843",
+      "file": "frontend/public/icon.png",
+      "originGitSha": "20da2f06432e54d80c5ee5a7ba840d496f17e504",
+      "originSha256": "2b2c19d0400056000bb88636410c71c39ec3bc6b9cc871d6b022adf8cddb6e7a",
+      "sha256": "b0fbc447c225e81d877499fd8bbef8ff7cea4196489cb92dd5f70d46a023b6ba",
+      "traceProfile": "light-ground-pixel",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/666ghj/MiroFish"
+    },
     "mirotalk": {
       "source": "selfhst",
       "icon": "mirotalk",
@@ -2833,6 +3693,16 @@
       "source": "selfhst",
       "icon": "misskey",
       "sha256": "aa837f618acccafeea1cd43d7ab3e7c6be9d970c4028f42a88438007ed2c44e7"
+    },
+    "mistserver": {
+      "source": "official",
+      "icon": "mistserver",
+      "repository": "DDVTECH/mistserver",
+      "revision": "ddd9bec7e143f41c39c61b1d3473cbcf1a42f9b6",
+      "file": "lsp/images/MistServer_logo.svg",
+      "sha256": "2a6465542c96363707cd3224999c05db2447654c71820785d44115f73a99fc75",
+      "license": "Unlicense",
+      "identityUrl": "https://github.com/DDVTECH/mistserver"
     },
     "mitra": {
       "source": "selfhst",
@@ -2880,6 +3750,29 @@
       "source": "selfhst",
       "icon": "moodle",
       "sha256": "6a14ac48e5e2c307c918fdb72ff7973dbdf0f59b498cdeee8d1bab48a309a942"
+    },
+    "mopidy": {
+      "source": "official-png",
+      "icon": "mopidy",
+      "repository": "mopidy/mopidy",
+      "revision": "ceb96aaf653473061db09cef2382e5ce758a62e3",
+      "file": "docs/images/logo.png",
+      "originGitSha": "3f019f7e80ff3a5ffc085732fefa19d0ea2889d1",
+      "originSha256": "65d0eb6dc7d9652fbc3aae1f619f53fb6d7e71163fc4676081653a01f9c921ed",
+      "sha256": "df73b93310cb621f97cd517b92e778d7363365d430da3227e1bf67789bfea059",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/mopidy/mopidy"
+    },
+    "morphic": {
+      "source": "official",
+      "sourceProfile": "morphic-static-jsx",
+      "icon": "morphic",
+      "repository": "miurla/morphic",
+      "revision": "41c97193f82b8a7bd15dae2cc565ce7a83fe4508",
+      "file": "components/ui/animated-logo.tsx",
+      "sha256": "c6d1244501d49cdcfb65f24f9cd1eccee9531d21c69a4d22a6d9b57db788d335",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/miurla/morphic"
     },
     "movary": {
       "source": "selfhst",
@@ -3033,6 +3926,16 @@
       "icon": "nocodb",
       "sha256": "b70f22ea8c6227e9db5bca79934bcd84d16069e50fd70ddf7c6a9c19c0d3bd2e"
     },
+    "nod": {
+      "source": "official",
+      "icon": "nod",
+      "repository": "n8n-io/nod",
+      "revision": "163192759dd85ced6ad2ca7cd41f85e7f92544f6",
+      "file": "docs/public/favicon.svg",
+      "sha256": "e6729f1f7421bb3485096d2c664a2ab81a5e8d4494fd6a78fcd1c8c1217d8b73",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/n8n-io/nod"
+    },
     "node-red": {
       "source": "selfhst",
       "icon": "node-red",
@@ -3068,6 +3971,18 @@
       "icon": "novu",
       "sha256": "efc199d663d73b44bb6975224ac1a20d61568b9a56fdb87722fd132e59d7cab9"
     },
+    "nsq": {
+      "source": "official-png",
+      "icon": "nsq",
+      "repository": "nsqio/nsq",
+      "revision": "85cf10c09c6c3c86160d6f0eb156f62d0efc1648",
+      "file": "nsqadmin/static/img/favicon.png",
+      "originGitSha": "c0466c380d4ff59d155e0f4244987c6233757796",
+      "originSha256": "5082dfb0e6a628b95b7d418d0c26fbf37eda331706da9402bddd358c50e12938",
+      "sha256": "d4cbec298f27bc931e5b08a58b95a7a6c119cbb0e937d20441c32203dbd00417",
+      "license": "MIT",
+      "identityUrl": "https://github.com/nsqio/nsq"
+    },
     "ntfy": {
       "source": "selfhst",
       "icon": "ntfy",
@@ -3092,6 +4007,18 @@
       "source": "dashboard",
       "icon": "nzbhydra2",
       "sha256": "03ed6a9d8ee1fc82fd75ab87c749a26deddc01f2e2e4467898a2e4368db83839"
+    },
+    "ocs-inventory-ng": {
+      "source": "official-png",
+      "icon": "ocs-inventory-ng",
+      "repository": "OCSInventory-NG/OCSInventory-Server-Frontend-Rework",
+      "revision": "7e536ca525cfa6a9343421ef1d1b7487cda2bd31",
+      "file": "src/assets/img/logo-white.png",
+      "originGitSha": "cd49ceb0f59a45f47bad5b866a87291f9bf4e7bb",
+      "originSha256": "ea5aa8568ced5b6e4371f8626b32888169e5b2a3ec3a5f3ea5ce0976a95ee278",
+      "sha256": "4af4121c569b07487dbd6f9b61476dc858118adfcd78908d4930a12f7a432850",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/OCSInventory-NG/OCSInventory-ocsreports"
     },
     "october-cms": {
       "source": "simple-icons",
@@ -3127,6 +4054,16 @@
       "source": "selfhst",
       "icon": "ombi",
       "sha256": "3ffecb3cd1009e375ffbf6187aeca22dfc5cbf3155ed128aa28d3ffa67f34b04"
+    },
+    "omero": {
+      "source": "official",
+      "icon": "omero",
+      "repository": "ome/www.openmicroscopy.org",
+      "revision": "50e6b81e9448e5445c96b0b0c5d2934fd6c373fe",
+      "file": "img/logos/omero-logomark.svg",
+      "sha256": "eba9ee1b22c2e21c21903be56bde4fb55e9b7e87c118e2a5dccc7a163aa1ac24",
+      "license": "CC-BY-4.0",
+      "identityUrl": "https://www.openmicroscopy.org/omero/"
     },
     "omniroute": {
       "source": "selfhst",
@@ -3166,6 +4103,30 @@
       "source": "selfhst",
       "icon": "open-dronelog",
       "sha256": "cf1aa2a31de509c28c5ea57f8e609d96bea7142352244a9460645d7071de6df3"
+    },
+    "open-journal-systems": {
+      "source": "official-png",
+      "icon": "open-journal-systems",
+      "repository": "pkp/ojs",
+      "revision": "1e1d3fc49b69290f0931e81982e4be8a35232cb3",
+      "file": "templates/images/structure/logo.png",
+      "originGitSha": "ea9877590779fec76b38906e43a46818d81f0871",
+      "originSha256": "07d1b72d25cb751ceb11a52f6c90c8a6fed19103a1b86cb7ae4bcdd4b90725e0",
+      "sha256": "972843d1c15003200ace4e7eae5bc646deccf0e3dfa88851d64d01b861bfc66a",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/pkp/ojs"
+    },
+    "open-monograph-press": {
+      "source": "official-png",
+      "icon": "open-monograph-press",
+      "repository": "pkp/omp",
+      "revision": "bdfae3fe79f7be2f201126e3af9aa66d1998fe9f",
+      "file": "templates/images/structure/logo.png",
+      "originGitSha": "20e4c53cf12c1772e2b8a982ba8c454c0e021606",
+      "originSha256": "9f9d8046a8c0f80a7f4270682c42f583294c566d28971abb2c75fb7a72080077",
+      "sha256": "fc1548d56c86d859cb610dcfa34ccc810ee47af5f06cf39603ee651daf885d1d",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/pkp/omp"
     },
     "open-notebook": {
       "source": "dashboard",
@@ -3224,6 +4185,28 @@
       "icon": "openhands",
       "sha256": "e3d52c0762ce433d265360410419160d72a2d9d0035365faaff35208aa469a4e"
     },
+    "openhuman": {
+      "source": "official",
+      "icon": "openhuman",
+      "repository": "tinyhumansai/openhuman",
+      "revision": "a98b3a499ae0dafa9c2c65cc2d9117e521d2866e",
+      "file": "app/public/brand/OpenhumanLogo-Black.svg",
+      "sha256": "7892979a084a5e2bbc73c32fe0f447918aa9b458c50bf0bb856469c837e6401c",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/tinyhumansai/openhuman"
+    },
+    "openlit": {
+      "source": "official-png",
+      "icon": "openlit",
+      "repository": "openlit/openlit",
+      "revision": "463a1c1b3cd72a94fab4155efe0f28d90d87fe95",
+      "file": "src/client/public/images/logo.png",
+      "originGitSha": "5c60527d14266f23fafc31ec5ca3e617237ea6b7",
+      "originSha256": "169eb690a310d0bc14fe0c9ccafb9fbfdd1bd1bcf308a5a353291a5bac9c68c0",
+      "sha256": "7993efa96b3bb7f0d958d698dee967f16ca61297b6b46b811d8e53e9a5714005",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/openlit/openlit"
+    },
     "openmausbot": {
       "source": "official",
       "icon": "openmausbot",
@@ -3260,10 +4243,33 @@
       "license": "AGPL-3.0-or-later (first-party repository)",
       "identityUrl": "https://openremote.io/"
     },
+    "openrouteservice": {
+      "source": "official-png",
+      "icon": "openrouteservice",
+      "repository": "GIScience/openrouteservice-app",
+      "revision": "6ff5e9e9e3df1fe8fd45122b4cecbf1c910e7712",
+      "file": "app/img/logo@2x.png",
+      "originGitSha": "b729c283acb471b22b5b03c60c224119a45a7110",
+      "originSha256": "327076aa208a27c38f892cb0b9a0d5d0b44fcf1c0a08bfac14a46dcb12931f2f",
+      "sha256": "02e37160447bc05fd5c7d6584faa656c37bd74f49b977e486568cb66f3e5f9eb",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/GIScience/openrouteservice",
+      "traceProfile": "light-ground-upscaled"
+    },
     "opensearch": {
       "source": "selfhst",
       "icon": "opensearch",
       "sha256": "5dfdbba82e5a41742808eeed4e313b56266beee18c32df2bfd6dc7a456d52f60"
+    },
+    "openseo": {
+      "source": "official",
+      "icon": "openseo",
+      "repository": "duckduckdeploy/openseo",
+      "revision": "12b525400539f980668d088ff7154236a2376e88",
+      "file": "apps/app/src/app/icon.svg",
+      "sha256": "68744e354ca162d19ff8644229b19c985a3752f98da1ed2ddf82fca46127e15c",
+      "license": "MIT",
+      "identityUrl": "https://github.com/duckduckdeploy/openseo"
     },
     "opensign": {
       "source": "selfhst-png",
@@ -3286,6 +4292,16 @@
       "source": "selfhst",
       "icon": "openttd",
       "sha256": "abca2c663e74b95dcf7ab4525cd42e54647bf10410b2bb1f70ffa19857a1b840"
+    },
+    "openviking": {
+      "source": "official",
+      "icon": "openviking",
+      "repository": "volcengine/OpenViking",
+      "revision": "37491383df452f12918e353e02abb924cc8d50c1",
+      "file": "frontend/docs/docs/public/logo.svg",
+      "sha256": "1f4e1c2c23695a7852360d23e1fd4e77b6c5887df1761b0348d9119b03221e4c",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/volcengine/OpenViking"
     },
     "openvpn-access-server": {
       "source": "selfhst",
@@ -3314,6 +4330,26 @@
       "originGitSha": "e88c96b1cba4ca24b397cc55eb969fa88bd6a96f",
       "originSha256": "e4584f21d20ed600860f762500064dcae2e25fbcab134f2c86475aed6ffec1b7"
     },
+    "osrm": {
+      "source": "official",
+      "icon": "osrm",
+      "repository": "Project-OSRM/osrm-frontend",
+      "revision": "33c557b1830d4986e84f9035e90fb6b4c398b36b",
+      "file": "images/osrm_logo.svg",
+      "sha256": "9791a14c55ee13d54a56fb45ed7bfafa3fb676260aff043b22ab9d5bf3544583",
+      "license": "BSD-2-Clause",
+      "identityUrl": "https://github.com/Project-OSRM/osrm-frontend"
+    },
+    "otobo": {
+      "source": "official",
+      "icon": "otobo",
+      "repository": "ROTHEROSS/otobo",
+      "revision": "5fdbd956e8f824f8be7ff43d7a0a6d627f0faf4c",
+      "file": "var/httpd/htdocs/common/img/logo_small.svg",
+      "sha256": "e3ebbc505d24fdf4844cb9bbb808ab5d725a2626dec201b141aa02c7304a154e",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/ROTHEROSS/otobo"
+    },
     "outline": {
       "source": "selfhst",
       "icon": "outline",
@@ -3339,6 +4375,18 @@
       "icon": "owncloud",
       "sha256": "822e153e4586d953b19d6f40f50b0fae8c42aa51988c67b25233e6bde7152a2e"
     },
+    "owntracks-recorder": {
+      "source": "official-png",
+      "icon": "owntracks-recorder",
+      "repository": "owntracks/recorder",
+      "revision": "2d3851258561e83784f7ec59fc3ebf636fec5ec6",
+      "file": "assets/recorder-logo-192.png",
+      "originGitSha": "6ce501a73976f8db95792ea7df7ba77ae8c87c6d",
+      "originSha256": "ac4bf951cdaa601ee69ec634210c7bbef90ed8f7d35fa3d4ec69034711012a3b",
+      "sha256": "0c1a797932d87819e5d5c386959c911b875e507ffba6bc631e1a79b14905d612",
+      "license": "GPL-2.0-or-later (see OwnTracks-Recorder-LICENSE.txt)",
+      "identityUrl": "https://github.com/owntracks/recorder"
+    },
     "oxicloud": {
       "source": "selfhst",
       "icon": "oxicloud",
@@ -3349,12 +4397,32 @@
       "icon": "pairdrop",
       "sha256": "426eea8936836e6d1cbc3a6aad8903ef7970aaacc9997fb6e40e5b1d5ba6279c"
     },
+    "paisa": {
+      "source": "official",
+      "icon": "paisa",
+      "repository": "ananthakumaran/paisa",
+      "revision": "cb00dd31017b5e511af2e2d63aef2646e905f800",
+      "file": "brand/logo.svg",
+      "sha256": "30e9e59ea9884d8af1402003e42364b965fecf25c024d5fbf1fe62e98702b1c0",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/ananthakumaran/paisa"
+    },
     "pangolin-newt": {
       "source": "dashboard",
       "icon": "pangolin",
       "sha256": "42109798fc74f800c17693f46aa35489217ed8a87bc208bc394858d7446782d2",
       "identityUrl": "https://www.hostinger.com/applications/pangolin-newt",
       "brandOf": "pangolin"
+    },
+    "paperclip": {
+      "source": "official",
+      "icon": "paperclip",
+      "repository": "paperclipai/paperclip",
+      "revision": "7a2ee0da1cad925465bba6e616e3010bc9243526",
+      "file": "docs/images/logo-light.svg",
+      "sha256": "0739a470abdd3c251ba27d2dccba314d6a721b830d787f9b85ae80fd42c431e2",
+      "license": "MIT",
+      "identityUrl": "https://github.com/paperclipai/paperclip"
     },
     "paperless-ngx": {
       "source": "selfhst",
@@ -3370,6 +4438,30 @@
       "source": "selfhst",
       "icon": "papra",
       "sha256": "b00c370b4070eb5c15598aeabc15c84ccc7b98c69088c2b73bfd976ababba632"
+    },
+    "para": {
+      "source": "official-png",
+      "icon": "para",
+      "repository": "Erudika/para",
+      "revision": "be190b4264c8571295ce14a235c35124de9c101e",
+      "file": "para-server/src/main/resources/static/apple-touch-icon.png",
+      "originGitSha": "e849f4c7ef14638d2947523c9fd76ce6cf3e053d",
+      "originSha256": "e42b5a1bc8581e88206f3f540341f6d9b236f64886258ea5e962190e843f6294",
+      "sha256": "ae44633db6e64db2dee54e9a2f1b116d30ef330dc5898498af516ac0c3c4189e",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/Erudika/para"
+    },
+    "parse-server": {
+      "source": "official-png",
+      "icon": "parse-server",
+      "repository": "parse-community/parse-server",
+      "revision": "a3f152f64dfaefedf9d9bb3e4c4579413193daab",
+      "file": ".github/parse-server-logo.png",
+      "originGitSha": "80fbc24344f56e09a15f288b60b19d2467602393",
+      "originSha256": "db24650c5a2935aaed8ecebc9841aa6cd01f64a7bf3718e6704e09f509739309",
+      "sha256": "a6f8a4ccfa3caa2932e4077f11a626435bb8a625f720aa1b757f697651586eb7",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/parse-community/parse-server"
     },
     "parseable": {
       "source": "selfhst",
@@ -3416,6 +4508,16 @@
       "icon": "penpot",
       "sha256": "8320223cddb8b6c4e24c330a8415552048395452d24b5d817288026d12b4bc76"
     },
+    "percona-pmm": {
+      "source": "official",
+      "icon": "percona-pmm",
+      "repository": "percona/pmm",
+      "revision": "7c1a38f09659547ef0070344dacab38cc0fef471",
+      "file": "documentation/docs/assets/pmm-mark.svg",
+      "sha256": "b31ca1060dcaf8cae8ffaa5a0cc9f5348449e4332f797e22ccae0961293317ae",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/percona/pmm"
+    },
     "pgadmin": {
       "source": "selfhst",
       "icon": "pgadmin",
@@ -3425,6 +4527,32 @@
       "source": "dashboard",
       "icon": "pgbackweb",
       "sha256": "a2055c12465a3471b76bfca1ccf2405500ca8c9ae2d2742d2e9977b4495b3f10"
+    },
+    "pghero": {
+      "source": "official-png",
+      "icon": "pghero",
+      "repository": "ankane/pghero",
+      "revision": "d504e8a7319f18c7d906ac1048868fd4419467e7",
+      "file": "app/assets/images/pghero/favicon.png",
+      "originGitSha": "d6af4b0b8c2ab5ccf00b7a13412662f04714d9e2",
+      "originSha256": "db10337a56c45eb43c22ff5019546b520fa22c7281d4d385f235cbca67ed26bb",
+      "sha256": "142712c3430d1d0efb14450a8e4cd80a2ceaf099133d469162e5e50621800043",
+      "traceProfile": "light-ground-pixel",
+      "license": "MIT",
+      "identityUrl": "https://github.com/ankane/pghero"
+    },
+    "pgweb": {
+      "source": "official-png",
+      "icon": "pgweb",
+      "repository": "sosedoff/pgweb",
+      "revision": "e4858a16d8e032730055289596ea9059a91bca64",
+      "file": "static/img/icon.png",
+      "originGitSha": "a1d1f3123d0fb450e43cbf303541a5b35f503935",
+      "originSha256": "3937ea6e72c7823a9014408162a40ba52bf81ba37a5e87bd241e698851b39da4",
+      "sha256": "1ad6c3e18f9558d367db9092d465779a5b8f2a38810ac539c3fa089c9d25e3ab",
+      "traceProfile": "light-ground-pixel",
+      "license": "MIT",
+      "identityUrl": "https://github.com/sosedoff/pgweb"
     },
     "phoenix": {
       "source": "official",
@@ -3480,6 +4608,19 @@
       "source": "selfhst",
       "icon": "phpmyadmin",
       "sha256": "f0bd87e516120b3bd9cd4d0d42358df5af7977edc0f79985fe544472d00fb5f9"
+    },
+    "picoclaw": {
+      "source": "official-png",
+      "icon": "picoclaw",
+      "repository": "sipeed/picoclaw",
+      "revision": "bbf6893ca7afad27f1d00a0f5a45982a549c6ed6",
+      "file": "web/backend/icon.png",
+      "originGitSha": "e0b4aab9c42f1b84b3ff7ffb145a965bcd67e925",
+      "originSha256": "68a133e77515857a245da31ecdeba843a75ad2237790da4b2d3456501e1bd647",
+      "sha256": "ec08bc77838d10648afc7456ecff971ef3af8cc0cb16611920b6a4dd85814b06",
+      "traceProfile": "light-ground-pixel",
+      "license": "MIT",
+      "identityUrl": "https://github.com/sipeed/picoclaw"
     },
     "picoshare": {
       "source": "selfhst",
@@ -3570,6 +4711,18 @@
       "icon": "posterizarr",
       "sha256": "5a8b4ffc37d7b1b71f196d718db85d96bc15dbcfa181164d31a6bbd3b62c42de"
     },
+    "posterr": {
+      "source": "official-png",
+      "icon": "posterr",
+      "repository": "petersem/posterr",
+      "revision": "4609d7e2ef2ce37bac78349b3978e61a706d0180",
+      "file": "public/favicons/android-chrome-512x512.png",
+      "originGitSha": "348558e6bf47aa50d06f1c9d5654c762341e965d",
+      "originSha256": "5d1797f7fe491a555198b8cadd795f762286dc5d5991e00286c70d120c430e40",
+      "sha256": "6878b3cfa08f288272c2b66b84d7860aeb785325dcc5460e9b2de1700c398f3e",
+      "license": "MIT",
+      "identityUrl": "https://github.com/petersem/posterr"
+    },
     "postgresql": {
       "source": "selfhst",
       "icon": "postgresql",
@@ -3604,6 +4757,16 @@
       "source": "selfhst",
       "icon": "privatebin",
       "sha256": "f4d28867c80a24a4c3606c57b6dd258b7bedee90d72a7575c62a6f9ad526f509"
+    },
+    "privategpt": {
+      "source": "official",
+      "icon": "privategpt",
+      "repository": "zylon-ai/private-gpt",
+      "revision": "2373cc7b912019c9b8fdb8907b2c256799b2adcb",
+      "file": "ui/references/logo-privategpt-wordmark-dark-transparent.svg",
+      "sha256": "b4dec09885011c953b4f5761adc4e8008ffe5b2327eba6a7a17013f3befa54c6",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/zylon-ai/private-gpt"
     },
     "profilarr": {
       "source": "selfhst",
@@ -3650,6 +4813,42 @@
       "icon": "pulse",
       "sha256": "f2c36ce4f0a027f6867afa5f02c49fa22474cc15fc0821388b0527bd1dbccec1"
     },
+    "pycsw": {
+      "source": "official",
+      "icon": "pycsw",
+      "repository": "geopython/pycsw",
+      "revision": "3bc6fb77489e9876bbcbc2b8f6dd8ca1b2bb0597",
+      "file": "docs/_static/logo/logo-pycsw.svg",
+      "sha256": "f2a270a88eea5e688c470eaa1a516aee87a1cd3e94b8aaec1a16dd195b12fc10",
+      "license": "MIT",
+      "identityUrl": "https://github.com/geopython/pycsw"
+    },
+    "pydio-cells": {
+      "source": "official-png",
+      "icon": "pydio-cells",
+      "repository": "pydio/cells",
+      "revision": "e53f0eec4e719903e67aff3b61a9be83d6c242ea",
+      "file": "discovery/install/assets/src/res/css/PydioLogo250.png",
+      "originGitSha": "c1d192ad131fbbc29ef0fa45915fe5a601b38107",
+      "originSha256": "9185f8fb516e539f7dee8cf0c81db9c9439cb129f099587f68e677460acfdc9d",
+      "sha256": "6f17ea8e437d6c90b938997928cdb533678d209b9773aae1196b784252bdc392",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/pydio/cells",
+      "traceProfile": "dark-ground-upscaled"
+    },
+    "pygeoapi": {
+      "source": "official-png",
+      "icon": "pygeoapi",
+      "repository": "geopython/pygeoapi",
+      "revision": "a7a9a37b257dc062d5f7833c1c9eb577fa2b8ee6",
+      "file": "pygeoapi/static/img/logo.png",
+      "originGitSha": "047711101928eb105d82cc2c6b32f97752ccbac2",
+      "originSha256": "cbe4f8b5dac9e7b3a2ea2f2e332ba67f582d0328ee4199d7c479a017779d6250",
+      "sha256": "9aaa21a7b554f4d81aac4ae345b5eaca96982947ce9f2b3a2c39b7e01f16bd99",
+      "license": "MIT",
+      "identityUrl": "https://github.com/geopython/pygeoapi",
+      "traceProfile": "light-ground-upscaled"
+    },
     "qbittorrent": {
       "source": "selfhst",
       "icon": "qbittorrent",
@@ -3659,6 +4858,31 @@
       "source": "selfhst",
       "icon": "qdrant",
       "sha256": "60d7dff084f7c408802e213c0307161655801be9958754351fc83c271fb71edb"
+    },
+    "qloapps": {
+      "source": "official-png",
+      "icon": "qloapps",
+      "repository": "Qloapps/QloApps",
+      "revision": "dad4ef2034196685ad9858d8d4e886478724870a",
+      "file": "install-dev/theme/img/logo.png",
+      "originGitSha": "98132803e8895bead4eccb3ad123fd421ae69099",
+      "originSha256": "16713770a0b049fcd2276019ead9d3c44417597464a3936397356c7347980113",
+      "sha256": "ecefa430f37d46322b25ef5f6403d64b3cac724243b6e6d8d474a9b04962f0c8",
+      "license": "OSL-3.0",
+      "identityUrl": "https://github.com/Qloapps/QloApps",
+      "traceProfile": "dark-ground-upscaled"
+    },
+    "quasarr": {
+      "source": "official-png",
+      "icon": "quasarr",
+      "repository": "rix1337/Quasarr",
+      "revision": "000e138c6eca9fbe3c0a7db9c9797f3022d3f60e",
+      "file": "Quasarr.png",
+      "originGitSha": "cbb6e5bf8328323622b77c6fa3fb40c8a6b90f62",
+      "originSha256": "0187a6f1ba5a3052d96263f86ce77b4191f7a1935b64d61ca5a4662d0e5b4be8",
+      "sha256": "5256eab048f9e57ad41eeccf796ed43159f80a3e6c3f9665c178a8a469c14167",
+      "license": "MIT",
+      "identityUrl": "https://github.com/rix1337/Quasarr"
     },
     "quickwit": {
       "source": "selfhst",
@@ -3695,10 +4919,30 @@
       "icon": "rallly",
       "sha256": "a9faf5016c622954b04499d2aafe5ff120329ccd966eeaa68d6a0039afc61fb9"
     },
+    "ralph": {
+      "source": "official",
+      "icon": "ralph",
+      "repository": "allegro/ralph",
+      "revision": "b80ca56bf00302a6a5afc7e83e6b3a11155eba37",
+      "file": "contrib/logo.svg",
+      "sha256": "5c6e234668e864e9a0a2d419a7f7f40316ac191c7885bece6c1fe1e25d80967a",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/allegro/ralph"
+    },
     "raneto": {
       "source": "selfhst",
       "icon": "raneto",
       "sha256": "71dabda853fb1d9b8681fb9e8365a7b81ad5bf4f153feab4fa52f2fa06e2ab06"
+    },
+    "razzia": {
+      "source": "official",
+      "icon": "razzia",
+      "repository": "Ralex91/Razzia",
+      "revision": "602de6666e89d9e66a277be2f5799166fbdc098a",
+      "file": ".github/icon.svg",
+      "sha256": "7594a69ec11c73e9f8c04d189bd3ac6d5533bfe00f65dedb4d420478ea4bcadb",
+      "license": "MIT",
+      "identityUrl": "https://github.com/Ralex91/Razzia"
     },
     "reactive-resume": {
       "source": "selfhst",
@@ -3709,6 +4953,39 @@
       "source": "selfhst",
       "icon": "readeck",
       "sha256": "7604440eea4968dd30ed81530b17c14950af402a8ef151fdd492b5d33775bde7"
+    },
+    "readur": {
+      "source": "official-png",
+      "icon": "readur",
+      "repository": "readur/readur",
+      "revision": "9abe15bf4f7358c472793ee0dac761999313ace4",
+      "file": "frontend/public/icons/icon-512.png",
+      "originGitSha": "5daf8aa3e9f39b470b95ee8ca46a39db383dcf70",
+      "originSha256": "a98b8658db4a0959bb7d0332364f94ab020f2c3a4d0e91fb3d0e64a2b7321599",
+      "sha256": "7fffff5b14d86d9c4d697f7ac12ab090283421938bd534b733bcf888068fd19e",
+      "license": "MIT",
+      "identityUrl": "https://github.com/readur/readur",
+      "traceProfile": "gradient-detail"
+    },
+    "readyset": {
+      "source": "official",
+      "icon": "readyset",
+      "repository": "readysettech/docs-project",
+      "revision": "2c88d92af3335e45c6f7048f878dc6a967812eb6",
+      "file": "public/Currentlogo.svg",
+      "sha256": "028b66860b8041f45098530b54dfa5372fd3d25f14bd7d7d27c5997dca1bcdd4",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/readysettech/docs-project"
+    },
+    "redaxo": {
+      "source": "official",
+      "icon": "redaxo",
+      "repository": "redaxo/core",
+      "revision": "6a6c3abd95fe8b21ad555f8a84f5342ce5e6a308",
+      "file": "redaxo/src/core/assets/redaxo-logo.svg",
+      "sha256": "00cd6a8798e2df0f980d25c5b52a8ed6a8282f0a38085b1d13977115d92aae08",
+      "license": "MIT with REDAXO backend attribution condition (see REDAXO-LICENSE.txt)",
+      "identityUrl": "https://github.com/redaxo/core"
     },
     "redis": {
       "source": "selfhst",
@@ -3732,10 +5009,35 @@
       "icon": "reitti",
       "sha256": "b696a9bcd0fbaa83397da31d45b9b9bee62ee5d252b7fbd9919c332276edd573"
     },
+    "reiverr": {
+      "source": "official-png",
+      "icon": "reiverr",
+      "repository": "aleksilassila/reiverr",
+      "revision": "5923207efa3a537f1c9b6eec6364ad884ce1d06e",
+      "file": "frontend/public/favicon.png",
+      "originGitSha": "825b9e65af7c104cfb07089bb28659393b4f2097",
+      "originSha256": "5146ed79b486cb9e1cdcdd7814cd22ae78e70ceb30fa06b4cd9a16cf121bc9e6",
+      "sha256": "37c465d7eba82c39077ea8872c5d77e618c1ee1adca695a01e2a0c5279647333",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/aleksilassila/reiverr"
+    },
     "relaticle": {
       "source": "selfhst",
       "icon": "relaticle",
       "sha256": "f978c386b9590a6bfa84e5f49e2a8a3875a5a220553d12f43526a9e3458bdbd4"
+    },
+    "remark42": {
+      "source": "official-png",
+      "icon": "remark42",
+      "repository": "umputun/remark42",
+      "revision": "f72165c641b5a9a0d36ea2d612a33451893cc7d4",
+      "file": "site/static/apple-touch-icon.png",
+      "originGitSha": "f40917b7af44e8ac7203bdf22510352d1f6cc354",
+      "originSha256": "db60e18f36442f70c5a0359129afc05212f9bbd8feb0184b446a3b5bdd3e1c21",
+      "sha256": "158d269084cf76b4b3e69a33cff92959ecd34346954aced675e5d2ea87332805",
+      "license": "MIT",
+      "identityUrl": "https://github.com/umputun/remark42",
+      "traceProfile": "gradient-detail"
     },
     "remmina": {
       "source": "selfhst",
@@ -3781,6 +5083,19 @@
       "source": "selfhst",
       "icon": "romm",
       "sha256": "1171c71e42f4b8c1e3954c55092c620122d6e2a066928a6018db240a14cb1e15"
+    },
+    "rosariosis": {
+      "source": "official-png",
+      "icon": "rosariosis",
+      "repository": "francoisjacquet/rosariosis",
+      "revision": "fe25aeea3b5a667af234169c19dec2a8c6e54376",
+      "file": "apple-touch-icon.png",
+      "originGitSha": "7a706d94fdd3edc849222e1ff40ba4deae4c880e",
+      "originSha256": "9cb07c45bd1814a262bc959620bfc68787797f40472d68c7feb1b539772f4981",
+      "sha256": "2eaa413703b3d9e163a635bfc9ae37a777d66b8bfa30097911a0fd17a07d8776",
+      "license": "GPL-2.0-or-later",
+      "identityUrl": "https://github.com/francoisjacquet/rosariosis",
+      "traceProfile": "light-ground-pixel"
     },
     "rotki": {
       "source": "selfhst",
@@ -3844,6 +5159,28 @@
       "icon": "saltcorn",
       "sha256": "5c5d30c122569e09cb547339f1f17da808a0236ba2e16694cf0c0b3d85378ef4"
     },
+    "scada-lts": {
+      "source": "official-png",
+      "icon": "scada-lts",
+      "repository": "SCADA-LTS/Scada-LTS",
+      "revision": "f1cf088585cabd6f5a457698a764e0fc07cf98ee",
+      "file": "scadalts-ui/src/assets/slts_logo.png",
+      "originGitSha": "fc889a22347245dd38b877fd3b51fcf72b0a2388",
+      "originSha256": "c4a00178751e7b932d793ffacba92646407fb2b666181ab9aa7b76c1ea968a16",
+      "sha256": "6b2e3d0302bd0ff60e5385958f672d4ce1b5b663525572b924354afe4b8db4cb",
+      "license": "GPL-2.0",
+      "identityUrl": "https://github.com/SCADA-LTS/Scada-LTS"
+    },
+    "scoold": {
+      "source": "official",
+      "icon": "scoold",
+      "repository": "Erudika/scoold",
+      "revision": "bd2a2a858de76c0b4891462faf3350d1ed323fb5",
+      "file": "src/main/resources/static/images/logosq.svg",
+      "sha256": "23514650b5a78a83e96b73055d34369220257ed98e3b732404bc3a3d0e5e01fd",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/Erudika/scoold"
+    },
     "scrypted": {
       "source": "selfhst",
       "icon": "scrypted",
@@ -3879,12 +5216,47 @@
       "icon": "semaphore",
       "sha256": "9531c8d351ba836f1afecec06e68bd86bb4a1b3ffa617407588112900d65bbea"
     },
+    "senaite-lims": {
+      "source": "official-png",
+      "icon": "senaite-lims",
+      "repository": "senaite/senaite.lims",
+      "revision": "f6675a62693bd09c524a87ee8c2b748a4a8d7912",
+      "file": "static/senaite-logo.png",
+      "originGitSha": "31569bd8fb63393a7ed969b27b8694b4d20efdab",
+      "originSha256": "6d791a45656f335f10b4d6ac2f91580d21a6acc0c2ff9e09c3a60bed216ae4da",
+      "sha256": "227f95d99bdfc74fb7d58dc0f3be34caa60881d4824e50a38fdf85f2f334f63e",
+      "license": "GPL-2.0",
+      "identityUrl": "https://github.com/senaite/senaite.lims"
+    },
+    "serge": {
+      "source": "official-png",
+      "icon": "serge",
+      "repository": "serge-chat/serge",
+      "revision": "3cb250c48286d644fd1e73e8a47cbacb60be6e21",
+      "file": "web/static/favicon.png",
+      "originGitSha": "44163c5fc73c4a1a026e44dc31a77251eb2fa7be",
+      "originSha256": "d3f9bafa43f86cf8f87109b6cd492d4e99e73c5c9f9c03e05081f585cfa0b31b",
+      "sha256": "992e8072a6582ba7ad701f445b7de2324dc1ebd31c59a4f618fa21511ecf1d95",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/serge-chat/serge",
+      "traceProfile": "dark-ground-pixel"
+    },
     "serpbear": {
       "source": "selfhst-png",
       "icon": "serpbear",
       "sha256": "79581123e489c927d99b1bd2ece2c58d45b8acc4a2e9a933e9460d833c5b6fb3",
       "originGitSha": "c1469a00d786dde0ec322156b48f4fab501f6323",
       "originSha256": "12da7f46df0694caca6d6557469f6e3d04889535e9752ed052ce2256a21f31ec"
+    },
+    "serverkit": {
+      "source": "official",
+      "icon": "serverkit",
+      "repository": "jhd3197/ServerKit",
+      "revision": "2132f675c6459318f433c9f039f611a3319607a0",
+      "file": "frontend/src/assets/ServerKitLogo.svg",
+      "sha256": "131aa4c91066aafb6d2f4fdcbdbb0edd3d9501812de7e75dcf550085696c4696",
+      "license": "MIT",
+      "identityUrl": "https://github.com/jhd3197/ServerKit"
     },
     "serverstatus": {
       "source": "official",
@@ -3912,10 +5284,32 @@
       "icon": "shelfmark",
       "sha256": "392052123565a6984defacbcd12a368be2dba46f5dd2335027d17cb458a2520d"
     },
+    "sherlock": {
+      "source": "official-png",
+      "icon": "sherlock",
+      "repository": "sherlock-project/sherlock",
+      "revision": "c588d7c8b476df9f9c84912a05d1430fb8cdcdae",
+      "file": "docs/images/sherlock-logo.png",
+      "originGitSha": "3b0ee09bc2c03d54466c2079f60ff604112d7244",
+      "originSha256": "3ef3383c34b9a4e01bd448ac7efb88fc4c6beab966382377cd96968ec07a56af",
+      "sha256": "db7d3609add66a1e7910c0b616a903d4793eefe2e9c92bd20f20ad1617ddaf20",
+      "license": "MIT",
+      "identityUrl": "https://github.com/sherlock-project/sherlock"
+    },
     "shiori": {
       "source": "dashboard",
       "icon": "shiori",
       "sha256": "1c8aed9c89866a8ebf11c562e8dc70e178c7bb498ad4cc5719bac4bded317c1a"
+    },
+    "shipshipship": {
+      "source": "official",
+      "icon": "shipshipship",
+      "repository": "GauthierNelkinsky/ShipShipShip",
+      "revision": "6024b5b0c7776c2d4a766e2484c9a5bd10c1d194",
+      "file": "admin/src/lib/assets/favicon.svg",
+      "sha256": "d7d9227f0fe5bfb4189fb6ba4dd9e2d524f6a1dfd02bd901c65330987675c0b3",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/GauthierNelkinsky/ShipShipShip"
     },
     "shlink": {
       "source": "selfhst",
@@ -3939,6 +5333,30 @@
       "originGitSha": "f901ff019ec9841650eae7e33db00c648ad253ad",
       "originSha256": "0be3a4fa76ac036a09cad18fe18e0586fe505db6be815a7bcbe25b821cb6cd1d",
       "referenceUrl": "https://github.com/containrrr/shoutrrr/blob/660a36d4805d23f5677193fc0360b5fa1e0bbd05/docs/shoutrrr-logotype.svg"
+    },
+    "shynet": {
+      "source": "official-png",
+      "icon": "shynet",
+      "repository": "milesmcc/shynet",
+      "revision": "ca35caba3af2b888acc990b99152c500a1c44461",
+      "file": "images/slogo.png",
+      "originGitSha": "5818a8dceb644ca0e588cbdf5c0cd6780e2abc5e",
+      "originSha256": "eacc4891198e1d8c9687407810807e913d1572f8e4e35447e43a26e79f1c9126",
+      "sha256": "6cb2fd70ba491ca7a7378008b305649cdf9db7f3a6460f3ae30cdd2b768a92a5",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/milesmcc/shynet"
+    },
+    "sickgear": {
+      "source": "official-png",
+      "icon": "sickgear",
+      "repository": "SickGear/SickGear",
+      "revision": "6a63ea2b2ba83506f3c6f75b563d6decfbbb8333",
+      "file": "gui/slick/images/ico/apple-touch-icon-180x180.png",
+      "originGitSha": "4ccac455636a41e67ebda409cf43c2161dfdd2eb",
+      "originSha256": "ed65d46075ecb2daf9e8c345b5474f8a201728b0c67cd4db48547bc761c0b832",
+      "sha256": "4f1bf48e81ac8c23c53fd8b6da53831b1e7553ea800c559ef3147434487b95d8",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/SickGear/SickGear"
     },
     "signoz": {
       "source": "selfhst",
@@ -4004,6 +5422,18 @@
       "icon": "slskd",
       "sha256": "ab9296211e174cd3bc0347157505e3fd206b4151e351e95e4aea26df648e2d5d"
     },
+    "smocker": {
+      "source": "official-png",
+      "icon": "smocker",
+      "repository": "smocker-dev/smocker",
+      "revision": "1cfdb10d7953bec700959d3d41dbd2be7de7b4a1",
+      "file": "client/assets/logo180.png",
+      "originGitSha": "c9f875acb446ea70e473beb22f2ce1ca278df500",
+      "originSha256": "48505034547782137b84a995ffceac077997744e9cca2f7f3302705b1d24524d",
+      "sha256": "480ddfd4b0411dd2287679d5220e4561e32a05828c816dc06c9d1e5cdf6c4e31",
+      "license": "MIT",
+      "identityUrl": "https://github.com/smocker-dev/smocker"
+    },
     "smokeping": {
       "source": "selfhst-png",
       "icon": "smokeping",
@@ -4015,6 +5445,19 @@
       "source": "selfhst",
       "icon": "snapdrop",
       "sha256": "ed0624c9fa9d9df49469ccc9f326d2afb06d3d45a9c35a8f31c70e793c5d7f1a"
+    },
+    "snapotter": {
+      "source": "official-png",
+      "icon": "snapotter",
+      "repository": "snapotter-hq/SnapOtter",
+      "revision": "72c2295ef5f817a79b1dd427300425f619260998",
+      "file": "apps/web/public/logo-512.png",
+      "originGitSha": "03fe75be706a60abf97cca3dec01c4e09b987358",
+      "originSha256": "c81e32aed354ca9fc80b11330cf5e54b80670450ecdd69d295ce247d3e602751",
+      "sha256": "c893a3714ab5e53cc7fbbb14d8c102a24f49d77927890e36d90c3fb59b2a2eb3",
+      "traceProfile": "light-ground-upscaled",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/snapotter-hq/SnapOtter"
     },
     "snappymail": {
       "source": "selfhst",
@@ -4058,10 +5501,33 @@
       "icon": "sonarr",
       "sha256": "e2768070dea49719b4311cf514ee08d4e2f56e3a7e710ed0aea5efaf9ebae48b"
     },
+    "songloft": {
+      "source": "official",
+      "icon": "songloft",
+      "repository": "songloft-org/songloft",
+      "revision": "0ed7f396be4851081ffd35f6b3e7b8bdcee01ee4",
+      "file": "docs/public/favicon.svg",
+      "sha256": "949e30875401262776817ab97e5ed79936b4887edef76ee4cb7954f8ea96a704",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/songloft-org/songloft"
+    },
     "speaches": {
       "source": "selfhst",
       "icon": "speaches",
       "sha256": "245c09747e3e3c7209857df5fbde8906485f3dfb32cda13e8658d9797a6e5922"
+    },
+    "speakr": {
+      "source": "official-png",
+      "icon": "speakr",
+      "repository": "murtaza-nasir/speakr",
+      "revision": "de02ee13ad9b4c3dab2d57a7e13bdb113d5f22f0",
+      "file": "static/img/icon-512x512.png",
+      "originGitSha": "2afd60eceb4d87664cccae94258d4d44b343f5cb",
+      "originSha256": "c8282db9a625b5db17c1ee639f134c6b4189b37b19e6e1ed3c1f072b557365dc",
+      "sha256": "48c63f20bea8e716f4cdf56970c64ca7bc77ebd831a2be3e906a6c9998be8d09",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/murtaza-nasir/speakr",
+      "traceProfile": "gradient-detail"
     },
     "speedtest-tracker": {
       "source": "selfhst",
@@ -4112,6 +5578,18 @@
       "source": "selfhst",
       "icon": "sshwifty",
       "sha256": "6c6e1d3109e7ac3306224d18746e043ff14d067914a35fc4d383c476cb03f0ef"
+    },
+    "starbase-80": {
+      "source": "official-png",
+      "icon": "starbase-80",
+      "repository": "notclickable-jordan/starbase-80",
+      "revision": "595c123975ca887e260b5c6b86b1dc5a9df39991",
+      "file": "public/logo.png",
+      "originGitSha": "235c04b0ed0b4285dfc9a416c2945fe3962ec4d9",
+      "originSha256": "7b769ee64880794be48d7e19043ac78008ceedfcd223ba23ae8bbbaf326d5dfe",
+      "sha256": "d7ba743082906f783bcd4ac8171a432709533346898066e1c08b59e62e844f17",
+      "license": "MIT",
+      "identityUrl": "https://github.com/notclickable-jordan/starbase-80"
     },
     "starrocks": {
       "source": "official",
@@ -4193,6 +5671,16 @@
       "icon": "swing-music",
       "sha256": "ec5db6b14d5408bf5610e7e447d572086e92647a05ee3e7c672a985b0225c16e"
     },
+    "synclounge": {
+      "source": "official",
+      "icon": "synclounge",
+      "repository": "synclounge/synclounge",
+      "revision": "322159e701c4090308143870e3e2af6128547634",
+      "file": "src/assets/images/platforms/synclounge.svg",
+      "sha256": "db5b869dbe2a220fe70f6663631f48b6efaf0c35c1c2ed1c09961bef0da1de65",
+      "license": "MIT",
+      "identityUrl": "https://github.com/synclounge/synclounge"
+    },
     "syncthing": {
       "source": "selfhst",
       "icon": "syncthing",
@@ -4225,6 +5713,16 @@
       "originGitSha": "2a88abc720799b1282bf65f7486e2aed6c5ec61e",
       "originSha256": "0b33952da10a1734bb029ef2dbe4dde81a22120328a2f02d3884a5ba29778b55"
     },
+    "teammapper": {
+      "source": "official",
+      "icon": "teammapper",
+      "repository": "b310-digital/teammapper",
+      "revision": "a7e3532679ab328dd94edfaf1419f3cdbcbdc09f",
+      "file": "teammapper-frontend/src/assets/icons/teammapper.svg",
+      "sha256": "972d6826e3571f9830b90374d435436c1d7503147eeac84d90383fc71d3e7a30",
+      "license": "MIT",
+      "identityUrl": "https://github.com/b310-digital/teammapper"
+    },
     "technitium-dns-server": {
       "source": "thesvg",
       "icon": "technitium-dns-server/default",
@@ -4232,6 +5730,18 @@
       "license": "Trademark of Technitium. Used for identification under nominative fair use.",
       "identityUrl": "https://www.hostinger.com/applications/technitium-dns-server",
       "projectUrl": "https://technitium.com/dns/"
+    },
+    "teedy": {
+      "source": "official-png",
+      "icon": "teedy",
+      "repository": "sismics/docs",
+      "revision": "5b39c4680b5a107a44d9d38bdf45e8fb6953128f",
+      "file": "docs-web/src/main/webapp/src/img/icons/icon-512x512.png",
+      "originGitSha": "7cd2bf926b629a3560dcd82b454ff2f0281a2c0f",
+      "originSha256": "502b1d6cce04a8a76e5c5b2d8ff4bb48dd163dd49a62f50cf3fbb17f26fe310a",
+      "sha256": "3bcf353c7458596f330311b3d6625ac1ae0536e3934d6053ebe2e73325aa7f49",
+      "license": "GPL-2.0",
+      "identityUrl": "https://github.com/sismics/docs"
     },
     "temporal": {
       "source": "logos",
@@ -4263,6 +5773,40 @@
       "icon": "thingsboard",
       "sha256": "e494b9282d43072e4b9463de41afab13b6f822e83ce9630d14e865434e388347"
     },
+    "thinkdashboard": {
+      "source": "official-png",
+      "icon": "thinkdashboard",
+      "repository": "MatiasDesuu/ThinkDashboard",
+      "revision": "7133a22b2c608e6183fb6d68ab379fcbd4b5f56a",
+      "file": "extension/icons/icon256.png",
+      "originGitSha": "7a207189268902219d0f69d211e4cf9acbd23d40",
+      "originSha256": "394da72c2c14c1a2a189cf0ac9cca9480623e15322143f9436f3d99b69eb720e",
+      "sha256": "61fae961a297c7dc760d1aeed8a344f503fc4a3632ebcce9aeab9ed759ff2152",
+      "license": "MIT",
+      "identityUrl": "https://github.com/MatiasDesuu/ThinkDashboard"
+    },
+    "thruk": {
+      "source": "official",
+      "icon": "thruk",
+      "repository": "sni/thruk",
+      "revision": "17a2704e4811202b04bb95ea4f00e404b3b5460b",
+      "file": "themes/themes-available/Light/images/logo.svg",
+      "sha256": "0b5b29134e771f1bc35c5cc708ca7b0838ee2fa0eac8ce9400e8907d025518f7",
+      "license": "Artistic-1.0 OR GPL-1.0-or-later (see Thruk-LICENSE.txt)",
+      "identityUrl": "https://github.com/sni/thruk"
+    },
+    "thumbor": {
+      "source": "official-png",
+      "icon": "thumbor",
+      "repository": "thumbor/thumbor",
+      "revision": "3c8f2c5515f126a397ec8987fd5c4a98421c96be",
+      "file": "logo-thumbor.png",
+      "originGitSha": "14704071809e5840ef178c2b1a95399b3b7148a7",
+      "originSha256": "1e8184ba55db25989d494b3a1f2a331255e080e24e10d5943cbeb56a8e5fa668",
+      "sha256": "7729381a91c3c9fbc1ffa1d6a0154da8510a924df00c726887f5fc02cca2dc11",
+      "license": "MIT",
+      "identityUrl": "https://github.com/thumbor/thumbor"
+    },
     "tianji": {
       "source": "selfhst",
       "icon": "tianji",
@@ -4285,6 +5829,16 @@
       "source": "selfhst",
       "icon": "timetagger",
       "sha256": "7b771111ed39b49efbf29cb9e9367463ff2ad9035160174b0ec8c85ea10f6194"
+    },
+    "tinode": {
+      "source": "official",
+      "icon": "tinode",
+      "repository": "tinode/chat",
+      "revision": "fd8801cdea3f2984008b0cdf38a253060515ce04",
+      "file": "docs/logo.svg",
+      "sha256": "574760834be3a7217554e387e530c4fd9cf42b5a753102e0c2762f1b390c1533",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/tinode/chat"
     },
     "tiny-tiny-rss": {
       "source": "selfhst",
@@ -4325,6 +5879,19 @@
       "source": "selfhst",
       "icon": "tracktor",
       "sha256": "f63fb90774f44aed92f0615007b3e83e7030049f1670b5d1340fd9eb38013415"
+    },
+    "traduora": {
+      "source": "official-png",
+      "icon": "traduora",
+      "repository": "ever-co/ever-traduora",
+      "revision": "241db22c3a7ac5ecc47496abd8afc362d29fe26f",
+      "file": "docs-website/static/img/logo.png",
+      "originGitSha": "b5a05b86f92a18120eae91df8c09d4fe628a02ac",
+      "originSha256": "0c974ef8705b46091d36d3f36452cfaedefaa5513bd7ca520179f9f51014ecff",
+      "sha256": "6d4b07b0452237187c96734d2e24bb310d6cf445615994280272adb2ad5a00f4",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/ever-co/ever-traduora",
+      "traceProfile": "light-ground-detail"
     },
     "traggo": {
       "source": "dashboard",
@@ -4373,6 +5940,18 @@
       "icon": "trino",
       "sha256": "70c94c1dda910730576ccc831f3d4dd9cfcd649792b82015b691453f3b50f6ad"
     },
+    "trudesk": {
+      "source": "official-png",
+      "icon": "trudesk",
+      "repository": "polonel/trudesk",
+      "revision": "29f3f1698f341e3d8fcc4f4eb5340ee43427fe63",
+      "file": "public/img/defaultLogoDark.png",
+      "originGitSha": "cb7541d65e86edbea0c625809d758594a1c56b9d",
+      "originSha256": "c41e744329ee86b493fff90f32831250f8ed85c677eed10ecefc105221da54c0",
+      "sha256": "763f15331e4547c3fb0f7a5b487e4cc08c52defa767a2355e0b05d17ae59c086",
+      "license": "Apache-2.0 (see Trudesk-LICENSE.txt)",
+      "identityUrl": "https://github.com/polonel/trudesk"
+    },
     "tubearchivist": {
       "source": "thesvg",
       "icon": "tube-archivist/default",
@@ -4400,6 +5979,16 @@
       "source": "simple-icons",
       "icon": "twenty",
       "sha256": "e796bc66edfcad4ec12d20efb052f1f2171a4023a6b514118ee9b14c47790760"
+    },
+    "tyk-gateway": {
+      "source": "official",
+      "icon": "tyk-gateway",
+      "repository": "TykTechnologies/tyk-docs",
+      "revision": "0029db721cab8d3bf004b630ed4341bc3de143ad",
+      "file": "img/logos/tyk-logo-opensource.svg",
+      "sha256": "a754f25040e8e0ee832d0133623f6a19341931a2ac7f42fb698ccdd4c573af29",
+      "license": "MPL-2.0",
+      "identityUrl": "https://github.com/TykTechnologies/tyk-docs"
     },
     "typebot": {
       "source": "selfhst",
@@ -4498,6 +6087,18 @@
       "identityUrl": "https://usesend.com/",
       "modifications": "Cropped the official useSend wordmark viewBox to its integral square app symbol without redrawing the mark"
     },
+    "vane": {
+      "source": "official-png",
+      "icon": "vane",
+      "repository": "ItzCrazyKns/Vane",
+      "revision": "348feca3e378fb4157b217724ed508dc707f853f",
+      "file": "public/icon.png",
+      "originGitSha": "f6fe3c7728b8aa93e8c462a411755a9a6b33eb67",
+      "originSha256": "9b8256f4f605af5e54fb11141c29f93c14fabe185af5394c1f94605a7cfad69e",
+      "sha256": "6c44af3bddac1214cefd0d12dc0d4584cc097ec9b70a975baad4e956b1ac86f3",
+      "license": "MIT",
+      "identityUrl": "https://github.com/ItzCrazyKns/Vane"
+    },
     "vault": {
       "source": "selfhst",
       "icon": "hashicorp-vault",
@@ -4530,6 +6131,16 @@
       "icon": "vikunja",
       "sha256": "a1f0e468acdd9e2bccf07d723634e261d2775013659656a606bc9d8d33a7d978"
     },
+    "vince-analytics": {
+      "source": "official",
+      "icon": "vince-analytics",
+      "repository": "vinceanalytics/vince",
+      "revision": "fc06f7a22f785e6e152cb72e3210fcc099b07fa5",
+      "file": "app/images/mark.svg",
+      "sha256": "ae07ec3ff819049efa483a6d078262775a12ece7c30486b2064547b042f8cfb4",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/vinceanalytics/vince"
+    },
     "visual-studio-code-server": {
       "source": "selfhst",
       "icon": "visual-studio-code",
@@ -4553,10 +6164,35 @@
       "identityUrl": "https://www.hostinger.com/applications/vvveb-cms",
       "projectUrl": "https://www.vvveb.com"
     },
+    "waha": {
+      "source": "official-png",
+      "icon": "waha",
+      "repository": "devlikeapro/waha",
+      "revision": "c42f68ab25b93fd77f583e17477cbcc9d14471cc",
+      "file": "logo.png",
+      "originGitSha": "72f07bd45eb1d30b6a74fbc4594bbdb5fa158fa5",
+      "originSha256": "4cb438c0c1a09e4e0ad1bcac1aa7736a52a4e1350c022abdfb0a7c0c278c1915",
+      "sha256": "c5a83ff9534dc2b68e8b25711616623ee9e29e53cb5ea9d9d293db32f39499fc",
+      "license": "Apache-2.0",
+      "identityUrl": "https://github.com/devlikeapro/waha",
+      "traceProfile": "light-ground-upscaled"
+    },
     "wakapi": {
       "source": "selfhst",
       "icon": "wakapi",
       "sha256": "35ca56fe705261064a444c8797819f07f32dfb1d876f654e77cd76aa56b63fb6"
+    },
+    "waline": {
+      "source": "official-png",
+      "icon": "waline",
+      "repository": "walinejs/waline",
+      "revision": "05fec3c627b5d99255d200efc283368db12b7a65",
+      "file": "assets/logo.png",
+      "originGitSha": "97fe7dcb3f00ed715491c8b372de87ff54f5462c",
+      "originSha256": "e9ec7d54053ba3c17b3172edc4f67476cba26ea012476f2a454f2c6524157466",
+      "sha256": "ca5f4d008588a7f6557b0e6f5d77d222af6f98114cfcac65991e18a0fd6f86c5",
+      "license": "GPL-2.0",
+      "identityUrl": "https://github.com/walinejs/waline"
     },
     "wallabag": {
       "source": "selfhst",
@@ -4594,6 +6230,16 @@
       "source": "selfhst",
       "icon": "wavelog",
       "sha256": "a4d32cbd379f03e1a55562372b92118b940a951c0fcf78f53ce0160fb31ba01c"
+    },
+    "wbo": {
+      "source": "official",
+      "icon": "wbo",
+      "repository": "lovasoa/whitebophir",
+      "revision": "f6a8075c08cc0133117411453a82ba50379a4856",
+      "file": "client-data/favicon.svg",
+      "sha256": "1de40ea97504b6512b4e39a80ffeab80cd1368b38b386db8cbfd234856d7fae2",
+      "license": "AGPL-3.0",
+      "identityUrl": "https://github.com/lovasoa/whitebophir"
     },
     "wealthfolio": {
       "source": "selfhst",
@@ -4636,6 +6282,19 @@
       "source": "selfhst",
       "icon": "wekan",
       "sha256": "7ce4f2260d6beadd6a39ceee2555fa89098a7d652e6466fd363c4611856368fb"
+    },
+    "weknora": {
+      "source": "official-png",
+      "icon": "weknora",
+      "repository": "Tencent/WeKnora",
+      "revision": "032c67f30d63f744ffa9131887c35f7d15121224",
+      "file": "misc/intro-video/assets/logo-light.png",
+      "originGitSha": "81aa0d02875dedd05d0503bc829572955ff6ce16",
+      "originSha256": "4e76bd6581d20aaa1a5d9efa941fc57ee3aef9fa0f3551571267d51e03078ac3",
+      "sha256": "fa04050324ae5b47e7bd93f6c196591286bda7c545d628df3f7b640805bd1e1b",
+      "traceProfile": "light-ground-pixel",
+      "license": "MIT",
+      "identityUrl": "https://github.com/Tencent/WeKnora"
     },
     "wger": {
       "source": "selfhst",
@@ -4808,6 +6467,20 @@
       "icon": "yourls",
       "sha256": "6ce62d38d8bbca62f6cd98da4e32d9239e1a896725ea791c2fa288a4c4b5177e"
     },
+    "yt-dlp-web-ui": {
+      "source": "official-ico",
+      "icon": "yt-dlp-web-ui",
+      "repository": "marcopiovanello/yt-dlp-web-ui",
+      "revision": "c7ad3bd79c7c520a7d17e7f2ba19d962be8e7897",
+      "file": "frontend/src/assets/favicon.ico",
+      "originGitSha": "1c1753bbe49896c0a6af1f36a34a41f348d961aa",
+      "originSha256": "53f00b43208b2b726ef77795ed01c1e3a3ceb4985f53da82de112a5dea236601",
+      "sha256": "a24a380878e33c1f9219199ac98bef81f4ce2d914e24531eeda5a092a5f1ba54",
+      "icoSize": 128,
+      "traceProfile": "light-ground-upscaled",
+      "license": "GPL-3.0",
+      "identityUrl": "https://github.com/marcopiovanello/yt-dlp-web-ui"
+    },
     "yuvomi": {
       "source": "selfhst",
       "icon": "yuvomi",
@@ -4822,6 +6495,16 @@
       "source": "selfhst",
       "icon": "zensical",
       "sha256": "e629d772ba487c3c5058190b2794daa5fcf3e1cd3375c6d945d2ac9a873007c5"
+    },
+    "zeronote": {
+      "source": "official",
+      "icon": "zeronote",
+      "repository": "OscarSaharoy/zeronote",
+      "revision": "b13d90bdf19cd89610c87293678141c16f0fa38c",
+      "file": "svg/logo.svg",
+      "sha256": "408e5078ae76112521e4b5aba72ebe793b74479f86537648b4dbb346d848b544",
+      "license": "GPL-2.0",
+      "identityUrl": "https://github.com/OscarSaharoy/zeronote"
     },
     "zincsearch": {
       "source": "simple-icons",

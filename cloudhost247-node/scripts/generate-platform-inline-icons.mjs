@@ -31,8 +31,10 @@ function githubSource(collection, asset, ref) {
   const repositoryName = ref.repository ?? meta.repository;
   const revision = ref.revision ?? meta.revision;
   const file = ref.file ?? `${meta.folder}/${asset}.svg`;
+  const reviewedJsx = ref.sourceProfile === 'morphic-static-jsx' &&
+    repositoryName === 'miurla/morphic' && file === 'components/ui/animated-logo.tsx';
   if (!/^[\w.-]+\/[\w.-]+$/.test(repositoryName) || !/^[a-f0-9]{40}$/.test(revision) ||
-      !/^[\w. -]+(?:\/[\w. -]+)*\.svg$/.test(file) || file.includes('..')) {
+      (!/^[\w. -]+(?:\/[\w. -]+)*\.svg$/.test(file) && !reviewedJsx) || file.includes('..')) {
     throw new Error(`Invalid pinned GitHub source for ${collection}:${asset}`);
   }
   const [owner, repo] = repositoryName.split('/');
@@ -77,25 +79,30 @@ function tracePinnedPngs(icons) {
       const originRepo = ref.repository ?? meta.repository;
       const revision = ref.revision ?? meta.revision;
       const file = ref.file ?? `${meta.folder}/${ref.icon}.png`;
-      if (!/^[\w.-]+\/[\w.-]+$/.test(originRepo) || !/^[a-f0-9]{40}$/.test(revision) ||
-          !/^[\w.-]+(?:\/[\w.-]+)*\.png$/.test(file) || file.includes('..') ||
-          !/^[a-f0-9]{40}$/.test(ref.originGitSha)) {
-        throw new Error(`${slug}: invalid pinned PNG git object, revision or path`);
+      const isIco = ref.source === 'official-ico';
+      if (isIco && (ref.icoSize !== 128 || ref.traceProfile !== 'light-ground-upscaled' || !file.endsWith('.ico'))) {
+        throw new Error(`${slug}: ICO source requires the reviewed 128px light-ground-upscaled frame`);
       }
-      // Prove that the pinned PNG object really occupies this named file in this
+      if (!isIco && !file.endsWith('.png')) throw new Error(`${slug}: PNG source requires a PNG file`);
+      if (!/^[\w.-]+\/[\w.-]+$/.test(originRepo) || !/^[a-f0-9]{40}$/.test(revision) ||
+          !/^[\w.@-]+(?:\/[\w.@-]+)*\.(?:png|ico)$/.test(file) || file.includes('..') ||
+          !/^[a-f0-9]{40}$/.test(ref.originGitSha)) {
+        throw new Error(`${slug}: invalid pinned raster git object, revision or path`);
+      }
+      // Prove that the pinned raster object really occupies this named file in this
       // project's immutable revision, not just that its bytes exist on GitHub.
       const [owner, repo] = originRepo.split('/');
       const query = `query { repository(owner: "${owner}", name: "${repo}") { source: object(expression: "${revision}:${file}") { oid } } }`;
       const tree = JSON.parse(execFileSync('gh', ['api', 'graphql', '-f', `query=${query}`], { cwd: project, encoding: 'utf8' }));
       if (tree.errors || tree.data?.repository?.source?.oid !== ref.originGitSha) {
-        throw new Error(`${slug}: original PNG git object does not match ${revision}:${file}`);
+        throw new Error(`${slug}: original raster git object does not match ${revision}:${file}`);
       }
       const { content } = JSON.parse(execFileSync('gh', ['api', `repos/${originRepo}/git/blobs/${ref.originGitSha}`], {
         cwd: project, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024,
       }));
       const png = Buffer.from(content, 'base64');
-      if (SHA(png) !== ref.originSha256) throw new Error(`${slug}: original PNG differs from the pinned git object`);
-      const input = path.join(temp, `${slug}.png`);
+      if (SHA(png) !== ref.originSha256) throw new Error(`${slug}: original raster differs from the pinned git object`);
+      const input = path.join(temp, `${slug}.${isIco ? 'ico' : 'png'}`);
       const outputSvg = path.join(temp, `${slug}.svg`);
       writeFileSync(input, png);
       // No raster is shipped to the browser. VTracer produces genuine <path> elements;
@@ -105,12 +112,17 @@ function tracePinnedPngs(icons) {
       // higher-precision profile; all other traces use the original settings.
       const traceOptions = ref.traceProfile === 'gradient-detail'
         ? 'mode="spline", filter_speckle=1, color_precision=8, layer_difference=5, corner_threshold=45, length_threshold=1.5, max_iterations=10, splice_threshold=50, path_precision=2'
+        : ['light-ground-detail', 'light-ground-upscaled', 'dark-ground-upscaled', 'dark-ground-pixel', 'light-ground-pixel'].includes(ref.traceProfile)
+          ? null // Pinned Pillow alpha compositing and VTracer settings live in the helper.
         : ref.traceProfile === undefined
           ? 'mode="spline", filter_speckle=2, color_precision=7, layer_difference=8, corner_threshold=60, length_threshold=4, max_iterations=10, splice_threshold=45, path_precision=2'
           : (() => { throw new Error(`${slug}: unsupported trace profile`); })();
-      execFileSync('python3', ['-c',
-        `import sys, vtracer; vtracer.convert_image_to_svg_py(sys.argv[1], sys.argv[2], colormode="color", hierarchical="stacked", ${traceOptions})`,
-        input, outputSvg], {
+      const traceCommand = ['light-ground-detail', 'light-ground-upscaled', 'dark-ground-upscaled', 'dark-ground-pixel', 'light-ground-pixel'].includes(ref.traceProfile)
+        ? [path.join(project, 'scripts/trace-logo-light-ground.py'), input, outputSvg, ...(isIco ? ['--ico-128-upscale'] : ref.traceProfile === 'light-ground-pixel' ? ['--pixel'] : ref.traceProfile === 'dark-ground-pixel' ? ['--dark-pixel'] : ref.traceProfile === 'dark-ground-upscaled' ? ['--dark-upscale'] : ref.traceProfile === 'light-ground-upscaled' ? ['--upscale'] : [])]
+        : ['-c',
+          `import sys, vtracer; vtracer.convert_image_to_svg_py(sys.argv[1], sys.argv[2], colormode="color", hierarchical="stacked", ${traceOptions})`,
+          input, outputSvg];
+      execFileSync('python3', traceCommand, {
         cwd: project,
         env: { ...process.env, PYTHONPATH: [path.join(repository, '.cache/py-libs'), process.env.PYTHONPATH].filter(Boolean).join(path.delimiter) },
       });
@@ -130,14 +142,14 @@ function obtainSources() {
     if (!validId.test(slug) || !validAsset.test(ref.icon) || !manifest.collections[ref.source]) {
       throw new Error(`Unsafe icon identifier or unknown source: ${slug} / ${ref.icon} / ${ref.source}`);
     }
-    if (['official', 'official-png'].includes(ref.source)) {
+    if (['official', 'official-png', 'official-ico'].includes(ref.source)) {
       if (!ref.license || !ref.identityUrl || !/^https:\/\//.test(ref.identityUrl) ||
           !ref.file || !ref.repository || !/^[a-f0-9]{40}$/.test(ref.revision)) {
         throw new Error(`${slug}: official artwork needs an individual license, identity URL and pinned upstream file`);
       }
-      if (ref.source === 'official-png' && (!/^[a-f0-9]{40}$/.test(ref.originGitSha) ||
+      if (['official-png', 'official-ico'].includes(ref.source) && (!/^[a-f0-9]{40}$/.test(ref.originGitSha) ||
           !/^[a-f0-9]{64}$/.test(ref.originSha256))) {
-        throw new Error(`${slug}: traced first-party artwork needs its original PNG git blob and SHA-256`);
+        throw new Error(`${slug}: traced first-party artwork needs its original raster git blob and SHA-256`);
       }
     }
     const cached = path.join(cache, `${slug}.svg`);
@@ -180,6 +192,32 @@ function obtainSources() {
 }
 
 function prepareSvg(source, slug) {
+  if (manifest.icons[slug].sourceProfile === 'morphic-static-jsx') {
+    // Extract only the reviewed static SVG from the hash-pinned TSX. Never
+    // execute upstream JavaScript. Preserve its default black body/white eyes;
+    // remove animation classes and caller-provided overrides, not geometry.
+    if (slug !== 'morphic' || (source.match(/<svg\b/g) ?? []).length !== 1) {
+      throw new Error('morphic: unexpected upstream JSX structure');
+    }
+    source = source.match(/<svg\b[\s\S]*?<\/svg>/)?.[0] ?? '';
+    source = source.replace(/className=\{cn\([\s\S]*?\)\}/g, '')
+      .replace('{...props}', '')
+      .replace("fill={bodyColor ?? 'black'}", 'fill="black"');
+    if (!source.includes('viewBox="0 0 256 256"') ||
+        (source.match(/<circle\b/g) ?? []).length !== 1 ||
+        (source.match(/<ellipse\b/g) ?? []).length !== 2 || /[{}]/.test(source)) {
+      throw new Error('morphic: unreviewed expression or geometry in static logo');
+    }
+  }
+  if (slug === 'maxkb') {
+    // SVGO drops gradients with these upstream non-ASCII IDs while retaining
+    // their CSS references. Rename identifiers/references only; keep every
+    // stop, colour, coordinate and path unchanged before normal ID scoping.
+    if ((source.match(/<linearGradient\b/g) ?? []).length !== 6 || !source.includes('未命名的渐变_7')) {
+      throw new Error('maxkb: unexpected upstream gradient structure');
+    }
+    source = source.replaceAll('未命名的渐变_7', 'maxkb-gradient');
+  }
   if (slug === 'galaxy') {
     // Galaxy's Inkscape export contains an embedded, unused SVG <font> table.
     // Its actual visible logo is nine vector paths; React has no <font> or
@@ -273,6 +311,24 @@ function prepareSvg(source, slug) {
     if (!root.includes('viewBox="0 0 1417.32 283.46"')) throw new Error('apache-streampipes: unexpected official wordmark dimensions');
     root = root.replace('viewBox="0 0 1417.32 283.46"', 'viewBox="55 14 255 255"');
   }
+  // PKP's original OMP/OJS artwork combines a distinctive typeset wordmark,
+  // underline and tiny descriptive tagline. Show only the original wordmark
+  // and underline in catalogue slots: the raster-derived tagline is not faithful
+  // at this size. No traced letter geometry is redrawn or substituted.
+  const publishingCrop = {
+    'open-monograph-press': ['0 0 289 160', '0 0 289 128'],
+    'open-journal-systems': ['0 0 231 160', '0 0 231 138'],
+  }[slug];
+  if (publishingCrop) {
+    const [original, cropped] = publishingCrop;
+    if (!root.includes(`viewBox="${original}"`)) throw new Error(`${slug}: unexpected original wordmark dimensions`);
+    root = root.replace(`viewBox="${original}"`, `viewBox="${cropped}"`);
+    const [, , width, height] = cropped.split(' ');
+    // Explicit clipping also excludes tagline paths when the SVG is nested in
+    // a larger viewport with preserveAspectRatio letterboxing.
+    source = source.replace(svgTag, `${svgTag}<defs><clipPath id="publishing-wordmark"><rect width="${width}" height="${height}" /></clipPath></defs><g clip-path="url(#publishing-wordmark)">`)
+      .replace(/<\/svg>\s*$/, '</g></svg>');
+  }
   // Pixel dimensions in some Inkscape exports exceed 100,000 px. The viewBox
   // plus the caller's CSS is what scales the React-rendered vector.
   root = root.replace(/\s+(?:width|height)="[^"]*"/g, '').replace(/\s+aria-hidden="true"/g, '');
@@ -289,6 +345,10 @@ function codeFor(slug, number) {
     plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
     typescript: true,
     jsxRuntime: 'automatic',
+    // Babel's automatic >500 KB compaction removes the newlines used below
+    // to strip imports/exports. Keep the same format for large reviewed art;
+    // the unsafe-element rejection remains unchanged.
+    jsx: { babelConfig: { compact: false } },
     // Keep original brand colours, clip paths and viewBox. Prefix style selectors and IDs
     // per slug so two different brands can never reference each other's gradients.
     svgoConfig: { plugins: [{ name: 'preset-default', params: { overrides: { removeViewBox: false } } }, { name: 'prefixIds', params: { prefix: slug } }] },
@@ -316,6 +376,13 @@ function codeFor(slug, number) {
       return '';
     }).replace(/\s+textAnchor="none"/g, '');
   }
+  // Nested source SVGs must retain their own geometry. Forwarding tile dimensions
+  // or accessibility props to them shrinks/clips artwork and duplicates labels.
+  let outerProps = true;
+  body = body.replace(/\s+\{\.\.\.props\}/g, (attribute) => {
+    if (outerProps) { outerProps = false; return attribute; }
+    return '';
+  });
   if (body === jsx || /<\s*(?:image|foreignObject|script)\b/i.test(body)) throw new Error(`Unsafe or unconverted JSX for ${slug}`);
   const meta = manifest.collections[ref.source];
   const url = ref.repository
@@ -327,12 +394,15 @@ function codeFor(slug, number) {
   return `// ${slug}: ${url} (${ref.license ?? meta.license}; ${change})\n${body.trim()}\n`;
 }
 
+// Keep the detailed mascot from delaying every other S-logo's lazy import.
+const groupFor = (slug) => ['snapotter', 'hollama', 'picoclaw', 'weknora'].includes(slug) ? slug : slug[0].toLowerCase();
+
 function renderGroups() {
   const groups = new Map();
   const slugs = Object.keys(manifest.icons).sort();
   for (const slug of slugs) {
-    const group = slug[0].toLowerCase();
-    if (!/^[a-z0-9]$/.test(group)) throw new Error(`Unexpected first letter: ${slug}`);
+    const group = groupFor(slug);
+    if (!/^[a-z0-9]+$/.test(group)) throw new Error(`Unexpected first letter: ${slug}`);
     if (!groups.has(group)) groups.set(group, []);
     groups.get(group).push(slug);
   }
@@ -343,7 +413,7 @@ function renderGroups() {
     generated.set(`${group}.tsx`, `// GENERATED by scripts/generate-platform-inline-icons.mjs. Do not edit by hand.\nimport type { ComponentType, SVGProps } from 'react';\n\n${body}\nconst ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {\n${records}\n};\n\nexport default function IconGroup({ slug, ...props }: SVGProps<SVGSVGElement> & { slug: string }) {\n  const Logo = ICONS[slug];\n  return Logo ? <Logo {...props} /> : null;\n}\n`);
   }
   const loaders = [...groups.keys()].sort().map((group) => `  ${JSON.stringify(group)}: lazy(() => import('./${group}')),`).join('\n');
-  const index = slugs.map((slug) => `  ${JSON.stringify(slug)}: ${JSON.stringify(slug[0].toLowerCase())},`).join('\n');
+  const index = slugs.map((slug) => `  ${JSON.stringify(slug)}: ${JSON.stringify(groupFor(slug))},`).join('\n');
   const wideSlugs = slugs.filter((slug) => {
     const source = prepareSvg(readFileSync(path.join(cache, `${slug}.svg`), 'utf8'), slug);
     const viewBox = source.match(/<svg\b[^>]*?viewBox="([^"]+)"/)?.[1];
@@ -364,7 +434,7 @@ if (checking) {
   console.log(`Verified ${manifest && Object.keys(manifest.icons).length} pinned inline logos in ${generated.size - 1} code chunks.`);
 } else {
   for (const filename of readdirSync(output)) {
-    if (/^(?:[a-z0-9]|registry)\.tsx$/.test(filename) && !generated.has(filename)) unlinkSync(path.join(output, filename));
+    if (/^(?:[a-z0-9]|snapotter|hollama|picoclaw|weknora|registry)\.tsx$/.test(filename) && !generated.has(filename)) unlinkSync(path.join(output, filename));
   }
   for (const [file, content] of generated) writeFileSync(path.join(output, file), content);
   console.log(`Generated ${Object.keys(manifest.icons).length} pinned inline logos in ${generated.size - 1} code chunks.`);

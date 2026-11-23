@@ -43,3 +43,6 @@ __pycache__/
 # Provenance for the shipped photography lives in assets/images/cloudhost247/photography/sources.json
 # and docs/PHOTOGRAPHY-LICENSES.md.
 /image-search/
+
+# Local upstream-logo research (not release inputs).
+/logo-research-260/
