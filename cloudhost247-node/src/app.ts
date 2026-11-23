@@ -13,6 +13,7 @@ import { registerAuthRoutes } from './routes/auth';
 import { registerDomainAutoRenewRoutes } from './routes/domain-auto-renew';
 import { registerEmailAuthenticationRoutes } from './routes/email-authentication';
 import { registerEmailForwarderRoutes } from './routes/email-forwarders';
+import { registerWordPressRoutes } from './routes/wordpress';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
 import { registerVisitorIpRoute } from './routes/visitor-ip';
@@ -213,6 +214,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerEmailAuthenticationRoutes(instance, env, pool);
     // Email forwarding rules (G06): tenant-scoped forwarders; no mail provider activated.
     await registerEmailForwarderRoutes(instance, env, pool);
+    // WordPress hosting (A02): clone/stage/migrate jobs queued honestly — WP-CLI bridge
+    // not configured, so execution is pending worker activation.
+    await registerWordPressRoutes(instance, env, pool);
     // Automatic renewal controls (I12): auto-renew toggle for customer domains.
     await registerDomainAutoRenewRoutes(instance, env, pool);
     // Agency / reseller hosting (W10, J Agency core): staff-managed agencies, clients and
