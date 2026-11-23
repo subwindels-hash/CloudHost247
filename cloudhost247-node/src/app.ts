@@ -10,6 +10,7 @@ import { registerIncidentRoutes } from './routes/incidents';
 import { registerAbuseReportRoutes } from './routes/abuse-reports';
 import { registerAgencyRoutes } from './routes/agency';
 import { registerAuthRoutes } from './routes/auth';
+import { registerEmailForwarderRoutes } from './routes/email-forwarders';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
 import { registerVisitorIpRoute } from './routes/visitor-ip';
@@ -206,6 +207,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     await registerIncidentRoutes(instance, env, pool);
     // Public abuse-report intake (F13): submission is open to anyone, staff review is gated.
     await registerAbuseReportRoutes(instance, env, pool);
+    // Email forwarding rules (G06): tenant-scoped forwarders; no mail provider activated.
+    await registerEmailForwarderRoutes(instance, env, pool);
     // Agency / reseller hosting (W10, J Agency core): staff-managed agencies, clients and
     // reseller packages. Display-only under the D2 financial freeze.
     await registerAgencyRoutes(instance, env, pool);
