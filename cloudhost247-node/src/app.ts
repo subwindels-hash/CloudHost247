@@ -16,6 +16,7 @@ import { registerEmailForwarderRoutes } from './routes/email-forwarders';
 import { registerWordPressRoutes } from './routes/wordpress';
 import { registerIpAddressRoutes } from './routes/ip-addresses';
 import { registerLiveChatRoutes } from './routes/live-chat';
+import { registerPhpConfigRoutes } from './routes/php-config';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
 import { registerVisitorIpRoute } from './routes/visitor-ip';
@@ -222,6 +223,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // IP address inventory (E12 — E VPS): internal free/assigned/reserved pool; no
     // external provider allocation yet.
     await registerIpAddressRoutes(instance, env, pool);
+    // PHP configuration (A08 — A Hosting): per-service PHP version/settings store.
+    // No PHP-FPM provider or control panel is called — preference only.
+    await registerPhpConfigRoutes(instance, env, pool);
     // Live chat (K03 — K Support): internal customer↔staff conversations; no
     // third-party chat provider configured.
     await registerLiveChatRoutes(instance, env, pool);
