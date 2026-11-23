@@ -14,6 +14,7 @@ import { registerDomainAutoRenewRoutes } from './routes/domain-auto-renew';
 import { registerEmailAuthenticationRoutes } from './routes/email-authentication';
 import { registerEmailForwarderRoutes } from './routes/email-forwarders';
 import { registerWordPressRoutes } from './routes/wordpress';
+import { registerIpAddressRoutes } from './routes/ip-addresses';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
 import { registerVisitorIpRoute } from './routes/visitor-ip';
@@ -217,6 +218,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // WordPress hosting (A02): clone/stage/migrate jobs queued honestly — WP-CLI bridge
     // not configured, so execution is pending worker activation.
     await registerWordPressRoutes(instance, env, pool);
+    // IP address inventory (E12 — E VPS): internal free/assigned/reserved pool; no
+    // external provider allocation yet.
+    await registerIpAddressRoutes(instance, env, pool);
     // Automatic renewal controls (I12): auto-renew toggle for customer domains.
     await registerDomainAutoRenewRoutes(instance, env, pool);
     // Agency / reseller hosting (W10, J Agency core): staff-managed agencies, clients and
