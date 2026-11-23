@@ -469,42 +469,63 @@ export function Catalog({ section }: { section: MarketingSection }) {
   );
 }
 
-interface SearchEntry {
-  title: string;
-  to: string;
-  kind: string;
-  description: string;
-}
-
+/**
+ * Site search, backed by the server-side index (`GET /api/v1/search`).
+ *
+ * This used to filter a fixed list in the browser, which meant it could only match titles and
+ * summaries and could not see the FAQ at all. The index now lives on the server and covers the
+ * pages, documentation, tools and FAQ the site actually publishes; the query is sent there, so the
+ * disclosure below says so. Results are debounced and the previous list stays on screen while the
+ * next query runs, so typing does not make the page flicker or fire a request per keystroke.
+ */
 export function SiteSearch({ section }: { section: MarketingSection }) {
   const [query, setQuery] = useState('');
-  const entries: SearchEntry[] = useMemo(() => {
-    const list: SearchEntry[] = [];
-    for (const page of MARKETING_INDEX) {
-      list.push({ title: page.title, to: page.route, kind: page.category, description: page.description });
-    }
-    for (const document of DOCUMENT_INDEX) {
-      list.push({ title: document.title, to: document.href, kind: `Documentation · ${document.section}`, description: document.summary });
-    }
-    for (const tool of TOOL_INDEX.tools) {
-      list.push({ title: tool.name, to: tool.path, kind: 'Tool', description: tool.description });
-    }
-    return list;
-  }, []);
+  const [term, setTerm] = useState('');
+  const [state, setState] = useState<{ status: 'loading' | 'ready' | 'error'; results: SiteSearchResult[] }>({
+    status: 'loading',
+    results: [],
+  });
 
-  const needle = query.trim().toLowerCase();
-  const results = needle.length < 2
-    ? []
-    : entries.filter((entry) =>
-        entry.title.toLowerCase().includes(needle)
-        || entry.description.toLowerCase().includes(needle)
-        || entry.kind.toLowerCase().includes(needle)
-      ).slice(0, 40);
+  useEffect(() => {
+    const timer = setTimeout(() => setTerm(query.trim()), SITE_SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
+    if (term.length < SITE_SEARCH_MIN_QUERY_LENGTH) {
+      setState({ status: 'loading', results: [] });
+      return;
+    }
+    let cancelled = false;
+    setState((previous) => ({ status: 'loading', results: previous.results }));
+    searchSite(term)
+      .then((response) => {
+        if (cancelled) return;
+        setState({ status: 'ready', results: Array.isArray(response.results) ? response.results : [] });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setState({ status: 'error', results: [] });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [term]);
+
+  const searching = term.length >= SITE_SEARCH_MIN_QUERY_LENGTH;
 
   return (
     <>
       <h2>{section.heading}</h2>
-      <form className="ch-search-box" role="search" onSubmit={(event) => { event.preventDefault(); if (needle.length >= 2) trackAnalyticsSearch(); }}>
+      <form
+        className="ch-search-box"
+        role="search"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setTerm(query.trim());
+          if (query.trim().length >= SITE_SEARCH_MIN_QUERY_LENGTH) trackAnalyticsSearch();
+        }}
+      >
         <label className="ch-visually-hidden" htmlFor="ch-site-search">Search services, tools and documents</label>
         <input
           id="ch-site-search"
@@ -517,38 +538,46 @@ export function SiteSearch({ section }: { section: MarketingSection }) {
         <button className="ch-btn ch-btn--outline" type="submit">Search</button>
       </form>
       <p className="ch-muted" style={{ fontSize: '0.82rem', marginTop: '10px' }}>
-        Searched in your browser — the query is never sent to the server. With analytics permission, submitting a search may record an event without the query.
+        Searched on the server across the pages, documentation, tools and FAQ this site publishes. The query is not stored.
+        With analytics permission, submitting a search may record an event without the query.
       </p>
-      {needle.length >= 2 ? (
-        results.length > 0 ? (
-          <div className="ch-grid ch-grid--2" style={{ marginTop: '24px' }}>
-            {results.map((result) => (
-              <Link className="ch-card" to={result.to} key={`${result.kind}-${result.to}-${result.title}`}>
-                <span className="ch-pill">{result.kind}</span>
-                <h3>{result.title}</h3>
-                <p>{result.description}</p>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="ch-state" style={{ marginTop: '24px' }}>
-            <span>
-              Nothing matched “{query}”. Try a service name, a tool, or a policy — or{' '}
-              <Link to="/contact">ask us directly</Link>.
-            </span>
-          </div>
-        )
+      {searching && state.status === 'loading' ? (
+        <p className="ch-state" style={{ marginTop: '24px' }}>Searching…</p>
+      ) : null}
+      {searching && state.status === 'error' ? (
+        <div className="ch-state" style={{ marginTop: '24px' }}>
+          <span>
+            Search is unavailable right now. Try again in a moment, or{' '}
+            <Link to="/contact">ask us directly</Link>.
+          </span>
+        </div>
+      ) : null}
+      {searching && state.status === 'ready' && state.results.length > 0 ? (
+        <div className="ch-grid ch-grid--2" style={{ marginTop: '24px' }}>
+          {state.results.map((result) => (
+            <Link className="ch-card" to={result.href} key={`${result.category}-${result.href}-${result.title}`}>
+              <span className="ch-pill">{result.category}</span>
+              <h3>{result.title}</h3>
+              <p>{result.snippet || result.description}</p>
+            </Link>
+          ))}
+        </div>
+      ) : null}
+      {searching && state.status === 'ready' && state.results.length === 0 ? (
+        <div className="ch-state" style={{ marginTop: '24px' }}>
+          <span>
+            Nothing matched “{term}”. Try a service name, a tool, or a policy — or{' '}
+            <Link to="/contact">ask us directly</Link>.
+          </span>
+        </div>
       ) : null}
     </>
   );
 }
 
-import { MARKETING_PAGES, DOCUMENTS as DOCUMENT_INDEX } from '../../content/registry';
-import TOOL_INDEX from '../../content/tools.generated.json';
 import News from '../../components/marketing/News';
 import DocIndex from '../../components/marketing/DocIndex';
-
-const MARKETING_INDEX = MARKETING_PAGES;
+import { searchSite, SITE_SEARCH_DEBOUNCE_MS, SITE_SEARCH_MIN_QUERY_LENGTH, type SiteSearchResult } from '../../lib/search-api';
 
 /* ------------------------------------------------------------------ */
 

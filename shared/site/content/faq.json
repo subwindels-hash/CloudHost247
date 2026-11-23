@@ -1,0 +1,66 @@
+{
+  "family": "faq",
+  "$comment": "The published CloudHost247 FAQ, authored once here and projected into both surfaces by scripts/site/generate.mjs: the FAQ page reads faq.generated.json, and the site search corpus reads the same entries. The wording is the real published FAQ (faqs.php); internal links were repointed to the pages that actually exist on this platform, exactly as FaqPage did before this file replaced its hand-maintained copy. Answers are Markdown rendered by frontend/src/lib/markdown.tsx — no HTML, no dangerouslySetInnerHTML.",
+  "items": [
+    {
+      "id": "faq-1",
+      "question": "What is CloudHost247?",
+      "answer": "CloudHost247 is a professional web hosting and cloud solutions provider offering secure, reliable, and high-performance hosting, domain registration, and managed IT services for individuals, businesses, and organizations worldwide."
+    },
+    {
+      "id": "faq-2",
+      "question": "What services do you offer?",
+      "answer": "We provide:\n\n- Shared, VPS, and Dedicated Hosting\n- Cloud Hosting Solutions\n- Domain Registration and Management\n- Website Security and SSL Certificates\n- Managed Server Support\n- Email Hosting\n- Data Backup and Recovery Services"
+    },
+    {
+      "id": "faq-3",
+      "question": "How do I create an account?",
+      "answer": "Click [Create Account](/register), and follow the on-screen instructions. Once you complete the registration, you'll receive an email confirmation."
+    },
+    {
+      "id": "faq-4",
+      "question": "How can I pay for my services?",
+      "answer": "We accept multiple payment methods, including:\n\n- Credit/Debit Cards\n- PayPal\n- Bank Transfers\n- Cryptocurrency (Bitcoin, Ethereum where applicable)"
+    },
+    {
+      "id": "faq-5",
+      "question": "Do you offer refunds?",
+      "answer": "Yes, we have a Refund Policy that applies to eligible services. Refund requests must be submitted within the specified refund period stated in our Refund Policy."
+    },
+    {
+      "id": "faq-6",
+      "question": "How do I cancel my account or services?",
+      "answer": "You can cancel your account by:\n\n- Logging into your [Dashboard](/dashboard) and submitting a cancellation request\n- Contacting our support team through the [Contact us](/contact)"
+    },
+    {
+      "id": "faq-7",
+      "question": "How do I request data deletion?",
+      "answer": "Refer to our Data Deletion Instructions. Send your account details through the [Contact us](/contact), and we'll process your request in accordance with our Data Protection Standards."
+    },
+    {
+      "id": "faq-8",
+      "question": "Do you keep my personal information safe?",
+      "answer": "Absolutely. We follow strict Data Protection Standards that comply with GDPR, CCPA, and other regulations. Your data is encrypted, stored securely, and never sold to third parties."
+    },
+    {
+      "id": "faq-9",
+      "question": "Do you provide 24/7 customer support?",
+      "answer": "Yes, our support team is available 24/7/365 via:\n\n- [Contact us](/contact)\n- Live Chat (on our website)\n- Support Tickets in the Client Area"
+    },
+    {
+      "id": "faq-10",
+      "question": "How do I transfer my website to CloudHost247?",
+      "answer": "We offer free migration assistance for most hosting plans. Simply [contact our support team](/contact) with your current hosting details, and we'll handle the transfer for you."
+    },
+    {
+      "id": "faq-11",
+      "question": "What happens if my website gets hacked?",
+      "answer": "If your website is compromised, our security team can assist with malware removal, security patches, and restoration from backups (if backups are active on your account)."
+    },
+    {
+      "id": "faq-12",
+      "question": "Where can I read your full policies?",
+      "answer": "All our policies, including Privacy Policy, Terms & Conditions, Refund Policy, Cookie Policy, and Data Protection Standards, are listed on our [Legal & Policy Center](/legal)."
+    }
+  ]
+}

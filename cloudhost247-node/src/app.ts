@@ -69,6 +69,7 @@ import { registerMrzToolRoutes } from './routes/mrz-tools';
 import { registerBusinessToolsRoutes } from './routes/business-tools';
 import { registerNavigationRoutes } from './routes/navigation';
 import { registerSeoRoutes } from './routes/seo';
+import { registerSearchRoutes } from './routes/search';
 import { registerFileToolsRoutes } from './routes/file-tools';
 import { registerBuilderRoutes } from './routes/builder';
 import { registerStoreRoutes } from './routes/store';
@@ -308,6 +309,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // The public SEO surface (sitemap.xml / robots.txt) is generated from that same navigation
     // definition plus the content customers actually published, so it can never drift from the menu.
     await registerSeoRoutes(instance, env, pool);
+    // Public site search over the same published corpus (pages, documentation, tools, FAQ).
+    await registerSearchRoutes(instance, env, pool);
     await registerBuilderRoutes(instance, env, pool);
     await registerStoreRoutes(instance, env, pool);
     await registerLogoMakerRoutes(instance, env, pool);

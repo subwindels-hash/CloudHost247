@@ -780,7 +780,7 @@ The centralized platform supports all 18 hosting control panels and PaaS platfor
 ### Architecture & APIs
 
 - **Catalog & Plans Schema**: Migration `0043_create_control_panels_and_plans.sql` stores normalized platform capabilities, hardware requirements (min CPU, RAM, disk), compatible operating systems, and commercial licensing tiers (`control_panel_plans`).
-- **Brand Assets**: Platform marks render as inline SVG in code (`frontend/src/components/PlatformLogo.tsx`); no external logo files are served.
+- **Brand Assets**: Official SVG vectors located in `/panel-logos/`.
 - **Public Endpoints**:
   - `GET /api/v1/control-panels` - Filterable marketplace catalog with starting prices and supported OSes.
   - `GET /api/v1/control-panels/:slug` - Platform detail specification with native capabilities checklist and commercial licensing tiers.
