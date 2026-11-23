@@ -36,11 +36,11 @@ The register was built from repository inspection, not from the site's own claim
 
 | Status | Count | Share |
 | --- | ---: | ---: |
-| Complete and verified | 49 | 23% |
+| Complete and verified | 53 | 25% |
 | Implemented but not fully verified | 75 | 36% |
 | In progress | 0 | 0% |
 | Blocked by external provider | 16 | 8% |
-| Not implemented | 69 | 33% |
+| Not implemented | 65 | 31% |
 | Not applicable | 2 | 1% |
 | **Total** | **211** | **100%** |
 
@@ -61,7 +61,7 @@ The platform is **not** a greenfield site: real DB schemas, APIs, permissions, m
 
 | Workstream | Features | Verified | Not implemented | Headline |
 | --- | ---: | ---: | ---: | --- |
-| A Hosting | 16 | 2 | 5 | VPS order defect; WP/PHP/agency/dedicated-IP/migration have no backend |
+| A Hosting | 16 | 3 | 4 | VPS order defect; WP/agency/dedicated-IP/migration have no backend |
 | B Builder | 18 | 3 | 7 | Node builder publishes real sites; no drag canvas, staging, clone, domain binding in Node |
 | C AI | 11 | 1 | 5 | Fail-closed LLM router + real ledger/entitlements; no external model configured |
 | D Control panel | 24 | 4 | 9 | Overview, domains, DNS, tickets solid; file/FTP/DB/PHP/cron/email are capability flags only |
@@ -69,8 +69,8 @@ The platform is **not** a greenfield site: real DB schemas, APIs, permissions, m
 | F Security | 18 | 5 | 5 | Auth/MFA/passkeys/audit/firewall verified; malware, DDoS, DR, login alerts absent |
 | G Email | 18 | 0 | 6 | WHMCS marketing source-complete; no live send, no Node customer API, no AI copywriting |
 | H Ecommerce | 11 | 4 | 3 | Store/cart/orders/tools verified; gateways frozen, no analytics/social connectors |
-| I Domains | 12 | 1 | 5 | DNS zones/propagation verified; registrar ops need real APIs + credentials |
-| J Agency | 11 | 1 | 10 | RBAC exists; agency model is essentially absent |
+| I Domains | 12 | 2 | 4 | DNS zones/propagation verified; registrar ops need real APIs + credentials |
+| J Agency | 11 | 2 | 9 | RBAC exists; agency model is essentially absent |
 | K Support | 10 | 1 | 3 | Tickets verified; no live chat, no searchable KB, no incident feed |
 | L Billing | 12 | 5 | 4 | Cart/invoices/ledger/refunds verified; renewals, coupons, tax, plan changes absent |
 | GX Global | 10 | 3 | 5 | 13 locales + Intl formatting verified; country detection and regional payments absent |
