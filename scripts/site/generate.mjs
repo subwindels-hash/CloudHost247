@@ -51,6 +51,15 @@ const DOCS_PUBLIC = join(ROOT, 'cloudhost247-node', 'frontend', 'public', 'docs'
 const TOOLS_OUT = join(ROOT, 'cloudhost247-node', 'frontend', 'src', 'content', 'tools.generated.json');
 const LEGAL_GENERATED = join(ROOT, 'shared', 'site', 'content', 'legal.generated.json');
 const LEGAL_OUT = join(ROOT, 'cloudhost247-node', 'frontend', 'src', 'content', 'legal.generated.json');
+const FAQ_JSON = join(ROOT, 'shared', 'site', 'content', 'faq.json');
+const FAQ_OUT = join(ROOT, 'cloudhost247-node', 'frontend', 'src', 'content', 'faq.generated.json');
+/**
+ * The site-search corpus is emitted as TypeScript rather than JSON because the API compiles with
+ * `tsc` (CommonJS, `dist/`) and does not copy `.json` into the output tree — the same reason the
+ * navigation registry is emitted as `.ts`. The frontend gets the FAQ as JSON because Vite inlines
+ * JSON imports at build time.
+ */
+const SEARCH_CORPUS_OUT = join(ROOT, 'cloudhost247-node', 'src', 'search', 'site-search-corpus.generated.ts');
 const ASSET_SOURCE = join(ROOT, 'assets', 'images', 'cloudhost247');
 const ASSET_PUBLIC = join(ROOT, 'cloudhost247-node', 'frontend', 'public', 'media', 'cloudhost247');
 
@@ -1269,6 +1278,137 @@ function validateToolsTaxonomy(registry) {
   return counts;
 }
 
+/**
+ * The published FAQ, authored once in `shared/site/content/faq.json`.
+ *
+ * It is projected twice — into the FAQ page (`faq.generated.json`) and into the site-search corpus —
+ * so the page a customer reads and the index a customer searches cannot drift apart. The file is
+ * validated here rather than at render time: a missing answer or a duplicate id fails the build
+ * instead of quietly producing a half-indexed FAQ.
+ */
+export function loadFaq() {
+  if (!existsSync(FAQ_JSON)) {
+    fail('shared/site/content/faq.json is missing — the FAQ page and the site-search corpus both read it.');
+    return { items: [] };
+  }
+  const parsed = JSON.parse(readFileSync(FAQ_JSON, 'utf8'));
+  const items = parsed.items ?? [];
+  if (!Array.isArray(items) || items.length === 0) {
+    fail('shared/site/content/faq.json declares no items.');
+    return { items: [] };
+  }
+  const seen = new Set();
+  for (const item of items) {
+    if (!item || typeof item.id !== 'string' || !item.id.trim()) fail('a FAQ item has no id.');
+    if (seen.has(item.id)) fail(`duplicate FAQ id "${item.id}".`);
+    seen.add(item.id);
+    if (typeof item.question !== 'string' || !item.question.trim()) fail(`FAQ "${item.id}" has no question.`);
+    if (typeof item.answer !== 'string' || !item.answer.trim()) fail(`FAQ "${item.id}" has no answer.`);
+  }
+  return { items };
+}
+
+/** Markdown link syntax is indexing noise: `[Create Account](/register)` should index as words, not as `](`. */
+function plainText(value) {
+  return String(value ?? '')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '$1')
+    .replace(/[*`>#]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function clip(value, max) {
+  const text = plainText(value);
+  return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
+}
+
+/**
+ * The site-search corpus: one entry per thing a customer might be looking for.
+ *
+ * Sources are all real and already published — the marketing pages, the documentation index, the
+ * public tools catalogue and the FAQ. Nothing is invented to make the index look bigger, and no
+ * draft, disabled or account-only tool is included: `publicTools()` already honours
+ * `visibility: 'public'`, the same rule the Tools Center enforces.
+ */
+export function buildSearchCorpus(contentPages, docs, tools, faq) {
+  const entries = [];
+  for (const page of contentPages) {
+    const sections = [];
+    for (const section of page.sections ?? []) {
+      if (section.heading) sections.push(section.heading);
+      if (section.kicker) sections.push(section.kicker);
+      for (const item of section.items ?? []) {
+        if (item.title) sections.push(item.title);
+        if (item.label) sections.push(item.label);
+        if (item.body) sections.push(item.body);
+        if (item.text) sections.push(item.text);
+        if (item.link?.label) sections.push(item.link.label);
+      }
+      for (const column of section.columns ?? []) {
+        if (typeof column === 'string') sections.push(column);
+        else if (column?.label) sections.push(column.label);
+      }
+      for (const row of section.rows ?? []) {
+        for (const cell of row ?? []) {
+          if (typeof cell === 'string') sections.push(cell);
+        }
+      }
+    }
+    entries.push({
+      href: page.route,
+      title: page.title,
+      category: `Page · ${page.category}`,
+      description: clip(page.description, 240),
+      body: clip(`${page.title} ${page.description} ${sections.join(' ')}`, 6000),
+    });
+  }
+  for (const document of docs) {
+    entries.push({
+      href: document.href,
+      title: document.title,
+      category: `Documentation · ${document.section}`,
+      description: clip(document.summary, 240),
+      body: clip(`${document.title} ${document.summary}`, 2000),
+    });
+  }
+  for (const tool of tools) {
+    entries.push({
+      href: tool.path,
+      title: tool.name,
+      category: 'Tool',
+      description: clip(tool.description, 240),
+      body: clip(`${tool.name} ${tool.description} ${tool.detail} ${(tool.keywords ?? []).join(' ')}`, 4000),
+    });
+  }
+  for (const item of faq.items) {
+    entries.push({
+      href: `/faq#${item.id}`,
+      title: item.question,
+      category: 'FAQ',
+      description: clip(item.answer, 240),
+      body: clip(`${item.question} ${item.answer}`, 3000),
+    });
+  }
+  return entries;
+}
+
+function emitSearchCorpusTs(entries) {
+  const banner = `/**
+ * GENERATED FILE — do not edit.
+ *
+ * Source: shared/site/content/*.json + shared/site/content/faq.json + docs/ + src/tools/catalog.ts
+ * Regenerate: node scripts/site/generate.mjs
+ *
+ * The corpus the public site search runs over. It is built from content that is already published —
+ * marketing pages, the documentation index, the public tools catalogue and the FAQ — so a search
+ * result is always a page that exists. Entries are indexed in memory by
+ * src/search/site-search.ts; nothing here is served to a browser.
+ */
+`;
+  const lines = entries.map((entry) => `  ${JSON.stringify(entry)},`);
+  return `${banner}export const SITE_SEARCH_CORPUS: SiteSearchDoc[] = [\n${lines.join('\n')}\n];\n\nexport interface SiteSearchDoc {\n  href: string;\n  title: string;\n  category: string;\n  description: string;\n  body: string;\n}\n`;
+}
+
 function firstHeading(markdown) {
   const match = markdown.match(/^#\s+(.+)$/m);
   return match ? match[1].replace(/[*`]/g, '').trim() : '';
@@ -1555,6 +1695,8 @@ function main() {
   const contentPages = validatePages(rawPages, routes, tools, registryRoutes, legalSlugs);
   attachVisual3d(contentPages);
   const docs = buildDocsIndex();
+  const faq = loadFaq();
+  const searchCorpus = buildSearchCorpus(contentPages, docs.index, publicTools(), faq);
 
   /**
    * Crawl-policy validation. The PHP exclusion list is authored in the registry, so the two ways
@@ -1605,6 +1747,8 @@ function main() {
     faqs: contentPages.reduce((total, page) => total + (page.faqs?.length ?? 0), 0),
     toolsIndexed: null,
     documentationFiles: docs.index.length,
+    faqItems: faq.items.length,
+    searchCorpusEntries: searchCorpus.length,
     documentationBytes: docs.copied.reduce((total, doc) => total + doc.markdown.length, 0),
     assetsCopied: 0, // filled in by the write phase, once the illustration copy has run
     phpPagesEnriched: 0,
@@ -1655,6 +1799,10 @@ function main() {
   writeFileSync(PAGES_OUT, `${json({ version: registry.version, pages: contentPages })}\n`);
   writeFileSync(TOOLS_OUT, `${json({ version: registry.version, tools: publicTools() })}\n`);
   writeFileSync(DOCS_OUT, `${json({ version: registry.version, documents: docs.index })}\n`);
+  // The FAQ page reads the same entries the search corpus indexes.
+  writeFileSync(FAQ_OUT, `${json({ version: registry.version, items: faq.items })}\n`);
+  mkdirSync(dirname(SEARCH_CORPUS_OUT), { recursive: true });
+  writeFileSync(SEARCH_CORPUS_OUT, emitSearchCorpusTs(searchCorpus));
   // The legal extractor writes to shared/; the application imports it from its own tree.
   if (!existsSync(LEGAL_GENERATED)) {
     fail('legal.generated.json is missing — run: node scripts/site/extract-legal.mjs');

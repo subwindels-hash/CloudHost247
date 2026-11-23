@@ -36,11 +36,11 @@ The register was built from repository inspection, not from the site's own claim
 
 | Status | Count | Share |
 | --- | ---: | ---: |
-| Complete and verified | 49 | 23% |
-| Implemented but not fully verified | 75 | 36% |
+| Complete and verified | 53 | 25% |
+| Implemented but not fully verified | 86 | 41% |
 | In progress | 0 | 0% |
 | Blocked by external provider | 16 | 8% |
-| Not implemented | 69 | 33% |
+| Not implemented | 54 | 26% |
 | Not applicable | 2 | 1% |
 | **Total** | **211** | **100%** |
 
@@ -61,18 +61,18 @@ The platform is **not** a greenfield site: real DB schemas, APIs, permissions, m
 
 | Workstream | Features | Verified | Not implemented | Headline |
 | --- | ---: | ---: | ---: | --- |
-| A Hosting | 16 | 2 | 5 | VPS order defect; WP/PHP/agency/dedicated-IP/migration have no backend |
+| A Hosting | 16 | 4 | 1 | VPS order defect; dedicated-IP/migration have no backend; WP and agency have backend APIs |
 | B Builder | 18 | 3 | 7 | Node builder publishes real sites; no drag canvas, staging, clone, domain binding in Node |
 | C AI | 11 | 1 | 5 | Fail-closed LLM router + real ledger/entitlements; no external model configured |
-| D Control panel | 24 | 4 | 9 | Overview, domains, DNS, tickets solid; file/FTP/DB/PHP/cron/email are capability flags only |
+| D Control panel | 24 | 4 | 7 | Overview, domains, DNS, tickets, email forwarding, SPF/DKIM/DMARC solid; file/FTP/DB/PHP/cron are capability flags only |
 | E VPS | 15 | 4 | 1 | 13 adapters + lifecycle implemented; live provisioning unproven; UUID defect blocks ordering |
 | F Security | 18 | 5 | 5 | Auth/MFA/passkeys/audit/firewall verified; malware, DDoS, DR, login alerts absent |
-| G Email | 18 | 0 | 6 | WHMCS marketing source-complete; no live send, no Node customer API, no AI copywriting |
+| G Email | 18 | 0 | 4 | SPF/DKIM/DMARC and email forwarding backends implemented; no live send, no Node customer API, no AI copywriting |
 | H Ecommerce | 11 | 4 | 3 | Store/cart/orders/tools verified; gateways frozen, no analytics/social connectors |
-| I Domains | 12 | 1 | 5 | DNS zones/propagation verified; registrar ops need real APIs + credentials |
-| J Agency | 11 | 1 | 10 | RBAC exists; agency model is essentially absent |
-| K Support | 10 | 1 | 3 | Tickets verified; no live chat, no searchable KB, no incident feed |
-| L Billing | 12 | 5 | 4 | Cart/invoices/ledger/refunds verified; renewals, coupons, tax, plan changes absent |
+| I Domains | 12 | 2 | 4 | DNS zones/propagation verified; registrar ops need real APIs + credentials |
+| J Agency | 11 | 2 | 6 | RBAC exists; agency/reseller backend (agencies, clients, packages) implemented; frontend agency UI absent |
+| K Support | 10 | 1 | 2 | Tickets verified; live chat backend implemented; no searchable KB, no incident feed, no chat widget |
+| L Billing | 12 | 5 | 3 | Cart/invoices/ledger/refunds verified; auto-renew toggle implemented; coupons, tax, plan changes absent |
 | GX Global | 10 | 3 | 5 | 13 locales + Intl formatting verified; country detection and regional payments absent |
 | W Website | 18 | 12 | 1 | Public site, chrome, legal, SEO structures verified statically; no browser matrix |
 | AR Architecture | 7 | 3 | 0 | Registry/design-system/vault verified; duplicate-stack decision outstanding |
@@ -108,7 +108,7 @@ Official pages (accessed 2026-11-07):
 
 ## 6. Known gaps that must not be presented as features
 
-The following are **Not implemented** despite having marketing pages, capability flags, or legacy PHP files: WordPress management, PHP version/config, file manager, FTP/SFTP accounts, database management, cron jobs, email accounts/forwarders/webmail, guided SPF/DKIM/DMARC, malware scanning, DDoS rule management, disaster recovery, login notifications, dedicated IP allocation, website migration, staging, cloning, blog/CMS, landing-page presets, site performance insights, domain renewal/locking/privacy/contact management, coupons, automatic renewals, plan upgrades/downgrades, tax and regional billing, regional payment methods, regional content/contact/legal variants, country detection, marketing analytics connectors, live chat, searchable KB, incident notifications, feedback capture, abuse reporting, and the entire agency/reseller/white-label model except RBAC.
+The following are **Not implemented** despite having marketing pages, capability flags, or legacy PHP files: file manager, FTP/SFTP accounts, database management, cron jobs, email accounts/webmail, malware scanning, DDoS rule management, disaster recovery, login notifications, website migration, staging, cloning, blog/CMS, landing-page presets, site performance insights, domain renewal/locking/privacy/contact management, coupons, plan upgrades/downgrades, tax and regional billing, regional payment methods, regional content/contact/legal variants, country detection, marketing analytics connectors, searchable KB, incident notifications, feedback capture, abuse reporting, and white-label branding. (WordPress management, PHP version/config, email forwarding, SPF/DKIM/DMARC, live chat, automatic renewals, and the agency/reseller backend now have implemented APIs with passing tests.)
 
 ## 7. Decisions required before Phase 4
 

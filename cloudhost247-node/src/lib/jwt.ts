@@ -51,3 +51,24 @@ export function verifyAuthToken(env: Env, token: string): AuthTokenClaims {
   }
   return decoded as unknown as AuthTokenClaims;
 }
+
+/**
+ * Reads the `jti`/`exp` pair from a token this app just signed, WITHOUT verifying the signature.
+ *
+ * Used only on the login response path, where the token was minted by this process microseconds
+ * earlier and the caller needs its id and expiry to record the session row. It is deliberately not
+ * an authentication primitive: nothing may call this on a token that arrived from a client. The
+ * claims are shape-checked rather than trusted, so a malformed token throws instead of yielding a
+ * session row keyed on `undefined`.
+ */
+export function decodeAuthTokenClaims(token: string): { jti: string; exp: number } {
+  const decoded = jwt.decode(token);
+  if (!decoded || typeof decoded === 'string') {
+    throw new Error('Invalid token payload');
+  }
+  const claims = decoded as { jti?: unknown; exp?: unknown };
+  if (typeof claims.jti !== 'string' || typeof claims.exp !== 'number') {
+    throw new Error('Token is missing jti/exp claims');
+  }
+  return { jti: claims.jti, exp: claims.exp };
+}

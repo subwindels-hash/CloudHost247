@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 /**
  * A deliberately small Markdown renderer for the published documentation.
@@ -26,7 +27,7 @@ interface Block {
   lang?: string;
 }
 
-function parseInline(text: string, keyPrefix: string): ReactNode[] {
+function parseInline(text: string, keyPrefix: string, internalLinks: boolean): ReactNode[] {
   // Documentation is fetched from public Markdown at runtime, outside Vite's module transform.
   // Apply the same customer-facing punctuation rule to prose while leaving fenced code untouched.
   // split/join remains compatible with the frontend ES2020 library target.
@@ -51,6 +52,10 @@ function parseInline(text: string, keyPrefix: string): ReactNode[] {
           // Outbound links from documentation open in a new tab and are marked as such, so a
           // reader can tell the difference between our docs and somebody else's site.
           <a key={key} href={href} target="_blank" rel="noopener noreferrer nofollow">{label}</a>
+        ) : internalLinks ? (
+          // Customer-facing prose (the FAQ) links inside the SPA. A plain anchor here would make
+          // the browser throw away the application and reload it for a link one route away.
+          <Link key={key} to={href}>{label}</Link>
         ) : (
           <a key={key} href={href}>{label}</a>
         )
@@ -168,7 +173,7 @@ export function parseMarkdown(markdown: string): Block[] {
   return blocks;
 }
 
-export function Markdown({ source }: { source: string }) {
+export function Markdown({ source, internalLinks = false }: { source: string; internalLinks?: boolean }) {
   const blocks = parseMarkdown(source);
   return (
     <>
@@ -177,7 +182,7 @@ export function Markdown({ source }: { source: string }) {
         switch (block.type) {
           case 'heading': {
             const level = Math.min(block.level ?? 2, 4);
-            const text = parseInline(block.text ?? '', key);
+            const text = parseInline(block.text ?? '', key, internalLinks);
             if (level === 1) return <h1 key={key}>{text}</h1>;
             if (level === 2) return <h2 key={key}>{text}</h2>;
             if (level === 3) return <h3 key={key}>{text}</h3>;
@@ -190,20 +195,20 @@ export function Markdown({ source }: { source: string }) {
               </pre>
             );
           case 'quote':
-            return <blockquote key={key}>{parseInline(block.text ?? '', key)}</blockquote>;
+            return <blockquote key={key}>{parseInline(block.text ?? '', key, internalLinks)}</blockquote>;
           case 'rule':
             return <hr key={key} />;
           case 'list':
             return block.ordered ? (
               <ol key={key}>
                 {(block.items ?? []).map((item, itemIndex) => (
-                  <li key={`${key}-${itemIndex}`}>{parseInline(item, `${key}-${itemIndex}`)}</li>
+                  <li key={`${key}-${itemIndex}`}>{parseInline(item, `${key}-${itemIndex}`, internalLinks)}</li>
                 ))}
               </ol>
             ) : (
               <ul key={key}>
                 {(block.items ?? []).map((item, itemIndex) => (
-                  <li key={`${key}-${itemIndex}`}>{parseInline(item, `${key}-${itemIndex}`)}</li>
+                  <li key={`${key}-${itemIndex}`}>{parseInline(item, `${key}-${itemIndex}`, internalLinks)}</li>
                 ))}
               </ul>
             );
@@ -214,7 +219,7 @@ export function Markdown({ source }: { source: string }) {
                   <thead>
                     <tr>
                       {(block.head ?? []).map((cell, cellIndex) => (
-                        <th key={`${key}-h${cellIndex}`} scope="col">{parseInline(cell, `${key}-h${cellIndex}`)}</th>
+                        <th key={`${key}-h${cellIndex}`} scope="col">{parseInline(cell, `${key}-h${cellIndex}`, internalLinks)}</th>
                       ))}
                     </tr>
                   </thead>
@@ -222,7 +227,7 @@ export function Markdown({ source }: { source: string }) {
                     {(block.rows ?? []).map((row, rowIndex) => (
                       <tr key={`${key}-r${rowIndex}`}>
                         {row.map((cell, cellIndex) => (
-                          <td key={`${key}-r${rowIndex}-c${cellIndex}`}>{parseInline(cell, `${key}-r${rowIndex}-c${cellIndex}`)}</td>
+                          <td key={`${key}-r${rowIndex}-c${cellIndex}`}>{parseInline(cell, `${key}-r${rowIndex}-c${cellIndex}`, internalLinks)}</td>
                         ))}
                       </tr>
                     ))}
@@ -231,7 +236,7 @@ export function Markdown({ source }: { source: string }) {
               </div>
             );
           default:
-            return <p key={key}>{parseInline(block.text ?? '', key)}</p>;
+            return <p key={key}>{parseInline(block.text ?? '', key, internalLinks)}</p>;
         }
       })}
     </>

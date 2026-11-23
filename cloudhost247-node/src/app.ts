@@ -6,7 +6,18 @@ import fastifyStatic from '@fastify/static';
 import type { Env } from './config/env';
 import { registerSecurityPlugins } from './plugins/security';
 import { registerHealthRoutes } from './routes/health';
+import { registerIncidentRoutes } from './routes/incidents';
+import { registerAbuseReportRoutes } from './routes/abuse-reports';
+import { registerAgencyRoutes } from './routes/agency';
 import { registerAuthRoutes } from './routes/auth';
+import { registerDomainAutoRenewRoutes } from './routes/domain-auto-renew';
+import { registerEmailAuthenticationRoutes } from './routes/email-authentication';
+import { registerEmailForwarderRoutes } from './routes/email-forwarders';
+import { registerWordPressRoutes } from './routes/wordpress';
+import { registerIpAddressRoutes } from './routes/ip-addresses';
+import { registerLiveChatRoutes } from './routes/live-chat';
+import { registerPhpConfigRoutes } from './routes/php-config';
+import { registerWebsiteAccessShareRoutes } from './routes/website-access-shares';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
 import { registerCurrencyRoutes } from './routes/currency';
 import { registerVisitorIpRoute } from './routes/visitor-ip';
@@ -16,6 +27,7 @@ import { registerAccountRoutes } from './routes/account';
 import { registerAdminCustomerRoutes } from './routes/admin-customers';
 import { registerAccountIdentityRoutes } from './routes/account-identity';
 import { registerAccountSecurityRoutes } from './routes/account-security';
+import { registerSecurityRoutes } from './routes/security';
 import { registerWhmcsAccountRoutes, type WhmcsAccountRouteDeps } from './routes/account-whmcs';
 import { registerWhmcsPublicRoutes, type WhmcsPublicRouteDeps } from './routes/whmcs-public';
 import { registerAdminAccountSecurityRoutes } from './routes/admin-account-security';
@@ -68,6 +80,7 @@ import { registerMrzToolRoutes } from './routes/mrz-tools';
 import { registerBusinessToolsRoutes } from './routes/business-tools';
 import { registerNavigationRoutes } from './routes/navigation';
 import { registerSeoRoutes } from './routes/seo';
+import { registerSearchRoutes } from './routes/search';
 import { registerFileToolsRoutes } from './routes/file-tools';
 import { registerBuilderRoutes } from './routes/builder';
 import { registerStoreRoutes } from './routes/store';
@@ -197,6 +210,33 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
   app.register(async (instance) => {
     await registerSecurityPlugins(instance, env);
     await registerHealthRoutes(instance, env, pool);
+    // Public incident notifications (K07) sit next to the public status surface.
+    await registerIncidentRoutes(instance, env, pool);
+    // Public abuse-report intake (F13): submission is open to anyone, staff review is gated.
+    await registerAbuseReportRoutes(instance, env, pool);
+    // SPF/DKIM/DMARC email authentication (G05): guided DKIM key generation + DNS record values.
+    await registerEmailAuthenticationRoutes(instance, env, pool);
+    // Email forwarding rules (G06): tenant-scoped forwarders; no mail provider activated.
+    await registerEmailForwarderRoutes(instance, env, pool);
+    // WordPress hosting (A02): clone/stage/migrate jobs queued honestly — WP-CLI bridge
+    // not configured, so execution is pending worker activation.
+    await registerWordPressRoutes(instance, env, pool);
+    // IP address inventory (E12 — E VPS): internal free/assigned/reserved pool; no
+    // external provider allocation yet.
+    await registerIpAddressRoutes(instance, env, pool);
+    // PHP configuration (A08 — A Hosting): per-service PHP version/settings store.
+    // No PHP-FPM provider or control panel is called — preference only.
+    await registerPhpConfigRoutes(instance, env, pool);
+    // Live chat (K03 — K Support): internal customer↔staff conversations; no
+    // third-party chat provider configured.
+    await registerLiveChatRoutes(instance, env, pool);
+    // Automatic renewal controls (I12): auto-renew toggle for customer domains.
+    await registerDomainAutoRenewRoutes(instance, env, pool);
+    // Agency / reseller hosting (W10, J Agency core): staff-managed agencies, clients and
+    // reseller packages. Display-only under the D2 financial freeze.
+    await registerAgencyRoutes(instance, env, pool);
+    // Website access sharing (J03 — J Agency): agency clients share builder site access.
+    await registerWebsiteAccessShareRoutes(instance, env, pool);
     await registerAuthRoutes(instance, env, pool);
     await registerPublicCatalogRoutes(instance, env, pool);
     // B2.4 — the public orderability verdict. Anonymous, and the only place a hosting page may learn
@@ -212,6 +252,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // Username, the rotating Security PIN and its six-digit email-verification gate, plus account
     // recovery (customer side) and staff oversight of recovery + PIN policy (admin side).
     await registerAccountSecurityRoutes(instance, env, pool);
+    // Phase 6 (security) — the account's own session inventory and authentication event history.
+    // Customer-only and scoped by the authenticated user id; see src/routes/security.ts.
+    await registerSecurityRoutes(instance, env, pool);
     // B5.1 — one customer identity. Links the signed-in account to its WHMCS client (verified email
     // match) and mints single-use session hand-offs into the billing client area. Answers
     // `configured: false` until WHMCS credentials are supplied, and never touches the SPA cart.
@@ -304,6 +347,8 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // The public SEO surface (sitemap.xml / robots.txt) is generated from that same navigation
     // definition plus the content customers actually published, so it can never drift from the menu.
     await registerSeoRoutes(instance, env, pool);
+    // Public site search over the same published corpus (pages, documentation, tools, FAQ).
+    await registerSearchRoutes(instance, env, pool);
     await registerBuilderRoutes(instance, env, pool);
     await registerStoreRoutes(instance, env, pool);
     await registerLogoMakerRoutes(instance, env, pool);

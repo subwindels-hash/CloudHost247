@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadEnv } from '../../src/config/env';
-import { signAuthToken, verifyAuthToken } from '../../src/lib/jwt';
+import { decodeAuthTokenClaims, signAuthToken, verifyAuthToken } from '../../src/lib/jwt';
 
 const env = loadEnv({
   NODE_ENV: 'test',
@@ -41,5 +41,21 @@ describe('jwt helpers', () => {
   it('rejects a tampered token', () => {
     const token = signAuthToken(env, { sub: 'user-1', role: 'customer', email: 'a@example.com' });
     expect(() => verifyAuthToken(env, `${token}tampered`)).toThrow();
+  });
+});
+
+describe('decodeAuthTokenClaims', () => {
+  it('reads the jti and exp of a token this app just signed, without verifying it', () => {
+    const token = signAuthToken(env, { sub: 'user-1', role: 'customer', email: 'a@example.com' });
+    const decoded = decodeAuthTokenClaims(token);
+    expect(decoded.jti).toBe(verifyAuthToken(env, token).jti);
+    expect(decoded.exp).toBe(verifyAuthToken(env, token).exp);
+  });
+
+  it('throws on a token with no jti/exp rather than yielding undefined claims', () => {
+    // Signed with a payload that cannot carry the standard claims, so the shape check is what
+    // refuses it — a session row keyed on `undefined` would be a silent corruption.
+    const unsigned = 'not-a-token';
+    expect(() => decodeAuthTokenClaims(unsigned)).toThrow();
   });
 });

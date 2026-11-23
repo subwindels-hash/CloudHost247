@@ -70,14 +70,16 @@
 
 ## 3. P0 — pre-flight defect remediation (before Phase 3)
 
-> **Status 2026-11-07: P0-1 is COMPLETE and verified.** The chosen fix is the API-boundary identifier contract (`src/lib/identifier-contract.ts`), not a seed-data rewrite, because re-keying would require touching the quarantined `0041` migration and live foreign keys. 71 tests across 12 files + 2 new suites pass. P0-2..P0-5 remain open and are tracked in `docs/PHASE-DELIVERY-REPORT.md`.
+> **Status 2026-11-07: P0-1 is COMPLETE and verified.** The chosen fix is the API-boundary identifier contract (`src/lib/identifier-contract.ts`), not a seed-data rewrite, because re-keying would require touching the quarantined `0041` migration and live foreign keys. 71 tests across 12 files + 2 new suites pass.
+>
+> **Status 2026-11-22: P0-2 is COMPLETE and verified.** All 21 management operations on all 18 registered control-panel adapters now throw `ControlPanelOperationError` (`code: NOT_IMPLEMENTED`, `retryable: false`, with `panelSlug`/`operation` on the record) instead of returning fabricated `success: true` / `ACTIVE` / `healthy: true`; the local read-only surface (`generateInstallScript`, `getAccessInfo`, `validateCompatibility`, `getRequiredFirewallPorts`) is unchanged. Added `src/control-panels/errors.ts` and a 4-test block in `tests/unit/control-panel-adapters.test.ts` (10/10 in that file; 3307/3307 across 204 unit suites). No route previously called the stubbed operations, so no endpoint behaviour changed. P0-3..P0-5 remain open and are tracked in `docs/PHASE-DELIVERY-REPORT.md`.
 
 These are correctness/honesty defects found in Phase 1, not new features.
 
 | ID | Defect | Exact files | Fix | Acceptance |
 | --- | --- | --- | --- | --- |
 | **P0-1** | Every seeded OS id fails zod 4.6.7 `.uuid()`, so VPS ordering and reinstall return 400 | `cloudhost247-node/database/migrations/0041_create_os_catalog_and_server_provisioning.sql`, `0048_operating_system_logo_assets.sql`, `0051_operating_system_logo_assets.sql`; `src/routes/servers.ts:83-97`; 11 files matching `tests/integration/*` with `20000000-0000-0000` | Preferred: **new forward migration** re-keying seeded ids to valid v4 UUIDs, updating FK references transactionally, plus a data-integrity check. Alternative (only if D2 authorises 0041 changes): edit 0041 and the two asset migrations together. **Do not** silently relax the Zod schema to `z.string()` — that weakens input validation. | `tests/integration/server-infrastructure.test.ts` 10/10; `provisioning-lifecycle.test.ts`, `server-reinstall-acceptance.test.ts`, `public-os-availability.test.ts`, `os-image-revalidation.test.ts` pass; a real `POST /api/v1/servers` with a seeded OS id returns 201 with an unpaid order and **no provider call** |
-| **P0-2** | Control-panel base adapter fabricates success | `cloudhost247-node/src/control-panels/adapters/base.ts`, `src/control-panels/types.ts` | Replace stub `success: true` / `ACTIVE` / `healthy` returns with an explicit `NOT_IMPLEMENTED` / `CONFIGURATION_REQUIRED` typed error until a real WHM/cPanel adapter is wired; keep the capability catalogue read-only | New negative test asserts no operation returns success without a recorded upstream call; `provider-capability-truth.test.ts` extended |
+| **P0-2** | Control-panel base adapter fabricates success — **DONE 2026-11-22** | `cloudhost247-node/src/control-panels/adapters/base.ts`, `src/control-panels/types.ts` | Replace stub `success: true` / `ACTIVE` / `healthy` returns with an explicit `NOT_IMPLEMENTED` / `CONFIGURATION_REQUIRED` typed error until a real WHM/cPanel adapter is wired; keep the capability catalogue read-only | New negative test asserts no operation returns success without a recorded upstream call; `provider-capability-truth.test.ts` extended |
 | **P0-3** | SSL routes are record CRUD with no CA | `src/routes/ssl.ts`, `src/db/ssl.ts` | Add an explicit `issuanceStatus = 'not_configured'` state; do not render "SSL active/installed" from a stored row alone | `ssl-firewall-api.test.ts` + new negative test; UI states match DB reality |
 | **P0-4** | Display-only FX can imply a different charged amount | `database/migrations/0083_create_display_fx_rates.sql`, `docs/CURRENCY_DISPLAY.md`, `frontend/src/currency/display-currency.ts`, `src/routes/currency.ts` | Interim (before D4): make the USD-charge disclosure unconditional wherever a converted amount is shown, and add a test that no converted amount appears without it | `frontend/tests/unit/currency-display.test.ts` extended; `docs/CURRENCY_DISPLAY.md` legal-review flag remains visible |
 | **P0-5** | Duplicate-stack ambiguity | `cloudhost247-node/`, `platform/` | Record D1 in `docs/ARCHITECTURE-DECISION-RECORD.md` with rationale; mark the non-canonical tree as deprecated in its README and freeze new feature work there | Decision doc reviewed; no new duplicated service introduced |
@@ -171,6 +173,23 @@ P0-1..P0-5 ─────────────┤                           
 ## 8. Phase 6 — VPS, security, backups, monitoring
 
 **Entry:** P0-1 fixed; **D3** for provider acceptance.
+
+> **Status 2026-11-22 — the security sub-row's session work is COMPLETE and verified.** `src/routes/security.ts`
+> is built and registered, with migration `0119_create_auth_sessions.sql`: one `auth_sessions` row per login
+> token; `GET /api/v1/account/security/sessions` (list, `?includeRevoked=true`), `DELETE …/sessions/:id`
+> (revoke one) and `POST …/sessions/revoke-others`. Revocation writes the `jti` to the existing
+> `revoked_tokens` table, so a revoked session stops working on its next request rather than at a sweep —
+> pinned by an integration test that calls the revoked token immediately afterwards and gets 401. A
+> sign-in from a browser/device the account has not used before raises a `SECURITY_LOGIN_NEW_DEVICE`
+> in-app notification (email copy queued through the existing outbox); the first recorded sign-in and a
+> repeat from a known browser stay silent. Both are scoped by the authenticated user id, and a
+> delegated support session is refused (403) on all four routes. AccountPage gains a **Sessions** card
+> (list / revoke / sign out every other device) and a **Recent security events** list reading
+> `auth_audit_log`. Evidence: `tests/integration/security-sessions.test.ts` 9/9,
+> `frontend/tests/unit/account-sessions.test.tsx` 5/5, `tests/unit/jwt.test.ts` 6/6, plus a live run
+> against the dev stack (register → list → unfamiliar-browser alert → revoke → 401). Still open in this
+> sub-row: malware scanning, DDoS/CDN rule management, and a pruning sweep for expired `auth_sessions`
+> rows (the table grows by one row per login; `expires_at` is indexed for that future sweep).
 
 | Work | Exact paths |
 | --- | --- |

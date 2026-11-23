@@ -92,6 +92,41 @@ export interface AccountSecurityPayload {
   securityNumber: SecurityNumberStatus;
 }
 
+/**
+ * A session this build recorded for the account (Phase 6 — security). `current` marks the session
+ * the caller is using right now. There is deliberately no token identifier in this shape.
+ */
+export interface AccountSession {
+  id: string;
+  userAgent: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  revokedAt: string | null;
+  revokedReason: string | null;
+  current: boolean;
+}
+
+export interface AccountSessionsPayload {
+  sessions: AccountSession[];
+  /**
+   * Always true. The server records sessions at login; tokens issued before that recording existed
+   * have no row, so this list is "sessions we recorded", never "every session that exists".
+   */
+  recordedOnly: boolean;
+}
+
+/** One row of the account's own authentication/security event history. */
+export interface AccountSecurityEvent {
+  id: string;
+  type: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: unknown;
+  createdAt: string;
+}
+
 /** A verification challenge opened by POST /account/security-pin/view. */
 export interface SecurityPinChallenge {
   challengeToken: string;

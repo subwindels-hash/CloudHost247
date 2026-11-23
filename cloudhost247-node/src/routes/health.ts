@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import type { Env } from '../config/env';
 import { isDatabaseReachable, isSchemaPresent } from '../db/pool';
 import type { Queryable } from '../db/types';
+import { listIncidents } from '../db/incidents';
 
 /**
  * /health — liveness. Confirms the Node process is up and answering HTTP requests. Must stay
@@ -52,12 +53,35 @@ export async function registerHealthRoutes(app: FastifyInstance, env: Env, pool?
     } catch {
       website = 'degraded';
     }
+    // Active incidents declared by an operator. The list is honest: empty when none are declared,
+    // and never auto-detected — `monitored: false` stays permanent.
+    let incidents: { incident_number: string; title: string; status: string; severity: string; started_at: Date }[] = [];
+    if (pool) {
+      try {
+        const all = await listIncidents(pool);
+        incidents = all
+          .filter((i) => i.status !== 'resolved')
+          .map((i) => ({
+            incident_number: i.incident_number,
+            title: i.title,
+            status: i.status,
+            severity: i.severity,
+            started_at: i.started_at,
+          }));
+      } catch {
+        // Incidents are additive to the status page: if the incidents table is missing (e.g. a
+        // database that predates this migration), report no incidents rather than failing the
+        // whole status endpoint.
+        incidents = [];
+      }
+    }
     return {
       // `monitored: false` is permanent until an independent monitoring system exists. It is the
       // honest answer, and the UI renders it as "not monitored" rather than as "operational".
       monitored: false,
       checkedAt: new Date().toISOString(),
       latencyMs: Date.now() - started,
+      incidents,
       components: [
         {
           id: 'api',

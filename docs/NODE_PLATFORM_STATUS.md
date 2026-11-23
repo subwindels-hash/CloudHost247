@@ -1808,3 +1808,64 @@ sub-phase before the next one begins.
   "production-ready" claim is made for this target. The standing condition is
   unchanged: the claim requires a real run on a real host with recorded evidence
   (versions, logs, healthcheck output, restore drill).
+
+## Phase 6 security — session enumeration and unfamiliar-sign-in alerts (added 2026-11-22)
+
+- **What was missing.** Tokens are stateless JWTs and `revoked_tokens` (0003) could already
+  invalidate one specific token, but there was **no inventory**: a customer could not see which
+  browsers/devices could still act as them, could not revoke one without changing their password, and
+  was never told about a sign-in from a device the account had not used before. The register row was
+  `F11 Login notifications — Not implemented`, and `src/routes/security.ts` was named in the plan as
+  `(new)`.
+- **Built.** Migration `0119_create_auth_sessions.sql` adds `auth_sessions` (one row per login token:
+  `jti` unique, user agent, peer address, `created_at`, `last_seen_at`, `revoked_at`/`revoked_reason`,
+  `expires_at`) and widens the `auth_audit_log` event CHECK with `auth_session_revoked` /
+  `auth_sessions_revoked`, following the same drop-and-readd pattern as 0013/0022/0025/0059/0060/0061/0085.
+  `src/db/auth-sessions.ts` is the data layer; `src/routes/security.ts` is registered in `src/app.ts`:
+  - `GET /api/v1/account/security/sessions` — the caller's recorded sessions, `current` marking the one
+    the request itself uses; `?includeRevoked=true` adds revoked rows with their reason;
+  - `DELETE /api/v1/account/security/sessions/:id` — revoke one (including the current one, which ends
+    this login);
+  - `POST /api/v1/account/security/sessions/revoke-others` — "sign out every other device";
+  - `GET /api/v1/account/security/events` — the caller's own `auth_audit_log` rows, most recent first.
+  Login records the session and raises the alert in `src/services/login-session-service.ts`, called from
+  the register, password-login, passkey-login and MFA-completion paths; `authenticate()` refreshes
+  `last_seen_at` on a 15-minute throttle.
+- **Revocation is real, not cosmetic.** `revokeAuthSession` writes the `jti` to `revoked_tokens` — the
+  table `src/lib/require-auth.ts` already checks on every request — so the session dies on its next
+  request. Stamping `revoked_at` only keeps the row legible. Pinned by a test that calls the revoked
+  token immediately and gets 401, and by a live run on the dev stack.
+- **The familiarity rule, and why it keys on the user agent.** An alert fires only when the account has
+  at least one other active recorded session **and** none of them carries this request's user agent. So
+  the first recorded sign-in is never announced, a repeat from a known browser is silent, and a client
+  sending no user agent is never treated as a known device. It deliberately does **not** use the IP
+  address: the app reads `request.ip`, which is the immediate peer, so behind the reverse proxy every
+  request appears to come from the proxy and an IP-based test would either never fire or fire on every
+  mobile-network change. The recorded address is shown to the customer, who is the best judge of whether
+  it is theirs, and the notification says so in as many words.
+- **Scope and refusals.** Every query is scoped by the authenticated `auth.userId`; there is no
+  `:userId`, and a session id belonging to another account is a 404 indistinguishable from a missing one.
+  A delegated support session is refused 403 on all four routes (`session.enumerate`, `session.revoke`
+  added to `SUPPORT_MODE_RESTRICTED_ACTIONS`) and the attempt is audited. Bookkeeping can never fail a
+  login: `recordLoginSessionAndNotify` reports its own errors to the request log and swallows them.
+- **Frontend.** `AccountPage` gains a **Sessions** card (list, revoke one, "sign out every other device")
+  and a **Recent security events** list, with typed wrappers in `frontend/src/lib/account-api.ts`.
+  Load failure renders "couldn't load", never an empty list that would read as "you have no other
+  sessions"; an absent `sessions` array in a malformed response renders as none rather than blanking the
+  page.
+- **Verified.** `tests/integration/security-sessions.test.ts` **9/9** (records on registration; one
+  alert per unfamiliar browser and none on repeat; immediate 401 after revoke; cross-account id is 404
+  and changes nothing; revoke-others kills the others and keeps the caller; logout stamps `logout`;
+  unauthenticated 401 on all four; events are per-account; support mode 403). Plus
+  `frontend/tests/unit/account-sessions.test.tsx` **5/5**, `tests/unit/jwt.test.ts` **6/6** (the new
+  `decodeAuthTokenClaims`), and the existing auth/account/security suites still green. Live on the dev
+  stack: register → one session → second browser → exactly one `SECURITY_LOGIN_NEW_DEVICE` notification
+  → revoke → revoked token 401 while the revoking token stays 200.
+- **Deliberately not implemented, and not implied.** Malware scanning, DDoS/CDN rule management, IP
+  reputation / geo-velocity, and any automatic lockout are all absent; a notification is information
+  for the customer, not a verdict. `auth_sessions` rows are never deleted — the table grows by one row
+  per login, and `expires_at` is indexed so a future sweep can prune rows whose token has already expired
+  naturally. Nothing is claimed about sessions this build did not record: tokens issued before 0119, or
+  by a code path that does not record one, have no row, and the API says `recordedOnly: true`.
+- **No browser verification.** The UI was exercised through jsdom contract tests, not a real browser;
+  the register row stays `Implemented but not fully verified`.

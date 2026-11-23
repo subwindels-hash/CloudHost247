@@ -2,6 +2,7 @@ import type { FastifyRequest } from 'fastify';
 import type { Env } from '../config/env';
 import type { Queryable } from '../db/types';
 import { isTokenRevoked } from '../db/revoked-tokens';
+import { touchAuthSession } from '../db/auth-sessions';
 import { findUserById } from '../db/users';
 import { findSupportSessionById, isSupportSessionActive } from '../db/support-sessions';
 import { UnauthorizedError } from './errors';
@@ -126,6 +127,12 @@ export async function authenticate(request: FastifyRequest, env: Env, pool: Quer
     supportSessionId = session.id;
     actingAdminId = session.admin_id;
   }
+
+  // Refresh the session inventory's `last_seen_at` (Phase 6 security), throttled inside
+  // src/db/auth-sessions.ts to one write per session per interval. Best effort by design: this is a
+  // statistic for the customer's own review, so a failure here must never reject an otherwise valid
+  // request — and a token with no recorded session row simply matches no rows.
+  await touchAuthSession(pool, claims.jti).catch(() => undefined);
 
   return {
     ...claims,

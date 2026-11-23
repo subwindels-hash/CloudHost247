@@ -10,6 +10,10 @@ import type {
   FirewallPortRule,
   CompatibilityCheckResult,
 } from '../types';
+import {
+  ControlPanelOperationError,
+  controlPanelOperationNotImplemented,
+} from '../errors';
 
 export abstract class BaseControlPanelAdapter implements ControlPanelAdapter {
   abstract readonly slug: string;
@@ -131,133 +135,229 @@ echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] ${this.name} installation completed suc
 
   /**
    * Helper to verify whether a capability is supported before executing an operation.
+   *
+   * This is a local check over the static capability catalogue, not an upstream call. It stays for
+   * subclasses that override an operation and still want to gate it, and it fails closed with a
+   * typed, non-retryable error rather than a plain `Error`.
    */
   protected assertCapability(capability: keyof ControlPanelCapabilities, operationName: string): void {
     if (!this.capabilities[capability]) {
-      throw new Error(
+      throw new ControlPanelOperationError(
+        this.slug,
+        operationName,
+        'UNSUPPORTED_OPERATION',
         `Operation '${operationName}' is not supported by ${this.name} (${this.slug}). Capability '${String(capability)}' is false.`
       );
     }
   }
 
+  /**
+   * Every management operation below fails closed with `NOT_IMPLEMENTED`.
+   *
+   * None of them is wired to a real panel upstream in this build, so answering `success: true`,
+   * `ACTIVE` or `healthy: true` would fabricate a result no provider produced — a caller would
+   * believe an account was created, a domain configured or a certificate issued when nothing was
+   * ever contacted. The local, read-only surfaces above (`generateInstallScript`, `getAccessInfo`,
+   * `validateCompatibility`, `getRequiredFirewallPorts`) remain usable; everything that would
+   * mutate or read a real panel refuses by name, with the reason on the record.
+   */
+
   async install(options: ControlPanelInstallOptions): Promise<ControlPanelOperationResult> {
-    const script = this.generateInstallScript(options);
-    return {
-      success: true,
-      message: `${this.name} installation payload generated`,
-      data: { scriptLength: script.length, method: this.installationMethod },
-    };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'install',
+      hint: 'The installation payload can still be generated locally with generateInstallScript(); it is neither executed nor verified upstream.',
+    });
   }
 
   async uninstall(options: { serverIp: string }): Promise<ControlPanelOperationResult> {
-    return {
-      success: true,
-      message: `${this.name} uninstall requested for ${options.serverIp}`,
-    };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'uninstall',
+    });
   }
 
   async configure(options: Record<string, unknown>): Promise<ControlPanelOperationResult> {
-    return {
-      success: true,
-      message: `${this.name} configuration updated`,
-      data: options,
-    };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'configure',
+    });
   }
 
   async getStatus(target: { serverIp: string }): Promise<{ status: string; version?: string }> {
-    return {
-      status: 'ACTIVE',
-      version: 'latest',
-    };
+    void target;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'getStatus',
+    });
   }
 
   async healthCheck(target: { serverIp: string }): Promise<{ healthy: boolean; details?: string }> {
-    return {
-      healthy: true,
-      details: `${this.name} reachable on port ${this.defaultPort}`,
-    };
+    void target;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'healthCheck',
+    });
   }
 
   async createAccount(options: Record<string, unknown>): Promise<ControlPanelOperationResult> {
-    this.assertCapability('multi_user', 'createAccount');
-    return { success: true, message: 'Account creation queued', data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'createAccount',
+    });
   }
 
   async suspendAccount(options: Record<string, unknown>): Promise<ControlPanelOperationResult> {
-    this.assertCapability('multi_user', 'suspendAccount');
-    return { success: true, message: 'Account suspension queued', data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'suspendAccount',
+    });
   }
 
   async unsuspendAccount(options: Record<string, unknown>): Promise<ControlPanelOperationResult> {
-    this.assertCapability('multi_user', 'unsuspendAccount');
-    return { success: true, message: 'Account unsuspension queued', data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'unsuspendAccount',
+    });
   }
 
   async terminateAccount(options: Record<string, unknown>): Promise<ControlPanelOperationResult> {
-    this.assertCapability('multi_user', 'terminateAccount');
-    return { success: true, message: 'Account termination queued', data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'terminateAccount',
+    });
   }
 
   async createDomain(options: { domain: string; serverIp?: string }): Promise<ControlPanelOperationResult> {
-    this.assertCapability('domains', 'createDomain');
-    return { success: true, message: `Domain ${options.domain} configured`, data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'createDomain',
+    });
   }
 
   async deleteDomain(options: { domain: string }): Promise<ControlPanelOperationResult> {
-    this.assertCapability('domains', 'deleteDomain');
-    return { success: true, message: `Domain ${options.domain} removed`, data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'deleteDomain',
+    });
   }
 
   async createSubdomain(options: { domain: string; subdomain: string }): Promise<ControlPanelOperationResult> {
-    this.assertCapability('domains', 'createSubdomain');
-    return { success: true, message: `Subdomain ${options.subdomain}.${options.domain} created`, data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'createSubdomain',
+    });
   }
 
   async createDatabase(options: { databaseName: string; user?: string }): Promise<ControlPanelOperationResult> {
-    this.assertCapability('databases', 'createDatabase');
-    return { success: true, message: `Database ${options.databaseName} created`, data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'createDatabase',
+    });
   }
 
   async deleteDatabase(options: { databaseName: string }): Promise<ControlPanelOperationResult> {
-    this.assertCapability('databases', 'deleteDatabase');
-    return { success: true, message: `Database ${options.databaseName} deleted`, data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'deleteDatabase',
+    });
   }
 
   async createEmailAccount(options: { email: string; quotaMb?: number }): Promise<ControlPanelOperationResult> {
-    this.assertCapability('email', 'createEmailAccount');
-    return { success: true, message: `Email account ${options.email} created`, data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'createEmailAccount',
+    });
   }
 
   async deleteEmailAccount(options: { email: string }): Promise<ControlPanelOperationResult> {
-    this.assertCapability('email', 'deleteEmailAccount');
-    return { success: true, message: `Email account ${options.email} deleted`, data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'deleteEmailAccount',
+    });
   }
 
   async createDNSRecord(options: Record<string, unknown>): Promise<ControlPanelOperationResult> {
-    this.assertCapability('dns', 'createDNSRecord');
-    return { success: true, message: 'DNS record created', data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'createDNSRecord',
+    });
   }
 
   async deleteDNSRecord(options: Record<string, unknown>): Promise<ControlPanelOperationResult> {
-    this.assertCapability('dns', 'deleteDNSRecord');
-    return { success: true, message: 'DNS record deleted', data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'deleteDNSRecord',
+    });
   }
 
   async issueSSL(options: { domain: string }): Promise<ControlPanelOperationResult> {
-    this.assertCapability('ssl', 'issueSSL');
-    return { success: true, message: `SSL certificate issued for ${options.domain}`, data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'issueSSL',
+    });
   }
 
   async renewSSL(options: { domain: string }): Promise<ControlPanelOperationResult> {
-    this.assertCapability('ssl', 'renewSSL');
-    return { success: true, message: `SSL certificate renewed for ${options.domain}`, data: options };
+    void options;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'renewSSL',
+    });
   }
 
   async getUsage(target: { serverIp: string }): Promise<Record<string, unknown>> {
-    return { serverIp: target.serverIp, panel: this.slug, status: 'ONLINE' };
+    void target;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'getUsage',
+    });
   }
 
   async restartService(serviceName: string): Promise<ControlPanelOperationResult> {
-    return { success: true, message: `Service ${serviceName} restarted on ${this.name}` };
+    void serviceName;
+    throw controlPanelOperationNotImplemented({
+      panelSlug: this.slug,
+      panelName: this.name,
+      operation: 'restartService',
+    });
   }
 }

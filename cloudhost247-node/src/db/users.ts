@@ -318,7 +318,10 @@ export async function recordAuthEvent(
       | 'account_recovery_cancelled'
       | 'account_recovery_identity_verified'
       | 'account_recovery_approved'
-      | 'account_recovery_rejected';
+      | 'account_recovery_rejected'
+      // --- 0119: session enumeration and revocation (Phase 6 security) --------------------------
+      | 'auth_session_revoked'
+      | 'auth_sessions_revoked';
     ipAddress?: string | null;
     userAgent?: string | null;
     metadata?: Record<string, unknown>;

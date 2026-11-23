@@ -7,7 +7,9 @@ import { apiFetch, apiFetchBlob } from './api';
 import type {
   AccountProfile,
   AccountRecoveryRequest,
+  AccountSecurityEvent,
   AccountSecurityPayload,
+  AccountSessionsPayload,
   AdminSupportSession,
   RevealedSecurityPin,
   SecurityPinChallenge,
@@ -259,6 +261,41 @@ export function changeMySecurityNumber(currentSecurityNumber: string, newSecurit
  */
 export function getMyAccountSecurity() {
   return apiFetch<AccountSecurityPayload>('/api/v1/account/security');
+}
+
+// --- Account Security: session inventory and security events (Phase 6) ------------------------
+
+/**
+ * The account's recorded sessions. `includeRevoked` adds rows already revoked (labelled with the
+ * reason) so the customer can see what happened to a session, not just which ones still work.
+ */
+export function getMySessions(includeRevoked = false) {
+  return apiFetch<AccountSessionsPayload>(
+    `/api/v1/account/security/sessions${includeRevoked ? '?includeRevoked=true' : ''}`
+  );
+}
+
+/** Revokes one of the caller's own sessions. Revoking the current one ends this login too. */
+export function revokeMySession(sessionId: string) {
+  return apiFetch<{ revoked: boolean; sessionId: string; current: boolean }>(
+    `/api/v1/account/security/sessions/${encodeURIComponent(sessionId)}`,
+    { method: 'DELETE' }
+  );
+}
+
+/** Revokes every recorded session except the one this request is made with. */
+export function revokeMyOtherSessions() {
+  return apiFetch<{ revoked: number; keptCurrentSession: boolean }>(
+    '/api/v1/account/security/sessions/revoke-others',
+    { method: 'POST', body: JSON.stringify({}) }
+  );
+}
+
+/** The account's own recent authentication/security events. */
+export function getMySecurityEvents(limit = 50) {
+  return apiFetch<{ events: AccountSecurityEvent[]; limit: number }>(
+    `/api/v1/account/security/events?limit=${encodeURIComponent(String(limit))}`
+  );
 }
 
 export function checkUsernameAvailability(username: string) {

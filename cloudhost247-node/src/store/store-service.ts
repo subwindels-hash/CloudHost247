@@ -42,6 +42,7 @@ export interface StoreRow {
   theme: Record<string, unknown>;
   plan_code: string;
   subscription_id: string | null;
+  custom_domain: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -107,10 +108,23 @@ export async function createStore(
     slug = `${slugify(name).slice(0, 52)}-${randomBytes(2).toString('hex')}`;
   }
 
+  // Build the INSERT dynamically so we only send parameters for values that are
+  // actually provided. This avoids PGlite being unable to infer the SQL type of
+  // untyped `null` parameters (e.g. site_id when no builder site is linked).
+  const insertColumns: string[] = ['id', 'user_id', 'name', 'slug', 'description', 'currency'];
+  const insertParams: unknown[] = [randomUUID(), userId, name, slug, (input.description ?? '').slice(0, 2000), currency];
+  let paramIndex = 7;
+
+  if (input.siteId) {
+    insertColumns.splice(2, 0, 'site_id');
+    insertParams.splice(2, 0, input.siteId);
+    paramIndex = 8;
+  }
+
   const { rows } = await db.query<StoreRow>(
-    `INSERT INTO store_stores (id, user_id, site_id, name, slug, description, currency)
-     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-    [randomUUID(), userId, input.siteId ?? null, name, slug, (input.description ?? '').slice(0, 2000), currency]
+    `INSERT INTO store_stores (${insertColumns.join(', ')})
+     VALUES (${insertParams.map((_, i) => `$${i + 1}`).join(', ')}) RETURNING *`,
+    insertParams
   );
   const store = rows[0];
   if (!store) throw new Error('Store creation failed');
@@ -128,6 +142,7 @@ export async function updateStore(
     paymentMode?: 'order_intake' | 'provider';
     settings?: Record<string, unknown>;
     theme?: Record<string, unknown>;
+    customDomain?: string | null;
   }
 ): Promise<StoreRow> {
   const store = await requireOwnedStore(db, userId, storeId);
@@ -135,29 +150,68 @@ export async function updateStore(
     // Not a blocker — a merchant may legitimately take orders and arrange payment directly — but
     // the mode is reported back exactly as it is, so the storefront can say so.
   }
-  const { rows } = await db.query<StoreRow>(
-    `UPDATE store_stores SET
-        name = COALESCE($2, name),
-        description = COALESCE($3, description),
-        status = COALESCE($4, status),
-        payment_mode = COALESCE($5, payment_mode),
-        settings = COALESCE($6, settings),
-        theme = COALESCE($7, theme),
-        updated_at = now()
-      WHERE id = $1 RETURNING *`,
-    [
-      store.id,
-      patch.name?.trim() || null,
-      patch.description ?? null,
-      patch.status ?? null,
-      patch.paymentMode ?? null,
-      patch.settings === undefined ? null : JSON.stringify(patch.settings),
-      patch.theme === undefined ? null : JSON.stringify(patch.theme),
-    ]
-  );
-  const updated = rows[0];
-  if (!updated) throw new NotFoundError('No store was found with that id');
-  return updated;
+
+  // Build the UPDATE dynamically so we only send parameters for fields the caller
+  // actually provided. This avoids PGlite being unable to infer the SQL type of
+  // untyped `null` parameters (which happens with COALESCE when a parameter is
+  // null but no typed context is available).
+  const setClauses: string[] = [];
+  const params: unknown[] = [store.id];
+  let paramIndex = 2;
+
+  const push = (value: unknown) => { params.push(value); paramIndex += 1; };
+
+  if (patch.name !== undefined) {
+    setClauses.push(`name = $${paramIndex}`);
+    push(patch.name.trim() || null);
+  }
+  if (patch.description !== undefined) {
+    setClauses.push(`description = $${paramIndex}`);
+    push(patch.description ?? null);
+  }
+  if (patch.status !== undefined) {
+    setClauses.push(`status = $${paramIndex}`);
+    push(patch.status);
+  }
+  if (patch.paymentMode !== undefined) {
+    setClauses.push(`payment_mode = $${paramIndex}`);
+    push(patch.paymentMode);
+  }
+  if (patch.settings !== undefined) {
+    setClauses.push(`settings = $${paramIndex}`);
+    push(JSON.stringify(patch.settings));
+  }
+  if (patch.theme !== undefined) {
+    setClauses.push(`theme = $${paramIndex}`);
+    push(JSON.stringify(patch.theme));
+  }
+  if (patch.customDomain !== undefined) {
+    if (patch.customDomain === null) {
+      setClauses.push(`custom_domain = NULL`);
+    } else {
+      setClauses.push(`custom_domain = $${paramIndex}`);
+      push(patch.customDomain);
+    }
+  }
+
+  setClauses.push(`updated_at = now()`);
+
+  try {
+    const { rows } = await db.query<StoreRow>(
+      `UPDATE store_stores SET ${setClauses.join(', ')} WHERE id = $1 RETURNING *`,
+      params
+    );
+    const updated = rows[0];
+    if (!updated) throw new NotFoundError('No store was found with that id');
+    return updated;
+  } catch (err: any) {
+    // Unique violation on custom_domain: convert the DB constraint error
+    // into a 400 validation error rather than a 500.
+    if (err?.code === '23505') {
+      throw new ValidationError('This custom domain is already in use by another store');
+    }
+    throw err;
+  }
 }
 
 /* --------------------------------------------------------------------------------------------
