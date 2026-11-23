@@ -1,4 +1,5 @@
-import unittest, importlib.util, copy, re
+import unittest, importlib.util, copy, re, tempfile
+from unittest.mock import patch
 from pathlib import Path
 import json
 ROOT=Path(__file__).resolve().parents[2]
@@ -234,14 +235,11 @@ class WebsiteTests(unittest.TestCase):
   self.assertEqual(drifted,[],'the platform serves different bytes than the theme library: '+'; '.join(drifted[:5]))
 
  def test_catalogue_marks_are_first_party_and_distinct(self):
-  # The platform serves its control-panel and operating-system logos from
-  # frontend/public/{panel-logos,os-logos}. Those directories shipped genuine vendor artwork —
-  # the Ubuntu roundel, the cPanel wordmark, Debian's #A80030 — which contradicts this repo's
-  # own published policy (assets/images/cloudhost247/README.md: "no vendor logo is drawn or
-  # traced ... no third-party logos are fabricated, bundled without a license, or used to imply
-  # affiliation") and, for a catalogue whose rows are mostly DISABLED, implies an endorsement
-  # no vendor gave. The marks are now CloudHost247's own line art. These assertions are what
-  # stops the vendor files coming back.
+  # This older library contains neutral CloudHost247 illustrations, NOT project logos. The
+  # Node SPA now renders source-matched inline panel/OS SVGs and ignores legacy logo URLs.
+  # Its removed /panel-logos/ directory must not be revived with these substitute glyphs.
+  # Legacy /os-logos/ URL copies still exist for older clients; keep them in sync with the
+  # original site's neutral art, not with the SPA's project-specific logos.
   generator=(ROOT/'scripts/generate-catalog-assets.py').read_text()
   allowed={c.lower() for c in re.findall(r"'(#[0-9a-fA-F]{6})'",generator)}
   self.assertGreaterEqual(len(allowed),10,'the palette guard should read the generator allow-list')
@@ -257,8 +255,11 @@ class WebsiteTests(unittest.TestCase):
                     sorted((ROOT/'cloudhost247-node/database/migrations').glob('*0041*.sql')))
   referenced=set(re.findall(r"'(/os-logos/[a-z-]+\.svg)'",migration))
   self.assertGreaterEqual(len(referenced),6,'migration 0041 names the OS logos it seeds')
-  served={m['served'] for m in marks}
-  self.assertTrue(referenced<=served,f'seeded OS logos with no mark: {sorted(referenced-served)}')
+  os_served={m['served'] for m in marks if m['family']=='operating-system'}
+  self.assertTrue(referenced<=os_served,
+                  f'seeded OS logos with no mark: {sorted(referenced-os_served)}')
+  self.assertFalse(list((ROOT/'cloudhost247-node/frontend/public/panel-logos').glob('*')),
+                   'neutral panel illustrations must not reappear as project logo assets')
 
   # --- the same policy, swept across every tree this project serves -------------------------
   # The mark families above are checked by identity; this is the catch-all. `templates/orderforms/
@@ -286,19 +287,35 @@ class WebsiteTests(unittest.TestCase):
   glyphs={}
   for mark in marks:
    canonical=ROOT/mark['canonical']
-   served_path=ROOT/'cloudhost247-node/frontend/public'/mark['served'].lstrip('/')
    self.assertTrue(canonical.is_file(),mark['canonical'])
-   self.assertTrue(served_path.is_file(),mark['served'])
    body=canonical.read_text()
-   # One definition, two copies: the theme and the platform cannot show different artwork.
-   self.assertEqual(body,served_path.read_text(),mark['served'])
-   self.assertIn(f"<title>{mark['title']}</title>",body,mark['served'])
+   if mark['family']=='operating-system':
+    served_path=ROOT/'cloudhost247-node/frontend/public'/mark['served'].lstrip('/')
+    self.assertTrue(served_path.is_file(),mark['served'])
+    # Legacy OS URL copies still share one definition with the neutral site library.
+    self.assertEqual(body,served_path.read_text(),mark['served'])
+   else:
+    self.assertNotIn('served',mark,'panel illustrations are not public logo URLs')
+   self.assertIn(f"<title>{mark['title']}</title>",body,mark['canonical'])
    for colour in re.findall(r'#[0-9a-fA-F]{6}',body):
-    # A vendor brand hex here is the finding this test exists for.
-    self.assertIn(colour.lower(),allowed,f"{mark['served']} uses {colour}")
+    self.assertIn(colour.lower(),allowed,f"{mark['canonical']} uses {colour}")
    key=re.sub(r'<title>[^<]*</title>','',body)
-   self.assertNotIn(key,glyphs,f"{mark['served']} renders the same glyph as {glyphs.get(key)}")
-   glyphs[key]=mark['served']
+   self.assertNotIn(key,glyphs,f"{mark['canonical']} renders the same glyph as {glyphs.get(key)}")
+   glyphs[key]=mark['canonical']
+
+ def test_catalogue_generator_cannot_restore_neutral_panel_logo_assets(self):
+  spec=importlib.util.spec_from_file_location('catalogue_assets',ROOT/'scripts/generate-catalog-assets.py')
+  generator=importlib.util.module_from_spec(spec);spec.loader.exec_module(generator)
+  with tempfile.TemporaryDirectory() as tmp:
+   with patch.object(generator,'SERVED',Path(tmp)):
+    written,marks=generator.emit_served_marks()
+   self.assertEqual(written,len(generator.OS_SLUGS))
+   self.assertEqual(len(marks),len(generator.PANEL_SLUGS)+len(generator.OS_SLUGS))
+   self.assertFalse((Path(tmp)/'panel-logos').exists(),
+                    'running --emit-served must not bring substitute panel logos back')
+   self.assertEqual(len(list((Path(tmp)/'os-logos').glob('*.svg'))),len(generator.OS_SLUGS))
+   self.assertTrue(all('served' not in mark for mark in marks
+                       if mark['family']=='control-panel'))
 
  def test_every_theme_include_resolves_or_is_a_declared_parent_template(self):
   # The theme is a child of twenty-one and ships only what it restyles, so some includes are the
