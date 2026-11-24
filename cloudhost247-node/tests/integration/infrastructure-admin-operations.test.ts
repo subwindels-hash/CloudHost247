@@ -1,12 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { PgliteClient } from '../../database/db-client';
 import { migrateUp } from '../../database/migrate';
 import { buildApp } from '../../src/app';
 import { loadEnv } from '../../src/config/env';
 import { createUser } from '../../src/db/users';
 import { signAuthToken } from '../../src/lib/jwt';
+import { buildKeyRing, decryptSecret } from '../../src/lib/crypto';
+import { setKeyRingForTesting } from '../../src/lib/keyring';
 
 /**
  * Operator-facing infrastructure surface: adapter configuration reporting, mock-provider
@@ -19,11 +21,20 @@ describe('admin infrastructure operations', () => {
     NODE_ENV: 'test',
     DATABASE_URL: 'postgresql://test:test@localhost/test',
     JWT_SECRET: 'i'.repeat(32),
+    CREDENTIAL_ENCRYPTION_KEY: 'd'.repeat(64),
   } as NodeJS.ProcessEnv);
+  const encryptionKey = 'd'.repeat(64);
   let adminToken = '';
+  let superAdminToken = '';
   let customerToken = '';
 
   beforeAll(async () => {
+    // The key-ring accessor uses the runtime env parser. Stub test values locally and restore them
+    // after this file so other suites never inherit credentials or database settings.
+    vi.stubEnv('DATABASE_URL', 'postgresql://test:test@localhost/test');
+    vi.stubEnv('JWT_SECRET', 'i'.repeat(32));
+    vi.stubEnv('CREDENTIAL_ENCRYPTION_KEY', encryptionKey);
+    setKeyRingForTesting(buildKeyRing(encryptionKey));
     db = new PGlite();
     await migrateUp(new PgliteClient(db), { isProduction: false });
     const admin = await createUser(db, {
@@ -31,13 +42,19 @@ describe('admin infrastructure operations', () => {
     });
     await db.query(`UPDATE users SET role='admin' WHERE id=$1`, [admin.id]);
     adminToken = signAuthToken(env, { sub: admin.id, role: 'admin', email: admin.email });
+    const superAdmin = await createUser(db, {
+      id: randomUUID(), email: `super-admin-${randomUUID()}@example.com`, passwordHash: 'hash', fullName: 'Super Admin',
+    });
+    await db.query(`UPDATE users SET role='super_admin' WHERE id=$1`, [superAdmin.id]);
+    superAdminToken = signAuthToken(env, { sub: superAdmin.id, role: 'super_admin', email: superAdmin.email });
     const customer = await createUser(db, {
       id: randomUUID(), email: `customer-${randomUUID()}@example.com`, passwordHash: 'hash', fullName: 'Customer',
     });
     customerToken = signAuthToken(env, { sub: customer.id, role: 'customer', email: customer.email });
   });
 
-  afterAll(async () => { await db.close(); });
+  afterAll(async () => { await db.close(); setKeyRingForTesting(null); vi.unstubAllEnvs(); });
+  afterEach(() => vi.unstubAllGlobals());
 
   function auth(token: string) { return { authorization: `Bearer ${token}` }; }
 
@@ -84,9 +101,95 @@ describe('admin infrastructure operations', () => {
       .toContain('PROXMOX_LAB_API_TOKEN');
     // Only names and booleans: no property may carry a secret-looking value.
     for (const credential of body.configuration.credentials) {
-      expect(Object.keys(credential).sort()).toEqual(['description', 'fallbackName', 'name', 'present', 'required']);
+      expect(Object.keys(credential).sort()).toEqual(['description', 'fallbackName', 'name', 'present', 'required', 'stored', 'suffix']);
     }
     expect(body.images).toEqual({ total: 0, verifiedActive: 0 });
+    await app.close();
+  });
+
+  it('lets only super admins save encrypted credentials and connect through a real adapter request', async () => {
+    const app = buildApp(env, { serveFrontend: false, pool: db });
+    const created = await app.inject({
+      method: 'POST', url: '/api/v1/admin/providers', headers: auth(adminToken),
+      payload: {
+        name: 'Hetzner Dashboard', slug: `hetzner-dash-${randomUUID().slice(0, 8)}`, providerType: 'HETZNER',
+        adapter: 'hetzner', status: 'CONFIGURATION_REQUIRED', apiBaseUrl: 'https://api.hetzner.test/v1',
+        credentialEnvPrefix: 'HETZNER_DASHBOARD',
+      },
+    });
+    expect(created.statusCode).toBe(201);
+    const providerId = created.json().provider.id as string;
+    const secret = `hcloud-${randomUUID()}`;
+
+    const denied = await app.inject({
+      method: 'POST', url: `/api/v1/admin/providers/${providerId}/connect`, headers: auth(adminToken),
+      payload: { credentials: { _API_TOKEN: secret } },
+    });
+    expect(denied.statusCode).toBe(403);
+
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ servers: [] }), {
+      status: 200, headers: { 'content-type': 'application/json' },
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+    const connected = await app.inject({
+      method: 'POST', url: `/api/v1/admin/providers/${providerId}/connect`, headers: auth(superAdminToken),
+      payload: { credentials: { _API_TOKEN: secret } },
+    });
+    expect(connected.statusCode, connected.body).toBe(200);
+    expect(connected.json().result).toMatchObject({ status: 'connected', code: null });
+    expect(connected.json().provider).toMatchObject({ status: 'ACTIVE', lastHealthStatus: 'HEALTHY' });
+    expect(JSON.stringify(connected.json())).not.toContain(secret);
+
+    const firstCall = fetchMock.mock.calls[0] as unknown as [RequestInfo | URL, RequestInit];
+    expect(String(firstCall[0])).toBe('https://api.hetzner.test/v1/servers?per_page=1');
+    expect(new Headers(firstCall[1]?.headers).get('authorization')).toBe(`Bearer ${secret}`);
+
+    const stored = await db.query<{ encrypted_credentials: string; credential_names: unknown }>(
+      `SELECT encrypted_credentials,credential_names FROM infrastructure_provider_credentials WHERE provider_id=$1`,
+      [providerId]
+    );
+    expect(stored.rows[0]?.encrypted_credentials).toBeTruthy();
+    expect(stored.rows[0]?.encrypted_credentials).not.toContain(secret);
+    expect(JSON.parse(decryptSecret(buildKeyRing(encryptionKey), stored.rows[0]!.encrypted_credentials)))
+      .toEqual({ _API_TOKEN: secret });
+    expect(stored.rows[0]?.credential_names).toEqual(['_API_TOKEN']);
+
+    const report = await app.inject({
+      method: 'GET', url: `/api/v1/admin/providers/${providerId}/configuration`, headers: auth(adminToken),
+    });
+    expect(report.statusCode).toBe(200);
+    expect(report.json().configuration.credentials[0]).toMatchObject({
+      name: 'HETZNER_DASHBOARD_API_TOKEN', suffix: '_API_TOKEN', present: true, stored: true,
+    });
+    expect(JSON.stringify(report.json())).not.toContain(secret);
+    await app.close();
+  });
+
+  it('keeps a provider inactive when the provider rejects the saved API credentials', async () => {
+    const app = buildApp(env, { serveFrontend: false, pool: db });
+    const created = await app.inject({
+      method: 'POST', url: '/api/v1/admin/providers', headers: auth(adminToken),
+      payload: {
+        name: 'Rejected Hetzner', slug: `hetzner-no-${randomUUID().slice(0, 8)}`, providerType: 'HETZNER',
+        adapter: 'hetzner', status: 'CONFIGURATION_REQUIRED', apiBaseUrl: 'https://api.hetzner.test/v1',
+        credentialEnvPrefix: 'HETZNER_REJECTED',
+      },
+    });
+    const providerId = created.json().provider.id as string;
+    const secret = `bad-${randomUUID()}`;
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: 'invalid_token' }), {
+      status: 401, headers: { 'content-type': 'application/json' },
+    })));
+
+    const result = await app.inject({
+      method: 'POST', url: `/api/v1/admin/providers/${providerId}/connect`, headers: auth(superAdminToken),
+      payload: { credentials: { _API_TOKEN: secret } },
+    });
+    expect(result.statusCode, result.body).toBe(200);
+    expect(result.json().result).toMatchObject({ status: 'failed', code: 'AUTHENTICATION_FAILED' });
+    expect(result.json().result.message).toContain('rejected the credentials');
+    expect(result.json().provider.status).toBe('UNAVAILABLE');
+    expect(JSON.stringify(result.json())).not.toContain(secret);
     await app.close();
   });
 

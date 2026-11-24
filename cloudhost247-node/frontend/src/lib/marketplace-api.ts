@@ -85,6 +85,37 @@ export async function fetchMarketplaceApp(slug: string) {
 
 // --- Installations (spec §23, §44) ---------------------------------------------------------------
 
+export type InstallationOperation =
+  | 'install'
+  | 'verify'
+  | 'status'
+  | 'logs'
+  | 'start'
+  | 'stop'
+  | 'restart'
+  | 'update'
+  | 'reinstall'
+  | 'backup'
+  | 'restore'
+  | 'uninstall';
+
+export interface OperationCapability {
+  supported: boolean;
+  reason: string | null;
+  method?: string;
+}
+
+export interface InstallationCapabilities {
+  engine: 'docker' | 'cpanel' | 'kubernetes';
+  simulationMode: boolean;
+  operations: Record<InstallationOperation, OperationCapability>;
+}
+
+export interface InstallationCapabilityCheck {
+  capabilities: InstallationCapabilities;
+  capacity: { available: boolean; reason: string | null };
+}
+
 export interface MyInstallation {
   id: string;
   name: string;
@@ -123,6 +154,17 @@ export async function requestInstallation(input: {
   environment?: Record<string, string>;
 }) {
   return apiFetch<InstallationRequestResult>('/api/v1/app-installations', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function fetchInstallationCapabilities(input: {
+  applicationId: string;
+  versionId: string;
+  serverId: string;
+}) {
+  return apiFetch<InstallationCapabilityCheck>('/api/v1/app-installations/capabilities', {
     method: 'POST',
     body: JSON.stringify(input),
   });

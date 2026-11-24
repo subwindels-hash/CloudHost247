@@ -37,7 +37,8 @@ import { setInvoiceStatus } from '../db/invoices';
 import { setOrderPaymentStatus } from '../db/orders';
 import { findPlanById } from '../db/catalog-plans';
 import { listPublishedPricingForPlan, type BillingPeriod } from '../db/catalog-pricing';
-import type { ApplicationManifest, HostingType, ManifestEnvironmentEntry } from '../marketplace/manifest-schema';
+import type { ApplicationManifest, ManifestEnvironmentEntry } from '../marketplace/manifest-schema';
+import { deploymentCapabilities } from '../deployments/capabilities';
 
 export interface CreateInstallationInput {
   applicationIdOrSlug: string;
@@ -49,6 +50,8 @@ export interface CreateInstallationInput {
   billingPeriod?: BillingPeriod;
   environment?: Record<string, string>;
   backupEnabled?: boolean;
+  /** Injected from server configuration; clients cannot override deployment adapter availability. */
+  kubernetesAdapterEnabled?: boolean;
 }
 
 export interface InstallationRequestResult {
@@ -66,15 +69,19 @@ export interface InstallationRequestResult {
 /** Server auto-selection (spec §43 step 3): first active compatible server with capacity. */
 export async function selectServerForApplication(
   db: Queryable,
-  manifest: ApplicationManifest
+  manifest: ApplicationManifest,
+  options: { kubernetesEnabled?: boolean; customerId?: string } = {}
 ): Promise<string | null> {
   const candidates = await listServers(db, { status: 'active' });
-  const wants: HostingType[] = manifest.supportedHostingTypes;
   for (const server of candidates) {
-    const dockerOk = wants.includes('docker') && server.docker_enabled && (server.server_type === 'VPS' || server.server_type === 'DEDICATED');
-    const cpanelOk = wants.includes('cpanel') && server.cpanel_enabled && server.server_type === 'CPANEL';
-    const k8sOk = wants.includes('kubernetes') && server.kubernetes_enabled && server.server_type === 'KUBERNETES';
-    if (!dockerOk && !cpanelOk && !k8sOk) continue;
+    // Auto-placement can use shared platform inventory or this customer's own server, never
+    // another customer's private resource.
+    if (server.customer_id !== null && server.customer_id !== options.customerId) continue;
+    const capability = deploymentCapabilities(server, manifest, {
+      kubernetesEnabled: options.kubernetesEnabled ?? false,
+      simulationMode: false,
+    });
+    if (!capability.operations.install.supported) continue;
     const allocation = await getServerAllocation(db, server.id);
     const cpuOk = allocation.cpu + manifest.requirements.cpu <= server.cpu_cores;
     const memOk = allocation.memoryMb + manifest.requirements.memory <= server.memory_mb;
@@ -148,13 +155,27 @@ export async function createInstallationRequest(
     const server = await findServerById(db, serverId);
     if (!server || server.status !== 'active') throw new NotFoundError('No active server was found with that id');
     assertHostingCompatible(server.server_type, manifest);
+    const capability = deploymentCapabilities(server, manifest, {
+      kubernetesEnabled: input.kubernetesAdapterEnabled ?? false,
+      simulationMode: false,
+    });
+    if (!capability.operations.install.supported) {
+      throw new ValidationError(capability.operations.install.reason ?? `Installation is not supported by the ${capability.engine} adapter`);
+    }
   } else {
-    serverId = await selectServerForApplication(db, manifest);
+    serverId = await selectServerForApplication(db, manifest, {
+      kubernetesEnabled: input.kubernetesAdapterEnabled,
+      customerId: userId,
+    });
     if (!serverId) {
       throw new ConflictError(
-        'No server with spare capacity is currently available for this application — please try again later or contact support'
+        'No active server with spare capacity and an enabled deployment adapter is currently available for this application — please try again later or contact support'
       );
     }
+  }
+  const selectedServerId = serverId;
+  if (!selectedServerId) {
+    throw new ConflictError('No active server with an enabled deployment adapter is available for this application');
   }
 
   // --- Domain ------------------------------------------------------------------------------------
@@ -227,12 +248,43 @@ export async function createInstallationRequest(
 
   // --- Atomic creation: installation + order + invoice -------------------------------------------
   return withTransaction(db, async (tx) => {
+    // Serialize allocations on the target row, then re-read its capabilities and current usage.
+    // This prevents two concurrent orders from both consuming the same last available capacity.
+    const targetLock = await tx.query<{ id: string }>(
+      `SELECT id FROM servers WHERE id=$1 AND status='active' FOR UPDATE`,
+      [selectedServerId]
+    );
+    if (!targetLock.rows[0]) throw new NotFoundError('No active server was found with that id');
+    const currentServer = await findServerById(tx, selectedServerId);
+    if (!currentServer || currentServer.status !== 'active') {
+      throw new NotFoundError('No active server was found with that id');
+    }
+    if (currentServer.customer_id !== null && currentServer.customer_id !== userId) {
+      throw new NotFoundError('No active server was found with that id');
+    }
+    assertHostingCompatible(currentServer.server_type, manifest);
+    const currentCapability = deploymentCapabilities(currentServer, manifest, {
+      kubernetesEnabled: input.kubernetesAdapterEnabled ?? false,
+      simulationMode: false,
+    });
+    if (!currentCapability.operations.install.supported) {
+      throw new ValidationError(currentCapability.operations.install.reason ?? 'Installation is not supported on the selected server');
+    }
+    const allocation = await getServerAllocation(tx, selectedServerId);
+    const hasCapacity =
+      allocation.cpu + manifest.requirements.cpu <= currentServer.cpu_cores
+      && allocation.memoryMb + manifest.requirements.memory <= currentServer.memory_mb
+      && allocation.storageMb + manifest.requirements.storage <= currentServer.storage_mb;
+    if (!hasCapacity) {
+      throw new ConflictError('The selected server no longer has enough unallocated capacity for this application version');
+    }
+
     const installation = await createInstallation(tx, {
       id: installationId,
       customerId: userId,
       applicationId: application.id,
       applicationVersionId: version.id,
-      serverId,
+      serverId: selectedServerId,
       name: input.name?.trim() || `${application.name} (${containerProject})`,
       domain: input.domain ?? null,
       containerProject,
@@ -306,7 +358,7 @@ export async function createInstallationRequest(
       await setInvoiceStatus(tx, invoice.id, 'paid');
       await enqueueDeployment(tx, {
         installationId: installation.id,
-        serverId,
+        serverId: selectedServerId,
         orderId: order.id,
         action: 'install',
         idempotencyKey: `install:${installation.id}:${order.id}`,

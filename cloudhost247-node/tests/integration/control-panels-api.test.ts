@@ -130,6 +130,23 @@ describe('Control Panels API & Catalog Integration', () => {
       expect(JSON.parse(fazer.payload).controlPanels.map((x: any) => [x.slug, x.name])).toEqual([['fazerai-agents', 'fazer.ai agents']]);
     });
 
+    it('distinguishes app-directory metadata from configured offers and manifest recipes', async () => {
+      const response = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?search=wordpress' });
+      expect(response.statusCode).toBe(200);
+      const wordpress = JSON.parse(response.payload).controlPanels.find((entry: any) => entry.slug === 'wordpress');
+      expect(wordpress).toBeDefined();
+      expect(wordpress.catalogSource).toBe('directory');
+      expect(wordpress.hasValidatedManifest).toBe(true);
+      expect(wordpress.hasPanelBootstrapAdapter).toBe(false);
+      expect(wordpress.panelBootstrapProviderVerified).toBe(false);
+      expect(wordpress.panelManagementAvailable).toBe(false);
+      expect(wordpress.panelManagementProviderVerified).toBe(false);
+      expect(wordpress.operationallySupported).toBe(false);
+      expect(wordpress.hasPublishedMarketplaceApp).toBe(false);
+      expect(wordpress.planCount).toBe(0);
+      expect(wordpress.startingPrice).toBeNull();
+    });
+
     it('searches and filters beyond the first page and validates page sizes', async () => {
       const filtered = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?search=galaxy&license=FREE&limit=24' });
       const result = JSON.parse(filtered.payload);
@@ -162,6 +179,43 @@ describe('Control Panels API & Catalog Integration', () => {
       expect(planNames).toContain('cPanel Solo');
       expect(planNames).toContain('cPanel Admin (Up to 5 Accounts)');
       expect(planNames).toContain('cPanel Pro (Up to 30 Accounts)');
+      expect(body.controlPanel.catalogSource).toBe('configured');
+      expect(body.controlPanel.hasPanelBootstrapAdapter).toBe(true);
+      expect(body.controlPanel.panelBootstrapProviderVerified).toBe(false);
+      expect(body.controlPanel.panelManagementAvailable).toBe(false);
+      expect(body.controlPanel.panelManagementProviderVerified).toBe(false);
+      expect(body.controlPanel.operationallySupported).toBe(false);
+      expect(body.controlPanel.panelOperations).toHaveLength(22);
+      expect(body.controlPanel.panelOperations.find((operation: any) => operation.operation === 'Install')).toMatchObject({
+        implemented: false,
+        providerVerified: false,
+      });
+    });
+
+    it('returns detail metadata for directory-only apps without inventing a plan', async () => {
+      const res = await app.inject({ method: 'GET', url: '/api/v1/control-panels/wordpress' });
+      expect(res.statusCode).toBe(200);
+      const panel = JSON.parse(res.payload).controlPanel;
+      expect(panel).toMatchObject({
+        slug: 'wordpress',
+        catalogSource: 'directory',
+        status: 'DIRECTORY_ONLY',
+        hasValidatedManifest: true,
+        hasPanelBootstrapAdapter: false,
+        panelBootstrapProviderVerified: false,
+        panelManagementAvailable: false,
+        panelManagementProviderVerified: false,
+        operationallySupported: false,
+        hasPublishedMarketplaceApp: false,
+        planCount: 0,
+        startingPrice: null,
+        plans: [],
+      });
+      expect(panel.panelOperations.find((operation: any) => operation.operation === 'Install')).toMatchObject({
+        implemented: false,
+        providerVerified: false,
+        reason: 'No CloudHost247 control-panel adapter is registered for this entry.',
+      });
     });
 
     it('returns 404 for unknown slug', async () => {

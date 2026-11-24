@@ -151,8 +151,125 @@ describe('marketplace + application installation flow', () => {
     expect(encryptionKey).toMatchObject({ generated: true, customerProvided: false });
     expect(n8n.versions[0].stable).toBe(true);
 
+    // The broad software directory links to an app only after its version and application are published.
+    const directory = await app().inject({ method: 'GET', url: '/api/v1/control-panels/catalog?search=wordpress' });
+    const wordpressEntry = (directory.json() as { controlPanels: Array<{ slug: string; hasPublishedMarketplaceApp: boolean }> })
+      .controlPanels.find((entry) => entry.slug === 'wordpress');
+    expect(wordpressEntry).toMatchObject({ slug: 'wordpress', hasPublishedMarketplaceApp: true });
+
     // Slug that never existed → 404.
     expect((await app().inject({ method: 'GET', url: '/api/v1/apps/does-not-exist' })).statusCode).toBe(404);
+  });
+
+  it('reports server-specific install capability to the wizard and hides foreign customer servers', async () => {
+    await importCatalog();
+    const admin = await createUser('admin@example.com', 'admin');
+    await publishAll(admin.token);
+    const customer = await createUser('capability-customer@example.com');
+    const stranger = await createUser('capability-stranger@example.com');
+    const server = await makeServer('capability-docker');
+    const publishedApp = await app().inject({ method: 'GET', url: '/api/v1/apps/n8n' });
+    const versionId = publishedApp.json().app.versions[0].id as string;
+
+    const unauthenticated = await app().inject({
+      method: 'POST',
+      url: '/api/v1/app-installations/capabilities',
+      payload: { applicationId: 'n8n', versionId, serverId: server.id },
+    });
+    expect(unauthenticated.statusCode).toBe(401);
+
+    const supported = await app().inject({
+      method: 'POST',
+      url: '/api/v1/app-installations/capabilities',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { applicationId: 'n8n', versionId, serverId: server.id },
+    });
+    expect(supported.statusCode).toBe(200);
+    expect(supported.json()).toMatchObject({
+      capabilities: {
+        engine: 'docker',
+        operations: { install: { supported: true } },
+      },
+      capacity: { available: true, reason: null },
+    });
+
+    await db.query(`UPDATE servers SET cpu_cores=1 WHERE id=$1`, [server.id]);
+    const insufficient = await app().inject({
+      method: 'POST',
+      url: '/api/v1/app-installations/capabilities',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { applicationId: 'n8n', versionId, serverId: server.id },
+    });
+    expect(insufficient.statusCode).toBe(200);
+    expect(insufficient.json()).toMatchObject({
+      capabilities: { operations: { install: { supported: true } } },
+      capacity: { available: false },
+    });
+    const insufficientOrder = await app().inject({
+      method: 'POST',
+      url: '/api/v1/app-installations',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { applicationId: 'n8n', versionId, serverId: server.id },
+    });
+    expect(insufficientOrder.statusCode).toBe(409);
+    expect(insufficientOrder.json().message).toContain('no longer has enough unallocated capacity');
+
+    const cpanelServer = await createServer(db, {
+      name: 'capability-cpanel', hostname: 'capability-cpanel.example.com', serverType: 'CPANEL',
+      cpuCores: 8, memoryMb: 16_384, storageMb: 204_800,
+      dockerEnabled: false, kubernetesEnabled: false, cpanelEnabled: true,
+    });
+    const unsupported = await app().inject({
+      method: 'POST',
+      url: '/api/v1/app-installations/capabilities',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { applicationId: 'n8n', versionId, serverId: cpanelServer.id },
+    });
+    expect(unsupported.statusCode).toBe(200);
+    expect(unsupported.json().capabilities.operations.install).toMatchObject({ supported: false });
+    expect(unsupported.json().capacity.available).toBe(true);
+
+    const foreignServer = await makeServer('foreign-customer-server');
+    await db.query(`UPDATE servers SET customer_id = $1 WHERE id = $2`, [stranger.userId, foreignServer.id]);
+    const foreignCapability = await app().inject({
+      method: 'POST',
+      url: '/api/v1/app-installations/capabilities',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { applicationId: 'n8n', versionId, serverId: foreignServer.id },
+    });
+    expect(foreignCapability.statusCode).toBe(404);
+
+    const foreignInstall = await app().inject({
+      method: 'POST',
+      url: '/api/v1/app-installations',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { applicationId: 'n8n', versionId, serverId: foreignServer.id },
+    });
+    expect(foreignInstall.statusCode).toBe(404);
+  });
+
+  it('does not auto-place an app on another customer’s private server', async () => {
+    await importCatalog();
+    const admin = await createUser('admin@example.com', 'admin');
+    await publishAll(admin.token);
+    const customer = await createUser('auto-place-customer@example.com');
+    const owner = await createUser('private-server-owner@example.com');
+    const privateServer = await makeServer('private-auto-placement-target');
+    await db.query(`UPDATE servers SET customer_id = $1 WHERE id = $2`, [owner.userId, privateServer.id]);
+
+    const request = await app().inject({
+      method: 'POST',
+      url: '/api/v1/app-installations',
+      headers: { authorization: `Bearer ${customer.token}` },
+      payload: { applicationId: 'wordpress' },
+    });
+    expect(request.statusCode).toBe(409);
+    expect(request.json().message).toContain('No active server with spare capacity');
+    const installations = await db.query<{ count: number }>(
+      `SELECT count(*)::int AS count FROM application_installations WHERE customer_id = $1`,
+      [customer.userId],
+    );
+    expect(installations.rows[0]?.count).toBe(0);
   });
 
   it('requests an installation: order + unpaid invoice, deployment NOT created, secrets not echoed', async () => {
@@ -248,6 +365,17 @@ describe('marketplace + application installation flow', () => {
       payload: { applicationId: 'n8n', serverId: server.id },
     });
     const { installationId } = request.json() as { installationId: string };
+    const detail = await app().inject({
+      method: 'GET',
+      url: `/api/v1/app-installations/${installationId}`,
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    expect(detail.statusCode).toBe(200);
+    expect(detail.json().capabilities).toMatchObject({
+      engine: 'docker',
+      simulationMode: false,
+      operations: { install: { supported: true }, verify: { supported: true }, backup: { supported: true } },
+    });
 
     // An unpaid installation is pending — stop is not allowed from pending (status guard).
     const prematureStop = await app().inject({
@@ -259,6 +387,19 @@ describe('marketplace + application installation flow', () => {
 
     // Mark it healthy (simulating a finished install) → actions enqueue jobs.
     await db.query(`UPDATE application_installations SET status = 'healthy' WHERE id = $1`, [installationId]);
+
+    const verify = await app().inject({
+      method: 'POST',
+      url: `/api/v1/app-installations/${installationId}/verify`,
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    expect(verify.statusCode).toBe(202);
+    const verificationId = (verify.json() as { deploymentId: string }).deploymentId;
+    const verification = await db.query<{ action: string; payload: Record<string, unknown> }>(
+      `SELECT action, payload FROM deployments WHERE id = $1`,
+      [verificationId]
+    );
+    expect(verification.rows[0]).toMatchObject({ action: 'healthcheck', payload: { manualVerification: true } });
 
     const restart = await app().inject({
       method: 'POST',
@@ -374,6 +515,46 @@ describe('marketplace + application installation flow', () => {
       payload: { applicationId: 'wordpress', serverId: cpanelServer.id },
     });
     expect(wordpressRequest.statusCode).toBe(201);
+    const { installationId } = wordpressRequest.json() as { installationId: string };
+    const detail = await app().inject({
+      method: 'GET',
+      url: `/api/v1/app-installations/${installationId}`,
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    expect(detail.json().capabilities).toMatchObject({
+      engine: 'cpanel',
+      operations: {
+        install: { supported: true },
+        start: { supported: true },
+        stop: { supported: true },
+        verify: { supported: false },
+        logs: { supported: false },
+        restart: { supported: false },
+        update: { supported: false },
+      },
+    });
+
+    await db.query(`UPDATE application_installations SET status = 'healthy' WHERE id = $1`, [installationId]);
+    const unsupportedRestart = await app().inject({
+      method: 'POST',
+      url: `/api/v1/app-installations/${installationId}/restart`,
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    expect(unsupportedRestart.statusCode).toBe(409);
+    expect(unsupportedRestart.json().message).toContain('WHM has no per-account application restart');
+    const unsupportedVerification = await app().inject({
+      method: 'POST',
+      url: `/api/v1/app-installations/${installationId}/verify`,
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    expect(unsupportedVerification.statusCode).toBe(409);
+    const logs = await app().inject({
+      method: 'GET',
+      url: `/api/v1/app-installations/${installationId}/logs?tail=100`,
+      headers: { authorization: `Bearer ${customer.token}` },
+    });
+    expect(logs.json()).toMatchObject({ available: false, logs: '' });
+    expect(logs.json().message).toContain('Per-application logs are not available');
   });
 
   /**

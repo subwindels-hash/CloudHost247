@@ -7,6 +7,7 @@
  * returned to a route, DTO, log line, or notification.
  */
 import { buildServerCloudInitWithControlPanel } from '../../control-panels/registry';
+import { getControlPanelReadiness } from '../../control-panels/readiness';
 import { getCredential, storeCredential } from '../../db/servers';
 import type { CustomerServerDetailRow } from '../../db/server-provisioning';
 import type { Queryable } from '../../db/types';
@@ -61,6 +62,35 @@ export async function ensureAgentIdentity(
       false
     );
   }
+  let controlPanelSlug: string | null = null;
+  let panelOsSlug: string | undefined;
+  let panelOsVersion: string | undefined;
+  let panelArchitecture: 'x86_64' | 'arm64' | undefined;
+  if (server.control_panel_id) {
+    const panel = await db.query<{ slug: string }>(`SELECT slug FROM control_panels WHERE id=$1`, [server.control_panel_id]);
+    const slug = panel.rows[0]?.slug;
+    if (!slug) {
+      throw new ProviderError('INVALID_CONFIGURATION', 'The selected control panel no longer exists', false);
+    }
+    if (!server.os_slug || !server.os_version) {
+      throw new ProviderError('INVALID_CONFIGURATION', 'The selected control panel requires a recorded operating-system slug and version', false);
+    }
+    if (server.architecture !== 'x86_64' && server.architecture !== 'arm64') {
+      throw new ProviderError('INVALID_CONFIGURATION', 'The selected control panel requires a verified server architecture', false);
+    }
+    if (!getControlPanelReadiness(slug).operationallySupported) {
+      throw new ProviderError(
+        'UNSUPPORTED_OPERATION',
+        `Control-panel bootstrap for ${slug} is blocked: provider acceptance, per-server installation verification, and lifecycle management are not all established`,
+        false,
+      );
+    }
+    controlPanelSlug = slug;
+    panelOsSlug = server.os_slug;
+    panelOsVersion = server.os_version;
+    panelArchitecture = server.architecture;
+  }
+
   const id = server.agent_id ?? `agent-${generateSecret(12).toLowerCase()}`;
   let secret = server.agent_id ? await getCredential(db, getKeyRing(), server.id, 'agent_secret') : null;
   if (!secret) {
@@ -69,12 +99,6 @@ export async function ensureAgentIdentity(
   }
   if (!server.agent_id) await db.query(`UPDATE servers SET agent_id=$2,updated_at=now() WHERE id=$1`, [server.id, id]);
   const sshKeys = await getServerSshKeys(db, server);
-
-  let controlPanelSlug: string | null = null;
-  if (server.control_panel_id) {
-    const panel = await db.query<{ slug: string }>(`SELECT slug FROM control_panels WHERE id=$1`, [server.control_panel_id]);
-    controlPanelSlug = panel.rows[0]?.slug ?? null;
-  }
 
   return {
     id,
@@ -87,7 +111,9 @@ export async function ensureAgentIdentity(
       controlUrl,
       installerUrl,
       controlPanelSlug,
-      architecture: server.architecture as 'x86_64' | 'arm64',
+      osSlug: panelOsSlug,
+      osVersion: panelOsVersion,
+      architecture: panelArchitecture,
     }),
   };
 }

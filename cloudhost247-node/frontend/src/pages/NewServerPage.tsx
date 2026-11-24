@@ -34,6 +34,7 @@ export default function NewServerPage() {
   const [versionId,setVersionId] = useState('');
   const [architecture,setArchitecture] = useState<'x86_64'|'arm64'>('x86_64');
   const [controlPanelId,setControlPanelId] = useState('');
+  const [panelReadinessNotice,setPanelReadinessNotice] = useState('');
   const [billingPeriod,setBillingPeriod] = useState('monthly');
   const [hostname,setHostname] = useState('');
   const [sshKeys,setSshKeys] = useState<SshKey[]>([]);
@@ -104,23 +105,51 @@ export default function NewServerPage() {
     if (currentVersion && !currentVersion.architectures.includes(architecture)) setArchitecture(currentVersion.architectures[0] ?? 'x86_64');
   },[systems,osId,versionId,architecture]);
 
-  const compatibleControlPanels = useMemo(() => (configuration?.controlPanels ?? []).filter((panel) =>
-    panel.availability.some((item) => item.operatingSystemVersionId===versionId && item.architecture===architecture)
-  ),[configuration,versionId,architecture]);
+  const compatibleControlPanels = useMemo(() => {
+    if (!location || !versionId) return [];
+    return (configuration?.controlPanels ?? []).flatMap((panel) => {
+      const selectedAvailability = panel.availability.find((item) =>
+        item.operatingSystemVersionId === versionId
+        && item.architecture === architecture
+        && item.providerId === location.providerId
+        && item.regionId === location.regionId
+        && item.datacenterId === location.datacenterId
+      );
+      return selectedAvailability ? [{ ...panel, selectedAvailability }] : [];
+    });
+  },[configuration,location,versionId,architecture]);
+  const orderableControlPanels = useMemo(
+    () => compatibleControlPanels.filter((panel) =>
+      panel.operationallySupported === true && panel.selectedAvailability.hardwareCompatible === true
+    ),
+    [compatibleControlPanels],
+  );
 
   useEffect(() => {
     const targetSlug = params.get('panel');
-    if (targetSlug && configuration?.controlPanels) {
-      const match = configuration.controlPanels.find((p) => p.slug === targetSlug || p.id === targetSlug);
-      if (match && !controlPanelId) {
-        setControlPanelId(match.id);
-      }
+    if (!targetSlug || !configuration?.controlPanels || !location || !versionId) return;
+    const listedPanel = configuration.controlPanels.find((p) => p.slug === targetSlug || p.id === targetSlug);
+    if (!listedPanel) return;
+    const match = compatibleControlPanels.find((panel) => panel.id === listedPanel.id);
+    if (!match) {
+      setPanelReadinessNotice(`${listedPanel.name} is not listed as compatible with the selected operating system, architecture, provider, and location.`);
+      return;
     }
-  }, [configuration, params, controlPanelId]);
+    if (!match.selectedAvailability.hardwareCompatible) {
+      setPanelReadinessNotice(`${match.name} cannot be selected: ${match.selectedAvailability.hardwareReason ?? 'the selected server configuration does not meet its listed minimum resources.'}`);
+      return;
+    }
+    if (match.operationallySupported !== true) {
+      setPanelReadinessNotice(`${match.name} is listed for reference, but bootstrap, installation verification, lifecycle support, and provider acceptance are not all established. It cannot be selected for this order.`);
+      return;
+    }
+    if (!controlPanelId) setControlPanelId(match.id);
+    setPanelReadinessNotice('');
+  }, [configuration,params,controlPanelId,location,versionId,architecture,compatibleControlPanels]);
 
   useEffect(() => {
-    if (controlPanelId && !compatibleControlPanels.some((panel) => panel.id===controlPanelId)) setControlPanelId('');
-  },[compatibleControlPanels,controlPanelId]);
+    if (controlPanelId && !orderableControlPanels.some((panel) => panel.id===controlPanelId)) setControlPanelId('');
+  },[orderableControlPanels,controlPanelId]);
 
   async function saveKey(event: FormEvent) {
     event.preventDefault();
@@ -157,6 +186,7 @@ export default function NewServerPage() {
         <Link to="/dashboard/servers">Back to servers</Link>
       </section>
       {error && <CatalogErrorBanner message={error} />}
+      {panelReadinessNotice && <p className="ch247-banner ch247-banner--warning" role="status">{panelReadinessNotice}</p>}
 
       <section className="ch247-card">
         <h2>1. Plan &amp; billing</h2>
@@ -184,7 +214,7 @@ export default function NewServerPage() {
         <div className="ch247-form-grid">
           <label className="ch247-field">Hostname<input required value={hostname} onChange={(event) => setHostname(event.target.value.toLowerCase())} placeholder="vps-01.example.com" /></label>
           <label className="ch247-field">SSH key<select required value={sshKeyId} onChange={(event) => setSshKeyId(event.target.value)}><option value="">Select a key</option>{sshKeys.map((key) => <option key={key.id} value={key.id}>{key.name} · {key.fingerprint}</option>)}</select></label>
-          <label className="ch247-field">Control panel<select value={controlPanelId} onChange={(event)=>setControlPanelId(event.target.value)}><option value="">None</option>{compatibleControlPanels.map((panel)=><option key={panel.id} value={panel.id}>{panel.name}</option>)}</select><small>Only panels compatible with this OS version and architecture are shown.</small></label>
+          <label className="ch247-field">Control panel<select value={controlPanelId} onChange={(event)=>setControlPanelId(event.target.value)}><option value="">None</option>{compatibleControlPanels.map((panel)=><option key={panel.id} value={panel.id} disabled={panel.operationallySupported !== true || panel.selectedAvailability.hardwareCompatible !== true}>{panel.name}{panel.selectedAvailability.hardwareCompatible !== true ? ' — minimum resources not met' : panel.operationallySupported === true ? '' : ' — not provider-verified'}</option>)}</select><small>OS, architecture, and minimum-resource compatibility are checked against this provider location. Directory compatibility is not proof of installation. Selection also requires provider-backed bootstrap, per-server verification, and lifecycle acceptance.</small>{compatibleControlPanels.length > 0 && orderableControlPanels.length === 0 && <small>No compatible panel has passed resource and operational-readiness checks yet; choose None for this server order.</small>}</label>
         </div>
         <button type="button" className="ch247-btn" onClick={() => setShowKeyForm((current) => !current)}>{showKeyForm?'Cancel':'Add SSH key'}</button>
         {showKeyForm && <div className="ch247-inline-key-form"><label className="ch247-field">Key name<input value={newKey.name} onChange={(event) => setNewKey({ ...newKey,name: event.target.value })} /></label><label className="ch247-field">OpenSSH public key<textarea rows={3} value={newKey.publicKey} onChange={(event) => setNewKey({ ...newKey,publicKey: event.target.value })} /></label><button type="button" className="ch247-btn" disabled={busy} onClick={(event) => void saveKey(event as unknown as FormEvent)}>Save key</button></div>}

@@ -21,6 +21,9 @@ import { requireRole } from '../lib/require-role';
 import { NotFoundError, ValidationError } from '../lib/errors';
 import { catalogIdSchema } from '../lib/identifier-contract';
 import { auditRequest } from '../lib/audit';
+import { listControlPanelAdapters } from '../control-panels/registry';
+import { controlPanelMethodImplemented, getControlPanelReadiness, type ControlPanelManagementMethod } from '../control-panels/readiness';
+import { loadManifestCatalog, validatedManifests } from '../marketplace/manifest-loader';
 import platformCatalog from '../../shared/platform-catalog.json';
 
 // Control-panel rows are seeded deterministic catalogue ids (see identifier-contract.ts).
@@ -84,7 +87,42 @@ type CatalogSearchItem = {
   description: string | null;
   requiresLicense: boolean;
   supportedOs: string[];
+  catalogSource?: 'configured' | 'directory';
+  hasValidatedManifest?: boolean;
+  hasPanelBootstrapAdapter?: boolean;
+  panelBootstrapProviderVerified?: boolean;
+  panelManagementAvailable?: boolean;
+  panelManagementProviderVerified?: boolean;
+  operationallySupported?: boolean;
+  hasPublishedMarketplaceApp?: boolean;
+  planCount?: number;
+  startingPrice?: number | null;
 };
+
+const panelManagementMethods: Array<{ operation: string; method: ControlPanelManagementMethod }> = [
+  { operation: 'Install', method: 'install' },
+  { operation: 'Uninstall', method: 'uninstall' },
+  { operation: 'Configure', method: 'configure' },
+  { operation: 'Read status', method: 'getStatus' },
+  { operation: 'Health check', method: 'healthCheck' },
+  { operation: 'Create account', method: 'createAccount' },
+  { operation: 'Suspend account', method: 'suspendAccount' },
+  { operation: 'Unsuspend account', method: 'unsuspendAccount' },
+  { operation: 'Terminate account', method: 'terminateAccount' },
+  { operation: 'Create domain', method: 'createDomain' },
+  { operation: 'Delete domain', method: 'deleteDomain' },
+  { operation: 'Create subdomain', method: 'createSubdomain' },
+  { operation: 'Create database', method: 'createDatabase' },
+  { operation: 'Delete database', method: 'deleteDatabase' },
+  { operation: 'Create email account', method: 'createEmailAccount' },
+  { operation: 'Delete email account', method: 'deleteEmailAccount' },
+  { operation: 'Create DNS record', method: 'createDNSRecord' },
+  { operation: 'Delete DNS record', method: 'deleteDNSRecord' },
+  { operation: 'Issue SSL', method: 'issueSSL' },
+  { operation: 'Renew SSL', method: 'renewSSL' },
+  { operation: 'Read usage', method: 'getUsage' },
+  { operation: 'Restart service', method: 'restartService' },
+];
 
 function parseOrThrow<T>(schema: z.ZodType<T>, value: unknown): T {
   const result = schema.safeParse(value);
@@ -98,8 +136,54 @@ export async function registerControlPanelsRoutes(
   overridePool?: Queryable
 ) {
   const pool = overridePool ?? getPool(env);
+  const validatedManifestSlugs = new Set(
+    validatedManifests(loadManifestCatalog(undefined, env.MARKETPLACE_MANIFESTS_DIR))
+      .map((manifest) => manifest.id)
+  );
+  const adaptersBySlug = new Map(listControlPanelAdapters().map((adapter) => [adapter.slug, adapter]));
 
-  const listPublicPanelSummaries = async (category?: string) => {
+  const listPublishedMarketplaceSlugs = async (): Promise<Set<string>> => {
+    const { rows } = await pool.query<{ slug: string }>(
+      `SELECT DISTINCT a.slug
+       FROM applications a
+       JOIN application_versions v ON v.application_id = a.id
+       WHERE a.status = 'published' AND v.status = 'published'`
+    );
+    return new Set(rows.map((row) => row.slug));
+  };
+
+  const listPanelManagementOperations = (slug: string) => {
+    const adapter = adaptersBySlug.get(slug);
+    return panelManagementMethods.map(({ operation, method }) => {
+      const implemented = controlPanelMethodImplemented(slug, method);
+      return {
+        operation,
+        implemented,
+        providerVerified: false,
+        reason: implemented
+          ? 'An adapter method exists, but provider-backed acceptance has not been recorded.'
+          : adapter
+            ? 'This operation is not implemented by the CloudHost247 control-panel adapter.'
+            : 'No CloudHost247 control-panel adapter is registered for this entry.',
+      };
+    });
+  };
+
+  const supportMetadata = (
+    slug: string,
+    catalogSource: 'configured' | 'directory',
+    hasPublishedMarketplaceApp = false
+  ) => {
+    return {
+      catalogSource,
+      hasValidatedManifest: validatedManifestSlugs.has(slug),
+      hasPublishedMarketplaceApp,
+      ...getControlPanelReadiness(slug),
+    };
+  };
+
+  const listPublicPanelSummaries = async (category?: string, publishedAppSlugs?: Set<string>) => {
+    const published = publishedAppSlugs ?? await listPublishedMarketplaceSlugs();
     const panels = await listControlPanels(pool, { status: 'ACTIVE', category });
     const plans = panels.length ? await listControlPanelPlans(pool, { status: 'ACTIVE' }) : [];
     const plansByPanel = new Map<string, typeof plans>();
@@ -110,8 +194,9 @@ export async function registerControlPanelsRoutes(
     }
     return panels.map((panel) => {
       const panelPlans = plansByPanel.get(panel.id) ?? [];
-      const startingPrice = panelPlans.length ? Math.min(...panelPlans.map((p) => Number(p.price))) : 0;
+      const startingPrice = panelPlans.length ? Math.min(...panelPlans.map((p) => Number(p.price))) : null;
       return {
+        ...supportMetadata(panel.slug, 'configured', published.has(panel.slug)),
         id: panel.id,
         name: panel.name,
         slug: panel.slug,
@@ -190,11 +275,20 @@ export async function registerControlPanelsRoutes(
     /** Return a single catalogue slice; filters and counts cover the *whole* directory. */
     app.get(`${prefix}/control-panels/catalog`, async (request) => {
       const query = parseOrThrow(catalogPageSchema, request.query);
-      const dbPanels = await listPublicPanelSummaries();
+      const publishedAppSlugs = await listPublishedMarketplaceSlugs();
+      const dbPanels = await listPublicPanelSummaries(undefined, publishedAppSlugs);
       const seen = new Set(dbPanels.map((panel) => panel.slug));
       // DB rows override the corresponding static listing without duplicating it.
       // This is the same order previously used by the browser's full-list merge.
-      const all: CatalogSearchItem[] = [...dbPanels, ...platformCatalog.filter((panel) => !seen.has(panel.slug))];
+      const directoryEntries = platformCatalog
+        .filter((panel) => !seen.has(panel.slug))
+        .map((panel) => ({
+          ...panel,
+          ...supportMetadata(panel.slug, 'directory', publishedAppSlugs.has(panel.slug)),
+          planCount: 0,
+          startingPrice: null,
+        }));
+      const all: CatalogSearchItem[] = [...dbPanels, ...directoryEntries];
       const categoryCounts = {
         ALL: all.length,
         OPERATING_SYSTEM: all.filter((panel) => panel.category === 'OPERATING_SYSTEM').length,
@@ -234,16 +328,38 @@ export async function registerControlPanelsRoutes(
         panel = await getControlPanelWithPlans(pool, slugOrId);
       }
 
-      if (!panel || panel.status === 'ARCHIVED') {
+      if (panel?.status === 'ARCHIVED') {
         throw new NotFoundError('Control panel not found');
+      }
+
+      if (!panel) {
+        const directoryEntry = !isUuid
+          ? platformCatalog.find((item) => item.slug === slugOrId)
+          : undefined;
+        if (!directoryEntry) throw new NotFoundError('Control panel not found');
+        const publishedAppSlugs = await listPublishedMarketplaceSlugs();
+        return {
+          controlPanel: {
+            ...directoryEntry,
+            ...supportMetadata(directoryEntry.slug, 'directory', publishedAppSlugs.has(directoryEntry.slug)),
+            panelOperations: listPanelManagementOperations(directoryEntry.slug),
+            status: 'DIRECTORY_ONLY',
+            planCount: 0,
+            startingPrice: null,
+            plans: [],
+          },
+        };
       }
 
       const startingPrice = panel.plans.length
         ? Math.min(...panel.plans.map((p) => Number(p.price)))
-        : 0;
+        : null;
+      const publishedAppSlugs = await listPublishedMarketplaceSlugs();
 
       return {
         controlPanel: {
+          ...supportMetadata(panel.slug, 'configured', publishedAppSlugs.has(panel.slug)),
+          panelOperations: listPanelManagementOperations(panel.slug),
           id: panel.id,
           name: panel.name,
           slug: panel.slug,
@@ -263,6 +379,7 @@ export async function registerControlPanelsRoutes(
           },
           supportedOs: panel.supported_os,
           capabilities: panel.capabilities,
+          planCount: panel.plans.length,
           startingPrice,
           billingCycle: panel.plans[0]?.billing_cycle ?? 'monthly',
           plans: panel.plans.map((p) => ({

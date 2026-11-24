@@ -344,6 +344,7 @@ export default function ServerDetailPage() {
   const terminating = server.status === 'deleting' || server.status === 'retired';
 
   const panelSlug = server.control_panel_slug;
+  const panelInstallationVerified = server.control_panel_installation_verified === true;
   const panelPortInfo = panelSlug ? PANEL_PORTS[panelSlug] : null;
   const panelUrl =
     panelSlug === 'adminbolt'
@@ -387,7 +388,7 @@ export default function ServerDetailPage() {
       {error && <CatalogErrorBanner message={error} />}
       {message && <p className="ch247-banner ch247-banner--info">{message}</p>}
 
-      {/* Control Panel Integration Card */}
+      {/* A panel selection is not evidence that the bootstrap completed on this provider. */}
       {server.control_panel_name && (
         <section className="ch247-card ch247-panel-status-card">
           <div className="ch247-section-heading">
@@ -396,11 +397,13 @@ export default function ServerDetailPage() {
                 <PlatformLogo slug={server.control_panel_slug ?? ''} name={server.control_panel_name} className="ch247-panel-logo-md__svg" compact />
               </span>
               <div>
-                <span className="ch247-eyebrow">Installed Control Panel</span>
+                <span className="ch247-eyebrow">
+                  {panelInstallationVerified ? 'Control panel installation verified' : 'Selected control panel · installation unverified'}
+                </span>
                 <h2 style={{ margin: 0 }}>{server.control_panel_name}</h2>
               </div>
             </div>
-            {panelUrl && server.status === 'active' && (
+            {panelInstallationVerified && panelUrl && server.status === 'active' && (
               <a
                 href={panelUrl}
                 target={panelSlug === 'adminbolt' ? '_self' : '_blank'}
@@ -412,18 +415,24 @@ export default function ServerDetailPage() {
             )}
           </div>
 
+          {!panelInstallationVerified && (
+            <p className="ch247-banner ch247-banner--warning" role="status">
+              The server record stores a panel selection, not provider acceptance or a successful panel install. Server readiness checks do not verify this panel, and panel-management operations are not established for this server.
+            </p>
+          )}
+
           <div style={{ marginTop: '1rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.9rem' }}>
             <div>
-              <span style={{ color: '#64748b' }}>Access URL: </span>
-              <strong>{panelUrl ?? 'Available after IP assignment'}</strong>
+              <span style={{ color: '#64748b' }}>{panelInstallationVerified ? 'Panel URL: ' : 'Expected panel URL (not verified): '}</span>
+              <strong>{panelUrl ?? 'Not available'}</strong>
             </div>
             <div>
-              <span style={{ color: '#64748b' }}>Initial access: </span>
-              <strong>Use your selected SSH key</strong>
+              <span style={{ color: '#64748b' }}>Panel credentials: </span>
+              <strong>Not recorded by this build</strong>
             </div>
             <div>
-              <span style={{ color: '#64748b' }}>Installation Method: </span>
-              <span>{server.control_panel_installation_method ?? 'Automated via Cloud-Init'}</span>
+              <span style={{ color: '#64748b' }}>Catalog-listed install method: </span>
+              <span>{server.control_panel_installation_method ?? 'Not recorded'}</span>
             </div>
           </div>
         </section>

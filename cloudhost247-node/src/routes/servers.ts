@@ -41,6 +41,7 @@ import {
   findCustomerServerById,
   findProvisioningJobById,
   listCustomerServers,
+  type CustomerServerDetailRow,
 } from '../db/server-provisioning';
 import { ImageResolutionError, resolveReinstallTarget } from '../infrastructure/services/image-resolver';
 import { findProviderById } from '../db/infrastructure-providers';
@@ -50,8 +51,9 @@ import {
   resolveTermEnd,
   revokeScheduledTermination,
 } from '../services/server-termination-service';
-import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
+import { createConfiguredInfrastructureProviderAdapter } from '../infrastructure/providers/credentials';
 import { providerErrorToHttpError } from '../infrastructure/providers/error-mapping';
+import { getControlPanelReadiness } from '../control-panels/readiness';
 import type { RescueSession } from '../infrastructure/providers/types';
 
 const idSchema = z.string().uuid('id must be a valid UUID');
@@ -147,6 +149,20 @@ function publicServerDto(server: Awaited<ReturnType<typeof findServerById>>) {
     cpuCores: server.cpu_cores,
     memoryMb: server.memory_mb,
     storageMb: server.storage_mb,
+  };
+}
+
+function customerServerDto(server: CustomerServerDetailRow) {
+  const panelReadiness = server.control_panel_slug ? getControlPanelReadiness(server.control_panel_slug) : null;
+  return {
+    ...server,
+    control_panel_bootstrap_provider_verified: panelReadiness?.panelBootstrapProviderVerified ?? null,
+    control_panel_management_available: panelReadiness?.panelManagementAvailable ?? null,
+    control_panel_management_provider_verified: panelReadiness?.panelManagementProviderVerified ?? null,
+    control_panel_operationally_supported: panelReadiness?.operationallySupported ?? null,
+    // No per-server bootstrap/health-check evidence is stored by this build.
+    control_panel_installation_verified: server.control_panel_id ? false : null,
+    control_panel_installation_status: server.control_panel_id ? 'unverified' as const : null,
   };
 }
 
@@ -405,7 +421,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
       listServers(pool,{ status: 'active' }),
     ]);
     return {
-      servers: owned,
+      servers: owned.map(customerServerDto),
       deploymentTargets: targets.filter((server) => !server.customer_id).map(publicServerDto).filter(Boolean),
     };
   };
@@ -417,7 +433,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     const auth = await authenticate(request, env, pool);
     const serverId = parseOrThrow(idSchema, request.params.id);
     const owned = await findOwnedCustomerServer(pool,serverId,auth.userId);
-    if (owned) return { server: owned };
+    if (owned) return { server: customerServerDto(owned) };
 
     const server = await findServerById(pool, serverId);
     if (!server || server.customer_id || server.status !== 'active') throw new NotFoundError('No server was found with that id');
@@ -718,7 +734,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     }
     let session: Record<string, unknown>;
     try {
-      const adapter = createInfrastructureProviderAdapter(provider);
+      const adapter = await createConfiguredInfrastructureProviderAdapter(pool, provider);
       session = await adapter.getConsole(server.provider_server_id);
     } catch (error) {
       // The provider message can name internal endpoints, so it stays in the server log.
@@ -749,7 +765,7 @@ export async function registerServerRoutes(app: FastifyInstance, env: Env, overr
     if (!server.provider_server_id) throw new ConflictError('The server has not been created at the provider yet');
     const provider = await findProviderById(pool, server.provider_id);
     if (!provider || provider.status !== 'ACTIVE') throw new ValidationError('The infrastructure provider for this server is not active');
-    return { auth, server, provider, adapter: createInfrastructureProviderAdapter(provider) };
+    return { auth, server, provider, adapter: await createConfiguredInfrastructureProviderAdapter(pool, provider) };
   }
 
   app.post<{ Params: { id: string } }>('/api/v1/servers/:id/rescue', async (request) => {

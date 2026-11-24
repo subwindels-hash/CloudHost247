@@ -45,7 +45,26 @@ export interface ServerConfiguration {
   plan: { id: string; name: string; description: string | null };
   regions: AvailableRegion[];
   operatingSystems: AvailableOperatingSystem[];
-  controlPanels?: Array<{ id: string; name: string; slug: string; availability: Array<{ operatingSystemVersionId: string; architecture: string }> }>;
+  controlPanels?: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    minimumRequirements: { ramMb: number; cpuCores: number; diskGb: number };
+    availability: Array<{
+      operatingSystemVersionId: string;
+      architecture: string;
+      providerId: string;
+      regionId: string;
+      datacenterId: string | null;
+      hardwareCompatible: boolean;
+      hardwareReason: string | null;
+    }>;
+    hasPanelBootstrapAdapter?: boolean;
+    panelBootstrapProviderVerified?: boolean;
+    panelManagementAvailable?: boolean;
+    panelManagementProviderVerified?: boolean;
+    operationallySupported?: boolean;
+  }>;
 }
 
 export interface CustomerServer {
@@ -78,6 +97,12 @@ export interface CustomerServer {
   control_panel_category?: string | null;
   control_panel_installation_method?: string | null;
   control_panel_capabilities?: Record<string, boolean> | null;
+  control_panel_bootstrap_provider_verified?: boolean | null;
+  control_panel_management_available?: boolean | null;
+  control_panel_management_provider_verified?: boolean | null;
+  control_panel_operationally_supported?: boolean | null;
+  control_panel_installation_verified?: boolean | null;
+  control_panel_installation_status?: 'unverified' | null;
   cpu_cores: number;
   memory_mb: number;
   storage_mb: number;

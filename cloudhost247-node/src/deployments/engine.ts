@@ -275,8 +275,11 @@ function requireServer(ctx: PipelineContext, hostingTypes: string[]): ServerRow 
   const { server, installation } = ctx;
   if (!server) fail('NO_SERVER', 'No server selected for this deployment');
   if (server.status !== 'active') fail('SERVER_NOT_ACTIVE', `Server is ${server.status}`);
+  const dockerCompatible =
+    (server.server_type === 'VPS' && (hostingTypes.includes('docker') || hostingTypes.includes('vps'))) ||
+    (server.server_type === 'DEDICATED' && (hostingTypes.includes('docker') || hostingTypes.includes('dedicated')));
   const compatible =
-    (hostingTypes.includes('docker') && server.docker_enabled && (server.server_type === 'VPS' || server.server_type === 'DEDICATED')) ||
+    (dockerCompatible && server.docker_enabled) ||
     (hostingTypes.includes('cpanel') && server.cpanel_enabled && server.server_type === 'CPANEL') ||
     (hostingTypes.includes('kubernetes') && server.kubernetes_enabled && server.server_type === 'KUBERNETES');
   if (!compatible) {
@@ -527,14 +530,13 @@ function installPipeline(ctx: PipelineContext): StepDefinitionInternal[] {
         );
         const domainId = rows[0]?.id;
         if (domainId) {
-          // Certificate issuance is delegated to Traefik's letsencrypt resolver (Docker) or
-          // cert-manager/AutoSSL (kubernetes/cpanel) at routing time; the resolver stores it and
-          // handles renewal. We mark the domain pending-issued; the healthcheck job confirms
-          // issuance shortly after and flips it to issued.
+          // This step only records a pending state. Docker/Kubernetes routing metadata may ask
+          // an installed resolver to issue a certificate, but this worker does not call or verify
+          // a certificate provider and has no path that records successful issuance.
           await setDomainSslStatus(tx, domainId, 'pending');
         }
       });
-      await log('info', `SSL requested for ${installation.domain} via platform certificate resolver`);
+      await log('info', `SSL is enabled in the manifest for ${installation.domain}; certificate issuance remains pending and is not verified by this worker`);
     },
   };
 
@@ -1059,6 +1061,14 @@ function healthcheckPipeline(ctx: PipelineContext): StepDefinitionInternal[] {
         );
         const previous = installation.health_status;
         await recordHealthResult(db, installation.id, healthValue(report.health), {});
+
+        const manualVerification = (ctx.deployment.payload as { manualVerification?: boolean } | null)?.manualVerification === true;
+        if (manualVerification) {
+          if (report.health === 'unhealthy') {
+            await ctx.log('warn', 'Manual health verification reported unhealthy; automatic recovery was not requested.');
+          }
+          return;
+        }
 
         // Automatic recovery (spec §53): unhealthy → restart, with a circuit breaker after
         // repeated failures so a broken application is not restarted forever.
