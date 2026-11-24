@@ -1,0 +1,242 @@
+[
+  {
+    "name": "operating-systems",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/operating-systems-640.webp",
+        "sha256": "304c28a332125f4f783b551581a7f1be2b081b8244f0a87f7aa20573662b05c1"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/operating-systems-640.avif",
+        "sha256": "9a6719e0f422839357377deb6a2dcb630e140856ad22763af309eb098162fd0f"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/operating-systems-960.webp",
+        "sha256": "23213a2ba8ab807c35ba0979251204b250bbcba209aee20e23115d8962acb346"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/operating-systems-960.avif",
+        "sha256": "2fa70db63965cda5c0c4036804140907490179be979ddf082a08b7f7213d4bc1"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/operating-systems-1280.webp",
+        "sha256": "594fdb5cab5e7c82a3b8d972cea51ee43129f34a005eb812fc9ae6f919efd7f3"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/operating-systems-1280.avif",
+        "sha256": "1ad90c7af4e165536ce2acb867d9228af2d949567fae27dfee6f2103664da9c7"
+      }
+    ]
+  },
+  {
+    "name": "server-management",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/server-management-640.webp",
+        "sha256": "b9d49b353e5d7fa229c89cb6d6fb6c0c22c873d3aa8aeaa21fef7f16ac1faedf"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/server-management-640.avif",
+        "sha256": "9297ada64c814790a13333a15bbbce33120f9aef59e6c93b08d401605c7ae224"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/server-management-960.webp",
+        "sha256": "8cf390af7ef9c1d0236c4c45a319ca4c171a87eaadac1f1a1f9a9f5a74110309"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/server-management-960.avif",
+        "sha256": "41af85575ed34d50a6ba2886483047aa103c8bfd6b97ab7a81b606d4ffed65ed"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/server-management-1280.webp",
+        "sha256": "202924434a0f1a1e5de073ddbc3734761400d16fcfb217f248ac6dbeda2d0d05"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/server-management-1280.avif",
+        "sha256": "088dda6582bc575c609682d935bdd658ad2c83932f917d18d22266cbde4975a3"
+      }
+    ]
+  },
+  {
+    "name": "monitoring",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/monitoring-640.webp",
+        "sha256": "544a8eaa9c7e528a9b4d3b404caaf2c4ac9f036badc02ad1a4855d7c0c44dffe"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/monitoring-640.avif",
+        "sha256": "480bdc86cc2d2ab93e40254baebbe14c2146654555cf1bcb935b2ee15946f613"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/monitoring-960.webp",
+        "sha256": "75a43e35fa7934f1b63b96fe836fe814a09f5c1ed8f8059d5a3a9e0964ae663e"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/monitoring-960.avif",
+        "sha256": "0b1fb1352ba9fd545df0771070363b6c3657994eee24ce702d87eb0c2e2c5ed0"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/monitoring-1280.webp",
+        "sha256": "cb4ba231c517c809951d310656e8bc0a881499d576c56b54a349dfb6d925f6f2"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/monitoring-1280.avif",
+        "sha256": "b962feabf6f964f7eb8627412983a0100d58659b35f220b7da1c99e3a201e29a"
+      }
+    ]
+  },
+  {
+    "name": "cloud-backups",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/cloud-backups-640.webp",
+        "sha256": "b81f2e6a4693a66cc9c330ebef742b654c026c25a91dc6a3919bf2797718a0af"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-backups-640.avif",
+        "sha256": "d0a4fb1d914eda846a01e226545939ac3a5efae04f2edf919f0404f46fef231c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-backups-960.webp",
+        "sha256": "08c3834fe4d65a0a855ea24874f61689b95e1255614954ae93748737da0a4630"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-backups-960.avif",
+        "sha256": "d467f8023a96b6c95ba181b8d8a6e0f4094a90e1aaa834c19ec921f8f2209cd4"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-backups-1280.webp",
+        "sha256": "0de8d7814177f55d9e110d7b699c0a2da22284f4ec8d805ed821d3fcb0057b37"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-backups-1280.avif",
+        "sha256": "90f4114ec7b647674760b6f4498202445d8feed0bab077b13101fc84b41fbdc5"
+      }
+    ]
+  },
+  {
+    "name": "firewall",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/firewall-640.webp",
+        "sha256": "e4e62d8024acf2efc2d02e0f968076f2b9aae2845402f3d88746f245e9100519"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/firewall-640.avif",
+        "sha256": "256ffb74b0dab17071b640731eb93ea430419db5d1c868c3dbc67cdbd8131251"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/firewall-960.webp",
+        "sha256": "fe8ef8fd1fbbf59531f9207ca71995e05ab9a2865ecf5b45c0946de693c54e33"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/firewall-960.avif",
+        "sha256": "937ce96d2147f69c1c85dbe5a6db8d51b8b1405b8baa74ec216048ef10f591d3"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/firewall-1280.webp",
+        "sha256": "dbdd99a5f875069736d9bbc97624f5747bddcc52e0ebce4991e93eef0e690aaf"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/firewall-1280.avif",
+        "sha256": "19d2f1dccd861eea1ab75b470b8954a8cca4685aa2999608a70fc012abcf6ca9"
+      }
+    ]
+  },
+  {
+    "name": "cloud-security",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/cloud-security-640.webp",
+        "sha256": "05a1b02e75ef619b5b64e71f65261768194ceca533cdbf0d4f756af5ea9b024d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-security-640.avif",
+        "sha256": "4b52c203c5fcff22601770f4ee591ff3681e12c21da7a938d6142ba628f6170a"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-security-960.webp",
+        "sha256": "b08ebcb67cf4ddd0e83d80f6e69443c95017d836d2bdf655f659c717eaa88d4c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-security-960.avif",
+        "sha256": "5d590274225f02361af52a3ae3c1856b91fdda0e06de95a67f81a7c3d30ddaef"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-security-1280.webp",
+        "sha256": "cb7401a3671b27540c5488e76023e63aeb3d5a7bc427e9dba961da0c1196e5a9"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-security-1280.avif",
+        "sha256": "d5d38965b4e047016c0e2193040b7f4cf0099670c438a079fee9456549cbe423"
+      }
+    ]
+  },
+  {
+    "name": "ip-management",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/ip-management-640.webp",
+        "sha256": "b5b4c085c43a8fd0b5c245552525488430ec481603a929c875245cc17eb2b552"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ip-management-640.avif",
+        "sha256": "5c7dc089a189fd32ca7a0776deb95852b3f11af3fa2602833560588efe940378"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ip-management-960.webp",
+        "sha256": "46becd06c6c194d76959d226be2fea7d48aa66d319d06c33f1ea412dfb390757"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ip-management-960.avif",
+        "sha256": "49544eacc4f4be977dabb82a1327c893b5fd197bc9e1f7ebd3b9b86d5d112a26"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ip-management-1280.webp",
+        "sha256": "074bf4c0fa570dfb5341bf597718cfd4e0adfffabc5650fb2b87f4c910582087"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ip-management-1280.avif",
+        "sha256": "341402d80efadf74818328bb273ad7bffaa640641b0b8b1a6498ead84d7158b1"
+      }
+    ]
+  },
+  {
+    "name": "managed-services",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/managed-services-640.webp",
+        "sha256": "2bb989804ce726998835c37fc785bdfafcebe31bde86327e81800cca7c35799f"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/managed-services-640.avif",
+        "sha256": "e615d0a05953e1a51d10018c4f1a48c9601820c4200872201772c55c85dd3e51"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/managed-services-960.webp",
+        "sha256": "4c2ee8c0ea8a03a20157a239131bd68e4ce03e08153d78d7d311a58cb7936002"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/managed-services-960.avif",
+        "sha256": "b240cfa2856c006ef09da760e9d7cfa103bb6913b13e94e41991a2e37f40a917"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/managed-services-1280.webp",
+        "sha256": "e5afdeb29063374d2a5bbee5048c261c5bf4c4be90761a6cebba10250f0eff0a"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/managed-services-1280.avif",
+        "sha256": "248b146be77383b7b580f5cbf9f9f47a344883eedcf70d38879173f5a1992902"
+      }
+    ]
+  }
+]

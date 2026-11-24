@@ -1,0 +1,302 @@
+[
+  {
+    "name": "business-hosting",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/business-hosting-shop-v2-640.webp",
+        "sha256": "4d15e6ffc7c44127249ee23bf206641fdb96ab6c731c00053e71e1b8bc324fe0"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/business-hosting-shop-v2-640.avif",
+        "sha256": "56a722b5c0b916ac5f35790b592a4f4d6edee4f5e08eda54ad87e90d20c4bce5"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/business-hosting-shop-v2-960.webp",
+        "sha256": "a02a1028baecc8b89a69f7ba4cf62eecd8f952bfd1dc8c3078a3bbfb08994623"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/business-hosting-shop-v2-960.avif",
+        "sha256": "e08bb8bacf29187f2af7f40029b6731cad9f7f0ffd722f2a8ccdeb9a9a245566"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/business-hosting-shop-v2-1280.webp",
+        "sha256": "dbec42fdf5d4515fccfa4aaff9a10b81798a99745b45b5d492296b30010a1243"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/business-hosting-shop-v2-1280.avif",
+        "sha256": "013ebf8357cf6a8934fe49bf8266a1f610ed45c0968f8f271b2b55508ccf5b0c"
+      }
+    ]
+  },
+  {
+    "name": "wordpress-hosting",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/wordpress-hosting-640.webp",
+        "sha256": "32e5e0c5ca3dc1bde5463104db05b7c39ec062975a86cf6ce1a4567a30c94d03"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/wordpress-hosting-640.avif",
+        "sha256": "ca550a2a0ab60bbb6e35801d14519a4f0b0ad3f7d6e50f634c82cfae40061d23"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/wordpress-hosting-960.webp",
+        "sha256": "a336493757f89ab0c4db4a64a87a8c4331bb2427f50cba95fcc21ff562778c69"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/wordpress-hosting-960.avif",
+        "sha256": "cdf7430d274f7fbc8edd352553e2fe8c0563cae7b5629ed2afbb49ce880ec81b"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/wordpress-hosting-1280.webp",
+        "sha256": "3e2382c8ef0879a3215712a29d6ba8fd35b70d0558c9a15722bed2f7db535bcf"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/wordpress-hosting-1280.avif",
+        "sha256": "67cfcc0a153f91ef97109e81fcc096195ae231ccc46cb34af37b8aa27641e338"
+      }
+    ]
+  },
+  {
+    "name": "reseller-hosting",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/reseller-hosting-640.webp",
+        "sha256": "c7fada620b4ae2cd0d4e685a98cd8592e7ea0690addd405371a6631cfececb9c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/reseller-hosting-640.avif",
+        "sha256": "e0909095fa8121ae607eeffe4e0915c9beb2c089a4267f44ff8a04b10b7af5be"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/reseller-hosting-960.webp",
+        "sha256": "ca3257c2d99efd4e1b254a1888761d40476c48c6b41d6a8c1731adf84c7ea4a8"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/reseller-hosting-960.avif",
+        "sha256": "ba3fe12d57ba783642c560301c5b3a1681ed740c1a28ae6651f80ff34a537e4e"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/reseller-hosting-1280.webp",
+        "sha256": "0c4dc6a4bc58354b36368d3e3080e14551f4d2b2ebcb9e18ed64a807bcb08567"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/reseller-hosting-1280.avif",
+        "sha256": "feec4c81879a11ac03c8aed0b9d35bbd486a2344116ada8bd5b4acab9c0e1c2d"
+      }
+    ]
+  },
+  {
+    "name": "windows-hosting",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/windows-hosting-640.webp",
+        "sha256": "34ff16c55e6c72419d29be9521692ad67b0b9fbb66f2ef44ad07198bb99bd682"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/windows-hosting-640.avif",
+        "sha256": "b3cd60d3a44118e974ee0330a01c60467049a656d3ffd92824f6ee039c83c5eb"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/windows-hosting-960.webp",
+        "sha256": "3d10e0d15bdc0b94d62c44256a0603e6d0ddd67aa1a618cb110fd02fec258ae9"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/windows-hosting-960.avif",
+        "sha256": "f91dcc08a28a6ec97ed67881319cefdad091d6e58eba435c74092d8e6be80811"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/windows-hosting-1280.webp",
+        "sha256": "86d9e8b7d8379b48bb14d8cdbf8d1efe0d4432caa540478e21ac1dc9c9d67c90"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/windows-hosting-1280.avif",
+        "sha256": "6d753f671ae036a2ba02fe25cc4c278ecadad29d2e789499053103949a13999a"
+      }
+    ]
+  },
+  {
+    "name": "developer-hosting",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/developer-hosting-640.webp",
+        "sha256": "f2966bdbd38672a76e49354727da1cb0debd9c96088b7e2194ab174bedd7fe30"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developer-hosting-640.avif",
+        "sha256": "fd7a55b95e1287ce809f756802133a5cebb8b7bd38edfddd747d9bc81781c084"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developer-hosting-960.webp",
+        "sha256": "a790180401aff9367b55643780911609c5540ddc1af7ddd180421326fb2b90cc"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developer-hosting-960.avif",
+        "sha256": "46a46d90403c9301ab9d202e54407d7c23708ac2dd8306f46ab8717bf4fe21aa"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developer-hosting-1280.webp",
+        "sha256": "cea97ea113b4cca83901275c65aa337a8681b109941e4d65266d48e0ad3ce9d4"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developer-hosting-1280.avif",
+        "sha256": "48841aa5232472f237f1f3501d61b68e0e5decfb488b15ef6c1a0b1cc2ac525e"
+      }
+    ]
+  },
+  {
+    "name": "api-hosting",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/api-hosting-640.webp",
+        "sha256": "f4998cf4fe2ab8275c5ab189eec219a0e413ac0620d558ce5d87bc424d011a2c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/api-hosting-640.avif",
+        "sha256": "49ca114dac7f3c23b4e9f344b8bcf98a83294a83a5841de99a446b2ee25ebf3f"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/api-hosting-960.webp",
+        "sha256": "2f7e7b4d28686eefb3f555d9d2abbeedf2524efe49743989619261130323f788"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/api-hosting-960.avif",
+        "sha256": "dadc2a2578b70c1f56c8e2914ffa79167a00d2c72ff1777ec5113bec270295c7"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/api-hosting-1280.webp",
+        "sha256": "89bad428884214dda1ecf00b60feef8ecc9f612671c5ad9218506937a7f22955"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/api-hosting-1280.avif",
+        "sha256": "3ff6d8c7cf1c34b02b1a5027a9f687bb79ed3d465e1be891fd6f28d516bfa53c"
+      }
+    ]
+  },
+  {
+    "name": "ssl-hosting",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/ssl-hosting-640.webp",
+        "sha256": "735006e8de166564a741dc5a29c7c5bf75863da4f50d949be62aec1e1fb12da1"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ssl-hosting-640.avif",
+        "sha256": "006bedbafe2a29b3e7f365f9446003ffd0620c4864edb2baac09af941a4781d3"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ssl-hosting-960.webp",
+        "sha256": "05034d64d7df1c3b8b4229605bac34a1b3d008d8b0ea74a126f414dd2f37d286"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ssl-hosting-960.avif",
+        "sha256": "2abb74db7be2e10233f936b0f440cbe75d9f40d22c5bf08ae80d2551f49fa7b0"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ssl-hosting-1280.webp",
+        "sha256": "8a4d050898ce5bf2b8893080d08fb2ce41dcfb61078bdcc18ed4f660309bc834"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/ssl-hosting-1280.avif",
+        "sha256": "ac2529ad75dafbe59031439b2eb4076f2f0344578c56488d49dc6b2803e5debf"
+      }
+    ]
+  },
+  {
+    "name": "hosting-backups",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/hosting-backups-640.webp",
+        "sha256": "c40e0ff797df37f31f65da7eaa6bc088dd365881d23ece68cca5ff33beb341f6"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-backups-640.avif",
+        "sha256": "eb2275c839d67fdcb3a55a76f5cbe6fec8a6bfc93ebcb03f48b79d367cb63a64"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-backups-960.webp",
+        "sha256": "39df54c91dbb3e671967b941de6015934eee23b44f3043080d331a72efbf6962"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-backups-960.avif",
+        "sha256": "fec9be6ef57e1c29849da138cd39a4350df2780e39038bfd7fcb380d2af9aee5"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-backups-1280.webp",
+        "sha256": "55c2a30445edb744dd1e0b04f6f6c2be1825e944604bf8b2484c403c5dc9f872"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-backups-1280.avif",
+        "sha256": "43d3e3a460bcf9ab2a737906ad89fb8b98e0f9ff95af37dd66ed7caf501731bc"
+      }
+    ]
+  },
+  {
+    "name": "migration-hosting",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/migration-hosting-640.webp",
+        "sha256": "587ce493de78b6800f9430948b61ca66e1a026a97a1a9793a570fe0f7ff599cb"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/migration-hosting-640.avif",
+        "sha256": "84fa085210bb05cb9f37a227d2b7588e91c6c9650b33d520d7860d146a9f4b0a"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/migration-hosting-960.webp",
+        "sha256": "185f2d91dc742c3585c5aa1b4844268f7e2df123089a8eddcf2510d99bd2ec26"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/migration-hosting-960.avif",
+        "sha256": "1381bd17ce5ca6fcf54632705eee26d52c9785aab5a2ea845ae5458be1248373"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/migration-hosting-1280.webp",
+        "sha256": "2a960dac3f463cba9f732d02a561869a47afd7157ad049f5b3a9ffb7bcc1f6b4"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/migration-hosting-1280.avif",
+        "sha256": "d3a778e1cec972703c1435e9874a8b26e34fb1565691610920a58484a9ea1f87"
+      }
+    ]
+  },
+  {
+    "name": "hosting-security",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/hosting-security-640.webp",
+        "sha256": "650f240f6b524631648fa20b9a26d9e1b61b17282837ed9806d661245661f813"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-security-640.avif",
+        "sha256": "ae65e9d9898853798aac5f7b54201575c3ec828525db2dccf8b448a96e6459b1"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-security-960.webp",
+        "sha256": "b6c6605d878ca0b2ec04a884fddbcdc6def77889e4698f2afaba84afb975305d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-security-960.avif",
+        "sha256": "808e14d52cddd907811666292739fc49a0d8387937f951ba394af9bbd8ea2332"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-security-1280.webp",
+        "sha256": "a934726c17ddfa73a881b682941f37789965cac491ba1db115ecef6142683757"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/hosting-security-1280.avif",
+        "sha256": "abc274201cf7f7b3a141d0c21658043d6923746bebdb3a22d105d04b5666d477"
+      }
+    ]
+  }
+]

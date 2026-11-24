@@ -34,7 +34,7 @@ describe('service-specific storefront hero components', () => {
     }
     expect(artwork.getAttribute('alt')).toBeTruthy();
     if (!heroPhoto) {
-      expect(container.querySelectorAll('.service-showcase__tiles li')).toHaveLength(3);
+      expect(container.querySelectorAll('.service-showcase__tiles li')).toHaveLength(slug === 'smm-services' ? 4 : 3);
       expect(screen.getByText(/Options vary by plan/)).toBeTruthy();
     }
     expect(container.querySelector('section')?.contains(artwork)).toBe(true);
@@ -66,4 +66,27 @@ it('shows the local Microsoft 365 logo with original app icons and the independe
     expect(screen.getByRole('img', { name: `${app} logo` }).getAttribute('src')).toMatch(/^\/media\/brands\/microsoft-/);
   }
   expect(screen.getByText(/CloudHost247 is an independent service provider/)).toBeTruthy();
+});
+
+it('shows two people using phones on Number Services while preserving plans and provider caveats', () => {
+  render(<MemoryRouter><NumberServicesPage /></MemoryRouter>);
+  const image = screen.getByRole('img', { name: /woman making a phone call and a man looking at his phone/ });
+  expect(image.getAttribute('src')).toBe('/media/cloudhost247/service-people/number-services-960.webp');
+  expect(image.getAttribute('alt')).toContain('AI-generated');
+  expect(screen.getByTestId('published-plans')).toBeTruthy();
+  expect(screen.getByText(/capabilities depend on the country and provider/)).toBeTruthy();
+});
+
+it('shows the unique SMM creator image and labelled decorative engagement emoji with explicitly labelled example counts', () => {
+  const { container } = render(<MemoryRouter><SmmServicesPage /></MemoryRouter>);
+  const photo = screen.getByRole('img', { name: /smiling content creator using a smartphone/ });
+  expect(photo.getAttribute('src')).toBe('/media/cloudhost247/service-people/smm-creator-960.webp');
+  for (const label of ['Like', 'Comment', 'Share', 'Follow']) expect(screen.getByText(label)).toBeTruthy();
+  const emojis = Array.from(container.querySelectorAll('.service-showcase__number'));
+  expect(emojis.map(el => el.textContent)).toEqual(['❤️', '💬', '📤', '👥']);
+  expect(emojis.every(el => el.getAttribute('aria-hidden') === 'true')).toBe(true);
+  expect(container.querySelector('.service-showcase__tiles')?.querySelector('button, a')).toBeNull();
+  expect(screen.getByText(/Example engagement — illustrative numbers, not actual results/)).toBeTruthy();
+  for (const count of ['12.8K', '2.4K', '3.6K', '25.0K']) expect(screen.getByText(count)).toBeTruthy();
+  expect(screen.getByTestId('published-plans')).toBeTruthy();
 });

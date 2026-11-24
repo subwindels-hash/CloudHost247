@@ -1,0 +1,302 @@
+[
+  {
+    "name": "platforms",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/platforms-640.webp",
+        "sha256": "349379e7e28b5fcbc819f982ec916f03d85b20f4da46c49edf700797784c9437"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/platforms-640.avif",
+        "sha256": "45b4d6f92a5709f5f04090153fcb0e811292467b28da8dbd3e100c4c4d82735f"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/platforms-960.webp",
+        "sha256": "09635a0f7eab3f39ece8ffa7b1d874491228a3aeb6054ba3e4cfcd92bfafd92f"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/platforms-960.avif",
+        "sha256": "4f2866586ac5395234c9139d6628f43c4dfcc3a03c1d38d39e58a883a1256f2d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/platforms-1280.webp",
+        "sha256": "4830780882f0518ccae31a80571698dd7a277cc606b741efbbb7e39588db261c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/platforms-1280.avif",
+        "sha256": "d4faa3426cb16c07060dd269b9166c84fb5d34a898412ac9c19fcfd24e6911e9"
+      }
+    ]
+  },
+  {
+    "name": "applications",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/applications-640.webp",
+        "sha256": "56b4ab4343218baab6cad83ddd4ec0e894d3a206354fcba2840885ba94935a5f"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/applications-640.avif",
+        "sha256": "89b162501a6940a2c3151443a912514a9e1f4b59180f14f39d2f34913827a501"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/applications-960.webp",
+        "sha256": "02f6d6591f7865ad13cfdf1a4e4fec1d440cab7a239bf48bf8a609213fa65672"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/applications-960.avif",
+        "sha256": "5f65dbc7041ffa16ab0599420664f3e5ca17c8f971a4ed258377366eb804d493"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/applications-1280.webp",
+        "sha256": "612fd8e5a0a50b67d5fd11ecf2605bb169b93e8a65a71cad7575ea567a7024ba"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/applications-1280.avif",
+        "sha256": "f619efd1cadea1cd140d6022c82c8876d6d6303ac80387c18e58684f22d42ab1"
+      }
+    ]
+  },
+  {
+    "name": "databases",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/databases-640.webp",
+        "sha256": "4dd69c37c8bed4ddb2be8db4e8e2491b5e1274fcbf0262b5012d767a15bbcead"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/databases-640.avif",
+        "sha256": "0ec86efcbb77abb41e033141637773ab4bbfc98a00b42b4f2de373535fe32275"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/databases-960.webp",
+        "sha256": "bb72e81340585fe5068346e5f6f050ae2c3b7289831a0f1fd39566d7342853f3"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/databases-960.avif",
+        "sha256": "2d47682423d1c439514862d2af1a9a457333bc36c4519e84c150a0136c4967ec"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/databases-1280.webp",
+        "sha256": "9b33d90ed1c74e7b3012d0c98f05025bd47be68d3fa7b8e3adbbeed11ae35016"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/databases-1280.avif",
+        "sha256": "e28e6255b7c9fd3a72aea0da7f2e960d11610eeaf87090d0dbd36cc75ef49929"
+      }
+    ]
+  },
+  {
+    "name": "containers",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/containers-640.webp",
+        "sha256": "1e02ced49cb38bf057951b1d7cbd3c4970c4745428b0e1e4f67ac54ffe0377c0"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/containers-640.avif",
+        "sha256": "2347345b991a4c4b594f68d08d24d47e839e73218fb8b5711ddb60668cfafce9"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/containers-960.webp",
+        "sha256": "fc2c4a910d5f265ce778224b2d3324e4e1c3126877e72d0d9b34483d6bcc2a45"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/containers-960.avif",
+        "sha256": "3a8b85c0285c3a46569d327fa7230157029337549bac5c0a80e4b8c6c78df138"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/containers-1280.webp",
+        "sha256": "8481398d1349be218aa257e97be98b64d28874ff4f49ee4c4e6555b131fd3477"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/containers-1280.avif",
+        "sha256": "086f9efc495ade163b71c979e28907c3e507fac8364188b37ab85ae92eecd670"
+      }
+    ]
+  },
+  {
+    "name": "paas",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/paas-640.webp",
+        "sha256": "1687b8bf582e2bdd87d5e43449708ff8356236ce08029ac12199a0347b664845"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/paas-640.avif",
+        "sha256": "4c7a28684a04a1dad140d697735902c86ea6fb3e5797f3c3e33001ca7d664867"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/paas-960.webp",
+        "sha256": "e4a30d5f28f08aabe1686d7766ce0a14302de2ab2130bef97ee10b6c5054d5e5"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/paas-960.avif",
+        "sha256": "1aa3be9ddfab75df0afce1c315d1c21b37ef1f85680bfb430a81f4068704136a"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/paas-1280.webp",
+        "sha256": "fd84eadd49a6a216a7876ea95d52eddf64d84106b6174ecb1a5f318bac3b97cb"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/paas-1280.avif",
+        "sha256": "40fd7a06f56204b1f77e38f117dfcd9ae8dafc952ae16308ba5e3ab9af4f2766"
+      }
+    ]
+  },
+  {
+    "name": "cpanel",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/cpanel-640.webp",
+        "sha256": "b061b14c8e74180bbd37b07e20eea3f1df3093bc852d918851ea89dc4623a868"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cpanel-640.avif",
+        "sha256": "4bd5da1bfcb9e1565f32cb8082fb6f903d50a7541ec28adc23adcd54071b3bcf"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cpanel-960.webp",
+        "sha256": "70e60736405d8d376577068bad413f4f032c6fb29dfb12109e2573de2c30010e"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cpanel-960.avif",
+        "sha256": "6f5927bc49b4185e1280769d01f43651228b9cdc61c1bf6c83a973bd4650c885"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cpanel-1280.webp",
+        "sha256": "7206934eaf578406ffed1a6f97adb1d0b78c6785912100790ebff3bdc5fe1a09"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cpanel-1280.avif",
+        "sha256": "4653c66f53ad71ba5e88c44686d7c8a221290d179e91a8941848a4bf6543920a"
+      }
+    ]
+  },
+  {
+    "name": "websites",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/websites-640.webp",
+        "sha256": "442943998e1aec891661edf6b3d89f532f4a2967eaf0d117e1db3b4d9e446b00"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/websites-640.avif",
+        "sha256": "a5eaf09e6ab9ebf0e9e70797a5eb8bf55f93672c2ced26292fba7efe0b438887"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/websites-960.webp",
+        "sha256": "a502c2f381dc4f94566116b2dd59033f8aa89fedbf1c36340e43fd83b70b628d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/websites-960.avif",
+        "sha256": "a17a26ec6cd4e65dc9a339ae78b8a9759a0282f370e56ff346543c339ed248fe"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/websites-1280.webp",
+        "sha256": "cd6eecada591b759a4c93d84cff7b2fa544e2d64496ecf1d9c09ac8a234f031b"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/websites-1280.avif",
+        "sha256": "94c1870aa5fb8eb92388c8a6bdc721e0b68ae93d3a04d2890b1491dc724a9d42"
+      }
+    ]
+  },
+  {
+    "name": "rdp",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/rdp-640.webp",
+        "sha256": "3106bf744ced6d4318bdb826243dab3c284efeb57bbf3a698badff8a1c250c19"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/rdp-640.avif",
+        "sha256": "74d9dfc9d1eade28102daabfe6370b3c4a90facf55dc5a773aa1a3893fabc68a"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/rdp-960.webp",
+        "sha256": "844e950a13bc315b984c91cbaca257ab11c3e6b892d001e7f3ee86b04bc1d3ff"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/rdp-960.avif",
+        "sha256": "2aebdc4bcfda7825da6a4b0eb0aa5dbb1caa8e23408c7a4808d23b8bda7e027b"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/rdp-1280.webp",
+        "sha256": "6c898c1bb0e6efdf285c7224eac56f9d15d1959f1f2d1c14b92d5424fea2e28c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/rdp-1280.avif",
+        "sha256": "3f190b2cdd8af5c7697f1865bf7c0a3e7c68ec7056c7c43a9f517ed4c673149d"
+      }
+    ]
+  },
+  {
+    "name": "digital-products",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/digital-products-640.webp",
+        "sha256": "2e5320a806d9678a50008f3abca412e8f296c796d95554416fa71b0bbf021b8b"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/digital-products-640.avif",
+        "sha256": "935d875703644e9f0cf54c2e0572f2066c9eefa54570c976263d9d389301b18d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/digital-products-960.webp",
+        "sha256": "9a3366f34ba7b0b0bf6f8bfdc7a5f441e41cc2b9f8d62ef8d480d165a68c7dec"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/digital-products-960.avif",
+        "sha256": "1622087a8030ddefac16b47a50862bfa5d40b0b49f45e1a256adc3a38f38e811"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/digital-products-1280.webp",
+        "sha256": "3dd884135e7166cb75a20503bb7ba438a3861d5f6e322b241ee3362526093283"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/digital-products-1280.avif",
+        "sha256": "d0f68be3fc2e9c6e8a0f28e24c6bc93ce820db6da9af571bb3f5d1f2a72b7b59"
+      }
+    ]
+  },
+  {
+    "name": "proxy",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/proxy-640.webp",
+        "sha256": "e99500fe2f89e0401d94c12a520bc1de18cfa6172af725e58cffb8a93efcce7c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/proxy-640.avif",
+        "sha256": "e5fe62e13c45afb06f0c9ece2ba1c88d8a503aaaa7fb05e5ccede23306d30874"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/proxy-960.webp",
+        "sha256": "5d4e1293de32fe4582932731f78c7573f969dc0750166ed05a52b39f62c42599"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/proxy-960.avif",
+        "sha256": "0cf54667167d440796f050017c5b979301e7103cbf7fff506b09d137605bb624"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/proxy-1280.webp",
+        "sha256": "a068c1167a0144fd2cea14529a5608fa6e2e73096c9fea1d09422a0e61ccd21c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/proxy-1280.avif",
+        "sha256": "d9d6e0e537817866c3a831150033d5a7879e4fae02887c26eca9c92172156dd5"
+      }
+    ]
+  }
+]
