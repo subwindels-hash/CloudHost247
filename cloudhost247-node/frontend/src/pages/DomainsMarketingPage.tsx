@@ -1,3 +1,4 @@
+import ServiceHeroVisual from '../components/marketing/ServiceHeroVisual';
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { usePageMeta } from '../lib/usePageMeta';
@@ -104,16 +105,18 @@ export default function DomainsMarketingPage() {
 
   return (
     <div>
-      <section className="ch247-hero ch247-hero--compact ch247-hero--photo ch247-hero--domains">
-        <div className="ch247-hero__inner">
-          <h1>Domain Services</h1>
+      <section className="service-domain-hero">
+        <div className="service-domain-hero__grid">
+          <div><p className="service-domain-hero__kicker">YOUR NAME. YOUR NEXT CHAPTER.</p><h1>Domain Services</h1>
           <p>Find, register, transfer and invest in domain names — all in one place.</p>
+          <a className="service-domain-hero__button" href="#find-domain">Find your domain ↗</a></div>
+          <ServiceHeroVisual route="/domains" scene="developer" title="Domain services" />
         </div>
       </section>
 
       <section className="ch247-section">
         <div className="ch247-page">
-          <h2>Find your domain</h2>
+          <h2 id="find-domain">Find your domain</h2>
           <p>Search a name across our supported extensions. Availability and pricing come live from our domain provider.</p>
           <form className="ch247-dsvc-search" onSubmit={onSearch} role="search">
             <label className="sr-only" htmlFor="domain-search-input">

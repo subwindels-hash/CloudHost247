@@ -1,0 +1,3 @@
+Google productivity reference: user-provided Screenshot 2026-11-24 030407.png, used at user request. Google imagery and marks retain their respective rights; this is not proof of redistribution rights or endorsement.
+Microsoft hero photo: AI-generated illustrative office scene; not real customers or a Microsoft-provided photograph.
+Microsoft app icons: unchanged SVGs from homarr-labs/dashboard-icons; pinned sources and hashes in productivity-apps.source.json. Archive licence is preserved in microsoft-365-NOTICE.txt and does not grant trademark rights.

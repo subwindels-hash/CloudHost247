@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { serviceSceneForRoute } from '../../src/components/marketing/ServiceHeroVisual';
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
@@ -117,7 +120,15 @@ describe('public marketing pages', () => {
       });
 
       it('serves an illustration that exists in the published asset set', () => {
-        expect(html).toContain(`/media/cloudhost247/${page.visual}.svg`);
+        if (serviceSceneForRoute(page.route)) {
+          expect(html).toContain('service-showcase__photo');
+          const photo = html.match(/src="(\/media\/cloudhost247\/[^"]+\.webp)"/);
+          expect(photo, page.route).not.toBeNull();
+          expect(existsSync(path.join(process.cwd(), 'frontend/public', photo![1]))).toBe(true);
+        } else {
+          expect(html).toContain(`/media/cloudhost247/${page.visual}.svg`);
+          expect(html).not.toContain('service-showcase__photo');
+        }
       });
 
       it('declares its canonical route', () => {

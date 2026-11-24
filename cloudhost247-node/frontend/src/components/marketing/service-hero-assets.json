@@ -1,0 +1,214 @@
+{
+  "/cloud": {
+    "root": "/media/cloudhost247/cloud/cloud-hosting-3d",
+    "format": "raster"
+  },
+  "/cloud/public": {
+    "root": "/media/cloudhost247/cloud/public-cloud-3d",
+    "format": "raster"
+  },
+  "/cloud/private": {
+    "root": "/media/cloudhost247/cloud/private-cloud-3d",
+    "format": "raster"
+  },
+  "/cloud/enterprise-servers": {
+    "root": "/media/cloudhost247/servers/enterprise-servers-3d",
+    "format": "raster"
+  },
+  "/cloud/game-servers": {
+    "root": "/media/cloudhost247/servers/game-servers-3d",
+    "format": "raster"
+  },
+  "/cloud/infrastructure": {
+    "root": "/media/cloudhost247/hero/global-network-3d",
+    "format": "raster"
+  },
+  "/cloud/data-centers": {
+    "root": "/media/cloudhost247/cloud/data-centers-3d",
+    "format": "raster"
+  },
+  "/cloud/network": {
+    "root": "/media/cloudhost247/cloud/network-3d",
+    "format": "raster"
+  },
+  "/cloud/operating-systems": {
+    "root": "/media/cloudhost247/operating-systems/os-catalog-3d",
+    "format": "raster"
+  },
+  "/cloud/server-management": {
+    "root": "/media/cloudhost247/management/server-control-3d",
+    "format": "raster"
+  },
+  "/cloud/monitoring": {
+    "root": "/media/cloudhost247/management/monitoring-3d",
+    "format": "raster"
+  },
+  "/cloud/backups": {
+    "root": "/media/cloudhost247/photography/server-storage",
+    "format": "raster"
+  },
+  "/cloud/firewall": {
+    "root": "/media/cloudhost247/management/firewall-3d",
+    "format": "raster"
+  },
+  "/cloud/security": {
+    "root": "/media/cloudhost247/security/security-3d",
+    "format": "raster"
+  },
+  "/cloud/ip-management": {
+    "root": "/media/cloudhost247/management/ip-management-3d",
+    "format": "raster"
+  },
+  "/cloud/managed-services": {
+    "root": "/media/cloudhost247/management/managed-services-3d",
+    "format": "raster"
+  },
+  "/developers": {
+    "root": "/media/cloudhost247/deployment/developer-hosting-3d",
+    "format": "raster"
+  },
+  "/developers/deployment": {
+    "root": "/media/cloudhost247/deployment/deployment-pipeline-3d",
+    "format": "raster"
+  },
+  "/developers/environments": {
+    "root": "/media/cloudhost247/photography/data-centre-workstation",
+    "format": "raster"
+  },
+  "/developers/nodejs": {
+    "root": "/media/cloudhost247/deployment/nodejs-3d",
+    "format": "raster"
+  },
+  "/developers/php": {
+    "root": "/media/cloudhost247/deployment/php-3d",
+    "format": "raster"
+  },
+  "/developers/python": {
+    "root": "/media/cloudhost247/deployment/python-3d",
+    "format": "raster"
+  },
+  "/developers/laravel": {
+    "root": "/media/cloudhost247/deployment/laravel-3d",
+    "format": "raster"
+  },
+  "/developers/docker": {
+    "root": "/media/cloudhost247/deployment/docker-3d",
+    "format": "raster"
+  },
+  "/hosting": {
+    "root": "/media/cloudhost247/photography/data-centre-aisle",
+    "format": "raster"
+  },
+  "/hosting/web-hosting": {
+    "root": "/media/cloudhost247/hosting/web-hosting-3d",
+    "format": "raster"
+  },
+  "/hosting/business": {
+    "root": "/media/cloudhost247/hosting/business-hosting-3d",
+    "format": "raster"
+  },
+  "/hosting/wordpress": {
+    "root": "/media/cloudhost247/hosting/wordpress-hosting-3d",
+    "format": "raster"
+  },
+  "/hosting/reseller": {
+    "root": "/media/cloudhost247/hosting/reseller-hosting-3d",
+    "format": "raster"
+  },
+  "/hosting/windows": {
+    "root": "/media/cloudhost247/hosting/windows-hosting-3d",
+    "format": "raster"
+  },
+  "/hosting/email": {
+    "root": "/media/cloudhost247/hosting/email-hosting-3d",
+    "format": "raster"
+  },
+  "/hosting/developer": {
+    "root": "/media/cloudhost247/photography/documentation-workspace",
+    "format": "raster"
+  },
+  "/hosting/api": {
+    "root": "/media/cloudhost247/deployment/api-3d",
+    "format": "raster"
+  },
+  "/hosting/ssl": {
+    "root": "/media/cloudhost247/security/ssl-3d",
+    "format": "raster"
+  },
+  "/hosting/backups": {
+    "root": "/media/cloudhost247/management/backups-3d",
+    "format": "raster"
+  },
+  "/hosting/migration": {
+    "root": "/media/cloudhost247/management/migration-3d",
+    "format": "raster"
+  },
+  "/hosting/security": {
+    "root": "/media/cloudhost247/security/platform-security-3d",
+    "format": "raster"
+  },
+  "/platforms": {
+    "root": "/media/cloudhost247/photography/operations-centre",
+    "format": "raster"
+  },
+  "/platforms/applications": {
+    "root": "/media/cloudhost247/applications/application-stack-3d",
+    "format": "raster"
+  },
+  "/platforms/databases": {
+    "root": "/media/cloudhost247/photography/server-hardware",
+    "format": "raster"
+  },
+  "/platforms/containers": {
+    "root": "/media/cloudhost247/photography/server-racks-blue",
+    "format": "raster"
+  },
+  "/platforms/paas": {
+    "root": "/media/cloudhost247/deployment/paas-3d",
+    "format": "raster"
+  },
+  "/hosting/vps": {
+    "root": "/media/cloudhost247/cloud/vps-3d",
+    "format": "raster"
+  },
+  "/hosting/dedicated": {
+    "root": "/media/cloudhost247/servers/dedicated-servers-3d",
+    "format": "raster"
+  },
+  "/hosting/cpanel": {
+    "root": "/media/cloudhost247/hosting/cpanel-hosting-3d",
+    "format": "raster"
+  },
+  "/websites": {
+    "root": "/media/cloudhost247/hosting/website-design-3d",
+    "format": "raster"
+  },
+  "/hosting/rdp": {
+    "root": "/media/cloudhost247/photography/home-engineer",
+    "format": "raster"
+  },
+  "/smm-services": {
+    "root": "/media/cloudhost247/storefronts/smm-services",
+    "format": "svg"
+  },
+  "/number-services": {
+    "root": "/media/cloudhost247/storefronts/number-services",
+    "format": "svg"
+  },
+  "/digital-products": {
+    "root": "/media/cloudhost247/storefronts/digital-products",
+    "format": "svg"
+  },
+  "/proxy-services": {
+    "root": "/media/cloudhost247/photography/fibre-engineer",
+    "format": "raster"
+  },
+  "/smtp-hosting": {
+    "root": "/media/cloudhost247/photography/network-engineer",
+    "format": "raster"
+  },
+  "/domains": {
+    "root": "/media/cloudhost247/domains/domain-network-3d",
+    "format": "raster"
+  }
+}

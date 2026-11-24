@@ -3,3 +3,19 @@
 .office-window{display:block;padding:28px;min-height:380px}.office-dash-header{display:flex;justify-content:space-between;align-items:center}.office-dash-header div{display:flex;flex-direction:column;gap:8px}.office-dash-header div span,.office-dash-subtitle,.office-dash-footer{font-size:9px;letter-spacing:.12em;color:var(--ch-muted);font-weight:700}.office-dash-header strong{font-size:25px;letter-spacing:-.05em}.office-dash-subtitle{display:flex;justify-content:space-between;margin:32px 0 12px}.office-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.office-tile{border:1px solid var(--ch-soft);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:4px}.office-tile span{display:grid;place-items:center;width:30px;height:30px;background:#dceafe;color:#276bb1;border-radius:5px;font-size:18px;margin-bottom:8px}.office-tile b{font-size:13px}.office-tile small{font-size:10px;color:var(--ch-muted)}.office-indigo span{background:#e1e7fa;color:#455ca2}.office-green span{background:var(--ch-soft);color:var(--ch-gold-ink)}.office-orange span{background:#fae9dc;color:#b56e3b}.office-dash-footer{display:flex;justify-content:space-between;margin-top:24px}@media(max-width:800px){.office-window{padding:20px}}
 
 .office-wrap{width:min(1200px,calc(100% - 48px));margin:auto}.office-actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap}.office-section{padding:95px 0}.office-heading{display:flex;justify-content:space-between;align-items:end;gap:40px;margin-bottom:35px}.office-heading h2,.office-bottom h2{font-size:clamp(32px,4vw,48px);letter-spacing:-.04em;line-height:1.1;margin:10px 0}.office-heading>p{max-width:430px;color:var(--ch-gold-ink);line-height:1.7}.office-dark-button{background:var(--ch-ink-2);color:white}@media(max-width:800px){.office-section{padding:65px 0}.office-heading{display:block}}
+
+/* Product identification uses the unchanged original ribbon. The adjacent
+   product name is page typography, not a recreated Microsoft wordmark. */
+.office-brand-header{display:flex;align-items:center;gap:20px;width:fit-content;max-width:100%;margin-bottom:36px;padding-bottom:28px;border-bottom:1px solid #ffffff26}
+.office-brand{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:76px;height:84px;box-sizing:border-box;border-radius:12px}
+.office-brand img{display:block;width:64px;height:auto;object-fit:contain}
+.office-brand:focus-visible{outline:3px solid var(--ch-gold-champagne);outline-offset:5px}
+.office-brand-copy{display:flex;flex-direction:column;gap:8px;min-width:0}
+.office-brand-name{color:#fff;font-size:clamp(22px,2.4vw,30px);font-weight:600;line-height:1.15;letter-spacing:-.035em}
+.office-brand-description{color:#c4cbd8;font-size:12px;line-height:1.5;letter-spacing:.025em}
+.office-hero .office-caption{margin-top:40px;color:#b5becd}
+.office-hero .office-hero-link{text-underline-offset:6px;text-decoration-thickness:1px}
+.office-hero .office-button{box-shadow:0 6px 20px #0002}
+.office-hero .office-button:focus-visible,.office-hero .office-hero-link:focus-visible{outline:3px solid #fff;outline-offset:5px}
+@media(max-width:480px){.office-brand-header{gap:14px;margin-bottom:28px;padding-bottom:22px}.office-brand{width:58px;height:66px}.office-brand img{width:50px}.office-brand-description{font-size:11px}.office-hero .office-actions{gap:20px}.office-hero .office-caption{font-size:9px;line-height:1.8}}
+@media(prefers-reduced-motion:no-preference){.office-brand{transition:background-color .2s ease}.office-brand:hover{background:#ffffff0d}}

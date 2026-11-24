@@ -1,0 +1,11 @@
+{
+  "name": "Microsoft 365",
+  "repository": "homarr-labs/dashboard-icons",
+  "revision": "9d019529dfd4431770e7380bfafd6628800b7986",
+  "file": "svg/microsoft-365.svg",
+  "sourceUrl": "https://github.com/homarr-labs/dashboard-icons/blob/9d019529dfd4431770e7380bfafd6628800b7986/svg/microsoft-365.svg",
+  "officialWebsite": "https://www.microsoft.com/microsoft-365",
+  "gitBlob": "d2bb40d578c0d122ddd93cad9f34304876b84faf",
+  "sha256": "40521c746de4fc4420c6e7ff8bd8fdb60ea2989e56974e6049fb452254ff437b",
+  "note": "Unmodified Microsoft 365 ribbon logo from a third-party icon archive (2022 identity), not a locally generated logo or the Microsoft 365 Copilot logo. Source availability does not grant trademark rights or imply partnership."
+}

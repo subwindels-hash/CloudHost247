@@ -2,15 +2,20 @@ import { Link } from 'react-router-dom';
 import { ProductPlansSection } from '../components/ProductPlansSection';
 import { usePageMeta } from '../lib/usePageMeta';
 import './google-workspace.css';
+import './productivity-heroes.css';
 
 export default function GoogleWorkspacePage() {
   usePageMeta('Google Workspace', 'Explore Google Workspace options for a more connected way to work.');
   return <main className="workspace-store">
     <section className="workspace-hero"><div className="workspace-wrap workspace-hero-grid"><div>
-      <p className="workspace-kicker">GOOGLE WORKSPACE / CLOUDHOST247</p><h1>Good work<br/><em>happens together.</em></h1>
+      <a className="workspace-brand" href="https://workspace.google.com/" target="_blank" rel="noopener noreferrer" aria-label="Google Workspace official website"><img src="/media/brands/google-workspace.svg" width="512" height="66" alt="Google Workspace" /></a>
+      <p className="workspace-kicker">A CONNECTED WORKDAY</p><h1>Your best work.<br/><em>All in one place.</em></h1>
       <p className="workspace-lead">Bring your team’s email and everyday collaboration tools together. Explore Google Workspace options for a more connected way to work.</p>
       <div className="workspace-actions"><a className="workspace-button" href="#workspace-plans">Explore plans ↗</a><Link className="workspace-hero-link" to="/contact">Talk to our team →</Link></div><p className="workspace-caption">A MORE CONNECTED WORKDAY &nbsp; / &nbsp; CLOUDHOST247</p>
-    </div><div className="workspace-visual" data-tilt data-tilt-max="5" aria-label="Illustration of an email inbox and shared team workspace"><img className="ch-service-art" data-showcase-depth src="/media/cloudhost247/storefronts/google-workspace.svg" width="640" height="480" alt="Shared team workspace — conceptual illustration"/></div></div></section>
+    </div><div className="workspace-visual productivity-scene">
+      <img className="ch-service-art" src="/media/brands/google-productivity-reference.webp" width="1202" height="882" alt="Google productivity tools alongside a professional in a bright office" loading="eager" />
+      <div className="productivity-scene-caption"><span className="productivity-status-dot" />Familiar tools. More possibilities.</div>
+    </div></div></section>
     <div className="workspace-strip"><div className="workspace-wrap"><span>EMAIL</span><span>✳</span><span>COLLABORATION</span><span>✳</span><span>YOUR TEAM</span></div></div>
     <section className="workspace-section" id="workspace-plans"><div className="workspace-wrap"><div className="workspace-heading"><div><p className="workspace-kicker">01 / EXPLORE YOUR OPTIONS</p><h2>Find your fit for<br/>better teamwork.</h2></div><p>Compare published Google Workspace plans and review their details before ordering.</p></div><ProductPlansSection slug="google-workspace"/><p className="workspace-note">Plans appear here when published in this platform's catalog. For availability and ordering, <Link to="/contact">contact sales</Link>. Our existing WHMCS integration manages users and license assignments in an existing, authorized Google Workspace tenant with available licenses; it does not purchase subscriptions or seats. Contact us to confirm your setup before ordering.</p></div></section>
     <section className="workspace-section workspace-soft"><div className="workspace-wrap"><div className="workspace-heading"><div><p className="workspace-kicker">02 / MADE FOR WORKING TOGETHER</p><h2>Make space for<br/>your best work.</h2></div><p>Bring conversations, ideas and schedules closer together. Features depend on your Google Workspace edition and configuration.</p></div><div className="workspace-cards">{[['01 / COMMUNICATE','Email with your domain','Give your team a professional identity with business email on your domain.'],['02 / COLLABORATE','Work on ideas together','Use familiar tools to create, share and collaborate with your team.'],['03 / ORGANIZE','Keep your day moving','Bring the conversations and schedules that matter into your working day.']].map(([label,title,body]) => <article key={label} data-tilt data-tilt-max="3"><span>{label}</span><h3>{title}</h3><p>{body}</p></article>)}</div></div></section>
