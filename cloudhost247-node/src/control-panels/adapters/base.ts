@@ -61,12 +61,12 @@ export abstract class BaseControlPanelAdapter implements ControlPanelAdapter {
   }
 
   /**
-   * Generates a complete, idempotent shell installation script with logging and status reporting.
+   * Generates a shell bootstrap template with logging. A zero exit from its commands is not
+   * provider acceptance or proof that the panel is installed and healthy.
    */
   generateInstallScript(options: ControlPanelInstallOptions): string {
     const commands = this.getInstallCommands(options);
     const logPath = '/var/log/cloudhost247-panel-install.log';
-    const statusFile = '/var/lib/cloudhost247/panel-installed';
 
     return `#!/bin/bash
 set -euo pipefail
@@ -79,8 +79,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 ${commands.join('\n\n')}
 
-echo "${this.slug}" > ${statusFile}
-echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] ${this.name} installation completed successfully."
+echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] Bootstrap command sequence exited successfully; panel installation and provider acceptance remain unverified."
 `;
   }
 

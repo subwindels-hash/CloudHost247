@@ -7,8 +7,9 @@
  * validation failure before any deployment starts.
  *
  * Hosting provisioning (spec §37 flow): create WHM account → apply package → create database +
- * user → install WordPress when requested → SSL is requested via AutoSSL/UAPI. WordPress-on-
- * cPanel (spec §38) downloads the official WordPress core archive from wordpress.org, extracts
+ * user → install WordPress when requested. Certificate issuance is not invoked or verified by
+ * this adapter; any provider AutoSSL behavior is external and is not an installation result.
+ * WordPress-on-cPanel (spec §38) downloads the official WordPress core archive from wordpress.org, extracts
  * it into public_html via UAPI Fileman, writes wp-config.php with the generated DB credentials,
  * and completes the famous 5-minute install programmatically via the wp-admin/install.php API.
  */

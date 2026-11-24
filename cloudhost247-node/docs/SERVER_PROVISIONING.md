@@ -54,15 +54,23 @@ the same durable job and health gates. A failed reinstall leaves the previously 
 
 ## Provider configuration
 
-Provider credentials are read only by the API/worker process from environment variables. They are
-never accepted in catalog forms, returned by configuration endpoints, sent to the browser, placed in
-seed data, included in emails, or written to provisioning logs. The admin configuration endpoint
-returns only variable names and presence booleans.
+Provider credentials can be configured either as backend environment variables or by a Super Admin
+in Admin → Infrastructure → Providers & Regions. Dashboard submissions are encrypted with the
+platform AES-256-GCM key ring and stored separately from provider/catalog metadata. Plaintext is
+write-only: it is never returned by an API, sent to another browser, placed in seed data, included in
+emails, or written to provisioning logs. The configuration report exposes variable names and
+presence/source only. The API and worker must share the database and the same
+`CREDENTIAL_ENCRYPTION_KEY` or `CREDENTIAL_ENCRYPTION_KEYS` so they can use those values. Provider
+environment variables remain supported as a server-side fallback.
 
 A provider row may set `credential_env_prefix` to use a deployment-specific prefix. If it is empty,
-the adapter's default prefix is used. The API and worker must receive the same environment. Provider
-rows are created disabled/configuration-required and can be activated only after adapter validation.
-Missing credentials still fail closed at execution time if the environment changes after activation.
+the adapter's default prefix is used. Super Admin's **Save & Connect API** action stores any newly
+entered fields encrypted, then makes a real adapter validation request. It marks the provider active
+only when that request succeeds. This confirms API access, not full provisioning: plans, regions,
+OS-image mappings, resource metadata, agent health, and individual lifecycle operations still need
+their own validation. Provider rows otherwise remain disabled/configuration-required and missing or
+undecryptable credentials fail closed at execution time. Provider adapter requests require HTTPS;
+loopback HTTP is permitted only for a local TLS-terminating tunnel.
 
 Supported native adapters and their principal configuration are:
 

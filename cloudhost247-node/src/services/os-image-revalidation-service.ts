@@ -24,7 +24,7 @@ import {
   type InfrastructureProviderRow,
   type ServerOsImageRow,
 } from '../db/infrastructure-providers';
-import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
+import { createConfiguredInfrastructureProviderAdapter } from '../infrastructure/providers/credentials';
 import { ProviderError, type InfrastructureProviderAdapter } from '../infrastructure/providers/types';
 import { recordAuditBestEffort } from '../lib/audit';
 
@@ -117,7 +117,7 @@ export async function revalidateProviderImages(
     try {
       const adapter = options.adapterFactory
         ? options.adapterFactory(provider)
-        : createInfrastructureProviderAdapter(provider, options.source);
+        : await createConfiguredInfrastructureProviderAdapter(db, provider, options.source);
       const remote = await adapter.getImage(image);
       if (!remote?.available) {
         throw new ProviderError('IMAGE_UNAVAILABLE', 'Provider no longer offers this image', false);

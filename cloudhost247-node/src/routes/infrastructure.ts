@@ -7,6 +7,7 @@ import { withTransaction } from '../db/transaction';
 import { authenticate } from '../lib/require-auth';
 import { requireRole } from '../lib/require-role';
 import { auditRequest } from '../lib/audit';
+import { getKeyRing } from '../lib/keyring';
 import { ConflictError, NotFoundError, ValidationError } from '../lib/errors';
 import { catalogIdSchema } from '../lib/identifier-contract';
 import {
@@ -35,6 +36,7 @@ import {
   findOsImageById,
   findProviderById,
   findRegionById,
+  storeInfrastructureProviderCredentials,
   listDatacenters,
   listOsImages,
   listProviders,
@@ -47,8 +49,9 @@ import {
 import { findPlanById, listActivePlansForProduct } from '../db/catalog-plans';
 import { listPublishedPricingForPlan } from '../db/catalog-pricing';
 import { listAllProducts } from '../db/catalog-products';
-import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
-import { ADAPTER_KINDS, ADAPTER_PROFILES, describeProviderConfiguration, getAdapterProfile, type AdapterKind } from '../infrastructure/providers/configuration';
+import { createConfiguredInfrastructureProviderAdapter, describeConfiguredProvider, loadInfrastructureProviderCredentials } from '../infrastructure/providers/credentials';
+import { getControlPanelReadiness } from '../control-panels/readiness';
+import { ADAPTER_KINDS, ADAPTER_PROFILES, getAdapterProfile, type AdapterKind } from '../infrastructure/providers/configuration';
 import { ProviderError } from '../infrastructure/providers/types';
 import { sweepScheduledTerminations } from '../services/server-termination-service';
 import { listServerDrift, reconcileServerState } from '../services/infrastructure-reconciliation-service';
@@ -93,8 +96,9 @@ const providerStatus = z.enum(['ACTIVE','DISABLED','CONFIGURATION_REQUIRED','UNA
 const imageStatus = z.enum(['DRAFT','VALIDATING','ACTIVE','DISABLED','INVALID'] as const);
 
 // Provider/image/template metadata is operator-controlled, but it is still returned in privileged
-// admin projections and passed into adapter requests. Keep credentials in environment variables,
-// not in JSON fields that can be copied into browser responses, audit records, or provider logs.
+// admin projections and passed into adapter requests. Keep credentials in the encrypted,
+// write-only provider credential store or server environment variables, never JSON metadata that
+// can be copied into browser responses, audit records, or provider logs.
 const SENSITIVE_METADATA_TERMS = [
   'authorization', 'apikey', 'accesskey', 'consumerkey', 'applicationkey', 'secret',
   'token', 'password', 'passwd', 'credential', 'privatekey', 'userdata', 'cloudinit',
@@ -110,7 +114,7 @@ function containsSensitiveMetadata(value: unknown, depth = 0): boolean {
 }
 const safeMetadata = z.record(z.string(), z.unknown()).refine(
   (value) => !containsSensitiveMetadata(value),
-  'Metadata cannot contain provider credentials or secret material; configure those in the server environment',
+  'Metadata cannot contain provider credentials or secret material; use the Super Admin provider connection form or server environment',
 );
 
 function parse<T>(schema: z.ZodType<T>, value: unknown): T {
@@ -119,23 +123,112 @@ function parse<T>(schema: z.ZodType<T>, value: unknown): T {
   return result.data;
 }
 
+function safeProviderConnectionFailure(error: unknown): { code: string; message: string; status: string } {
+  const code = error instanceof ProviderError ? error.code : 'NETWORK_TEMPORARY_FAILURE';
+  const message = code === 'AUTHENTICATION_FAILED'
+    ? 'The provider rejected the credentials. Check the API key and its permissions.'
+    : code === 'PROVIDER_NOT_CONFIGURED' || code === 'CONFIGURATION_REQUIRED'
+      ? 'Required API credentials or endpoint settings are missing. Review the configuration panel.'
+      : code === 'INVALID_CONFIGURATION'
+        ? 'The provider settings were rejected. Check the API URL, region, and account configuration.'
+        : code === 'UNSUPPORTED_OPERATION'
+          ? 'This provider adapter does not support API connection testing in this release.'
+          : 'The provider API could not be reached. Check the endpoint, network access, and credentials.';
+  const status = ['PROVIDER_NOT_CONFIGURED', 'CONFIGURATION_REQUIRED', 'INVALID_CONFIGURATION'].includes(code)
+    ? 'CONFIGURATION_REQUIRED'
+    : 'UNAVAILABLE';
+  return { code, message, status };
+}
+
 async function listCompatibleControlPanels(db: Queryable,planId: string,rows: AvailableConfigurationRow[]) {
   const versionIds = [...new Set(rows.map((row) => row.version_id))];
   if (versionIds.length === 0) return [];
-  const result = await db.query<{ id: string; name: string; slug: string; operating_system_version_id: string; architecture: string }>(
-    `SELECT DISTINCT cp.id,cp.name,cp.slug,c.operating_system_version_id,c.architecture
+  const result = await db.query<{
+    id: string;
+    name: string;
+    slug: string;
+    minimum_ram_mb: number;
+    minimum_cpu_cores: number;
+    minimum_disk_gb: number;
+    operating_system_version_id: string;
+    architecture: string;
+  }>(
+    `SELECT DISTINCT cp.id,cp.name,cp.slug,cp.minimum_ram_mb,cp.minimum_cpu_cores,cp.minimum_disk_gb,
+       c.operating_system_version_id,c.architecture
      FROM control_panels cp JOIN control_panel_compatibility c ON c.control_panel_id=cp.id
      WHERE cp.status='ACTIVE' AND c.status='ACTIVE' AND c.operating_system_version_id=ANY($1::uuid[])
        AND (c.plan_id IS NULL OR c.plan_id=$2)
      ORDER BY cp.name`,[versionIds,planId]
   );
-  const panels = new Map<string,{ id: string;name: string;slug: string;availability: Array<{ operatingSystemVersionId: string;architecture: string }> }>();
+  type PanelAvailability = {
+    operatingSystemVersionId: string;
+    architecture: string;
+    providerId: string;
+    regionId: string;
+    datacenterId: string | null;
+    hardwareCompatible: boolean;
+    hardwareReason: string | null;
+  };
+  type CompatiblePanel = {
+    id: string;
+    name: string;
+    slug: string;
+    minimumRequirements: { ramMb: number; cpuCores: number; diskGb: number };
+    availability: PanelAvailability[];
+  };
+  const panels = new Map<string,CompatiblePanel>();
   for (const row of result.rows) {
-    const panel=panels.get(row.id)??{id:row.id,name:row.name,slug:row.slug,availability:[]};
-    panel.availability.push({operatingSystemVersionId:row.operating_system_version_id,architecture:row.architecture});
+    const configurations = rows.filter((configuration) =>
+      configuration.version_id === row.operating_system_version_id
+      && configuration.architecture === row.architecture
+    );
+    if (configurations.length === 0) continue;
+    const panel = panels.get(row.id) ?? {
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      minimumRequirements: {
+        ramMb: row.minimum_ram_mb,
+        cpuCores: row.minimum_cpu_cores,
+        diskGb: row.minimum_disk_gb,
+      },
+      availability: [],
+    };
+    for (const configuration of configurations) {
+      const metadata = configuration.configuration_metadata ?? {};
+      const cpuCores = typeof metadata.cpuCores === 'number' && Number.isInteger(metadata.cpuCores) && metadata.cpuCores >= 1
+        ? metadata.cpuCores : null;
+      const memoryMb = typeof metadata.memoryMb === 'number' && Number.isInteger(metadata.memoryMb) && metadata.memoryMb >= 256
+        ? metadata.memoryMb : null;
+      const storageMb = typeof metadata.storageMb === 'number' && Number.isInteger(metadata.storageMb) && metadata.storageMb >= 1024
+        ? metadata.storageMb : null;
+      const missing = cpuCores === null || memoryMb === null || storageMb === null;
+      const resourceIssues: string[] = [];
+      if (cpuCores !== null && cpuCores < row.minimum_cpu_cores) resourceIssues.push(`at least ${row.minimum_cpu_cores} CPU cores`);
+      if (memoryMb !== null && memoryMb < row.minimum_ram_mb) resourceIssues.push(`at least ${row.minimum_ram_mb} MB RAM`);
+      if (storageMb !== null && storageMb < row.minimum_disk_gb * 1024) resourceIssues.push(`at least ${row.minimum_disk_gb} GB storage`);
+      const hardwareCompatible = !missing && resourceIssues.length === 0;
+      const hardwareReason = hardwareCompatible
+        ? null
+        : missing
+          ? 'The provider configuration does not publish complete CPU, memory, and storage values, so panel resource compatibility cannot be verified.'
+          : `This configuration does not meet the panel’s listed minimum requirements (${resourceIssues.join(', ')}).`;
+      panel.availability.push({
+        operatingSystemVersionId: configuration.version_id,
+        architecture: configuration.architecture,
+        providerId: configuration.provider_id,
+        regionId: configuration.region_id,
+        datacenterId: configuration.datacenter_id,
+        hardwareCompatible,
+        hardwareReason,
+      });
+    }
     panels.set(row.id,panel);
   }
-  return [...panels.values()];
+  return [...panels.values()].map((panel) => ({
+    ...panel,
+    ...getControlPanelReadiness(panel.slug),
+  }));
 }
 
 function groupConfiguration(rows: AvailableConfigurationRow[]) {
@@ -192,6 +285,9 @@ const providerSchema = z.object({
   capabilities: z.record(z.string(), z.unknown()).optional(),metadata: safeMetadata.optional(),
 });
 const patchProviderSchema = providerSchema.omit({ slug: true,providerType: true,adapter: true }).partial();
+const providerConnectionSchema = z.object({
+  credentials: z.record(z.string().min(1).max(96), z.string().min(1).max(20_000)).optional().default({}),
+}).strict();
 const regionSchema = z.object({ providerId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),countryCode: z.string().length(2).nullable().optional(),status: z.enum(['ACTIVE','DISABLED','ARCHIVED'] as const).optional(),metadata: safeMetadata.optional() });
 const datacenterSchema = z.object({ regionId: id,code: z.string().min(1).max(96),name: z.string().min(1).max(160),status: z.enum(['ACTIVE','DISABLED','ARCHIVED'] as const).optional(),metadata: safeMetadata.optional() });
 const imageSchema = z.object({
@@ -297,7 +393,7 @@ async function validateImage(db: Queryable,imageId: string,actorId: string) {
     architecture:image.architecture,regionId:image.region_id,datacenterId:image.datacenter_id,
   },true);
   if (provider.status !== 'ACTIVE') throw new ValidationError('Provider must be active before an image can be verified');
-  const adapter = createInfrastructureProviderAdapter(provider);
+  const adapter = await createConfiguredInfrastructureProviderAdapter(db, provider);
   try {
     await adapter.validateConfiguration();
     const remote = await adapter.getImage(image);
@@ -617,7 +713,7 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
     await admin(request);
     const provider=await findProviderById(db,parse(id,request.params.id));
     if(!provider)throw new NotFoundError('No provider was found with that id');
-    const configuration=describeProviderConfiguration(provider);
+    const configuration=await describeConfiguredProvider(db,provider);
     const images=await db.query<{total:string;active:string}>(
       `SELECT count(*)::text total,count(*) FILTER (WHERE status='ACTIVE' AND verified_at IS NOT NULL)::text active
        FROM server_os_images WHERE provider_id=$1`,[provider.id]
@@ -627,6 +723,55 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
       configuration,
       images:{total:Number(images.rows[0]?.total??'0'),verifiedActive:Number(images.rows[0]?.active??'0')},
     };
+  });
+  app.post<{ Params: { id: string } }>('/api/v1/admin/providers/:id/connect',async (request) => {
+    const auth=await requireRole(request,env,db,['super_admin']);
+    const providerId=parse(id,request.params.id);
+    const input=parse(providerConnectionSchema,request.body??{});
+    const provider=await findProviderById(db,providerId);
+    if(!provider)throw new NotFoundError('No provider was found with that id');
+    if(provider.adapter==='mock'&&(env.NODE_ENV==='production'||!env.ALLOW_MOCK_PROVIDER)){
+      throw new ValidationError('The mock provider cannot be connected on this deployment');
+    }
+    const profile=getAdapterProfile(provider.adapter);
+    if(!profile)throw new ValidationError('No adapter implementation is registered for this provider');
+    const unknownFields=Object.keys(input.credentials).filter((suffix)=>!profile.credentials.some((credential)=>credential.suffix===suffix));
+    if(unknownFields.length>0)throw new ValidationError('One or more credential fields are not supported by this provider adapter');
+
+    const hasCredentialUpdates=Object.keys(input.credentials).length>0;
+    if(hasCredentialUpdates){
+      // Blank UI inputs are omitted, preserving unchanged values during key rotation. If an old
+      // envelope cannot be opened, newly entered values can still replace it; the real connection
+      // test below decides whether the resulting configuration is usable.
+      let existingCredentials:Record<string,string>={};
+      try{existingCredentials=await loadInfrastructureProviderCredentials(db,providerId)??{};}catch{existingCredentials={};}
+      try{
+        const mergedCredentials={...existingCredentials,...input.credentials};
+        await withTransaction(db,async(tx)=>{
+          await storeInfrastructureProviderCredentials(tx,getKeyRing(),providerId,mergedCredentials);
+          await updateProvider(tx,providerId,{status:'CONFIGURATION_REQUIRED',lastHealthStatus:'CONFIGURATION_REQUIRED'});
+        });
+      }catch(error){throw new ValidationError(error instanceof Error?error.message:'Provider credentials could not be stored securely');}
+    }
+
+    let failure:{code:string;message:string;status:string}|null=null;
+    try{
+      const adapter=await createConfiguredInfrastructureProviderAdapter(db,provider);
+      await adapter.validateConfiguration();
+    }catch(error){failure=safeProviderConnectionFailure(error);}
+
+    const updated= failure
+      ? await updateProvider(db,providerId,{status:failure.status,lastHealthStatus:failure.code})
+      : await updateProvider(db,providerId,{status:'ACTIVE',lastHealthStatus:'HEALTHY'});
+    const result=failure
+      ? {status:'failed' as const,code:failure.code,message:failure.message}
+      : {status:'connected' as const,code:null,message:'The provider API accepted the configured credentials.'};
+    await auditRequest(db,request,auth.userId,{
+      action:failure?'PROVIDER_CONNECTION_FAILED':'PROVIDER_CONNECTED',
+      resourceType:'provider',resourceId:providerId,
+      metadata:{adapter:provider.adapter,...(failure?{errorCode:failure.code}:{})},
+    });
+    return {provider:updated?{id:updated.id,name:updated.name,status:updated.status,lastHealthStatus:updated.last_health_status}:null,result};
   });
   app.patch<{ Params: { id: string } }>('/api/v1/admin/providers/:id',async (request) => {
     const auth=await admin(request);const providerId=parse(id,request.params.id);const patch=parse(patchProviderSchema,request.body);const existing=await findProviderById(db,providerId);if(!existing)throw new NotFoundError();
@@ -640,8 +785,8 @@ export async function registerInfrastructureRoutes(app: FastifyInstance,env: Env
         api_base_url:patch.apiBaseUrl!==undefined?patch.apiBaseUrl:existing.api_base_url,
         credential_env_prefix:patch.credentialEnvPrefix!==undefined?patch.credentialEnvPrefix:existing.credential_env_prefix,
       };
-      try{await createInfrastructureProviderAdapter(candidate).validateConfiguration();}
-      catch(error){throw new ValidationError(error instanceof Error?error.message:'Provider validation failed');}
+      try{await (await createConfiguredInfrastructureProviderAdapter(db,candidate)).validateConfiguration();}
+      catch(error){throw new ValidationError(safeProviderConnectionFailure(error).message);}
     }
     const provider=await updateProvider(db,providerId,patch);await auditRequest(db,request,auth.userId,{action:'PROVIDER_UPDATED',resourceType:'provider',resourceId:providerId,metadata:{status:provider?.status}});return {provider};
   });

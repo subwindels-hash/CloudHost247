@@ -81,10 +81,10 @@ export default function ControlPanelsPage() {
     <div className="ch247-control-panels-page">
       <section className="ch247-hero ch247-hero--compact ch247-control-panels-hero ch247-hero--servers">
         <div className="ch247-hero__inner">
-          <p className="ch247-control-panels-hero__eyebrow"><span aria-hidden="true">✦</span> CloudHost247 platform catalog</p>
+          <p className="ch247-control-panels-hero__eyebrow"><span aria-hidden="true">✦</span> CloudHost247 platform directory</p>
           <h1>Control Panels &amp; Application Platforms</h1>
           <p>
-            Browse the control panels and application platforms in CloudHost247’s live catalogue. Availability, operating systems and product features depend on the configured service.
+            Browse directory entries for control panels and application platforms. Catalogue presence, bootstrap templates, provider acceptance, installation verification, and lifecycle management are separate facts; only verified support is orderable.
           </p>
         </div>
       </section>
@@ -160,8 +160,58 @@ export default function ControlPanelsPage() {
             </p>
             <div id="platform-results" className="ch247-panel-grid" aria-busy={loadingMore}>
               {panels.map((panel) => {
-                const priceNum = Number(panel.startingPrice);
-                const priceDisplay = priceNum === 0 ? 'Free' : `$${panel.startingPrice} / ${panel.billingCycle}`;
+                const hasConfiguredPrice = panel.catalogSource === 'configured' && panel.planCount > 0 && panel.startingPrice !== null;
+                const priceNum = hasConfiguredPrice ? Number(panel.startingPrice) : null;
+                const priceDisplay = priceNum === null
+                  ? 'Not configured'
+                  : priceNum === 0 ? 'No charge listed' : `$${panel.startingPrice} / ${panel.billingCycle}`;
+                const hasLiveReadiness = [
+                  panel.hasPublishedMarketplaceApp,
+                  panel.hasValidatedManifest,
+                  panel.hasPanelBootstrapAdapter,
+                  panel.panelBootstrapProviderVerified,
+                  panel.panelManagementAvailable,
+                  panel.panelManagementProviderVerified,
+                  panel.operationallySupported,
+                ].every((value) => typeof value === 'boolean');
+                const canInstallMarketplace = hasLiveReadiness && panel.hasPublishedMarketplaceApp === true;
+                const canConfigureVps = panel.catalogSource === 'configured'
+                  && panel.status === 'ACTIVE'
+                  && panel.operationallySupported === true;
+                const supportLabel = canInstallMarketplace
+                  ? 'Published app listing'
+                  : !hasLiveReadiness
+                    ? 'Live readiness unknown'
+                    : panel.catalogSource === 'configured'
+                      ? panel.operationallySupported
+                        ? 'Operational integration verified'
+                        : panel.hasPanelBootstrapAdapter && !panel.panelBootstrapProviderVerified
+                          ? 'Bootstrap not provider-verified'
+                          : panel.panelManagementAvailable && !panel.panelManagementProviderVerified
+                            ? 'Management not provider-verified'
+                            : 'Panel management unavailable'
+                      : panel.hasValidatedManifest
+                        ? 'Manifest in source'
+                        : panel.hasPanelBootstrapAdapter
+                          ? 'Bootstrap template'
+                          : 'Directory only';
+                const supportTitle = !hasLiveReadiness
+                  ? 'This directory entry is shown without live readiness metadata. Marketplace publication, adapter support, and installation capability are unknown; no order or install is enabled.'
+                  : canInstallMarketplace
+                    ? 'A published application and version appear in the app marketplace. This listing is not proof of a successful install; target compatibility, supported operations, and the resulting deployment/verification record determine the outcome.'
+                    : panel.catalogSource === 'configured'
+                      ? panel.operationallySupported
+                        ? 'Bootstrap, verification, and lifecycle operations have provider-backed acceptance records; confirm current provider availability and license terms before ordering.'
+                        : panel.hasPanelBootstrapAdapter && !panel.panelBootstrapProviderVerified
+                          ? 'A bootstrap template exists, but provider-backed installation acceptance and per-server verification are not recorded. This listing is not orderable.'
+                          : panel.panelManagementAvailable && !panel.panelManagementProviderVerified
+                            ? 'Management adapter methods exist, but provider-backed lifecycle acceptance is not recorded. This listing is not orderable.'
+                            : 'Configured listing, but control-panel lifecycle/verification operations are not implemented in this build. A bootstrap template alone is not proof of installation.'
+                      : panel.hasValidatedManifest
+                        ? 'A validated app manifest exists in the repository; it still needs publication and provider-backed verification before it is an orderable offer.'
+                        : panel.hasPanelBootstrapAdapter
+                          ? 'An installation bootstrap template exists, but this does not include a working lifecycle/API integration.'
+                          : 'Directory metadata only; no validated install manifest or control-panel bootstrap is available yet.';
                 return (
                   <article key={panel.id} className="ch247-card ch247-panel-card">
                     <div className="ch247-panel-card__header">
@@ -179,6 +229,7 @@ export default function ControlPanelsPage() {
                                 ? 'Management'
                                 : 'Server Panel'}
                         </span>
+                        <span className="ch247-tag ch247-tag--readiness" title={supportTitle}>{supportLabel}</span>
                       </div>
                     </div>
 
@@ -186,7 +237,7 @@ export default function ControlPanelsPage() {
 
                     <div className="ch247-panel-card__specs">
                       <div className="ch247-spec-item">
-                        <span className="ch247-spec-label">Min. Spec</span>
+                        <span className="ch247-spec-label">Listed minimum spec</span>
                         <span className="ch247-spec-value">
                           {panel.minimumRequirements.cpuCores} CPU · {(panel.minimumRequirements.ramMb / 1024).toFixed(panel.minimumRequirements.ramMb % 1024 ? 1 : 0)} GB RAM · {panel.minimumRequirements.diskGb} GB
                         </span>
@@ -195,9 +246,9 @@ export default function ControlPanelsPage() {
                         <span className="ch247-spec-label">License</span>
                         <span className="ch247-spec-value">
                           {panel.requiresLicense ? (
-                            <span className="ch247-tag ch247-tag--license">Commercial</span>
+                            <span className="ch247-tag ch247-tag--license">Commercial license listed</span>
                           ) : (
-                            <span className="ch247-tag ch247-tag--free">Free & Included</span>
+                            <span className="ch247-tag ch247-tag--free">No commercial license listed</span>
                           )}
                         </span>
                       </div>
@@ -216,16 +267,26 @@ export default function ControlPanelsPage() {
 
                     <div className="ch247-panel-card__footer">
                       <div className="ch247-panel-card__pricing">
-                        <span className="ch247-panel-card__price-label">CloudHost247 Price</span>
+                        <span className="ch247-panel-card__price-label">Configured price</span>
                         <strong className="ch247-panel-card__price">{priceDisplay}</strong>
                       </div>
                       <div className="ch247-panel-card__actions">
                         <Link to={`/hosting/control-panels/${panel.slug}`} className="ch247-btn ch247-btn--secondary">
                           View Details
                         </Link>
-                        <Link to={`/servers/new?panel=${panel.slug}`} className="ch247-btn ch247-btn--primary">
-                          Deploy Now
-                        </Link>
+                        {canInstallMarketplace ? (
+                          <Link to={`/apps/${panel.slug}`} className="ch247-btn ch247-btn--primary">
+                            View app listing
+                          </Link>
+                        ) : canConfigureVps ? (
+                          <Link to={`/servers/new?panel=${panel.slug}`} className="ch247-btn ch247-btn--primary">
+                            Configure VPS
+                          </Link>
+                        ) : (
+                          <button type="button" className="ch247-btn ch247-btn--primary" disabled title={supportTitle}>
+                            Not orderable yet
+                          </button>
+                        )}
                       </div>
                     </div>
                   </article>

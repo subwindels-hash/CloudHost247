@@ -5,6 +5,8 @@ import {
   deleteInstallation,
   fetchMyInstallations,
   installationAction,
+  type InstallationCapabilities,
+  type InstallationOperation,
   type MyInstallation,
 } from '../lib/marketplace-api';
 import { apiFetch } from '../lib/api';
@@ -89,6 +91,7 @@ export default function AppInstancePage() {
   usePageMeta('Application', 'Manage your application installation');
   const [summary, setSummary] = useState<MyInstallation | null>(null);
   const [detail, setDetail] = useState<InstallationDetailRow | null>(null);
+  const [capabilities, setCapabilities] = useState<InstallationCapabilities | null>(null);
   const [tab, setTab] = useState<'overview' | 'logs' | 'backups' | 'domains' | 'config' | 'deployments'>(() => {
     if (location.pathname.endsWith('/logs')) return 'logs';
     if (location.pathname.endsWith('/backups')) return 'backups';
@@ -113,10 +116,16 @@ export default function AppInstancePage() {
 
   const loadCore = useCallback(() => {
     let cancelled = false;
-    apiFetch<{ installation: InstallationDetailRow; application: { name: string; slug: string } | null }>(
-      `/api/v1/app-installations/${installationId}`
-    )
-      .then((result) => !cancelled && setDetail(result.installation))
+    apiFetch<{
+      installation: InstallationDetailRow;
+      application: { name: string; slug: string } | null;
+      capabilities: InstallationCapabilities | null;
+    }>(`/api/v1/app-installations/${installationId}`)
+      .then((result) => {
+        if (cancelled) return;
+        setDetail(result.installation);
+        setCapabilities(result.capabilities);
+      })
       .catch((err: Error) => !cancelled && setError(err.message));
     fetchMyInstallations()
       .then((result) => {
@@ -134,9 +143,9 @@ export default function AppInstancePage() {
 
   // Tab loaders — each tab fetches its own sub-resource on first open.
   useEffect(() => {
-    if (tab === 'logs' && logs === null) {
-      apiFetch<{ logs: string }>(`/api/v1/app-installations/${installationId}/logs?tail=200`)
-        .then((result) => setLogs(result.logs))
+    if (tab === 'logs' && logs === null && capabilities?.operations.logs.supported) {
+      apiFetch<{ logs: string; available?: boolean; message?: string }>(`/api/v1/app-installations/${installationId}/logs?tail=200`)
+        .then((result) => setLogs(result.available === false ? `Logs unavailable: ${result.message ?? 'the deployment target did not provide logs'}` : result.logs))
         .catch((err: Error) => setLogs(`Logs unavailable: ${err.message}`));
     }
     if (tab === 'backups' && backups === null) {
@@ -159,7 +168,7 @@ export default function AppInstancePage() {
         .then((result) => setDeployments(result.deployments))
         .catch(() => setDeployments([]));
     }
-  }, [tab, installationId, logs, backups, domains, envKeys, deployments]);
+  }, [tab, installationId, logs, backups, domains, envKeys, deployments, capabilities]);
 
   // Live status feed while a deployment is running for this installation.
   useEffect(() => {
@@ -200,11 +209,11 @@ export default function AppInstancePage() {
   }
 
   async function uninstall() {
-    if (!window.confirm('Uninstall this application? Its data volumes will be removed after the final backup.')) return;
+    if (!window.confirm('Uninstall can permanently remove application files or account data. If you need to preserve data, make a copy using a backup path supported by this adapter first; backup and restore availability depends on the selected adapter.')) return;
     setBusy('uninstall');
     try {
       const result = await deleteInstallation(installationId);
-      setActionMessage(`Uninstall queued (deployment ${result.deploymentId}). A final backup runs first.`);
+      setActionMessage(`Uninstall queued (deployment ${result.deploymentId}). Follow the deployment record for the actual result.`);
     } catch (err) {
       setActionMessage(err instanceof Error ? err.message : 'Uninstall failed');
     } finally {
@@ -228,6 +237,48 @@ export default function AppInstancePage() {
     ['config', 'Configuration'],
     ['deployments', 'Deployments'],
   ];
+  const capabilityFor = (operation: InstallationOperation) => capabilities?.operations[operation]
+    ?? { supported: false, reason: 'Operation support could not be determined for this installation.' };
+  const actionStatuses: Partial<Record<InstallationOperation, readonly string[]>> = {
+    start: ['stopped', 'failed', 'healthy'],
+    stop: ['healthy', 'unhealthy', 'starting', 'failed'],
+    restart: ['healthy', 'unhealthy', 'stopped', 'starting', 'failed'],
+    update: ['healthy', 'unhealthy', 'stopped'],
+    backup: ['healthy', 'unhealthy', 'stopped'],
+    restore: ['healthy', 'unhealthy', 'stopped'],
+    reinstall: ['failed', 'stopped', 'unhealthy'],
+    verify: ['healthy', 'unhealthy', 'starting', 'failed'],
+  };
+  const operationAllowedForStatus = (operation: InstallationOperation) =>
+    actionStatuses[operation]?.includes(status) ?? !['deleted', 'deleting'].includes(status);
+  const actionButton = (operation: InstallationOperation, label: string, confirmMessage?: string) => {
+    const capability = capabilityFor(operation);
+    const allowedForStatus = operationAllowedForStatus(operation);
+    const title = !capability.supported
+      ? capability.reason ?? 'This operation is not supported by the selected deployment adapter.'
+      : !allowedForStatus
+        ? `Cannot ${operation} an installation with status "${status}".`
+        : capabilities?.simulationMode
+          ? 'Adapter path exists, but deployment simulation is enabled; no live provider action or verification will occur.'
+          : capability.method ?? 'Implemented by the selected adapter; the result still depends on live target execution.';
+    return (
+      <button
+        key={operation}
+        type="button"
+        className="ch247-btn"
+        disabled={busy !== '' || !capability.supported || !allowedForStatus}
+        title={title}
+        onClick={() => {
+          if (confirmMessage && !window.confirm(confirmMessage)) return;
+          void runAction(operation);
+        }}
+      >
+        {capability.supported ? label : `${label} unavailable`}
+      </button>
+    );
+  };
+  const unsupportedOperations = (['verify', 'logs', 'start', 'stop', 'restart', 'update', 'reinstall', 'backup', 'restore', 'uninstall'] as const)
+    .filter((operation) => !capabilityFor(operation).supported);
 
   return (
     <div className="ch247-stack">
@@ -248,14 +299,7 @@ export default function AppInstancePage() {
           >
             {detail.health_status || 'unknown'} health
           </span>
-          {detail.domain && (
-            <>
-              {' '}
-              <a href={`https://${detail.domain}`} target="_blank" rel="noreferrer">
-                {detail.domain}
-              </a>
-            </>
-          )}
+          {detail.domain && <> {' '}<span>{detail.domain}</span></>}
         </p>
         {actionMessage && <p className="ch247-banner ch247-banner--info">{actionMessage}</p>}
         {error && <CatalogErrorBanner message={error} />}
@@ -265,27 +309,47 @@ export default function AppInstancePage() {
             <Link to={`/dashboard/deployments/${runningDeployment.id}`}>watch it live</Link>.
           </p>
         )}
+        {capabilities?.simulationMode && (
+          <p className="ch247-banner ch247-banner--warning" role="status">
+            Simulation mode is enabled. Queued operations and health checks are simulated; this environment cannot confirm a real provider installation or live application health.
+          </p>
+        )}
+        {!capabilities && (
+          <p className="ch247-banner ch247-banner--warning" role="status">
+            Deployment operation support could not be determined. Actions remain unavailable until the target and manifest are resolved.
+          </p>
+        )}
 
         <div className="ch247-actions">
-          <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => runAction('start')}>
-            Start
-          </button>
-          <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => runAction('stop')}>
-            Stop
-          </button>
-          <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => runAction('restart')}>
-            Restart
-          </button>
-          <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => runAction('update')}>
-            Update
-          </button>
-          <button type="button" className="ch247-btn" disabled={busy !== ''} onClick={() => runAction('backup')}>
-            Back up now
-          </button>
-          <button type="button" className="ch247-btn ch247-btn--danger" disabled={busy !== ''} onClick={uninstall}>
-            Uninstall
+          {actionButton('start', 'Start')}
+          {actionButton('stop', 'Stop')}
+          {actionButton('restart', 'Restart')}
+          {actionButton('update', 'Update')}
+          {actionButton('reinstall', 'Reinstall', 'Reinstall this app from its saved manifest and environment? Verify that a suitable backup exists first; actual data preservation depends on the adapter.')}
+          {actionButton('backup', 'Back up now')}
+          {actionButton('verify', 'Verify health')}
+          <button
+            type="button"
+            className="ch247-btn ch247-btn--danger"
+            disabled={busy !== '' || !capabilityFor('uninstall').supported}
+            title={capabilityFor('uninstall').reason ?? (capabilities?.simulationMode
+              ? 'Simulation mode: uninstall will not contact a live provider.'
+              : 'Remove this application through the selected deployment adapter.')}
+            onClick={uninstall}
+          >
+            {capabilityFor('uninstall').supported ? 'Uninstall' : 'Uninstall unavailable'}
           </button>
         </div>
+        {capabilities && unsupportedOperations.length > 0 && (
+          <details className="ch247-page__hint">
+            <summary>Operations unavailable on this {capabilities.engine} target</summary>
+            <ul>
+              {unsupportedOperations.map((operation) => (
+                <li key={operation}><strong>{operation}:</strong> {capabilityFor(operation).reason}</li>
+              ))}
+            </ul>
+          </details>
+        )}
 
         <nav className="ch247-tabs" aria-label="Application sections">
           {tabs.map(([key, label]) => (
@@ -304,6 +368,12 @@ export default function AppInstancePage() {
             <dd>{summary?.application?.name ?? detail.application_id}</dd>
             <dt>Status</dt>
             <dd>{status}</dd>
+            <dt>Deployment adapter</dt>
+            <dd>{capabilities?.engine ?? 'unknown'}{capabilities?.simulationMode ? ' · simulation mode' : ''}</dd>
+            <dt>Verification</dt>
+            <dd>{capabilityFor('verify').supported
+              ? capabilityFor('verify').method ?? 'supported; see deployment events for result'
+              : `Unavailable: ${capabilityFor('verify').reason}`}</dd>
             <dt>Server</dt>
             <dd>{summary?.server ? `${summary.server.name} (${summary.server.type})` : 'Not assigned yet'}</dd>
             <dt>CPU limit</dt>
@@ -325,7 +395,9 @@ export default function AppInstancePage() {
       {tab === 'logs' && (
         <div className="ch247-card">
           <h2>Recent logs</h2>
-          {logs === null ? (
+          {!capabilityFor('logs').supported ? (
+            <p className="ch247-banner ch247-banner--warning">{capabilityFor('logs').reason}</p>
+          ) : logs === null ? (
             <CatalogLoadingBanner label="Loading logs…" />
           ) : (
             <div className="ch247-console">
@@ -337,8 +409,7 @@ export default function AppInstancePage() {
             </div>
           )}
           <p className="ch247-page__hint">
-            Read-only view of the last 200 lines from your application's containers, fetched live
-            from your server.
+            Read-only view of recent output exposed by the selected deployment adapter. The capability report identifies whether this target provides application logs and how they are read.
           </p>
         </div>
       )}
@@ -346,12 +417,19 @@ export default function AppInstancePage() {
       {tab === 'backups' && (
         <div className="ch247-card">
           <h2>Backups</h2>
+          {!capabilityFor('backup').supported && (
+            <p className="ch247-banner ch247-banner--warning">
+              New backups are unavailable: {capabilityFor('backup').reason}
+            </p>
+          )}
+          {!capabilityFor('restore').supported && (
+            <p className="ch247-page__hint">Restore is unavailable: {capabilityFor('restore').reason}</p>
+          )}
           {backups === null ? (
             <CatalogLoadingBanner label="Loading backups…" />
           ) : backups.length === 0 ? (
             <p className="ch247-page__hint">
-              No backups yet. Run "Back up now", or wait for the nightly schedule — archives are
-              stored off-server with a recorded checksum.
+              No completed backups are recorded. Use “Back up now” when the selected adapter supports it; archive location and integrity evidence depend on that adapter.
             </p>
           ) : (
             <table className="ch247-table">
@@ -390,10 +468,17 @@ export default function AppInstancePage() {
                         <button
                           type="button"
                           className="ch247-btn"
-                          disabled={busy !== ''}
+                          disabled={busy !== '' || !capabilityFor('restore').supported || !operationAllowedForStatus('restore')}
+                          title={!capabilityFor('restore').supported
+                            ? capabilityFor('restore').reason ?? 'Restore is not supported by the selected deployment adapter.'
+                            : !operationAllowedForStatus('restore')
+                              ? `Cannot restore an installation with status "${status}".`
+                              : capabilities?.simulationMode
+                                ? 'Simulation mode: restore will not contact a live provider.'
+                                : 'Restore this completed backup through the selected deployment adapter.'}
                           onClick={() => runAction('restore', { backupId: backup.id })}
                         >
-                          Restore
+                          {capabilityFor('restore').supported ? 'Restore' : 'Restore unavailable'}
                         </button>
                       )}
                     </td>
@@ -413,8 +498,7 @@ export default function AppInstancePage() {
           ) : domains.length === 0 ? (
             <p className="ch247-page__hint">
               No domains attached. Verify a domain under{' '}
-              <Link to="/dashboard/domains">Dashboard → Domains</Link>, then attach it here — SSL
-              is issued automatically.
+              <Link to="/dashboard/domains">Dashboard → Domains</Link>, then attach it here. Domain verification and attachment do not confirm DNS readiness or certificate issuance; SSL support depends on the deployment adapter and its actual result.
             </p>
           ) : (
             <ul className="ch247-plainlist">

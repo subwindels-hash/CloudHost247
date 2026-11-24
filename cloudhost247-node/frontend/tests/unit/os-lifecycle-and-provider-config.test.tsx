@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import OsLifecycleNotice from '../../src/components/OsLifecycleNotice';
 import ProviderConfigurationPanel from '../../src/components/ProviderConfigurationPanel';
@@ -46,8 +46,8 @@ describe('ProviderConfigurationPanel', () => {
       adapter: 'proxmox', label: 'Proxmox VE', envPrefix: 'PROXMOX_LAB', apiBaseUrl: null,
       apiBaseUrlRequired: true, apiBaseUrlConfigured: false,
       credentials: [
-        { name: 'PROXMOX_LAB_API_TOKEN', fallbackName: 'PROXMOX_API_TOKEN', description: 'API token', required: true, present: false },
-        { name: 'PROXMOX_LAB_API_URL', fallbackName: null, description: 'PVE API URL', required: false, present: true },
+        { suffix: '_API_TOKEN', name: 'PROXMOX_LAB_API_TOKEN', fallbackName: 'PROXMOX_API_TOKEN', description: 'API token', required: true, present: false, stored: false },
+        { suffix: '_API_URL', name: 'PROXMOX_LAB_API_URL', fallbackName: null, description: 'PVE API URL', required: false, present: true, stored: false },
       ],
       planMetadata: [{ key: 'providerNode', description: 'Target PVE node', required: true }],
       capabilities: { reinstall: true, snapshot: true, resize: true, console: true, metrics: true, rescue: false },
@@ -79,7 +79,36 @@ describe('ProviderConfigurationPanel', () => {
       },
     });
     render(<ProviderConfigurationPanel providerId="p1" />);
-    await waitFor(() => expect(screen.getByText(/All required server-side configuration is present/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/Run a connection test to verify provider access/)).toBeTruthy());
+  });
+
+  it('does not render credential entry or connection controls for other admins', async () => {
+    vi.mocked(apiFetch).mockResolvedValue(report);
+    const { container } = render(<ProviderConfigurationPanel providerId="p1" />);
+    await waitFor(() => expect(screen.getByText('Credential entry and provider connection are restricted to Super Admin.')).toBeTruthy());
+    expect(screen.queryByText('Connect provider API')).toBeNull();
+    expect(container.querySelector('input[type="password"]')).toBeNull();
+    expect(container.querySelector('form')).toBeNull();
+  });
+
+  it('lets a Super Admin submit a new credential without rendering it back', async () => {
+    const secret = 'never-render-this-token';
+    vi.mocked(apiFetch)
+      .mockResolvedValueOnce(report)
+      .mockResolvedValueOnce({
+        provider: { id: 'p1', name: 'Proxmox Lab', status: 'ACTIVE', lastHealthStatus: 'HEALTHY' },
+        result: { status: 'connected', code: null, message: 'The provider API accepted the configured credentials.' },
+      })
+      .mockResolvedValueOnce({ ...report, provider: { ...report.provider, status: 'ACTIVE' } });
+    const { container } = render(<ProviderConfigurationPanel providerId="p1" canManageCredentials />);
+    await waitFor(() => expect(screen.getByText(/Connect provider API/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText('PROXMOX_LAB_API_TOKEN required'), { target: { value: secret } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save & connect API' }));
+    await waitFor(() => expect(screen.getByText(/accepted the configured credentials/)).toBeTruthy());
+    expect(apiFetch).toHaveBeenCalledWith('/api/v1/admin/providers/p1/connect', expect.objectContaining({
+      method: 'POST', body: JSON.stringify({ credentials: { _API_TOKEN: secret } }),
+    }));
+    expect(container.textContent).not.toContain(secret);
   });
 
   it('surfaces a load failure instead of implying the provider is configured', async () => {

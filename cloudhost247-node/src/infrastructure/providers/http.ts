@@ -1,3 +1,4 @@
+import { requireSecureBaseUrl } from './common';
 import { ProviderError, type ProviderFailureCode } from './types';
 
 export interface ProviderHttpOptions {
@@ -21,10 +22,13 @@ export async function providerRequest<T>(
   init: RequestInit = {},
   options: ProviderHttpOptions = {}
 ): Promise<T> {
+  // All provider adapters may attach bearer-equivalent credentials. Refuse a plaintext external
+  // endpoint centrally so an adapter cannot accidentally bypass the transport security rule.
+  const secureUrl = requireSecureBaseUrl('Provider', url);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 30_000);
   try {
-    const response = await fetch(url, {
+    const response = await fetch(secureUrl, {
       ...init,
       signal: controller.signal,
       headers: {

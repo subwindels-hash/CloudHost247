@@ -23,7 +23,7 @@ export default function DashboardServersPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <PlatformLogo slug={server.os_slug ?? ''} name={server.os_name ?? 'Unknown operating system'} className="ch247-server-card__os-mark" />
           {server.control_panel_name && (
-            <span className="ch247-panel-logo-sm" title={server.control_panel_name}>
+            <span className="ch247-panel-logo-sm" title={`${server.control_panel_name} — ${server.control_panel_installation_verified === true ? 'installation verified' : 'selection only; installation unverified'}`}>
               <PlatformLogo slug={server.control_panel_slug ?? ''} name={server.control_panel_name} className="ch247-panel-logo-sm__svg" compact />
             </span>
           )}
@@ -32,7 +32,7 @@ export default function DashboardServersPage() {
       </div>
       <h2>{server.name}</h2>
       <p className="ch247-server-card__os">
-        {server.control_panel_name ? <strong style={{ color: 'var(--ch247-primary, #5f450a)' }}>{server.control_panel_name} · </strong> : null}
+        {server.control_panel_name ? <strong style={{ color: 'var(--ch247-primary, #5f450a)' }}>{server.control_panel_name} · {server.control_panel_installation_verified === true ? 'verified' : 'unverified'} · </strong> : null}
         {server.os_display_name??'Unknown operating system'} · {server.architecture??'—'} <OsLifecycleNotice compact status={server.os_version_status} displayName={server.os_display_name} endOfLifeDate={server.os_end_of_life_date}/>
       </p>
       <div className="ch247-server-card__ip"><small>PUBLIC IP</small><strong>{server.ip_address??(server.provisioning_status?.replace(/_/g,' ')??'Pending')}</strong></div>

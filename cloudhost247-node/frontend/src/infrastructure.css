@@ -98,6 +98,11 @@
 .ch247-provider-config__meta h4{margin:0 0 .4rem;font-size:.92rem}
 .ch247-provider-config__meta ul,.ch247-provider-config__notes{margin:0;padding-left:1.1rem;color:#475569;font-size:.85rem;display:grid;gap:.3rem}
 .ch247-provider-config__notes{color:#64748b;font-style:italic}
+.ch247-provider-connect{display:grid;gap:.85rem;padding:1rem;border:1px solid #e2e8f0;border-radius:10px;background:#fff}
+.ch247-provider-connect h3{margin:0 0 .35rem;font-size:1rem}
+.ch247-provider-connect p{margin:0;color:#64748b;font-size:.85rem;line-height:1.5}
+.ch247-provider-connect .ch247-field small{color:#64748b;font-weight:400}
+.ch247-provider-connect .ch247-btn{justify-self:start}
 .ch247-ok-text{color:#6b4d0c;font-weight:600}
 .ch247-log-meta{display:block;max-width:420px;white-space:pre-wrap;word-break:break-word;color:#475569}
 @media(max-width:767px){.ch247-provider-config__facts{grid-template-columns:1fr}.ch247-log-meta{max-width:none}}

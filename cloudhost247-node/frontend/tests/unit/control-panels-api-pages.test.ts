@@ -1,8 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fetchControlPanelsPage, type ControlPanelPage } from '../../src/lib/control-panels-api';
+import { fetchControlPanel, fetchControlPanelsPage, type ControlPanelPage } from '../../src/lib/control-panels-api';
+import { ApiRequestError } from '../../src/lib/api';
 
 const { apiFetch } = vi.hoisted(() => ({ apiFetch: vi.fn() }));
-vi.mock('../../src/lib/api', () => ({ apiFetch }));
+vi.mock('../../src/lib/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../src/lib/api')>()),
+  apiFetch,
+}));
 
 beforeEach(() => { apiFetch.mockReset(); });
 
@@ -27,6 +31,7 @@ describe('paged public catalogue client', () => {
     expect(first.controlPanels).toHaveLength(24);
     expect(first.total).toBe(1_092);
     expect(first.categoryCounts.ALL).toBe(1_092);
+    expect(first.controlPanels[0].hasPublishedMarketplaceApp).toBeUndefined();
     const end = await fetchControlPanelsPage({ offset: 1_080, limit: 24 });
     expect(end.controlPanels).toHaveLength(12);
     const search = await fetchControlPanelsPage({ offset: 0, limit: 24, search: ' Galaxy ', category: 'APPLICATION_DEPLOYMENT_PLATFORM', license: 'FREE' });
@@ -48,5 +53,23 @@ describe('paged public catalogue client', () => {
     controller.abort();
     apiFetch.mockRejectedValue(new Error('Aborted'));
     await expect(fetchControlPanelsPage({ offset: 0, limit: 24, signal: controller.signal })).rejects.toThrow('Aborted');
+  });
+});
+
+describe('control-panel detail fallback', () => {
+  it('keeps directory entries informational and does not invent a free plan', async () => {
+    apiFetch.mockRejectedValue(new ApiRequestError(404, 'NOT_FOUND', 'Not configured'));
+    const detail = await fetchControlPanel('wordpress');
+    expect(detail.catalogSource).toBe('directory');
+    expect(detail.planCount).toBe(0);
+    expect(detail.startingPrice).toBeNull();
+    expect(detail.hasPublishedMarketplaceApp).toBeUndefined();
+    expect(detail.plans).toEqual([]);
+  });
+
+  it('does not mask an API outage as a directory listing', async () => {
+    const failure = new ApiRequestError(503, 'SERVICE_UNAVAILABLE', 'API is unavailable', true);
+    apiFetch.mockRejectedValue(failure);
+    await expect(fetchControlPanel('wordpress')).rejects.toBe(failure);
   });
 });

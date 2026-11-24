@@ -68,6 +68,38 @@ describe('public control panels catalogue paged loading', () => {
     expect(screen.queryByRole('button', { name: /Show more/ })).toBeNull();
   });
 
+  it('separates a published app listing from a panel bootstrap that lacks lifecycle support', async () => {
+    const [publishedApp, bootstrapOnly] = fixtures(2);
+    stubCatalogue([
+      {
+        ...publishedApp,
+        id: 'wordpress', name: 'WordPress', slug: 'wordpress', catalogSource: 'directory',
+        hasPublishedMarketplaceApp: true, hasValidatedManifest: true,
+        hasPanelBootstrapAdapter: false, panelBootstrapProviderVerified: false,
+        panelManagementAvailable: false, panelManagementProviderVerified: false,
+        operationallySupported: false,
+        planCount: 0, startingPrice: null,
+      },
+      {
+        ...bootstrapOnly,
+        id: 'cpanel', name: 'cPanel', slug: 'cpanel', catalogSource: 'configured',
+        status: 'ACTIVE', hasPublishedMarketplaceApp: false, hasValidatedManifest: false,
+        hasPanelBootstrapAdapter: true, panelBootstrapProviderVerified: false,
+        panelManagementAvailable: true, panelManagementProviderVerified: false,
+        operationallySupported: false,
+        planCount: 0, startingPrice: null,
+      },
+    ]);
+
+    render(<MemoryRouter><ControlPanelsPage /></MemoryRouter>);
+    await waitFor(() => expect(cardCount()).toBe(2));
+    expect(screen.getByText('Published app listing')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'View app listing' }).getAttribute('href')).toBe('/apps/wordpress');
+    expect(screen.getByText('Bootstrap not provider-verified')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Not orderable yet' }).hasAttribute('disabled')).toBe(true);
+    expect(screen.queryByRole('link', { name: 'Configure VPS' })).toBeNull();
+  });
+
   it('resets to page zero and searches the whole directory after each filter change', async () => {
     stubCatalogue();
     render(<MemoryRouter><ControlPanelsPage /></MemoryRouter>);

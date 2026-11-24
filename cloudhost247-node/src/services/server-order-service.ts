@@ -13,6 +13,7 @@ import { fromCents, sumCents, toCents } from '../lib/money';
 import { DEFAULT_CURRENCY } from '../config/billing';
 import { NotFoundError, ValidationError } from '../lib/errors';
 import { provisionPaidOrder } from './provisioning-service';
+import { getControlPanelReadiness } from '../control-panels/readiness';
 
 export interface CreateServerOrderInput {
   planId: string;
@@ -50,9 +51,34 @@ async function validateSshKeys(db: Queryable, userId: string, ids: string[]): Pr
 
 async function validateControlPanel(
   db: Queryable,
-  input: { controlPanelId?: string | null; versionId: string; planId: string; architecture: string }
+  input: {
+    controlPanelId?: string | null;
+    versionId: string;
+    planId: string;
+    architecture: string;
+    cpuCores: number;
+    memoryMb: number;
+    storageMb: number;
+  }
 ): Promise<void> {
   if (!input.controlPanelId) return;
+  const panel = await db.query<{
+    id: string;
+    slug: string;
+    supported_os: string[];
+    minimum_ram_mb: number;
+    minimum_cpu_cores: number;
+    minimum_disk_gb: number;
+  }>(
+    `SELECT id,slug,supported_os,minimum_ram_mb,minimum_cpu_cores,minimum_disk_gb
+     FROM control_panels WHERE id=$1 AND status='ACTIVE'`,
+    [input.controlPanelId]
+  );
+  const selectedPanel = panel.rows[0];
+  if (!selectedPanel) {
+    throw new ValidationError('The selected control panel is unavailable or inactive');
+  }
+
   const explicit = await db.query(
     `SELECT cp.id FROM control_panels cp
      JOIN control_panel_compatibility c ON c.control_panel_id=cp.id
@@ -61,7 +87,9 @@ async function validateControlPanel(
        AND (c.plan_id IS NULL OR c.plan_id=$4) LIMIT 1`,
     [input.controlPanelId, input.versionId, input.architecture, input.planId]
   );
-  if (explicit.rows[0]) return;
+  if (!explicit.rows[0]) {
+    throw new ValidationError('The selected control panel has no active compatibility record for this operating-system version, architecture, and plan');
+  }
 
   const osInfo = await db.query<{ slug: string }>(
     `SELECT os.slug FROM operating_system_versions v
@@ -70,17 +98,25 @@ async function validateControlPanel(
     [input.versionId]
   );
   const osSlug = osInfo.rows[0]?.slug;
-
-  const panel = await db.query<{ id: string; supported_os: string[] }>(
-    `SELECT id, supported_os FROM control_panels WHERE id=$1 AND status='ACTIVE'`,
-    [input.controlPanelId]
-  );
-  if (!panel.rows[0]) {
-    throw new ValidationError('The selected control panel is unavailable or inactive');
+  if (!osSlug || !selectedPanel.supported_os.some((os) => osSlug.includes(os) || os.includes(osSlug))) {
+    throw new ValidationError(`The selected control panel is not listed as compatible with operating system '${osSlug ?? 'unknown'}'`);
   }
 
-  if (osSlug && !panel.rows[0].supported_os.some((os) => osSlug.includes(os) || os.includes(osSlug))) {
-    throw new ValidationError(`The selected control panel is not compatible with operating system '${osSlug}'`);
+  const resourceIssues: string[] = [];
+  if (input.cpuCores < selectedPanel.minimum_cpu_cores) resourceIssues.push(`at least ${selectedPanel.minimum_cpu_cores} CPU cores`);
+  if (input.memoryMb < selectedPanel.minimum_ram_mb) resourceIssues.push(`at least ${selectedPanel.minimum_ram_mb} MB RAM`);
+  if (input.storageMb < selectedPanel.minimum_disk_gb * 1024) resourceIssues.push(`at least ${selectedPanel.minimum_disk_gb} GB storage`);
+  if (resourceIssues.length > 0) {
+    throw new ValidationError(
+      `The selected server configuration does not meet ${selectedPanel.slug}'s listed minimum hardware requirements (${resourceIssues.join(', ')})`
+    );
+  }
+
+  const readiness = getControlPanelReadiness(selectedPanel.slug);
+  if (!readiness.operationallySupported) {
+    throw new ValidationError(
+      `Control-panel installation is not orderable: ${selectedPanel.slug} does not have provider-verified bootstrap, per-server installation verification, and lifecycle management acceptance. Choose no panel or install/manage software independently after server provisioning.`
+    );
   }
 }
 
@@ -119,12 +155,6 @@ export async function createServerOrder(
     throw new ValidationError('That operating system, version, architecture, region, and plan combination is unavailable');
   }
   await validateSshKeys(db,userId,input.sshKeyIds);
-  await validateControlPanel(db,{
-    controlPanelId: input.controlPanelId,
-    versionId: input.operatingSystemVersionId,
-    planId: input.planId,
-    architecture: input.architecture,
-  });
 
   const metadata = configuration.configuration_metadata ?? {};
   const cpuCores = integerMetadata(metadata,'cpuCores',1);
@@ -132,6 +162,15 @@ export async function createServerOrder(
   const storageMb = integerMetadata(metadata,'storageMb',1024);
   const bandwidthGb = typeof metadata.bandwidthGb === 'number' && Number.isInteger(metadata.bandwidthGb)
     ? metadata.bandwidthGb : null;
+  await validateControlPanel(db,{
+    controlPanelId: input.controlPanelId,
+    versionId: input.operatingSystemVersionId,
+    planId: input.planId,
+    architecture: input.architecture,
+    cpuCores,
+    memoryMb,
+    storageMb,
+  });
   const capabilities = typeof metadata.capabilities === 'object' && metadata.capabilities !== null
     ? metadata.capabilities as Record<string,boolean> : {};
 

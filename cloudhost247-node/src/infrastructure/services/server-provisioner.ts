@@ -24,7 +24,7 @@ import { findProviderById, type ServerOsImageRow } from '../../db/infrastructure
 import { resolveAvailableConfiguration } from '../../db/operating-systems';
 import { recordAuditBestEffort } from '../../lib/audit';
 import { notifyServerReady, notifyServerTerminated } from '../../services/notification-service';
-import { createInfrastructureProviderAdapter } from '../providers/registry';
+import { createConfiguredInfrastructureProviderAdapter } from '../providers/credentials';
 import {
   ProviderError,
   type CreateProviderServerInput,
@@ -258,7 +258,7 @@ export async function executeServerProvisioning(
     if (!server || !server.customer_id) throw new ProviderError('INVALID_CONFIGURATION','Customer server record is missing',false);
     const provider = await findProviderById(db,job.provider_id);
     if (!provider || provider.status !== 'ACTIVE') throw new ProviderError('PROVIDER_NOT_CONFIGURED','Infrastructure provider is not active',false);
-    const adapter = options.adapterOverride ?? createInfrastructureProviderAdapter(provider,options.source);
+    const adapter = options.adapterOverride ?? await createConfiguredInfrastructureProviderAdapter(db,provider,options.source);
 
     if (!['PROVISION','REINSTALL'].includes(job.operation)) {
       return { outcome: await executeLifecycleAction(db,deployment,job,adapter,server) };
