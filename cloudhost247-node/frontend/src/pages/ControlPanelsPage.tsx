@@ -76,6 +76,83 @@ export default function ControlPanelsPage() {
     }
   };
   const remainingCount = total - (panels?.length ?? 0);
+  const freePanels = panels?.filter((p) => !p.requiresLicense) ?? [];
+  const paidPanels = panels?.filter((p) => p.requiresLicense) ?? [];
+
+  const renderPanelCard = (panel: ControlPanelSummary) => {
+    const priceNum = Number(panel.startingPrice);
+    const priceDisplay = priceNum === 0
+      ? (panel.requiresLicense ? `$0 / ${panel.billingCycle}` : 'Free')
+      : `$${panel.startingPrice} / ${panel.billingCycle}`;
+    return (
+      <article key={panel.id} className="ch247-card ch247-panel-card">
+        <div className="ch247-panel-card__header">
+          <div className={`ch247-panel-card__logo-wrap${isWidePlatformLogo(panel.slug) ? ' ch247-panel-card__logo-wrap--wide' : ''}`}>
+            <PlatformLogo slug={panel.slug} name={panel.name} className="ch247-panel-card__logo" />
+          </div>
+          <div>
+            <h2 className="ch247-panel-card__title">{panel.name}</h2>
+            <span className="ch247-badge ch247-badge--category">
+              {panel.category === 'OPERATING_SYSTEM'
+                ? 'Operating System'
+                : panel.category === 'APPLICATION_DEPLOYMENT_PLATFORM'
+                  ? 'App Deployment'
+                  : panel.category === 'SERVER_MANAGEMENT'
+                    ? 'Management'
+                    : 'Server Panel'}
+            </span>
+          </div>
+        </div>
+
+        <p className="ch247-panel-card__desc">{panel.description}</p>
+
+        <div className="ch247-panel-card__specs">
+          <div className="ch247-spec-item">
+            <span className="ch247-spec-label">Min. Spec</span>
+            <span className="ch247-spec-value">
+              {panel.minimumRequirements.cpuCores} CPU · {(panel.minimumRequirements.ramMb / 1024).toFixed(panel.minimumRequirements.ramMb % 1024 ? 1 : 0)} GB RAM · {panel.minimumRequirements.diskGb} GB
+            </span>
+          </div>
+          <div className="ch247-spec-item">
+            <span className="ch247-spec-label">License</span>
+            <span className="ch247-spec-value">
+              {panel.requiresLicense ? (
+                <span className="ch247-tag ch247-tag--license">Commercial</span>
+              ) : (
+                <span className="ch247-tag ch247-tag--free">Free & Included</span>
+              )}
+            </span>
+          </div>
+          <div className="ch247-spec-item">
+            <span className="ch247-spec-label">Supported OS</span>
+            <span className="ch247-spec-value ch247-spec-os">
+              {panel.supportedOs.slice(0, 3).map((os) => (
+                <span key={os} className="ch247-pill">{os}</span>
+              ))}
+              {panel.supportedOs.length > 3 && (
+                <span className="ch247-pill ch247-pill--more">+{panel.supportedOs.length - 3}</span>
+              )}
+            </span>
+          </div>
+        </div>
+
+        <div className="ch247-panel-card__footer">
+          <div className="ch247-panel-card__pricing">
+            <span className="ch247-panel-card__price-label">CloudHost247 Price</span>
+            <strong className="ch247-panel-card__price">{priceDisplay}</strong>
+          </div>
+          <div className="ch247-panel-card__actions">
+            <Link to={`/hosting/control-panels/${panel.slug}`} className="ch247-btn ch247-btn--secondary">
+              View Details
+            </Link>
+            <Link to={`/servers/new?panel=${panel.slug}`} className="ch247-btn ch247-btn--primary">
+              Deploy Now
+            </Link>
+          </div>
+        </div>
+      </article>
+    );
+  };
 
   return (
     <div className="ch247-control-panels-page">
@@ -92,8 +169,6 @@ export default function ControlPanelsPage() {
       <section className="ch247-section ch247-control-panels-section">
         <div className="ch247-control-panels__body">
           {error && <div className="ch247-banner ch247-banner--error">{error}</div>}
-          <p className="ch247-logo-disclaimer">Logos identify software, not partnerships. Where original artwork has not been verified, the first two letters identify the app instead.</p>
-
           <div className="ch247-marketplace-controls ch247-control-panels-controls">
             <div className="ch247-filter-tabs" role="tablist" aria-label="Control panel categories">
               {[
@@ -158,79 +233,29 @@ export default function ControlPanelsPage() {
             <p className="ch247-control-panels-count" role="status" aria-live="polite">
               Showing {panels.length} of {total} platforms
             </p>
-            <div id="platform-results" className="ch247-panel-grid" aria-busy={loadingMore}>
-              {panels.map((panel) => {
-                const priceNum = Number(panel.startingPrice);
-                const priceDisplay = priceNum === 0 ? 'Free' : `$${panel.startingPrice} / ${panel.billingCycle}`;
-                return (
-                  <article key={panel.id} className="ch247-card ch247-panel-card">
-                    <div className="ch247-panel-card__header">
-                      <div className={`ch247-panel-card__logo-wrap${isWidePlatformLogo(panel.slug) ? ' ch247-panel-card__logo-wrap--wide' : ''}`}>
-                        <PlatformLogo slug={panel.slug} name={panel.name} className="ch247-panel-card__logo" />
-                      </div>
-                      <div>
-                        <h2 className="ch247-panel-card__title">{panel.name}</h2>
-                        <span className="ch247-badge ch247-badge--category">
-                          {panel.category === 'OPERATING_SYSTEM'
-                            ? 'Operating System'
-                            : panel.category === 'APPLICATION_DEPLOYMENT_PLATFORM'
-                              ? 'App Deployment'
-                              : panel.category === 'SERVER_MANAGEMENT'
-                                ? 'Management'
-                                : 'Server Panel'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <p className="ch247-panel-card__desc">{panel.description}</p>
-
-                    <div className="ch247-panel-card__specs">
-                      <div className="ch247-spec-item">
-                        <span className="ch247-spec-label">Min. Spec</span>
-                        <span className="ch247-spec-value">
-                          {panel.minimumRequirements.cpuCores} CPU · {(panel.minimumRequirements.ramMb / 1024).toFixed(panel.minimumRequirements.ramMb % 1024 ? 1 : 0)} GB RAM · {panel.minimumRequirements.diskGb} GB
-                        </span>
-                      </div>
-                      <div className="ch247-spec-item">
-                        <span className="ch247-spec-label">License</span>
-                        <span className="ch247-spec-value">
-                          {panel.requiresLicense ? (
-                            <span className="ch247-tag ch247-tag--license">Commercial</span>
-                          ) : (
-                            <span className="ch247-tag ch247-tag--free">Free & Included</span>
-                          )}
-                        </span>
-                      </div>
-                      <div className="ch247-spec-item">
-                        <span className="ch247-spec-label">Supported OS</span>
-                        <span className="ch247-spec-value ch247-spec-os">
-                          {panel.supportedOs.slice(0, 3).map((os) => (
-                            <span key={os} className="ch247-pill">{os}</span>
-                          ))}
-                          {panel.supportedOs.length > 3 && (
-                            <span className="ch247-pill ch247-pill--more">+{panel.supportedOs.length - 3}</span>
-                          )}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="ch247-panel-card__footer">
-                      <div className="ch247-panel-card__pricing">
-                        <span className="ch247-panel-card__price-label">CloudHost247 Price</span>
-                        <strong className="ch247-panel-card__price">{priceDisplay}</strong>
-                      </div>
-                      <div className="ch247-panel-card__actions">
-                        <Link to={`/hosting/control-panels/${panel.slug}`} className="ch247-btn ch247-btn--secondary">
-                          View Details
-                        </Link>
-                        <Link to={`/servers/new?panel=${panel.slug}`} className="ch247-btn ch247-btn--primary">
-                          Deploy Now
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
+            <div id="platform-results" aria-busy={loadingMore}>
+              {freePanels.length > 0 && (
+                <section className="ch247-panel-group" aria-labelledby="ch247-free-panels-heading">
+                  <div className="ch247-panel-group__header">
+                    <h2 id="ch247-free-panels-heading" className="ch247-panel-group__title">Free &amp; Included</h2>
+                    <span className="ch247-badge ch247-badge--muted">{freePanels.length}</span>
+                  </div>
+                  <div className="ch247-panel-grid">
+                    {freePanels.map(renderPanelCard)}
+                  </div>
+                </section>
+              )}
+              {paidPanels.length > 0 && (
+                <section className="ch247-panel-group" aria-labelledby="ch247-paid-panels-heading">
+                  <div className="ch247-panel-group__header">
+                    <h2 id="ch247-paid-panels-heading" className="ch247-panel-group__title">Paid &amp; Commercial</h2>
+                    <span className="ch247-badge ch247-badge--muted">{paidPanels.length}</span>
+                  </div>
+                  <div className="ch247-panel-grid">
+                    {paidPanels.map(renderPanelCard)}
+                  </div>
+                </section>
+              )}
             </div>
             {remainingCount > 0 && (
               <div className="ch247-control-panels-more">
