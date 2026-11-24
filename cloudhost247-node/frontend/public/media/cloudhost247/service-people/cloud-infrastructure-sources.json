@@ -1,0 +1,242 @@
+[
+  {
+    "name": "cloud-overview",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/cloud-overview-640.webp",
+        "sha256": "afe0e83b6ebc66f82a2377b8ece1a0c904f5b71ced1c7929169e02cad8d95145"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-overview-640.avif",
+        "sha256": "946339c735a56d3a238def9578a1e3d59c02c599806fa211c00c4ad7a71eed50"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-overview-960.webp",
+        "sha256": "621c2d709266b353a65b009c835d595e1e4a197b7bca9164db8cdbbbd0d916e5"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-overview-960.avif",
+        "sha256": "5d14a97121ecc2f75e4c84102d803cf691c57380e06579baff5bfad34b78c35b"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-overview-1280.webp",
+        "sha256": "c9c0901c186d7cbd4b2197a65c41f77a9ab103f2d60a8f77f6813d82888ed660"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/cloud-overview-1280.avif",
+        "sha256": "8f5e852c51db686da909b44ee39229399d2461876c05c8031a1cc2f2cfae467c"
+      }
+    ]
+  },
+  {
+    "name": "public-cloud",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/public-cloud-640.webp",
+        "sha256": "a830868405f00c02b36def06b42ccc6e55dfadc20369911fe258b8380446fbb3"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/public-cloud-640.avif",
+        "sha256": "e9c6f88dcf13cd8838222384afde4ccc79e1c69411786e14dc8aac6767db8664"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/public-cloud-960.webp",
+        "sha256": "c709e6da5ed81d3ad1b85acb7f215d72025d49fbe0f1317055a46bf71d4ec42f"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/public-cloud-960.avif",
+        "sha256": "7012d6e17332ac9628ab228110c08d5eb1ff524e95f54c9e34aee46ee1cbd95a"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/public-cloud-1280.webp",
+        "sha256": "7d230cbae7856a336713ceace4076d2d0cd5c90c2bfe6d9a847075e8f250649d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/public-cloud-1280.avif",
+        "sha256": "c2b1bd84d7484f86714db57b2042317ced5024d25be1d5f1de914d4efbc718da"
+      }
+    ]
+  },
+  {
+    "name": "private-cloud",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/private-cloud-640.webp",
+        "sha256": "df0d16a3fdc0cb8c4d6ea87928f46d41984d1cb0002fb24373eb1c5d3cb2c5e3"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/private-cloud-640.avif",
+        "sha256": "3e15bf72c172a9ea32568466ebaa5f734f85d0ccda96c005c1abdb1b33f0d875"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/private-cloud-960.webp",
+        "sha256": "c1044f7921bff398c02cf1ffc1d28f1a6f97411a61646abdaae3c99dfb5a44cd"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/private-cloud-960.avif",
+        "sha256": "02178fa0143ffad3632453e94cacce051465ac4064a7ebf81d61e8e5a179693e"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/private-cloud-1280.webp",
+        "sha256": "e8780d7719422465c6319b681867cf833c0873317bc624d90d5fffc43be785b7"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/private-cloud-1280.avif",
+        "sha256": "6ab648d9f222956da848d1420ed5088f4e3d4e076239dfaf6b5adfd77aaf7ce3"
+      }
+    ]
+  },
+  {
+    "name": "enterprise-servers",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/enterprise-servers-640.webp",
+        "sha256": "902e6cba0e779d9f09b1056d245c74e0fa2a40353bf9b4aca67863bc96636c92"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/enterprise-servers-640.avif",
+        "sha256": "db024135f31031972cf9d762084eab8bf6bb8cb7edc750433ba800dfbfd2b330"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/enterprise-servers-960.webp",
+        "sha256": "2c0f40807ae0a8e754fff7a5c82e08d78c56b1f6f04bfb5dfce44c882e3206b8"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/enterprise-servers-960.avif",
+        "sha256": "868dff2acccafaef710f2a664a029d98a3610f99a9855970ddd042ec7e7c7318"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/enterprise-servers-1280.webp",
+        "sha256": "01d934b0171b5c720e06ece752e6e55efbe20f912c121572652bf96d9dbd3893"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/enterprise-servers-1280.avif",
+        "sha256": "158ba49adf1839db91fef02c134c4902c7b9243c6d104968dd7e271788879ade"
+      }
+    ]
+  },
+  {
+    "name": "game-servers",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/game-servers-640.webp",
+        "sha256": "83f1b8de64483c0200ff3f9104876e6bb43c463ddd060cf296b6c1bc7f68d8e2"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/game-servers-640.avif",
+        "sha256": "db0a3bf352f40e0d45d96ef8cb3cdc08193bfe36bfc305f4ec7f7d38879d570e"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/game-servers-960.webp",
+        "sha256": "cb57da7452da73d606fca70fd78e8a4e507c8150f7388b0c5b16c80d9fb47581"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/game-servers-960.avif",
+        "sha256": "16fc2e3ecd87a79ea2a06d594cb4876acebd09ad42c8bf87a4f565791cf18559"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/game-servers-1280.webp",
+        "sha256": "ea9011214ae5a6a9d5f615ff96df1d163164854e90181413dce1cb0b0078117e"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/game-servers-1280.avif",
+        "sha256": "443bfa96303bcb2f13322a3cbc43df8611adca039cda70716f186c7f611f0ffc"
+      }
+    ]
+  },
+  {
+    "name": "infrastructure",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/infrastructure-640.webp",
+        "sha256": "774ea91707ef140a8475c2a293a2446498b4da029a9d8f88150fc5c0f065b9c6"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/infrastructure-640.avif",
+        "sha256": "0d3ca4dca7e5022badd8cf1a5eea79090b762fa26fb654d1c62933d4d5ad2a11"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/infrastructure-960.webp",
+        "sha256": "d14d9f8d08b579433f94d052d5fb3956691a46a80d852be8b93e9fb39090b822"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/infrastructure-960.avif",
+        "sha256": "0570119293d4af42105d52007c2175b4836e545d9e71081ae85e103e794d5877"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/infrastructure-1280.webp",
+        "sha256": "c8c3375c62690c5f6240931d20e666c4cab989d8d5fda6cc3bbb54b0d1ba53f6"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/infrastructure-1280.avif",
+        "sha256": "3567727f222bac5954f505d549518a41d01f9fbc6c0c4c24315957401fc5fb34"
+      }
+    ]
+  },
+  {
+    "name": "data-centers",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/data-centers-640.webp",
+        "sha256": "535ddc88f0ed6707665d21836d8e0068c27a3928704e7505aa710fe166ed5ce1"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/data-centers-640.avif",
+        "sha256": "be3673f63e69f205c9a6b41aaf53d47851c9d535289d0a51f17a9becefbf5554"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/data-centers-960.webp",
+        "sha256": "a351522d228930528165fae91c5d5e5679d598b683fe73e2f7b1e6d20d7029ea"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/data-centers-960.avif",
+        "sha256": "4c942c19d6a7e1b89b95e1bc1483eb69a20d313f0859e0cf58f7bc58f6700902"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/data-centers-1280.webp",
+        "sha256": "77382b62dab379c7862ccdfdd4c9b8d2f46d0d69049972dbadb946e203d74356"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/data-centers-1280.avif",
+        "sha256": "b9662b17390682abb655225f5347ffe6f70c912c8ea37f5609e7b1eeaeaa0ecf"
+      }
+    ]
+  },
+  {
+    "name": "network",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/network-640.webp",
+        "sha256": "b6f5c384a922cffcd1dab26211f1f21de899fb365d569d163b251ba2e65224b0"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/network-640.avif",
+        "sha256": "dbe177aeca8a28ff794f6e2df3077007276468796748698b24bb65f6dd183e70"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/network-960.webp",
+        "sha256": "65078b4cbc8877b3878272730bde56764c1ce91620b7afdaedd3828e8d9bc32d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/network-960.avif",
+        "sha256": "babbd987fd356b4cc20f033bbcb12a018ea7379a0e9f3e35f542039d8d78fd82"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/network-1280.webp",
+        "sha256": "338c8d7d3d30f68abdf6af2d243185de8b51431b50f39811d600b96b47b1a06d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/network-1280.avif",
+        "sha256": "dd8d899009255a113f062907f81881c6122394f2af71a03e7d71166cb0b55b67"
+      }
+    ]
+  }
+]

@@ -1,0 +1,83 @@
+Number Services hero
+AI-generated illustrative image created for this page at the user's request.
+Depicts two fictional adult professionals: one making a phone call, one viewing
+his phone. Not actual customers, employees, or a provider endorsement.
+Responsive WebP and AVIF variants preserve the full 4:3 composition.
+This image is assigned only to /number-services in the service hero registry.
+
+Social Media Marketing hero
+AI-generated illustrative portrait of a fictional adult content creator with a
+smartphone, laptop and camera. Not an actual customer, employee or endorsement.
+Used only on /smm-services. Like, Comment and Share emoji cards are HTML page
+illustrations, not real engagement results, working social buttons or guarantees.
+Layout research: https://socialmedia55.com/ and https://www.hootsuite.com/.
+No third-party photography, testimonials, metrics or service claims were copied.
+The SMM hero now includes user-requested example metrics (12.8K likes, 2.4K
+comments, 3.6K shares, 25.0K followers), explicitly disclosed on the page as
+illustrative numbers, not actual results. These are not live analytics or promises.
+
+Hosting and email people-scenes (six-page batch)
+SMTP, Email Hosting, Hosting overview, Web Hosting, VPS and Dedicated Servers
+have separate AI-generated illustrative photos. People, workplaces, equipment
+and on-screen interfaces are fictional. They are not proof of actual customers,
+CloudHost247 facilities, software capabilities, successful email delivery or
+provider endorsement. No invented metrics or guarantees are added to the pages.
+The email scenes show a generic compose window and Send button, not a real mail
+client integration. Each image belongs to one page only. Responsive file hashes
+are recorded in hosting-email-sources.json.
+
+Cloud and infrastructure people-scenes (eight-page batch)
+Cloud overview, Public Cloud, Private Cloud, Enterprise Servers, Game Servers,
+Infrastructure, Data Centers and Network each have a distinct AI-generated scene
+of people beside their relevant computer/server equipment. Faces, workplaces,
+equipment and screen interfaces are fictional, not actual employees, customers,
+provider facilities or real monitoring results. No third-party branding is claimed.
+Each scene is assigned only to its own page. Responsive file hashes are recorded
+in cloud-infrastructure-sources.json. Full-frame layout preserves people and screens.
+
+Cloud operations people-scenes (eight-page batch)
+Operating Systems, Server Management, Monitoring, Backups, Firewall, Security,
+IP Management and Managed Services each have a distinct AI-generated scene.
+People, hardware, facilities and screen interfaces are fictional illustrations,
+not actual staff, customers, provider facilities, monitoring results or product
+screenshots. No performance or security guarantees are represented by the images.
+Each scene is exclusive to its assigned route. Responsive file hashes are in
+cloud-operations-sources.json. Full-frame layout keeps overlays off faces/screens.
+
+Developer people-scenes (eight-page batch)
+Developers overview, Deployment, Environments, Node.js, PHP, Python, Laravel and
+Docker each have their own AI-generated people-and-workstation illustration.
+People, workplaces, equipment and screen interfaces are fictional, not actual
+staff, customers, software screenshots or evidence of supported capabilities.
+No third-party endorsement is claimed. Existing original brand marks elsewhere
+on the pages are unchanged. Each scene is exclusive to its route; responsive
+file hashes are recorded in developer-sources.json.
+
+Hosting specialties people-scenes (ten-page batch)
+Business, WordPress, Reseller, Windows, Developer, API, SSL, Backups, Migration
+and Security hosting each use a distinct AI-generated illustration. People,
+workplaces, equipment and interfaces are fictional, not actual staff, clients,
+software screenshots, certificate records, backup schedules or security results.
+No illustrated screen content represents actual plan features or guarantees.
+Original brand marks elsewhere on the pages remain unchanged. Each image is
+exclusive to its route. File hashes are in hosting-specialties-sources.json.
+
+Business Hosting image revised at user request: fictional male business owner
+reviewing a generic online shop at a desktop, replacing the earlier female-owner
+scene. All six responsive variants and their manifest hashes were updated.
+
+Platform and other service people-scenes (ten-page batch)
+Platforms, Applications, Databases, Containers, PaaS, cPanel, Websites, RDP,
+Digital Products and Proxy Services each use their own AI-generated illustration.
+People, facilities, devices and screen content are fictional, not actual staff,
+customers, product screenshots, analytics or evidence of features and guarantees.
+No third-party endorsement is claimed. Original logos elsewhere are unchanged.
+Each scene is exclusive to its route. Responsive file hashes are recorded in
+platform-services-sources.json. Domains remains pending the next generation batch.
+
+Domains completion and Business Hosting cache refresh
+Domains now has a unique AI-generated entrepreneur/domain-search scene; screen
+content is illustrative, not actual domain availability or pricing. Hashes are
+in domain-sources.json. Business Hosting's revised shop-owner scene now uses
+business-hosting-shop-v2 URLs for every responsive variant to avoid stale browser
+caches. Its hashes and paths are updated in hosting-specialties-sources.json.

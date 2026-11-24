@@ -1,0 +1,32 @@
+[
+  {
+    "name": "domains",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/domains-640.webp",
+        "sha256": "935a4d2936c279693d8b85cb26245d36026343199b4d89224fee9ca536f9dccc"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/domains-640.avif",
+        "sha256": "3fd8430f320f4cbdd73ce37ed45c212a217a4ecc05783cce59163a0af6e01607"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/domains-960.webp",
+        "sha256": "32969a9055e8b493a577cccbbe398a19795398a281c6ee9d81f30f2f63637afe"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/domains-960.avif",
+        "sha256": "01056f967a074be2c9b3913269975b463ffb9cc3ce9b95eaa841d1fce2809393"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/domains-1280.webp",
+        "sha256": "bf43d52d3681c683d87a22fa111044b43a9ef9a0c16622e39fac9849dd63e722"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/domains-1280.avif",
+        "sha256": "47a25ca20546655b9e22b74d2a328a8f101b8de9553a104a9e6767d5b2ca7b1d"
+      }
+    ]
+  }
+]

@@ -1,214 +1,316 @@
 {
   "/cloud": {
-    "root": "/media/cloudhost247/cloud/cloud-hosting-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/cloud-overview",
+    "format": "raster",
+    "people": true,
+    "description": "Two cloud specialists reviewing a diagram on a desktop monitor beside a server rack"
   },
   "/cloud/public": {
-    "root": "/media/cloudhost247/cloud/public-cloud-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/public-cloud",
+    "format": "raster",
+    "people": true,
+    "description": "An engineer using a laptop and large cloud resource monitor near server racks"
   },
   "/cloud/private": {
-    "root": "/media/cloudhost247/cloud/private-cloud-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/private-cloud",
+    "format": "raster",
+    "people": true,
+    "description": "A systems specialist using a laptop beside an enclosed private server cabinet"
   },
   "/cloud/enterprise-servers": {
-    "root": "/media/cloudhost247/servers/enterprise-servers-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/enterprise-servers",
+    "format": "raster",
+    "people": true,
+    "description": "Two engineers reviewing a workstation monitor beside enterprise server racks"
   },
   "/cloud/game-servers": {
-    "root": "/media/cloudhost247/servers/game-servers-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/game-servers",
+    "format": "raster",
+    "people": true,
+    "description": "A game developer at dual monitors showing a game and server panels beside a computer tower"
   },
   "/cloud/infrastructure": {
-    "root": "/media/cloudhost247/hero/global-network-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/infrastructure",
+    "format": "raster",
+    "people": true,
+    "description": "An engineer checking a tablet beside networking racks and a topology monitor"
   },
   "/cloud/data-centers": {
-    "root": "/media/cloudhost247/cloud/data-centers-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/data-centers",
+    "format": "raster",
+    "people": true,
+    "description": "A technician using a laptop on a cart beside an open rack in a data center aisle"
   },
   "/cloud/network": {
-    "root": "/media/cloudhost247/cloud/network-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/network",
+    "format": "raster",
+    "people": true,
+    "description": "A network engineer at a desktop monitor beside switches and organized network cables"
   },
   "/cloud/operating-systems": {
-    "root": "/media/cloudhost247/operating-systems/os-catalog-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/operating-systems",
+    "format": "raster",
+    "people": true,
+    "description": "A systems administrator at an operating system settings monitor beside a server tower"
   },
   "/cloud/server-management": {
-    "root": "/media/cloudhost247/management/server-control-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/server-management",
+    "format": "raster",
+    "people": true,
+    "description": "A server administrator using a laptop beside an open server rack"
   },
   "/cloud/monitoring": {
-    "root": "/media/cloudhost247/management/monitoring-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/monitoring",
+    "format": "raster",
+    "people": true,
+    "description": "An operations analyst reviewing resource charts on dual monitors beside a server rack"
   },
   "/cloud/backups": {
-    "root": "/media/cloudhost247/photography/server-storage",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/cloud-backups",
+    "format": "raster",
+    "people": true,
+    "description": "A backup administrator at a file scheduling monitor beside a storage array"
   },
   "/cloud/firewall": {
-    "root": "/media/cloudhost247/management/firewall-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/firewall",
+    "format": "raster",
+    "people": true,
+    "description": "A network specialist reviewing firewall rules at a monitor beside a network appliance"
   },
   "/cloud/security": {
-    "root": "/media/cloudhost247/security/security-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/cloud-security",
+    "format": "raster",
+    "people": true,
+    "description": "A security analyst at an audit monitor beside glass-front server equipment"
   },
   "/cloud/ip-management": {
-    "root": "/media/cloudhost247/management/ip-management-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/ip-management",
+    "format": "raster",
+    "people": true,
+    "description": "A network administrator reviewing address allocation on a monitor beside network switches"
   },
   "/cloud/managed-services": {
-    "root": "/media/cloudhost247/management/managed-services-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/managed-services",
+    "format": "raster",
+    "people": true,
+    "description": "Two support professionals reviewing a service ticket monitor beside a server cabinet"
   },
   "/developers": {
-    "root": "/media/cloudhost247/deployment/developer-hosting-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/developers",
+    "format": "raster",
+    "people": true,
+    "description": "Two developers reviewing code on a desktop monitor beside a computer tower"
   },
   "/developers/deployment": {
-    "root": "/media/cloudhost247/deployment/deployment-pipeline-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/deployment",
+    "format": "raster",
+    "people": true,
+    "description": "A release engineer using a laptop beside a deployment pipeline monitor and server rack"
   },
   "/developers/environments": {
-    "root": "/media/cloudhost247/photography/data-centre-workstation",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/environments",
+    "format": "raster",
+    "people": true,
+    "description": "An engineer using dual monitors with code and application previews beside a workstation tower"
   },
   "/developers/nodejs": {
-    "root": "/media/cloudhost247/deployment/nodejs-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/nodejs",
+    "format": "raster",
+    "people": true,
+    "description": "A developer at a code editor monitor with a laptop and computer tower"
   },
   "/developers/php": {
-    "root": "/media/cloudhost247/deployment/php-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/php",
+    "format": "raster",
+    "people": true,
+    "description": "A web developer at a monitor showing code and a web application preview"
   },
   "/developers/python": {
-    "root": "/media/cloudhost247/deployment/python-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/python",
+    "format": "raster",
+    "people": true,
+    "description": "A developer reviewing code and data visualizations on a monitor beside a computer tower"
   },
   "/developers/laravel": {
-    "root": "/media/cloudhost247/deployment/laravel-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/laravel",
+    "format": "raster",
+    "people": true,
+    "description": "A web developer at a code and dashboard monitor beside a laptop and computer tower"
   },
   "/developers/docker": {
-    "root": "/media/cloudhost247/deployment/docker-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/docker",
+    "format": "raster",
+    "people": true,
+    "description": "A DevOps engineer at dual monitors showing a container diagram and terminal beside a server cabinet"
   },
   "/hosting": {
-    "root": "/media/cloudhost247/photography/data-centre-aisle",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/hosting",
+    "format": "raster",
+    "people": true,
+    "description": "An IT consultant at a desktop monitor beside a glass-walled server room"
   },
   "/hosting/web-hosting": {
-    "root": "/media/cloudhost247/hosting/web-hosting-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/web-hosting",
+    "format": "raster",
+    "people": true,
+    "description": "A web designer working beside a monitor displaying a website editor"
   },
   "/hosting/business": {
-    "root": "/media/cloudhost247/hosting/business-hosting-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/business-hosting-shop-v2",
+    "format": "raster",
+    "people": true,
+    "description": "A business owner reviewing an online shop on a desktop monitor beside a laptop and computer tower"
   },
   "/hosting/wordpress": {
-    "root": "/media/cloudhost247/hosting/wordpress-hosting-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/wordpress-hosting",
+    "format": "raster",
+    "people": true,
+    "description": "A content creator at a blog editor monitor beside a computer tower"
   },
   "/hosting/reseller": {
-    "root": "/media/cloudhost247/hosting/reseller-hosting-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/reseller-hosting",
+    "format": "raster",
+    "people": true,
+    "description": "Two agency professionals reviewing client websites on a monitor beside a server cabinet"
   },
   "/hosting/windows": {
-    "root": "/media/cloudhost247/hosting/windows-hosting-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/windows-hosting",
+    "format": "raster",
+    "people": true,
+    "description": "A systems administrator at a server configuration monitor beside server equipment"
   },
   "/hosting/email": {
-    "root": "/media/cloudhost247/hosting/email-hosting-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/email",
+    "format": "raster",
+    "people": true,
+    "description": "A business owner composing and sending an email on a laptop"
   },
   "/hosting/developer": {
-    "root": "/media/cloudhost247/photography/documentation-workspace",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/developer-hosting",
+    "format": "raster",
+    "people": true,
+    "description": "A developer using a laptop beside a code and website preview monitor"
   },
   "/hosting/api": {
-    "root": "/media/cloudhost247/deployment/api-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/api-hosting",
+    "format": "raster",
+    "people": true,
+    "description": "An engineer at a request and response monitor beside a laptop and server tower"
   },
   "/hosting/ssl": {
-    "root": "/media/cloudhost247/security/ssl-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/ssl-hosting",
+    "format": "raster",
+    "people": true,
+    "description": "A website administrator reviewing certificate settings on a desktop monitor"
   },
   "/hosting/backups": {
-    "root": "/media/cloudhost247/management/backups-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/hosting-backups",
+    "format": "raster",
+    "people": true,
+    "description": "An administrator at a backup scheduling monitor beside a storage array"
   },
   "/hosting/migration": {
-    "root": "/media/cloudhost247/management/migration-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/migration-hosting",
+    "format": "raster",
+    "people": true,
+    "description": "An engineer at dual monitors showing source and destination website files"
   },
   "/hosting/security": {
-    "root": "/media/cloudhost247/security/platform-security-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/hosting-security",
+    "format": "raster",
+    "people": true,
+    "description": "A security engineer at a website audit monitor beside a server rack"
   },
   "/platforms": {
-    "root": "/media/cloudhost247/photography/operations-centre",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/platforms",
+    "format": "raster",
+    "people": true,
+    "description": "A platform engineer at an application monitor beside a server cabinet"
   },
   "/platforms/applications": {
-    "root": "/media/cloudhost247/applications/application-stack-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/applications",
+    "format": "raster",
+    "people": true,
+    "description": "A developer reviewing an application catalog on a desktop monitor beside a laptop"
   },
   "/platforms/databases": {
-    "root": "/media/cloudhost247/photography/server-hardware",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/databases",
+    "format": "raster",
+    "people": true,
+    "description": "A database administrator reviewing tables and schema on a monitor beside a storage server"
   },
   "/platforms/containers": {
-    "root": "/media/cloudhost247/photography/server-racks-blue",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/containers",
+    "format": "raster",
+    "people": true,
+    "description": "An engineer at dual monitors showing container resources and a terminal beside a server rack"
   },
   "/platforms/paas": {
-    "root": "/media/cloudhost247/deployment/paas-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/paas",
+    "format": "raster",
+    "people": true,
+    "description": "Two engineers reviewing an application deployment dashboard on a desktop monitor"
   },
   "/hosting/vps": {
-    "root": "/media/cloudhost247/cloud/vps-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/vps",
+    "format": "raster",
+    "people": true,
+    "description": "A systems engineer using two monitors beside a server cabinet"
   },
   "/hosting/dedicated": {
-    "root": "/media/cloudhost247/servers/dedicated-servers-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/dedicated",
+    "format": "raster",
+    "people": true,
+    "description": "An engineer using a laptop next to an open dedicated server rack"
   },
   "/hosting/cpanel": {
-    "root": "/media/cloudhost247/hosting/cpanel-hosting-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/cpanel",
+    "format": "raster",
+    "people": true,
+    "description": "A website administrator reviewing hosting controls on a monitor beside a computer tower"
   },
   "/websites": {
-    "root": "/media/cloudhost247/hosting/website-design-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/websites",
+    "format": "raster",
+    "people": true,
+    "description": "A web designer reviewing a website layout on a desktop monitor beside a laptop"
   },
   "/hosting/rdp": {
-    "root": "/media/cloudhost247/photography/home-engineer",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/rdp",
+    "format": "raster",
+    "people": true,
+    "description": "A remote worker using a desktop monitor with application windows beside a laptop"
   },
   "/smm-services": {
-    "root": "/media/cloudhost247/storefronts/smm-services",
-    "format": "svg"
+    "root": "/media/cloudhost247/service-people/smm-creator",
+    "format": "raster"
   },
   "/number-services": {
-    "root": "/media/cloudhost247/storefronts/number-services",
-    "format": "svg"
+    "root": "/media/cloudhost247/service-people/number-services",
+    "format": "raster"
   },
   "/digital-products": {
-    "root": "/media/cloudhost247/storefronts/digital-products",
-    "format": "svg"
+    "root": "/media/cloudhost247/service-people/digital-products",
+    "format": "raster",
+    "people": true,
+    "description": "A creative professional reviewing digital templates on a monitor beside a graphics tablet"
   },
   "/proxy-services": {
-    "root": "/media/cloudhost247/photography/fibre-engineer",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/proxy",
+    "format": "raster",
+    "people": true,
+    "description": "A network engineer reviewing a routing diagram on a monitor beside a network appliance"
   },
   "/smtp-hosting": {
-    "root": "/media/cloudhost247/photography/network-engineer",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/smtp",
+    "format": "raster",
+    "people": true,
+    "description": "A developer using the Send button in an email compose window on a desktop monitor"
   },
   "/domains": {
-    "root": "/media/cloudhost247/domains/domain-network-3d",
-    "format": "raster"
+    "root": "/media/cloudhost247/service-people/domains",
+    "format": "raster",
+    "people": true,
+    "description": "An entrepreneur reviewing domain search results on a desktop monitor beside a laptop"
   }
 }

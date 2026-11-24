@@ -1,0 +1,242 @@
+[
+  {
+    "name": "developers",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/developers-640.webp",
+        "sha256": "4c358c28eeec8018b8ec0297c7d7c9a0a7ef2985d990cc98bd7575e74f2f515a"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developers-640.avif",
+        "sha256": "e6cf624a0e65cc0505e76b975165c4a4059509ce81f8cabe37e8bdc430e100f0"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developers-960.webp",
+        "sha256": "e35658e3138ba46b7f44e0802f86d5d63cc148d46be05e19c010f8691157d8d1"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developers-960.avif",
+        "sha256": "d63ae5b09c77b3c5be01e8d82dcdf904c4f9f6101486373ddbf2e6483d403ac4"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developers-1280.webp",
+        "sha256": "f830b134619cb0b49363e437169b33264dd000e71db808ea65155fde212b8eba"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/developers-1280.avif",
+        "sha256": "2608df7f1cb05f0c20f70b54cc8f65409981faba86aaa4d15a2bb7b074cb2eb0"
+      }
+    ]
+  },
+  {
+    "name": "deployment",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/deployment-640.webp",
+        "sha256": "16b51e24f4a44043c4d82d215fc23cfac82b5af587bbe37af708040a2817b13c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/deployment-640.avif",
+        "sha256": "fca2636e7cb9deef7d5e1fb87feb56ee46abf3b16b50d69a4e3e47781314b00d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/deployment-960.webp",
+        "sha256": "f7fd13414b5d3b5696cd7da41c03745b0466d15f2f97bd75f7c3a3fda96ad34f"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/deployment-960.avif",
+        "sha256": "5e73f2f77c67494326d4813574cffac0b5e26b82aa5989b57afb8b870844b0cb"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/deployment-1280.webp",
+        "sha256": "ede91bd89ca25835ff0db135ab0e92a65c965bcdb51eb4af839fcc5f8d82dfa5"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/deployment-1280.avif",
+        "sha256": "671fc37ce699b945d60bb5dfc356e6f77ce0bbcb5048806ec97e2af29b7e0afe"
+      }
+    ]
+  },
+  {
+    "name": "environments",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/environments-640.webp",
+        "sha256": "3fa5fee7101dd40239e3350d79281cfb209c4187fd85bca6e19b47f4f94f44e0"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/environments-640.avif",
+        "sha256": "e2da3690c9d3d2a29c3c2cceca19380c9b99baeccc7971310a1d8dd6c269efb6"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/environments-960.webp",
+        "sha256": "567e272d2e5e49aa9d617df7f3d5d354a49e637f333c0f060c03e35f637e78b5"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/environments-960.avif",
+        "sha256": "89a4474efafead76399e5fe0115741b0f29b795fba4dc39db21f226a71bafee1"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/environments-1280.webp",
+        "sha256": "298f399258314f18d357ae13e0e8810b23ac96d43e31ac2441320e0da96c428d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/environments-1280.avif",
+        "sha256": "3621a40e7ec6da1cad38a46c4d464dc1fd053f0ac5c45c9d0a33e81bcd6fe023"
+      }
+    ]
+  },
+  {
+    "name": "nodejs",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/nodejs-640.webp",
+        "sha256": "ec9e4667f0a0f65fa70ba5b64ca4c783362eb71d7a4f25cb325c513ff1f44040"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/nodejs-640.avif",
+        "sha256": "91937472ce73f8a13eee7d3028a345cd1d0cede8230e340280c18248832f6f55"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/nodejs-960.webp",
+        "sha256": "477ed87648cff48fcaf57d7dc924082027816d4cb00a233462a5114439d92d6f"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/nodejs-960.avif",
+        "sha256": "17ef260ebcf3479fcd482c3cacea1faa4c9b0c89bbf4e1b262b6d27e16d863d7"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/nodejs-1280.webp",
+        "sha256": "09d0dc0dc4166bf314133d7f647b13eeadda1a086aa334a64bd197021a8f5cb3"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/nodejs-1280.avif",
+        "sha256": "e6e2a2c6c15236c6def13918e22c1c043b41b06ec2abfc112dc49a4ce096c903"
+      }
+    ]
+  },
+  {
+    "name": "php",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/php-640.webp",
+        "sha256": "65270b56a23585bdce40e6118b3b0cf10b58d96f7498dcdce93cac0b3c118ec5"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/php-640.avif",
+        "sha256": "817b6a59d0c87272bcb747bbf0ed045746d6f54a51aa6b6a4d193bc2c6a444ec"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/php-960.webp",
+        "sha256": "654174aa6c66db2064ce82d7b692623631ddf9fc565f8b2f0e8760a1c421ca08"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/php-960.avif",
+        "sha256": "5369fef3a4d38590dc6da7c4320737b3be08cf8ec035499b5dcc9d68d290f8fb"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/php-1280.webp",
+        "sha256": "58aebf3c016b78e090caec8646fd036303c8d89db1115ecbda9213a91e748f30"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/php-1280.avif",
+        "sha256": "a49eb36226cffd67b1cfbd5b3d9392b1b2da29f557df671b5ace79b382a9f148"
+      }
+    ]
+  },
+  {
+    "name": "python",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/python-640.webp",
+        "sha256": "6a94e20c9101da405e1070b2144ee4de5d788b590575d4e3c1081fd7af7ef7bf"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/python-640.avif",
+        "sha256": "e4015b6b28990262d93042f444aeb3405e70f61fd4269d812d004b23ec08e175"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/python-960.webp",
+        "sha256": "537d84bdbe324173eedd6bc3ebacc0d4fa02645a39e9328bcf243a0d30e6ee33"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/python-960.avif",
+        "sha256": "7ad14937ed8bb398e567b15982c9d7e6d189d90261af52d524039055c57776d9"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/python-1280.webp",
+        "sha256": "996fd6cc18b3e2b4248e3bc3ec5622e3cedf6f4288937df562c4689ab722ab58"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/python-1280.avif",
+        "sha256": "55c619b9cdf661d531258b138da2d7f73c7f60d0aae63e9e76a57aa594148716"
+      }
+    ]
+  },
+  {
+    "name": "laravel",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/laravel-640.webp",
+        "sha256": "2cb6f167f6f48a937d82ee41fad1aaf531ab6d2efdf13056a15df3ded6bd5667"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/laravel-640.avif",
+        "sha256": "4202f38e19bbb7ef9bfba8ef193329177d309b4ab2b64a7f24d99ec8d3fdc30b"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/laravel-960.webp",
+        "sha256": "6b321dd79d781f10ee555817c3a87d5df46d5956e09596d62f0c382dc08598fb"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/laravel-960.avif",
+        "sha256": "827095d21d4754d318076d6d194591bcd18e0fc42c3977766543e26694b7b3cb"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/laravel-1280.webp",
+        "sha256": "17d15edcdad162d4105d09f808c8636bc59d8985028297fa230a3e49ba95f1c3"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/laravel-1280.avif",
+        "sha256": "111943277c56c759dc11357d3a7b231ea4d22342f8c8b7ace8755ae32c11137a"
+      }
+    ]
+  },
+  {
+    "name": "docker",
+    "origin": "AI-generated illustrative imagery; fictional people and facilities",
+    "files": [
+      {
+        "file": "/media/cloudhost247/service-people/docker-640.webp",
+        "sha256": "951004c2c2455008b56a93a462f8fd948b218ded124d7ef0ee5edaad6a60c3af"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/docker-640.avif",
+        "sha256": "911d07723b88bea82a6e16e365eb96e93dd06797872ed3884163bfec85a488e3"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/docker-960.webp",
+        "sha256": "1c49d1e8c7e6ae96f71a16b75adfc52884c024f71b2bdfc3fa346f436e7e987d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/docker-960.avif",
+        "sha256": "6fd740aa9cf030f9851c27077130e8c288b336cc8384d92c8d41fbc0494f696c"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/docker-1280.webp",
+        "sha256": "891d15daa84069ca59cd0690ab01a3452023850b5f99f2448f40917052e6413d"
+      },
+      {
+        "file": "/media/cloudhost247/service-people/docker-1280.avif",
+        "sha256": "fcbcef67c4a25502e5906f617110faaa20fdf4318a4b6afb0bc12f98282f64c8"
+      }
+    ]
+  }
+]

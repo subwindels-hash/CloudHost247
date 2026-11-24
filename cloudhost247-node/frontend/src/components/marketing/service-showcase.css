@@ -43,3 +43,12 @@
 .service-showcase--diagram .service-showcase__photo{object-fit:contain;background:#f3f6fc}
 .service-showcase--diagram .service-showcase__note{position:relative;top:auto;right:auto;width:100%;max-width:none;margin-top:16px;padding:16px 20px}
 .service-showcase--diagram .service-showcase__tiles{position:relative;left:auto;right:auto;bottom:auto;margin-top:12px}
+
+/* People/workstation scenes keep the full frame and all overlays off the monitors. */
+.service-showcase--people .service-showcase__photo{aspect-ratio:4/3;object-fit:contain;background:#f2f5f8}
+.service-showcase--people .service-showcase__note{position:relative;top:auto;right:auto;width:calc(100% - 28px);max-width:none;margin:-12px auto 0;padding:15px 20px;gap:6px}
+.service-showcase--people .service-showcase__note strong{font-size:20px}
+.service-showcase--people .service-showcase__tiles{position:relative;left:auto;right:auto;bottom:auto;margin:12px 14px 0}
+.service-showcase--people .service-showcase__tiles li{flex-direction:row;justify-content:center;gap:8px;padding:12px 6px;font-size:11px}
+.service-showcase--people .service-showcase__number{width:26px;height:26px;flex-shrink:0;font-size:10px}
+@media(max-width:420px){.service-showcase--people .service-showcase__note{width:calc(100% - 12px);padding:14px}.service-showcase--people .service-showcase__tiles{margin-inline:4px;gap:5px}.service-showcase--people .service-showcase__tiles li{font-size:9px;padding:10px 4px;gap:5px}}
