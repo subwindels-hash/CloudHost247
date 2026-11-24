@@ -1,0 +1,32 @@
+[
+  {
+    "name": "microsoft-word",
+    "sourceUrl": "https://github.com/homarr-labs/dashboard-icons/blob/9d019529dfd4431770e7380bfafd6628800b7986/svg/microsoft-word.svg",
+    "gitBlob": "65d2be7b0e7ede908d47b37e19906f5c10726769",
+    "sha256": "0b10e8d227aebeef03b78f93147da9e21712bf3544df786dcc10c89cf01b853e"
+  },
+  {
+    "name": "microsoft-excel",
+    "sourceUrl": "https://github.com/homarr-labs/dashboard-icons/blob/9d019529dfd4431770e7380bfafd6628800b7986/svg/microsoft-excel.svg",
+    "gitBlob": "bd8133d066e7b92625d1e53641ae2f3169ee137d",
+    "sha256": "8f81cc6d7af4d00c3771fa2efaaf883b8fcffcdc38b12b9d168cb5ae2f87886c"
+  },
+  {
+    "name": "microsoft-powerpoint",
+    "sourceUrl": "https://github.com/homarr-labs/dashboard-icons/blob/9d019529dfd4431770e7380bfafd6628800b7986/svg/microsoft-powerpoint.svg",
+    "gitBlob": "40c971bc89b04242dd1ee4b87f5752e041fa1b70",
+    "sha256": "9905e2bbf6589dbcebbef7b5c78f91d401d0627dce6abe469ad7b9f1e42b5114"
+  },
+  {
+    "name": "microsoft-outlook",
+    "sourceUrl": "https://github.com/homarr-labs/dashboard-icons/blob/9d019529dfd4431770e7380bfafd6628800b7986/svg/microsoft-outlook.svg",
+    "gitBlob": "4ea9b1883a2550845162704e430b182f6b1b4db6",
+    "sha256": "39b9c39deaadd715813cae246b16d077112de567d81aa2c40414f2afb707cc97"
+  },
+  {
+    "name": "microsoft-teams",
+    "sourceUrl": "https://github.com/homarr-labs/dashboard-icons/blob/9d019529dfd4431770e7380bfafd6628800b7986/svg/microsoft-teams.svg",
+    "gitBlob": "891dccd9d6f302588d1ceeeedc7c995aefbe8269",
+    "sha256": "1ab26279cd8fc9e773d496173ab5db9d28a8610b19f197340a94131e6477292e"
+  }
+]

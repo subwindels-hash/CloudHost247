@@ -1,3 +1,5 @@
+import PlatformLogo from '../../components/PlatformLogo';
+import ServiceHeroVisual, { serviceSceneForRoute } from '../../components/marketing/ServiceHeroVisual';
 import { BASE_CURRENCY } from '../../currency/display-currency';
 import { useEffect, useMemo, useState } from 'react';
 import { trackAnalyticsCatalog, trackAnalyticsSearch, trackAnalyticsSelect, useMarketing } from '../../lib/marketing';
@@ -29,8 +31,16 @@ import { Illustration } from '../../components/marketing/Illustration';
  */
 
 const ART = '/media/cloudhost247';
+const SERVICE_BRANDS: Record<string, { slug: string; name: string }> = {
+  '/hosting/wordpress': { slug: 'wordpress', name: 'WordPress' },
+  '/hosting/cpanel': { slug: 'cpanel', name: 'cPanel' },
+  '/developers/docker': { slug: 'docker', name: 'Docker' },
+  '/developers/laravel': { slug: 'laravel', name: 'Laravel' },
+};
 
 function Visual({ page }: { page: MarketingPage }) {
+  const scene = serviceSceneForRoute(page.route);
+  if (scene) return <ServiceHeroVisual scene={scene} title={page.title} route={page.route} />;
   return (
     <Illustration
       visual={page.visual}
@@ -714,13 +724,14 @@ export default function MarketingPage() {
     .slice(0, 6);
 
   return (
-    <div className="ch-ds">
+    <div className={`ch-ds${serviceSceneForRoute(page.route) ? " service-landing service-landing--registry" : ""}`}>
       <Breadcrumbs page={page} />
 
       <section className="ch-hero">
         <div className="ch-wrap">
           <div className="ch-hero__inner">
             <div>
+              {SERVICE_BRANDS[page.route] && <div className="service-product-brand"><span className="service-product-brand__mark"><PlatformLogo {...SERVICE_BRANDS[page.route]} /></span><span>{SERVICE_BRANDS[page.route].name}</span></div>}
               {page.hero.kicker ? <p className="ch-kicker">{page.hero.kicker}</p> : null}
               <h1>{page.hero.heading}</h1>
               <p className="ch-lede">{page.hero.lede}</p>
