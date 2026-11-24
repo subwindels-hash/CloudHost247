@@ -1,0 +1,32 @@
+yucca — unchanged source artwork
+Source: https://github.com/yuccastream/yuccastream-com/blob/07872732e4e08cd14bbdbd8fadda82dd6b0a6003/img/Yucca-Icon.jpg
+SHA-256 of the local image: bbec821aed6d70c52162c0bf1809af3c51686e8c3e1edb2ffce51b1bd9fd0f0f
+
+This identifies a catalogue product. No affiliation, endorsement or permission
+to operate the software as a commercial hosted service is implied. Source
+verification is distinct from rights clearance. Copyright and trademark rights
+remain with their respective holders.
+
+OPEN ARTWORK RIGHTS REVIEW: Repository MIT notice names the Bootstrap template author, not the plant artwork author. No blanket artwork reuse permission is asserted.
+
+The MIT License (MIT)
+
+Copyright (c) 2013-2019 Blackrock Digital LLC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.

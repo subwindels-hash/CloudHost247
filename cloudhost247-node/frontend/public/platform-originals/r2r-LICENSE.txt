@@ -1,0 +1,16 @@
+r2r: source artwork capture
+Source page: https://r2r-docs.sciphi.ai/self-hosting/configuration/retrieval/overview
+Asset reference: https://files.buildwithfern.com/https://sciphi.docs.buildwithfern.com/2025-05-20T17:18:43.700Z/logo/sciphi_black.svg
+Captured file SHA-256: 824e9b6416fd10a29a5d6a893fc6a82d57a46e6c318b254e6316b11ed742a4fb
+
+The official documentation logo visibly reads R2R. Retrieved as a PNG representation of the source SVG, not a claim of byte equality to the SVG. No local tracing or drawing.
+
+This file is stored as retrieved by image search. No upstream Git revision,
+Git blob or publisher checksum was supplied; none is invented. The captured
+file hash pins the local bytes only. It does not prove byte equality to a
+publisher's original design file or to a source SVG.
+
+OPEN ARTWORK RIGHTS REVIEW: a separate artwork reuse licence was not
+established. Copyright and trademarks remain with their holders. This is
+referential catalogue artwork, not an endorsement or a software/hosting licence.
+No blanket permission is inferred from the fact that an image is public.

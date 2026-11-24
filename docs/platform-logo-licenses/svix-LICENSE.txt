@@ -1,0 +1,17 @@
+svix — source artwork and unresolved rights notice
+Source: https://www.svix.com/_next/static/immutable/media/svix-brand.1_kgs6wctypz2.svg
+SHA-256: 25749645c7bcfa98aa6c360cfd41c07c648597f56b1134ba640485a7211141ab
+
+Official press-page brand lockup retrieved as PNG from SVG. This is a captured rendition, NOT byte-identical SVG or a claim of trademark permission. Press assets are expressly subject to Svix Marks Usage Policy; required permission is not established.
+
+Terms: Separate artwork and trademark clearance unresolved
+
+IMPORTANT: This catalogue integration records artwork identity, not legal
+clearance. No blanket reuse, hosting, sponsorship, partnership or endorsement
+permission is asserted. Obtain any required permission before production
+publication. A software licence is not automatically a licence for marks.
+Files remain unmodified as retrieved; capture/redistribution limitations are
+recorded above.
+
+Official press assets: https://www.svix.com/press/
+Marks Usage Policy applies; no written consent recorded.

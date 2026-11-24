@@ -1,0 +1,16 @@
+manticore-search: source artwork capture
+Source page: https://manticoresearch.com/about/
+Asset reference: https://manticoresearch.com/images/about/big_logo_hu25568b0d3ce97562a08180bba02f294e_79228_464x0_resize_box_3.png
+Captured file SHA-256: 34a3c28ca93ff8c7daf1f8ed4114845b4f9a2e0e8c3202867341cd0421427802
+
+Publisher-served logo image; the filename records publisher-side resizing. No local resampling.
+
+This file is stored as retrieved by image search. No upstream Git revision,
+Git blob or publisher checksum was supplied; none is invented. The captured
+file hash pins the local bytes only. It does not prove byte equality to a
+publisher's original design file or to a source SVG.
+
+OPEN ARTWORK RIGHTS REVIEW: a separate artwork reuse licence was not
+established. Copyright and trademarks remain with their holders. This is
+referential catalogue artwork, not an endorsement or a software/hosting licence.
+No blanket permission is inferred from the fact that an image is public.

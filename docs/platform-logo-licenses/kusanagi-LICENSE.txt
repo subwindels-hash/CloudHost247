@@ -1,0 +1,16 @@
+kusanagi: source artwork capture
+Source page: https://kusanagi.tokyo/character/
+Asset reference: https://www.prime-strategy.co.jp/wp-content/uploads/2025/08/kusanagi2.png
+Captured file SHA-256: 77c0f250f6d176ffd9f3804e50c968425194997ce1d00c110d1e770ce072019e
+
+Original wordmark hosted by the publisher Prime Strategy, not unrelated character fan art.
+
+This file is stored as retrieved by image search. No upstream Git revision,
+Git blob or publisher checksum was supplied; none is invented. The captured
+file hash pins the local bytes only. It does not prove byte equality to a
+publisher's original design file or to a source SVG.
+
+OPEN ARTWORK RIGHTS REVIEW: a separate artwork reuse licence was not
+established. Copyright and trademarks remain with their holders. This is
+referential catalogue artwork, not an endorsement or a software/hosting licence.
+No blanket permission is inferred from the fact that an image is public.

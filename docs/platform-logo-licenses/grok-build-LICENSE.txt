@@ -1,0 +1,19 @@
+grok-build — artwork provenance
+Source: https://github.com/amahpour/switchboard/blob/0681038a5040c00d5423bb1e80cfc63eb78bd934/src/switchboard/web/static/agents/grok-light.png
+SHA-256: 37ddbcb6e2a7f2e4b3be78a7d41296a3bc7edf6926362434efc00df5a56a3586
+Source Git blob: 8dd11d2e177cddf25e010f6de33bd35b031a2c63
+
+Grok mark redistributed unchanged in switchboard. Its pinned static-asset test and PR 940 identify the official x.ai brand kit original Grok_Logomark_Dark.png. SHA-256 agrees with the recorded original; the official ZIP was not independently downloaded here. This identifies Grok Build, not an invented Build-specific emblem.
+
+x.ai brand guidelines; accurate reference only, no alteration or endorsement
+Copyright and trademarks remain with their owners. This catalogue does not
+imply endorsement or a partnership. Source verification is not blanket
+commercial hosting permission.
+
+Official product: https://x.ai/build
+Brand kit: https://data.x.ai/logos/SpaceXAI_Grok_Assets.zip
+Guidelines: https://x.ai/legal/brand-guidelines
+Redistribution provenance: https://github.com/amahpour/switchboard/pull/940
+Use only to accurately refer to the provider or its services; do not imply
+endorsement, combine into another mark, alter the logo, or use in another
+product name. Observe changes or withdrawal requested by the rights holder.

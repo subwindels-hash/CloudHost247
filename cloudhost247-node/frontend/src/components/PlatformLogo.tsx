@@ -1,10 +1,9 @@
-/**
- * Vendor-identifying artwork is always rendered as SVG paths in React code, never
- * fetched as an image. Fourteen earlier project-specific panel vectors remain inline below;
- * remaining sourced vectors live in lazily loaded generated TSX chunks. Unknown
- * slugs display an explicit "SVG pending" state, not a made-up branded monogram.
- * See docs/platform-logo-coverage.md for per-slug provenance and gaps.
+/** Original vendor artwork: inline vectors or locally pinned original images.
+ * Never use arbitrary API image URLs or invent a mark for an unresolved project.
+ * See docs/platform-logo-coverage.md for provenance and outstanding gaps.
  */
+import originalLogos from '../data/platform-original-logos.json';
+import bundleLogos from '../data/platform-bundle-logos.json';
 import type { JSX } from 'react';
 import { Suspense } from 'react';
 import InlineCatalogueLogo, { hasCodeRenderedLogo, isWideCodeRenderedLogo } from '../data/generated-platform-icons/registry';
@@ -185,23 +184,71 @@ export function isKnownPlatformSlug(slug: string | null | undefined): boolean {
 
 /** Let wordmarks breathe instead of squeezing them into a 38px square. */
 export function isWidePlatformLogo(slug: string): boolean {
-  return slug === 'plesk' || isWideCodeRenderedLogo(slug);
+  return Object.prototype.hasOwnProperty.call(bundleLogos.bundles, slug) || originalLogos[slug as keyof typeof originalLogos]?.wide || slug === 'plesk' || isWideCodeRenderedLogo(slug);
 }
 
 function LogoUnavailable({ name, className, loading = false }: { name: string; className?: string; loading?: boolean }) {
+  const letters = Array.from(name.trim()).filter(char => /\p{L}/u.test(char)).slice(0, 2).join('').toLocaleUpperCase('en-US');
   return (
     <span
       className={`${className ?? ''} ch247-platform-logo-unavailable`}
-      role="status"
-      aria-label={loading ? `Loading ${name} logo` : `Verified SVG logo pending for ${name}`}
-      title={loading ? undefined : `The ${name} project has a logo; a verified SVG rendition is pending`}
+      role={loading ? "status" : "img"}
+      aria-label={loading ? `Loading ${name} logo` : `${name} letter badge`}
+      title={loading ? undefined : `${name} — letter badge, not an official logo`}
     >
-      {loading ? '…' : 'SVG pending'}
+      {loading ? '…' : letters || '?'}
     </span>
   );
 }
 
 export default function PlatformLogo({ slug, name, className }: PlatformLogoProps) {
+  const bundle = Object.prototype.hasOwnProperty.call(bundleLogos.bundles, slug)
+    ? bundleLogos.bundles[slug as keyof typeof bundleLogos.bundles] : undefined;
+  if (bundle) return (
+    <span className={`${className ?? ''} ch247-bundle-logo`.trim()} role="group" aria-label={`${name} component logos`}>
+      {bundle.map((key) => {
+        const component = bundleLogos.components[key as keyof typeof bundleLogos.components];
+        return <span className="ch247-bundle-logo__component" key={key}>
+          <img src={component.url} alt={`${component.name} logo`} loading="lazy" decoding="async"
+            className={key === 'openlitespeed' ? 'ch247-bundle-logo__image ch247-platform-logo--dark-ground' : 'ch247-bundle-logo__image'} />
+          <span className="ch247-bundle-logo__label">{component.name}</span>
+        </span>;
+      })}
+      <a className="ch247-bundle-logo__notice" href="/platform-components/NOTICES.txt" target="_blank" rel="noopener noreferrer">Component marks · sources</a>
+    </span>
+  );
+  const original = Object.prototype.hasOwnProperty.call(originalLogos, slug)
+    ? originalLogos[slug as keyof typeof originalLogos] : undefined;
+  if (original) {
+    const image = <img src={original.url} alt={`${name} logo`} className={`${className ?? ''}${slug === 'asp-net' ? ' ch247-dotnet-mark' : ''}${['dkron', 'skyvern', 'eclipse-kura', 'nopcommerce', 'ant-media-server-ce', 'r2r', 'canarytokens', 'fastpanel', 'fazerai-agents'].includes(slug) ? ' ch247-platform-logo--dark-ground' : ''}`.trim()}
+      title={slug === 'plone' ? 'Plone is a registered trademark of the Plone Foundation. Commercial-use permission is not established.' : slug === 'geneac' ? 'Geneac — original website banner artwork' : slug === 'iceshrimp' ? '© 2023 Laura Hausmann (Kilcat), CC BY-SA 4.0 — unchanged original artwork' : undefined}
+      loading="lazy" decoding="async" style={{ objectFit: 'contain', ...(slug === 'plone' ? { width: 160, height: 50, minWidth: 160, minHeight: 50, margin: 8 } : {}), ...(slug === 'asp-net' ? { width: 50, height: 50, minWidth: 50, minHeight: 50, margin: 16 } : {}) }} />;
+    if (slug === 'plone') return (
+      <a className="ch247-platform-logo-link" href="https://plone.org/" target="_blank" rel="noopener noreferrer" aria-label="Official Plone project website — Plone is a registered trademark of the Plone Foundation">
+        {image}
+      </a>
+    );
+    if (slug === 'apache-jspwiki') return (
+      <a className="ch247-platform-logo-link" href="https://jspwiki.apache.org/" target="_blank" rel="noopener noreferrer" aria-label="Official Apache JSPWiki project website">
+        {image}
+      </a>
+    );
+    if ('noticeUrl' in original && typeof original.noticeUrl === 'string') return (
+      <a className="ch247-platform-logo-link" href={original.noticeUrl} target="_blank" rel="noopener noreferrer" aria-label={`${name} artwork source and license`}>
+        {image}
+      </a>
+    );
+    if (slug === 'iceshrimp') return (
+      <a className="ch247-platform-logo-link" href="/platform-originals/iceshrimp-LICENSE.txt" target="_blank" rel="noopener noreferrer" aria-label="Iceshrimp logo attribution and CC BY-SA 4.0 license">
+        {image}
+      </a>
+    );
+    return slug === 'apache-kvrocks' ? (
+      <a className="ch247-platform-logo-link" href="https://kvrocks.apache.org/" target="_blank" rel="noopener noreferrer" aria-label="Official Apache Kvrocks project website">
+        {image}
+      </a>
+    ) : image;
+  }
   const mark = MARKS[slug];
   if (mark) {
     return <svg viewBox={mark.viewBox} className={className} role="img" aria-label={`${name} logo`} preserveAspectRatio="xMidYMid meet">{mark.content}</svg>;

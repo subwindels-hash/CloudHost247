@@ -1,0 +1,150 @@
+atomic-server — source artwork and unresolved rights notice
+Source: https://github.com/ontola/atomic-server/blob/f71b6d07834fbe9a5ca6fa9ff6efe3da571ebcfb/brand/src/atomic-mark.svg
+SHA-256: cda35a647672d2b9123144545695e9ba8b1645a2373c4016bae1799af88d9502
+Git blob: b6c32c154f7d3ead1b40b02997607890fb32393c
+Revision: f71b6d07834fbe9a5ca6fa9ff6efe3da571ebcfb
+
+brand/README.md explicitly identifies atomic-mark.svg as the AtomicServer mark. Accurate factual reference is allowed; commercial use as a selling feature requires written permission. No such permission is established here.
+
+Terms: Atomic Server brand licence; NOT MIT
+
+IMPORTANT: This catalogue integration records artwork identity, not legal
+clearance. No blanket reuse, hosting, sponsorship, partnership or endorsement
+permission is asserted. Obtain any required permission before production
+publication. A software licence is not automatically a licence for marks.
+Files remain unmodified as retrieved; capture/redistribution limitations are
+recorded above.
+
+Atomic brand assets — licence
+=============================
+
+Copyright (c) 2020 Joep Meindertsma / Ontola.io. All rights reserved.
+
+THE CONTENTS OF THIS DIRECTORY ARE NOT COVERED BY THE MIT LICENCE THAT
+APPLIES TO THE REST OF THIS REPOSITORY.
+
+The MIT licence in the repository root grants rights in the *software*. It
+does not grant any right to use the names, logos, marks or other brand
+features of Atomic Server, Atomic Data, Atomic Canvas or Ontola. Those are
+reserved. This directory — the source marks in `src/`, the generated
+artifacts in `dist/`, and every icon this package renders into the apps —
+is licensed separately, on the terms below.
+
+Nothing here restricts your rights under the MIT licence with respect to
+the software itself. You may fork, modify, redistribute and sell the code.
+What you may not do is present your version as though it were ours.
+
+
+What you may do without asking
+------------------------------
+
+1. Use the marks to refer accurately to the Atomic projects — in articles,
+   talks, documentation, comparison tables, "works with Atomic Server"
+   integration notices, and similar factual reference.
+
+2. Redistribute an *unmodified* build of the software with its icons in
+   place. Packaging Atomic Server for a distro or app store is fine.
+
+3. Reproduce the marks with their proportions and colours intact. Do not
+   recolour, rotate, stretch, add effects, or rebuild them from memory —
+   generate from `brand/src/`.
+
+
+What requires written permission
+--------------------------------
+
+1. Using the marks on a *modified* build or a fork. If you change the
+   software, replace the branding. This is the rule that keeps the marks
+   meaningful, and it is deliberately the same one the Linux distributions
+   apply to Firefox and Chromium.
+
+2. Any use suggesting sponsorship, endorsement, affiliation or an official
+   relationship that does not exist.
+
+3. Use in your own product name, company name, domain name, app-store
+   listing name, or logo.
+
+4. Merchandise, or any commercial use of the marks as a selling feature.
+
+Requests: joep@ontola.io
+
+
+Why this carve-out exists
+-------------------------
+
+Atomic is free software and is meant to stay that way. Trademark is the
+mechanism that lets it stay free: anyone may run, fork and sell the code,
+while the *name* continues to denote software that actually comes from
+this project. Reserving the marks is what makes a sustainable business
+possible around an MIT codebase without ever having to restrict the code.
+
+See TRADEMARKS.md in the repository root for the full policy.
+
+# Atomic trademark policy
+
+The Atomic software is MIT licensed. The Atomic **marks** are not.
+
+This split is intentional and it is the standard arrangement for open source
+projects that intend to remain open: the MIT licence gives away the code, and
+trademark keeps the *name* attached to software that genuinely comes from this
+project. You can fork Atomic Server, change it however you like, and sell it.
+You cannot call the result Atomic Server.
+
+> This document states project policy. It is not legal advice.
+
+## The marks
+
+| Mark | Type | Applies to |
+| --- | --- | --- |
+| **Atomic Data** | word | the specification |
+| **Atomic Server** | word | the server and its apps |
+| **Atomic Canvas** | word | the infinite-canvas app |
+| The ring-and-orb device | figurative | all of the above |
+| **Ontola** | word | the company |
+
+Canonical artwork lives in [`brand/src/`](./brand/src/) and is the only
+approved source. Everything else in the repo is generated from it by
+`node brand/generate.mjs` — never trace, redraw or hand-edit a copy.
+
+Owner: Joep Meindertsma / Ontola.io.
+
+## Permitted and restricted use
+
+See [`brand/LICENSE`](./brand/LICENSE) for the operative terms. In short:
+referring to Atomic is always fine; shipping a modified build under our name
+is not. Permission requests go to joep@ontola.io.
+
+## Registration status
+
+**None of these marks are registered yet.** Until they are, they are unregistered
+marks — enforceable in some jurisdictions on a use basis, but far weaker and more
+expensive to defend than a registration.
+
+Practical notes for closing that gap:
+
+- **Use `™`, not `®`.** `®` is reserved for registered marks and using it before
+  registration is itself an offence in several jurisdictions, including the EU
+  and US. Switch only once a registration certificate issues.
+- **Where.** Ontola is Dutch, so the realistic options are a Benelux
+  registration via [BOIP](https://www.boip.int) (cheapest, Benelux only) or an
+  EU trade mark via [EUIPO](https://euipo.europa.eu) covering all 27 member
+  states for roughly EUR 850+ per class. A US registration via USPTO matters
+  separately if US customers are a target, since US rights are largely
+  use-based and territorial.
+- **Which classes.** For this business the relevant Nice classes are almost
+  certainly **class 9** (downloadable software) and **class 42** (SaaS, PaaS,
+  software design and development). Class 35 may matter if the marks get used
+  for business/data services.
+- **Which marks to prioritise.** The figurative ring-and-orb device is the
+  strongest candidate — distinctive and clearly ours. Word marks built on
+  "Atomic" are weaker, because "atomic" is close to descriptive in a data
+  context and registries frequently refuse or narrow such applications. A
+  **composite mark** (device + wordmark together) is usually the pragmatic way
+  to get protection on the name.
+- **Keep evidence of use.** Dated screenshots, release artifacts and this
+  repository's history all establish first-use dates, which matter both for
+  registration and for opposing later filings by others.
+
+Getting this filed is a genuine business priority rather than a code change,
+and is worth a conversation with a Benelux/EU trade mark attorney before
+filing — a refused application is not refundable.

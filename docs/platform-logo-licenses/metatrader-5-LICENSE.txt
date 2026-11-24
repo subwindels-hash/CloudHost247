@@ -1,0 +1,13 @@
+metatrader-5 — unchanged source artwork
+Source: https://www.metatrader5.com/i/trading-platform/logo-metatrader-5.png
+SHA-256 of the local image: a98d647c477cf26965ed32b59d0497c0336c6bfcd6c16dbaea318204e9c5d22f
+
+This identifies a catalogue product. No affiliation, endorsement or permission
+to operate the software as a commercial hosted service is implied. Source
+verification is distinct from rights clearance. Copyright and trademark rights
+remain with their respective holders.
+
+OPEN ARTWORK RIGHTS REVIEW: Official website asset; no separate artwork reuse grant was established. No blanket artwork reuse permission is asserted.
+
+
+Obtained from the official product page through image retrieval. No upstream Git commit, Git blob or publisher checksum was supplied; none is invented. This hash pins our captured file only.

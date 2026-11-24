@@ -1,0 +1,11 @@
+zenfeed — unchanged source artwork
+Source: https://github.com/glidea/zenfeed-web/blob/cdfa01412379b8fc5db124dbc6b00746b448a74e/static/icon.png
+SHA-256 of the local image: 3927363245e1e5f7a7f912ad7958511dc9de33b3cdf209695ba1f606d6b80f74
+
+This identifies a catalogue product. No affiliation, endorsement or permission
+to operate the software as a commercial hosted service is implied. Source
+verification is distinct from rights clearance. Copyright and trademark rights
+remain with their respective holders.
+
+OPEN ARTWORK RIGHTS REVIEW: No root artwork licence found in the official web-client repository. No blanket artwork reuse permission is asserted.
+

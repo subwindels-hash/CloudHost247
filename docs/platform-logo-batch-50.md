@@ -1,0 +1,86 @@
+# Fifty-project logo sourcing pass
+
+## Result: 6 additions; 44 still unresolved
+
+The user requested 50 completed original logos. **That target was not met in
+this pass.** Fifty catalogue entries were screened through repository lookups,
+recursive image-path searches, available root licence texts and prior recorded
+identity/rights findings. This is not fifty visual reviews or permissions.
+Six source-matched originals were admitted; the other 44 were not filled with
+invented marks. Full catalogue coverage is now **1,006/1,091**, leaving **85**.
+
+For the six additions: inspected downloaded originals, checked pinned application
+or documentation references, retained notices, and verified installed file
+hashes. Five original PNGs are unchanged. Kvrocks is the exact PNG payload from
+a single full-canvas image in the official SVG (not rasterised or redrawn).
+Skyvern's pale wordmark gets a dark CSS background. Gemini CLI uses its official
+IDE-companion icon. Open Archiver's original is only 60px, with no invented detail.
+
+Apache Kvrocks is linked to its project website, following the
+[ASF graphic-mark policy](https://www.apache.org/foundation/marks/). That policy
+also states that ASF graphic logos are covered by the Apache License. The
+Apache licence text is retained; no licence for the website's whole source tree
+is inferred. This does not imply ASF endorsement of CloudHost247 services.
+
+Validation: 16 unit tests passed (1 todo), complete logo/hash/gap audit passed,
+and frontend TypeScript passed. Original raster support does not eliminate
+identity, attribution, licence or trademark review requirements.
+
+## Project-by-project record
+
+A failed lookup or empty filename search is not proof that a project has no
+logo. Repositories with mismatched identities are explicitly rejected below.
+Earlier restrictions are retained as blockers, not newly resolved by this scan.
+
+| Catalogue entry | Outcome | Repository / pinned revision | Finding |
+| --- | --- | --- | --- |
+| `aapanel` | Unresolved | [`aaPanel/aaPanel`](https://github.com/aaPanel/aaPanel/tree/38bf35903b37b50d9654f47c4ad904ca3369715f) / `38bf35903b37b50d9654f47c4ad904ca3369715f` | Custom aaPanel licence; modification/redistribution and artwork terms remain unresolved. |
+| `ant-media-server-ce` | Unresolved | [`ant-media/ant-media-documentation`](https://github.com/ant-media/ant-media-documentation/tree/545241adf3726b06fd0eef5dbd86d37d370e676e) / `545241adf3726b06fd0eef5dbd86d37d370e676e` | Documentation logo candidates found but no root artwork reuse grant established. |
+| `apache-jspwiki` | Unresolved | [`apache/jspwiki`](https://github.com/apache/jspwiki/tree/d86cfde5c058a65451a4f9aba8606380a721934c) / `d86cfde5c058a65451a4f9aba8606380a721934c` | Inspected feather-source candidate: generic/partial ASF feather, not accepted as a distinct JSPWiki mark. Historical UI variant selection still needs verification. |
+| `apache-kvrocks` | Added | [`apache/kvrocks-website`](https://github.com/apache/kvrocks-website/tree/a9b47e8e962cfe005877290bc3c1a824d793bde6) / `a9b47e8e962cfe005877290bc3c1a824d793bde6` | Original `static/img/logo.svg`; identity reference `docusaurus.config.js`. Licence notice: [apache-kvrocks](platform-logo-licenses/apache-kvrocks-LICENSE.txt). |
+| `atomic-server` | Unresolved | [`ontola/atomic-server`](https://github.com/ontola/atomic-server/tree/f71b6d07834fbe9a5ca6fa9ff6efe3da571ebcfb) / `f71b6d07834fbe9a5ca6fa9ff6efe3da571ebcfb` | Separate brand restrictions previously identified; root MIT software licence does not supersede them. |
+| `automatisch` | Unresolved | [`automatisch/automatisch`](https://github.com/automatisch/automatisch/tree/41f3c56a163103cae761bb44f03638cb84e859ee) / `41f3c56a163103cae761bb44f03638cb84e859ee` | Tree dominated by integration-provider favicons; actual project/rebrand identity still needs verification. Root licence delegates to AGPL and enterprise terms. |
+| `canarytokens` | Unresolved | [`thinkst/canarytokens`](https://github.com/thinkst/canarytokens/tree/61f3e0c7790f08f1be09a947cb0d68e6152cde6a) / `61f3e0c7790f08f1be09a947cb0d68e6152cde6a` | Special GPL clarifications remain unresolved for this commercial catalogue. |
+| `checkrr` | Unresolved | [`aetaric/checkrr`](https://github.com/aetaric/checkrr/tree/323bef3c4acf9f775961d1cedeef476f1a7b2577) / `323bef3c4acf9f775961d1cedeef476f1a7b2577` | No logo/favicon/icon image candidates found by this filename scan. This does not prove artwork is unavailable elsewhere. |
+| `crontab-ui` | Unresolved | [`alseambusher/crontab-ui`](https://github.com/alseambusher/crontab-ui/tree/870d958669d64dca1d27ff7bf5d616d17ee7553b) / `870d958669d64dca1d27ff7bf5d616d17ee7553b` | No PNG/WebP/SVG artwork found in the inspected tree; seek first-party branding outside this repository. |
+| `deepwiki-open` | Unresolved | [`AsyncFuncAI/deepwiki-open`](https://github.com/AsyncFuncAI/deepwiki-open/tree/f216676fa37042c04eba3ccef56098d011670913) / `f216676fa37042c04eba3ccef56098d011670913` | Downloaded favicon is the Vercel triangle, not accepted as a DeepWiki project mark. |
+| `emailengine` | Unresolved | [`postalsys/emailengine`](https://github.com/postalsys/emailengine/tree/92cfab95de7e985d4fee67d1074c34c0df339314) / `92cfab95de7e985d4fee67d1074c34c0df339314` | Artwork candidates exist; proprietary licensing/reuse review remains unresolved. |
+| `euro-office-documentserver` | Unresolved | [`Euro-Office/documentation`](https://github.com/Euro-Office/documentation/tree/cab9d09a158f18abf5b23e9233845c9a5ed55079) / `cab9d09a158f18abf5b23e9233845c9a5ed55079` | Brand candidates found but no root licence grant; artwork scope unresolved. |
+| `evolution-api` | Unresolved | [`EvolutionAPI/evolution-api`](https://github.com/EvolutionAPI/evolution-api/tree/182c255ae351ff31043d7d6b872799b809338c42) / `182c255ae351ff31043d7d6b872799b809338c42` | Modified Apache licence includes additional conditions; not admitted on plain Apache assumptions. |
+| `fossflow` | Unresolved | [`Abrar74774/FossFLOW`](https://github.com/Abrar74774/FossFLOW/tree/1f20f2bccb3fb4dfd1dda8779fb0791497e9cc61) / `1f20f2bccb3fb4dfd1dda8779fb0791497e9cc61` | Corrected failed repository lookup to Abrar74774/FossFLOW. React-style public logo filenames remain candidates; earlier boilerplate identity rejection is not overturned by the tree scan. |
+| `gemini-cli` | Added | [`google-gemini/gemini-cli`](https://github.com/google-gemini/gemini-cli/tree/aafdfdfb50b57fda86165323014477796870d3ea) / `aafdfdfb50b57fda86165323014477796870d3ea` | Original `packages/vscode-ide-companion/assets/icon.png`; identity reference `packages/vscode-ide-companion/package.json`. Licence notice: [gemini-cli](platform-logo-licenses/gemini-cli-LICENSE.txt). |
+| `gotenberg` | Added | [`gotenberg/gotenberg.dev`](https://github.com/gotenberg/gotenberg.dev/tree/4cde12f33761398253c0557bcf768d4752e3e909) / `4cde12f33761398253c0557bcf768d4752e3e909` | Original `static/img/logo.png`; identity reference `docusaurus.config.js`. Licence notice: [gotenberg](platform-logo-licenses/gotenberg-LICENSE.txt). |
+| `gowa` | Unresolved | [`aldinokemal/go-whatsapp-web-multidevice`](https://github.com/aldinokemal/go-whatsapp-web-multidevice/tree/3dd0f71d30af3bb4c56619b2f33c13dc410554bf) / `3dd0f71d30af3bb4c56619b2f33c13dc410554bf` | No logo/favicon image candidates or root licence file found by these searches; no substituted WhatsApp corporate mark. |
+| `iceshrimp` | Unresolved | [`iceshrimp/iceshrimp`](https://github.com/iceshrimp/iceshrimp) / Lookup failed | GitHub repository lookup failed; official source location needs resolution. Not counted as a reviewed image. |
+| `imaginary` | Unresolved | [`h2non/imaginary`](https://github.com/h2non/imaginary/tree/6a274b488759a896aff02f52afee6e50b5e3a3ee) / `6a274b488759a896aff02f52afee6e50b5e3a3ee` | Inspected image paths are test inputs or a deployment-service button, not established product branding. |
+| `juxtapose` | Unresolved | [`NUKnightLab/juxtapose`](https://github.com/NUKnightLab/juxtapose/tree/8bb72a9f15d2eeea21bb8c06f0e576a58bbf5747) / `8bb72a9f15d2eeea21bb8c06f0e576a58bbf5747` | Available logo image paths are publishers/sponsors. Earlier header inspection found styled HTML text, not a standalone asset. |
+| `koffan` | Unresolved | [`PanSalut/Koffan`](https://github.com/PanSalut/Koffan/tree/b5eefc90743d1a478bfad8b4be7740912e3995f7) / `b5eefc90743d1a478bfad8b4be7740912e3995f7` | Corrected repository to PanSalut/Koffan; MIT plus Commons Clause explicitly limits selling/hosting. Artwork scope unresolved. |
+| `komari` | Unresolved | [`komari-monitor/komari-web`](https://github.com/komari-monitor/komari-web/tree/c306173c9b3274f642afc54d123fc4bc57c5b2a9) / `c306173c9b3274f642afc54d123fc4bc57c5b2a9` | Actual favicon identified previously, but no repository licence grant found; OS/provider icons excluded. |
+| `letta` | Unresolved | [`letta-ai/letta`](https://github.com/letta-ai/letta/tree/8816d3a8516893bfdc0fa14bfb1235226012e295) / `8816d3a8516893bfdc0fa14bfb1235226012e295` | No logo/icon/favicon PNG/WebP/SVG/ICO candidates in inspected tree; separate branding source needed. |
+| `littlelink-server` | Unresolved | [`techno-tim/littlelink-server`](https://github.com/techno-tim/littlelink-server/tree/e7fa7dbb3178fcd963e6472f25e96a874f496a11) / `e7fa7dbb3178fcd963e6472f25e96a874f496a11` | Icon directory supplies social-service brands, not proof of a Littlelink Server identity. |
+| `manticore-search` | Unresolved | [`manticoresoftware/manticoresearch`](https://github.com/manticoresoftware/manticoresearch/tree/a3eb0b4f4c1b2c22677c3da396e0d3f86c274125) / `a3eb0b4f4c1b2c22677c3da396e0d3f86c274125` | Tree image candidates are documentation illustrations; earlier README uses externally hosted branding. No pinned original admitted. |
+| `microrealestate` | Unresolved | [`microrealestate/microrealestate`](https://github.com/microrealestate/microrealestate/tree/df66a8fbef9e44d0b8dd157e10a3f75938c46f09) / `df66a8fbef9e44d0b8dd157e10a3f75938c46f09` | Current sustainable-use/custom licence requires review; historical MIT terms not assumed for current asset. |
+| `multica` | Unresolved | [`multica-ai/multica`](https://github.com/multica-ai/multica/tree/6368504e1181a0365013ca5796ec453bf9535f11) / `6368504e1181a0365013ca5796ec453bf9535f11` | Custom added commercial conditions require review; not treated as plain Apache permission. |
+| `nango` | Unresolved | [`NangoHQ/nango`](https://github.com/NangoHQ/nango/tree/970f9e6715806ff96e7096b12afc86dce22827f6) / `970f9e6715806ff96e7096b12afc86dce22827f6` | Elastic License 2.0 with service restrictions; artwork-specific reuse scope unresolved. |
+| `nemoclaw` | Unresolved | [`NVIDIA/NemoClaw`](https://github.com/NVIDIA/NemoClaw/tree/860c09d3c810ef926d49f0dd4e33ad2fab426f62) / `860c09d3c810ef926d49f0dd4e33ad2fab426f62` | Identified NVIDIA corporate marks and a system diagram, not a distinct verified NemoClaw logo. |
+| `nopcommerce` | Unresolved | [`nopSolutions/nopCommerce`](https://github.com/nopSolutions/nopCommerce/tree/9cdf7a5fc7e941e2a6100ded2e85b6f47f5b1d26) / `9cdf7a5fc7e941e2a6100ded2e85b6f47f5b1d26` | nopCommerce Public License v4 is not treated as generic MIT/Apache; artwork and service-use terms need review. |
+| `open-archiver` | Added | [`LogicLabs-OU/OpenArchiver`](https://github.com/LogicLabs-OU/OpenArchiver/tree/1903f17ef46296d41265ea4769086e32b13d9af9) / `1903f17ef46296d41265ea4769086e32b13d9af9` | Original `packages/frontend/static/favicon.png`; identity reference `packages/frontend/src/app.html`. Licence notice: [open-archiver](platform-logo-licenses/open-archiver-LICENSE.txt). |
+| `open-source-pos` | Unresolved | [`opensourcepos/opensourcepos`](https://github.com/opensourcepos/opensourcepos/tree/8cf7cd43466d7d60168b02be7579707d495b9eff) / `8cf7cd43466d7d60168b02be7579707d495b9eff` | Brand assets found; previously identified attribution/footer conditions remain under review. |
+| `openai-codex` | Unresolved | [`openai/codex`](https://github.com/openai/codex/tree/56bb44c05c9b2056642ed356cf847f004519cc95) / `56bb44c05c9b2056642ed356cf847f004519cc95` | Splash image and skills-provider images are not automatically a standalone Codex project logo. |
+| `perplexica` | Unresolved | [`ItzCrazyKns/Perplexica`](https://github.com/ItzCrazyKns/Perplexica/tree/348feca3e378fb4157b217724ed508dc707f853f) / `348feca3e378fb4157b217724ed508dc707f853f` | Downloaded current icon differs from earlier Perplexica identity; project redirect/rebrand to Vane is not silently applied to this catalogue entry. |
+| `plik` | Unresolved | [`root-gg/plik`](https://github.com/root-gg/plik/tree/48ca619f4cfbf32e22e625f1fdd0e998dc82949e) / `48ca619f4cfbf32e22e625f1fdd0e998dc82949e` | Downloaded 16px cloud favicon, but configurable branding and project identity remain insufficiently established; no generic cloud substitution. |
+| `plone` | Unresolved | [`plone/plone.org`](https://github.com/plone/plone.org/tree/5b67159fab85a6bef0be811bc72254b52b9afa75) / `5b67159fab85a6bef0be811bc72254b52b9afa75` | Existing commercial mark policy blocker remains; no root licence found in this companion repository scan. |
+| `r2r` | Unresolved | [`SciPhi-AI/R2R`](https://github.com/SciPhi-AI/R2R/tree/9c5a94d151f90876bd7eb860f300a8fd662dc481) / `9c5a94d151f90876bd7eb860f300a8fd662dc481` | Inspected image paths are application/screenshots/example data, not a verified reusable logo. |
+| `redpanda-console` | Unresolved | [`redpanda-data/console`](https://github.com/redpanda-data/console/tree/027d9212f9325c066654dd6f78c6d41796bbb9da) / `027d9212f9325c066654dd6f78c6d41796bbb9da` | Graphic candidates found; previously identified BSL/RCL scope and artwork reuse remain unresolved. |
+| `sharkey` | Unresolved | [`MisskeyIO/misskey`](https://github.com/MisskeyIO/misskey/tree/431e1c1d3561d28663e3241b90a7ef8d05b78bdf) / `431e1c1d3561d28663e3241b90a7ef8d05b78bdf` | MisskeyIO/misskey lookup returned Misskey artwork, not established Sharkey identity. Rejected this repository mapping; no Misskey logo used. |
+| `shinyproxy` | Unresolved | [`openanalytics/shinyproxy`](https://github.com/openanalytics/shinyproxy/tree/c10dcd481c01d9ffee10fc474eb482b748b38966) / `c10dcd481c01d9ffee10fc474eb482b748b38966` | No image candidates in tree; prior template inspection established operator-configured logo slot. |
+| `skyvern` | Added | [`Skyvern-AI/skyvern`](https://github.com/Skyvern-AI/skyvern/tree/c835b01b0d04348992a801227feb6559513221a5) / `c835b01b0d04348992a801227feb6559513221a5` | Original `skyvern-frontend/public/logo.png`; identity reference `skyvern-frontend/src/components/Logo.tsx`. Licence notice: [skyvern](platform-logo-licenses/skyvern-LICENSE.txt). |
+| `spacetimedb` | Unresolved | [`clockworklabs/SpacetimeDB`](https://github.com/clockworklabs/SpacetimeDB/tree/c31d45503681c5426207f3630da5ac3320324816) / `c31d45503681c5426207f3630da5ac3320324816` | Business Source License restrictions remain; not treated as unrestricted art permission. |
+| `svix` | Unresolved | [`svix/svix-webhooks`](https://github.com/svix/svix-webhooks/tree/3704695e5982a493a9b7a158945bb04846df928e) / `3704695e5982a493a9b7a158945bb04846df928e` | No logo/favicon/icon image candidates returned by tree filename search; another official source needed. |
+| `text-generation-web-ui` | Added | [`oobabooga/text-generation-webui`](https://github.com/oobabooga/text-generation-webui/tree/c93f8871239550de2ccfe1e95d469aa82616f07e) / `c93f8871239550de2ccfe1e95d469aa82616f07e` | Original `css/icon.png`; identity reference `server.py`. Licence notice: [text-generation-web-ui](platform-logo-licenses/text-generation-web-ui-LICENSE.txt). |
+| `tiny-file-manager` | Unresolved | [`prasathmani/tinyfilemanager`](https://github.com/prasathmani/tinyfilemanager/tree/41491439a6b243c55502581e53fad20bc4c6e777) / `41491439a6b243c55502581e53fad20bc4c6e777` | No bundled artwork found; prior source inspection found empty default configurable favicon. |
+| `twingate-connector` | Unresolved | [`Twingate/connector-docker`](https://github.com/Twingate/connector-docker) / Lookup failed | Attempted Twingate/connector-docker lookup failed. No original artwork identified; this is a lookup failure, not proof none exists. |
+| `wireguard-easy` | Unresolved | [`wg-easy/wg-easy`](https://github.com/wg-easy/wg-easy/tree/53d7a04da19a5d3c051bd0c2d0895cf4eb0c30d9) / `53d7a04da19a5d3c051bd0c2d0895cf4eb0c30d9` | Original WireGuard marks found, but commercial trademark permission remains unresolved. |
+| `yacy` | Unresolved | [`yacy/yacy_net_homepage`](https://github.com/yacy/yacy_net_homepage/tree/28798f8a030e566659359a80b11162486a4dcaa6) / `28798f8a030e566659359a80b11162486a4dcaa6` | Logo candidates exist; root licence names Cinder theme, not sufficient evidence for YaCy artwork coverage. |
+| `yao` | Unresolved | [`YaoApp/yao`](https://github.com/YaoApp/yao/tree/46c1ea57f12599f17989c59773a0bedc743745a8) / `46c1ea57f12599f17989c59773a0bedc743745a8` | Modified Apache terms require review; no unqualified Apache artwork admission. |
+| `zenfeed` | Unresolved | [`glidea/zenfeed-web`](https://github.com/glidea/zenfeed-web/tree/cdfa01412379b8fc5db124dbc6b00746b448a74e) / `cdfa01412379b8fc5db124dbc6b00746b448a74e` | Icon candidate exists; no root licence grant found in companion repository. |

@@ -1,0 +1,22 @@
+Iceshrimp branding
+
+© 2023 Laura Hausmann. Created by Kilcat (https://kilcat.carrd.co).
+Licensed under CC BY-SA 4.0:
+https://creativecommons.org/licenses/by-sa/4.0/
+Legal code: https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+Upstream licence text:
+https://iceshrimp.dev/iceshrimp/branding/raw/branch/dev/LICENSE.md
+Licence revision: 4e55bd25e1ee72a40ed4df01aa0260c1e1721800
+Licence Git blob: 2eaa912a4882cbfe88f6dd9e31b9fac059646a33
+
+The local image is unchanged. It is the original assets/logo.png distributed by
+Iceshrimp, not a recreated or resized image. Copyright and licence apply to
+this artwork, not to unrelated application code.
+
+Original asset:
+https://iceshrimp.dev/iceshrimp/iceshrimp/media/branch/dev/assets/logo.png
+File commit: 28259129e8182e4dffd067730afbba2e5eaea34c
+Git LFS pointer blob: ec2b1115c782b8a22c09d36fba0ad0519132fbf0
+LFS object SHA-256: 30413bc6a5284ad4bf68f973b5787511130a83cb53003c686ba88f41935df3b2
+Size: 55577 bytes

@@ -1,0 +1,25 @@
+Snac2 / snac — Susie, original raster logo
+Source file: https://github.com/Yonle/snac2/blob/955b24d3ecd484ecb232db8e23b3aa4a4f7227ea/doc/susie64.png
+Source Git blob: 739d1544b53767d1c2f20db377713e1e42d7037a
+SHA-256: b35fc4cca27d2468fb8a62fd8ce822f231f085a8200d013d06ef49be8da2e093
+
+Identity evidence: https://comam.es/snac/grunfink/p/1711176017.741099
+On 23 March 2024, grunfink, identified on the page and in the repository README
+as snac's author, wrote: "I miss Susie, the logo of #snac..."
+In the same thread the author confirmed: "Sorry, no SVG, just this raster image."
+
+This is the unchanged 64px Susie PNG distributed with snac. Yonle/snac2 is the
+GitHub source mirror used for retrieval, not a claim that Yonle authored Susie.
+It is also used as an avatar, but that does not invalidate the author's explicit
+identification as the project logo. No conversion, drawing, tracing, recolouring,
+or local resampling was performed. No affiliation or endorsement is implied.
+
+MIT License
+
+Copyright (c) 2022 - 2023 grunfink (Fediverse: @grunfink@comam.es)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

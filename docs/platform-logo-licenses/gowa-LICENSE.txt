@@ -1,0 +1,13 @@
+gowa — unchanged source artwork
+Source: https://github.com/aldinokemal/go-whatsapp-web-multidevice/blob/3dd0f71d30af3bb4c56619b2f33c13dc410554bf/gallery/gowa.svg
+SHA-256 of the local image: 9895999f1d663137889b5d0f3471b2cacb4417a470e99159d990c8f70ca41cc9
+
+This identifies a catalogue product. No affiliation, endorsement or permission
+to operate the software as a commercial hosted service is implied. Source
+verification is distinct from rights clearance. Copyright and trademark rights
+remain with their respective holders.
+
+OPEN ARTWORK RIGHTS REVIEW: Official README selects the logo; no root artwork licence was found. No blanket artwork reuse permission is asserted.
+
+
+The upstream SVG already contains two embedded PNGs and a mask. It is served unchanged, not retraced, cropped or reconstructed. No raster-in-SVG wrapper was created here. Active/external SVG content is rejected by the audit.

@@ -1,0 +1,1367 @@
+asp-net — unchanged original catalogue artwork
+Source: https://github.com/dotnet/brand/blob/91845f6ddf2123b3bb1bfd1b6a386d9ce02b43aa/logo/dotnet-logo.png
+SHA-256: 8fcf6f6cd575c0f8c643691765a7db2a4b3b104bfbff34646555f5ccffdb2895
+
+This page identifies the upstream project and provides artwork notices. It
+is not an assertion of endorsement or a licence to operate a managed service.
+No software functionality is provided by this image. The software's separate
+commercial/deployment conditions still apply and are not waived by displaying
+its logo. No application footer, authentication or licence checks were changed.
+
+# .NET Brand Guidelines
+
+The purpose of these guidelines is to provide a framework for communicating with the .NET developer community and establishing a consistent brand identity. This repo serves as a guide and reference to designers, writers, and developers to create consistent, on-brand content for .NET. 
+
+Read the [.NET Brand Guidelines](dotnet-styleGuide-2024.pdf).
+
+## Logo
+
+The .NET logo is one of the most simple and direct visual representations of the .NET brand. The .NET logo purple color is #512bd4. Please read the brand guidelines for proper uses of the logo. 
+
+See the [logo](/logo) folder.
+
+## Illustrations
+These illustrations are more than sketches, they’re stories full of character, delightful surprises—and layers of meaning, many containing the [dotnet-bot](https://github.com/dotnet-bot). The dotnet-bot represents the community that comes with the .NET brand and platform. Dotnet-bot also helps with checking pull-requests on .NET repos. Please read the brand guidelines for proper uses. 
+
+See the [spot-illustrations](/spot-illustrations) folder.
+
+## Presentation Template
+You can use the presentation template as a starting point for your presentations to the .NET developer community. It contains type, theme colors, and illustrations that follow the brand guidelines. 
+
+See the [presentation-template](/presentation-template) folder.
+
+## Type
+
+The Open Sans typeface helps express the humanity in our voice and personality across all our communications. Open Sans is an open source typeface designed by Steve Matteson, Type Director of Ascender Corp.
+
+You can download it from Google Fonts: [fonts.google.com/specimen/Open+Sans](https://fonts.google.com/specimen/Open+Sans) 
+
+## License
+
+Illustrations in the brand repo are licensed under the very permissive [CC0 1.0 Universal license](https://github.com/dotnet/brand/blob/master/LICENSE). You may use the artwork to create your own .NET swag items to give away at community events, use the presentation template for your presentations, and use the illustrations and logo to represent .NET in related content, per the [.NET Brand Guidelines](dotnet-styleGuide-2024.pdf). 
+
+The .NET brand guidelines and .NET logo are copyright of the .NET authors. 
+
+The photos in the brand guidelines are all from [unsplash](https://unsplash.com) and are released under the [unsplash license](https://unsplash.com/license).
+
+Brand guideline source: https://github.com/dotnet/brand/blob/91845f6ddf2123b3bb1bfd1b6a386d9ce02b43aa/dotnet-styleGuide-2024.pdf
+Identity reference: https://dotnet.microsoft.com/en-us/apps/aspnet
+Microsoft uses .NET branding on its ASP.NET product page. This is the shared .NET mark, not a newly created ASP.NET-specific logo.
+
+.NET Style Guide November 2024
+Style guidelines
+A reference for assets, design, and writing.
+These style guidelines can help have a unified visual 
+identity and facilitate effective communication within 
+the .NET developer community. This reference 
+empowers designers, writers, and developers  
+in crafting a unified, on-brand content.
+.NET Style Guide November 2024
+Contents
+Story and principles
+
+Essential elements
+
+Imagery
+
+Expression and application
+01
+
+02
+
+03
+
+04
+.NET Style Guide November 2024
+01
+Story and principles
+.NET Style Guide November 2024
+What is .NET?
+Modern 
+Build feature-rich experiences with cutting-edge, performant technologies, leveraging 
+.NET’s cross-platform support and integration with cloud and AI.
+
+Productive 
+Use top editors, AI coding assistants, and cloud environments to save time and deploy 
+efficiently across platforms.
+
+Adaptive 
+Get started fast and reuse your skills to build web, cloud, mobile, and desktop apps 
+with .NET.
+A free, cross-platform, open-source 
+developer framework for building modern 
+apps and powerful cloud services.
+.NET Style Guide November 2024
+Universal
+
+Open
+
+Powerful
+
+Simple
+
+Dependable
+
+Approachable
+
+Adaptable
+
+Innovative
+
+Creative principles
+.NET Style Guide November 2024
+Our creative principles are important and useful attributes to help craft copy, 
+create designs, engage with customers, and help us define how we want to 
+show up in the world. 
+Tone of voice
+Approachable
+
+Helpful
+
+Authentic
+
+Simple
+
+Clear
+
+Good-natured
+
+Inclusive
+Arrogant
+
+Dismissive
+
+Fake
+
+Complicated
+
+Ambiguous
+
+Sarcastic
+
+Exclusive
+When writing, speaking or designing, take into account these qualities.
+.NET Style Guide November 2024
+.NET Style Guide November 2024
+02
+Essential elements
+Logo Download logo
+Treatment and usage
+Logo minimum size and clear space
+The square logo is the primary logo for .NET
+Primary Logo
+On screen, it should never appear smaller than 50 pixels.
+Logotype
+On screen, it should never appear smaller than 27 pixels.  
+In print, it must appear at least .28” (5.5 mm).
+Clear space
+Make the logo stand out by giving it space on all sides 
+equivalent to the height of the ‘N’.
+.NET logotypePrimary .NET logo
+Minimum height
+On screen: 50 px  
+Print: .52” (12.7 mm) 
+On screen: 27 px  
+Print: .28” (5.5 mm) tall
+On screen: 70 px wide 
+Print: .72” (17.7 mm) wide
+On screen: 50 px wide 
+Print: .52” (13.2 mm) wide
+Minimum width
+Minimum clear space
+.NET Style Guide November 2024
+Color Primary palette Secondary palette
+Brand Purple
+Primary
+#512BD4
+Pantone 2736 U
+CMYK: 51, 66, 0, 17
+Magenta
+Primary
+#D600AA
+Pantone Rhodamine Red U
+CMYK: 0, 84, 17, 16
+Blue
+Primary
+#512BD4
+Pantone 2194 U
+CMYK: 96, 58, 0, 0
+Brand Purple
+Shade 25 
+#311A7F
+Brand Purple
+Tint 30
+#B9AAEE
+Brand Purple
+Tint 45
+#EEEAFB
+Magenta
+Shade 20 
+#800066
+magenta
+Tint 30
+#EF99DD
+magenta
+Tint 45
+#FBE5F6
+BLUE
+Shade 30 
+#042B66
+BLUE
+Tint 30
+#9DC4FF
+BLUE
+Tint 45
+#E7F0FF
+Our color palette is a source of clarity and relevance and should 
+be applied thoughtfully. It creates familiarity and in a community 
+centric atmosphere evokes emotion.
+Before this color palette iteration, the .NET brand color was 
+primarily purple. The expanded palette still features purple as 
+the primary color, with additional colors to make it more flexible 
+depending on tonality. This addition helps express growing skills, 
+technological advances, and user experience. 
+cyan
+Primary
+#28C2D1
+Pantone 319 U
+CMYK: 66, 6, 0, 18
+BLUE
+Shade 30 
+#18747D
+BLUE
+Tint 45
+#E9F9FA
+midnight BLUE
+Shade 20 
+#0F042C
+midnight BLUE
+Shade 10
+#14053A
+flaming o
+Primary
+#F65163
+Pantone 1788 U
+CMYK: 0, 65, 58, 4
+Flaming o
+Shade 30 
+#74222B
+Flaming o
+Tint 40
+#FDDCE0
+yell ow
+Primary
+#F7B548
+Pantone 129 U
+CMYK: 0, 26, 69, 3
+yell ow
+Shade 30 
+#70511D
+yell ow
+Tint 40
+#FDF0DA
+midnight blue
+Primary
+#190649
+Pantone 2372 U
+CMYK: 19, 26, 0, 71
+.NET Style Guide November 2024
+Color
+Gradients
+Blue > 
+Purple
+Gradients
+Purple > 
+Blue
+Gradients
+Flamingo > 
+Purple
+Gradients
+Magenta > 
+Flamingo
+Gradients
+Purple >
+Magenta
+Gradients
+Cyan > 
+Purple
+Gradients
+Purple > 
+Cyan
+Gradients
+Flamingo > 
+Purple
+Gradients
+Magenta > 
+Flamingo
+Gradients
+Purple > 
+Magenta
+Choose between two primary gradient wheels, one for light theme 
+and one for dark theme. 
+.NET Style Guide November 2024
+Type
+AaBbCcDdEeFfGgHhIiJjKkLlMmN
+nOoPpQqRrSsTtUuVvWwXxYyZz
+AaBbCcDdEeFfGgHhIiJjKkLlMmNn
+OoPpQqRrSsTtUuVvWwXxYyZz
+Light  Medium  Bold  Semibold  Extra bold  Regular
+Light  Medium  Bold  Regular
+Space Grotesk
+Open Sans
+Download Space Grotesk
+Download Open Sans
+.NET Style Guide November 2024
+Use Space Grotesk for headlines and Open Sans for secondary headlines and body copy.
+Best for bigger headlines
+Best for smaller titles and paragraphs
+Type scale
+8       12        20        32        52       84
+Example scale sequence generated from 20pt body copy
+H1 Space Grotesk Bold
+H2 Space Grotesk Medium
+B1 Open Sans Regular
+H3 Open Sans Bold
+B2 Open Sans Regular
+H4 Space Grotesk Medium
+B4 Open Sans Regular
+.NET Style Guide November 2024
+Type examples
+Type can be expressive and can be used creatively, 
+applying color, scale and thoughtful copy writing.
+.NET Style Guide November 2024
+03
+Imagery
+.NET Style Guide November 2024
+Imagery
+Iconography Spot illustration Data visualization Code visualization Hero illustration
+Best for many blocks of text. 
+Based on the Fluent design 
+language. 
+Best used small, as 
+supplementary graphics 
+in communications.
+How we show data, numbers 
+and other visualizations.
+This is how we focus on code. Artworks that have more depth 
+and storytelling and can be used 
+as hero images or backgrounds.
+80%
+51%
+94%
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+service Greeter {
+ rpc SayHello (HelloRequest) returns (HelloReply) { }
+}
+1
+
+2
+await db.B lo gs.Wh ere( b =>  b. Slu g ==  slu g)
+   .F irst Async() ;
+1
+ 
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+buil der .Service s
+       .Add Http Client <O rderService Client >(c =>
+            c .B ase Add ress = ne w("h ttp :// or ders ");
+       )
+       .Add Stan dar dResilienceHan dler() ;
+.NET Style Guide November 2024
+Iconography
+Icons are great at supporting concepts and ideas at a 
+glance and are most effective when used to group similar 
+types of content or break up large blocks of text into 
+smaller components, making them easier to scan.  
+.NET icons are based on the Fluent design language.
+ Console
+Build web apps and services for macOS, 
+Windows, Linux, and Docker.
+In-browser tutorial
+Use a single codebase to build native mobile 
+apps for iOS, Android, and more.
+Mobile and desktop
+Consume existing cloud services or create and 
+deploy your own.
+Machine Learning
+Add vision algorithms, speech processing, 
+predictive models, and more to your apps.
+Game development
+Develop 2D and 3D games for the most 
+popular desktops, phones, and consoles.
+Web
+Create native apps for Windows and macOS or 
+build apps that run anywhere with web 
+technologies.
+.NET Style Guide November 2024
+Spot illustrations
+Meant to accompany blocks of text, these illustrations are useful for 
+wayfinding or to represent specific features. They are isometric, best 
+used small (up to 200 pixels) and depict simple metaphors in 3D. 
+Consider making the spot illustrations universal across .NET for a  
+clear user experience. 
+
+22.NET Style Guide November 2024.NET Style Guide November 2024
+Data visualization
+Data visualizations help with clarity for metrics, figures, and 
+business-level information in an impactful way while leveraging 
+brand elements like color, typography, and simple shapes.
+Color 
+Be sure to use .NET brand colors to ensure consistency. 
+Utilize gradients to create emphasis or dimension 
+wherever necessary. Use high-contrast color 
+combinations to clearly distinguish separate data points.
+Typography
+Make sure type feels balanced and appropriately scaled 
+with the overall graphics.
+Accessibility (WCAG AA)  
+Graphics need to have at least a 3:1 contrast ratio.
+Normal text needs to have at least 4.5:1 contrast ratio.
+Large text needs to have at least 3:1 contrast ratio.
+Use this  to ensure your  
+designs are accessible.
+contrast checker tool
+12.4
+CATEGORY 1
+Chart Title
+CATEGORY 2
+8.2
+4
+8.9
+11.3
+9.8
+Nov 2020 Nov 2021 May 2022 May 2024Nov 2022 Nov 2023 Nov 2024
+.NET 5 .NET 6 .NET 7 .NET 8 .NET 9
+Latest release
+P atches  fo r 1 8  mo nths
+Standard  Term  Support
+P atches  fo r 3 6  mo nths
+Long Term  Support
+ 80%
+51%
+94%
+100%
+General guidelines
+.N ET  St y le  Guide Nov ember 2024
+Code visualization
+Code visualizations are important storytelling elements within the  
+.NET platform. They can be enhanced with motion to create engaging, 
+interactive experiences that capture the attention of developers and 
+inspire them to learn more about what’s possible with .NET.
+Space Mono – Regular, 18pt
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+service Greeter {
+ rpc SayHello (HelloRequest) returns (HelloReply) { }
+}
+1
+
+2
+await db.Blogs.Where(b => b.Slug == slug)
+   .FirstAsync();
+1
+ 
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+builder.Services
+       .AddHttpClient<OrderServiceClient>(c =>
+            c.BaseAddress = new("http://orders");
+       )
+       .AddStandardResilienceHandler();
+Space Mono – Regular, 18pt
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+service Greeter {
+ rpc SayHello (HelloRequest) returns (HelloReply) { }
+}
+1
+
+2
+await db.Blogs.Where(b => b.Slug == slug)
+   .FirstAsync();
+1
+ 
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+builder.Services
+       .AddHttpClient<OrderServiceClient>(c =>
+            c.BaseAddress = new("http://orders");
+       )
+       .AddStandardResilienceHandler();
+#00467E – Code
+#7A7A7A – Line #s
+Co rner radi us :
+16px
+#B6D3FF – Code
+#7A7A7A – Line #s
+.NET Style Guide November 2024
+Hero illustration
+Isometric perspective
+Hero illustrations are built using an isometric grid to 
+create dynamic compositions by layering 2D/3D objects, 
+UI components, and devices. All elements within 
+individual compositions must be visually skewed at the 
+same angle to ensure consistency.
+Visual elements and metaphor
+3D designs are used to represent apps, concepts, and UI 
+components. These elements can also be combined with 
+2D wireframes, code samples, and devices.  
+Style and usage
+.NET Style Guide November 2024
+
+dotnet-bot
+The dotnet-bot was originally created by a member of the 
+.NET community and has since become our mascot.  
+The bot has gone through a series of makeovers over the 
+years and we are currently using a new 3D style which 
+enhances its personality and opens the opportunity for 
+creative stories. 
+dotnet-bot’s story and value
+November 2024 .NET Style Guide
+Don’t overdo it
+The value that the bot brings to the our storytelling is 
+preferred for community events, swag, and collectables.  
+In this way we avoid its exhaustion. Refrain from  
+over-using the bot in communications, web experiences,  
+or presentations that aren’t related to the .NET community  
+or events.
+Don’t reuse old artwork
+Refrain from reusing old 2D bot artwork for any  
+new communications.
+Free. Cross-platform. Open source. 
+Build any app 
+with .NET
+Create beautiful apps faster and easier with the 
+free, open-source platform that's loved by 
+developers and trusted by organizations.
+Download Get started
+Supported on Windows, Linux, and macOS
+Free and open source
+.NET is developed and maintained as a 
+free and open-source project on 
+GitHub, the home for millions of 
+developers who want to build great 
+things together.
+Fast and cross-platform
+.NET performs faster than any other 
+popular framework, according to 
+TechEmpower. You can write, run, and 
+build on multiple platforms, including 
+Windows, Linux, and macOS.
+Modern and productive
+.NET helps you build apps for web, 
+mobile, desktop, the cloud, and more. 
+With its large supportive ecosystem 
+and powerful tooling, .NET is the most 
+productive platform for developers.
+Build your apps with the power of .NET
+Multi-platform
+Deploy to mobile, web, desktop, and 
+embedded devices from a single codebase.
+Front-end web
+Build your front end apps in C#.  
+No need to learn JavaScript.
+Back -end API s
+Reuse code to build secure RES T API s that 
+reach all your clients.
+Here is the title
+Here is a discription of what this 
+carousel item is all about. I t could be 
+an event, an announcement, 
+something special for the 
+community, customer stories, etc.
+Button
+Explore everythin g 
+.NET has to o ff er
+Web
+Build web apps 
+and services for 
+macOS, 
+Windows, Linux, 
+and Docker.
+M obile
+Use a single 
+codebase to 
+build native 
+mobile apps for 
+iOS, A ndroid, 
+and more.
+Desktop
+Create native 
+apps for 
+Windows and 
+macOS or build 
+apps that ruin 
+anywhere wit h 
+web 
+technologies.
+M icroservi
+ces
+Create 
+independently 
+deployable 
+microservices 
+that run on 
+docker 
+containers.
+Cloud
+Consume 
+existing cloud 
+services or 
+create and 
+deploy your 
+own.
+M achine 
+Learning
+A dd vision 
+algorit hums, 
+speec h 
+processing, 
+predictive 
+models, and 
+more to your 
+apps.
+Game 
+Developm
+ent
+Develop 2D and 
+3D games for 
+the most 
+popular 
+desktops, 
+phones, and 
+consoles.
+I nternet of 
+Things
+Make IoT apps, 
+wit h native 
+support for t he 
+Raspberry Pi 
+and other 
+single -board 
+computers.
+Everythin g you need for 
+your .NET learnin g 
+journey
+.NET o ffers a library of learning resources. Access videos, 
+tutorials, labs, research, and help content from 
+M icrosoft Docs so that you can build better.
+Explore learning portal
+Highlight title
+This is body copy. 
+Button
+Highlight title
+This is body copy. 
+Button
+.NET Why .NET Features Learn Docs Downloads Live TV All Microsoft  Search  John
+NuGet
+The robust NuGet package ecosystem 
+helps developers like you create, share, 
+and consume useful code.
+Browse the NuGet Gallery
+Visual Studio
+Code, build, debug, deploy, collaborate, 
+analyze, learn —it's how you make 
+software.
+M eet the Visual Studio family
+Azure
+Solve today's hybrid challenges and 
+build the future across multiple clouds, 
+on-premises, and at the edge.
+What is Azure
+Build be tter to gether 
+with our global developer 
+community
+Join the large, engaged community of developers 
+around the globe who build with .NET. Share, 
+showcase, and solve together. Stay connected.
+M eet the .NET community
+stars on GitHub
+395k+
+followers on Twitter
+290 k+
+members on M eetup
+365K+
+Who uses .NET ? They do
+Powered by M icrosoft, .NET is the chosen 
+developer platform for the world's top 
+organizations. Amazing developers like you use 
+.NET to build incredible software for millions of 
+companies around the world, in every industry.
+Read customer stories
+Ready to get started? Our step-by-step tutorial will help you get .NET running 
+on your computer.
+Start tutorial
+Follow us
+Englis h (United States ) Dark modePowered by . NET  6.0.6 Contact Microsoft Support Privacy &  Cookies Terms of Use Trademarks © Microsoft 2022
+N ov 2020 N ov 2021 May 2022 May 2024N ov 2022 N ov 2023 N ov 2024
+.NET 5 .NET 6 .NET 7 .NET 8 .NET 9
+Latest release
+Patches for 18 months
+S tandard  Term  Support
+Patches for 3 6  months
+L ong Term  Support
+Things to avoid
+.NET S ty l e Guid e N ovem b er 2024
+Don ’ t place type over illustrations.
+Don ’ t skew or stretch illustrations.
+Don ’ t combine di fferent illustration types 
+wit hin a single composition.
+Don ’ t recolor, edit, or c hange existing assets.
+Don ’ t use 2D illustrations as hero images. Don ’ t use outdated illustrations.
+Don ’ t use 3D illustrations as patterns or   
+background textures.
+Don ’ t depict humans or animals in 
+illustrations.
+Build .
+Test.
+Deploy.
+04 
+Expression  
+and application
+.NET Style Guide November 2024
+
+Web
+Build beautiful, web 
+apps with Blazor
+Use the power of .NET and C# to build full-stack web 
+apps without writing a line of JavaScript.
+Get started Read docs
+Run anywhere
+Host Blazor components in any web 
+browser on WebAssembly, server-side 
+in ASP.NET Core, or in native client 
+apps.
+Start today
+Create beautiful user experiences fast. 
+The flexible, reusable Blazor 
+component models are simple, 
+composable, declarative, and efficient.
+Web and native
+Use Blazor components on the web and 
+in hybrid native apps for mobile &amp; 
+desktop.
+Blazor for Beginners
+The Blazor for Beginners video series shows you how to build 
+a simple user interface using Blazor. Blazor expert Jeff Fritz 
+unpacks exactly what Blazor is and how you can use it to 
+make your own web applications—including layout, 
+components, data access, and form field validation.
+Watch on YouTube
+Connect to data
+Visualize  and edit  data by binding  to 
+strongly  typed data models.
+L earn more
+Forms & validation
+Build  interactive  data forms with  rich  
+data validation.
+L earn more
+Security
+Quickly  set  up  authentication  and 
+authorization  policies  using  
+preconfigured templates and 
+integrated  tooling.
+L earn more
+JavaScript interop
+Call  into  existing  JavaScript  libraries  
+and APIs from C#.
+L earn more
+See how 
+ can 
+enhan ce 
+your 
+e xp erien ce 
+with Blazor
+Visual 
+Studi o
+Visual Studio helps you 
+easily build, debug, test, and 
+deploy full-stack C# Blazor 
+Web Apps.
+Debug and test
+Debug your C# code running  in  
+the browser from Visual  Studio  
+and write  automated tests.
+L earn more
+Hot reload
+Quickly  iterate  using  Visual  
+Studio's  Hot Reload feature to 
+apply  code changes at run  time  
+and see  results updated  in  real 
+time.
+L earn more
+Everything you need for your  
+learning journey with Blazor
+Explore a huge library of learning resources for the Blazor 
+community. Access videos, tutorials, labs, research, and content from 
+M icrosoft L earn.
+Explore learning portal
+Blazor for Beginners videos
+Watch now
+M icrosoft L earn
+L earn more
+L inked I n L earning
+L earn more
+C onne c t and build with our global develo per comm unity
+Stay u p to date 
+You can stay up to date with new content on the official .NET 
+Blog  and YouTube channel . Get quick answers to questions 
+with an active community of developers on Stack Overflow  or 
+Microsoft Q&A , and more. 
+ UI  com ponent e cosyste m s
+Get productive fast with beautiful re-usable U I  components 
+from top component vendors like Syncfusion , DevExpress , UX 
+Divers , GrapeCity , Telerik , and more.
+Ready to get started? Our step-by-step tutorial will help you get Blazor running 
+on your computer.
+Get started
+Follow us
+English  (United  States) Dark modePowered  by .NET  6.0.6 Contact  Microsoft Support Privacy  &  Cookies Terms  of Use Trademarks © Microsoft  2022
+Build .  T est.  Deploy.
+.NET is the free, open-source, cross-platform 
+framework for building all your apps and powerful 
+cloud services.
+Download Get started
+Supported  on W indows , Linux , and macOS
+Build it with .NET
+Web
+Build  web apps and services 
+for  macOS , W indows , Linux , 
+and Docker.
+M obile and desktop
+Use  a single  codebase  to build  
+native  mobile  apps for  i OS , 
+Android , and more.
+Cloud
+Consume  existing  cloud  
+services or create and deploy  
+your own.
+M icroservices
+Create  independently  
+deployable  microservices  that  
+run  on docker containers.
+M achine learning Game Development I nternet of Things Desktop Front-end web Back-end AP I s
+F aster res ponse ti m es ,  
+less compute power ,  
+better a pp li cations
+The F ortunes test simulates  a simple  web 
+application  where HTML  is rendered server -side 
+after  querying  a database.  See TechEmpower's 
+Round  22 Results.
+ASP.NET Core 
+(Minimal APIs)
+342 .5K33.9K
+Node. js 
+(Express)
+Go 
+(Gin)
+62.6K
+Fortunes  responses per second
+.NET  Conf 2024
+.NET 9 launches at .NET Conf 2024 ! 
+Tune in with the .NET community on 
+November 12-14 to celebrate and 
+learn what you can do with .NET 9 at 
+the biggest .NET virtual event.
+Save the date
+Open sour ce
+NET  is developed and maintained  as  a free and open-source proj ect on G ithHub , 
+the home  for  millions  of developers  who want  to build  great things  together.
+Button
+C ross -platform
+Y ou can write , run , and build  on multiple  platforms , including  W indows , Linux , 
+and macOS.
+Button
+Everything you need for 
+your .NET  learning 
+journey
+.NET offers a library of learning resources. Access videos, 
+tutorials, labs, research, and help content from 
+M icrosoft Docs so that you can build better.
+Explore learning portal
+.NET for beginners videos
+Getting  started with  .NET  development? 
+W e  have  you covered  with  our .NET  for  
+Beginners  videos. Explore  videos on web, 
+mobile , desktop, C#, machine  learning , 
+containers /Docker, data access , and more
+Browse beginner videos
+M icrosoft L earn
+Discover your path  to build  apps with  .NET  
+on Microsoft  Learn.  W hether you're j ust 
+starting  or an experienced  professional , 
+Microsoft  Learn's hands-on approach 
+helps  you arrive at your goals faster, with  
+more  confidence and at your own pace for  
+free.
+Get started
+L inked I n L earning
+Get an introduction  to the programming  
+skills  needed  for  a career as  a .NET  
+software developer.  Experience  .NET  
+learning  courses  that  provide  a broad 
+perspective  on core technologies  
+leveraging  .NET .
+Explore courses
+P roduc tive
+With its large supportive ecosystem and powerful tooling, .NET is the most 
+productive platform for developers.
+NuGet
+The robust NuGet package 
+ecosystem  helps  developers  like  you 
+create, share , and consume  useful  
+code.  
+Browse the NuGet Gallery
+Visual Studio
+Develop  with  the best IDE for  .NET  
+developers  using  W indows.  Packed 
+with  an array of tools and features 
+to elevate and enhance every  stage  
+of software development. 
+M eet the Visual Studio family
+Visual Studio 
+C ode
+Develop  on Linux , macOS , or 
+W indows  to build  cross -platform  
+websites and services.  Install  the C# 
+De v Ki t to get the best experience.
+Download Visual Studio Code
+Azure
+Solve  today's hybrid  challenges  and 
+build  the future  across  multiple  
+clouds , on-premises , and at the 
+edge .  
+What is Azure
+Build be tter together 
+with our global developer 
+community
+Join the large, engaged community of developers 
+around the globe who build with .NET. Share, 
+showcase, and solve together. Stay connected.
+M eet the .NET community
+stars on GitHub
+395k+
+followers on Twitter
+2 90k+
+members on M eetup
+365K+
+Who uses .NET? 
+Powered by M icrosoft, .NET is the chosen 
+developer platform for the world 's top 
+organizations. Amazing developers like you use 
+.NET to build incredible software for millions of 
+companies around the world, in every industry.
+Read customer stories
+Ready to get started? L earn .NET easily with our step-by-step tutorials.
+Start tutorial
+Follow us
+English  (United  States) Dark mode Powered  by .NET  6.0.6 Contact  Microsoft Support Privacy  &  Cookies Terms  of Use Trademarks © Microsoft  2022
+Ebook templates
+Ebook covers should follow the following layout setup to 
+create consistency in the Ebook series. 
+Headline: Space Grotesk bold 84pt
+12 columns with 95px margin
+Page dimensions 1274 x 1650px
+Author: Open Sans bold 32 pt
+Illustration: Usable area 1084 x 665px
+Ebook series: Space Grotesk Medium 
+36pt with 5px tracking
+.NET Style Guide November 2024
+Swag
+Streaming and video
+Basic concepts with
+Welcome
+Day 1
+.NET Style Guide November 2024
+Example of streaming assets for live events and lower thirds 
+for video material.
+Presenter Name
+Presenter Title

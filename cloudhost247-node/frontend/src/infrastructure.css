@@ -189,8 +189,7 @@
   min-height: 0;
 }
 
-/* An unsourced SVG means only that our rendition is pending, not that the
-   project's actual logo does not exist. Never invent a vendor badge. */
+/* User-approved letter fallback; never represented as official artwork. */
 .ch247-platform-logo-unavailable {
   display: inline-flex;
   align-items: center;
@@ -198,7 +197,12 @@
   min-width: 0;
   min-height: 0;
   color: #475569;
-  font: 600 9px/1.1 system-ui, sans-serif;
+  font: 700 14px/1 system-ui, sans-serif;
+  letter-spacing: 0.03em;
+  border-radius: 6px;
+  background: #eef2f6;
+  width: 100%;
+  height: 100%;
   text-align: center;
   overflow: hidden;
 }
@@ -212,3 +216,26 @@
 .ch247-panel-logo-sm__svg{width:100%;height:100%}
 .ch247-panel-logo-md{width:44px;height:44px;border-radius:8px;background:#f5f5f3;border:1px solid #e2e8f0;display:inline-flex;align-items:center;justify-content:center;padding:4px;flex:none}
 .ch247-panel-logo-md__svg{width:100%;height:100%}
+
+/* The .NET primary mark requires 50px plus clear space. Do not shrink it to
+   the usual compact icon size or clip its margin in a marketplace tile. */
+.ch247-app-tile:has(.ch247-dotnet-mark),
+.ch247-panel-card__logo-wrap:has(.ch247-dotnet-mark),
+.ch247-panel-detail-header__logo-wrap:has(.ch247-dotnet-mark) {
+  min-width: 90px;
+  min-height: 90px;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+/* Approved bundle presentation: individual originals, each visibly named.
+   Never imply there is a new combined vendor brand. */
+.ch247-bundle-logo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%; height: auto; }
+.ch247-bundle-logo__component { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.ch247-bundle-logo .ch247-bundle-logo__image { width: 80px; max-width: 100%; height: 32px; object-fit: contain; }
+.ch247-bundle-logo__label { font-size: 10px; line-height: 1.2; color: #334155; text-align: center; overflow-wrap: anywhere; }
+.ch247-bundle-logo__notice { grid-column: 1 / -1; font-size: 9px; line-height: 1.3; color: #475569; text-align: center; }
+.ch247-panel-card__header:has(.ch247-bundle-logo) { flex-wrap: wrap; }
+.ch247-panel-card__logo-wrap:has(.ch247-bundle-logo),
+.ch247-panel-detail-header__logo-wrap:has(.ch247-bundle-logo) { width: 190px; max-width: 100%; height: auto; min-height: 72px; padding: 8px; flex-shrink: 0; }
+.ch247-app-tile:has(.ch247-bundle-logo) { min-width: 190px; height: auto !important; min-height: 72px; overflow: visible; }

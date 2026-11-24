@@ -1,0 +1,14 @@
+ant-media-server-ce: unchanged identifying artwork
+Source: https://github.com/ant-media/ant-media-documentation/blob/545241adf3726b06fd0eef5dbd86d37d370e676e/static/img/Ant-Media-Logo-light.png
+SHA-256: cf05413d9116fb9e80fcf530109d10f6c03a81b96a6fb65df673e7780a4f00e8
+
+This is identifying catalogue artwork, not a software deployment or an
+endorsement. All third-party brand rights remain with their owners. Source
+verification is not a general commercial-hosting or trademark permission.
+No application code, footer, licence checks or access controls were changed.
+
+The exact original image is published in Ant Media's official documentation
+repository. No root artwork licence was found there. No Apache, MIT or other
+blanket artwork grant is asserted. This notice records copyright/source only;
+permission for wider promotional reuse remains an open review item. The image
+is not modified and is used only to identify the named product.
