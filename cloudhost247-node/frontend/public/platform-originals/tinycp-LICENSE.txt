@@ -1,0 +1,16 @@
+tinycp: source artwork capture
+Source page: https://sourceforge.net/software/product/TinyCP/
+Asset reference: Image retrieved with the listing page as provenance; no first-party asset pin supplied.
+Captured file SHA-256: abece77cac7de4b42a2936e799b0f48d26fd86df525bcbc13d2bbe00c1d33da6
+
+TinyCP wordmark supplied by its SourceForge software listing. This is a captured listing image, not a claimed first-party Git asset. Official product identity: https://tinycp.com/ .
+
+This file is stored as retrieved by image search. No upstream Git revision,
+Git blob or publisher checksum was supplied; none is invented. The captured
+file hash pins the local bytes only. It does not prove byte equality to a
+publisher's original design file or to a source SVG.
+
+OPEN ARTWORK RIGHTS REVIEW: a separate artwork reuse licence was not
+established. Copyright and trademarks remain with their holders. This is
+referential catalogue artwork, not an endorsement or a software/hosting licence.
+No blanket permission is inferred from the fact that an image is public.

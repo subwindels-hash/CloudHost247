@@ -92,7 +92,7 @@ export default function ControlPanelsPage() {
       <section className="ch247-section ch247-control-panels-section">
         <div className="ch247-control-panels__body">
           {error && <div className="ch247-banner ch247-banner--error">{error}</div>}
-          <p className="ch247-logo-disclaimer">Logos identify software, not partnerships. “SVG pending” means this listing’s real project logo has not yet been verified for code rendering; we won’t invent one.</p>
+          <p className="ch247-logo-disclaimer">Logos identify software, not partnerships. Where original artwork has not been verified, the first two letters identify the app instead.</p>
 
           <div className="ch247-marketplace-controls ch247-control-panels-controls">
             <div className="ch247-filter-tabs" role="tablist" aria-label="Control panel categories">

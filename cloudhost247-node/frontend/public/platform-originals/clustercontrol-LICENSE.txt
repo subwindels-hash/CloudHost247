@@ -1,0 +1,16 @@
+clustercontrol: source artwork capture
+Source page: https://docs.severalnines.com/clustercontrol/latest/getting-started/
+Asset reference: https://docs.severalnines.com/clustercontrol/latest/images/Clustercontrol-black-letters.png
+Captured file SHA-256: cf354a3b3e2e4c1ccdd79e91a9bc43b478792b0daca5f0d79e0bd29c7b02d3f3
+
+Original product wordmark from official documentation.
+
+This file is stored as retrieved by image search. No upstream Git revision,
+Git blob or publisher checksum was supplied; none is invented. The captured
+file hash pins the local bytes only. It does not prove byte equality to a
+publisher's original design file or to a source SVG.
+
+OPEN ARTWORK RIGHTS REVIEW: a separate artwork reuse licence was not
+established. Copyright and trademarks remain with their holders. This is
+referential catalogue artwork, not an endorsement or a software/hosting licence.
+No blanket permission is inferred from the fact that an image is public.

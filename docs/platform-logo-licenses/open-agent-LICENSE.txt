@@ -1,0 +1,16 @@
+open-agent — source artwork and unresolved rights notice
+Source: https://github.com/the-open-agent/static/blob/29be533f8a94f9c60b1e5313fc747971be7aea47/img/openagent-logo_1900x450.png
+SHA-256: c178e27e3e85d23ff6a01b3b2c5183b1988c853a0f359691b9225540f2f54259
+Git blob: f453d1b3b8236becf8728594f2ac421cbba00b5b
+Revision: 29be533f8a94f9c60b1e5313fc747971be7aea47
+
+Official the-open-agent/static asset; the-open-agent/openagent README explicitly selects img/openagent-logo_1900x450.png from cdn.openagentai.org. Hostinger describes the same multi-provider, RAG and enterprise authentication platform.
+
+Terms: Separate artwork reuse grant not established
+
+IMPORTANT: This catalogue integration records artwork identity, not legal
+clearance. No blanket reuse, hosting, sponsorship, partnership or endorsement
+permission is asserted. Obtain any required permission before production
+publication. A software licence is not automatically a licence for marks.
+Files remain unmodified as retrieved; capture/redistribution limitations are
+recorded above.

@@ -1,0 +1,11 @@
+juxtapose — artwork provenance
+Source: https://github.com/jc21/juxtapose/blob/2151f3d31b96e6bfdf6ef50e96c1a959b48df7f4/src/frontend/images/logo.png
+SHA-256: 1c7d2daac01cbce93935574bfdcd30ed260db2007121b97cae5fce9feef61c5f
+Source Git blob: bdad90345821a5aebf7a1ad83855cce344750991
+
+Original jc21/juxtapose notification-service logo. NOT NUKnightLab/juxtapose, which is an unrelated before/after slider. README lists Jira, Bitbucket, Docker Hub, Gerrit and Zendesk, matching the Hostinger entry.
+
+Separate artwork reuse grant unconfirmed
+Copyright and trademarks remain with their owners. This catalogue does not
+imply endorsement or a partnership. Source verification is not blanket
+commercial hosting permission.

@@ -1,10 +1,502 @@
 # Control Panels & Application Platforms — inline-logo audit
 
-## Status: incomplete
+## Status: original artwork incomplete — letter fallbacks approved
 
-The catalogue has **1,091 distinct projects**. **979 entries** currently render a source-matched, code-defined inline SVG: 14 pre-existing hand-written panel marks and **965 pinned generated marks** (827 from vector originals, 138 from visually reviewed raster-to-path traces (137 PNG, 1 ICO)). **112 still say “SVG pending”**; see [the exact, generated work queue](platform-logo-gaps.md). This is not all-1,091 coverage. No initials, invented vendor symbols, remote `<img>` elements or PNGs embedded in SVGs are shown for gaps. The shared renderer is used by the public catalogue, detail pages, marketplace cards, OS selector, server views and admin listings.
+**Current total: 1,080/1,092 visually covered; 12 missing.** (1,066 individual marks plus 14 approved component-mark groups.) **Coverage is not rights clearance: open artwork-permission questions are recorded in each applicable manifest entry and linked source notice.** The user approved unchanged
+local original PNG/WebP artwork, superseding the inline-only requirement.
+The user now approves first-two-letter badges for unresolved entries. These replace the visible “SVG pending” text, but are not official logos and do not increase sourced-artwork coverage.
+Historical counts and trace blockers below describe earlier passes. Identity
+and reuse checks still apply; existing inline vectors remain supported.
 
-A matching filename in a collection is evidence of an identity, **not** a vendor's verification or a trademark licence. Some of the 965 sourced marks still merit one-by-one comparison with the current project brand and legal review before commercial deployment. Do not describe the entire catalogue as verified or fully licensed on the strength of the counts below. Legacy `logo_url` fields in API records are deliberately ignored by these browser views. The previously attempted public `panel-logos/` image directory was removed.
+Added SQLChat's original `public/chat-logo.webp` from
+`sqlchat/sqlchat@85af0b4733d91d5c97a2ad89660cbfc515898676`, referenced by its
+frontend ConnectionSidebar and settings. Visually inspected the original
+wordmark. Stored unchanged at `frontend/public/platform-originals/sqlchat.webp`;
+Git blob and SHA-256 are recorded in `platform-original-logos.json`.
+Retained [SQLChat's MIT notice](platform-logo-licenses/SQLChat-LICENSE.txt).
+The shared renderer accepts only these local manifest paths, never arbitrary
+API image URLs. The gap audit checks original-file hashes. Validation passed:
+logo audit, 16 unit tests (1 todo), and frontend TypeScript.
+
+### Hiccup original PNG
+
+Added unchanged `ashwin-pc/hiccup` `public/logo512.png` from revision
+`e290862229e92860b1bcc97339d4f0dd2764280e`. Its web application manifest names
+Hiccup and explicitly selects this 512px icon. Inspected the original: the blue
+gradient and dark background are preserved rather than converted into paths.
+Pinned Git blob and SHA-256 in the local-original manifest; retained
+[Hiccup's MIT notice](platform-logo-licenses/Hiccup-LICENSE.txt).
+The earlier trace-fidelity blocker is superseded by direct original rendering.
+
+### ZNC original PNG
+
+Added unchanged `znc/znc` `logo.png` from revision
+`edeab9c1c158d27f9379c2c707b1dc670608782d`. The README explicitly displays
+this file as ZNC's header logo linking to znc.in. Inspected the original;
+metallic shading and outlined lettering remain intact without tracing.
+Pinned original Git blob and SHA-256 in `platform-original-logos.json` and
+retained [the Apache-2.0 notice](platform-logo-licenses/ZNC-LICENSE.txt).
+This supersedes the earlier trace-only blocker, not the historical findings.
+
+### Spacedrive original PNG
+
+Added unchanged `spacedriveapp/spacedrive` `.github/logo.png` at
+`30576ad1e5567b26dacdd0a68083ad77f714e960`. README explicitly selects it with Spacedrive
+alt text. Visually inspected the blue sphere; original shading is retained,
+not approximated by paths. Local original manifest records Git blob and SHA-256.
+Retained [the Apache-2.0 notice](platform-logo-licenses/Spacedrive-LICENSE.txt).
+The historical trace-fidelity rejection is superseded by original rendering.
+A combined repository search initially led to attributing this path to GOWA;
+the failed fetch corrected that attribution before any admission. No GOWA logo
+was added.
+
+### MeshCentral and WebCord originals
+
+Added two unchanged upstream PNGs, visually inspected before admission:
+
+- **MeshCentral**: `Ylianst/MeshCentral@6da4680a61cda2b610ceff28a3e4f0454b0e583c`, `public/favicon-303x303.png`. [Apache-2.0 notice](platform-logo-licenses/MeshCentral-LICENSE.txt).
+- **WebCord**: `SpacingBat3/WebCord@c00f4bbc4dd1b0aa7185b3da5d26444e05874ac5`, `sources/assets/icons/app.png`. [MIT notice](platform-logo-licenses/WebCord-LICENSE.txt).
+
+MeshCentral's login template explicitly selects its 303px Apple touch icon.
+WebCord's documentation header explicitly selects its app PNG with `WebCord
+Logo` alt text. WebCord's artwork resembles Discord branding because it is
+its upstream-selected client mark; do not describe it as independently designed
+or as trademark clearance. Original hashes and Git blobs are pinned in the
+local-original manifest. Clouds, lettering, gradients and shading are preserved
+without the trace losses previously recorded. Historical fidelity rejections
+are superseded only for these unchanged originals.
+
+### Plandex original documentation wordmark
+
+Added unchanged `plandex-ai/plandex` `docs/static/img/plandex-logo-light.png`
+at `e2d772072efadbe41d2946d97d79be55532dbab5`. `docs/docusaurus.config.ts` explicitly
+selects it as the light-theme navbar logo with Plandex alt text. Inspected
+original lettering and gradients. The README selects separate v2 variants;
+this entry is specifically the documentation's selected wordmark, not a claim
+that all upstream branding is identical. Local Git blob and SHA-256 are pinned;
+[MIT notice retained](platform-logo-licenses/Plandex-LICENSE.txt).
+No tracing, replacement font, or cropping was applied.
+
+### TaxHacker original PNG
+
+Added unchanged `vas3k/TaxHacker` `public/logo/512.png`, revision
+`97f8a59af4361b8e772752204617098e17f299e2`. README explicitly displays this
+file, and repository code search finds it in the entry and self-hosted pages.
+Inspected the original cat/laptop artwork. Its texture and shading remain
+unchanged; no raster-to-path conversion or embedded-image SVG is used.
+Git blob and SHA-256 are pinned in the local-original manifest, with
+[MIT notice retained](platform-logo-licenses/TaxHacker-LICENSE.txt).
+The previous trace-fidelity blocker is superseded by this original file.
+
+### Screego original PNG
+
+Added unchanged `screego/server` `ui/src/logo.png` at
+`324e98abbd9c61cfa01c94e7df904fa834e41925`. The README explicitly displays `docs/logo.png`,
+which has the identical Git blob `18d0cab5595bb67e181aec312f20eb6be1c9f259`.
+Inspected original gophers and translucent glow. No tracing or halo-generating
+conversion was applied. The local manifest pins source revision, Git blob and
+SHA-256. Retained [the repository GPL-3.0 text](platform-logo-licenses/Screego-LICENSE.txt)
+and the original PNG as source; no artwork-specific licence was separately
+stated in the inspected README or licence listing. This is a repository-licence
+record, not a blanket trademark/third-party-artwork clearance. Review gopher
+attribution requirements before commercial deployment. Earlier rendition
+rejections are superseded only by direct display of the unchanged PNG.
+
+### Ten-original batch requested by the user
+
+Added ten unchanged PNG originals after inspecting the artwork together. Each
+source revision and Git blob is pinned; local file SHA-256 is audited. The
+manifest's `identityFile` records the pinned application/README/config reference.
+Dkron's application imports `ui/src/images/dkron-logo.png`, byte-identical by
+Git blob to the selected public asset. Its pale wordmark receives a dark CSS
+background; the original bytes are not changed. CoAI's 512px desktop icon is
+itself soft-edged; no claim of added sharpness is made. Atlas's default logo is
+only 100px; it is preserved at original resolution, not AI-upscaled.
+
+| Catalogue slug | Repository and revision | Original file | Repository licence |
+| --- | --- | --- | --- |
+| `classquiz` | `mawoka-myblock/ClassQuiz@f99e0105430b86099f819b76b9c3d6d720bac820` | `logo.png` | [MPL-2.0](platform-logo-licenses/classquiz-LICENSE.txt) |
+| `coai` | `coaidev/coai@3048a493eedcfe75de4d59afd5139847ad3195ed` | `app/src-tauri/icons/icon.png` | [Apache-2.0](platform-logo-licenses/coai-LICENSE.txt) |
+| `dkron` | `dkron-io/dkron@8952bde62f7483d83b06d68d7bbaeeaa0fa8a948` | `ui/public/dkron-logo.png` | [LGPL-3.0](platform-logo-licenses/dkron-LICENSE.txt) |
+| `trip` | `itskovacs/trip@856b1edfe81a735fce4b544c2e16a6518cebf164` | `src/public/icons/TRIP_512.png` | [MIT](platform-logo-licenses/trip-LICENSE.txt) |
+| `soulsync` | `Nezreka/SoulSync@6fdd64e9e94f85e4b2409e66b0b5449c7c3a4e3a` | `webui/static/pwa-icon-512.png` | [MIT](platform-logo-licenses/soulsync-LICENSE.txt) |
+| `karaoke-eternal` | `bhj/KaraokeEternal@5d46aca8cdea867d6a3c6933e63e480adba525b5` | `docs/assets/images/logo_mic.png` | [ISC](platform-logo-licenses/karaoke-eternal-LICENSE.txt) |
+| `jelly-clipper` | `arnolicious/jelly-clipper@134b70264ea662edaacd5e219dca1bc0a5df97c9` | `static/apple-touch-icon.png` | [MIT](platform-logo-licenses/jelly-clipper-LICENSE.txt) |
+| `atlas-cmms` | `Grashjs/cmms@a3c7ce38adedeb90ac13c280e8ccad6622ff2a42` | `frontend/public/static/images/logo/logo.png` | [AGPL-3.0](platform-logo-licenses/atlas-cmms-LICENSE.txt) |
+| `local-deep-research` | `LearningCircuit/local-deep-research@8669e980f5f7565bcd96907d3184505506239178` | `src/local_deep_research/web/static/favicon.png` | [MIT](platform-logo-licenses/local-deep-research-LICENSE.txt) |
+| `topola-genealogy-viewer` | `Pewu/topola-viewer@3e2fe29753b19c044519714fec116f4fb8f23be6` | `public/favicon.png` | [Apache-2.0](platform-logo-licenses/topola-genealogy-viewer-LICENSE.txt) |
+
+Licence texts are retained alongside source provenance. Unchanged PNGs are
+included as the original artwork source; no derivative traces were made.
+Repository licences are not blanket trademark clearance. Existing production
+licensing review requirements still apply, particularly for copyleft material.
+Earlier trace-fidelity blockers for these ten are superseded by direct original
+rendering. No project names, generic fallback marks or third-party sponsor logos
+were substituted to reach the requested count.
+
+### Fifty-project source pass — six additions, not fifty completed logos
+
+The requested 50-project sourcing pass produced six admitted originals. The
+other 44 remain unresolved; this is not a claim to have delivered 50 logos.
+See the [per-project result ledger](platform-logo-batch-50.md) for revisions,
+source paths, lookup failures, identity rejections and rights blockers.
+
+Added Gotenberg's selected navbar PNG, Open Archiver's selected favicon,
+Skyvern's frontend wordmark, Text Generation Web UI's Gradio favicon, Gemini
+CLI's official IDE companion icon, and Apache Kvrocks' project mark. Five PNGs
+are stored unchanged from upstream PNG files. Kvrocks' official SVG contains
+one PNG at full canvas dimensions: extracted those exact original PNG bytes,
+without resampling, tracing or cropping. Its container hash, Git blob and
+extraction description are recorded separately from the extracted PNG hash.
+
+Skyvern's pale lettering uses a dark CSS ground without changing pixels.
+Gemini CLI's entry is specifically its official companion icon, not a claim
+that the terminal's ASCII header is a bitmap. Open Archiver's 60px source is
+not artificially sharpened. Kvrocks links to its official project website;
+the [ASF policy](https://www.apache.org/foundation/marks/) explicitly covers
+project graphics under the Apache licence and permits graphic website links.
+This does not authorise use as an endorsed CloudHost247 brand. Repository
+licence texts and original-image source provenance are retained for all six.
+
+### Ten-original update: two new entries and eight trace replacements
+
+This batch changes ten catalogue logos, **not ten previously missing entries**.
+Added Zen and DeskRPG from their own web-app manifests. Replaced eight traced
+renditions with the exact original PNG bytes already pinned by those trace
+records: Big-AGI, Cap CAPTCHA, Casibase, ChiefOnboarding, Coral Talk, Dialoqbase,
+Dograh and Domoticz. Each original hash was checked against the prior
+`originSha256` before migration. The removed trace hash is preserved in the
+original-file manifest; generated SVG entries were removed, not double-counted.
+All ten originals were visually inspected. ChiefOnboarding and Dograh retain
+wide wordmark layout. Current split: 14 handwritten + 959 generated + 35 local
+originals = 1,008 sourced.
+
+Zen identity was resolved against Hostinger's note-taking application page,
+then matched to `sheshbabu/zen` and its explicit `assets/site.webmanifest`.
+The upstream 512px original retains its orange gradients. AGPL text is retained
+in [zen-LICENSE.txt](platform-logo-licenses/zen-LICENSE.txt).
+
+DeskRPG's pinned current licence explicitly adds **Infrastructure Provider
+Permission** for unmodified one-click deployments to customer-controlled
+infrastructure. That changes the earlier blanket Sustainable Use blocker for
+that narrow deployment model. Fees must be for infrastructure, not the software;
+all notices must remain; customer use stays subject to the licence; operating
+it on behalf of customers as a managed service is excluded. This logo change
+does not validate or alter deployment/pricing compliance. The exact PWA image
+selected by `public/manifest.json` is used, not the separate employee-avatar
+Apple icon or a guessed variant. See
+[deskrpg-LICENSE.txt](platform-logo-licenses/deskrpg-LICENSE.txt).
+
+Other research in this pass remains unresolved: JobOps has Commons Clause
+terms; Evolution Go adds notification/logo conditions; .NET brand files are
+not automatically ASP.NET-specific branding; Drizzle ORM art is not assumed to
+be Gateway's logo; Anki Enhanced, Explo and Crucix searches found screenshots,
+provider icons or text rather than a verified standalone brand asset. GoWA's
+separate dashboard/reuse terms need further review. No such asset was silently
+substituted to reach ten additions.
+
+### Ten more original-file replacements (coverage unchanged)
+
+Replaced ten existing traces with their unchanged original PNGs. This does
+**not** resolve any of the 83 remaining gaps and is not counted as ten new
+sourced entries. Every fetched file matched its existing `originSha256` and
+Git blob before migration. Original revision and file hashes are preserved;
+the prior trace digest remains as `replacesTraceSha256`. Existing licence
+notices and source-identity reviews continue to apply.
+
+| Catalogue slug | Pinned repository revision | Original file |
+| --- | --- | --- |
+| `eclipse-kura` | `eclipse-kura/kura-management-ui@79659e4b7381dfd1f21747b545e157cb2a098d19` | `org.eclipse.kura.web2/src/main/webapp/eclipse/kura/icons/kura_login_logo.png` |
+| `embystat` | `mregni/EmbyStat@be617783dafaaa27d3a1b3524fbbc9fc9470795f` | `branding/logo-color.png` |
+| `errbit` | `errbit/errbit@14655aef50e53ebb4e4d30b3be627a4a0d52740f` | `docs/notifications/slack/errbit.png` |
+| `expensave` | `algirdasc/expensave@5305cee55487e058e5a80ad7e719d11f1ef89a5e` | `frontend/src/assets/favicon/android-chrome-256x256.png` |
+| `fusiondirectory` | `fusiondirectory/fusiondirectory@1efe63dab1b99ba57f553cae6d529021cf1e4c52` | `html/themes/breezy/icons/scalable/apps/fusiondirectory.png` |
+| `gpt-researcher` | `assafelovic/gpt-researcher@8b474fe7d92aca112601cb87e1ec0999103bc01a` | `docs/static/img/gptr-logo-tile.png` |
+| `hollama` | `fmaclen/hollama@a6614a2e0c6f0634f75e6b1605dcae28b8628bb1` | `electron/resources/icons/png/1024x1024.png` |
+| `dspace` | `DSpace/DSpace@7ad52048c3143f161f6cb8ad93b15243aad3913f` | `dspace-api/src/main/resources/dspace_logo.png` |
+| `cops` | `seblucas/cops@7828cc600e904941583227071b8f4efd3b9385fb` | `images/icons/icon144.png` |
+| `codimd` | `hackmdio/codimd@b1188a5648a23d970b9ad58612376e6602431f6f` | `public/favicon.png` |
+
+Inspected all ten originals visually. Eclipse Kura's white wordmark receives
+the shared dark CSS ground, without changing its pixels. Kura, EmbyStat and
+FusionDirectory use wide layout. No resampling, tracing, invented lettering,
+or replacement vendor symbol was used. Hollama's original has more texture
+than the traced rendition. All generated entries for these ten were removed
+rather than leaving overlapping registries.
+
+Current split: **14 handwritten + 949 generated + 45 local originals = 1,008**.
+The historical inline-only totals below are not the current count.
+
+### Nine-original update (no missing entries resolved)
+
+Replaced nine traced logos with unchanged upstream PNG files. All downloads
+matched both the previously pinned Git blob and original SHA-256. Existing
+licence notices remain in place; each new original manifest record preserves
+the removed trace digest. These are **nine fidelity updates, not nine newly
+resolved gaps**. Coverage stays 1,008 sourced and 83 pending.
+
+| Catalogue slug | Pinned repository revision | Original file |
+| --- | --- | --- |
+| `kill-bill` | `killbill/killbill@8881b6617a7ef2d0bd5e1dd354d37405eb1362d6` | `profiles/killbill/src/main/webapp/images/KillBillLogo400x400.png` |
+| `m3db` | `m3db/m3@ea708d3a685f613af7dd0a39571f98d0802c4105` | `site/static/images/logo-square.png` |
+| `mailtrain` | `Mailtrain-org/mailtrain@89b189d0f5fcb3bb069dde7c2da72d5acd071dd5` | `client/static/mailtrain-notext.png` |
+| `mapstore` | `geosolutions-it/MapStore2@cacb8452dbe145267ad3b67b692ff24a8c3feb4b` | `web/client/product/assets/img/favicon.png` |
+| `maputnik` | `maplibre/maputnik@b6db2ff9e823f4f2156d54c73dcf469c844e57c4` | `src/img/maputnik.png` |
+| `mediago` | `mediago-dev/mediago@c4a1cac40800b9754cf4305283442031ea835ba0` | `apps/ui/public/icon-512.png` |
+| `mirofish` | `666ghj/MiroFish@7657031ac01184afe2cb220f5ee3545573b5e843` | `frontend/public/icon.png` |
+| `mopidy` | `mopidy/mopidy@ceb96aaf653473061db09cef2382e5ce758a62e3` | `docs/images/logo.png` |
+| `nsq` | `nsqio/nsq@85cf10c09c6c3c86160d6f0eb156f62d0efc1648` | `nsqadmin/static/img/favicon.png` |
+
+Visually inspected all nine originals. MapStore's faded lower globe is present
+in the source, not a missing piece; MiroFish's pixel styling is upstream artwork.
+Mailtrain's small 61×72 source is not artificially enhanced. None was traced,
+resampled, cropped or replaced with a similar-looking vendor logo. Generated
+entries were removed, keeping the source registries disjoint.
+
+Current split: **14 handwritten + 940 generated + 54 local originals = 1,008**.
+
+### Missing-logo research follow-up: Automatisch
+
+One previously missing entry resolved; the requested ten-new-logo batch is
+**not complete**. Automatisch uses its own v0.9.3 favicon from
+`automatisch/automatisch@8156b8b356b641c1acb5672226a7598b5b3cfbe2`, explicitly
+selected in `packages/web/public/index.html` and the application manifest.
+This is the upstream dark-blue stylised a, not an initial we generated.
+The historical release avoids substituting the newer Mation rebrand for the
+Automatisch catalogue identity. Hostinger's Automatisch page confirms the
+workflow-automation product. The root licence assigns non-enterprise files
+(including this favicon) to AGPL-3.0; both scope text and full licence are retained.
+
+The browser serves the **unchanged original ICO**, preserving all embedded
+sizes; no tracing or PNG conversion is used. Local-path validation now accepts
+ICO as well as PNG/WebP and still verifies the file hash. Visual review used a
+scratch decoded preview only, never installed as the production asset.
+
+Current split: 14 handwritten + 940 generated + 55 originals = 1,009 sourced.
+See [missing-logo research findings](platform-logo-missing-ten.md) for the
+unresolved candidates. No existing trace replacement is counted as a new logo.
+
+### Official-forge follow-up: Iceshrimp
+
+One new missing entry resolved, **not the requested ten**. Iceshrimp's official
+source is on iceshrimp.dev, not the previously attempted GitHub repository.
+The original `assets/logo.png` was retrieved by image search from the official
+project page. It was admitted only after its 55,577-byte payload matched the
+Git LFS SHA-256 published by the official forge, exactly:
+`30413bc6a5284ad4bf68f973b5787511130a83cb53003c686ba88f41935df3b2`.
+The manifest's Git blob identifies the **LFS pointer**, not the image payload.
+
+Visually inspected the full Iceshrimp wordmark and preserved its background,
+proportions and pixels. It uses the wide-logo layout. The separate official
+branding repository explicitly licenses artwork © 2023 Laura Hausmann (Kilcat)
+under CC BY-SA 4.0. Attribution and the licence link are retained in
+[iceshrimp-LICENSE.txt](platform-logo-licenses/iceshrimp-LICENSE.txt), also served
+beside the image and linked from it in the UI. No endorsement is implied.
+
+Current split: 14 handwritten + 940 generated + 56 originals = 1,010 sourced.
+
+Further research this pass: Sharkey GitHub search located forks, not a verified
+current upstream asset; the official GitLab page fetch failed. Komari's public
+repository contains sponsors and themes, not proof of its own logo. Letta Code
+contains screenshots rather than established Letta-server branding. Snac2,
+Conduit and FMD attempted GitHub mappings failed; no wrong repository was
+silently substituted. ShinyProxy's assumed site repository was absent. GoWA
+still needs a documented artwork grant. Manticore's separate artwork source
+remains unresolved. .NET's actual guidelines were downloaded and reviewed:
+its primary square logo requires at least 50px and clear space; it was not
+inserted into the smaller catalogue icons or assumed to be an ASP.NET-specific
+mark. These are open findings, not evidence that those projects lack logos.
+
+### Ten newly sourced catalogue entries
+
+Added ten unchanged upstream originals: ASP.NET (the shared official .NET
+mark), Evolution API, Evolution Go, JobOps, Koffan, Nango, Open Source POS,
+Redpanda Console, SpacetimeDB and YaCy. No traced-logo replacements are counted
+in this batch. Current split: 14 handwritten + 940 generated + 66 originals =
+**1,020 sourced; 71 unresolved**.
+
+See [the ten-entry admission ledger](platform-logo-ten-admissions.md) for exact
+pins, identity evidence and retained terms. Earlier blanket software-licence
+blockers are narrowed to distinguish catalogue artwork from operating the
+software. This is not commercial-hosting clearance: the restrictions remain
+recorded and no deployment permissions, licence enforcement or product code
+were changed. Every new image links to its source/copyright/licence notice.
+
+### Ten approved bundle entries
+
+The user explicitly approved **separate, labelled original component logos**
+for bundles with no verified single vendor logo. Ten previously pending entries
+now use this presentation: Docker and Traefik; six OpenLiteSpeed bundles
+(Django, Drupal, Joomla, Node.js, Rails, WordPress); LAMP; LEMP; and MERN.
+No invented combined brand, initials or traced substitute is used. Each image
+has its component name visible beneath it, an accessible name, and a source/
+licence link for the group. This is **not ten newly discovered composite logos**.
+
+Sources: 15 vector marks from the already-used SVG Logos collection, pinned to
+`@iconify-json/logos@1.2.20`, plus the unchanged OpenLiteSpeed PNG selected from
+its official example site. Geometry and colours were not redrawn; vector body
+and resulting SVG hashes, package archive hash, and OpenLiteSpeed Git revision,
+blob and SHA-256 are recorded in `platform-bundle-logos.json`. Original vector
+view boxes are preserved. All 16 component marks were visually inspected.
+OpenLiteSpeed's light lettering receives a dark CSS background, not pixel edits.
+
+The bundle audit validates local paths, every asset hash, SVG safety, component
+references and disjoint coverage. It rejects unknown/duplicate components and
+bundles overlapping individual marks. Component groups have their own registry
+rather than being miscounted as single vendor logos. Two other named stack
+entries (MEAN and MEVN) remain pending; they were not silently added beyond ten.
+
+Current split: **14 handwritten + 940 generated + 66 original-file marks +
+10 approved component groups = 1,030 covered**. There are still 61 unresolved
+catalogue entries. This count measures catalogue coverage, not unique artwork.
+
+Validation: logo audit, 18 unit tests (one remaining coverage TODO), frontend
+TypeScript, and HTTP loading of each component asset and notices passed.
+
+### Next ten catalogue entries: eight images and two stacks
+
+Added aaPanel, Multica, nopCommerce, FMD, Foundry VTT, Sharkey, MCP Server,
+Ant Media Server CE, MEAN and MEVN. See
+[next-ten source and limitations ledger](platform-logo-next-ten.md).
+Eight files are unchanged pinned PNGs; two stack groups extend the explicitly
+approved separately-labelled component approach. MEAN uses **AngularJS**, not
+modern Angular; MEVN uses Vue.js. There are now 1,040 visually covered entries
+and 51 missing entries. This metric is not a count of legally cleared marks.
+
+The Ant Media source is authoritative and the image is original, but a separate
+artwork licence was not established. The manifest and publicly linked notice
+explicitly retain that review issue; no general licence was inferred from its
+server code or dashboard template. Originality and rights clearance are not
+the same claim. The remaining software licence restrictions also still apply.
+
+### Ten further originals, not trace replacements
+
+Added Matrix Conduit, Twingate Connector, Ubooquity, Komari, Zenfeed, GoWA,
+Yucca, Yao, EmailEngine and MetaTrader 5. See
+[the source-format and review ledger](platform-logo-further-ten.md).
+Current split: 14 handwritten + 940 generated + 84 original files + 12
+component groups = **1,050 visually covered; 41 missing**.
+
+Nine files have pinned upstream Git blobs. MetaTrader 5 comes directly from
+its official product website via image retrieval, pinned by captured-file
+SHA-256, not an invented Git revision. Yao's website publishes its artwork
+under MIT, independently of its engine's custom software licence. GoWA's SVG
+already embeds PNGs; the original source is retained, not a newly generated
+wrapper. Local original SVG/JPEG support preserves these files without tracing
+or conversion. The audit checks SVG references and rejects active/external
+content while allowing the specifically reviewed embedded PNGs in GoWA.
+
+Identity was not inferred from filenames alone: Conduit's official site shows
+the yellow lightning bolt; Komari's main README pins the chosen frontend icon;
+Zenfeed's app.html selects its icon; GoWA's README displays its logo; Yucca's
+own site supplies the plant artwork; Yao uses its own website brand asset.
+Snac2's default avatar was rejected as insufficient project-logo evidence.
+LittleLink's mark was not substituted for the separately named server fork.
+Svix's explicit permission requirement remains unresolved; no mark was added.
+
+Six of this batch retain explicit artwork-rights review flags (Komari, Zenfeed,
+GoWA, Yucca, EmailEngine and MetaTrader 5). Their source identity is verified,
+but this is not a blanket copyright/trademark clearance. Original notices are
+publicly linked and retained in docs; no software hosting licence is implied.
+
+### Ten web/repository sourcing additions
+
+Added Apache JSPWiki, ClusterControl, Drizzle Gateway, Euro-Office DocumentServer,
+KUSANAGI, Letta, Manticore Search, Perplexica, R2R and TinyCP. Four files are
+unchanged pinned Git assets; six are image-search captures with source-page
+references and local SHA-256 pins, not invented Git hashes. See
+[web/repository batch ledger](platform-logo-web-ten.md) for source limitations.
+
+Current split: **14 handwritten + 940 generated + 94 local artwork files +
+12 approved component groups = 1,060 visually covered; 31 missing**.
+Only Apache JSPWiki and Perplexica have the specific reusable terms documented
+for this batch; eight other artwork-permission reviews remain explicit. Coverage
+is not rights clearance. Letta uses its official branded announcement artwork;
+TinyCP is a directory-provided wordmark; R2R is a PNG retrieval of its official
+SVG wordmark. These distinctions are not hidden as first-party original bytes.
+
+### UI-source follow-up: one addition, not ten
+
+The requested ten-entry batch was **not completed**. MicroRealEstate is newly
+covered by the actual static favicon at its current upstream revision. Reading
+`AppLogo.tsx` revealed the distinctive blue house/face geometry; `styles/brand.ts`
+then pointed to the matching static favicon. This avoids both the older generic
+building icon and any need to reconstruct a logo from JSX. The upstream SVG
+bytes are unchanged and checked against both SHA-256 and the Git blob.
+
+Retain its Sustainable Use licence and explicit artwork-permission review flag.
+No separate promotional-artwork grant was established. This is visual source
+coverage, not commercial-hosting or trademark clearance.
+
+Other searches this pass did not establish nine more logos: Codex results were
+screenshots and architecture diagrams; the purported FossFLOW logo was a
+network diagram; Crucix results included a website badge; DeepWiki Open results
+were cropped screenshots. Filename/UI-code searches for Checkrr, Crontab UI,
+Explo, Plik and Tiny File Manager were inconclusive. This does not prove those
+projects have no logos, and none was replaced by an invented mark. Explicit
+permission blockers on other remaining entries were not waived to reach ten.
+
+Current split: **14 handwritten + 940 generated + 95 local artwork files +
+12 approved component groups = 1,061 visually covered; 30 missing**.
+
+### Ten identified artwork additions — commercial clearance remains open
+
+Added Atomic Server, Canarytokens, Firefly, FASTPANEL, Geneac, Open Agent,
+OpenAI Codex, Plik, Plone and Svix. See [batch ledger](platform-logo-verified-ten.md).
+Seven files are unchanged pinned Git assets; Codex is an unchanged original app
+icon redistributed in a pinned npm package with a matching documented hash;
+two are official-site image captures. Geneac is its original branded website
+banner, not an isolated logo. Plik is a third-party catalogue copy.
+
+**This revises the earlier decision to keep identity-verified but legally
+uncleared artwork out of the preview. It does NOT resolve the legal blockers.**
+Restrictive terms for Firefly, Atomic Server, Canarytokens, Plone and Svix remain
+open production-publication gates. All ten carry explicit rights-review notices;
+no commercial permission or endorsement is claimed. Obtain appropriate review
+and permissions before production use.
+
+Current split: **14 handwritten + 940 generated + 105 local artwork files +
+12 approved component groups = 1,071 visually covered; 20 missing**.
+
+### Remaining-entry research: six additions, not ten
+
+This requested ten-entry batch was **not fully completed**. Added Juxtapose,
+DeepSeek Harness, Grok Build and Tiny File Manager source artwork, plus labelled
+Anki + Docker and OpenShell + OpenClaw component groups for Anki Sync Server
+Enhanced and NemoClaw. See [research ledger](platform-logo-remaining-six.md).
+The existing OpenLiteSpeed and Node.js group was rechecked, not counted anew.
+
+Current split: **14 handwritten + 940 generated + 109 local artwork files +
+14 approved component groups = 1,077 visually covered; 14 missing**.
+
+### Expanded archive search: Snac2 identity correction
+
+The broader search found direct author evidence that Susie **is** snac's logo,
+not merely a default avatar. Added the unchanged upstream 64px PNG with MIT
+notice, pinned Git blob and SHA-256. See [expanded-search record](platform-logo-expanded-search.md).
+This is one new addition, not a completed ten-entry batch.
+
+Current split: **14 handwritten + 940 generated + 110 local artwork files +
+14 approved component groups = 1,078 visually covered; 13 missing**.
+
+### Corrected merged catalogue identity: Fasten Health / fazer.ai agents
+
+Hostinger lists these as two separate products. The accidentally concatenated
+entry now displays Fasten Health and its original OnPrem favicon. Its old ID
+and slug are deliberately retained to avoid breaking existing references.
+fazer.ai agents is a separate entry with its own original project PNG.
+No combined logo was invented. See [correction ledger](platform-logo-fasten-fazer.md).
+
+**One previous gap resolved, one separate product added, two original artwork
+files installed. This is not ten missing-logo additions.** Catalogue size rises
+by one to 1,092. Current split: **14 handwritten + 940 generated + 112 original
+files + 14 component groups = 1,080 covered; 12 unresolved**.
+
+### Previous inline-only baseline
+
+The catalogue has **1,091 distinct projects**. **981 entries** currently render a source-matched, code-defined inline SVG: 14 pre-existing hand-written panel marks and **967 pinned generated marks** (827 from vector originals, 140 from visually reviewed raster-to-path traces (139 PNG, 1 ICO)). **110 still say “SVG pending”**; see [the exact, generated work queue](platform-logo-gaps.md). This is not all-1,091 coverage. No initials, invented vendor symbols, remote `<img>` elements or PNGs embedded in SVGs are shown for gaps. The shared renderer is used by the public catalogue, detail pages, marketplace cards, OS selector, server views and admin listings.
+
+A matching filename in a collection is evidence of an identity, **not** a vendor's verification or a trademark licence. Some of the 967 sourced marks still merit one-by-one comparison with the current project brand and legal review before commercial deployment. Do not describe the entire catalogue as verified or fully licensed on the strength of the counts below. Legacy `logo_url` fields in API records are deliberately ignored by these browser views. The previously attempted public `panel-logos/` image directory was removed.
 
 ## Sources, reproducibility and attribution
 
@@ -22,7 +514,7 @@ The manifest [`platform-logo-sources.json`](../cloudhost247-node/frontend/src/da
 | [TheSVG, individually checked variants](https://github.com/glincker/thesvg) | 21 | Per-project terms in the manifest; [collection guide](https://github.com/glincker/thesvg/blob/551229c188b4ab6e2d8b5763b9633ec91206d04c/LICENSING.md) | `551229c188b4ab6e2d8b5763b9633ec91206d04c` |
 | First-party repository vectors (SVG / reviewed JSX) | 143 | Individual upstream licence/terms in the manifest; e.g. [Apache 2.0](platform-logo-licenses/Apache-2.0.txt), [Lightdash](platform-logo-licenses/Lightdash-LICENSE.txt) | Each entry pins its own repository revision and file |
 | First-party repository ICOs traced into paths | 1 | Individual upstream licence/terms in the manifest | Pins original ICO bytes, git blob, frame size and final SVG hash |
-| First-party repository PNGs traced into paths | 86 | Individual upstream licence/terms in the manifest | Each entry pins its own revision, file, PNG blob and vector trace |
+| First-party repository PNGs traced into paths | 88 | Individual upstream licence/terms in the manifest | Each entry pins its own revision, file, PNG blob and vector trace |
 
 **Galaxy artwork attribution:** Galaxy Project Contributors, [Galaxy logo](https://github.com/galaxyproject/galaxy/blob/618c137d53c796dfa756b57d79ca5a57849386f7/static/favicon.svg), [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/); converted to JSX with its unused embedded SVG font removed and IDs scoped. The white-and-gold first-party artwork is shown on a navy ground for contrast, without redrawing its paths; this was visually checked on the live catalogue card after filtering to Galaxy. The project's [licence file](platform-logo-licenses/Galaxy-LICENSE.txt) specifies CC BY 3.0 for images. Source-collection copyright permissions do **not** transfer the individual projects' trademarks to CloudHost247.
 
@@ -1487,6 +1979,207 @@ notice (2014–2024 Dan Sosedoff) in
 correct project and PNG source path.
 
 **979 of 1,091 entries are now sourced; 112 remain pending.**
+
+## Renewed public-source review: aaPanel
+
+Revisited Hostinger's public homepage as an identity reference and searched
+for aaPanel artwork; third-party search hits are not treated as upstream
+provenance. Inspected aaPanel's own website and repository at
+`aaPanel/aaPanel` revision `38bf35903b37b50d9654f47c4ad904ca3369715f`.
+`BTPanel/static/vite/images/logo.png` and
+`BTPanel/static/icons/menu_logo.png` contain a green polygonal animal mark;
+`BTPanel/static/images/logo.png` is a small pale wordmark. A filename alone
+is not enough to establish which asset is the intended current panel identity.
+No third-party green-square/initials recreation was substituted.
+
+Retrieved this revision's `license.txt`: the custom AAPANEL agreement permits
+posting/integration of unchanged aaPanel (section 4), restricts public release
+of modifications (section 2.2), requires unchanged source on redistribution
+(section 4.3), and expressly covers graphics in its intellectual-property
+statement (section 5). These terms require review before distributing a traced
+logo derivative; they are not an MIT/Apache artwork grant. This is not a claim
+that ordinary nominative display of the aaPanel brand is prohibited.
+
+No aaPanel artwork was admitted in this pass. The catalogue remains at
+**979 sourced / 112 pending**; hiding unresolved entries or replacing their
+marks with guessed symbols is not counted as completion.
+
+## Official repository continuation: PowerDNS-Admin's selected favicon
+
+Pinned `PowerDNS-Admin/PowerDNS-Admin`,
+`powerdnsadmin/static/img/favicon.png`, revision
+`6b3b9cc160a1db77f52db298a131cae9968db71d`. The same revision's
+`powerdnsadmin/templates/base.html` explicitly selects this PNG as its favicon.
+The globe is therefore the application's upstream-selected icon, not a generic
+DNS illustration substituted by this catalogue. It is not claimed to be an
+exclusive wordmark or the separate PowerDNS server brand.
+
+Selected native `light-ground-pixel` tracing. Inspected source and trace and
+rendered generated React paths at 44px and 96px; the black globe outlines and
+white gaps remain intact, with minor pixel-boundary texture at enlargement.
+Original PNG blob/SHA-256 and final SVG SHA-256 are pinned. Retained the MIT
+repository notice (Khanh Ngo, Azorian Solutions and Tyler Todd) in
+[PowerDNS-Admin-LICENSE.txt](platform-logo-licenses/PowerDNS-Admin-LICENSE.txt).
+Tests assert the correct repository and favicon path. This supersedes the old
+unverified-globe research blocker based on explicit upstream usage evidence.
+
+**980 of 1,091 entries are now sourced; 111 remain pending.**
+
+## Follow-up validation and JSPWiki candidate
+
+Re-ran logo checks after PowerDNS-Admin: **966 pinned generated marks and 111
+gaps verified; 15 logo tests passed, 1 todo**. The combined validation command
+reached its time limit while frontend TypeScript was still running; its result
+was not captured, so this pass does not claim a completed TypeScript check.
+
+Located `apache/jspwiki` at `d86cfde5c058a65451a4f9aba8606380a721934c`,
+`jspwiki-war/src/main/webapp/images/jspwiki_logo.png`. Unlike the generic ASF
+feather found earlier, this file contains two adjacent versions of an older
+round mark. Inspected the original and a white-ground pixel trace, but did
+not add the combined image as a single logo or arbitrarily crop it. Its actual
+application usage and state selection need verification first. Research-only
+output does not increase the coverage count.
+
+**Coverage remains 980 sourced and 111 pending.**
+
+## JSPWiki state verification and completed typecheck
+
+The explicit follow-up frontend TypeScript run completed with exit code 0.
+Together with the previous logo check and 15 passing tests (1 todo), this
+confirms validation of the PowerDNS-Admin addition.
+
+Inspected JSPWiki's separate `jspwiki_logo_s.png` (64×64) and a research-only
+pixel trace. The pinned revision's `jspwiki-war/src/main/styles/jspwiki.css`
+uses the 128×64 `jspwiki_logo.png` sprite at `-64px 0` normally and `0 0` on
+hover. This establishes the two-state purpose rather than guessing at a crop.
+However, decoded RGBA comparison shows the separate small file is not exactly
+equal to either 64×64 sprite half. Its explicit usage found in repository search
+was a download test, not a current UI selection. The old styled mark therefore
+remains research-only pending verification of the appropriate current asset;
+no legacy variant was silently substituted for the catalogue identity.
+
+**Coverage remains 980 sourced and 111 pending.**
+
+## Official repository continuation: Cassandra Reaper
+
+Added the original Reaper wordmark PNG from `thelastpickle/cassandra-reaper`,
+`docs/img/logo.png`, revision `41d76351a72e6e88c563635a98b98f31e23bc75d`.
+At this revision `docs/download/index.html` explicitly uses `/img/logo.png`
+in the navbar homepage link. This is the repository's published documentation
+wordmark, not the generic book favicon or the earlier theme-icon candidate.
+No font substitution or hand-drawn lettering was used.
+
+Selected `light-ground-pixel`; inspected the source and traced lettering, then
+rendered actual generated React paths at 44px and 96px. The small source limits
+enlargement smoothness. Original PNG blob/SHA-256 and final SVG SHA-256 are
+pinned. Retained the Apache-2.0 text in
+[Cassandra-Reaper-LICENSE.txt](platform-logo-licenses/Cassandra-Reaper-LICENSE.txt).
+The repository separately identifies an EPL-2.0 EclipseStore dependency; that
+software dependency is not incorporated by this logo change. Tests assert the
+correct repository and wordmark path.
+
+**981 of 1,091 entries are now sourced; 110 remain pending.**
+
+## Official companion-repository review: Komari
+
+Found the actual mascot favicon in the official `komari-monitor/komari-web`
+repository's default `radix` branch, pinned revision
+`c306173c9b3274f642afc54d123fc4bc57c5b2a9`, `public/favicon.ico`.
+Its `index.html` explicitly selects this file. The unrelated OS logos in
+`public/assets/logo` and sponsor logos in `komari-monitor/public` are not used.
+Original ICO SHA-256:
+`bd28c1ec580926bc3f5e9cb2721976d9ebadeefe221bae77294bf33885c71a69`.
+
+The ICO contains a 256×256 frame, not the 128px frame currently allowed by the
+production ICO pipeline. A research-only PNG decode and pixel-boundary trace
+were inspected; the mascot's silhouette, hair and facial details are retained.
+No manifest entry was added: the frontend tree and README provided no explicit
+licence grant, and GitHub's repository licence field is null. Do not infer
+artwork permission from the backend repository's separate software licence.
+Admission also needs explicit 256px ICO handling and reproducibility tests;
+the local decode must not be described as a PNG committed upstream.
+
+**Coverage remains 981 sourced and 110 pending.** Komari now has a confirmed
+source candidate, but not completed rights/pipeline review.
+
+## Source review continuation: Juxtapose and Tiny File Manager
+
+Checked `NUKnightLab/juxtapose` at
+`8bb72a9f15d2eeea21bb8c06f0e576a58bbf5747`. Its
+`website/templates/_header.html` brands the product with styled HTML text,
+`Juxtapose <span>JS</span>`, using `product-logo` classes. The PNGs named as
+logos in its tree are publisher examples and institutional supporters, not
+Juxtapose artwork. None was substituted. An exact typography-derived vector
+would require verifying the original font, layout and applicable font terms;
+no arbitrary replacement font or hand-drawn symbol was added.
+
+Checked `prasathmani/tinyfilemanager` at
+`41491439a6b243c55502581e53fad20bc4c6e777`. `tinyfilemanager.php` defaults
+`$favicon_path` to an empty string and only emits a favicon link when an
+operator configures one. The inspected repository tree returned no PNG/SVG/ICO
+files. This establishes that the default source provides no icon to extract;
+it does not prove no official artwork exists anywhere else. Generic file and
+folder UI symbols are not a substitute for an original project mark.
+
+**Coverage remains 981 sourced and 110 pending.** This research-only pass
+made no production renderer or manifest changes.
+
+## Public brand-resource search: FASTPANEL
+
+Searched beyond third-party icon collections for official FASTPANEL artwork.
+Search indexing still describes `https://fastpanel.direct/brand-resources` as
+providing SVG/PNG logo downloads and clear-space guidance. Fetching that URL
+in this review instead resolved to `https://fastpanel.direct/`, whose current
+content says the website is being updated and links to the official wiki.
+No downloadable original logo SVG was returned by the fetched page. Search
+snippets are not treated as fetched asset bytes or sufficient provenance.
+
+Also fetched `https://fastpanel.wiki/`; its returned server-rack illustration
+is not a logo and was not substituted. GitHub search returned API clients and
+similarly named projects, not an established vendor branding repository.
+No unverified recreation or same-name project asset was admitted. The earlier
+CloudHost247 logo PR appearing in search results is not independent evidence
+of original vendor artwork.
+
+**Coverage remains 981 sourced and 110 pending.** No production manifest or
+renderer changes were made in this research pass.
+
+## Official-source review: ShinyProxy and Svix
+
+Rechecked `openanalytics/shinyproxy` at
+`c10dcd481c01d9ffee10fc474eb482b748b38966`. The inspected tree contains no
+PNG/SVG/ICO artwork. Its `src/main/resources/templates/fragments/navbar.html`
+conditionally displays `${logo}` only when configured, alongside `${title}`.
+This establishes a configurable logo slot, not a bundled project icon. The
+Open Analytics organisation listing contains numerous application demos;
+those applications' own logos must not be mistaken for ShinyProxy branding.
+
+Rechecked `svix/svix-webhooks` at
+`3704695e5982a493a9b7a158945bb04846df928e`; the logo/favicon SVG/PNG filename
+search returned no candidates. The organisation listing did not reveal an
+obvious public branding/documentation repository. This records the limits of
+this search, not a claim that Svix has no logo or no artwork elsewhere.
+
+**Coverage remains 981 sourced and 110 pending.** No replacement icons were
+introduced and no production code changed in this research pass.
+
+## Source review continuation: SQLChat ICO alternative
+
+Fetched `sqlchat/sqlchat`, `public/favicon.ico`, at
+`85af0b4733d91d5c97a2ad89660cbfc515898676`. Its original SHA-256 is
+`44d9a5b81221515e5b1d035e98d654ac0eb784ca6e19c2c4d3c447c6524c1bf5`.
+The ICO supplies only 16px, 32px and 48px frames. Inspected the largest frame
+and a native pixel-boundary trace: the small robot remains recognisable but
+fine face and badge details are poorly resolved on enlargement. This does not
+provide a higher-detail alternative to the earlier rejected WebP artwork.
+The repository's other PNGs are database-provider icons, not SQLChat branding.
+
+The inspected root licence is MIT, copyright 2025 Bytebase; this particular
+retry is blocked by rendition quality and the unsupported 48px ICO pipeline,
+not by an assertion that the software lacks an open-source licence. The
+research decode was not mislabeled as an upstream PNG or added to production.
+
+**Coverage remains 981 sourced and 110 pending.**
 
 ## Progressive loading
 

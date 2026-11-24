@@ -1,0 +1,7 @@
+drizzle-gateway: unchanged upstream file
+Source: https://github.com/drizzle-team/gateway-website/blob/d34e3c56bc64b921341ff619d74ce9dc7b9bcc7c/public/favicon.ico
+Git blob: 5c393133b6557ca35780a0ed218e6783949e134d
+SHA-256: 8abf022bca06c088a6b99bdb288fe72662801d1b9156fbf005b456c6cdcffc2a
+
+OPEN ARTWORK RIGHTS REVIEW: official source verified; separate artwork reuse grant not established. No blanket copyright, trademark or hosting permission is asserted.
+This is Gateway’s own public/favicon.ico, not artwork assumed from Drizzle ORM by filename alone. All ICO frames are preserved.

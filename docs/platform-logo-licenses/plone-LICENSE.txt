@@ -1,0 +1,20 @@
+plone — source artwork and unresolved rights notice
+Source: https://github.com/plone/plone.org/blob/5b67159fab85a6bef0be811bc72254b52b9afa75/frontend/src/components/layout/images/logo.svg
+SHA-256: 636612b310b718175453e71891f84f19120c4b5ea4e8bc0f448cb959fcba719e
+Git blob: d3677de1f41366396e4f42cd13dd0a19e7d0924e
+Revision: 5b67159fab85a6bef0be811bc72254b52b9afa75
+
+Original complete device, wordmark and registered-trademark symbol. Plone is a registered trademark of the Plone Foundation. Policy permits accurate informational product overviews with attribution/link; broader commercial use requires agreement. No agreement is established here.
+
+Terms: Plone Foundation mark policy; commercial permission unresolved
+
+IMPORTANT: This catalogue integration records artwork identity, not legal
+clearance. No blanket reuse, hosting, sponsorship, partnership or endorsement
+permission is asserted. Obtain any required permission before production
+publication. A software licence is not automatically a licence for marks.
+Files remain unmodified as retrieved; capture/redistribution limitations are
+recorded above.
+
+Plone is a registered trademark of the Plone Foundation.
+https://plone.org/foundation/copyright-licensing-logo/policy
+https://plone.org/foundation/copyright-licensing-logo/logoguidelines.pdf/@@download/file

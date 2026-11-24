@@ -1,0 +1,16 @@
+geneac — source artwork and unresolved rights notice
+Source: https://github.com/mrysav/geneac.net/blob/0cf8520b4e0a2530bb9a7aad4b82af90ff3f929f/assets/geneac-social.jpg
+SHA-256: 16fd822757373a1c9593f18093765a523e3558c372d86074dabdbda9a31c3aa2
+Git blob: 3958c4f50cdea35936e7a147790dd7593046e13e
+Revision: 0cf8520b4e0a2530bb9a7aad4b82af90ff3f929f
+
+Official website social artwork from mrysav/geneac.net, selected by _config.yml. This is a branded photographic banner, NOT an isolated logo. Stored in full without cropping or extracting the wordmark.
+
+Terms: Separate artwork/photograph reuse grant not established
+
+IMPORTANT: This catalogue integration records artwork identity, not legal
+clearance. No blanket reuse, hosting, sponsorship, partnership or endorsement
+permission is asserted. Obtain any required permission before production
+publication. A software licence is not automatically a licence for marks.
+Files remain unmodified as retrieved; capture/redistribution limitations are
+recorded above.

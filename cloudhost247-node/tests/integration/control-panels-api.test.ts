@@ -111,14 +111,23 @@ describe('Control Panels API & Catalog Integration', () => {
       expect(second.statusCode).toBe(200);
       const a = JSON.parse(first.payload);
       const b = JSON.parse(second.payload);
-      expect(a.total).toBe(1091);
-      expect(a.categoryCounts.ALL).toBe(1091);
+      expect(a.total).toBe(1092);
+      expect(a.categoryCounts.ALL).toBe(1092);
       expect(a.controlPanels).toHaveLength(24);
       expect(b.controlPanels).toHaveLength(24);
       expect(new Set([...a.controlPanels, ...b.controlPanels].map((p: any) => p.slug)).size).toBe(48);
       expect(a.controlPanels[0].slug).toBe('cpanel'); // the seeded DB row overrides its static listing
       const tail = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?offset=1085&limit=24' });
-      expect(JSON.parse(tail.payload).controlPanels).toHaveLength(6);
+      expect(JSON.parse(tail.payload).controlPanels).toHaveLength(7);
+    });
+
+    it('returns distinct Fasten Health and fazer.ai entries without replacing the legacy identifier', async () => {
+      const fasten = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?search=Fasten%20Health' });
+      const fazer = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?search=fazer.ai' });
+      expect(fasten.statusCode).toBe(200);
+      expect(fazer.statusCode).toBe(200);
+      expect(JSON.parse(fasten.payload).controlPanels.map((x: any) => [x.id, x.name])).toEqual([['app-fasten-healthfazer-ai-agents', 'Fasten Health']]);
+      expect(JSON.parse(fazer.payload).controlPanels.map((x: any) => [x.slug, x.name])).toEqual([['fazerai-agents', 'fazer.ai agents']]);
     });
 
     it('searches and filters beyond the first page and validates page sizes', async () => {
@@ -127,7 +136,7 @@ describe('Control Panels API & Catalog Integration', () => {
       expect(filtered.statusCode).toBe(200);
       expect(result.controlPanels.some((p: any) => p.slug === 'galaxy')).toBe(true);
       expect(result.controlPanels.every((p: any) => !p.requiresLicense)).toBe(true);
-      expect(result.categoryCounts.ALL).toBe(1091);
+      expect(result.categoryCounts.ALL).toBe(1092);
 
       const osOnly = await app.inject({ method: 'GET', url: '/api/v1/control-panels/catalog?category=OPERATING_SYSTEM&limit=8' });
       expect(JSON.parse(osOnly.payload).controlPanels.every((p: any) => p.category === 'OPERATING_SYSTEM')).toBe(true);

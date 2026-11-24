@@ -1,0 +1,28 @@
+perplexica: unchanged upstream file
+Source: https://github.com/ItzCrazyKns/Perplexica/blob/295334b19502e942339fdde7e343e8bf9e6ed1a1/public/icon.png
+Git blob: f6fe3c7728b8aa93e8c462a411755a9a6b33eb67
+SHA-256: 9b8256f4f605af5e54fb11141c29f93c14fabe185af5394c1f94605a7cfad69e
+
+Historical v1.11.2 README names Perplexica, and public/icon.png is present at that same revision. This is not an automatic substitution of current Vane branding or the old boilerplate Vercel favicon.
+
+MIT License
+
+Copyright (c) 2024 ItzCrazyKns
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

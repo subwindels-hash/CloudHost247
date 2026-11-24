@@ -724,18 +724,6 @@
       "icon": "bichon",
       "sha256": "fbfc1ff840d7acbeb6eb6cc2f6d45fe34d26c2f27adb73b4ff68ea5a3cefdb14"
     },
-    "big-agi": {
-      "source": "official-png",
-      "icon": "big-agi",
-      "repository": "enricoros/big-AGI",
-      "revision": "39fad0a0dde0efbcc4d7dea6d4d7340646e6fd10",
-      "file": "public/icons/icon-512x512.png",
-      "originGitSha": "6d77fa40c3478bb8d7075a52926f182110e1e6bd",
-      "originSha256": "6ee8328bfe169b9dfba4b92e563d87778f0b70ca5616924ea11d458494361f79",
-      "sha256": "4fb01877292e71135da744605e1e4a5103c360419ebdb0e673691db8c95882a8",
-      "license": "MIT",
-      "identityUrl": "https://github.com/enricoros/big-AGI"
-    },
     "bigcapital": {
       "source": "selfhst",
       "icon": "bigcapital",
@@ -887,18 +875,6 @@
       "icon": "calibre-web",
       "sha256": "914a8c131735883a1aa07e6cd5e476ba22a0a354f7391ad330dcb8339648ca7e"
     },
-    "cap": {
-      "source": "official-png",
-      "icon": "cap",
-      "sha256": "47290cf968c2cd5db4e04d87f2521fdc7cb2ca983729e9c06bdd95bd99d00162",
-      "repository": "tiagozip/cap",
-      "revision": "67005c58d7fd2d196fc07451f78aa0463a26c777",
-      "file": "docs/public/logo.png",
-      "license": "Apache-2.0",
-      "identityUrl": "https://www.hostinger.com/applications/cap",
-      "originGitSha": "f6e67dc3d0fe8acac6ed446748dcf01c7d024eee",
-      "originSha256": "6fa3264ee850131a8acd68a7a313b7878f00b5e67b854c3eb4377e9f5d869d5d"
-    },
     "casdoor": {
       "source": "selfhst-png",
       "icon": "casdoor",
@@ -906,17 +882,18 @@
       "originGitSha": "211148377989a895019f6d1082778aa9ec630fc8",
       "originSha256": "708946828401ef738b4a10cc63029d94e835307c094974b129ead5f4dc48d6ec"
     },
-    "casibase": {
+    "cassandra-reaper": {
       "source": "official-png",
-      "icon": "casibase",
-      "repository": "casibase/casibase-website",
-      "revision": "5a482bc42db22064621f7f14d47ed8c8abadeb85",
-      "file": "static/img/favicon.png",
-      "sha256": "b90570875e81008a37e2946dbb0be0d118a7259a28832871713851c7251d4567",
+      "icon": "cassandra-reaper",
+      "repository": "thelastpickle/cassandra-reaper",
+      "revision": "41d76351a72e6e88c563635a98b98f31e23bc75d",
+      "file": "docs/img/logo.png",
+      "originGitSha": "6feaba5c2d415e3f4d261b83453d6a8445f47d59",
+      "originSha256": "2fe4a16236f17907e9760f40e191a85ec42940a0e1f4f46023777bac78df31db",
+      "sha256": "62598f9801e639e8dbee19414e3e9b4b472219da2753abbfcf88e00ac842d168",
+      "traceProfile": "light-ground-pixel",
       "license": "Apache-2.0",
-      "identityUrl": "https://github.com/casibase/casibase-website",
-      "originGitSha": "20b69730a2c6e1820b016297026a973dc2b6d69c",
-      "originSha256": "3202557a356fd50e888c4b95709f7fb3ff3ad78c9f64a7e6a2cbd5bbb5e354bf"
+      "identityUrl": "https://github.com/thelastpickle/cassandra-reaper"
     },
     "castopod": {
       "source": "selfhst",
@@ -1007,19 +984,6 @@
       "source": "selfhst",
       "icon": "chibisafe",
       "sha256": "2e84a57199ed432ada9a3e7e7535e94730e7534aa5eb4feddef386ac09c48705"
-    },
-    "chiefonboarding": {
-      "source": "official-png",
-      "icon": "chiefonboarding",
-      "repository": "chiefonboarding/ChiefOnboarding",
-      "revision": "4da52a98bf6e481371646f25d8e784e1f9f989fa",
-      "file": "docs/public/header/logo.png",
-      "originGitSha": "433ceadb7e769d344671cfa42a81e34476dd4692",
-      "originSha256": "86f4a6a055d007f02b2e1659b93adee381e23baef1d8ee4fb92a7c44ba12458f",
-      "sha256": "b3a9bc0405558bbbe88eb56d8d3a2db221db963ee07ecb532b9c5ebcb8583f4e",
-      "license": "AGPL-3.0",
-      "identityUrl": "https://github.com/chiefonboarding/ChiefOnboarding",
-      "traceProfile": "light-ground-upscaled"
     },
     "chroma": {
       "source": "dashboard",
@@ -1145,19 +1109,6 @@
       "icon": "coder",
       "sha256": "e94549ed48bc9464893278117fb0b77df9d467682054862f7c007ba2db8cbea7"
     },
-    "codimd": {
-      "source": "official-png",
-      "icon": "codimd",
-      "repository": "hackmdio/codimd",
-      "revision": "b1188a5648a23d970b9ad58612376e6602431f6f",
-      "file": "public/favicon.png",
-      "originGitSha": "1600e49c2802667cb4c202c981e50cd999ea8413",
-      "originSha256": "d8b6d5022c9036bee6da38436db7dba4b1551ad1e0baf9c79f9facf9d8c98abd",
-      "sha256": "d25b7c1abf77a427a3f64c868ddf4d50cf8cc69aa0904935303fb6ba10b7fe14",
-      "traceProfile": "light-ground-pixel",
-      "license": "AGPL-3.0",
-      "identityUrl": "https://github.com/hackmdio/codimd"
-    },
     "cognee": {
       "source": "official",
       "icon": "cognee",
@@ -1206,35 +1157,10 @@
       "icon": "convoy",
       "sha256": "fd36232e9a53e8db61a526cf33ae1258e4f7411b8b7591370f17f1dd84cbfa94"
     },
-    "cops": {
-      "source": "official-png",
-      "icon": "cops",
-      "repository": "seblucas/cops",
-      "revision": "7828cc600e904941583227071b8f4efd3b9385fb",
-      "file": "images/icons/icon144.png",
-      "originGitSha": "facdfe1e72dde17f4a574d44204b3bc5e3159f9e",
-      "originSha256": "222a46730dc62521ab9e608b6a8be34a7cab3fa5d87e16d6982c6c37782362f0",
-      "sha256": "0098aa4918f9fbe81630c73ef6b64606e482375b9bfa24eb491fb1a6e0ff0897",
-      "license": "GPL-2.0",
-      "identityUrl": "https://github.com/seblucas/cops",
-      "traceProfile": "light-ground-upscaled"
-    },
     "copyparty": {
       "source": "selfhst",
       "icon": "copyparty",
       "sha256": "2ef993e1446e90cee5f8584706bbfa512f0f01a4d9dd4b755e2d387aefd2724d"
-    },
-    "coral-talk": {
-      "source": "official-png",
-      "icon": "coral-talk",
-      "repository": "coralproject/talk",
-      "revision": "a66f385cc6c06ce7fb02907f471eb58b9344d934",
-      "file": "client/src/core/client/admin/assets/favicon228.png",
-      "originGitSha": "19916eed38cbf41131ef6a3a3b9af3c38127174e",
-      "originSha256": "4bd3fbe080da92712f66d3a21b55b5b03d76091428fe3cde28fc42cf64a99e1b",
-      "sha256": "a5ebecd03479c8a7b947c87e4ec0cde28fd8c1741719e920eec7048b2f2be25a",
-      "license": "Apache-2.0 (see Coral-Talk-LICENSE.txt)",
-      "identityUrl": "https://github.com/coralproject/talk"
     },
     "corecontrol": {
       "source": "selfhst",
@@ -1449,18 +1375,6 @@
       "identityUrl": "https://github.com/dhis2/dhis2-core",
       "referenceUrl": "https://www.hostinger.com/applications/dhis2"
     },
-    "dialoqbase": {
-      "source": "official-png",
-      "icon": "dialoqbase",
-      "repository": "n4ze3m/dialoqbase",
-      "revision": "79320da7f45cc4940eff58caef6fedd3c7994f53",
-      "file": "app/ui/public/logo.png",
-      "originGitSha": "248adde0728d8547524708968bbff08905670f9c",
-      "originSha256": "0ed7118b3dd2c86227583c390ba068349b388fea76613fa855ddc6f14f20e9c0",
-      "sha256": "5b387f65b857541f3fd5b9bd1df558bd5dc4a69eb2413c29a56212a700728eb2",
-      "license": "MIT",
-      "identityUrl": "https://github.com/n4ze3m/dialoqbase"
-    },
     "dify": {
       "source": "selfhst",
       "icon": "dify",
@@ -1532,18 +1446,6 @@
       "icon": "docuseal",
       "sha256": "390bc32db77a25caca0963dd2cf3252637ff4ffce22c8ac8cfb0d88c68e46637"
     },
-    "dograh": {
-      "source": "official-png",
-      "icon": "dograh",
-      "repository": "dograh-hq/dograh",
-      "revision": "b5e30bd65d75ce6487ca40f5af60a284fe585146",
-      "file": "ui/public/dograh-logo.png",
-      "originGitSha": "40165da853c14597649f84b001dc3ff8a4670292",
-      "originSha256": "e36dcdef7a287bd29243a8e8e54c4ceb34535ab29a99a8c78e35833d1ddc5bb8",
-      "sha256": "7f5c952c490d2123b0b6da2ca6ab28d523a36862380a512cd058cf553574c0c5",
-      "license": "BSD-2-Clause",
-      "identityUrl": "https://github.com/dograh-hq/dograh"
-    },
     "dokku": {
       "source": "selfhst",
       "icon": "dokku",
@@ -1573,19 +1475,6 @@
       "sha256": "55ad33b71c6c1c78c65a93ce14bdab77465f435bc0436116d5daac4bad2b9d4b",
       "license": "GPL-2.0",
       "identityUrl": "https://github.com/DOMjudge/domjudge"
-    },
-    "domoticz": {
-      "source": "official-png",
-      "icon": "domoticz",
-      "repository": "domoticz/domoticz",
-      "revision": "52457bd41447557b1aeaf27a64a1dbc63df07da0",
-      "file": "www/images/logo/180.png",
-      "originGitSha": "780b2efaacaa4103138f5b3368308eb94e232b76",
-      "originSha256": "a65cb0b6593e9effd8c2179b449c39072751718f14870cd86bfdd9638045f394",
-      "sha256": "81fa2303ae77909a030d6099d7570e0a68f44cfb8178267af8b2ed51ea49dcbe",
-      "license": "GPL-3.0",
-      "identityUrl": "https://github.com/domoticz/domoticz",
-      "traceProfile": "gradient-detail"
     },
     "donetick": {
       "source": "selfhst",
@@ -1631,18 +1520,6 @@
       "source": "selfhst",
       "icon": "drupal",
       "sha256": "134226bb3422f05cbd52e5200cd9dd2fe569ba63ff55560feaa3bf830774178b"
-    },
-    "dspace": {
-      "source": "official-png",
-      "icon": "dspace",
-      "repository": "DSpace/DSpace",
-      "revision": "7ad52048c3143f161f6cb8ad93b15243aad3913f",
-      "file": "dspace-api/src/main/resources/dspace_logo.png",
-      "originGitSha": "2c7bd5764bce7dde7cc388aa4ecb0ebe41cf6eee",
-      "originSha256": "19571f7810405648d277ac3eec7c119703f640e9319c1cd198696bcf561735ad",
-      "sha256": "1ba3e77d58d59c16a958fff444007d271ea5ec00f26bcca85d9e922a214e6e98",
-      "license": "BSD-3-Clause",
-      "identityUrl": "https://github.com/DSpace/DSpace"
     },
     "duckdns": {
       "source": "selfhst",
@@ -1693,19 +1570,6 @@
       "license": "EPL-2.0",
       "identityUrl": "https://github.com/eclipse-hawkbit/hawkbit"
     },
-    "eclipse-kura": {
-      "source": "official-png",
-      "icon": "eclipse-kura",
-      "repository": "eclipse-kura/kura-management-ui",
-      "revision": "79659e4b7381dfd1f21747b545e157cb2a098d19",
-      "file": "org.eclipse.kura.web2/src/main/webapp/eclipse/kura/icons/kura_login_logo.png",
-      "originGitSha": "21fdec71b581ed90e9df9f19ca65cdecc6ed7a53",
-      "originSha256": "4ae6de959ff5bda8d862523937f1a61422f4ccf1c671b16e8cb6b75fdb47f9f3",
-      "sha256": "82c2c4fb816579f39fbb94f275dcf5134a1dc071a3692f4e38cf5af0542e50da",
-      "license": "EPL-2.0",
-      "identityUrl": "https://github.com/eclipse-kura/kura",
-      "traceProfile": "dark-ground-upscaled"
-    },
     "eclipse-mosquitto": {
       "source": "simple-icons",
       "icon": "eclipsemosquitto",
@@ -1746,18 +1610,6 @@
       "icon": "emby",
       "sha256": "cf1d35e9fabdcab6b0a6f348cc13c7438bdbf161fbf5347ed86dbabee3edecaa"
     },
-    "embystat": {
-      "source": "official-png",
-      "icon": "embystat",
-      "repository": "mregni/EmbyStat",
-      "revision": "be617783dafaaa27d3a1b3524fbbc9fc9470795f",
-      "file": "branding/logo-color.png",
-      "originGitSha": "20b926a46e9f4a9ce85a726726f76600f18b0108",
-      "originSha256": "94f3472a88ee0a9305bc4ccceecedcd53ee87b6bb3f08bdabc2dd9ed1bcb79dc",
-      "sha256": "3618fcad336369777ed383611a2f005d082c606a0176d1e78ae858c3591fa5db",
-      "license": "MIT",
-      "identityUrl": "https://github.com/mregni/EmbyStat"
-    },
     "emoncms": {
       "source": "selfhst",
       "icon": "emoncms",
@@ -1777,19 +1629,6 @@
       "source": "simple-icons",
       "icon": "ente",
       "sha256": "bf6bd70f000ab3eb30bb5d93f56830dc7951c448abcb101d9fa800822eb49daf"
-    },
-    "errbit": {
-      "source": "official-png",
-      "icon": "errbit",
-      "repository": "errbit/errbit",
-      "revision": "14655aef50e53ebb4e4d30b3be627a4a0d52740f",
-      "file": "docs/notifications/slack/errbit.png",
-      "originGitSha": "786d20969005e45133733442ce9caa4ee96992e3",
-      "originSha256": "835ad31987fa91efd3803ebc9c95e139a90a5183c49a04c1e532ee6bc97bf587",
-      "sha256": "9391e78a30f1ed5c197b7e7f1ac2da0450fe7ec009ddad33a93c13ddacd28095",
-      "traceProfile": "light-ground-upscaled",
-      "license": "MIT",
-      "identityUrl": "https://github.com/errbit/errbit"
     },
     "ersatztv": {
       "source": "selfhst",
@@ -1867,19 +1706,6 @@
       "file": "public/icon.svg",
       "license": "AGPL-3.0 (first-party repository)",
       "identityUrl": "https://exelearning.net/"
-    },
-    "expensave": {
-      "source": "official-png",
-      "icon": "expensave",
-      "repository": "algirdasc/expensave",
-      "revision": "5305cee55487e058e5a80ad7e719d11f1ef89a5e",
-      "file": "frontend/src/assets/favicon/android-chrome-256x256.png",
-      "originGitSha": "6bc86a9f22c4f994a697a91799e1de425adefba2",
-      "originSha256": "d00b7758436572f8d80017117c7b98f916de528ece250692d8f52c25ff0ea358",
-      "sha256": "b3f26fbae7f07f0e70b6db7f8b0f25e11467120a1996a4dad74801e521c99b47",
-      "license": "GPL-3.0",
-      "identityUrl": "https://github.com/algirdasc/expensave",
-      "traceProfile": "gradient-detail"
     },
     "expenseowl": {
       "source": "selfhst-png",
@@ -2162,19 +1988,6 @@
       "icon": "fusionauth",
       "sha256": "ddb1c389e0954fb58e22a6b296efe825352dcde01d9f0756b523d79822413e42"
     },
-    "fusiondirectory": {
-      "source": "official-png",
-      "icon": "fusiondirectory",
-      "repository": "fusiondirectory/fusiondirectory",
-      "revision": "1efe63dab1b99ba57f553cae6d529021cf1e4c52",
-      "file": "html/themes/breezy/icons/scalable/apps/fusiondirectory.png",
-      "originGitSha": "955ac6b4cbb87497f80ddd8985a7648b648e8b2f",
-      "originSha256": "441f263f12c53c617b848416220f0b107d9a117eb1124e5069a66cecaad88e3f",
-      "sha256": "64593a1dd56faab370266a3574973d486e805ef7acf3b69329f0d06759b81a97",
-      "license": "GPL-2.0",
-      "identityUrl": "https://github.com/fusiondirectory/fusiondirectory",
-      "traceProfile": "light-ground-upscaled"
-    },
     "fuxa": {
       "source": "official",
       "icon": "fuxa",
@@ -2331,18 +2144,6 @@
       "source": "selfhst",
       "icon": "gotify",
       "sha256": "d97b0c073d6513574d2ee1dff90aa06895d855c91872ed0f5bd78dffd706e7a3"
-    },
-    "gpt-researcher": {
-      "source": "official-png",
-      "icon": "gpt-researcher",
-      "repository": "assafelovic/gpt-researcher",
-      "revision": "8b474fe7d92aca112601cb87e1ec0999103bc01a",
-      "file": "docs/static/img/gptr-logo-tile.png",
-      "originGitSha": "0a402cb57328d9549b5e29119123061d9a302681",
-      "originSha256": "fc2620738722e43b847c794e7b4a2e33e0c3c882788776ea53aaebd9acb2a98e",
-      "sha256": "f7150913670c4ba4b202656ad35236d9b83d623c1fd34c6d3065ec7bc168a24d",
-      "license": "Apache-2.0",
-      "identityUrl": "https://github.com/assafelovic/gpt-researcher"
     },
     "grafana": {
       "source": "selfhst",
@@ -2531,19 +2332,6 @@
       "source": "selfhst",
       "icon": "hister",
       "sha256": "7211ef88c1959ce1f635fac38aa078ca9bdf9fc8a7db469fa817c93b5cebe5b6"
-    },
-    "hollama": {
-      "source": "official-png",
-      "icon": "hollama",
-      "repository": "fmaclen/hollama",
-      "revision": "a6614a2e0c6f0634f75e6b1605dcae28b8628bb1",
-      "file": "electron/resources/icons/png/1024x1024.png",
-      "originGitSha": "de0d68be11086874bbe998855962f271948a7af0",
-      "originSha256": "5f1c8f225f3570a5187dcd731b4674fe423adb0ae9d31b76692d058e231de9c0",
-      "sha256": "f52e48262b9605f8ca17a0d2ea0cd9a1f570ea5f7072ac8bbc00bf734bd9ef17",
-      "traceProfile": "light-ground-detail",
-      "license": "MIT",
-      "identityUrl": "https://github.com/fmaclen/hollama"
     },
     "homarr": {
       "source": "selfhst",
@@ -2998,18 +2786,6 @@
       "icon": "kibana",
       "sha256": "e34efb9a337022bcd70f55fbdb70fdb1fc621cb7d89abece01241b3191d26f66"
     },
-    "kill-bill": {
-      "source": "official-png",
-      "icon": "kill-bill",
-      "repository": "killbill/killbill",
-      "revision": "8881b6617a7ef2d0bd5e1dd354d37405eb1362d6",
-      "file": "profiles/killbill/src/main/webapp/images/KillBillLogo400x400.png",
-      "originGitSha": "610f58a1b8d4f46713fd48e834005dfb85440195",
-      "originSha256": "59606d057694f9ff0a4b491619cfebd09b09be5df485dcaf30bdbf6977fe4e1f",
-      "sha256": "2c39c1b352e67993e7b663e5f0e3ef70f9f5dedeb877060b83a19d97ce101380",
-      "license": "Apache-2.0",
-      "identityUrl": "https://github.com/killbill/killbill"
-    },
     "kimai": {
       "source": "selfhst",
       "icon": "kimai",
@@ -3360,18 +3136,6 @@
       "license": "MIT",
       "identityUrl": "https://www.hostinger.com/applications/lychee"
     },
-    "m3db": {
-      "source": "official-png",
-      "icon": "m3db",
-      "repository": "m3db/m3",
-      "revision": "ea708d3a685f613af7dd0a39571f98d0802c4105",
-      "file": "site/static/images/logo-square.png",
-      "originGitSha": "d10c4af195749048c715c88b9df311cd06ce620a",
-      "originSha256": "e12b1cb58790996ba35ac1d12c059a30bdf032fa53e2101cf775dc40f074569d",
-      "sha256": "ef7ce8a77ae381f4e58f3479b0f347b76a481332cd0ea2253b7dde410a45b3c1",
-      "license": "Apache-2.0",
-      "identityUrl": "https://github.com/m3db/m3"
-    },
     "mafl": {
       "source": "selfhst",
       "icon": "mafl",
@@ -3402,19 +3166,6 @@
       "source": "selfhst",
       "icon": "mailpit",
       "sha256": "7d0f82147720fdf14e0bdd72618397a4cfac186b734ace9b41509e43bd0c1559"
-    },
-    "mailtrain": {
-      "source": "official-png",
-      "icon": "mailtrain",
-      "repository": "Mailtrain-org/mailtrain",
-      "revision": "89b189d0f5fcb3bb069dde7c2da72d5acd071dd5",
-      "file": "client/static/mailtrain-notext.png",
-      "originGitSha": "47978c0afdc4a4a152f277c6d7ae5500c33429df",
-      "originSha256": "402eea3d1a54f12182e835ac512f839fdf6b7a0b94c123cf4fcd81b20e867f0b",
-      "sha256": "0b8f47a05b9593076a1989b023db5cbf28449d062c61a79e7b9001c6dc63f28d",
-      "license": "GPL-3.0",
-      "identityUrl": "https://github.com/Mailtrain-org/mailtrain",
-      "traceProfile": "light-ground-upscaled"
     },
     "maintenant": {
       "source": "selfhst",
@@ -3447,31 +3198,6 @@
       "source": "dashboard",
       "icon": "manyfold",
       "sha256": "583854bfec5a85d712e4dce69f98622b96ceb251f0c9607d420414965f5b4bd0"
-    },
-    "mapstore": {
-      "source": "official-png",
-      "icon": "mapstore",
-      "repository": "geosolutions-it/MapStore2",
-      "revision": "cacb8452dbe145267ad3b67b692ff24a8c3feb4b",
-      "file": "web/client/product/assets/img/favicon.png",
-      "originGitSha": "679ee3c5b298c2dda654fd1535881475591bf66b",
-      "originSha256": "035e34da0f3ab68b231657879cf169f176b55aecf10c3282aacf1c8dffc7d4d6",
-      "sha256": "3d285e365e6d7acb922732025c0084a75e4fb2b53ca16bc319c14c8aac6f89f1",
-      "license": "BSD-2-Clause",
-      "identityUrl": "https://github.com/geosolutions-it/MapStore2",
-      "traceProfile": "light-ground-pixel"
-    },
-    "maputnik": {
-      "source": "official-png",
-      "icon": "maputnik",
-      "repository": "maplibre/maputnik",
-      "revision": "b6db2ff9e823f4f2156d54c73dcf469c844e57c4",
-      "file": "src/img/maputnik.png",
-      "originGitSha": "894d0289c22d3e09ad4519679ed7a169614afa03",
-      "originSha256": "b4322a82c0cab1bc4872d963d73ed6666e6333dab28d22cd789280e462b7bc49",
-      "sha256": "4f7d3207d4586c7d039a1947356a0d369374cb6faa2d6a412aab991c104a2bae",
-      "license": "MIT",
-      "identityUrl": "https://github.com/maplibre/maputnik"
     },
     "mariadb": {
       "source": "selfhst",
@@ -3557,19 +3283,6 @@
       "source": "selfhst",
       "icon": "mealie",
       "sha256": "2871c909b3f0f4ba4ce8640a81691ace4f359df00bf8ddd73e122cef435724b7"
-    },
-    "mediago": {
-      "source": "official-png",
-      "icon": "mediago",
-      "repository": "mediago-dev/mediago",
-      "revision": "c4a1cac40800b9754cf4305283442031ea835ba0",
-      "file": "apps/ui/public/icon-512.png",
-      "originGitSha": "185d6a0141a65b6772d2640ef61f9d60489c3ffc",
-      "originSha256": "9a55510b0637e81e7c8a00e4718f283c19b1f5909a27109f34ff7d534cfe5dd2",
-      "sha256": "2e9eccc752e1900ed7bddfeaab5672e48e1a8c22ca4ca6f0fc94dd76af2ab289",
-      "license": "MIT",
-      "identityUrl": "https://github.com/mediago-dev/mediago",
-      "traceProfile": "gradient-detail"
     },
     "mediawiki": {
       "source": "dashboard",
@@ -3671,19 +3384,6 @@
       "icon": "miniflux",
       "sha256": "9a5c00b1be4f1a6a085b70008b436f6dffd43d4244f19ba4205f12afb86ecb8e"
     },
-    "mirofish": {
-      "source": "official-png",
-      "icon": "mirofish",
-      "repository": "666ghj/MiroFish",
-      "revision": "7657031ac01184afe2cb220f5ee3545573b5e843",
-      "file": "frontend/public/icon.png",
-      "originGitSha": "20da2f06432e54d80c5ee5a7ba840d496f17e504",
-      "originSha256": "2b2c19d0400056000bb88636410c71c39ec3bc6b9cc871d6b022adf8cddb6e7a",
-      "sha256": "b0fbc447c225e81d877499fd8bbef8ff7cea4196489cb92dd5f70d46a023b6ba",
-      "traceProfile": "light-ground-pixel",
-      "license": "AGPL-3.0",
-      "identityUrl": "https://github.com/666ghj/MiroFish"
-    },
     "mirotalk": {
       "source": "selfhst",
       "icon": "mirotalk",
@@ -3750,18 +3450,6 @@
       "source": "selfhst",
       "icon": "moodle",
       "sha256": "6a14ac48e5e2c307c918fdb72ff7973dbdf0f59b498cdeee8d1bab48a309a942"
-    },
-    "mopidy": {
-      "source": "official-png",
-      "icon": "mopidy",
-      "repository": "mopidy/mopidy",
-      "revision": "ceb96aaf653473061db09cef2382e5ce758a62e3",
-      "file": "docs/images/logo.png",
-      "originGitSha": "3f019f7e80ff3a5ffc085732fefa19d0ea2889d1",
-      "originSha256": "65d0eb6dc7d9652fbc3aae1f619f53fb6d7e71163fc4676081653a01f9c921ed",
-      "sha256": "df73b93310cb621f97cd517b92e778d7363365d430da3227e1bf67789bfea059",
-      "license": "Apache-2.0",
-      "identityUrl": "https://github.com/mopidy/mopidy"
     },
     "morphic": {
       "source": "official",
@@ -3970,18 +3658,6 @@
       "source": "selfhst",
       "icon": "novu",
       "sha256": "efc199d663d73b44bb6975224ac1a20d61568b9a56fdb87722fd132e59d7cab9"
-    },
-    "nsq": {
-      "source": "official-png",
-      "icon": "nsq",
-      "repository": "nsqio/nsq",
-      "revision": "85cf10c09c6c3c86160d6f0eb156f62d0efc1648",
-      "file": "nsqadmin/static/img/favicon.png",
-      "originGitSha": "c0466c380d4ff59d155e0f4244987c6233757796",
-      "originSha256": "5082dfb0e6a628b95b7d418d0c26fbf37eda331706da9402bddd358c50e12938",
-      "sha256": "d4cbec298f27bc931e5b08a58b95a7a6c119cbb0e937d20441c32203dbd00417",
-      "license": "MIT",
-      "identityUrl": "https://github.com/nsqio/nsq"
     },
     "ntfy": {
       "source": "selfhst",
@@ -4737,6 +4413,19 @@
       "source": "selfhst",
       "icon": "postiz",
       "sha256": "041767050a250be745e9e9a2003e07924cba898cf6eaf0673c05f865d55a770e"
+    },
+    "powerdns-admin": {
+      "source": "official-png",
+      "icon": "powerdns-admin",
+      "repository": "PowerDNS-Admin/PowerDNS-Admin",
+      "revision": "6b3b9cc160a1db77f52db298a131cae9968db71d",
+      "file": "powerdnsadmin/static/img/favicon.png",
+      "originGitSha": "551d2517f80e8cf774e65e50f406fee2042ad64b",
+      "originSha256": "9d90e37f130a7b8a3185a9f977c6c340262cbb50a0d8eaa45843e9b09cd94065",
+      "sha256": "3c9b08b1f112f7282823b9c883fdf43af379eb9373f6df1b9cbedf35a2727ff5",
+      "traceProfile": "light-ground-pixel",
+      "license": "MIT",
+      "identityUrl": "https://github.com/PowerDNS-Admin/PowerDNS-Admin"
     },
     "prefect": {
       "source": "simple-icons",

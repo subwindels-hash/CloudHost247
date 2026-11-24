@@ -1,0 +1,322 @@
+{
+  "description": "User-approved separate original component marks. Not official composite bundle logos.",
+  "packageTarballSha256": "4929bfb7b18333a13c64319b6a388cd998ff86a4c4d8c79f4ed470662bcc0dec",
+  "components": {
+    "django": {
+      "name": "Django",
+      "url": "/platform-components/django.svg",
+      "sha256": "a1136b7e84783f0b79fb4171c0ea17fa2b730f01dffdecdd3e8cd213b76504b5",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "django-icon",
+      "bodySha256": "828269b01786e4e180b51d62778b7ed5fb0ff6934affa8a35c939ee3bfca5b0e",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/django-icon/"
+    },
+    "drupal": {
+      "name": "Drupal",
+      "url": "/platform-components/drupal.svg",
+      "sha256": "8d785e31cf5b2b179d136072d8b62653fd33ee63ec77dc3d3d5cb1b0a896dbd7",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "drupal-icon",
+      "bodySha256": "6d898f99946fc8c5b61e850c11e210f79e1d4358da9982b14a7e7db0f0240026",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/drupal-icon/"
+    },
+    "joomla": {
+      "name": "Joomla",
+      "url": "/platform-components/joomla.svg",
+      "sha256": "87c1f0f5ddcf016d1f4737418242321d98794cacc2420f7eebc6ff6fc9429de9",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "joomla",
+      "bodySha256": "58e74e45009d52449417abbac7904ff5bfcb4fc7e66f6a370e6eae09a655e601",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/joomla/"
+    },
+    "nodejs": {
+      "name": "Node.js",
+      "url": "/platform-components/nodejs.svg",
+      "sha256": "c1874a49317b7ccbcdb09488039b3fc8f43928d01423dd6e1656a3cdcca56b82",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "nodejs-icon",
+      "bodySha256": "7f345ff59e9e9fe4fd93bf1dc58635070f81573ea96835e36f2809903e9fbfa0",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/nodejs-icon/"
+    },
+    "rails": {
+      "name": "Ruby on Rails",
+      "url": "/platform-components/rails.svg",
+      "sha256": "0d4c0fc17287d136281797518c6fab0558903ba18d27f2f4320e64571470f33d",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "rails",
+      "bodySha256": "fc681ff67a01c05437d21ad45254d06e0616ce4a230996d37723d312027c4661",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/rails/"
+    },
+    "wordpress": {
+      "name": "WordPress",
+      "url": "/platform-components/wordpress.svg",
+      "sha256": "9cf37f80d9c7d4ddc172565085078afec7684a8fad7fa6e15a9e26a2b79d21ef",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "wordpress-icon",
+      "bodySha256": "c2fd0afd5f7a883f204a88ab061714180dc0eab54c2a19d047064e43f914e10d",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/wordpress-icon/"
+    },
+    "docker": {
+      "name": "Docker",
+      "url": "/platform-components/docker.svg",
+      "sha256": "4eabe4f9c636322ec927eae19a5da385835852d38c05910064f8518e5f61b283",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "docker-icon",
+      "bodySha256": "1a6fa15443c6e74ef0b92d737ac24e61552e71b1e096d9a903ae602e0ff8c008",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/docker-icon/"
+    },
+    "traefik": {
+      "name": "Traefik",
+      "url": "/platform-components/traefik.svg",
+      "sha256": "9ec01b32ccc4d46a49c5724f9252ef61e07b86e882a04abab9d44afe2722822c",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "traefik-proxy-icon",
+      "bodySha256": "1cde61949cf11f4c2021d0ba3dc8e4486bb4b30adfc17a7190862fa14eb07e7c",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/traefik-proxy-icon/"
+    },
+    "apache-http": {
+      "name": "Apache HTTP Server",
+      "url": "/platform-components/apache-http.svg",
+      "sha256": "587fc2782a8acaf6b8840b910c478a5d3a8375ae320a4bc834acf3687fa807e3",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "apache-http",
+      "bodySha256": "4076024cb0fd2edb22c2a2e602c4bbf8f7bc736d0c370172b80020c27e44396b",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/apache-http/"
+    },
+    "mysql": {
+      "name": "MySQL",
+      "url": "/platform-components/mysql.svg",
+      "sha256": "a6121c288748bdbde9bbe2cdf3c77c4d4d685f6e9376e909d25085ecc62c3f3f",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "mysql-icon",
+      "bodySha256": "1e3de429a177ab9c7bf49e6da63891550875c63a405b207b909a70868a00d977",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/mysql-icon/"
+    },
+    "php": {
+      "name": "PHP",
+      "url": "/platform-components/php.svg",
+      "sha256": "6a58171466f5d138ac91b1eb415418c183d6be58f0b8d6fde900f39634c2980a",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "php",
+      "bodySha256": "dd730bc03cf6f910e7fc261e09aac5df25a108a03017f76cc2b8b8b52bcfba2d",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/php/"
+    },
+    "nginx": {
+      "name": "NGINX",
+      "url": "/platform-components/nginx.svg",
+      "sha256": "21b30e14f239f37ec747d491b51c2950838ddd3b31c566a98b1b8283092a6f83",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "nginx",
+      "bodySha256": "e1032d2414dbb5ee0fadc34314e7d6712a660e8893813b91e474f75a36586a68",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/nginx/"
+    },
+    "mongodb": {
+      "name": "MongoDB",
+      "url": "/platform-components/mongodb.svg",
+      "sha256": "9b83b213a569e5d18e4df37fa3612b215d58dde497245947815a5b0f31eeb38c",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "mongodb-icon",
+      "bodySha256": "2f25709d69abe19ead5f9c84805b40be986ae35b21ce5a5ecdc46011edf26d90",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/mongodb-icon/"
+    },
+    "express": {
+      "name": "Express",
+      "url": "/platform-components/express.svg",
+      "sha256": "b3883bdca80e63385cd1008ea36d0ce4a36bc7258ad6a4590e8a7658aadb0088",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "express",
+      "bodySha256": "48704703c640157e85604fe669c5a12a3dd1ab6fe9677a983b943e87f1b2b79b",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/express/"
+    },
+    "react": {
+      "name": "React",
+      "url": "/platform-components/react.svg",
+      "sha256": "2a2b62fbf146746df0316270f3bb100951d549b75e23b569d214711f3435601c",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "react",
+      "bodySha256": "f91a8acdcfbb87c77145b60a1e1cecc5b5eedc71b42cbe756b90de6dd60cf618",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/react/"
+    },
+    "openlitespeed": {
+      "name": "OpenLiteSpeed",
+      "url": "/platform-components/openlitespeed.png",
+      "sha256": "c175dc674b194cd686c131d5d514088f9d915254c7845ad57c0fb86b48bba7be",
+      "repository": "litespeedtech/openlitespeed",
+      "revision": "ee201e9be3e34ea8a9c795b5e5e6de659824c96a",
+      "file": "dist/Example/html/img/olsws_logo.png",
+      "gitBlob": "1eeb2547af85a9e1c26a9be651ecc229951166f3",
+      "license": "GPL-3.0",
+      "darkGround": true
+    },
+    "angularjs": {
+      "name": "AngularJS",
+      "url": "/platform-components/angularjs.svg",
+      "sha256": "d4dce66f60e083c9282a86e17e89128c474d4ad830546bb550828ddd8d213fb5",
+      "source": "@iconify-json/devicon",
+      "version": "1.2.84",
+      "icon": "angularjs",
+      "bodySha256": "7456be96dbf0febefeaef3ecc95b28743e2803acc0a877e04bc7658125bad69b",
+      "license": "MIT",
+      "sourceUrl": "https://icon-sets.iconify.design/devicon/angularjs/"
+    },
+    "vue": {
+      "name": "Vue.js",
+      "url": "/platform-components/vue.svg",
+      "sha256": "dd686effebeb0e8aa30686e01cafc0b16c5a431818d60b1a8df11d767dcc11f8",
+      "source": "@iconify-json/logos",
+      "version": "1.2.20",
+      "icon": "vue",
+      "bodySha256": "0d98745a0c7136b8ee04b3a94f8e5fcfb736dc8395efffd0d2f49ae3d05ade6f",
+      "license": "CC0-1.0",
+      "sourceUrl": "https://icon-sets.iconify.design/logos/vue/"
+    },
+    "anki": {
+      "name": "Anki",
+      "url": "/platform-components/anki.png",
+      "sha256": "95972806b05672f27d34025ea4bd897bd67228d40a7d01bc4b190801ec1fd25f",
+      "repository": "ankitects/anki",
+      "revision": "4177a657d78412e92897025a9da763031ff9e582",
+      "file": "docs/_static/logo.png",
+      "gitBlob": "abfad1a30a2d47dd1bf447054cdd8683b7411676",
+      "sourceUrl": "https://github.com/ankitects/anki/blob/4177a657d78412e92897025a9da763031ff9e582/docs/_static/logo.png",
+      "license": "See public component notices; software licences do not confer all trademark rights"
+    },
+    "openshell": {
+      "name": "OpenShell",
+      "url": "/platform-components/openshell.svg",
+      "sha256": "02a3c23287282e777628efc5e62a2940a5cb94a17044a03508ea17518f037136",
+      "repository": "NVIDIA/OpenShell",
+      "revision": "10b9d7106a22564cd74beac6e59eaae7a9ab3c7a",
+      "file": "docs/brand/assets/favicon.svg",
+      "gitBlob": "0dd7272ca92da3411b6853d91122e5d23edcabcd",
+      "sourceUrl": "https://github.com/NVIDIA/OpenShell/blob/10b9d7106a22564cd74beac6e59eaae7a9ab3c7a/docs/brand/assets/favicon.svg",
+      "license": "See public component notices; software licences do not confer all trademark rights"
+    },
+    "openclaw": {
+      "name": "OpenClaw",
+      "url": "/platform-components/openclaw.png",
+      "sha256": "8ce11071e6cc34f3086b1947bb5f4b7f43f237a7a023bd8e0aa0ac529173ceb8",
+      "repository": "openclaw/openclaw",
+      "revision": "ff9c567e0c30099900c0b9f134abdda488593819",
+      "file": "apps/ios/Sources/Assets.xcassets/AppIcon.appiconset/1024.png",
+      "gitBlob": "4aafe19b8475031a9a6b35dd720ec9fed882d799",
+      "sourceUrl": "https://github.com/openclaw/openclaw/blob/ff9c567e0c30099900c0b9f134abdda488593819/apps/ios/Sources/Assets.xcassets/AppIcon.appiconset/1024.png",
+      "license": "See public component notices; software licences do not confer all trademark rights"
+    }
+  },
+  "bundles": {
+    "openlitespeed-and-django": [
+      "openlitespeed",
+      "django"
+    ],
+    "openlitespeed-and-drupal": [
+      "openlitespeed",
+      "drupal"
+    ],
+    "openlitespeed-and-joomla": [
+      "openlitespeed",
+      "joomla"
+    ],
+    "openlitespeed-and-node-js": [
+      "openlitespeed",
+      "nodejs"
+    ],
+    "openlitespeed-and-rails": [
+      "openlitespeed",
+      "rails"
+    ],
+    "openlitespeed-and-wordpress": [
+      "openlitespeed",
+      "wordpress"
+    ],
+    "docker-and-traefik": [
+      "docker",
+      "traefik"
+    ],
+    "lamp-stack-apache-mysql-php": [
+      "apache-http",
+      "mysql",
+      "php"
+    ],
+    "lemp-stack-nginx-mysql-php": [
+      "nginx",
+      "mysql",
+      "php"
+    ],
+    "mern-stack-mongodb-expressjs-reactjs-nodejs": [
+      "mongodb",
+      "express",
+      "react",
+      "nodejs"
+    ],
+    "mean-stack-mongodb-expressjs-angularjs-nodejs": [
+      "mongodb",
+      "express",
+      "angularjs",
+      "nodejs"
+    ],
+    "mevn-stack-mongodb-expressjs-vuejs-nodejs": [
+      "mongodb",
+      "express",
+      "vue",
+      "nodejs"
+    ],
+    "anki-sync-server-enhanced": [
+      "anki",
+      "docker"
+    ],
+    "nemoclaw": [
+      "openshell",
+      "openclaw"
+    ]
+  },
+  "additionalPackagePins": {
+    "@iconify-json/devicon@1.2.84": "9c3e4ac6b27d717d3e76007e7cc7fe1ea3dad05c94d4c4e51d1a6ee562e0e43f"
+  },
+  "bundleSources": {
+    "anki-sync-server-enhanced": {
+      "repository": "chrislongros/anki-sync-server-enhanced",
+      "revision": "c88764f138d42377cccd7c68ec763d5354b6d78a",
+      "file": "README.md",
+      "gitBlob": "7e0f8696f139f51dcd62c3cb25fdddccc77dc176",
+      "sourceUrl": "https://github.com/chrislongros/anki-sync-server-enhanced/blob/c88764f138d42377cccd7c68ec763d5354b6d78a/README.md"
+    },
+    "nemoclaw": {
+      "repository": "NVIDIA/NemoClaw",
+      "revision": "4649634639d2ddcb26b84cb34db63b2d4176a8a1",
+      "file": "README.md",
+      "gitBlob": "20c8ccd89f67fcf1279fe656fdc7357ee3edda84",
+      "sourceUrl": "https://github.com/NVIDIA/NemoClaw/blob/4649634639d2ddcb26b84cb34db63b2d4176a8a1/README.md"
+    }
+  }
+}

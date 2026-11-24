@@ -1,0 +1,16 @@
+plik — source artwork and unresolved rights notice
+Source: https://github.com/YunoHost/apps/blob/69141cf300fa45c944fd15fa30ded0c9cb109dce/logos/plik.png
+SHA-256: 86a5e5d2c4e3fee98e326e70e60d4b5aace4e8f62c975cfef3476d83ff5fa427
+Git blob: 23bd36ed29cb760d14a95b3ace8464e9c76352d3
+Revision: 69141cf300fa45c944fd15fa30ded0c9cb109dce
+
+Unchanged Plik wordmark from YunoHost/apps logos/plik.png, not the generic upload-cloud favicon. Third-party catalogue provenance, not a claimed first-party design-file source.
+
+Terms: YunoHost catalogue copy; artwork rights unconfirmed
+
+IMPORTANT: This catalogue integration records artwork identity, not legal
+clearance. No blanket reuse, hosting, sponsorship, partnership or endorsement
+permission is asserted. Obtain any required permission before production
+publication. A software licence is not automatically a licence for marks.
+Files remain unmodified as retrieved; capture/redistribution limitations are
+recorded above.

@@ -11343,13 +11343,47 @@
   },
   {
     "id": "app-fasten-healthfazer-ai-agents",
-    "name": "Fasten Healthfazer.ai agents",
+    "name": "Fasten Health",
     "slug": "fasten-healthfazer-ai-agents",
     "category": "APPLICATION_DEPLOYMENT_PLATFORM",
-    "description": "One-click Fasten Healthfazer.ai agents deployment on CloudHost247 with automated container/runtime setup and SSL.",
+    "description": "Self-hosted personal and family health-record manager (Fasten OnPrem), for manually entered records and uploaded FHIR bundles.",
     "logoUrl": null,
-    "websiteUrl": null,
-    "documentationUrl": null,
+    "websiteUrl": "https://github.com/fastenhealth/fasten-onprem",
+    "documentationUrl": "https://docs.fastenhealth.com/",
+    "status": "ACTIVE",
+    "installationMethod": "DOCKER",
+    "requiresLicense": false,
+    "licenseProvider": "Open Source",
+    "minimumRequirements": {
+      "ramMb": 1024,
+      "cpuCores": 1,
+      "diskGb": 20
+    },
+    "supportedOs": [
+      "Ubuntu",
+      "Debian",
+      "AlmaLinux",
+      "Rocky Linux"
+    ],
+    "capabilities": {
+      "oneClick": true,
+      "ssl": true,
+      "docker": true
+    },
+    "startingPrice": "0",
+    "currency": "USD",
+    "billingCycle": "monthly",
+    "planCount": 1
+  },
+  {
+    "id": "app-fazerai-agents",
+    "name": "fazer.ai agents",
+    "slug": "fazerai-agents",
+    "category": "APPLICATION_DEPLOYMENT_PLATFORM",
+    "description": "Self-hosted AI customer-service agents with messaging, voice and scheduling integrations.",
+    "logoUrl": null,
+    "websiteUrl": "https://github.com/fazer-ai/agents",
+    "documentationUrl": "https://github.com/fazer-ai/agents#readme",
     "status": "ACTIVE",
     "installationMethod": "DOCKER",
     "requiresLicense": false,

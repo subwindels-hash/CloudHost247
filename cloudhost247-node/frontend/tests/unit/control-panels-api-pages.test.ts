@@ -25,14 +25,22 @@ describe('paged public catalogue client', () => {
     apiFetch.mockRejectedValue(new Error('Network unavailable'));
     const first = await fetchControlPanelsPage({ offset: 0, limit: 24 });
     expect(first.controlPanels).toHaveLength(24);
-    expect(first.total).toBe(1_091);
-    expect(first.categoryCounts.ALL).toBe(1_091);
+    expect(first.total).toBe(1_092);
+    expect(first.categoryCounts.ALL).toBe(1_092);
     const end = await fetchControlPanelsPage({ offset: 1_080, limit: 24 });
-    expect(end.controlPanels).toHaveLength(11);
+    expect(end.controlPanels).toHaveLength(12);
     const search = await fetchControlPanelsPage({ offset: 0, limit: 24, search: ' Galaxy ', category: 'APPLICATION_DEPLOYMENT_PLATFORM', license: 'FREE' });
     expect(search.total).toBe(1);
     expect(search.controlPanels.map((p) => p.slug)).toEqual(['galaxy']);
     expect(apiFetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('finds the correct product independently after splitting the malformed merged name', async () => {
+    apiFetch.mockRejectedValue(new Error('Network unavailable'));
+    const fasten = await fetchControlPanelsPage({ offset: 0, limit: 24, search: 'Fasten Health' });
+    expect(fasten.controlPanels.map(x => [x.id, x.name])).toEqual([['app-fasten-healthfazer-ai-agents', 'Fasten Health']]);
+    const fazer = await fetchControlPanelsPage({ offset: 0, limit: 24, search: 'fazer.ai' });
+    expect(fazer.controlPanels.map(x => [x.slug, x.name])).toEqual([['fazerai-agents', 'fazer.ai agents']]);
   });
 
   it('does not fall back to a full import when the request is cancelled', async () => {
