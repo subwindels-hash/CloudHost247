@@ -1,0 +1,51 @@
+/* First-party built-in live chat widget — visitor-facing. The staff console reuses the app's
+   shared ch247-* primitives (cards, tables, buttons). Docked bottom-left so it never covers the
+   AI support assistant (bottom-right). */
+.ch247-web-chat{position:fixed;right:1rem;bottom:1rem;z-index:1000}
+.ch247-web-chat-launch{position:relative;display:inline-flex;align-items:center;gap:.5rem;border:1px solid #0f766e;border-radius:999px;padding:.75rem 1.15rem;background:linear-gradient(150deg,#0d9488,#0f766e 60%,#115e59);color:#f0fdfa;font-weight:700;cursor:pointer;box-shadow:0 10px 28px rgba(13,148,136,.35),inset 0 1px 0 rgba(255,255,255,.35)}
+.ch247-web-chat-launch:hover{filter:brightness(1.06)}
+.ch247-web-chat-launch:focus-visible{outline:3px solid #99f6e4;outline-offset:2px}
+.ch247-web-chat-panel{position:absolute;right:0;bottom:4.2rem;width:min(380px,calc(100vw - 2rem));height:min(560px,calc(100vh - 6rem));display:flex;flex-direction:column;background:#fff;color:#172033;border:1px solid #ccf0ea;border-radius:16px;overflow:hidden;box-shadow:0 18px 60px rgba(15,23,42,.28)}
+.ch247-web-chat-panel>header{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.85rem 1rem;background:linear-gradient(150deg,#0d9488,#115e59);color:#ecfdf5;border-bottom:1px solid #0f766e}
+.ch247-web-chat-panel>header div{display:flex;flex-direction:column;gap:.1rem}
+.ch247-web-chat-panel>header small{opacity:.85;font-size:.72rem}
+.ch247-web-chat-panel>header button{background:transparent;border:0;color:#ecfdf5;font-size:1.5rem;line-height:1;cursor:pointer;padding:.25rem .4rem;border-radius:6px}
+.ch247-web-chat-panel>header button:hover{background:rgba(255,255,255,.15)}
+.ch247-web-chat-messages{flex:1;overflow-y:auto;padding:.75rem;background:#f4fbfa;display:flex;flex-direction:column;gap:.5rem}
+.ch247-web-chat-hint{margin:.4rem .2rem;font-size:.82rem;color:#475569}
+.ch247-web-chat-message{max-width:88%;padding:.5rem .7rem;border-radius:12px;background:#fff;border:1px solid #e2e8f0;font-size:.9rem}
+.ch247-web-chat-message--visitor{align-self:flex-end;background:#ccfbf1;border-color:#5eead4}
+.ch247-web-chat-message--staff{align-self:flex-start;background:#fff;border-color:#99f6e4}
+.ch247-web-chat-message small{font-weight:700;color:#0f766e;font-size:.7rem}
+.ch247-web-chat-message p{margin:.25rem 0 .15rem;white-space:pre-wrap;word-break:break-word}
+.ch247-web-chat-message time{font-size:.68rem;color:#64748b}
+.ch247-web-chat-intro p{margin:.25rem .2rem .6rem}
+.ch247-web-chat-intro form{display:flex;flex-direction:column;gap:.5rem}
+.ch247-web-chat-intro label{display:flex;flex-direction:column;gap:.2rem;font-size:.8rem;color:#334155}
+.ch247-web-chat-intro label span{opacity:.7;font-weight:400}
+.ch247-web-chat-intro input{padding:.55rem .65rem;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
+.ch247-web-chat-intro button{background:linear-gradient(150deg,#0d9488,#115e59);color:#f0fdfa;border:1px solid #0f766e;border-radius:8px;padding:.65rem 1rem;font:inherit;cursor:pointer}
+.ch247-web-chat-intro button:disabled{opacity:.6;cursor:not-allowed}
+.ch247-web-chat-compose{display:flex;gap:.5rem;padding:.6rem .75rem;border-top:1px solid #e2e8f0;background:#fff}
+.ch247-web-chat-compose input{flex:1;min-width:0;padding:.6rem .7rem;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
+.ch247-web-chat-compose button{background:linear-gradient(150deg,#0d9488,#115e59);color:#f0fdfa;border:1px solid #0f766e;border-radius:8px;padding:.6rem 1rem;cursor:pointer;font:inherit}
+.ch247-web-chat-compose button:disabled{opacity:.6;cursor:not-allowed}
+.ch247-web-chat-error{margin:.3rem .2rem;padding:.4rem .6rem;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;font-size:.8rem}
+@media(max-width:520px){.ch247-web-chat{right:.5rem;bottom:.5rem}.ch247-web-chat-panel{position:fixed;inset:.5rem;width:auto;height:auto}}
+
+.ch247-web-chat-message--ai{align-self:flex-start;background:#ede9fe;border-color:#ddd6fe}
+.ch247-web-chat-message--ai small{color:#6d28d9}
+.ch247-web-chat-ai-bar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:0;padding:.4rem .75rem;background:#f0fdfa;border-top:1px solid #ccf0ea;font-size:.72rem;color:#115e59}
+.ch247-web-chat-ai-bar--human{background:#fff7ed;border-top-color:#fed7aa;color:#c2410c}
+.ch247-web-chat-ai-bar button{flex-shrink:0;background:transparent;border:1px solid #0f766e;color:#0f766e;border-radius:999px;padding:.2rem .6rem;font-size:.72rem;font-weight:700;cursor:pointer}
+.ch247-web-chat-ai-bar button:disabled{opacity:.5;cursor:default}
+.ch247-web-chat-ai-bar button:hover:not(:disabled){background:#ccfbf1}
+.ch247-web-chat-links{list-style:none;margin:.35rem 0 .1rem;padding:0;display:flex;flex-direction:column;gap:.25rem}
+.ch247-web-chat-links a{display:inline-block;color:#0f766e;font-weight:600;font-size:.82rem;text-decoration:underline;text-underline-offset:2px;word-break:break-word}
+.ch247-web-chat-links a:hover{color:#115e59}
+.ch247-web-chat-links a:focus-visible{outline:2px solid #0f766e;outline-offset:2px;border-radius:4px}
+.ch247-web-chat-followups{display:flex;gap:.4rem;padding:.5rem .75rem 0;flex-wrap:wrap}
+.ch247-web-chat-followups button{background:#f4f6fa;border:1px solid #d6dfec;border-radius:999px;padding:.35rem .7rem;font-size:.78rem;color:#33415c;cursor:pointer;text-align:left}
+.ch247-web-chat-followups button:hover:not(:disabled){border-color:#0f766e;background:#f0fdfa;color:#115e59}
+.ch247-web-chat-followups button:disabled{opacity:.6;cursor:default}
+.ch247-web-chat-followups button:focus-visible{outline:2px solid #0f766e;outline-offset:2px}

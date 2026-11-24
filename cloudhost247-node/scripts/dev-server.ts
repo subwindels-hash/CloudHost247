@@ -68,7 +68,12 @@ async function main() {
   // runs it). A local database with no registrar connected therefore renders the honest empty
   // state, exactly as a fresh install does.
 
-  const app = buildApp(env, { serveFrontend: false, pool: db });
+  // API-only by default (the Vite dev server on :5173 is the app in `npm run dev:stack`). Set
+  // DEV_SERVE_FRONTEND=1 to additionally serve the built frontend from public/ on this port with
+  // SPA fallback — the same behaviour as the production server, and what the port-3000 preview
+  // needs. Requires `npm run build:frontend` to have produced public/index.html.
+  const serveFrontend = process.env.DEV_SERVE_FRONTEND === '1';
+  const app = buildApp(env, { serveFrontend, publicDir: path.join(process.cwd(), 'public'), pool: db });
   await app.listen({ port: PORT, host: '0.0.0.0' });
   // eslint-disable-next-line no-console
   console.log(`[dev-server] API listening on 0.0.0.0:${PORT}`);

@@ -5,7 +5,7 @@ import { MARKETING_ROUTES } from '../navigation/registry.generated';
 import Header from './Header';
 import Footer from './Footer';
 import SupportModeBanner from '../components/SupportModeBanner';
-import AiSupportWidget from '../components/AiSupportWidget';
+import WebChatWidget from '../components/WebChatWidget';
 import { CatalogLoadingBanner } from '../components/CatalogStateBanner';
 import AnnouncementBar from '../components/AnnouncementBar';
 import { startMarketing, useMarketing } from '../lib/marketing';
@@ -113,7 +113,9 @@ export default function Layout() {
         </Suspense>
       </main>
       <Footer />
-      <AiSupportWidget />
+      {/* The single built-in support entry point for visitors — AI answers first, a human picks
+          it up when needed. Hidden on /admin routes, where staff use the Admin → Live Chat console. */}
+      {!pathname.startsWith('/admin') && <WebChatWidget />}
     </div></ToolsNavigationProvider>
   );
 }

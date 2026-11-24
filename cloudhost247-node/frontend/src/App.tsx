@@ -129,6 +129,7 @@ const AdminWebsiteBuilderPage = lazy(() =>
   import('./pages/platform/AdminPlatformServicesPage').then((module) => ({ default: module.AdminWebsiteBuilderPage }))
 );
 const AdminUnifiedInboxPage = lazy(() => import('./pages/platform/AdminUnifiedInboxPage'));
+const AdminLiveChatPage = lazy(() => import('./pages/AdminLiveChatPage'));
 const NewServerPage = lazy(() => import('./pages/NewServerPage'));
 const ServerDetailPage = lazy(() => import('./pages/ServerDetailPage'));
 const ServerLogsPage = lazy(() => import('./pages/ServerLogsPage'));
@@ -497,6 +498,8 @@ export default function App() {
             <Route path="/admin/marketing-services" element={<AdminMarketingServicesPage />} />
             <Route path="/admin/unified-inbox" element={<AdminUnifiedInboxPage />} />
             <Route path="/admin/community" element={<AdminCommunityPage />} />
+            {/* Built-in first-party live chat console — no third-party provider involved. */}
+            <Route path="/admin/live-chat" element={<AdminLiveChatPage />} />
           </Route>
 
           {/* Staff-only (admin + super_admin) customer/ticket/billing management. RequireRole is a

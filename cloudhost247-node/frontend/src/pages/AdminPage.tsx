@@ -73,6 +73,7 @@ export default function AdminPage() {
           <Link to="/admin/email-trace">Email trace centre →</Link>
           <Link to="/admin/tickets">Manage support tickets →</Link>
           <Link to="/admin/ai-support">AI support &amp; human handoffs →</Link>
+          <Link to="/admin/live-chat">Live Chat — built-in chat console →</Link>
           <Link to="/admin/ai-command">AI Command Center — control plane →</Link>
           <Link to="/admin/invoices">Manage invoices & refunds →</Link>
           <Link to="/admin/revenue-guardian">Revenue Guardian — revenue recovery →</Link>

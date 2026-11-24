@@ -10,6 +10,7 @@ import { CurrencyProvider } from './currency/CurrencyProvider';
 // which is what unifies the dashboard, the marketing site and the WHMCS theme on one palette.
 import './styles.css';
 import './ai-support.css';
+import './web-chat.css';
 import './infrastructure.css';
 import './tools-center.css';
 import './business-tools.css';
