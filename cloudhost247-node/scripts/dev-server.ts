@@ -16,6 +16,8 @@ import { loadEnv } from '../src/config/env';
 import { buildApp } from '../src/app';
 import { PgliteClient } from '../database/db-client';
 import { migrateUp } from '../database/migrate';
+import { syncWebsiteKnowledge } from '../src/ai-website/knowledge-sync';
+import { knowledgeIndexReady } from '../src/ai-website/website-knowledge-repo';
 
 const DATA_DIR = process.env.PGLITE_DATA_DIR ?? path.join(process.cwd(), '.dev-db-pg');
 const PORT = Number(process.env.PORT ?? 3000);
@@ -67,6 +69,35 @@ async function main() {
   // catalogue (tests/security/test_domain_data_provenance.py, and the release-candidate gate that
   // runs it). A local database with no registrar connected therefore renders the honest empty
   // state, exactly as a fresh install does.
+
+  // The AI support agent answers from the website-knowledge index (`ai_knowledge_sources` /
+  // `ai_knowledge_chunks`). `migrate up` creates those tables empty, and on a real deployment an
+  // administrator (or the knowledge worker) builds the index. Nothing does that locally, so the
+  // agent on a fresh dev database refuses every question with `knowledge_unavailable` — it looks
+  // broken, but it is simply unindexed. Build it here, once, using the same committed projection and
+  // the same idempotent sync production uses. Subsequent boots are a no-op (unchanged sources are
+  // skipped). Set DEV_SKIP_KNOWLEDGE_SYNC=1 to skip it.
+  if (process.env.DEV_SKIP_KNOWLEDGE_SYNC !== '1') {
+    try {
+      const ready = await knowledgeIndexReady(db);
+      if (!ready) {
+        const started = Date.now();
+        // eslint-disable-next-line no-console
+        console.log('[dev-server] knowledge index empty — building it from the website projection (first run only)…');
+        const sync = await syncWebsiteKnowledge(db, { trigger: 'manual' });
+        // eslint-disable-next-line no-console
+        console.log(
+          `[dev-server] knowledge index ready: ${sync.indexed} source(s) indexed, ${sync.unchanged} unchanged, ` +
+          `${sync.failed} failed (${Date.now() - started} ms) — the AI support agent can now answer from the site`,
+        );
+      }
+    } catch (error) {
+      // A failed index build must not stop the API from booting: the agent degrades to escalation,
+      // which is exactly the behaviour it has on an unindexed production install.
+      // eslint-disable-next-line no-console
+      console.error('[dev-server] knowledge index build failed; the AI agent will escalate instead of answering:', error);
+    }
+  }
 
   // API-only by default (the Vite dev server on :5173 is the app in `npm run dev:stack`). Set
   // DEV_SERVE_FRONTEND=1 to additionally serve the built frontend from public/ on this port with

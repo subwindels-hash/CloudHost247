@@ -27,7 +27,13 @@
   /* Responsive hero photograph, following the shared `.ch247-hero--photo` pattern:
      a 1280px scene on wide viewports, the 640px crop below 768px. The scene
      matches Contact Us's 1584x672 wide-hero format, and its deliberately empty
-     left third carries the heading without the scrim having to fight it. */
+     left third carries the heading without the scrim having to fight it.
+
+     Sharpness across viewport sizes is deliberate (see the `min-width: 1600px`
+     block at the end of this file): this 1280px asset is only ever upscaled
+     1.00–1.25x up to 1600px. Past that the 1584px master is used instead, which
+     is the highest-resolution copy that exists — so the photograph is never
+     stretched by more than ~1.6x even on a 2560px display. */
   --cp-hero-image: url('/media/cloudhost247/hero-backgrounds/servers-1280.webp');
 
   position: relative;
@@ -40,11 +46,23 @@
 }
 
 /* Slow metallic sheen above the striped surface (z-index 2) but below readable
-   content (z-index 3) — the same layer Contact Us uses. */
+   content (z-index 3) — the same layer Contact Us uses.
+ *
+ * Bounded by the viewport (`100vh`), not by the document: the sheen is a light
+ * sweep, and the metallic finish it travels over is the page's own background
+ * gradient, which paints the full document. Tying the sheen to the page height
+ * meant a long catalogue spent an increasing share of every animation cycle
+ * off-screen — the further you scrolled, the less often you saw it, and on a
+ * tall enough page its gradient stops stretched until the highlight thinned out.
+ * Anchoring it to the first screen keeps its speed, opacity and highlight width
+ * identical at every page length. */
 .ch247-control-panels-page::after {
   content: '';
   position: absolute;
-  inset: -20% -60%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
   z-index: 2;
   pointer-events: none;
   background: linear-gradient(104deg, transparent 42%, rgba(255, 255, 255, .30) 49%, rgba(255, 255, 255, .10) 54%, transparent 61%);
@@ -54,14 +72,30 @@
   animation: ch247-control-panels-specular 16s ease-in-out infinite;
 }
 
-/* Neutral ink scrim only: the photograph's own colours stay intact. */
+/* Neutral ink scrim only: the photograph's own colours stay intact.
+ *
+ * The photograph is anchored to the RIGHT and the scrim to the left, so the
+ * heading always sits on the picture's deliberately empty left third while the
+ * server racks stay in frame. Triple stop sequence on the photo:
+ *
+ *   [scrim]      the ink veil under the heading, darkest at the left edge
+ *   [vignette]   a soft wash over the left 38% of the photo itself
+ *   [photo]      right-anchored
+ *
+ * The photo sits in a composited layer and is painted left-to-right
+ * (`background-repeat: no-repeat` on a fixed proportion), so nothing about the
+ * band below — page length, card count, or the section's height — can stretch,
+ * tile, or seam it. Page height is irrelevant to this layer by construction:
+ * every background here is a gradient or a `cover` photograph, both of which
+ * re-evaluate against the hero box alone. */
 .ch247-control-panels-page .ch247-control-panels-hero {
   position: relative;
   z-index: auto;
   color: #fff;
   background:
     linear-gradient(90deg, rgba(9, 15, 23, .92) 0%, rgba(9, 15, 23, .76) 45%, rgba(9, 15, 23, .35) 100%),
-    var(--cp-hero-image) center / cover no-repeat;
+    radial-gradient(ellipse 120% 100% at 0% 50%, rgba(9, 15, 23, .55), rgba(9, 15, 23, 0) 62%),
+    var(--cp-hero-image) right center / cover no-repeat;
   background-color: #10171d;
   box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .14);
 }
@@ -457,9 +491,37 @@
   }
 
   .ch247-control-panels-page .ch247-control-panels-hero {
+    /* The mobile crop keeps the 78% focal point from the shared hero pattern and
+       adds the same left vignette, so the empty third still carries the heading
+       instead of the scrim having to flatten the photo. */
     background:
       linear-gradient(90deg, rgba(9, 15, 23, .94), rgba(9, 15, 23, .72)),
+      radial-gradient(ellipse 130% 100% at 0% 50%, rgba(9, 15, 23, .48), rgba(9, 15, 23, 0) 65%),
       var(--cp-hero-image) 78% center / cover no-repeat;
+  }
+}
+
+/* Large displays: switch to the highest-resolution master that exists in the
+   repository.
+ *
+ * `servers-1280.webp` is 1280px wide, so on anything past 1280px a `cover` fill
+ * has to enlarge it: 1.25x at 1600px, 1.5x at 1920px, 2.0x at 2560px. That is
+ * the point where the thin rack cabling and the small status LEDs visibly soften.
+ * `servers.jpg` is the 1584x672 original those derivatives were made from, so
+ * from 1600px up the photographic hero is drawn from it instead — 1584 * 1.6 = a
+ * 2534px ceiling, which covers a 2560px display and keeps a 1920px desktop under
+ * 1.3x. It is a later background layer, so the ink scrim and vignette above it
+ * are untouched and the contrast under the heading is identical.
+ *
+ * The gradients are deliberately not re-declared here: only the image layer
+ * changes, so the stripe angles, ramps and scrim stops stay byte-identical to
+ * the smaller breakpoints and to Contact Us. */
+@media (min-width: 1600px) {
+  .ch247-control-panels-page .ch247-control-panels-hero {
+    background-image:
+      linear-gradient(90deg, rgba(9, 15, 23, .92) 0%, rgba(9, 15, 23, .76) 45%, rgba(9, 15, 23, .35) 100%),
+      radial-gradient(ellipse 120% 100% at 0% 50%, rgba(9, 15, 23, .55), rgba(9, 15, 23, 0) 62%),
+      url('/media/cloudhost247/hero-backgrounds/servers.jpg');
   }
 }
 
