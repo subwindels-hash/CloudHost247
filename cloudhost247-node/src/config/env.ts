@@ -73,6 +73,13 @@ const envSchema = z.object({
   VISITOR_IP_MODE: z.enum(['off', 'direct', 'trusted-proxy']).default('off'),
   VISITOR_IP_TRUSTED_PROXIES: z.string().max(4096).optional(),
 
+  // Comma-separated list of EXTRA origins allowed to call the API cross-origin — used only for the
+  // public first-party live chat endpoints (`/api/v1/web-chat/*`) embedded on the WHMCS public site,
+  // which is served from a different host than this application. APP_URL is always allowed. The
+  // SPA served by this application is same-origin and never needs an entry here. Example:
+  //   WEB_CHAT_ALLOWED_ORIGINS=https://cloudhost247.com,https://www.cloudhost247.com
+  WEB_CHAT_ALLOWED_ORIGINS: z.string().max(2000).optional(),
+
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 
   // Read-only website-launch conversation; disabled unless explicitly enabled in that environment.

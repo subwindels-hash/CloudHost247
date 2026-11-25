@@ -133,6 +133,9 @@ export default function Header() {
               <NavLink to="/admin/unified-inbox">Inbox</NavLink>
             ) : null}
             {user && SUPPORT_ROLES.includes(user.role) ? (
+              <NavLink to="/admin/live-chat">Live Chat</NavLink>
+            ) : null}
+            {user && SUPPORT_ROLES.includes(user.role) ? (
               <NavLink to="/admin/platform-services">Platform Services</NavLink>
             ) : null}
             {user && STAFF_ROLES.includes(user.role) ? (

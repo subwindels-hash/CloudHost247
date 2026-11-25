@@ -35,7 +35,14 @@ final class ThemeRepository
         'banner_button_text_color' => '#0a1620',
         'banner_text_color' => '#ffffff',
         'bing_verification_code' => '',
-        'chat_option_selected' => 'none',
+        // Built-in first-party live chat: `enable_live_chat_cloudhost247` toggles the widget
+        // ('on'); `web_chat_api_base_url` is the public origin of the Node platform that serves
+        // /api/v1/web-chat/* (empty renders nothing). Third-party live chat providers
+        // (Tawk.to / LiveChat / Zendesk) were removed — the chat is built into the platform.
+        'enable_live_chat_cloudhost247' => '',
+        // Optional override of the platform origin that serves /api/v1/web-chat/* for the
+        // built-in widget; empty falls back to $ch247Site.platform at render time.
+        'web_chat_api_base_url' => '',
         'cookies_message_text' => 'We use cookies to improve your experience on our site.',
         'cookies_position' => 'bottom',
         'country_calling_code_phone' => '',
@@ -46,7 +53,6 @@ final class ThemeRepository
         'dropdown_event' => 'hover',
         'enable_browser_cookies_cloudhost247' => '1',
         'enable_header_target' => '1',
-        'enable_live_chat_cloudhost247' => '',
         'enable_offer_setting_cloudhost247' => '',
         'enable_primary_sidebar_left' => '',
         'enable_secondary_sidebar_right' => '',
@@ -72,7 +78,6 @@ final class ThemeRepository
         'lg_pw_logo_height' => '',
         'lg_pw_logo_width' => '',
         'linkedin_handle_code' => '',
-        'live_chat_id' => '',
         'menu_layout' => 'default',
         'offer_background_style_one_color' => '#f3f7f8',
         'offer_hthree_style_one_background_color' => '#f3f7f8',

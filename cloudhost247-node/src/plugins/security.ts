@@ -13,6 +13,17 @@ export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
     ? env.FRAME_ANCESTORS.trim().split(/\s+/).filter(Boolean)
     : [];
 
+  // APP_URL is always allowed (it is this application's own public origin). Additional origins are
+  // permitted ONLY for the visitor live chat endpoints — the WHMCS public site embeds the same
+  // first-party web-chat widget the SPA uses, and it is served from another host. Credentials stay
+  // enabled for the same-origin SPA; the cross-origin widget sends a bearer-style X-Web-Chat-Token
+  // header instead of cookies.
+  const webChatOrigins = (env.WEB_CHAT_ALLOWED_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => /^https?:\/\/[^/]+$/.test(origin));
+  const webChatOriginSet = new Set(webChatOrigins);
+
   await app.register(helmet, {
     frameguard: extraFrameAncestors.length > 0 ? false : undefined,
     // The SPA is served by this same app, so keep CSP permissive enough for same-origin assets
@@ -40,7 +51,17 @@ export async function registerSecurityPlugins(app: FastifyInstance, env: Env) {
   });
 
   await app.register(cors, {
-    origin: env.APP_URL,
+    origin(origin, callback) {
+      // No Origin header (curl, server-to-server) — allow, matching @fastify/cors's default.
+      if (!origin) return callback(null, true);
+      if (origin === env.APP_URL) return callback(null, true);
+      // Extra origins configured for the first-party web chat widget embedded on the WHMCS site.
+      // The API authenticates with bearer tokens (never cookies), so admitting these origins
+      // exposes nothing they could not already reach with their own token — it does not enable
+      // cross-site credentialled reads of the first-party session.
+      if (webChatOriginSet.has(origin)) return callback(null, true);
+      return callback(null, false);
+    },
     credentials: true,
   });
 

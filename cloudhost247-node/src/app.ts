@@ -16,6 +16,7 @@ import { registerEmailForwarderRoutes } from './routes/email-forwarders';
 import { registerWordPressRoutes } from './routes/wordpress';
 import { registerIpAddressRoutes } from './routes/ip-addresses';
 import { registerLiveChatRoutes } from './routes/live-chat';
+import { registerWebChatRoutes } from './routes/web-chat';
 import { registerPhpConfigRoutes } from './routes/php-config';
 import { registerWebsiteAccessShareRoutes } from './routes/website-access-shares';
 import { registerPublicCatalogRoutes } from './routes/catalog-public';
@@ -230,6 +231,9 @@ export function buildApp(env: Env, options: BuildAppOptions = {}): FastifyInstan
     // Live chat (K03 — K Support): internal customer↔staff conversations; no
     // third-party chat provider configured.
     await registerLiveChatRoutes(instance, env, pool);
+    // First-party anonymous visitor live chat (public website widget + staff console) —
+    // no third-party chat provider. See src/routes/web-chat.ts.
+    await registerWebChatRoutes(instance, env, pool);
     // Automatic renewal controls (I12): auto-renew toggle for customer domains.
     await registerDomainAutoRenewRoutes(instance, env, pool);
     // Agency / reseller hosting (W10, J Agency core): staff-managed agencies, clients and
