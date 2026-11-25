@@ -184,7 +184,25 @@ describe('migration runner against the real database/migrations SQL files', () =
     '0117_ai_effect_outbox.sql',
     '0118_ai_support_message_requests.sql',
     '0119_create_auth_sessions.sql',
-  ];
+  
+    '0120_create_incidents.sql',
+    '0121_create_abuse_reports.sql',
+    '0122_create_agency_tables.sql',
+    '0123_create_email_forwarders.sql',
+    '0124_create_email_authentication.sql',
+    '0126_add_auto_renew_to_domains.sql',
+    '0127_extend_deployment_actions.sql',
+    '0128_create_ip_addresses.sql',
+    '0129_create_live_chat.sql',
+    '0130_add_custom_domain_to_stores.sql',
+    '0131_create_php_configs.sql',
+    '0132_create_website_access_shares.sql',
+    '0133_restore_infrastructure_deployment_actions.sql',
+    '0134_create_infrastructure_provider_credentials.sql',
+    '0135_create_web_chat.sql',
+    '0136_web_chat_ai.sql',
+    '0137_web_chat_ai_envelope.sql',
+];
 
   it('quarantines legacy unprocessed events with workflow history on claim upgrade', async () => {
     await db.exec(`CREATE TABLE ai_events (id uuid PRIMARY KEY, processed_at timestamptz, occurred_at timestamptz NOT NULL DEFAULT now());
