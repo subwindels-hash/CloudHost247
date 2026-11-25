@@ -103,28 +103,32 @@ export function buildServerCloudInitWithControlPanel(input: {
     'install -d -m 700 /var/lib/cloudhost247 && install -m 600 /dev/null /var/lib/cloudhost247/security-configured',
   ];
 
-  let panelRunCmd = '';
   if (input.controlPanelSlug) {
-    const adapter = getControlPanelAdapter(input.controlPanelSlug);
-    if (adapter) {
-      const panelScript = adapter.generateInstallScript({
-        hostname: input.hostname,
-        agentId: input.agentId,
-        agentSecret: input.agentSecret,
-        controlUrl: input.controlUrl,
-        osSlug: input.osSlug ?? 'ubuntu',
-        osVersion: input.osVersion ?? '24.04',
-        architecture: input.architecture ?? 'x86_64',
-        ...input.controlPanelOptions,
-      });
-
-      // Write script to /var/lib/cloudhost247/install-panel.sh and execute
-      baseInstall.push(
-        `cat << 'EOF' > /var/lib/cloudhost247/install-panel.sh\n${panelScript}\nEOF`,
-        'chmod 0700 /var/lib/cloudhost247/install-panel.sh',
-        '/var/lib/cloudhost247/install-panel.sh > /var/log/cloudhost247-panel-bootstrap.log 2>&1'
-      );
+    if (!input.osSlug || !input.osVersion || !input.architecture) {
+      throw new Error('Control-panel cloud-init requires the selected operating-system slug, version, and architecture');
     }
+    const adapter = getControlPanelAdapter(input.controlPanelSlug);
+    if (!adapter) {
+      throw new Error(`No control-panel bootstrap adapter is registered for '${input.controlPanelSlug}'`);
+    }
+    const panelScript = adapter.generateInstallScript({
+      ...input.controlPanelOptions,
+      hostname: input.hostname,
+      agentId: input.agentId,
+      agentSecret: input.agentSecret,
+      controlUrl: input.controlUrl,
+      osSlug: input.osSlug,
+      osVersion: input.osVersion,
+      architecture: input.architecture,
+    });
+
+    // Write the bootstrap template to /var/lib/cloudhost247/install-panel.sh and execute it.
+    // A successful command sequence is not proof of provider acceptance or a verified install.
+    baseInstall.push(
+      `cat << 'EOF' > /var/lib/cloudhost247/install-panel.sh\n${panelScript}\nEOF`,
+      'chmod 0700 /var/lib/cloudhost247/install-panel.sh',
+      '/var/lib/cloudhost247/install-panel.sh > /var/log/cloudhost247-panel-bootstrap.log 2>&1'
+    );
   }
 
   const installCmd = baseInstall.join(' && ');

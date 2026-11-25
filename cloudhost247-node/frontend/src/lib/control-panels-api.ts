@@ -1,4 +1,4 @@
-import { apiFetch } from './api';
+import { apiFetch, ApiRequestError } from './api';
 
 export interface ControlPanelSummary {
   id: string;
@@ -20,10 +20,25 @@ export interface ControlPanelSummary {
   };
   supportedOs: string[];
   capabilities: Record<string, boolean>;
-  startingPrice: string;
+  startingPrice: string | number | null;
   currency: string;
   billingCycle: string;
   planCount: number;
+  /** `configured` is a database-backed offer; `directory` is reference metadata only. */
+  catalogSource?: 'configured' | 'directory';
+  /** A validated manifest file exists; this does not mean it is published or provider-tested. */
+  hasValidatedManifest?: boolean;
+  /** A bootstrap-script adapter exists; this does not imply provider-accepted installation. */
+  hasPanelBootstrapAdapter?: boolean;
+  /** True only when a provider-backed bootstrap acceptance result has been recorded. */
+  panelBootstrapProviderVerified?: boolean;
+  panelManagementAvailable?: boolean;
+  /** True only when provider-backed management acceptance has been recorded. */
+  panelManagementProviderVerified?: boolean;
+  /** All bootstrap, verification, lifecycle, and provider-acceptance gates passed. */
+  operationallySupported?: boolean;
+  /** A published app/version exists in the application marketplace; host compatibility is checked on install. */
+  hasPublishedMarketplaceApp?: boolean;
 }
 
 export interface ControlPanelPlan {
@@ -40,8 +55,17 @@ export interface ControlPanelPlan {
   status: string;
 }
 
+export interface ControlPanelOperationStatus {
+  operation: string;
+  implemented: boolean;
+  providerVerified: boolean;
+  reason: string | null;
+}
+
 export interface ControlPanelDetail extends ControlPanelSummary {
   plans: ControlPanelPlan[];
+  /** Method presence is not provider-backed acceptance; every operation also reports verification state. */
+  panelOperations?: ControlPanelOperationStatus[];
 }
 
 export interface ControlPanelPage {
@@ -88,7 +112,16 @@ export async function fetchControlPanelsPage({ offset, limit, category, license,
         (p.description ?? '').toLowerCase().includes(term) ||
         p.supportedOs.some((os) => os.toLowerCase().includes(term)))
     );
-    return { controlPanels: filtered.slice(offset, offset + limit), total: filtered.length, categoryCounts };
+    return {
+      controlPanels: filtered.slice(offset, offset + limit).map((panel) => ({
+        ...panel,
+        catalogSource: 'directory' as const,
+        planCount: 0,
+        startingPrice: null,
+      })),
+      total: filtered.length,
+      categoryCounts,
+    };
   }
 }
 
@@ -99,10 +132,13 @@ export async function fetchControlPanels(category?: string): Promise<ControlPane
     const data = await apiFetch<{ controlPanels: ControlPanelSummary[] }>(`/api/v1/control-panels${query}`);
     const dbPanels = data.controlPanels ?? [];
     const seen = new Set(dbPanels.map((p) => p.slug));
-    const extras = PLATFORM_CATALOG.filter((p) => !seen.has(p.slug) && (!category || p.category === category));
+    const extras = PLATFORM_CATALOG
+      .filter((p) => !seen.has(p.slug) && (!category || p.category === category))
+      .map((p) => ({ ...p, catalogSource: 'directory' as const, planCount: 0, startingPrice: null }));
     return [...dbPanels, ...extras];
   } catch {
-    return category ? PLATFORM_CATALOG.filter((p) => p.category === category) : PLATFORM_CATALOG;
+    const fallback = category ? PLATFORM_CATALOG.filter((p) => p.category === category) : PLATFORM_CATALOG;
+    return fallback.map((p) => ({ ...p, catalogSource: 'directory' as const, planCount: 0, startingPrice: null }));
   }
 }
 
@@ -110,29 +146,19 @@ export async function fetchControlPanel(slug: string): Promise<ControlPanelDetai
   try {
     const data = await apiFetch<{ controlPanel: ControlPanelDetail }>(`/api/v1/control-panels/${encodeURIComponent(slug)}`);
     return data.controlPanel;
-  } catch {
+  } catch (error) {
+    // Only a 404 means "this directory entry has no configured database listing yet". Network,
+    // authorization, and server errors must stay visible instead of silently turning into a fake offer.
+    if (!(error instanceof ApiRequestError) || error.status !== 404) throw error;
     const { PLATFORM_CATALOG } = await import('../data/platform-catalog');
     const found = PLATFORM_CATALOG.find((p) => p.slug === slug);
-    if (!found) {
-      throw new Error(`Platform "${slug}" not found`);
-    }
+    if (!found) throw error;
     return {
       ...found,
-      plans: [
-        {
-          id: `${found.id}-standard`,
-          name: `${found.name} Standard`,
-          description: `Managed ${found.name} deployment on CloudHost247.`,
-          billingCycle: found.billingCycle,
-          price: found.startingPrice,
-          currency: found.currency,
-          setupFee: '0',
-          licenseType: found.requiresLicense ? 'COMMERCIAL' : 'OPEN_SOURCE',
-          includedDomains: null,
-          includedAccounts: null,
-          status: 'ACTIVE',
-        },
-      ],
+      catalogSource: 'directory',
+      planCount: 0,
+      startingPrice: null,
+      plans: [],
     };
   }
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   listControlPanelAdapters,
   getControlPanelAdapter,
@@ -6,6 +6,7 @@ import {
   buildServerCloudInitWithControlPanel,
 } from '../../src/control-panels/registry';
 import { ControlPanelOperationError } from '../../src/control-panels/errors';
+import { getControlPanelReadiness } from '../../src/control-panels/readiness';
 import type { ControlPanelAdapter, ControlPanelInstallOptions } from '../../src/control-panels/types';
 
 describe('Control Panel Adapters & Registry (Phase 4)', () => {
@@ -63,6 +64,19 @@ describe('Control Panel Adapters & Registry (Phase 4)', () => {
       expect(script).toContain('#!/bin/bash');
       expect(script).toContain('set -euo pipefail');
       expect(script).toContain(slug);
+      expect(script).toContain('panel installation and provider acceptance remain unverified');
+      expect(script).not.toContain('/var/lib/cloudhost247/panel-installed');
+    }
+  });
+
+  it('does not treat a generated bootstrap script as provider-backed operational support', () => {
+    for (const slug of ALL_18_SLUGS) {
+      const readiness = getControlPanelReadiness(slug);
+      expect(readiness.hasPanelBootstrapAdapter).toBe(true);
+      expect(readiness.panelBootstrapProviderVerified).toBe(false);
+      expect(readiness.panelManagementAvailable).toBe(false);
+      expect(readiness.panelManagementProviderVerified).toBe(false);
+      expect(readiness.operationallySupported).toBe(false);
     }
   });
 
@@ -82,6 +96,33 @@ describe('Control Panel Adapters & Registry (Phase 4)', () => {
     expect(cloudronAccess.url).toBe('https://srv.example.com');
   });
 
+  it('passes the selected OS version and architecture to the generated panel installer', () => {
+    const adapter = requireControlPanelAdapter('coolify');
+    const installer = vi.spyOn(adapter, 'generateInstallScript').mockReturnValue('#!/bin/sh\\ntrue');
+
+    buildServerCloudInitWithControlPanel({
+      hostname: 'node-02.cloudhost247.net',
+      sshKeys: ['ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo4w test@cloudhost247'],
+      agentId: 'agent-12345',
+      agentSecret: 'secret-token-abc',
+      controlUrl: 'https://control.cloudhost247.com',
+      installerUrl: 'https://control.cloudhost247.com/agent-install.sh',
+      controlPanelSlug: 'coolify',
+      osSlug: 'ubuntu',
+      osVersion: '22.04',
+      architecture: 'arm64',
+      // These stale panel options must not override the server's actual selected target.
+      controlPanelOptions: { osSlug: 'debian', osVersion: '12', architecture: 'x86_64' },
+    });
+
+    expect(installer).toHaveBeenCalledWith(expect.objectContaining({
+      osSlug: 'ubuntu',
+      osVersion: '22.04',
+      architecture: 'arm64',
+    }));
+    installer.mockRestore();
+  });
+
   it('validates hardware and OS compatibility accurately', () => {
     const dokploy = requireControlPanelAdapter('dokploy');
 
@@ -98,6 +139,18 @@ describe('Control Panel Adapters & Registry (Phase 4)', () => {
     expect(invalid.reasons.some((r) => r.includes('RAM'))).toBe(true);
   });
 
+  it('fails closed rather than defaulting a selected panel to Ubuntu on missing target data', () => {
+    expect(() => buildServerCloudInitWithControlPanel({
+      hostname: 'node-01.cloudhost247.net',
+      sshKeys: ['ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGo4w test@cloudhost247'],
+      agentId: 'agent-12345',
+      agentSecret: 'secret-token-abc',
+      controlUrl: 'https://control.cloudhost247.com',
+      installerUrl: 'https://control.cloudhost247.com/agent-install.sh',
+      controlPanelSlug: 'coolify',
+    })).toThrow(/requires the selected operating-system slug, version, and architecture/i);
+  });
+
   it('buildServerCloudInitWithControlPanel embeds agent and panel bootstrap in user-data', () => {
     const cloudInit = buildServerCloudInitWithControlPanel({
       hostname: 'node-01.cloudhost247.net',
@@ -107,6 +160,9 @@ describe('Control Panel Adapters & Registry (Phase 4)', () => {
       controlUrl: 'https://control.cloudhost247.com',
       installerUrl: 'https://control.cloudhost247.com/agent-install.sh',
       controlPanelSlug: 'coolify',
+      osSlug: 'ubuntu',
+      osVersion: '24.04',
+      architecture: 'x86_64',
     });
 
     expect(cloudInit).toContain('#cloud-config');
@@ -115,6 +171,8 @@ describe('Control Panel Adapters & Registry (Phase 4)', () => {
     expect(cloudInit).toContain('CH247_AGENT_SECRET=\'secret-token-abc\'');
     expect(cloudInit).toContain('coolify');
     expect(cloudInit).toContain('/var/lib/cloudhost247/install-panel.sh');
+    expect(cloudInit).toContain('panel installation and provider acceptance remain unverified');
+    expect(cloudInit).not.toContain('/var/lib/cloudhost247/panel-installed');
   });
 });
 

@@ -6,11 +6,13 @@ import {
   fetchMarketplaceApp,
   fetchPublicServers,
   fetchMyInstallations,
+  fetchInstallationCapabilities,
   requestInstallation,
   payInvoice,
   type MarketplaceAppDetail,
   type PublicServer,
   type MyInstallation,
+  type InstallationOperation,
 } from '../lib/marketplace-api';
 import AppTileDefault, { formatMemory, formatStorage } from '../components/AppTile';
 import { CatalogErrorBanner, CatalogLoadingBanner } from '../components/CatalogStateBanner';
@@ -31,6 +33,12 @@ export default function AppDetailPage() {
   const [error, setError] = useState('');
   const [servers, setServers] = useState<PublicServer[]>([]);
   const [installations, setInstallations] = useState<MyInstallation[]>([]);
+  const [capabilityCheck, setCapabilityCheck] = useState<{
+    key: string;
+    result: Awaited<ReturnType<typeof fetchInstallationCapabilities>>;
+  } | null>(null);
+  const [capabilityLoading, setCapabilityLoading] = useState(false);
+  const [capabilityError, setCapabilityError] = useState('');
 
   // Wizard state
   const [step, setStep] = useState(1);
@@ -82,6 +90,24 @@ export default function AppDetailPage() {
 
   const selectedServer = useMemo(() => servers.find((server) => server.id === serverId), [servers, serverId]);
   const selectedVersion = useMemo(() => app?.versions.find((v) => v.version === version), [app, version]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setCapabilityCheck(null);
+    setCapabilityError('');
+    if (!app || !selectedServer || !selectedVersion) {
+      setCapabilityLoading(false);
+      return () => { cancelled = true; };
+    }
+    setCapabilityLoading(true);
+    const key = `${app.slug}:${selectedVersion.id}:${selectedServer.id}`;
+    fetchInstallationCapabilities({ applicationId: app.slug, versionId: selectedVersion.id, serverId: selectedServer.id })
+      .then((result) => { if (!cancelled) setCapabilityCheck({ key, result }); })
+      .catch((cause: Error) => { if (!cancelled) setCapabilityError(cause.message); })
+      .finally(() => { if (!cancelled) setCapabilityLoading(false); });
+    return () => { cancelled = true; };
+  }, [app, selectedServer, selectedVersion]);
+
   const requirementsMet =
     !selectedServer ||
     !selectedVersion ||
@@ -91,7 +117,22 @@ export default function AppDetailPage() {
   const requiredCustomerEnv = (app?.environment.required ?? []).filter((item) => item.customerProvided);
   const missingEnv = requiredCustomerEnv.filter((item) => !env[item.key]?.trim());
 
-  const canSubmit = Boolean(serverId && version && !missingEnv.length && requirementsMet && !submitting);
+  const capabilityKey = app && selectedVersion && selectedServer
+    ? `${app.slug}:${selectedVersion.id}:${selectedServer.id}`
+    : '';
+  const currentCapabilityCheck = capabilityCheck?.key === capabilityKey ? capabilityCheck.result : null;
+  const installCapability = currentCapabilityCheck?.capabilities.operations.install;
+  const unsupportedOperations = currentCapabilityCheck
+    ? (Object.entries(currentCapabilityCheck.capabilities.operations) as Array<[
+        InstallationOperation,
+        { supported: boolean; reason: string | null },
+      ]>).filter(([, capability]) => !capability.supported)
+    : [];
+  const canSubmit = Boolean(
+    serverId && selectedVersion && !missingEnv.length && requirementsMet && !submitting
+      && installCapability?.supported === true
+      && currentCapabilityCheck?.capacity.available === true
+  );
 
   function environmentHint(item: {
     generated?: boolean;
@@ -365,12 +406,43 @@ export default function AppDetailPage() {
                     The selected server does not meet this version's minimum requirements.
                   </p>
                 )}
-                {app.sslSupported && <p className="ch247-page__hint">SSL certificate issued automatically for the primary domain.</p>}
-                {app.backupsSupported && <p className="ch247-page__hint">Nightly off-server backups included.</p>}
+                {capabilityLoading && <p className="ch247-page__hint" role="status">Checking the selected adapter and current server capacity…</p>}
+                {capabilityError && (
+                  <p className="ch247-banner ch247-banner--warning" role="status">
+                    Installation support could not be verified. The request remains disabled. {capabilityError}
+                  </p>
+                )}
+                {currentCapabilityCheck && installCapability?.supported === false && (
+                  <p className="ch247-banner ch247-banner--warning" role="status">
+                    This target cannot install the selected version: {installCapability.reason ?? 'the selected adapter does not support installation.'}
+                  </p>
+                )}
+                {currentCapabilityCheck && !currentCapabilityCheck.capacity.available && (
+                  <p className="ch247-banner ch247-banner--warning" role="status">
+                    {currentCapabilityCheck.capacity.reason ?? 'The selected server does not have enough unallocated capacity.'}
+                  </p>
+                )}
+                {currentCapabilityCheck && installCapability?.supported && currentCapabilityCheck.capacity.available && (
+                  <p className="ch247-page__hint">
+                    The {currentCapabilityCheck.capabilities.engine} adapter has an installation path for this target. This is not provider acceptance or a successful install; deployment and application verification are reported separately.
+                    {currentCapabilityCheck.capabilities.simulationMode ? ' Simulation mode is enabled, so the operation will not run against a live provider.' : ''}
+                  </p>
+                )}
+                {currentCapabilityCheck && unsupportedOperations.length > 0 && (
+                  <details className="ch247-page__hint">
+                    <summary>Operations unsupported for this version and target ({unsupportedOperations.length})</summary>
+                    <ul>
+                      {unsupportedOperations.map(([operation, capability]) => (
+                        <li key={operation}><strong>{operation}:</strong> {capability.reason ?? 'This deployment adapter does not support the operation.'}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                {app.sslSupported && <p className="ch247-page__hint">The published manifest flags SSL as enabled; this is not proof of certificate issuance. DNS, target configuration, and the deployment result still matter.</p>}
+                {app.backupsSupported && <p className="ch247-page__hint">Backups are enabled in the published manifest. Availability, restore support, and any schedule depend on the selected adapter and are shown in the installation capability report.</p>}
                 <p className="ch247-page__hint">
-                  Requesting the installation creates an order and invoice (billed pro-rata with your
-                  hosting); provisioning begins once the invoice is paid, and you will be able to watch
-                  the deployment live.
+                  Requesting creates a durable order and invoice. If payment is required, deployment stays
+                  queued until payment is verified; no installation runs synchronously in this form.
                 </p>
                 {submitError && <CatalogErrorBanner message={submitError} />}
                 <div className="ch247-wizard__nav">

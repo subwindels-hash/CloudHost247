@@ -104,6 +104,24 @@ describe('every adapter kind fails closed without server-side credentials', () =
     expect(fetchMock).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
+
+  it('enforces HTTPS centrally for native adapter requests carrying credentials', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const instance = createInfrastructureProviderAdapter(
+      provider('hetzner', 'HETZNER', {
+        api_base_url: 'http://api.hetzner.example/v1',
+        credential_env_prefix: 'HETZNER_DASHBOARD',
+      }),
+      { HETZNER_DASHBOARD_API_TOKEN: 'native-provider-secret' } as NodeJS.ProcessEnv,
+    );
+    await expect(instance.validateConfiguration()).rejects.toMatchObject<Partial<ProviderError>>({
+      code: 'INVALID_CONFIGURATION',
+      retryable: false,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
 });
 
 describe('mock provider isolation', () => {

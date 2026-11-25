@@ -20,7 +20,7 @@
 import type { Queryable } from '../db/types';
 import { findProviderById, type InfrastructureProviderRow } from '../db/infrastructure-providers';
 import { findCustomerServerById, updateCustomerServerProvisioning } from '../db/server-provisioning';
-import { createInfrastructureProviderAdapter } from '../infrastructure/providers/registry';
+import { createConfiguredInfrastructureProviderAdapter } from '../infrastructure/providers/credentials';
 import { ProviderError, type InfrastructureProviderAdapter } from '../infrastructure/providers/types';
 import { recordAuditBestEffort } from '../lib/audit';
 
@@ -106,7 +106,7 @@ export async function reconcileServerState(db: Queryable, options: Reconciliatio
     try {
       const adapter = options.adapterFactory
         ? options.adapterFactory(provider)
-        : createInfrastructureProviderAdapter(provider, options.source);
+        : await createConfiguredInfrastructureProviderAdapter(db, provider, options.source);
       remote = await adapter.getServer(server.provider_server_id);
     } catch (error) {
       await markChecked(db, server.id, now);

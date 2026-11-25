@@ -66,7 +66,39 @@ describe('server OS catalog and infrastructure boundaries', () => {
     await db.query(`INSERT INTO server_os_images(id,provider_id,operating_system_version_id,provider_image_id,architecture,region_id,status,verified_at) VALUES($1,$2,'20000000-0000-0000-0000-000000000006','ubuntu-24.04','x86_64',$3,'ACTIVE',now())`,[imageId,providerId,regionId]);
     await db.query(`INSERT INTO server_product_configurations(id,plan_id,provider_id,region_id,operating_system_version_id,architecture,server_type,status,metadata) VALUES($1,$2,$3,$4,'20000000-0000-0000-0000-000000000006','x86_64','VPS','ACTIVE',$5)`,[configurationId,plan.id,providerId,regionId,JSON.stringify({cpuCores:2,memoryMb:4096,storageMb:80000,providerServerType:'test-small',capabilities:{reinstall:true,start:true,stop:true,reboot:true,shutdown:true}})]);
     await db.query(`INSERT INTO customer_ssh_keys(id,user_id,name,public_key,fingerprint) VALUES($1,$2,'Order key','ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOrderKey tests@example.test',$3)`,[sshKeyId,user.id,`SHA256:${randomUUID()}`]);
+    const controlPanelId=(await db.query<{id:string}>(`SELECT id FROM control_panels WHERE slug='cpanel'`)).rows[0]?.id;
+    expect(controlPanelId).toBeDefined();
+    await db.query(`INSERT INTO control_panel_compatibility(id,control_panel_id,operating_system_version_id,plan_id,architecture,status) VALUES($1,$2,'20000000-0000-0000-0000-000000000006',NULL,'x86_64','ACTIVE')`,[randomUUID(),controlPanelId]);
     const app=buildApp(env,{serveFrontend:false,pool:db});const token=signAuthToken(env,{sub:user.id,role:'customer',email:user.email});
+    const configuration=await app.inject({method:'GET',url:`/api/v1/server-products/${plan.id}/configuration?serverType=VPS`});
+    expect(configuration.statusCode).toBe(200);
+    const listedPanel=configuration.json().controlPanels.find((panel:{slug:string})=>panel.slug==='cpanel');
+    expect(listedPanel).toMatchObject({
+      hasPanelBootstrapAdapter:true,
+      panelBootstrapProviderVerified:false,
+      panelManagementAvailable:false,
+      panelManagementProviderVerified:false,
+      operationallySupported:false,
+      minimumRequirements:{ramMb:2048,cpuCores:1,diskGb:40},
+    });
+    expect(listedPanel.availability).toContainEqual(expect.objectContaining({
+      operatingSystemVersionId:'20000000-0000-0000-0000-000000000006',
+      architecture:'x86_64',
+      providerId,
+      regionId,
+      datacenterId:null,
+      hardwareCompatible:true,
+      hardwareReason:null,
+    }));
+    const panelOrderPayload={planId:plan.id,billingPeriod:'monthly',providerId,regionId,datacenterId:null,operatingSystemVersionId:'20000000-0000-0000-0000-000000000006',architecture:'x86_64',serverType:'VPS',sshKeyIds:[sshKeyId],hostname:'panel-ordered.example.test',controlPanelId};
+    await db.query(`UPDATE control_panels SET minimum_ram_mb=8192 WHERE id=$1`,[controlPanelId]);
+    const insufficientPanelOrder=await app.inject({method:'POST',url:'/api/v1/servers',headers:{authorization:`Bearer ${token}`},payload:panelOrderPayload});
+    expect(insufficientPanelOrder.statusCode).toBe(400);
+    expect(insufficientPanelOrder.payload).toContain('minimum hardware requirements');
+    await db.query(`UPDATE control_panels SET minimum_ram_mb=2048 WHERE id=$1`,[controlPanelId]);
+    const panelOrder=await app.inject({method:'POST',url:'/api/v1/servers',headers:{authorization:`Bearer ${token}`},payload:panelOrderPayload});
+    expect(panelOrder.statusCode).toBe(400);
+    expect(panelOrder.payload).toContain('provider-verified bootstrap');
     const response=await app.inject({method:'POST',url:'/api/v1/servers',headers:{authorization:`Bearer ${token}`},payload:{planId:plan.id,billingPeriod:'monthly',providerId,regionId,datacenterId:null,operatingSystemVersionId:'20000000-0000-0000-0000-000000000006',architecture:'x86_64',serverType:'VPS',sshKeyIds:[sshKeyId],hostname:'ordered.example.test'}});
     expect(response.statusCode).toBe(201);const body=response.json();expect(body.provisioningStatus).toBe('AWAITING_PAYMENT');
     expect((await db.query<{count:number}>(`SELECT count(*)::int count FROM provisioning_jobs WHERE server_id=$1`,[body.serverId])).rows[0]?.count).toBe(0);

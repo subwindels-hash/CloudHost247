@@ -98,6 +98,7 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
     credentials: [
       { suffix: '_ACCESS_KEY_ID', description: 'IAM access key id', required: true, fallback: 'AWS_ACCESS_KEY_ID' },
       { suffix: '_SECRET_ACCESS_KEY', description: 'IAM secret access key', required: true, fallback: 'AWS_SECRET_ACCESS_KEY' },
+      { suffix: '_SESSION_TOKEN', description: 'Temporary IAM session token, when using temporary credentials', required: false, fallback: 'AWS_SESSION_TOKEN' },
       { suffix: '_REGION', description: 'Default EC2 region', required: true, fallback: 'AWS_REGION' },
     ],
     planMetadata: [{ key: 'providerServerType', description: 'EC2 instance type', required: true }, ...RESOURCE_METADATA],
@@ -222,9 +223,14 @@ export const ADAPTER_PROFILES: Record<AdapterKind, AdapterProfile> = {
       { suffix: '_AUTH_URL', description: 'Keystone v3 URL (password login)', required: false, fallback: 'OPENSTACK_AUTH_URL' },
       { suffix: '_USERNAME', description: 'Keystone user (password login)', required: false, fallback: 'OPENSTACK_USERNAME' },
       { suffix: '_PASSWORD', description: 'Keystone password (password login)', required: false, fallback: 'OPENSTACK_PASSWORD' },
-      { suffix: '_PROJECT_ID', description: 'Project id (or _PROJECT_NAME)', required: false, fallback: 'OPENSTACK_PROJECT_ID' },
+      { suffix: '_PROJECT_ID', description: 'Project id (or project name)', required: false, fallback: 'OPENSTACK_PROJECT_ID' },
+      { suffix: '_PROJECT_NAME', description: 'Project name for Keystone password login, when not using a project id', required: false, fallback: 'OPENSTACK_PROJECT_NAME' },
+      { suffix: '_USER_DOMAIN_NAME', description: 'Keystone user domain (usually Default)', required: false, fallback: 'OPENSTACK_USER_DOMAIN_NAME' },
+      { suffix: '_PROJECT_DOMAIN_NAME', description: 'Keystone project domain (usually Default)', required: false, fallback: 'OPENSTACK_PROJECT_DOMAIN_NAME' },
       { suffix: '_API_URL', description: 'Nova compute endpoint (token login)', required: false, fallback: 'OPENSTACK_API_URL' },
       { suffix: '_API_TOKEN', description: 'Pre-issued Keystone token (token login)', required: false, fallback: 'OPENSTACK_API_TOKEN' },
+      { suffix: '_IMAGE_URL', description: 'Glance image service endpoint override', required: false, fallback: 'OPENSTACK_IMAGE_URL' },
+      { suffix: '_REGION', description: 'OpenStack region name', required: false, fallback: 'OPENSTACK_REGION' },
     ],
     planMetadata: [
       { key: 'providerFlavorId', description: 'Nova flavor id', required: true },
@@ -269,7 +275,7 @@ export interface ProviderConfigurationReport {
   apiBaseUrlRequired: boolean;
   apiBaseUrlConfigured: boolean;
   /** Variable names and presence only — values are never read into this structure. */
-  credentials: Array<{ name: string; fallbackName: string | null; description: string; required: boolean; present: boolean }>;
+  credentials: Array<{ suffix: string; name: string; fallbackName: string | null; description: string; required: boolean; present: boolean; stored: boolean }>;
   planMetadata: AdapterPlanMetadataSpec[];
   capabilities: AdapterProfile['capabilities'];
   notes: string;
@@ -294,7 +300,7 @@ export function getAdapterProfile(adapter: string): AdapterProfile | null {
  * variable *names* and booleans leave this function, so the result is safe for the admin UI.
  */
 export function describeProviderConfiguration(
-  provider: Pick<InfrastructureProviderRow, 'adapter' | 'api_base_url' | 'credential_env_prefix'>,
+  provider: Pick<InfrastructureProviderRow, 'adapter' | 'api_base_url' | 'credential_env_prefix'> & Partial<Pick<InfrastructureProviderRow, 'slug'>>,
   source: NodeJS.ProcessEnv = process.env
 ): ProviderConfigurationReport {
   const profile = getAdapterProfile(provider.adapter);
@@ -314,12 +320,13 @@ export function describeProviderConfiguration(
       missing: ['adapter implementation'],
     };
   }
-  const prefix = provider.credential_env_prefix || profile.defaultEnvPrefix;
+  const prefix = provider.credential_env_prefix
+    || (profile.kind === 'generic_http' && provider.slug ? provider.slug.replace(/-/g, '_').toUpperCase() : profile.defaultEnvPrefix);
   const credentials = profile.credentials.map((credential) => {
     const name = `${prefix}${credential.suffix}`;
     const fallbackName = credential.fallback ?? null;
     const present = Boolean(source[name] ?? (fallbackName ? source[fallbackName] : undefined));
-    return { name, fallbackName, description: credential.description, required: credential.required, present };
+    return { suffix: credential.suffix, name, fallbackName, description: credential.description, required: credential.required, present, stored: false };
   });
   const configuredBaseUrl = provider.api_base_url ?? profile.defaultApiBaseUrl;
   let apiBaseUrlConfigured = Boolean(configuredBaseUrl);
@@ -338,7 +345,8 @@ export function describeProviderConfiguration(
   // OpenStack accepts either of two credential sets, so completeness is evaluated per login mode.
   if (profile.kind === 'openstack') {
     const present = (suffix: string) => credentials.find((credential) => credential.name.endsWith(suffix))?.present === true;
-    const passwordLogin = present('_AUTH_URL') && present('_USERNAME') && present('_PASSWORD') && present('_PROJECT_ID');
+    const passwordLogin = present('_AUTH_URL') && present('_USERNAME') && present('_PASSWORD')
+      && (present('_PROJECT_ID') || present('_PROJECT_NAME'));
     const tokenLogin = (present('_API_URL') || apiBaseUrlConfigured) && present('_API_TOKEN');
     missing.length = 0;
     if (!passwordLogin && !tokenLogin) {

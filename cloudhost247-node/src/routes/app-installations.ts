@@ -20,6 +20,11 @@ import { ValidationError, NotFoundError, ConflictError } from '../lib/errors';
 import { auditRequest } from '../lib/audit';
 import { createInstallationRequest, getMyInstallationDetail, listMyInstallations } from '../services/installation-service';
 import { findInstallationById, listInstallationsForCustomer } from '../db/application-installations';
+import { findServerById, getServerAllocation } from '../db/servers';
+import { findApplicationBySlug, findApplicationVersionById } from '../db/applications';
+import { findOwnedCustomerServer } from '../db/server-provisioning';
+import { deploymentCapabilities, type InstallationOperation } from '../deployments/capabilities';
+import { validateManifest, type ApplicationManifest } from '../marketplace/manifest-schema';
 import { enqueueDeployment, listDeployments } from '../db/deployments';
 import { listEnvironmentKeys, upsertEnvironmentEntry, deleteEnvironmentEntry } from '../db/application-config';
 import { listBackupsForInstallation, findBackupById } from '../db/ops-tables';
@@ -28,6 +33,11 @@ import { getKeyRing } from '../lib/keyring';
 import { applicationLogs as fetchLogs } from '../services/instance-operations';
 
 const idSchema = z.string().uuid('id must be a valid UUID');
+const installationCapabilitySchema = z.object({
+  applicationId: z.string().min(1).max(160),
+  versionId: z.string().uuid(),
+  serverId: z.string().uuid(),
+});
 
 const createInstallationSchema = z.object({
   applicationId: z.string().min(1).max(160),
@@ -58,12 +68,40 @@ async function myInstallationOrThrow(pool: Queryable, userId: string, installati
   return installation;
 }
 
+async function installableServerOrThrow(pool: Queryable, userId: string, serverId: string) {
+  const server = await findServerById(pool, serverId);
+  if (!server || server.status !== 'active') {
+    throw new NotFoundError('No active deployment server was found with that id');
+  }
+  // Platform targets are shared scheduling inventory (customer_id = null). Customer-owned
+  // servers may only be used by their owner; a guessed UUID must not cross tenant boundaries.
+  if (server.customer_id !== null) {
+    const owned = server.customer_id === userId
+      ? await findOwnedCustomerServer(pool, serverId, userId)
+      : null;
+    if (!owned) throw new NotFoundError('No active deployment server was found with that id');
+  }
+  return server;
+}
+
+async function capabilityForInstallation(pool: Queryable, env: Env, installation: Awaited<ReturnType<typeof myInstallationOrThrow>>) {
+  const version = await findApplicationVersionById(pool, installation.application_version_id);
+  if (!version) throw new ConflictError('The installation version is missing; operation support cannot be determined.');
+  const server = installation.server_id ? await findServerById(pool, installation.server_id) : null;
+  if (!server) throw new ConflictError('The installation has no assigned server; operation support cannot be determined.');
+  return deploymentCapabilities(server, version.manifest as ApplicationManifest, {
+    kubernetesEnabled: env.KUBERNETES_ADAPTER_ENABLED,
+    simulationMode: env.DEPLOYMENT_SIMULATION_MODE,
+  });
+}
+
 export async function registerAppInstallationRoutes(app: FastifyInstance, env: Env, overridePool?: Queryable) {
   const pool = overridePool ?? getPool(env);
 
   app.post('/api/v1/app-installations', async (request, reply) => {
     const auth = await authenticate(request, env, pool);
     const input = parseOrThrow(createInstallationSchema, request.body);
+    if (input.serverId) await installableServerOrThrow(pool, auth.userId, input.serverId);
     const result = await createInstallationRequest(pool, auth.userId, {
       applicationIdOrSlug: input.applicationId,
       versionId: input.versionId,
@@ -74,6 +112,7 @@ export async function registerAppInstallationRoutes(app: FastifyInstance, env: E
       billingPeriod: input.billingPeriod,
       environment: input.environment,
       backupEnabled: input.backupEnabled,
+      kubernetesAdapterEnabled: env.KUBERNETES_ADAPTER_ENABLED,
     });
     await auditRequest(pool, request, auth.userId, {
       action: 'installation.requested',
@@ -85,6 +124,40 @@ export async function registerAppInstallationRoutes(app: FastifyInstance, env: E
     return result;
   });
 
+  app.post('/api/v1/app-installations/capabilities', async (request) => {
+    const auth = await authenticate(request, env, pool);
+    const input = parseOrThrow(installationCapabilitySchema, request.body);
+    const application = await findApplicationBySlug(pool, input.applicationId);
+    if (!application || application.status !== 'published') {
+      throw new NotFoundError('No published application was found with that identifier');
+    }
+    const version = await findApplicationVersionById(pool, input.versionId);
+    if (!version || version.application_id !== application.id || version.status !== 'published') {
+      throw new NotFoundError('No published version was found for that application');
+    }
+    const server = await installableServerOrThrow(pool, auth.userId, input.serverId);
+    const validation = validateManifest(version.manifest);
+    if (!validation.valid || !validation.manifest) {
+      throw new ConflictError(`The published manifest failed validation: ${validation.errors.join('; ')}`);
+    }
+    const allocation = await getServerAllocation(pool, server.id);
+    const requirements = validation.manifest.requirements;
+    const capacityAvailable =
+      allocation.cpu + requirements.cpu <= server.cpu_cores
+      && allocation.memoryMb + requirements.memory <= server.memory_mb
+      && allocation.storageMb + requirements.storage <= server.storage_mb;
+    return {
+      capabilities: deploymentCapabilities(server, validation.manifest, {
+        kubernetesEnabled: env.KUBERNETES_ADAPTER_ENABLED,
+        simulationMode: env.DEPLOYMENT_SIMULATION_MODE,
+      }),
+      capacity: {
+        available: capacityAvailable,
+        reason: capacityAvailable ? null : 'The selected server does not currently have enough unallocated CPU, memory, or storage for this version.',
+      },
+    };
+  });
+
   app.get('/api/v1/app-installations', async (request) => {
     const auth = await authenticate(request, env, pool);
     return { installations: await listMyInstallations(pool, auth.userId) };
@@ -93,13 +166,21 @@ export async function registerAppInstallationRoutes(app: FastifyInstance, env: E
   app.get<{ Params: { id: string } }>('/api/v1/app-installations/:id', async (request) => {
     const auth = await authenticate(request, env, pool);
     const id = parseOrThrow(idSchema, request.params.id);
-    return await getMyInstallationDetail(pool, auth.userId, id);
+    const detail = await getMyInstallationDetail(pool, auth.userId, id);
+    const server = detail.installation.server_id ? await findServerById(pool, detail.installation.server_id) : null;
+    const capabilities = detail.version && server
+      ? deploymentCapabilities(server, detail.version.manifest as ApplicationManifest, {
+          kubernetesEnabled: env.KUBERNETES_ADAPTER_ENABLED,
+          simulationMode: env.DEPLOYMENT_SIMULATION_MODE,
+        })
+      : null;
+    return { ...detail, capabilities };
   });
 
   // --- Lifecycle actions: each enqueues an idempotent deployment job ----------------------------
   const action = (
     path: string,
-    actionName: 'start' | 'stop' | 'restart' | 'update' | 'backup' | 'restore' | 'reinstall',
+    actionName: 'start' | 'stop' | 'restart' | 'update' | 'backup' | 'restore' | 'reinstall' | 'healthcheck',
     allowedStatuses: string[],
     extra: (body: unknown) => Record<string, unknown> = () => ({})
   ) => {
@@ -113,6 +194,11 @@ export async function registerAppInstallationRoutes(app: FastifyInstance, env: E
       }
       if (!allowedStatuses.includes(installation.status)) {
         throw new ConflictError(`Cannot ${actionName} an installation with status "${installation.status}"`);
+      }
+      const operation: InstallationOperation = actionName === 'healthcheck' ? 'verify' : actionName;
+      const capability = (await capabilityForInstallation(pool, env, installation)).operations[operation];
+      if (!capability.supported) {
+        throw new ConflictError(`${actionName} is not supported: ${capability.reason ?? 'the selected deployment adapter does not implement this operation'}`);
       }
       let payload: Record<string, unknown> = {};
       if (actionName === 'restore') {
@@ -155,6 +241,8 @@ export async function registerAppInstallationRoutes(app: FastifyInstance, env: E
   action('backup', 'backup', ['healthy', 'unhealthy', 'stopped']);
   action('restore', 'restore', ['healthy', 'unhealthy', 'stopped']);
   action('reinstall', 'reinstall', ['failed', 'stopped', 'unhealthy']);
+  // Manual verification is a queued health check without the periodic worker's auto-restart side effect.
+  action('verify', 'healthcheck', ['healthy', 'unhealthy', 'starting', 'failed'], () => ({ manualVerification: true }));
 
   app.delete<{ Params: { id: string } }>('/api/v1/app-installations/:id', async (request, reply) => {
     const auth = await authenticate(request, env, pool);
@@ -163,6 +251,10 @@ export async function registerAppInstallationRoutes(app: FastifyInstance, env: E
     if (['deleting', 'deleted'].includes(installation.status)) {
       reply.code(204);
       return null;
+    }
+    const uninstallCapability = (await capabilityForInstallation(pool, env, installation)).operations.uninstall;
+    if (!uninstallCapability.supported) {
+      throw new ConflictError(`uninstall is not supported: ${uninstallCapability.reason ?? 'the selected deployment adapter does not implement this operation'}`);
     }
     const { deployment, created } = await enqueueDeployment(pool, {
       installationId: installation.id,
@@ -197,6 +289,10 @@ export async function registerAppInstallationRoutes(app: FastifyInstance, env: E
     const auth = await authenticate(request, env, pool);
     const id = parseOrThrow(idSchema, request.params.id);
     const installation = await myInstallationOrThrow(pool, auth.userId, id);
+    const capability = (await capabilityForInstallation(pool, env, installation)).operations.logs;
+    if (!capability.supported) {
+      return { logs: '', available: false, message: capability.reason };
+    }
     const tail = parseOrThrow(z.object({ tail: z.coerce.number().int().min(10).max(1000).optional() }), request.query ?? {});
     return await fetchLogs(pool, env, installation, tail.tail ?? 200);
   });
@@ -205,7 +301,13 @@ export async function registerAppInstallationRoutes(app: FastifyInstance, env: E
     const auth = await authenticate(request, env, pool);
     const id = parseOrThrow(idSchema, request.params.id);
     const installation = await myInstallationOrThrow(pool, auth.userId, id);
-    return { backups: await listBackupsForInstallation(pool, installation.id) };
+    const capabilities = (await capabilityForInstallation(pool, env, installation)).operations;
+    return {
+      backups: await listBackupsForInstallation(pool, installation.id),
+      backupSupported: capabilities.backup.supported,
+      restoreSupported: capabilities.restore.supported,
+      reason: capabilities.backup.supported ? capabilities.restore.reason : capabilities.backup.reason,
+    };
   });
 
   // Environment: keys only — values (secret or not) never leave the server (spec §16).

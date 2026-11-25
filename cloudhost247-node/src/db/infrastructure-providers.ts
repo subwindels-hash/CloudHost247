@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Queryable } from './types';
+import { currentKeyVersion, decryptSecret, encryptSecret, type EncryptionKeyRing } from '../lib/crypto';
 
 export type ProviderType =
   | 'OVH'
@@ -47,6 +48,96 @@ export interface InfrastructureProviderRow {
   last_health_status: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface InfrastructureProviderCredentialRow {
+  provider_id: string;
+  encrypted_credentials: string;
+  credential_names: unknown;
+  key_version: number;
+  created_at: string;
+  rotated_at: string | null;
+}
+
+function credentialNameArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
+function normalizeProviderCredentials(value: Record<string, string>): Record<string, string> {
+  const credentials: Record<string, string> = {};
+  for (const [suffix, secret] of Object.entries(value)) {
+    if (!/^_[A-Z0-9_]{1,95}$/.test(suffix)) {
+      throw new Error(`Invalid infrastructure provider credential field '${suffix}'`);
+    }
+    if (typeof secret !== 'string' || secret.length < 1 || secret.length > 20_000) {
+      throw new Error(`Infrastructure provider credential '${suffix}' must be a non-empty string no longer than 20000 characters`);
+    }
+    credentials[suffix] = secret;
+  }
+  if (Object.keys(credentials).length === 0) throw new Error('At least one infrastructure provider credential is required');
+  return credentials;
+}
+
+/** Names only; this query deliberately avoids decrypting or selecting the ciphertext. */
+export async function listInfrastructureProviderCredentialNames(db: Queryable, providerId: string): Promise<string[]> {
+  const { rows } = await db.query<{ credential_names: unknown }>(
+    `SELECT credential_names FROM infrastructure_provider_credentials WHERE provider_id=$1 LIMIT 1`,
+    [providerId]
+  );
+  return credentialNameArray(rows[0]?.credential_names);
+}
+
+/** Server-only credential read for provider adapters. Plaintext never leaves this service boundary. */
+export async function getInfrastructureProviderCredentials(
+  db: Queryable,
+  ring: EncryptionKeyRing,
+  providerId: string
+): Promise<Record<string, string> | null> {
+  const { rows } = await db.query<InfrastructureProviderCredentialRow>(
+    `SELECT provider_id,encrypted_credentials,credential_names,key_version,created_at,rotated_at
+       FROM infrastructure_provider_credentials WHERE provider_id=$1 LIMIT 1`,
+    [providerId]
+  );
+  const row = rows[0];
+  if (!row) return null;
+
+  try {
+    const parsed: unknown = JSON.parse(decryptSecret(ring, row.encrypted_credentials));
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('not an object');
+    const credentials: Record<string, string> = {};
+    for (const [suffix, secret] of Object.entries(parsed as Record<string, unknown>)) {
+      if (!/^_[A-Z0-9_]{1,95}$/.test(suffix) || typeof secret !== 'string' || secret.length < 1) {
+        throw new Error('invalid credential record');
+      }
+      credentials[suffix] = secret;
+    }
+    if (Object.keys(credentials).length === 0) throw new Error('empty credential record');
+    return credentials;
+  } catch {
+    // Do not surface ciphertext, key versions, or low-level crypto errors to API clients/logs.
+    throw new Error('Stored provider credentials could not be decrypted. A Super Admin must re-enter them.');
+  }
+}
+
+/** Encrypts credentials before persistence. The encrypted envelope is never returned. */
+export async function storeInfrastructureProviderCredentials(
+  db: Queryable,
+  ring: EncryptionKeyRing,
+  providerId: string,
+  value: Record<string, string>
+): Promise<void> {
+  const credentials = normalizeProviderCredentials(value);
+  await db.query(
+    `INSERT INTO infrastructure_provider_credentials
+       (provider_id,encrypted_credentials,credential_names,key_version)
+     VALUES ($1,$2,$3,$4)
+     ON CONFLICT (provider_id) DO UPDATE SET
+       encrypted_credentials=EXCLUDED.encrypted_credentials,
+       credential_names=EXCLUDED.credential_names,
+       key_version=EXCLUDED.key_version,
+       rotated_at=now()`,
+    [providerId, encryptSecret(ring, JSON.stringify(credentials)), JSON.stringify(Object.keys(credentials).sort()), currentKeyVersion(ring)]
+  );
 }
 
 export interface InfrastructureRegionRow {

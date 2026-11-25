@@ -260,6 +260,26 @@
     inset 0 -1px 0 rgba(74, 79, 84, .22);
 }
 
+.ch247-control-panels-page .ch247-tag--readiness {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: .42rem;
+  color: #344253;
+  background: rgba(235, 239, 243, .94);
+  border: 1px solid rgba(87, 101, 116, .28);
+  border-radius: 999px;
+  padding: .18rem .52rem;
+  font-size: .68rem;
+  font-weight: 750;
+  line-height: 1.25;
+}
+.ch247-control-panels-page .ch247-panel-card__actions button:disabled {
+  cursor: not-allowed;
+  opacity: .62;
+  filter: grayscale(.25);
+}
+
 .ch247-control-panels-page .ch247-control-panels-count {
   margin: 0 0 1rem;
   color: #303a44;
