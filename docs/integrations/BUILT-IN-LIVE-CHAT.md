@@ -23,12 +23,12 @@ conversations up from the console (with an audible ring when a visitor needs a h
 
 ## Authority and surfaces
 
-- Database: migration `0133_create_web_chat.sql` creates `web_chat_conversations` and
-  `web_chat_messages`; `0134_web_chat_ai.sql` extends them for AI-first handling —
+- Database: migration `0135_create_web_chat.sql` creates `web_chat_conversations` and
+  `web_chat_messages`; `0136_web_chat_ai.sql` extends them for AI-first handling —
   `web_chat_messages.author` gains `'ai'`, and conversations gain `ai_handling`
   (`'ai'` = the AI answers · `'human'` = a person owns it, the AI is silent) and `escalated_at`
   (stamped only for an AI/visitor-initiated handoff — not for an ordinary staff reply or take-over).
-  `0135_web_chat_ai_envelope.sql` adds the `links` and `follow_ups` JSON columns to
+  `0137_web_chat_ai_envelope.sql` adds the `links` and `follow_ups` JSON columns to
   `web_chat_messages` so AI answers persist the verified links and one-tap suggested follow-ups the
   widgets render (empty defaults for visitor/staff messages). A visitor is identified by an opaque random token; only its sha256 hash is stored
   (`visitor_token_hash`). A database leak cannot impersonate a visitor.
@@ -85,7 +85,7 @@ conversations up from the console (with an audible ring when a visitor needs a h
   server-side against the site registry; the widget never constructs a URL itself) rendered as a
   link list under the answer, and their `followUps` rendered as one-tap suggestion chips that send
   the question as the next visitor message. Both persist on the message row
-  (`web_chat_messages.links` / `web_chat_messages.follow_ups`, migration `0135_web_chat_ai_envelope.sql`).
+  (`web_chat_messages.links` / `web_chat_messages.follow_ups`, migration `0137_web_chat_ai_envelope.sql`).
 - WHMCS legacy theme: `cloudhost247_legacy_includes/livechatoptions.tpl` renders the built-in
   widget when the theme setting `enable_live_chat_cloudhost247` is `on`. The API origin is the
   theme's verified same-origin Node mount (`platform_base_path`, e.g. `/platform`) unless the
