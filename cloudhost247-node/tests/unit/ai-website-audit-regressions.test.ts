@@ -79,6 +79,22 @@ describe('audit: coverage guard actually fires on unsupported subjects', () => {
     const u = understandQuery('webhosting prices', { vocabulary });
     expect(u.ungroundedTokens ?? []).not.toContain('webhosting');
   });
+
+  it('does not treat an offering alias the corpus never spells as a coverage gap', () => {
+    // The Node.js page writes "Node.js", never "nodejs". Treating the customer's spelling as a
+    // required term rejected the very page the question was about, so the assistant refused to
+    // answer "do you support nodejs" while happily answering "do you support node.js".
+    const u = understandQuery('do you support nodejs', { vocabulary });
+    expect(u.ungroundedTokens ?? []).not.toContain('nodejs');
+    expect(u.strictTokens).not.toContain('nodejs');
+  });
+
+  it('still fails closed on a subject that is genuinely absent from the site', () => {
+    // The alias exemption must be narrow: an unknown word must keep blocking an answer.
+    const u = understandQuery('do you support kubernetes', { vocabulary });
+    const ungrounded = u.ungroundedTokens ?? [];
+    if (!vocabulary.has('kubernetes')) expect(ungrounded.length).toBeGreaterThan(0);
+  });
 });
 
 describe('audit: catalogue documents never leak instructions to customers', () => {

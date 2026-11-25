@@ -336,7 +336,15 @@ function composeDeterministic(
   }
 
   // Pricing is always the live answer, appended when the question asked about money.
-  if (understanding.intent === 'pricing' && options.facts?.available) {
+  //
+  // `intent === 'pricing'` is broader than "about money": the classifier treats the word "plan" as a
+  // price cue, which is right for "what plans do you offer" and wrong for "can I upgrade my plan
+  // later" — a lifecycle question that was answered with a paragraph about the catalogue having no
+  // published price. Only suppress the price block for a plan *change*, so ordinary price questions
+  // keep their prices.
+  const PLAN_LIFECYCLE = /\b(?:upgrade|downgrade|change|switch|move|resize|migrate)\b.{0,24}\b(?:plan|package|tier)\b|\b(?:plan|package|tier)\b.{0,24}\b(?:upgrade|downgrade|change|switch|move|resize)\b/i;
+  const asksAboutMoney = understanding.intent === 'pricing' && !PLAN_LIFECYCLE.test(understanding.raw);
+  if (asksAboutMoney && options.facts?.available) {
     const prices = selectRelevantPrices(options.facts, [...terms, ...retrieval.entities.map((entity) => entity.label)], 8);
     const block = formatPriceBlock(prices, understanding);
     if (block.text) {
@@ -354,7 +362,7 @@ function composeDeterministic(
     } else {
       sections.push('The catalogue is readable but has no published price for that product group, so there is no price I can quote. A draft or unpublished product is never presented as purchasable.');
     }
-  } else if (understanding.intent === 'pricing' && options.facts && !options.facts.available) {
+  } else if (asksAboutMoney && options.facts && !options.facts.available) {
     sections.push('I cannot reach the published catalogue at the moment, so I will not quote a price from memory. CloudHost247 Support can confirm the current price.');
   }
 

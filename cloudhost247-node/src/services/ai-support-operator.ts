@@ -94,9 +94,74 @@ const REFUND_REQUEST = /\b(?:refund|chargeback|money back|cancel\s+(?:my\s+)?pay
 const COMPLAINT_REQUEST = /\b(?:complaint|complain|lawyer|legal action|sue|fraud)\b/i;
 const BILLING_REQUEST = /\b(?:billing|invoice|renewal|renew|payment method|pay invoice|payment)\b/i;
 const SERVER_INCIDENT = /\b(?:server|vps|instance)\b.{0,30}\b(?:down|offline|unreachable|broken|not working|failed)\b/i;
+
+/**
+ * A defect reported against a service the customer *owns* ("my website is slow", "my email is not
+ * arriving"). This is not a general question and must never be answered from a marketing page —
+ * measured behaviour was that "my website is slow" was answered with "Do I need hosting to use the
+ * website builder?" at 0.55 confidence, which is a confident wrong answer about the customer's own
+ * service. It is account-specific, so it escalates; the reply also hands over the destinations that
+ * genuinely help.
+ *
+ * The how-to exclusion is what keeps "how do I make my site faster" a procedural answer instead of
+ * an escalation: asking *how* is a question about the platform, reporting *that* it is slow is a
+ * report about an account.
+ */
+const OWNED_SERVICE = /\bmy\s+(?:web\s?site|site|server|vps|instance|email|mail|mailbox|domain|dns|database|app|application|store|shop|ssl|certificate)\b/i;
+const SERVICE_SYMPTOM = /\b(?:down|offline|unreachable|broken|slow|sluggish|lag(?:gy|ging)?|timing out|timed out|timeouts?|hanging|hangs|not loading|won'?t load|will not load|not working|doesn'?t work|not responding|keeps? (?:going )?down|keeps? crashing|crash(?:ed|ing)?|overloaded|high (?:cpu|memory|ram|load)|not arriving|not receiving|not sending|not delivering|not resolving|not propagating|bouncing|failed|failing|expired|suspended|blacklisted)\b/i;
+const HOW_TO_QUESTION = /\b(?:how (?:do|can|does|to)|where (?:can|do|is)|what (?:is|are) the (?:process|steps))\b/i;
 const ACCOUNT_ACTION = /\b(?:transfer|delete|cancel|renew)\s+my\s+|\b(?:can you|please|i need you to)\s+(?:update|change|add|remove|delete|configure)\s+my\b/i;
 const PRICE_REQUEST = /\b(?:price|pricing|cost|how much|fee|fees|cheapest|cheap|affordable|budget|plan|plans)\b/i;
 const LOST_ACCESS = /\b(?:cannot|can't|unable to|forgot|lost)\b.{0,40}\b(?:log ?in|sign ?in|access (?:my )?account|password|account)\b|\b(?:locked out|account locked)\b/i;
+
+/**
+ * Greetings and thanks carry no retrieval signal. Left to retrieval they match whichever page
+ * happens to contain the word — "hi" was answered with a business-hosting paragraph and "ok" with
+ * VPS deployment runbook steps, because a bare pleasantry has nothing else to match on. These are
+ * recognised first and answered conversationally, the way a support agent opens a chat.
+ */
+const GREETING = /^(?:hi+|hey+|hello+|yo|howdy|greetings|good (?:morning|afternoon|evening))(?:[!.,\s]+(?:there|all|folks|team|guys|mate|sir|madam))?[!.,\s]*$/i;
+const THANKS = /^(?:thanks|thank you|thx|ty|cheers|appreciate it|much appreciated)(?:[!.,\s]+(?:so much|very much|a lot|again|for the help|for your help))?[!.,\s]*(?:bye|goodbye)?[!.,\s]*$/i;
+const ACKNOWLEDGEMENT = /^(?:ok(?:ay)?|k|cool|great|perfect|nice|awesome|got it|i see|alright|sure|fine|understood|makes sense)[!.,\s]*$/i;
+const FAREWELL = /^(?:bye|goodbye|good night|see you|that'?s all|no thanks|no thank you|nothing else|that'?s it)[!.,\s]*$/i;
+
+/**
+ * A message that says something is wrong but never says what. Answering it from retrieval produces
+ * a confidently irrelevant paragraph (\"it is not working\" was answered with Google Workspace
+ * marketing copy), so these are met with a question instead — the one thing a good agent does.
+ */
+const VAGUE_PROBLEM = /\b(?:it|this|that|something|things?|everything|anything|nothing)\b\s*(?:is|are|'s|s)?\s*(?:not working|doesn'?t work|does not work|broken|wrong|failing|failed|not right|messed up)\b|\b(?:i|we) (?:have|got|'ve got) (?:a |an )?(?:problem|issue|error|question)\b|^\s*(?:problem|issue|error|broken|not working|doesn'?t work)\s*[.!?]*\s*$/i;
+
+/**
+ * Wants help but has not named a subject: \"I need help\", \"can you help me\", \"help me please\".
+ * Distinct from the greeting case — the visitor is asking for assistance, not saying hello, so the
+ * reply must offer somewhere to look rather than just invite a question.
+ */
+const VAGUE_HELP_REQUEST = /^(?:please\s+)?(?:can you\s+|could you\s+|i\s+)?(?:need\s+|want\s+)?help(?:\s+me)?(?:\s+(?:with|about|on))?(?:\s+(?:something|this|that|my \w+))?\s*[.!?]*$/i;
+
+/**
+ * The services a "which service do you mean?" question may point at. Only routes that actually
+ * resolve are used (see `guidanceLinks`), so this list can never produce a dead link.
+ */
+const SERVICE_MENU: ReadonlyArray<{ label: string; route: string }> = [
+  { label: 'Web hosting', route: '/hosting' },
+  { label: 'VPS hosting', route: '/hosting/vps' },
+  { label: 'WordPress hosting', route: '/hosting/wordpress' },
+  { label: 'Email hosting', route: '/hosting/email' },
+  { label: 'Domain names', route: '/domains' },
+  { label: 'Help centre', route: '/help' },
+];
+
+/** Resolve the service menu to verified internal routes only; never emit an unverified URL. */
+function guidanceLinks(limit = 4): AnswerLink[] {
+  const links: AnswerLink[] = [];
+  for (const item of SERVICE_MENU) {
+    if (links.length >= limit) break;
+    const url = resolveRoute(item.route);
+    if (url) links.push({ label: item.label, url, kind: 'route' });
+  }
+  return links;
+}
 
 const noAnswer = (
   intent: string,
@@ -170,7 +235,84 @@ export async function decideSupportResponse(
   context: OperatorContext = {}
 ): Promise<OperatorDecision> {
   const text = message.trim();
+  // Nothing to answer: only punctuation, an emoji, or a stray character. This used to fall through
+  // to retrieval, find no terms, and report `knowledge_unavailable` — telling the visitor the
+  // knowledge system was down when in fact they had not asked anything yet.
+  if (!/[\p{L}\p{N}]/u.test(text)) {
+    return {
+      kind: 'CLARIFY',
+      body: 'I did not catch a question there. What would you like to know about CloudHost247 — plans and pricing, hosting options, domains, or something on your account?',
+      intent: 'empty',
+      confidence: 0.2,
+      sources: [],
+      engine: 'reviewed',
+      origin: 'reviewed',
+      links: guidanceLinks(3),
+    };
+  }
   if (!text) return noAnswer('empty', 'AI_UNABLE_TO_ANSWER', 'Please send a question or ask for CloudHost247 Support.', 0);
+
+  // Conversational openers and closers. Handled before any keyword rule, because a bare "hi" or
+  // "thanks" has no subject to retrieve and would otherwise be answered by whichever page happens
+  // to contain the word. A greeting that *does* carry a question ("hi, do you offer WordPress?")
+  // fails these anchored tests and is answered normally.
+  if (FAREWELL.test(text)) {
+    return {
+      kind: 'ANSWER',
+      body: 'Happy to help — if anything else comes up, just message me here and I’ll pick it up.',
+      intent: 'farewell',
+      confidence: 0.9,
+      sources: [],
+      engine: 'reviewed',
+      origin: 'reviewed',
+    };
+  }
+  if (GREETING.test(text)) {
+    return {
+      kind: 'ANSWER',
+      body: [
+        'Hello — welcome to CloudHost247. I can help with plans and pricing, hosting and server options, domains, DNS, email and most account questions.',
+        'What would you like to look at?',
+      ].join('\n\n'),
+      intent: 'greeting',
+      confidence: 0.9,
+      sources: [],
+      engine: 'reviewed',
+      origin: 'reviewed',
+      links: guidanceLinks(3),
+      followUps: ['What hosting plans do you offer?', 'How much does a VPS cost?', 'How do I point my domain here?'],
+    };
+  }
+  if (THANKS.test(text)) {
+    return {
+      kind: 'ANSWER',
+      body: 'You’re welcome — glad that helped. If there is anything else, ask me here any time.',
+      intent: 'thanks',
+      confidence: 0.9,
+      sources: [],
+      engine: 'reviewed',
+      origin: 'reviewed',
+    };
+  }
+  if (ACKNOWLEDGEMENT.test(text)) {
+    // "yes"/"ok" is consent when the previous turn asked a consent question. The newsletter branch
+    // below handled this before the conversational rules existed; without this guard a bare "ok"
+    // would be answered with small talk instead of completing the subscription the visitor agreed to.
+    const consentPending = context.previousMessages?.some(
+      (item) => item.author_type === 'AI' && /newsletter|subscribe to CloudHost247/i.test(item.body),
+    );
+    if (!consentPending) {
+      return {
+        kind: 'ANSWER',
+        body: 'Good. If you would like detail on anything — plans, pricing, or setting something up — tell me which service and I will pull up the specifics.',
+        intent: 'acknowledgement',
+        confidence: 0.85,
+        sources: [],
+        engine: 'reviewed',
+        origin: 'reviewed',
+      };
+    }
+  }
 
   if (HUMAN_REQUEST.test(text)) {
     return noAnswer('human_request', 'USER_REQUESTED_HUMAN', 'I’ll check whether a CloudHost247 support representative is available.', 1);
@@ -178,7 +320,13 @@ export async function decideSupportResponse(
   if (SECURITY_REQUEST.test(text)) {
     return noAnswer('security', 'SECURITY_RELATED', 'Security-related requests need a human support representative. I will preserve this conversation and escalate it.', 1);
   }
-  if (REFUND_REQUEST.test(text)) {
+  // "What is the refund policy?" is a question about a published document, not a demand on an
+  // account. The REFUND_REQUEST guard used to catch it and refuse to answer, which is over-cautious:
+  // the policy page is public and retrieval can quote it. A first-person demand ("I want a refund",
+  // "refund my invoice") still escalates, because that one needs an account decision.
+  const asksAboutRefundPolicy = /\b(?:refund|money back)\b.{0,20}\b(?:policy|policies|terms|rules|how (?:does|do)|what (?:is|are))\b|\b(?:policy|policies|terms|rules)\b.{0,20}\b(?:refund|money back)\b/i.test(text)
+    && !/\b(?:my|our)\b.{0,20}\b(?:refund|invoice|payment|order|charge)\b|\b(?:i|we)\s+(?:want|need|demand|request)\b.{0,20}\b(?:refund|money back)\b|\brefund\s+my\b|\bgive me (?:a )?refund\b/i.test(text);
+  if (REFUND_REQUEST.test(text) && !asksAboutRefundPolicy) {
     return noAnswer('refund', 'REFUND_REQUEST', 'Refund decisions require CloudHost247 Support. I will preserve this conversation and connect it to the support queue.', 1);
   }
   if (COMPLAINT_REQUEST.test(text)) {
@@ -203,6 +351,24 @@ export async function decideSupportResponse(
       'I cannot verify a customer server’s live status from general chat. I will preserve this conversation and connect you to CloudHost247 Support.',
       0.99
     );
+  }
+  // A fault reported against the customer's own service. Escalates rather than answering, because
+  // no published page can say what is wrong with *their* website today.
+  if (OWNED_SERVICE.test(text) && SERVICE_SYMPTOM.test(text) && !HOW_TO_QUESTION.test(text)) {
+    const statusUrl = resolveRoute('/status');
+    const helpUrl = resolveRoute('/help');
+    return {
+      ...noAnswer(
+        'owned_service_incident',
+        'TECHNICAL_SUPPORT_REQUIRED',
+        'I can see you are reporting a problem with one of your own services. That needs someone who can look at the actual server, so I will pass this conversation to the CloudHost247 support team with what you have written.\n\nIf it helps in the meantime, the service status page shows any known platform incident, and the help centre covers the common fixes.',
+        0.9,
+      ),
+      links: [
+        ...(statusUrl ? [{ label: 'Service status', url: statusUrl, kind: 'route' as const }] : []),
+        ...(helpUrl ? [{ label: 'Help centre', url: helpUrl, kind: 'route' as const }] : []),
+      ],
+    };
   }
   if (ACCOUNT_ACTION.test(text)) {
     return noAnswer(
@@ -248,6 +414,44 @@ export async function decideSupportResponse(
 
   const previousCustomer = context.previousMessages?.find((item) => item.author_type === 'CUSTOMER')?.body ?? '';
   const previousAi = context.previousMessages?.find((item) => item.author_type === 'AI')?.body ?? '';
+
+  // A message that reports a fault without naming what is faulty. Retrieval cannot answer it — it
+  // has no subject — and answering anyway produced confident, irrelevant paragraphs. Ask instead.
+  // Checked after the guard rails above, so "my server is down" still escalates as an incident.
+  if (VAGUE_PROBLEM.test(text)) {
+    return {
+      kind: 'CLARIFY',
+      body: [
+        'I can help with that — I just need to know what it is. Could you tell me which service is affected (web hosting, VPS, email, domains) and what you are seeing?',
+        'If it concerns a specific account, service or invoice, say so and I will pass this conversation to the CloudHost247 support team, who can check it directly.',
+      ].join('\n\n'),
+      intent: 'vague_problem',
+      confidence: 0.4,
+      sources: [],
+      engine: 'reviewed',
+      origin: 'reviewed',
+      links: guidanceLinks(3),
+      followUps: ['My website is not loading', 'My email is not arriving', 'I cannot sign in'],
+    };
+  }
+
+  // Wants assistance but has not named a subject. Offer the destinations rather than a random page.
+  if (VAGUE_HELP_REQUEST.test(text)) {
+    return {
+      kind: 'CLARIFY',
+      body: [
+        'Of course. What do you need help with? I can cover plans and pricing, hosting and server options, domains and DNS, email, or point you at the right part of your account.',
+        'If you would rather talk to a person, ask for a human in this chat and I will hand the conversation over.',
+      ].join('\n\n'),
+      intent: 'vague_help',
+      confidence: 0.4,
+      sources: [],
+      engine: 'reviewed',
+      origin: 'reviewed',
+      links: guidanceLinks(4),
+      followUps: ['What hosting plans do you offer?', 'How do I manage DNS?', 'I need a human'],
+    };
+  }
 
   // 1. Reviewed operating procedures.
   //

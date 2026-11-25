@@ -51,7 +51,7 @@ export const SERVICE_ENTITIES: readonly ServiceEntity[] = [
   { id: 'domain-transfer', route: '/domains/transfer', label: 'Domain transfer', aliases: ['domain transfer', 'transfer domain', 'transfer a domain', 'transfer my domain', 'move domain'] },
   { id: 'domain-search', route: '/domains/search', label: 'Domain search', aliases: ['domain search', 'check domain', 'domain availability', 'is my domain available', 'search domain'] },
   { id: 'dns-management', route: '/domains/dns', label: 'DNS management', aliases: ['dns', 'dns management', 'nameserver', 'nameservers', 'name server', 'a record', 'cname', 'mx record', 'txt record', 'dns record', 'dns records', 'propagation'] },
-  { id: 'email-hosting', route: '/hosting/email', label: 'Email hosting', aliases: ['email', 'email hosting', 'business email', 'business email hosting', 'mailbox', 'mailboxes', 'smtp', 'imap', 'webmail', 'professional email', 'email address', 'email addresses'] },
+  { id: 'email-hosting', route: '/hosting/email', label: 'Email hosting', aliases: ['email', 'email hosting', 'business email', 'business email hosting', 'mailbox', 'mailboxes', 'smtp', 'imap', 'webmail', 'professional email', 'email address', 'email addresses', 'gmail', 'google mail'] },
   { id: 'ssl', route: '/hosting/ssl', label: 'SSL certificates', aliases: ['ssl', 'ssl certificate', 'ssl certificates', 'tls', 'https', 'certificate', 'security certificate', 'secure certificate', 'letsencrypt', 'lets encrypt', "let's encrypt"] },
   { id: 'cpanel', route: '/hosting/cpanel', label: 'cPanel hosting', aliases: ['cpanel', 'c panel', 'control panel', 'control panels', 'cp'] },
   { id: 'plesk', route: '/hosting/plesk', label: 'Plesk hosting', aliases: ['plesk'] },
@@ -436,6 +436,17 @@ export function understandQuery(
 
   // Question scaffolding is shared with retrieval; it is not an unknown subject.
   const expansionList = [...expansions];
+  /**
+   * A word the corpus never uses, but which is a known alias of an offering the question already
+   * resolved, is not a coverage gap — the entity layer translated it. This is what makes
+   * "do you support nodejs" work: the page says "Node.js", never "nodejs", so treating the
+   * customer's spelling as a required term rejected the very page the question was about. Only
+   * applies when the corpus has no such word, so a real subject ("weather") still fails closed.
+   */
+  const entityAlias = (token: string): boolean => {
+    if (vocabulary.has(token)) return false;
+    return entities.some((entity) => entity.aliases.some((alias) => alias.split(' ').includes(token)));
+  };
   const ungroundedTokens = content.filter((token) => {
     if (vocabulary.has(token)) return false;
     const corrected = correctedTokens[content.indexOf(token)] ?? token;
@@ -487,8 +498,10 @@ export function understandQuery(
     correctedTokens: expandedTokens,
     // The words that must actually appear on a page for it to be the answer: the customer's own
     // words, minus the ones we can translate ourselves. "forecast" stays (the site has no page about
-    // forecasting); "wp" and "wordpress" collapse to the one word that matters.
-    strictTokens: [...new Set(expandedTokens.filter((token) => !boosted.has(token)))],
+    // forecasting); "wp" and "wordpress" collapse to the one word that matters. A spelling that only
+    // the entity layer knows ("nodejs" for a page that writes "Node.js") is exempt for the same
+    // reason: the page already answers the offering the customer named.
+    strictTokens: [...new Set(expandedTokens.filter((token) => !boosted.has(token) && !entityAlias(token)))],
     expansions: [...expansions],
     entities,
     corrections: [...corrections],
